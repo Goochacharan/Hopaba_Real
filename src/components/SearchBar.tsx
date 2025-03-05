@@ -17,12 +17,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
   initialValue = '' 
 }) => {
   const [query, setQuery] = useState(initialValue);
-  const [isFocused, setIsFocused] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [location, setLocation] = useState<string | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const detectLocation = () => {
+  const detectLocation = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if ('geolocation' in navigator) {
       setLocationLoading(true);
       navigator.geolocation.getCurrentPosition(
@@ -48,12 +50,37 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   };
 
-  const clearSearch = () => {
+  const clearSearch = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setQuery('');
     if (inputRef.current) {
       inputRef.current.focus();
     }
   };
+
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+    // Focus the input when expanding
+    if (!isExpanded) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  };
+
+  // Handle clicks outside the search bar to collapse it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (formRef.current && !formRef.current.contains(event.target as Node) && isExpanded) {
+        setIsExpanded(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isExpanded]);
 
   useEffect(() => {
     if (initialValue) {
@@ -62,59 +89,69 @@ const SearchBar: React.FC<SearchBarProps> = ({
   }, [initialValue]);
 
   return (
-    <div className={cn("w-full max-w-2xl mx-auto", className)}>
+    <div className={cn("relative w-full max-w-2xl mx-auto", className)}>
       <form 
+        ref={formRef}
         onSubmit={handleSubmit}
+        onClick={!isExpanded ? toggleExpand : undefined}
         className={cn(
-          "relative w-full overflow-hidden group transition-all-300",
-          "rounded-2xl border border-border bg-white/80 backdrop-blur-sm",
-          isFocused ? "shadow-lg" : "shadow-sm hover:shadow-md"
+          "fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 transition-all duration-300 ease-in-out",
+          isExpanded 
+            ? "w-[90%] max-w-2xl rounded-2xl shadow-lg" 
+            : "w-16 h-16 rounded-full shadow-md hover:shadow-lg cursor-pointer",
+          "border border-border bg-white/90 backdrop-blur-sm"
         )}
       >
-        <div className="flex items-center px-4 h-14">
-          <Search className="h-5 w-5 text-muted-foreground mr-2 flex-shrink-0" />
-          
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            placeholder={placeholder}
-            className="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground"
-          />
-          
-          {query && (
-            <button
-              type="button"
-              onClick={clearSearch}
-              className="p-1 rounded-full hover:bg-secondary text-muted-foreground flex-shrink-0"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-          
-          <button
-            type="button"
-            onClick={detectLocation}
-            className={cn(
-              "ml-2 p-2 rounded-full flex-shrink-0 transition-all-200",
-              "text-muted-foreground hover:text-primary hover:bg-secondary"
+        {isExpanded ? (
+          <>
+            <div className="flex items-center px-4 h-16">
+              <Search className="h-5 w-5 text-muted-foreground mr-3 flex-shrink-0" />
+              
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={placeholder}
+                className="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground text-lg py-4"
+              />
+              
+              {query && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="p-2 rounded-full hover:bg-secondary text-muted-foreground flex-shrink-0"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              )}
+              
+              <button
+                type="button"
+                onClick={detectLocation}
+                className={cn(
+                  "ml-2 p-2 rounded-full flex-shrink-0 transition-all-200",
+                  "text-muted-foreground hover:text-primary hover:bg-secondary"
+                )}
+                title="Use current location"
+              >
+                <MapPin className={cn(
+                  "h-5 w-5 transition-all",
+                  locationLoading && "animate-pulse"
+                )} />
+              </button>
+            </div>
+            
+            {location && (
+              <div className="px-4 py-2 bg-secondary/50 border-t border-border flex items-center text-xs text-muted-foreground">
+                <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                {location}
+              </div>
             )}
-            title="Use current location"
-          >
-            <MapPin className={cn(
-              "h-5 w-5 transition-all",
-              locationLoading && "animate-pulse"
-            )} />
-          </button>
-        </div>
-        
-        {location && (
-          <div className="px-4 py-2 bg-secondary/50 border-t border-border flex items-center text-xs text-muted-foreground">
-            <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
-            {location}
+          </>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Search className="h-6 w-6 text-primary" />
           </div>
         )}
       </form>

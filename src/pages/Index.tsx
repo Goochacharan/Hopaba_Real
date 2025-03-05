@@ -81,12 +81,12 @@ const Index = () => {
           ) : recommendations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {recommendations.map((recommendation, index) => (
-                <LocationCard 
-                  key={recommendation.id} 
-                  recommendation={recommendation}
-                  className={`animate-scale-in`}
-                  style={{ animationDelay: `${index * 100}ms` }}
-                />
+                <div key={recommendation.id} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                  <LocationCard 
+                    recommendation={recommendation}
+                    className="h-full"
+                  />
+                </div>
               ))}
             </div>
           ) : initialLoad ? (
