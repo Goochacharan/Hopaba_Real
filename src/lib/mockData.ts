@@ -1,0 +1,162 @@
+
+export interface Recommendation {
+  id: string;
+  name: string;
+  category: string;
+  tags: string[];
+  rating: number;
+  address: string;
+  distance: string;
+  image: string;
+  description: string;
+  openNow?: boolean;
+  hours?: string;
+  priceLevel?: string;
+}
+
+// Mock recommendations data
+export const mockRecommendations: Recommendation[] = [
+  {
+    id: '1',
+    name: 'Chic Cuts & Styles',
+    category: 'Salons',
+    tags: ['Unisex', 'Trendy', 'Walk-ins'],
+    rating: 4.8,
+    address: '123 Style Avenue, San Francisco',
+    distance: '0.5 miles away',
+    image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
+    description: 'Modern unisex salon offering premium haircuts, styling, and coloring services in a relaxed atmosphere.',
+    openNow: true,
+    hours: 'Until 8:00 PM',
+    priceLevel: '$$'
+  },
+  {
+    id: '2',
+    name: 'Harmony Hair Studio',
+    category: 'Salons',
+    tags: ['Unisex', 'Organic', 'Appointment'],
+    rating: 4.6,
+    address: '456 Beauty Lane, San Francisco',
+    distance: '0.8 miles away',
+    image: 'https://images.unsplash.com/photo-1470259078422-826894b933aa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1174&q=80',
+    description: 'Eco-friendly salon focusing on sustainable beauty practices and personalized haircare treatments.',
+    openNow: true,
+    hours: 'Until 7:00 PM',
+    priceLevel: '$$$'
+  },
+  {
+    id: '3',
+    name: 'Urban Mane',
+    category: 'Salons',
+    tags: ['Unisex', 'Boutique', 'Trending'],
+    rating: 4.5,
+    address: '789 Fashion Street, San Francisco',
+    distance: '1.2 miles away',
+    image: 'https://images.unsplash.com/photo-1532710093739-9470acff878f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    description: 'Boutique salon specializing in contemporary cuts and styles for all genders in an upscale environment.',
+    openNow: false,
+    hours: 'Opens tomorrow at 9:00 AM',
+    priceLevel: '$$'
+  },
+  {
+    id: '4',
+    name: 'Craft Coffee House',
+    category: 'Cafes',
+    tags: ['Specialty Coffee', 'Pastries', 'Wifi'],
+    rating: 4.7,
+    address: '321 Brew Street, San Francisco',
+    distance: '0.3 miles away',
+    image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1178&q=80',
+    description: 'Artisanal coffee shop serving single-origin espresso drinks and house-made pastries in a cozy atmosphere.',
+    openNow: true,
+    hours: 'Until 6:00 PM',
+    priceLevel: '$$'
+  },
+  {
+    id: '5',
+    name: 'Fusion Restaurant',
+    category: 'Restaurants',
+    tags: ['Asian Fusion', 'Dinner', 'Cocktails'],
+    rating: 4.4,
+    address: '567 Flavor Road, San Francisco',
+    distance: '1.5 miles away',
+    image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1174&q=80',
+    description: 'Creative restaurant blending Asian and Western flavors with an extensive craft cocktail menu.',
+    openNow: true,
+    hours: 'Until 10:00 PM',
+    priceLevel: '$$$'
+  },
+  {
+    id: '6',
+    name: 'Elite Barber Shop',
+    category: 'Salons',
+    tags: ['Men', 'Traditional', 'Premium'],
+    rating: 4.9,
+    address: '890 Classic Avenue, San Francisco',
+    distance: '2.0 miles away',
+    image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    description: 'Traditional barbershop offering classic men\'s cuts, hot towel shaves, and grooming services.',
+    openNow: false,
+    hours: 'Opens tomorrow at 10:00 AM',
+    priceLevel: '$$'
+  },
+  {
+    id: '7',
+    name: 'Wellness Spa & Salon',
+    category: 'Health',
+    tags: ['Unisex', 'Spa', 'Haircare'],
+    rating: 4.7,
+    address: '654 Relaxation Road, San Francisco',
+    distance: '1.7 miles away',
+    image: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    description: 'Comprehensive wellness center combining salon services with spa treatments for a complete self-care experience.',
+    openNow: true,
+    hours: 'Until 9:00 PM',
+    priceLevel: '$$$'
+  },
+];
+
+// Function to filter recommendations based on search query
+export const searchRecommendations = (
+  query: string, 
+  category: string = 'all'
+): Recommendation[] => {
+  const lowercaseQuery = query.toLowerCase();
+  
+  // If this is a unisex salon query
+  if (lowercaseQuery.includes('unisex') && lowercaseQuery.includes('salon')) {
+    const filteredResults = mockRecommendations.filter(item => 
+      (item.category === 'Salons' || category === 'all' || item.category.toLowerCase() === category.toLowerCase()) && 
+      (item.tags.some(tag => tag.toLowerCase() === 'unisex'))
+    );
+    return filteredResults.length ? filteredResults : mockRecommendations.filter(item => item.category === 'Salons');
+  }
+
+  // General search
+  let filtered = mockRecommendations;
+  
+  // Apply category filter if not 'all'
+  if (category !== 'all') {
+    const categoryName = category === 'salons' ? 'Salons' 
+                       : category === 'cafes' ? 'Cafes' 
+                       : category === 'restaurants' ? 'Restaurants'
+                       : category === 'health' ? 'Health'
+                       : category;
+    
+    filtered = filtered.filter(item => 
+      item.category.toLowerCase() === categoryName.toLowerCase()
+    );
+  }
+  
+  // Apply query filter
+  if (query) {
+    filtered = filtered.filter(item =>
+      item.name.toLowerCase().includes(lowercaseQuery) ||
+      item.description.toLowerCase().includes(lowercaseQuery) ||
+      item.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery)) ||
+      item.category.toLowerCase().includes(lowercaseQuery)
+    );
+  }
+  
+  return filtered;
+};
