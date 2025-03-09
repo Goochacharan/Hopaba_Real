@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, ExternalLink, Clock, SendIcon, Search } from 'lucide-react';
+import { MapPin, Star, ExternalLink, Clock, SendIcon, Search, Phone, MessageSquare } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -49,6 +48,24 @@ const LocationCard: React.FC<LocationCardProps> = ({
         duration: 3000,
       });
     }, 1500);
+  };
+
+  const handleCall = () => {
+    // Simulate phone functionality - would integrate with real phone API
+    toast({
+      title: "Calling",
+      description: `Calling ${recommendation.name}...`,
+      duration: 3000,
+    });
+  };
+
+  const handleWhatsApp = () => {
+    // Simulate WhatsApp integration - would open WhatsApp with predefined message
+    toast({
+      title: "Opening WhatsApp",
+      description: `Messaging ${recommendation.name} via WhatsApp...`,
+      duration: 3000,
+    });
   };
 
   return (
@@ -121,6 +138,28 @@ const LocationCard: React.FC<LocationCardProps> = ({
               {tag}
             </span>
           ))}
+        </div>
+
+        {/* Contact buttons */}
+        <div className="flex gap-2 mt-4">
+          <Button 
+            onClick={handleCall} 
+            variant="outline" 
+            size="sm" 
+            className="flex-1 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
+          >
+            <Phone className="mr-1 h-4 w-4" />
+            Call
+          </Button>
+          <Button 
+            onClick={handleWhatsApp} 
+            variant="outline" 
+            size="sm" 
+            className="flex-1 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
+          >
+            <MessageSquare className="mr-1 h-4 w-4" />
+            Message
+          </Button>
         </div>
       </div>
 
