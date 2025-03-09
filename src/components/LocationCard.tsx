@@ -1,8 +1,11 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, ExternalLink, Clock } from 'lucide-react';
+import { MapPin, Star, ExternalLink, Clock, SendIcon } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 
 interface LocationCardProps {
   recommendation: Recommendation;
@@ -14,6 +17,38 @@ const LocationCard: React.FC<LocationCardProps> = ({
   className 
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [showFollowUp, setShowFollowUp] = useState(false);
+  const [followUpQuestion, setFollowUpQuestion] = useState('');
+  const [followUpAnswer, setFollowUpAnswer] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleFollowUpQuestion = () => {
+    if (!followUpQuestion.trim()) return;
+    
+    setIsLoading(true);
+    
+    // Simulate API call for follow-up question answer
+    setTimeout(() => {
+      const answers = [
+        `${recommendation.name} is known for their excellent customer service and unique approach to ${recommendation.category.toLowerCase()}.`,
+        `According to recent reviews, their most popular offerings are their premium services and their friendly staff.`,
+        `They're particularly busy on weekends, so it's recommended to book in advance if that's when you plan to visit.`,
+        `They've been serving the community for over 5 years and have built a strong reputation for quality.`
+      ];
+      
+      // Select a random answer
+      const randomAnswer = answers[Math.floor(Math.random() * answers.length)];
+      setFollowUpAnswer(randomAnswer);
+      setIsLoading(false);
+      
+      toast({
+        title: "Response received",
+        description: "We've got more information about this place for you",
+        duration: 3000,
+      });
+    }, 1500);
+  };
 
   return (
     <div 
@@ -92,14 +127,52 @@ const LocationCard: React.FC<LocationCardProps> = ({
         <div className="text-sm text-muted-foreground">
           {recommendation.distance}
         </div>
-        <a 
-          href="#" 
-          className="text-primary text-sm font-medium flex items-center gap-1 hover:underline"
-        >
-          View More
-          <ExternalLink className="w-3 h-3" />
-        </a>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setShowFollowUp(!showFollowUp)} 
+            className="text-primary text-sm font-medium hover:underline focus:outline-none"
+          >
+            {showFollowUp ? "Hide questions" : "Ask about this place"}
+          </button>
+          <a 
+            href="#" 
+            className="text-primary text-sm font-medium flex items-center gap-1 hover:underline"
+          >
+            View More
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
       </div>
+
+      {showFollowUp && (
+        <div className="p-4 bg-muted/20 border-t border-border/50">
+          {followUpAnswer && (
+            <div className="mb-3 p-3 bg-secondary/70 rounded-lg text-sm">
+              {followUpAnswer}
+            </div>
+          )}
+          
+          <div className="flex items-center gap-2">
+            <Input
+              value={followUpQuestion}
+              onChange={(e) => setFollowUpQuestion(e.target.value)}
+              placeholder="Ask anything about this place..."
+              className="flex-1 h-10 text-sm"
+            />
+            <Button 
+              size="sm" 
+              onClick={handleFollowUpQuestion}
+              disabled={isLoading || !followUpQuestion.trim()}
+            >
+              {isLoading ? (
+                <div className="h-4 w-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <SendIcon className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
