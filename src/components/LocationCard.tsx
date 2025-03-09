@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { MapPin, Star, ExternalLink, Clock, SendIcon, Search, Phone, MessageSquare } from 'lucide-react';
@@ -168,12 +169,16 @@ const LocationCard: React.FC<LocationCardProps> = ({
           {recommendation.distance}
         </div>
         <div className="flex items-center gap-2">
-          <button 
-            onClick={() => setShowFollowUp(!showFollowUp)} 
-            className="text-primary text-sm font-medium hover:underline focus:outline-none"
-          >
-            {showFollowUp ? "Hide questions" : "Ask about this place"}
-          </button>
+          {/* Small search bar instead of "Ask about this place" text */}
+          <div className="relative">
+            <button 
+              onClick={() => setShowFollowUp(!showFollowUp)}
+              className="flex items-center gap-1 rounded-full border border-border/50 bg-white/90 px-2 py-1 text-xs text-muted-foreground hover:border-primary/20 hover:text-primary transition-all"
+            >
+              <Search className="h-3 w-3" />
+              <span>Ask</span>
+            </button>
+          </div>
           <a 
             href="#" 
             className="text-primary text-sm font-medium flex items-center gap-1 hover:underline"
