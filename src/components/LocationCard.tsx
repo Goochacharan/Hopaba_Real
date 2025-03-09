@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, ExternalLink, Clock, SendIcon } from 'lucide-react';
+import { MapPin, Star, ExternalLink, Clock, SendIcon, Search } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -147,25 +147,30 @@ const LocationCard: React.FC<LocationCardProps> = ({
       {showFollowUp && (
         <div className="p-4 bg-muted/20 border-t border-border/50">
           {followUpAnswer && (
-            <div className="mb-3 p-3 bg-secondary/70 rounded-lg text-sm">
+            <div className="mb-4 p-4 bg-secondary/70 rounded-lg text-sm">
               {followUpAnswer}
             </div>
           )}
           
-          <div className="flex items-center gap-2">
-            <Input
-              value={followUpQuestion}
-              onChange={(e) => setFollowUpQuestion(e.target.value)}
-              placeholder="Ask anything about this place..."
-              className="flex-1 h-10 text-sm"
-            />
+          <div className="flex items-center rounded-full border border-border/50 bg-white/90 backdrop-blur-sm shadow-sm overflow-hidden transition-all hover:border-primary/20 hover:shadow">
+            <div className="flex-1 flex items-center pl-4">
+              <Search className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
+              <input
+                value={followUpQuestion}
+                onChange={(e) => setFollowUpQuestion(e.target.value)}
+                placeholder="Ask anything about this place..."
+                className="flex-1 bg-transparent border-none outline-none text-sm py-3"
+              />
+            </div>
             <Button 
               size="sm" 
+              variant="ghost"
               onClick={handleFollowUpQuestion}
               disabled={isLoading || !followUpQuestion.trim()}
+              className="h-full rounded-none px-4"
             >
               {isLoading ? (
-                <div className="h-4 w-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
+                <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               ) : (
                 <SendIcon className="h-4 w-4" />
               )}
