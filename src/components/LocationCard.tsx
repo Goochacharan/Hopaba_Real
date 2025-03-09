@@ -41,6 +41,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       const randomAnswer = answers[Math.floor(Math.random() * answers.length)];
       setFollowUpAnswer(randomAnswer);
       setIsLoading(false);
+      setFollowUpQuestion(''); // Clear the input after submission
       
       toast({
         title: "Response received",
@@ -152,7 +153,13 @@ const LocationCard: React.FC<LocationCardProps> = ({
             </div>
           )}
           
-          <div className="flex items-center rounded-full border border-border/50 bg-white/90 backdrop-blur-sm shadow-sm overflow-hidden transition-all hover:border-primary/20 hover:shadow">
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleFollowUpQuestion();
+            }}
+            className="flex items-center rounded-full border border-border/50 bg-white/90 backdrop-blur-sm shadow-sm overflow-hidden transition-all hover:border-primary/20 hover:shadow"
+          >
             <div className="flex-1 flex items-center pl-4">
               <Search className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
               <input
@@ -163,9 +170,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
               />
             </div>
             <Button 
+              type="submit"
               size="sm" 
               variant="ghost"
-              onClick={handleFollowUpQuestion}
               disabled={isLoading || !followUpQuestion.trim()}
               className="h-full rounded-none px-4"
             >
@@ -175,7 +182,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
                 <SendIcon className="h-4 w-4" />
               )}
             </Button>
-          </div>
+          </form>
         </div>
       )}
     </div>
