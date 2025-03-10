@@ -169,14 +169,14 @@ const LocationCard: React.FC<LocationCardProps> = ({
           {recommendation.distance}
         </div>
         <div className="flex items-center gap-2">
-          {/* Small search bar instead of "Ask about this place" text */}
+          {/* Longer search button */}
           <div className="relative">
             <button 
               onClick={() => setShowFollowUp(!showFollowUp)}
-              className="flex items-center gap-1 rounded-full border border-border/50 bg-white/90 px-2 py-1 text-xs text-muted-foreground hover:border-primary/20 hover:text-primary transition-all"
+              className="flex items-center gap-1 rounded-full border border-border/50 bg-white/90 px-3 py-1.5 text-sm text-muted-foreground hover:border-primary/20 hover:text-primary transition-all"
             >
-              <Search className="h-3 w-3" />
-              <span>Ask</span>
+              <Search className="h-3.5 w-3.5" />
+              <span>Ask a question</span>
             </button>
           </div>
           <a 
@@ -202,7 +202,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               e.preventDefault();
               handleFollowUpQuestion();
             }}
-            className="flex items-center rounded-full border border-border/50 bg-white/90 backdrop-blur-sm shadow-sm overflow-hidden transition-all hover:border-primary/20 hover:shadow"
+            className="flex items-center rounded-lg border border-border/50 bg-white/90 backdrop-blur-sm shadow-sm overflow-hidden transition-all hover:border-primary/20 hover:shadow"
           >
             <div className="flex-1 flex items-center pl-4">
               <Search className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
