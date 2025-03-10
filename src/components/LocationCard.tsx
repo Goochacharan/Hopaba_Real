@@ -17,7 +17,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
   className 
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [showFollowUp, setShowFollowUp] = useState(false);
   const [followUpQuestion, setFollowUpQuestion] = useState('');
   const [followUpAnswer, setFollowUpAnswer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -169,62 +168,44 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </div>
       </div>
 
-      <div className="px-4 py-3 bg-secondary/50 border-t border-border/50 flex justify-between items-center">
-        <div>
-          {/* This div is now empty since we moved the distance up */}
-        </div>
-        <div>
-          {/* Search button */}
-          <button 
-            onClick={() => setShowFollowUp(!showFollowUp)}
-            className="flex items-center gap-1 rounded-full border border-border/50 bg-white/90 px-3 py-1.5 text-sm text-muted-foreground hover:border-primary/20 hover:text-primary transition-all"
+      <div className="px-4 py-3 bg-secondary/50 border-t border-border/50">
+        {followUpAnswer && (
+          <div className="mb-4 p-4 bg-secondary/70 rounded-lg text-sm">
+            {followUpAnswer}
+          </div>
+        )}
+        
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleFollowUpQuestion();
+          }}
+          className="flex items-center rounded-lg border border-border/50 bg-white/90 backdrop-blur-sm shadow-sm overflow-hidden transition-all hover:border-primary/20 hover:shadow"
+        >
+          <div className="flex-1 flex items-center pl-4">
+            <Search className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
+            <input
+              value={followUpQuestion}
+              onChange={(e) => setFollowUpQuestion(e.target.value)}
+              placeholder="Ask anything about this place..."
+              className="flex-1 bg-transparent border-none outline-none text-sm py-3"
+            />
+          </div>
+          <Button 
+            type="submit"
+            size="sm" 
+            variant="ghost"
+            disabled={isLoading || !followUpQuestion.trim()}
+            className="h-full rounded-none px-4"
           >
-            <Search className="h-3.5 w-3.5" />
-            <span>Ask a question</span>
-          </button>
-        </div>
+            {isLoading ? (
+              <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <SendIcon className="h-4 w-4" />
+            )}
+          </Button>
+        </form>
       </div>
-
-      {showFollowUp && (
-        <div className="p-4 bg-muted/20 border-t border-border/50">
-          {followUpAnswer && (
-            <div className="mb-4 p-4 bg-secondary/70 rounded-lg text-sm">
-              {followUpAnswer}
-            </div>
-          )}
-          
-          <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleFollowUpQuestion();
-            }}
-            className="flex items-center rounded-lg border border-border/50 bg-white/90 backdrop-blur-sm shadow-sm overflow-hidden transition-all hover:border-primary/20 hover:shadow"
-          >
-            <div className="flex-1 flex items-center pl-4">
-              <Search className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
-              <input
-                value={followUpQuestion}
-                onChange={(e) => setFollowUpQuestion(e.target.value)}
-                placeholder="Ask anything about this place..."
-                className="flex-1 bg-transparent border-none outline-none text-sm py-3"
-              />
-            </div>
-            <Button 
-              type="submit"
-              size="sm" 
-              variant="ghost"
-              disabled={isLoading || !followUpQuestion.trim()}
-              className="h-full rounded-none px-4"
-            >
-              {isLoading ? (
-                <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <SendIcon className="h-4 w-4" />
-              )}
-            </Button>
-          </form>
-        </div>
-      )}
     </div>
   );
 };
