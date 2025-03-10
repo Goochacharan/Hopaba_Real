@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, ExternalLink, Clock, SendIcon, Search, Phone, MessageSquare } from 'lucide-react';
+import { MapPin, Star, Clock, SendIcon, Search, Phone, MessageSquare } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -168,24 +168,15 @@ const LocationCard: React.FC<LocationCardProps> = ({
         <div className="text-sm text-muted-foreground">
           {recommendation.distance}
         </div>
-        <div className="flex items-center gap-2">
-          {/* Longer search button */}
-          <div className="relative">
-            <button 
-              onClick={() => setShowFollowUp(!showFollowUp)}
-              className="flex items-center gap-1 rounded-full border border-border/50 bg-white/90 px-3 py-1.5 text-sm text-muted-foreground hover:border-primary/20 hover:text-primary transition-all"
-            >
-              <Search className="h-3.5 w-3.5" />
-              <span>Ask a question</span>
-            </button>
-          </div>
-          <a 
-            href="#" 
-            className="text-primary text-sm font-medium flex items-center gap-1 hover:underline"
+        <div>
+          {/* Search button */}
+          <button 
+            onClick={() => setShowFollowUp(!showFollowUp)}
+            className="flex items-center gap-1 rounded-full border border-border/50 bg-white/90 px-3 py-1.5 text-sm text-muted-foreground hover:border-primary/20 hover:text-primary transition-all"
           >
-            View More
-            <ExternalLink className="w-3 h-3" />
-          </a>
+            <Search className="h-3.5 w-3.5" />
+            <span>Ask a question</span>
+          </button>
         </div>
       </div>
 
