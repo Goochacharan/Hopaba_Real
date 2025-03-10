@@ -113,16 +113,21 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </div>
 
         {recommendation.openNow !== undefined && (
-          <div className="flex items-center text-sm mb-3">
-            <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
-            <span className={recommendation.openNow ? "text-emerald-600" : "text-rose-600"}>
-              {recommendation.openNow ? "Open now" : "Closed"}
-            </span>
-            {recommendation.hours && (
-              <span className="text-muted-foreground ml-1">
-                {recommendation.hours}
+          <div className="flex items-center justify-between text-sm mb-3">
+            <div className="flex items-center">
+              <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
+              <span className={recommendation.openNow ? "text-emerald-600" : "text-rose-600"}>
+                {recommendation.openNow ? "Open now" : "Closed"}
               </span>
-            )}
+              {recommendation.hours && (
+                <span className="text-muted-foreground ml-1">
+                  {recommendation.hours}
+                </span>
+              )}
+            </div>
+            <div className="text-muted-foreground">
+              {recommendation.distance}
+            </div>
           </div>
         )}
 
@@ -165,8 +170,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
       </div>
 
       <div className="px-4 py-3 bg-secondary/50 border-t border-border/50 flex justify-between items-center">
-        <div className="text-sm text-muted-foreground">
-          {recommendation.distance}
+        <div>
+          {/* This div is now empty since we moved the distance up */}
         </div>
         <div>
           {/* Search button */}
