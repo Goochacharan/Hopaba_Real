@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, Clock, SendIcon, Search, Phone, MessageSquare } from 'lucide-react';
+import { MapPin, Star, Clock, SendIcon, Search, Phone, MessageSquare, Help, Calendar, ParkingCircle, Utensils } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -22,8 +22,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleFollowUpQuestion = () => {
-    if (!followUpQuestion.trim()) return;
+  const handleFollowUpQuestion = (question?: string) => {
+    const questionToAsk = question || followUpQuestion;
+    if (!questionToAsk.trim()) return;
     
     setIsLoading(true);
     
@@ -67,6 +68,14 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000,
     });
   };
+
+  // Predefined follow-up questions with their icons
+  const quickQuestions = [
+    { text: "What services do they offer?", icon: <Help className="w-3 h-3" /> },
+    { text: "Do they have reservations?", icon: <Calendar className="w-3 h-3" /> },
+    { text: "Is parking available?", icon: <ParkingCircle className="w-3 h-3" /> },
+    { text: "Popular items?", icon: <Utensils className="w-3 h-3" /> },
+  ];
 
   return (
     <div 
@@ -175,6 +184,20 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </div>
         )}
         
+        {/* Quick question chips */}
+        <div className="flex flex-wrap gap-2 mb-3">
+          {quickQuestions.map((question, index) => (
+            <button
+              key={index}
+              onClick={() => handleFollowUpQuestion(question.text)}
+              className="flex items-center gap-1.5 bg-white border border-border/60 rounded-full px-3 py-1.5 text-xs text-muted-foreground hover:border-primary/20 hover:bg-primary/5 hover:text-primary transition-colors"
+            >
+              {question.icon}
+              <span>{question.text}</span>
+            </button>
+          ))}
+        </div>
+        
         <form 
           onSubmit={(e) => {
             e.preventDefault();
@@ -211,3 +234,4 @@ const LocationCard: React.FC<LocationCardProps> = ({
 };
 
 export default LocationCard;
+
