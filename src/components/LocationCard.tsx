@@ -1,14 +1,21 @@
+
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { MapPin, Star, Clock, SendIcon, Search, Phone, MessageSquare, HelpCircle, Calendar, ParkingCircle, Utensils } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface LocationCardProps {
   recommendation: Recommendation;
   className?: string;
+}
+
+interface FollowUpAnswer {
+  question: string;
+  answer: string;
+  timestamp: string;
 }
 
 const LocationCard: React.FC<LocationCardProps> = ({ 
@@ -17,7 +24,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [followUpQuestion, setFollowUpQuestion] = useState('');
-  const [followUpAnswer, setFollowUpAnswer] = useState<string | null>(null);
+  const [followUpAnswers, setFollowUpAnswers] = useState<FollowUpAnswer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -38,7 +45,21 @@ const LocationCard: React.FC<LocationCardProps> = ({
       
       // Select a random answer
       const randomAnswer = answers[Math.floor(Math.random() * answers.length)];
-      setFollowUpAnswer(randomAnswer);
+      
+      // Format current time
+      const now = new Date();
+      const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      // Add to answers history instead of replacing
+      setFollowUpAnswers(prev => [
+        ...prev, 
+        { 
+          question: questionToAsk, 
+          answer: randomAnswer,
+          timestamp: timeString
+        }
+      ]);
+      
       setIsLoading(false);
       setFollowUpQuestion(''); // Clear the input after submission
       
@@ -177,9 +198,18 @@ const LocationCard: React.FC<LocationCardProps> = ({
       </div>
 
       <div className="px-4 py-3 bg-secondary/50 border-t border-border/50">
-        {followUpAnswer && (
-          <div className="mb-4 p-4 bg-secondary/70 rounded-lg text-sm">
-            {followUpAnswer}
+        {/* Show all follow-up answers instead of just the latest one */}
+        {followUpAnswers.length > 0 && (
+          <div className="mb-4 space-y-3 max-h-80 overflow-y-auto">
+            {followUpAnswers.map((item, index) => (
+              <div key={index} className="p-4 bg-secondary/70 rounded-lg">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-xs font-medium text-primary">{item.question}</p>
+                  <span className="text-xs text-muted-foreground">{item.timestamp}</span>
+                </div>
+                <p className="text-sm">{item.answer}</p>
+              </div>
+            ))}
           </div>
         )}
         
