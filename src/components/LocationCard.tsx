@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { MapPin, Star, Clock, SendIcon, Search, Phone, MessageSquare, HelpCircle, Calendar, ParkingCircle, Utensils } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
@@ -22,6 +23,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
   recommendation, 
   className 
 }) => {
+  const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [followUpQuestion, setFollowUpQuestion] = useState('');
   const [followUpAnswers, setFollowUpAnswers] = useState<FollowUpAnswer[]>([]);
@@ -71,7 +73,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }, 1500);
   };
 
-  const handleCall = () => {
+  const handleCall = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click navigation
     // Simulate phone functionality - would integrate with real phone API
     toast({
       title: "Calling",
@@ -80,13 +83,25 @@ const LocationCard: React.FC<LocationCardProps> = ({
     });
   };
 
-  const handleWhatsApp = () => {
+  const handleWhatsApp = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click navigation
     // Simulate WhatsApp integration - would open WhatsApp with predefined message
     toast({
       title: "Opening WhatsApp",
       description: `Messaging ${recommendation.name} via WhatsApp...`,
       duration: 3000,
     });
+  };
+
+  const handleCardClick = () => {
+    navigate(`/location/${recommendation.id}`);
+  };
+
+  // Handle form submission separately to prevent card navigation
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleFollowUpQuestion();
   };
 
   // Predefined follow-up questions with their icons
@@ -99,8 +114,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
   return (
     <div 
+      onClick={handleCardClick}
       className={cn(
-        "group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300",
+        "group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer",
         "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]",
         className
       )}
@@ -214,11 +230,14 @@ const LocationCard: React.FC<LocationCardProps> = ({
         )}
         
         {/* Quick question chips */}
-        <div className="flex flex-wrap gap-2 mb-3">
+        <div className="flex flex-wrap gap-2 mb-3" onClick={(e) => e.stopPropagation()}>
           {quickQuestions.map((question, index) => (
             <button
               key={index}
-              onClick={() => handleFollowUpQuestion(question.text)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleFollowUpQuestion(question.text);
+              }}
               className="flex items-center gap-1.5 bg-white border border-border/60 rounded-full px-3 py-1.5 text-xs text-muted-foreground hover:border-primary/20 hover:bg-primary/5 hover:text-primary transition-colors"
             >
               {question.icon}
@@ -228,10 +247,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </div>
         
         <form 
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleFollowUpQuestion();
-          }}
+          onSubmit={handleFormSubmit}
+          onClick={(e) => e.stopPropagation()}
           className="flex items-center rounded-lg border border-border/50 bg-white/90 backdrop-blur-sm shadow-sm overflow-hidden transition-all hover:border-primary/20 hover:shadow"
         >
           <div className="flex-1 flex items-center pl-4">

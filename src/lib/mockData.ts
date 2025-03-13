@@ -293,3 +293,8 @@ export const searchRecommendations = (
   
   return filtered;
 };
+
+// Add a new function to get a recommendation by ID
+export const getRecommendationById = (id: string): Recommendation | undefined => {
+  return mockRecommendations.find(rec => rec.id === id);
+};
