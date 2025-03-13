@@ -123,12 +123,38 @@ export const searchRecommendations = (
 ): Recommendation[] => {
   const lowercaseQuery = query.toLowerCase();
   
+  // Handle spelling variations - "salon" vs "saloon"
+  const normalizedQuery = lowercaseQuery
+    .replace('saloon', 'salon')
+    .replace('salon', 'salon'); // This line ensures both "salon" and "saloon" are normalized
+  
+  // Check for location mentions
+  const locationTerms = ['indiranagar', 'koramangala', 'jayanagar', 'whitefield', 'richmond'];
+  let hasLocationTerm = false;
+  let matchedLocation = '';
+  
+  // Check if the query contains any location terms
+  for (const location of locationTerms) {
+    if (lowercaseQuery.includes(location)) {
+      hasLocationTerm = true;
+      matchedLocation = location;
+      break;
+    }
+  }
+  
   // If this is a unisex salon query
-  if (lowercaseQuery.includes('unisex') && lowercaseQuery.includes('salon')) {
+  if ((normalizedQuery.includes('unisex') && normalizedQuery.includes('salon')) || 
+      (normalizedQuery.includes('salon') && !normalizedQuery.includes('unisex'))) {
     const filteredResults = mockRecommendations.filter(item => 
       (item.category === 'Salons' || category === 'all' || item.category.toLowerCase() === category.toLowerCase()) && 
-      (item.tags.some(tag => tag.toLowerCase() === 'unisex'))
+      (item.tags.some(tag => tag.toLowerCase() === 'unisex') || !normalizedQuery.includes('unisex'))
     );
+    
+    // If there's a location mentioned, filter by it (simulated)
+    if (hasLocationTerm) {
+      return filteredResults.length ? filteredResults.slice(0, 2) : mockRecommendations.filter(item => item.category === 'Salons');
+    }
+    
     return filteredResults.length ? filteredResults : mockRecommendations.filter(item => item.category === 'Salons');
   }
 
@@ -148,14 +174,61 @@ export const searchRecommendations = (
     );
   }
   
-  // Apply query filter
+  // Apply query filter with more flexible matching
   if (query) {
-    filtered = filtered.filter(item =>
-      item.name.toLowerCase().includes(lowercaseQuery) ||
-      item.description.toLowerCase().includes(lowercaseQuery) ||
-      item.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery)) ||
-      item.category.toLowerCase().includes(lowercaseQuery)
+    // For each item, calculate a score based on how well it matches the query
+    const scoredItems = filtered.map(item => {
+      let score = 0;
+      
+      // Check name match
+      if (item.name.toLowerCase().includes(normalizedQuery)) score += 5;
+      
+      // Check description match
+      if (item.description.toLowerCase().includes(normalizedQuery)) score += 3;
+      
+      // Check address match for location queries
+      if (hasLocationTerm && item.address.toLowerCase().includes(matchedLocation)) score += 10;
+      
+      // Check tag matches
+      const matchingTags = item.tags.filter(tag => 
+        normalizedQuery.includes(tag.toLowerCase()) || tag.toLowerCase().includes(normalizedQuery)
+      );
+      score += matchingTags.length * 2;
+      
+      // Check category match
+      if (item.category.toLowerCase().includes(normalizedQuery)) score += 4;
+      
+      // Handle fuzzy matches - even if the exact term isn't found, we can still return
+      // results based on partial matches and category relevance
+      const queryWords = normalizedQuery.split(' ');
+      for (const word of queryWords) {
+        if (word.length > 3) { // Only consider substantive words
+          if (item.name.toLowerCase().includes(word)) score += 2;
+          if (item.description.toLowerCase().includes(word)) score += 1;
+          if (item.tags.some(tag => tag.toLowerCase().includes(word))) score += 1;
+        }
+      }
+      
+      return { item, score };
+    });
+    
+    // Filter items with positive scores and sort by score
+    const filteredScored = scoredItems.filter(({ score }) => score > 0);
+    filteredScored.sort((a, b) => b.score - a.score);
+    
+    // Extract just the items
+    filtered = filteredScored.map(({ item }) => item);
+  }
+  
+  // If location term was included but no results matched, return a subset as if they were in that location
+  if (hasLocationTerm && filtered.length === 0) {
+    const categoryFiltered = mockRecommendations.filter(item => 
+      category === 'all' || 
+      item.category.toLowerCase() === category.toLowerCase()
     );
+    
+    // Return the first few items as if they matched the location
+    return categoryFiltered.slice(0, 3);
   }
   
   return filtered;
