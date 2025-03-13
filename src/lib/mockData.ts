@@ -1,4 +1,3 @@
-
 export interface Recommendation {
   id: string;
   name: string;
@@ -114,6 +113,48 @@ export const mockRecommendations: Recommendation[] = [
     hours: 'Until 9:00 PM',
     priceLevel: '$$$'
   },
+  {
+    id: '8',
+    name: 'Melodious Flute Academy',
+    category: 'Music',
+    tags: ['Flute', 'Beginner-Friendly', 'Classical'],
+    rating: 4.9,
+    address: '123 Music Lane, Nagarbhavi, Bangalore',
+    distance: '0.3 miles away',
+    image: 'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    description: 'Premier flute learning center with highly qualified teachers offering personalized lessons for all age groups and skill levels.',
+    openNow: true,
+    hours: 'Until 8:00 PM',
+    priceLevel: '$$'
+  },
+  {
+    id: '9',
+    name: 'Nagarbhavi Music School',
+    category: 'Music',
+    tags: ['Flute', 'All Instruments', 'Workshops'],
+    rating: 4.7,
+    address: '456 Harmony Road, Nagarbhavi, Bangalore',
+    distance: '0.7 miles away',
+    image: 'https://images.unsplash.com/photo-1513883049090-d0b7439799bf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    description: 'Comprehensive music school offering flute lessons along with various other instruments. Regular workshops and recitals for students.',
+    openNow: true,
+    hours: 'Until 7:30 PM',
+    priceLevel: '$$'
+  },
+  {
+    id: '10',
+    name: 'Classical Flute Guru',
+    category: 'Music',
+    tags: ['Flute', 'Carnatic', 'Private Lessons'],
+    rating: 4.8,
+    address: '789 Raaga Street, Nagarbhavi, Bangalore',
+    distance: '1.2 miles away',
+    image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1167&q=80',
+    description: 'Specialized in Carnatic flute teaching with an experienced guru who has performed internationally. One-on-one personalized lessons.',
+    openNow: false,
+    hours: 'Opens tomorrow at 9:00 AM',
+    priceLevel: '$$$'
+  },
 ];
 
 // Function to filter recommendations based on search query
@@ -129,7 +170,7 @@ export const searchRecommendations = (
     .replace('salon', 'salon'); // This line ensures both "salon" and "saloon" are normalized
   
   // Check for location mentions
-  const locationTerms = ['indiranagar', 'koramangala', 'jayanagar', 'whitefield', 'richmond'];
+  const locationTerms = ['indiranagar', 'koramangala', 'jayanagar', 'whitefield', 'richmond', 'nagarbhavi'];
   let hasLocationTerm = false;
   let matchedLocation = '';
   
@@ -158,6 +199,24 @@ export const searchRecommendations = (
     return filteredResults.length ? filteredResults : mockRecommendations.filter(item => item.category === 'Salons');
   }
 
+  // Handle flute teacher searches
+  if (normalizedQuery.includes('flute') || normalizedQuery.includes('music') || normalizedQuery.includes('teacher')) {
+    const filteredResults = mockRecommendations.filter(item => 
+      (item.category === 'Music' || category === 'all') &&
+      (item.tags.some(tag => tag.toLowerCase() === 'flute') || 
+       item.description.toLowerCase().includes('flute'))
+    );
+    
+    // If there's a location mentioned, further filter by location
+    if (hasLocationTerm) {
+      return filteredResults.filter(item => 
+        item.address.toLowerCase().includes(matchedLocation)
+      );
+    }
+    
+    return filteredResults;
+  }
+
   // General search
   let filtered = mockRecommendations;
   
@@ -167,6 +226,7 @@ export const searchRecommendations = (
                        : category === 'cafes' ? 'Cafes' 
                        : category === 'restaurants' ? 'Restaurants'
                        : category === 'health' ? 'Health'
+                       : category === 'music' ? 'Music'
                        : category;
     
     filtered = filtered.filter(item => 
