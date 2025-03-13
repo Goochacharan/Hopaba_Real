@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { Phone, MessageSquare, MapPin, Clock, DollarSign, Languages, Award, Calendar, ExternalLink, ArrowLeft, HelpCircle } from 'lucide-react';
+import { Phone, MessageSquare, MapPin, Clock, DollarSign, Languages, Award, Calendar, ExternalLink, ArrowLeft, HelpCircle, Star } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
 
 const LocationDetails = () => {
@@ -14,6 +14,15 @@ const LocationDetails = () => {
   const [location, setLocation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [question, setQuestion] = useState('');
+  const [questionAnswers, setQuestionAnswers] = useState<{ question: string; answer: string; timestamp: string }[]>([]);
+  const [askingQuestion, setAskingQuestion] = useState(false);
+  
+  // Sample reviews data
+  const reviews = [
+    { id: 1, name: "Priya S.", rating: 5, text: "Great experience! The instructor was very patient and helped my child learn quickly.", date: "2 weeks ago" },
+    { id: 2, name: "Rahul M.", rating: 4, text: "Professional teaching methods and flexible timings. My daughter enjoys her lessons here.", date: "1 month ago" },
+    { id: 3, name: "Ananya K.", rating: 5, text: "Excellent teacher who understands how to work with children. Highly recommended!", date: "2 months ago" },
+  ];
   
   useEffect(() => {
     if (!id) {
@@ -59,21 +68,56 @@ const LocationDetails = () => {
     const questionText = text || question;
     if (!questionText.trim()) return;
     
-    toast({
-      title: "Question Sent",
-      description: "We've sent your question and will notify you when there's a response",
-      duration: 3000,
-    });
+    setAskingQuestion(true);
     
-    setQuestion('');
+    // Sample answers for different question types
+    const answers = {
+      "What services do they offer?": `${location?.name} offers specialized ${location?.category.toLowerCase()} instruction for all age groups, including beginners and advanced students.`,
+      "What is their experience?": `${location?.name} has over 12 years of teaching experience and has trained numerous award-winning students.`,
+      "What are their qualifications?": `${location?.name} holds advanced degrees in music and is certified by prestigious music academies.`,
+      "Do they offer trial classes?": "Yes, they offer a free trial class for new students to assess their teaching style and methodology.",
+      "What age groups do they teach?": "They teach students of all age groups, from 5 years old to adults, with specialized curriculum for each group.",
+      "Do they have experience with beginners?": "They have extensive experience working with beginners and have developed special techniques to make learning enjoyable.",
+      "What is the class duration?": "Classes typically last 45-60 minutes depending on the student's age and experience level.",
+      "Do they provide instruments?": "Students are encouraged to bring their own instruments, but they do have a few instruments available for beginners."
+    };
+    
+    // Generate a response - either from predefined answers or a generic response
+    let answer = answers[questionText as keyof typeof answers];
+    if (!answer) {
+      answer = `Thank you for your question about ${location?.name}. They would be happy to provide more information about "${questionText}" when you contact them directly.`;
+    }
+    
+    // Format current time
+    const now = new Date();
+    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    // Simulate API delay
+    setTimeout(() => {
+      setQuestionAnswers(prev => [...prev, { 
+        question: questionText, 
+        answer, 
+        timestamp: timeString 
+      }]);
+      setQuestion('');
+      setAskingQuestion(false);
+      
+      toast({
+        title: "Question Answered",
+        description: "We've received an answer to your question",
+        duration: 3000,
+      });
+    }, 1000);
   };
   
   // Predefined suggested questions
   const suggestedQuestions = [
-    "What is their experience?",
+    "What services do they offer?",
     "What are their qualifications?",
     "Do they offer trial classes?",
-    "What age groups do they teach?"
+    "What age groups do they teach?",
+    "Do they have experience with beginners?",
+    "What is the class duration?"
   ];
   
   if (loading) {
@@ -192,9 +236,50 @@ const LocationDetails = () => {
                 ))}
               </div>
             </div>
+            
+            {/* Reviews Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
+              <h2 className="text-xl font-semibold mb-4">Reviews</h2>
+              <div className="space-y-4">
+                {reviews.map(review => (
+                  <div key={review.id} className="border-b border-border/50 pb-4 last:border-0 last:pb-0">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="font-medium">{review.name}</div>
+                        <div className="text-xs text-muted-foreground">{review.date}</div>
+                      </div>
+                      <div className="flex items-center text-amber-500">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} size={14} className={i < review.rating ? "fill-amber-500" : ""} />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{review.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           
           <div className="space-y-4">
+            {/* Questions & Answers Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden p-6">
+              <h3 className="font-medium mb-4">Questions & Answers</h3>
+              {questionAnswers.length > 0 && (
+                <div className="mb-4 space-y-3 max-h-80 overflow-y-auto">
+                  {questionAnswers.map((item, index) => (
+                    <div key={index} className="p-4 bg-secondary/70 rounded-lg">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-xs font-medium text-primary">{item.question}</p>
+                        <span className="text-xs text-muted-foreground">{item.timestamp}</span>
+                      </div>
+                      <p className="text-sm">{item.answer}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden p-6">
               <h3 className="font-medium mb-4">Suggested Questions</h3>
               <div className="space-y-2">
@@ -225,9 +310,13 @@ const LocationDetails = () => {
                   <button 
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
                     onClick={() => handleAskQuestion()}
-                    disabled={!question.trim()}
+                    disabled={!question.trim() || askingQuestion}
                   >
-                    <ExternalLink className="h-5 w-5" />
+                    {askingQuestion ? (
+                      <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <ExternalLink className="h-5 w-5" />
+                    )}
                   </button>
                 </div>
               </div>
