@@ -36,70 +36,40 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
       
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 py-2 px-4 z-50">
         <div className="max-w-5xl mx-auto flex justify-around">
-          <Button 
-            variant={location.pathname === '/' ? "default" : "ghost"} 
-            size="icon" 
-            asChild 
-            className="flex flex-col items-center gap-1" 
-            aria-label="Home"
-          >
-            <Link to="/">
-              <Home className="h-5 w-5" />
-              <span className="text-xs">Home</span>
-            </Link>
-          </Button>
+          <NavButton 
+            to="/" 
+            icon={<Home className="h-5 w-5" />} 
+            label="Home" 
+            isActive={location.pathname === '/'} 
+          />
           
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            asChild 
-            className="flex flex-col items-center gap-1" 
-            aria-label="Search"
-          >
-            <Link to="/">
-              <Search className="h-5 w-5" />
-              <span className="text-xs">Search</span>
-            </Link>
-          </Button>
+          <NavButton 
+            to="/" 
+            icon={<Search className="h-5 w-5" />} 
+            label="Search" 
+            isActive={false} 
+          />
           
-          <Button 
-            variant={location.pathname === '/map' ? "default" : "ghost"} 
-            size="icon" 
-            asChild 
-            className="flex flex-col items-center gap-1" 
-            aria-label="Map"
-          >
-            <Link to="/map">
-              <Map className="h-5 w-5" />
-              <span className="text-xs">Map</span>
-            </Link>
-          </Button>
+          <NavButton 
+            to="/map" 
+            icon={<Map className="h-5 w-5" />} 
+            label="Map" 
+            isActive={location.pathname === '/map'} 
+          />
           
-          <Button 
-            variant={location.pathname === '/profile' ? "default" : "ghost"} 
-            size="icon" 
-            asChild 
-            className="flex flex-col items-center gap-1" 
-            aria-label="Profile"
-          >
-            <Link to="/profile">
-              <User className="h-5 w-5" />
-              <span className="text-xs">Profile</span>
-            </Link>
-          </Button>
+          <NavButton 
+            to="/profile" 
+            icon={<User className="h-5 w-5" />} 
+            label="Profile" 
+            isActive={location.pathname === '/profile'} 
+          />
           
-          <Button 
-            variant={location.pathname === '/settings' ? "default" : "ghost"} 
-            size="icon" 
-            asChild 
-            className="flex flex-col items-center gap-1" 
-            aria-label="Settings"
-          >
-            <Link to="/settings">
-              <Settings className="h-5 w-5" />
-              <span className="text-xs">Settings</span>
-            </Link>
-          </Button>
+          <NavButton 
+            to="/settings" 
+            icon={<Settings className="h-5 w-5" />} 
+            label="Settings" 
+            isActive={location.pathname === '/settings'} 
+          />
         </div>
       </div>
       
@@ -115,6 +85,31 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         </div>
       </footer>
     </div>
+  );
+};
+
+interface NavButtonProps {
+  to: string;
+  icon: React.ReactNode;
+  label: string;
+  isActive: boolean;
+}
+
+const NavButton: React.FC<NavButtonProps> = ({ to, icon, label, isActive }) => {
+  return (
+    <Link 
+      to={to}
+      className={cn(
+        "flex flex-col items-center gap-1 px-3 py-2 rounded-md transition-colors",
+        isActive 
+          ? "text-foreground" 
+          : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+      )}
+      aria-label={label}
+    >
+      {icon}
+      <span className="text-xs">{label}</span>
+    </Link>
   );
 };
 
