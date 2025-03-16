@@ -70,13 +70,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
     
     setIsListening(true);
     
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
+    // Use the appropriate constructor based on browser support
+    const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognitionConstructor();
     
     recognition.lang = 'en-US';
     recognition.interimResults = false;
     
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
       setQuery(transcript);
       setIsListening(false);
