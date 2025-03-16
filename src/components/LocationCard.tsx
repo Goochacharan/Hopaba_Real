@@ -245,30 +245,24 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </div>
 
         <div className="flex gap-2 mt-4">
-          <Button 
-            onClick={handleCall} 
-            variant="outline" 
-            size="sm" 
-            className="flex-1 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
+          <button 
+            onClick={handleCall}
+            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
           >
-            <Phone className="h-4 w-4" />
-          </Button>
-          <Button 
-            onClick={handleWhatsApp} 
-            variant="outline" 
-            size="sm" 
-            className="flex-1 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
+            <Phone className="h-5 w-5" />
+          </button>
+          <button 
+            onClick={handleWhatsApp}
+            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
           >
-            <MessageCircle className="h-4 w-4" />
-          </Button>
-          <Button 
-            onClick={handleDirections} 
-            variant="outline" 
-            size="sm" 
-            className="flex-1 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
+            <MessageCircle className="h-5 w-5" />
+          </button>
+          <button 
+            onClick={handleDirections}
+            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
           >
-            <Navigation2 className="h-4 w-4" />
-          </Button>
+            <Navigation2 className="h-5 w-5" />
+          </button>
         </div>
       </div>
     </div>
