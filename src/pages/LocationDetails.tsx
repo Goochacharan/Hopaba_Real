@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -393,18 +394,18 @@ const LocationDetails = () => {
                     type="text"
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
-                    placeholder="Ask question about this place..."
-                    className="w-full pr-10"
+                    placeholder="Ask a question about this place..."
+                    className="w-full pr-12 bg-[#F6F6F7]"
                   />
                   <button 
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#F1F1F1] hover:bg-[#E8E8E9] rounded-full w-8 h-8 flex items-center justify-center transition-colors"
                     onClick={() => handleAskQuestion()}
                     disabled={!question.trim() || askingQuestion}
                   >
                     {askingQuestion ? (
-                      <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <SendHorizontal className="h-5 w-5 transform rotate-[45deg]" />
+                      <SendHorizontal className="h-4 w-4 transform rotate-[45deg] text-[#8E9196]" />
                     )}
                   </button>
                 </div>
