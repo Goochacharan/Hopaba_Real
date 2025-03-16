@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -7,15 +6,18 @@ import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { Badge } from '@/components/ui/badge';
 
 interface LocationCardProps {
   recommendation: Recommendation;
   className?: string;
+  ranking?: number;
 }
 
 const LocationCard: React.FC<LocationCardProps> = ({ 
   recommendation, 
-  className 
+  className,
+  ranking
 }) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -77,6 +79,17 @@ const LocationCard: React.FC<LocationCardProps> = ({
       )}
     >
       <div className="relative w-full h-48 overflow-hidden">
+        {ranking !== undefined && (
+          <div className="absolute top-3 left-3 z-10">
+            <Badge 
+              variant="default" 
+              className="flex items-center justify-center h-8 w-8 rounded-full text-lg font-bold p-0"
+            >
+              {ranking}
+            </Badge>
+          </div>
+        )}
+        
         <div className={cn(
           "absolute inset-0 bg-muted/30",
           imageLoaded ? "opacity-0" : "opacity-100"
@@ -90,7 +103,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
             imageLoaded ? "opacity-100 blur-0" : "opacity-0 blur-sm"
           )}
         />
-        <div className="absolute top-3 left-3">
+        <div className="absolute top-3 left-14">
           <span className="px-2 py-1 rounded-full text-xs font-medium bg-black/40 backdrop-blur-sm text-white">
             {recommendation.category}
           </span>
@@ -160,7 +173,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
           ))}
         </div>
 
-        {/* Contact buttons */}
         <div className="flex gap-2 mt-4">
           <Button 
             onClick={handleCall} 

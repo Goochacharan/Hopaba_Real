@@ -35,6 +35,21 @@ const Index = () => {
     }
   );
 
+  // Calculate rankings based on rating and simulated review count
+  const rankedRecommendations = [...filteredRecommendations].sort((a, b) => {
+    // First sort by rating
+    if (b.rating !== a.rating) {
+      return b.rating - a.rating;
+    }
+    
+    // Generate deterministic reviewer count based on id to create consistent ranking
+    const aReviewers = parseInt(a.id) * 10 + a.rating * 5;
+    const bReviewers = parseInt(b.id) * 10 + b.rating * 5;
+    
+    // If ratings are equal, sort by reviewer count
+    return bReviewers - aReviewers;
+  });
+
   return (
     <MainLayout>
       <section className="flex flex-col items-center justify-center py-8 md:py-14">
@@ -75,12 +90,13 @@ const Index = () => {
                 />
               ))}
             </div>
-          ) : filteredRecommendations.length > 0 ? (
+          ) : rankedRecommendations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredRecommendations.map((recommendation, index) => (
+              {rankedRecommendations.map((recommendation, index) => (
                 <div key={recommendation.id} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
                   <LocationCard 
                     recommendation={recommendation}
+                    ranking={index < 10 ? index + 1 : undefined}
                     className="h-full"
                   />
                 </div>
