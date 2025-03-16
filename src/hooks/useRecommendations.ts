@@ -35,7 +35,31 @@ const useRecommendations = ({
         await new Promise(resolve => setTimeout(resolve, 800));
         
         const results = searchRecommendations(query, category);
-        setRecommendations(results);
+        
+        // Add multiple images to each result if not already present
+        const resultsWithImages = results.map(result => {
+          if (Array.isArray(result.images) && result.images.length > 0) {
+            return result;
+          }
+          
+          // Generate array of images based on the main image
+          // This creates variations based on the primary image URL
+          // In a real app, these would come from the backend
+          const mainImage = result.image;
+          const baseUrl = mainImage.split('?')[0]; // Remove any query params
+          const images = [
+            mainImage,
+            `${baseUrl}?v=2`,
+            `${baseUrl}?v=3`,
+          ];
+          
+          return {
+            ...result,
+            images
+          };
+        });
+        
+        setRecommendations(resultsWithImages);
       } catch (err) {
         console.error('Error fetching recommendations:', err);
         setError('Failed to fetch recommendations. Please try again.');

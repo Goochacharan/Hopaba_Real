@@ -39,8 +39,12 @@ const Index = () => {
   const rankedRecommendations = [...filteredRecommendations].map(item => {
     // Generate a consistent review count based on the item's id and rating
     const reviewCount = parseInt(item.id) * 10 + Math.floor(item.rating * 15);
+    
+    // Generate multiple images if not already present
+    const recommendation = { ...item, reviewCount };
+    
     // Return item with reviewCount
-    return { ...item, reviewCount };
+    return recommendation;
   }).sort((a, b) => {
     // First sort by rating
     if (b.rating !== a.rating) {

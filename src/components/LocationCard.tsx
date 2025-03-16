@@ -1,13 +1,24 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2 } from 'lucide-react';
+import { 
+  MapPin, Star, Clock, Phone, Heart, 
+  Navigation2, MessageCircle, Share2 
+} from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Badge } from '@/components/ui/badge';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselNext, 
+  CarouselPrevious 
+} from '@/components/ui/carousel';
 
 interface LocationCardProps {
   recommendation: Recommendation;
@@ -20,14 +31,31 @@ const LocationCard: React.FC<LocationCardProps> = ({
   recommendation, 
   className,
   ranking,
-  reviewCount = Math.floor(Math.random() * 300) + 50 // Default to random review count if not provided
+  reviewCount = Math.floor(Math.random() * 300) + 50
 }) => {
   const navigate = useNavigate();
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
   const { toast } = useToast();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(recommendation.id);
   const isMobile = useIsMobile();
+
+  // Handle multiple images
+  const images = Array.isArray(recommendation.images) && recommendation.images.length > 0 
+    ? recommendation.images 
+    : [recommendation.image]; // Fallback to single image if images array is empty
+
+  React.useEffect(() => {
+    setImageLoaded(Array(images.length).fill(false));
+  }, [images.length]);
+
+  const handleImageLoad = (index: number) => {
+    setImageLoaded(prev => {
+      const newState = [...prev];
+      newState[index] = true;
+      return newState;
+    });
+  };
 
   const getMedalStyle = (rank: number) => {
     switch(rank) {
@@ -194,20 +222,35 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </div>
         )}
         
-        <div className={cn(
-          "absolute inset-0 bg-muted/30",
-          imageLoaded ? "opacity-0" : "opacity-100"
-        )} />
-        <img
-          src={recommendation.image}
-          alt={recommendation.name}
-          onLoad={() => setImageLoaded(true)}
-          className={cn(
-            "w-full h-full object-cover transition-all-500",
-            imageLoaded ? "opacity-100 blur-0" : "opacity-0 blur-sm"
+        <Carousel className="w-full h-full">
+          <CarouselContent className="h-full">
+            {images.map((img, index) => (
+              <CarouselItem key={index} className="h-full">
+                <div className={cn(
+                  "absolute inset-0 bg-muted/30",
+                  imageLoaded[index] ? "opacity-0" : "opacity-100"
+                )} />
+                <img
+                  src={img}
+                  alt={`${recommendation.name} - image ${index + 1}`}
+                  onLoad={() => handleImageLoad(index)}
+                  className={cn(
+                    "w-full h-full object-cover transition-all-500",
+                    imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
+                  )}
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          {images.length > 1 && (
+            <>
+              <CarouselPrevious className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2" />
+              <CarouselNext className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2" />
+            </>
           )}
-        />
-        <div className="absolute top-3 left-20">
+        </Carousel>
+
+        <div className="absolute top-3 left-20 z-10">
           <span className="px-2 py-1 rounded-full text-xs font-medium bg-black/40 backdrop-blur-sm text-white">
             {recommendation.category}
           </span>
@@ -216,7 +259,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         <button 
           onClick={handleWishlistToggle}
           className={cn(
-            "absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all",
+            "absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10",
             inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500"
           )}
         >
