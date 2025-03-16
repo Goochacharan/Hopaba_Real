@@ -1,12 +1,12 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { Phone, MessageCircle, MapPin, Clock, DollarSign, Languages, Award, Calendar, ExternalLink, ArrowLeft, HelpCircle, Star } from 'lucide-react';
+import { Phone, MessageCircle, MapPin, Clock, DollarSign, Languages, Award, Calendar, ExternalLink, ArrowLeft, HelpCircle, Star, Navigation2, Share2 } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const LocationDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,13 +17,7 @@ const LocationDetails = () => {
   const [question, setQuestion] = useState('');
   const [questionAnswers, setQuestionAnswers] = useState<{ question: string; answer: string; timestamp: string }[]>([]);
   const [askingQuestion, setAskingQuestion] = useState(false);
-  
-  // Sample reviews data
-  const reviews = [
-    { id: 1, name: "Priya S.", rating: 5, text: "Great experience! The instructor was very patient and helped my child learn quickly.", date: "2 weeks ago" },
-    { id: 2, name: "Rahul M.", rating: 4, text: "Professional teaching methods and flexible timings. My daughter enjoys her lessons here.", date: "1 month ago" },
-    { id: 3, name: "Ananya K.", rating: 5, text: "Excellent teacher who understands how to work with children. Highly recommended!", date: "2 months ago" },
-  ];
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     if (!id) {
@@ -31,7 +25,6 @@ const LocationDetails = () => {
       return;
     }
     
-    // Simulate loading data
     setLoading(true);
     setTimeout(() => {
       const foundLocation = getRecommendationById(id);
@@ -65,13 +58,66 @@ const LocationDetails = () => {
     });
   };
   
+  const handleDirections = () => {
+    const destination = encodeURIComponent(location.address);
+    let mapsUrl;
+
+    if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      mapsUrl = `maps://maps.apple.com/?q=${destination}`;
+    } else {
+      mapsUrl = `https://www.google.com/maps/search/?api=1&query=${destination}`;
+    }
+    
+    window.open(mapsUrl, '_blank');
+    
+    toast({
+      title: "Opening Directions",
+      description: `Getting directions to ${location?.name}...`,
+      duration: 2000,
+    });
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: location.name,
+        text: `Check out ${location.name}`,
+        url: window.location.origin + `/location/${location.id}`,
+      })
+      .then(() => {
+        toast({
+          title: "Shared successfully",
+          description: `You've shared ${location.name}`,
+          duration: 2000,
+        });
+      })
+      .catch((error) => {
+        console.error('Error sharing:', error);
+        toast({
+          title: "Sharing failed",
+          description: "Could not share this location",
+          variant: "destructive",
+          duration: 2000,
+        });
+      });
+    } else {
+      const shareUrl = window.location.origin + `/location/${location.id}`;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        toast({
+          title: "Link copied",
+          description: "The link has been copied to your clipboard",
+          duration: 2000,
+        });
+      });
+    }
+  };
+  
   const handleAskQuestion = (text?: string) => {
     const questionText = text || question;
     if (!questionText.trim()) return;
     
     setAskingQuestion(true);
     
-    // Sample answers for different question types
     const answers = {
       "What services do they offer?": `${location?.name} offers specialized ${location?.category.toLowerCase()} instruction for all age groups, including beginners and advanced students.`,
       "What is their experience?": `${location?.name} has over 12 years of teaching experience and has trained numerous award-winning students.`,
@@ -83,17 +129,14 @@ const LocationDetails = () => {
       "Do they provide instruments?": "Students are encouraged to bring their own instruments, but they do have a few instruments available for beginners."
     };
     
-    // Generate a response - either from predefined answers or a generic response
     let answer = answers[questionText as keyof typeof answers];
     if (!answer) {
       answer = `Thank you for your question about ${location?.name}. They would be happy to provide more information about "${questionText}" when you contact them directly.`;
     }
     
-    // Format current time
     const now = new Date();
     const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
-    // Simulate API delay
     setTimeout(() => {
       setQuestionAnswers(prev => [...prev, { 
         question: questionText, 
@@ -111,7 +154,6 @@ const LocationDetails = () => {
     }, 1000);
   };
   
-  // Predefined suggested questions
   const suggestedQuestions = [
     "What services do they offer?",
     "What are their qualifications?",
@@ -213,20 +255,30 @@ const LocationDetails = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-4 gap-3">
                   <button 
                     onClick={handleCall} 
-                    className="flex items-center justify-center gap-2 h-12 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+                    className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
                   >
                     <Phone className="h-5 w-5" />
-                    <span>Call</span>
                   </button>
                   <button 
                     onClick={handleChat} 
-                    className="flex items-center justify-center gap-2 h-12 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+                    className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
                   >
                     <MessageCircle className="h-5 w-5" />
-                    <span>Chat</span>
+                  </button>
+                  <button 
+                    onClick={handleDirections} 
+                    className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+                  >
+                    <Navigation2 className="h-5 w-5" />
+                  </button>
+                  <button 
+                    onClick={handleShare} 
+                    className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+                  >
+                    <Share2 className="h-5 w-5" />
                   </button>
                 </div>
               </div>
@@ -248,7 +300,6 @@ const LocationDetails = () => {
               </div>
             </div>
             
-            {/* Reviews Section */}
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
               <h2 className="text-xl font-semibold mb-4">Reviews</h2>
               <div className="space-y-4">
@@ -273,7 +324,6 @@ const LocationDetails = () => {
           </div>
           
           <div className="space-y-4">
-            {/* Questions & Answers Section */}
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden p-6">
               <h3 className="font-medium mb-4">Questions & Answers</h3>
               {questionAnswers.length > 0 && (
