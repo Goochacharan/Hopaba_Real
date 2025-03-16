@@ -287,7 +287,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </div>
 
         {recommendation.openNow !== undefined && (
-          <div className="flex items-center justify-between text-sm mb-3">
+          <div className="flex flex-col text-sm mb-3">
             <div className="flex items-center">
               <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
               <span className={recommendation.openNow ? "text-emerald-600" : "text-rose-600"}>
@@ -299,9 +299,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
                 </span>
               )}
             </div>
-            <div className="text-muted-foreground">
-              {recommendation.distance}
-            </div>
+            {recommendation.distance && (
+              <div className="text-muted-foreground pl-5 mt-1">
+                {recommendation.distance} away
+              </div>
+            )}
           </div>
         )}
 
