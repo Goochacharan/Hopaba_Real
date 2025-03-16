@@ -1,10 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { Phone, MessageCircle, MapPin, Clock, DollarSign, Languages, Award, Calendar, ExternalLink, ArrowLeft, HelpCircle, Star, Navigation2, Share2 } from 'lucide-react';
+import { Phone, MessageCircle, MapPin, Clock, DollarSign, Languages, Award, Calendar, ExternalLink, ArrowLeft, Star, Navigation2, Share2 } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -407,7 +406,6 @@ const LocationDetails = () => {
                         onClick={() => handleAskQuestion(q)}
                         className="flex items-center gap-2 text-sm py-2 px-4 rounded-full border border-border hover:bg-secondary/70 transition-colors whitespace-nowrap"
                       >
-                        <HelpCircle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                         <span>{q}</span>
                       </button>
                     ))}
