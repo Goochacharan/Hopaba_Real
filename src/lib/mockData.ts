@@ -9,6 +9,7 @@ export interface Recommendation {
   distance: string;
   image: string;
   description: string;
+  phone?: string; // Added phone property as optional
   openNow?: boolean;
   hours?: string;
   priceLevel?: string;
@@ -24,6 +25,7 @@ export const mockRecommendations: Recommendation[] = [
     rating: 4.8,
     address: '123 Style Avenue, Indiranagar, Bangalore',
     distance: '0.5 miles away',
+    phone: '+919876543210',
     image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
     description: 'Modern unisex salon offering premium haircuts, styling, and coloring services in a relaxed atmosphere.',
     openNow: true,
@@ -38,6 +40,7 @@ export const mockRecommendations: Recommendation[] = [
     rating: 4.6,
     address: '456 Beauty Lane, San Francisco',
     distance: '0.8 miles away',
+    phone: '+919876543211',
     image: 'https://images.unsplash.com/photo-1470259078422-826894b933aa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1174&q=80',
     description: 'Eco-friendly salon focusing on sustainable beauty practices and personalized haircare treatments.',
     openNow: true,
@@ -52,6 +55,7 @@ export const mockRecommendations: Recommendation[] = [
     rating: 4.5,
     address: '789 Fashion Street, San Francisco',
     distance: '1.2 miles away',
+    phone: '+919876543212',
     image: 'https://images.unsplash.com/photo-1532710093739-9470acff878f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
     description: 'Boutique salon specializing in contemporary cuts and styles for all genders in an upscale environment.',
     openNow: false,
@@ -66,6 +70,7 @@ export const mockRecommendations: Recommendation[] = [
     rating: 4.7,
     address: '321 Brew Street, San Francisco',
     distance: '0.3 miles away',
+    phone: '+919876543213',
     image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1178&q=80',
     description: 'Artisanal coffee shop serving single-origin espresso drinks and house-made pastries in a cozy atmosphere.',
     openNow: true,
@@ -80,6 +85,7 @@ export const mockRecommendations: Recommendation[] = [
     rating: 4.4,
     address: '567 Flavor Road, San Francisco',
     distance: '1.5 miles away',
+    phone: '+919876543214',
     image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1174&q=80',
     description: 'Creative restaurant blending Asian and Western flavors with an extensive craft cocktail menu.',
     openNow: true,
@@ -94,6 +100,7 @@ export const mockRecommendations: Recommendation[] = [
     rating: 4.9,
     address: '890 Classic Avenue, San Francisco',
     distance: '2.0 miles away',
+    phone: '+919876543215',
     image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
     description: 'Traditional barbershop offering classic men\'s cuts, hot towel shaves, and grooming services.',
     openNow: false,
@@ -108,6 +115,7 @@ export const mockRecommendations: Recommendation[] = [
     rating: 4.7,
     address: '654 Relaxation Road, San Francisco',
     distance: '1.7 miles away',
+    phone: '+919876543216',
     image: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
     description: 'Comprehensive wellness center combining salon services with spa treatments for a complete self-care experience.',
     openNow: true,
@@ -122,6 +130,7 @@ export const mockRecommendations: Recommendation[] = [
     rating: 4.9,
     address: '123 Music Lane, Nagarbhavi, Bangalore',
     distance: '0.3 miles away',
+    phone: '+919876543217',
     image: 'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
     description: 'Premier flute learning center with highly qualified teachers offering personalized lessons for all age groups and skill levels.',
     openNow: true,
@@ -136,6 +145,7 @@ export const mockRecommendations: Recommendation[] = [
     rating: 4.7,
     address: '456 Harmony Road, Nagarbhavi, Bangalore',
     distance: '0.7 miles away',
+    phone: '+919876543218',
     image: 'https://images.unsplash.com/photo-1513883049090-d0b7439799bf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
     description: 'Comprehensive music school offering flute lessons along with various other instruments. Regular workshops and recitals for students.',
     openNow: true,
@@ -150,6 +160,7 @@ export const mockRecommendations: Recommendation[] = [
     rating: 4.8,
     address: '789 Raaga Street, Nagarbhavi, Bangalore',
     distance: '1.2 miles away',
+    phone: '+919876543219',
     image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1167&q=80',
     description: 'Specialized in Carnatic flute teaching with an experienced guru who has performed internationally. One-on-one personalized lessons.',
     openNow: false,
