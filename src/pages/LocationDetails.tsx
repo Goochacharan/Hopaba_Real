@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,9 @@ const reviews: Review[] = [
     text: 'Best flute classes in Bangalore! The instructor is very skilled and has a great way of teaching complex techniques in simple ways.'
   }
 ];
+
+// We'll define a fixed review count to match the home page
+const TOTAL_REVIEW_COUNT = 153;
 
 const LocationDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -247,7 +251,7 @@ const LocationDetails = () => {
                       <Star className="fill-amber-500 w-4 h-4" />
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      {reviews.length} reviews
+                      {TOTAL_REVIEW_COUNT} reviews
                     </span>
                   </div>
                 </div>
@@ -330,6 +334,16 @@ const LocationDetails = () => {
             
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
               <h2 className="text-xl font-semibold mb-4">Reviews</h2>
+              <div className="flex items-center mb-4">
+                <span className="font-medium">
+                  {TOTAL_REVIEW_COUNT} reviews
+                </span>
+                <div className="flex items-center ml-3 text-amber-500">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={16} className={i < Math.floor(location.rating) ? "fill-amber-500" : ""} />
+                  ))}
+                </div>
+              </div>
               <div className="space-y-4">
                 {reviews.map(review => (
                   <div key={review.id} className="border-b border-border/50 pb-4 last:border-0 last:pb-0">
