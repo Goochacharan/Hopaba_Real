@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
-import SearchBar from '@/components/SearchBar';
 import CategoryFilter from '@/components/CategoryFilter';
 import LocationCard from '@/components/LocationCard';
 import AnimatedLogo from '@/components/AnimatedLogo';
@@ -55,12 +54,6 @@ const Index = () => {
             Natural language recommendations for the best businesses, services, and experiences near you.
           </p>
         </div>
-
-        <SearchBar 
-          onSearch={handleSearch} 
-          className="mb-6 animate-fade-in" 
-          placeholder="Try 'suggest me a good unisex salon near me'"
-        />
 
         <CategoryFilter 
           selectedCategory={category} 

@@ -3,8 +3,8 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
 import { cn } from '@/lib/utils';
-import { Home, Search, User, Map, Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Home, User, ListChecks, Calendar } from 'lucide-react';
+import SearchBar from './SearchBar';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -30,10 +30,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         </div>
       </header>
       
-      <main className={cn("w-full flex-1 max-w-5xl mx-auto px-4 md:px-6 py-8", className)}>
+      <main className={cn("w-full flex-1 max-w-5xl mx-auto px-4 md:px-6 py-8 mb-28", className)}>
         {children}
       </main>
       
+      {/* Fixed Search Bar above the navigation */}
+      <div className="fixed bottom-16 left-0 right-0 px-4 z-50">
+        <div className="max-w-5xl mx-auto">
+          <SearchBar 
+            onSearch={() => {}} 
+            className="mb-0" 
+            placeholder="Search for recommendations..."
+          />
+        </div>
+      </div>
+      
+      {/* Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 py-2 px-4 z-50">
         <div className="max-w-5xl mx-auto flex justify-around">
           <NavButton 
@@ -44,17 +56,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
           />
           
           <NavButton 
-            to="/" 
-            icon={<Search className="h-5 w-5" />} 
-            label="Search" 
-            isActive={false} 
+            to="/my-list" 
+            icon={<ListChecks className="h-5 w-5" />} 
+            label="My List" 
+            isActive={location.pathname === '/my-list'} 
           />
           
           <NavButton 
-            to="/map" 
-            icon={<Map className="h-5 w-5" />} 
-            label="Map" 
-            isActive={location.pathname === '/map'} 
+            to="/events" 
+            icon={<Calendar className="h-5 w-5" />} 
+            label="Events" 
+            isActive={location.pathname === '/events'} 
           />
           
           <NavButton 
@@ -63,17 +75,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             label="Profile" 
             isActive={location.pathname === '/profile'} 
           />
-          
-          <NavButton 
-            to="/settings" 
-            icon={<Settings className="h-5 w-5" />} 
-            label="Settings" 
-            isActive={location.pathname === '/settings'} 
-          />
         </div>
       </div>
       
-      <footer className="w-full py-6 px-6 border-t border-border/50 mb-16">
+      <footer className="w-full py-6 px-6 border-t border-border/50 mb-36">
         <div className="max-w-5xl mx-auto w-full flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
             <AnimatedLogo size="sm" />
