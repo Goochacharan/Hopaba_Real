@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -240,17 +241,18 @@ const LocationDetails = () => {
               </div>
               
               <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h1 className="text-2xl font-bold">{location.name}</h1>
-                  <div className="flex flex-col items-end">
-                    <div className="flex items-center text-amber-500">
-                      <span className="text-lg font-semibold mr-1 text-amber-700">{location.rating}</span>
-                      <Star className="fill-amber-500 w-4 h-4" />
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {TOTAL_REVIEW_COUNT} reviews
-                    </span>
+                <div className="mb-2">
+                  <h1 className="text-xl font-bold">{location.name}</h1>
+                </div>
+                
+                <div className="flex items-center mb-4">
+                  <div className="flex items-center text-amber-500">
+                    <span className="text-lg font-semibold mr-1 text-amber-700">{location.rating}</span>
+                    <Star className="fill-amber-500 w-4 h-4" />
                   </div>
+                  <span className="text-xs text-muted-foreground ml-1">
+                    {TOTAL_REVIEW_COUNT} reviews
+                  </span>
                 </div>
                 
                 <div className="space-y-4 mb-6">
