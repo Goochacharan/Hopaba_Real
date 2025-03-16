@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,40 @@ import { Phone, MessageCircle, MapPin, Clock, DollarSign, Languages, Award, Cale
 import { getRecommendationById } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
+
+// Define the reviews data structure
+interface Review {
+  id: string;
+  name: string;
+  date: string;
+  rating: number;
+  text: string;
+}
+
+// Mock reviews data
+const reviews: Review[] = [
+  {
+    id: '1',
+    name: 'Priya Singh',
+    date: '2 weeks ago',
+    rating: 5,
+    text: 'Amazing teaching methods! My son has been learning flute here for 6 months and has shown incredible progress. Highly recommend for beginners.'
+  },
+  {
+    id: '2',
+    name: 'Raj Patel',
+    date: '1 month ago',
+    rating: 4,
+    text: 'Very professional instruction. The teacher is patient and knowledgeable. Good for all age groups.'
+  },
+  {
+    id: '3',
+    name: 'Ananya Sharma',
+    date: '2 months ago',
+    rating: 5,
+    text: 'Best flute classes in Bangalore! The instructor is very skilled and has a great way of teaching complex techniques in simple ways.'
+  }
+];
 
 const LocationDetails = () => {
   const { id } = useParams<{ id: string }>();
