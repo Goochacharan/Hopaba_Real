@@ -1,15 +1,13 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { MessageCircle, MapPin, Clock, DollarSign, Languages, Award, Calendar, ExternalLink, ArrowLeft, Star, Navigation2, Share2 } from 'lucide-react';
+import { MessageCircle, MapPin, Clock, DollarSign, Languages, Award, Calendar, ExternalLink, ArrowLeft, Star, Navigation2, Share2, Phone } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-// Define the reviews data structure
 interface Review {
   id: string;
   name: string;
@@ -18,7 +16,6 @@ interface Review {
   text: string;
 }
 
-// Mock reviews data
 const reviews: Review[] = [
   {
     id: '1',
@@ -43,7 +40,6 @@ const reviews: Review[] = [
   }
 ];
 
-// We'll define a fixed review count to match the home page
 const TOTAL_REVIEW_COUNT = 153;
 
 const LocationDetails = () => {
@@ -293,7 +289,13 @@ const LocationDetails = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-4 gap-3">
+                  <button 
+                    onClick={handleCall} 
+                    className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+                  >
+                    <Phone className="h-5 w-5" />
+                  </button>
                   <button 
                     onClick={handleChat} 
                     className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
