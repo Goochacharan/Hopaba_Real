@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle } from 'lucide-react';
+import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2 } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -117,6 +117,44 @@ const LocationCard: React.FC<LocationCardProps> = ({
       description: `Getting directions to ${recommendation.name}...`,
       duration: 2000,
     });
+  };
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (navigator.share) {
+      navigator.share({
+        title: recommendation.name,
+        text: `Check out ${recommendation.name}`,
+        url: window.location.origin + `/location/${recommendation.id}`,
+      })
+      .then(() => {
+        toast({
+          title: "Shared successfully",
+          description: `You've shared ${recommendation.name}`,
+          duration: 2000,
+        });
+      })
+      .catch((error) => {
+        console.error('Error sharing:', error);
+        toast({
+          title: "Sharing failed",
+          description: "Could not share this location",
+          variant: "destructive",
+          duration: 2000,
+        });
+      });
+    } else {
+      // Fallback for browsers that don't support the Web Share API
+      const shareUrl = window.location.origin + `/location/${recommendation.id}`;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        toast({
+          title: "Link copied",
+          description: "The link has been copied to your clipboard",
+          duration: 2000,
+        });
+      });
+    }
   };
 
   const handleCardClick = () => {
@@ -262,6 +300,12 @@ const LocationCard: React.FC<LocationCardProps> = ({
             className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
           >
             <Navigation2 className="h-5 w-5" />
+          </button>
+          <button 
+            onClick={handleShare}
+            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+          >
+            <Share2 className="h-5 w-5" />
           </button>
         </div>
       </div>
