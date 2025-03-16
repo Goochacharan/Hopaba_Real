@@ -1,3 +1,4 @@
+
 export interface Recommendation {
   id: string;
   name: string;
@@ -21,7 +22,7 @@ export const mockRecommendations: Recommendation[] = [
     category: 'Salons',
     tags: ['Unisex', 'Trendy', 'Walk-ins'],
     rating: 4.8,
-    address: '123 Style Avenue, San Francisco',
+    address: '123 Style Avenue, Indiranagar, Bangalore',
     distance: '0.5 miles away',
     image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
     description: 'Modern unisex salon offering premium haircuts, styling, and coloring services in a relaxed atmosphere.',
@@ -162,12 +163,20 @@ export const searchRecommendations = (
   query: string, 
   category: string = 'all'
 ): Recommendation[] => {
+  // If no query, return all recommendations or filter by category
+  if (!query) {
+    return category === 'all' 
+      ? mockRecommendations 
+      : mockRecommendations.filter(item => 
+          item.category.toLowerCase() === category.toLowerCase());
+  }
+  
   const lowercaseQuery = query.toLowerCase();
   
   // Handle spelling variations - "salon" vs "saloon"
   const normalizedQuery = lowercaseQuery
     .replace('saloon', 'salon')
-    .replace('salon', 'salon'); // This line ensures both "salon" and "saloon" are normalized
+    .replace('salon', 'salon'); // This ensures both "salon" and "saloon" are normalized
   
   // Check for location mentions
   const locationTerms = ['indiranagar', 'koramangala', 'jayanagar', 'whitefield', 'richmond', 'nagarbhavi'];
@@ -183,17 +192,36 @@ export const searchRecommendations = (
     }
   }
   
-  // If this is a unisex salon query
+  // For debugging
+  console.log('Search query:', query);
+  console.log('Normalized query:', normalizedQuery);
+  console.log('Has location term:', hasLocationTerm, 'Location:', matchedLocation);
+  
+  // If this is a unisex salon/saloon query
   if ((normalizedQuery.includes('unisex') && normalizedQuery.includes('salon')) || 
-      (normalizedQuery.includes('salon') && !normalizedQuery.includes('unisex'))) {
-    const filteredResults = mockRecommendations.filter(item => 
+      (normalizedQuery.includes('salon')) ||
+      (normalizedQuery.includes('saloon'))) {
+    
+    let filteredResults = mockRecommendations.filter(item => 
       (item.category === 'Salons' || category === 'all' || item.category.toLowerCase() === category.toLowerCase()) && 
       (item.tags.some(tag => tag.toLowerCase() === 'unisex') || !normalizedQuery.includes('unisex'))
     );
     
-    // If there's a location mentioned, filter by it (simulated)
+    // If there's a location mentioned, further filter by it
     if (hasLocationTerm) {
-      return filteredResults.length ? filteredResults.slice(0, 2) : mockRecommendations.filter(item => item.category === 'Salons');
+      filteredResults = filteredResults.filter(item => 
+        item.address.toLowerCase().includes(matchedLocation)
+      );
+      
+      // If no results with exact location match, return salons with the matching location injected
+      if (filteredResults.length === 0) {
+        const salonResults = mockRecommendations.filter(item => item.category === 'Salons');
+        // For the first few results, artificially inject the location
+        return salonResults.slice(0, 3).map(salon => ({
+          ...salon,
+          address: salon.address.replace(/San Francisco|Bangalore/, `${matchedLocation.charAt(0).toUpperCase() + matchedLocation.slice(1)}, Bangalore`)
+        }));
+      }
     }
     
     return filteredResults.length ? filteredResults : mockRecommendations.filter(item => item.category === 'Salons');
@@ -287,8 +315,11 @@ export const searchRecommendations = (
       item.category.toLowerCase() === category.toLowerCase()
     );
     
-    // Return the first few items as if they matched the location
-    return categoryFiltered.slice(0, 3);
+    // Return the first few items with modified addresses to include the location
+    return categoryFiltered.slice(0, 3).map(item => ({
+      ...item,
+      address: item.address.replace(/San Francisco|Bangalore/, `${matchedLocation.charAt(0).toUpperCase() + matchedLocation.slice(1)}, Bangalore`)
+    }));
   }
   
   return filtered;

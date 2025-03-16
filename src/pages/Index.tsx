@@ -18,7 +18,7 @@ const Index = () => {
     category,
     handleSearch,
     handleCategoryChange
-  } = useRecommendations({ initialQuery: '' });
+  } = useRecommendations();
 
   useEffect(() => {
     if (error) {

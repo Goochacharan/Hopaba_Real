@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
 import { cn } from '@/lib/utils';
 import { Home, User, ListChecks, Calendar } from 'lucide-react';
 import SearchBar from './SearchBar';
+import useRecommendations from '@/hooks/useRecommendations';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,15 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { handleSearch } = useRecommendations();
+  
+  const onSearch = (query: string) => {
+    handleSearch(query);
+    if (location.pathname !== '/') {
+      navigate('/');
+    }
+  };
   
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center">
@@ -38,7 +48,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
       <div className="fixed bottom-20 left-0 right-0 px-4 z-50">
         <div className="max-w-5xl mx-auto">
           <SearchBar 
-            onSearch={() => {}} 
+            onSearch={onSearch} 
             className="mb-0" 
             placeholder="Search for recommendations..."
           />

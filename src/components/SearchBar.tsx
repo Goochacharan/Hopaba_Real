@@ -109,18 +109,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
           )}
           
           <button
-            type="button"
-            onClick={detectLocation}
+            type="submit"
             className={cn(
               "ml-2 p-2 rounded-full flex-shrink-0 transition-all-200",
               "text-muted-foreground hover:text-primary hover:bg-secondary"
             )}
-            title="Use current location"
+            title="Search"
           >
-            <MapPin className={cn(
-              "h-4 w-4 transition-all",
-              locationLoading && "animate-pulse"
-            )} />
+            <Search className="h-4 w-4" />
           </button>
         </div>
         
