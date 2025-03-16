@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Search, MapPin, X } from 'lucide-react';
+import { Input } from './ui/input';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -58,16 +59,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   };
 
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
-    // Focus the input when expanding
-    if (!isExpanded) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-    }
-  };
-
   // Handle clicks outside the search bar to collapse it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -89,69 +80,54 @@ const SearchBar: React.FC<SearchBarProps> = ({
   }, [initialValue]);
 
   return (
-    <div className={cn("relative w-full max-w-2xl mx-auto", className)}>
+    <div className={cn("w-full max-w-2xl mx-auto", className)}>
       <form 
         ref={formRef}
         onSubmit={handleSubmit}
-        onClick={!isExpanded ? toggleExpand : undefined}
-        className={cn(
-          "fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 transition-all duration-300 ease-in-out",
-          isExpanded 
-            ? "w-[90%] max-w-2xl rounded-2xl shadow-lg" 
-            : "w-16 h-16 rounded-full shadow-md hover:shadow-lg cursor-pointer",
-          "border border-border bg-white/90 backdrop-blur-sm"
-        )}
+        className="w-full bg-white rounded-xl shadow-md border border-border"
       >
-        {isExpanded ? (
-          <>
-            <div className="flex items-center px-4 h-16">
-              <Search className="h-5 w-5 text-muted-foreground mr-3 flex-shrink-0" />
-              
-              <input
-                ref={inputRef}
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={placeholder}
-                className="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground text-lg py-4"
-              />
-              
-              {query && (
-                <button
-                  type="button"
-                  onClick={clearSearch}
-                  className="p-2 rounded-full hover:bg-secondary text-muted-foreground flex-shrink-0"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              )}
-              
-              <button
-                type="button"
-                onClick={detectLocation}
-                className={cn(
-                  "ml-2 p-2 rounded-full flex-shrink-0 transition-all-200",
-                  "text-muted-foreground hover:text-primary hover:bg-secondary"
-                )}
-                title="Use current location"
-              >
-                <MapPin className={cn(
-                  "h-5 w-5 transition-all",
-                  locationLoading && "animate-pulse"
-                )} />
-              </button>
-            </div>
-            
-            {location && (
-              <div className="px-4 py-2 bg-secondary/50 border-t border-border flex items-center text-xs text-muted-foreground">
-                <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
-                {location}
-              </div>
+        <div className="flex items-center px-4 h-12">
+          <Search className="h-5 w-5 text-muted-foreground mr-3 flex-shrink-0" />
+          
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={placeholder}
+            className="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground py-2"
+          />
+          
+          {query && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="p-2 rounded-full hover:bg-secondary text-muted-foreground flex-shrink-0"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+          
+          <button
+            type="button"
+            onClick={detectLocation}
+            className={cn(
+              "ml-2 p-2 rounded-full flex-shrink-0 transition-all-200",
+              "text-muted-foreground hover:text-primary hover:bg-secondary"
             )}
-          </>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Search className="h-6 w-6 text-primary" />
+            title="Use current location"
+          >
+            <MapPin className={cn(
+              "h-4 w-4 transition-all",
+              locationLoading && "animate-pulse"
+            )} />
+          </button>
+        </div>
+        
+        {location && (
+          <div className="px-4 py-2 bg-secondary/50 border-t border-border flex items-center text-xs text-muted-foreground">
+            <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+            {location}
           </div>
         )}
       </form>

@@ -30,12 +30,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         </div>
       </header>
       
-      <main className={cn("w-full flex-1 max-w-5xl mx-auto px-4 md:px-6 py-8 mb-28", className)}>
+      <main className={cn("w-full flex-1 max-w-5xl mx-auto px-4 md:px-6 py-8 mb-36", className)}>
         {children}
       </main>
       
       {/* Fixed Search Bar above the navigation */}
-      <div className="fixed bottom-16 left-0 right-0 px-4 z-50">
+      <div className="fixed bottom-20 left-0 right-0 px-4 z-50">
         <div className="max-w-5xl mx-auto">
           <SearchBar 
             onSearch={() => {}} 
