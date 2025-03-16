@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { MessageCircle, MapPin, Clock, DollarSign, Languages, Award, Calendar, ExternalLink, ArrowLeft, Star, Navigation2, Share2, Phone } from 'lucide-react';
+import { MessageCircle, MapPin, Clock, DollarSign, Languages, Award, Calendar, SendHorizontal, ArrowLeft, Star, Navigation2, Share2, Phone } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -319,7 +319,7 @@ const LocationDetails = () => {
             </div>
             
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
-              <h2 className="text-xl font-semibold mb-4">About</h2>
+              <h2 className="text-xl font-semibold mb-4">{location.name}</h2>
               <p className="text-muted-foreground">{location.description}</p>
               
               <div className="mt-4">
@@ -403,7 +403,7 @@ const LocationDetails = () => {
                     {askingQuestion ? (
                       <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <ExternalLink className="h-5 w-5" />
+                      <SendHorizontal className="h-5 w-5" />
                     )}
                   </button>
                 </div>
