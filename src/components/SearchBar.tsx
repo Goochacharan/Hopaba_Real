@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Search, MapPin, X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { Input } from './ui/input';
 
 interface SearchBarProps {
@@ -19,30 +19,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   const [query, setQuery] = useState(initialValue);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [location, setLocation] = useState<string | null>(null);
-  const [locationLoading, setLocationLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-
-  const detectLocation = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    if ('geolocation' in navigator) {
-      setLocationLoading(true);
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation('Using your current location');
-          setLocationLoading(false);
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-          setLocation(null);
-          setLocationLoading(false);
-        }
-      );
-    } else {
-      setLocation(null);
-    }
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,8 +65,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
         className="w-full bg-white rounded-xl shadow-md border border-border"
       >
         <div className="flex items-center px-4 h-12">
-          <Search className="h-5 w-5 text-muted-foreground mr-3 flex-shrink-0" />
-          
           <input
             ref={inputRef}
             type="text"
@@ -119,13 +95,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
             <Search className="h-4 w-4" />
           </button>
         </div>
-        
-        {location && (
-          <div className="px-4 py-2 bg-secondary/50 border-t border-border flex items-center text-xs text-muted-foreground">
-            <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
-            {location}
-          </div>
-        )}
       </form>
     </div>
   );
