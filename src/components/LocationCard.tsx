@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, Clock, Phone, Heart, Navigation2, Share2 } from 'lucide-react';
+import { MapPin, Star, Clock, Phone, Heart, Navigation2 } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -259,7 +259,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
             size="sm" 
             className="flex-1 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
           >
-            <Share2 className="h-4 w-4" />
+            <img 
+              src="/lovable-uploads/1a5c7d70-69a2-4e6d-b9a0-50fe3fadcb85.png" 
+              alt="WhatsApp" 
+              className="h-4 w-4" 
+            />
           </Button>
           <Button 
             onClick={handleDirections} 
