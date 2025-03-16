@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,12 @@ import { getRecommendationById } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 interface Review {
   id: string;
@@ -44,6 +49,13 @@ const reviews: Review[] = [
 
 const TOTAL_REVIEW_COUNT = 153;
 
+const reviewSchema = z.object({
+  rating: z.number().min(1).max(5),
+  reviewText: z.string().min(3, "Review must be at least 3 characters").max(500, "Review cannot exceed 500 characters"),
+});
+
+type ReviewFormValues = z.infer<typeof reviewSchema>;
+
 const LocationDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -53,8 +65,19 @@ const LocationDetails = () => {
   const [question, setQuestion] = useState('');
   const [questionAnswers, setQuestionAnswers] = useState<{ question: string; answer: string; timestamp: string }[]>([]);
   const [askingQuestion, setAskingQuestion] = useState(false);
+  const [userReviews, setUserReviews] = useState<Review[]>([]);
+  const [selectedRating, setSelectedRating] = useState<number>(0);
+  const [reviewFormVisible, setReviewFormVisible] = useState(false);
   const isMobile = useIsMobile();
   
+  const form = useForm<ReviewFormValues>({
+    resolver: zodResolver(reviewSchema),
+    defaultValues: {
+      rating: 0,
+      reviewText: "",
+    },
+  });
+
   useEffect(() => {
     if (!id) {
       navigate('/');
@@ -202,6 +225,42 @@ const LocationDetails = () => {
     "Do they teach online?",
     "What is their cancellation policy?"
   ];
+
+  const toggleReviewForm = () => {
+    setReviewFormVisible(!reviewFormVisible);
+    if (reviewFormVisible) {
+      form.reset();
+      setSelectedRating(0);
+    }
+  };
+
+  const handleRatingSelect = (rating: number) => {
+    setSelectedRating(rating);
+    form.setValue("rating", rating);
+  };
+
+  const onSubmitReview = (values: ReviewFormValues) => {
+    const reviewId = Math.random().toString(36).substring(2, 9);
+    const currentDate = "Just now";
+    const newReview: Review = {
+      id: reviewId,
+      name: "You",
+      date: currentDate,
+      rating: values.rating,
+      text: values.reviewText,
+    };
+    setUserReviews(prev => [newReview, ...prev]);
+    toast({
+      title: "Review submitted",
+      description: "Thank you for sharing your experience!",
+      duration: 3000,
+    });
+    form.reset();
+    setSelectedRating(0);
+    setReviewFormVisible(false);
+  };
+  
+  const allReviews = [...userReviews, ...reviews];
   
   if (loading) {
     return (
@@ -338,7 +397,71 @@ const LocationDetails = () => {
             </div>
             
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
-              <h2 className="text-xl font-semibold mb-4">Reviews</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Reviews</h2>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={toggleReviewForm}
+                  className="text-sm"
+                >
+                  {reviewFormVisible ? "Cancel" : "Write a review"}
+                </Button>
+              </div>
+
+              {reviewFormVisible && (
+                <div className="mb-6 p-4 bg-secondary/30 rounded-lg">
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmitReview)} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Your rating</Label>
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map((rating) => (
+                            <button
+                              key={rating}
+                              type="button"
+                              onClick={() => handleRatingSelect(rating)}
+                              className="focus:outline-none"
+                            >
+                              <Star 
+                                className={`w-6 h-6 ${rating <= selectedRating ? "text-amber-500 fill-amber-500" : "text-gray-300"}`} 
+                              />
+                            </button>
+                          ))}
+                          {form.formState.errors.rating && (
+                            <p className="text-destructive text-xs ml-2">Please select a rating</p>
+                          )}
+                        </div>
+                      </div>
+
+                      <FormField
+                        control={form.control}
+                        name="reviewText"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Your review</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Share your experience with this place..." 
+                                className="min-h-[100px]"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="flex justify-end">
+                        <Button type="submit" className="w-full sm:w-auto">
+                          Submit review
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </div>
+              )}
+
               <div className="flex items-center mb-4">
                 <span className="font-medium">
                   {TOTAL_REVIEW_COUNT} reviews
@@ -350,7 +473,7 @@ const LocationDetails = () => {
                 </div>
               </div>
               <div className="space-y-4">
-                {reviews.map(review => (
+                {allReviews.map(review => (
                   <div key={review.id} className="border-b border-border/50 pb-4 last:border-0 last:pb-0">
                     <div className="flex justify-between items-start mb-2">
                       <div>
@@ -416,7 +539,6 @@ const LocationDetails = () => {
                         strokeWidth="2" 
                         strokeLinecap="round" 
                         strokeLinejoin="round"
-                        className="lucide lucide-send-horizontal"
                       >
                         <path d="m3 3 3 9-3 9 19-9Z"/>
                         <path d="M6 12h16"/>
