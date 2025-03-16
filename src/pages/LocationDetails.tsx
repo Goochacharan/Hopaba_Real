@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -241,9 +242,14 @@ const LocationDetails = () => {
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h1 className="text-2xl font-bold">{location.name}</h1>
-                  <div className="flex items-center bg-amber-50 text-amber-700 rounded-full px-3 py-1">
-                    <span className="text-lg font-semibold mr-1">{location.rating}</span>
-                    <span className="text-amber-500">★</span>
+                  <div className="flex items-center">
+                    <div className="flex items-center bg-amber-50 text-amber-700 rounded-full px-3 py-1">
+                      <span className="text-lg font-semibold mr-1">{location.rating}</span>
+                      <span className="text-amber-500">★</span>
+                    </div>
+                    <span className="ml-2 text-sm text-muted-foreground">
+                      {reviews.length} reviews
+                    </span>
                   </div>
                 </div>
                 
@@ -261,11 +267,6 @@ const LocationDetails = () => {
                       </span>
                       <p className="text-muted-foreground">3:00 PM - 7:00 PM (Mon-Fri), 10:00 AM - 5:00 PM (Sat-Sun)</p>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Phone className="h-5 w-5 text-muted-foreground mr-3 mt-0.5 flex-shrink-0" />
-                    <span>+91 76543 56565</span>
                   </div>
                   
                   <div className="flex items-start">
