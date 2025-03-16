@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
 import { Phone, MessageSquare, MapPin, Clock, DollarSign, Languages, Award, Calendar, ExternalLink, ArrowLeft, HelpCircle, Star } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const LocationDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -117,7 +118,11 @@ const LocationDetails = () => {
     "Do they offer trial classes?",
     "What age groups do they teach?",
     "Do they have experience with beginners?",
-    "What is the class duration?"
+    "What is the class duration?",
+    "What is their teaching style?",
+    "How much experience do they have?",
+    "Do they teach online?",
+    "What is their cancellation policy?"
   ];
   
   if (loading) {
@@ -280,20 +285,23 @@ const LocationDetails = () => {
               )}
             </div>
             
+            {/* Horizontally scrollable suggested questions */}
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden p-6">
               <h3 className="font-medium mb-4">Suggested Questions</h3>
-              <div className="space-y-2">
-                {suggestedQuestions.map((q, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleAskQuestion(q)}
-                    className="flex w-full items-center gap-2 text-sm text-left py-2 px-3 rounded-lg hover:bg-secondary/70 transition-colors"
-                  >
-                    <HelpCircle className="w-4 h-4 text-muted-foreground" />
-                    <span>{q}</span>
-                  </button>
-                ))}
-              </div>
+              <ScrollArea className="w-full whitespace-nowrap pb-4">
+                <div className="flex gap-2 w-max">
+                  {suggestedQuestions.map((q, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleAskQuestion(q)}
+                      className="flex items-center gap-2 text-sm py-2 px-4 rounded-full border border-border hover:bg-secondary/70 transition-colors whitespace-nowrap"
+                    >
+                      <HelpCircle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      <span>{q}</span>
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
             </div>
             
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden p-6">
