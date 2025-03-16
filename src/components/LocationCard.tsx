@@ -2,12 +2,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, Clock, Phone, MessageSquare, Heart } from 'lucide-react';
+import { MapPin, Star, Clock, Phone, MessageSquare, Heart, Navigation2 } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Badge } from '@/components/ui/badge';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LocationCardProps {
   recommendation: Recommendation;
@@ -27,6 +28,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const { toast } = useToast();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(recommendation.id);
+  const isMobile = useIsMobile();
 
   // Helper function to get medal styling based on ranking
   const getMedalStyle = (rank: number) => {
@@ -96,6 +98,31 @@ const LocationCard: React.FC<LocationCardProps> = ({
         duration: 2000,
       });
     }
+  };
+
+  const handleDirections = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click navigation
+    
+    // Get location coordinates or address
+    const destination = encodeURIComponent(recommendation.address);
+    let mapsUrl;
+
+    // Check if user is on iOS to determine which maps app to open
+    if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      // Open Apple Maps on iOS devices
+      mapsUrl = `maps://maps.apple.com/?q=${destination}`;
+    } else {
+      // Open Google Maps for all other devices
+      mapsUrl = `https://www.google.com/maps/search/?api=1&query=${destination}`;
+    }
+    
+    window.open(mapsUrl, '_blank');
+    
+    toast({
+      title: "Opening Directions",
+      description: `Getting directions to ${recommendation.name}...`,
+      duration: 2000,
+    });
   };
 
   const handleCardClick = () => {
@@ -241,6 +268,15 @@ const LocationCard: React.FC<LocationCardProps> = ({
           >
             <MessageSquare className="mr-1 h-4 w-4" />
             Message
+          </Button>
+          <Button 
+            onClick={handleDirections} 
+            variant="outline" 
+            size="sm" 
+            className="flex-1 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
+          >
+            <Navigation2 className="mr-1 h-4 w-4" />
+            Directions
           </Button>
         </div>
       </div>

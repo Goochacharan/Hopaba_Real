@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import MyList from "./pages/MyList";
 import Events from "./pages/Events";
+import Map from "./pages/Map";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/my-list" element={<MyList />} />
             <Route path="/events" element={<Events />} />
+            <Route path="/map" element={<Map />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
