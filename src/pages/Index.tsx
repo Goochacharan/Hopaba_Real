@@ -35,19 +35,20 @@ const Index = () => {
     }
   );
 
-  // Calculate rankings based on rating and simulated review count
-  const rankedRecommendations = [...filteredRecommendations].sort((a, b) => {
+  // Calculate rankings based on rating and generate consistent review counts
+  const rankedRecommendations = [...filteredRecommendations].map(item => {
+    // Generate a consistent review count based on the item's id and rating
+    const reviewCount = parseInt(item.id) * 10 + Math.floor(item.rating * 15);
+    // Return item with reviewCount
+    return { ...item, reviewCount };
+  }).sort((a, b) => {
     // First sort by rating
     if (b.rating !== a.rating) {
       return b.rating - a.rating;
     }
     
-    // Generate deterministic reviewer count based on id to create consistent ranking
-    const aReviewers = parseInt(a.id) * 10 + a.rating * 5;
-    const bReviewers = parseInt(b.id) * 10 + b.rating * 5;
-    
     // If ratings are equal, sort by reviewer count
-    return bReviewers - aReviewers;
+    return b.reviewCount - a.reviewCount;
   });
 
   return (
@@ -97,6 +98,7 @@ const Index = () => {
                   <LocationCard 
                     recommendation={recommendation}
                     ranking={index < 10 ? index + 1 : undefined}
+                    reviewCount={recommendation.reviewCount}
                     className="h-full"
                   />
                 </div>
