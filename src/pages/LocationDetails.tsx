@@ -7,6 +7,7 @@ import { MessageCircle, MapPin, Clock, DollarSign, Languages, Award, Calendar, S
 import { getRecommendationById } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Input } from '@/components/ui/input';
 
 interface Review {
   id: string;
@@ -388,12 +389,12 @@ const LocationDetails = () => {
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden p-6">
               <div className="space-y-4">
                 <div className="relative">
-                  <input
+                  <Input
                     type="text"
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
-                    placeholder="Ask a question about this place..."
-                    className="w-full rounded-lg border border-border p-3 pr-10"
+                    placeholder="Ask question about this place..."
+                    className="w-full pr-10"
                   />
                   <button 
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
@@ -403,7 +404,7 @@ const LocationDetails = () => {
                     {askingQuestion ? (
                       <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <SendHorizontal className="h-5 w-5 transform rotate-45" />
+                      <SendHorizontal className="h-5 w-5 transform rotate-[45deg]" />
                     )}
                   </button>
                 </div>
