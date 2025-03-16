@@ -14,6 +14,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
 interface Review {
   id: string;
@@ -68,6 +69,8 @@ const LocationDetails = () => {
   const [userReviews, setUserReviews] = useState<Review[]>([]);
   const [selectedRating, setSelectedRating] = useState<number>(0);
   const [reviewFormVisible, setReviewFormVisible] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
+  const [currentImage, setCurrentImage] = useState(0);
   const isMobile = useIsMobile();
   
   const form = useForm<ReviewFormValues>({
@@ -89,6 +92,10 @@ const LocationDetails = () => {
       const foundLocation = getRecommendationById(id);
       if (foundLocation) {
         setLocation(foundLocation);
+        const images = foundLocation.images && foundLocation.images.length > 0
+          ? foundLocation.images
+          : [foundLocation.image];
+        setImageLoaded(Array(images.length).fill(false));
       } else {
         toast({
           title: "Location not found",
@@ -101,6 +108,14 @@ const LocationDetails = () => {
     }, 500);
   }, [id, navigate, toast]);
   
+  const handleImageLoad = (index: number) => {
+    setImageLoaded(prev => {
+      const newState = [...prev];
+      newState[index] = true;
+      return newState;
+    });
+  };
+
   const handleCall = () => {
     toast({
       title: "Calling",
@@ -279,6 +294,10 @@ const LocationDetails = () => {
   
   if (!location) return null;
   
+  const images = location.images && location.images.length > 0
+    ? location.images
+    : [location.image];
+  
   return (
     <MainLayout>
       <div className="container max-w-4xl mx-auto py-8 px-4">
@@ -296,7 +315,31 @@ const LocationDetails = () => {
           <div className="md:col-span-2">
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6">
               <div className="h-64 w-full overflow-hidden">
-                <img src={location.image} alt={location.name} className="w-full h-full object-cover" />
+                <Carousel className="w-full h-full">
+                  <CarouselContent className="h-full">
+                    {images.map((img: string, index: number) => (
+                      <CarouselItem key={index} className="h-full">
+                        <div className={`absolute inset-0 bg-muted/30 ${
+                          imageLoaded[index] ? 'opacity-0' : 'opacity-100'
+                        }`} />
+                        <img 
+                          src={img} 
+                          alt={`${location.name} - image ${index + 1}`}
+                          className={`w-full h-full object-cover transition-all duration-500 ${
+                            imageLoaded[index] ? 'opacity-100 blur-0' : 'opacity-0 blur-sm'
+                          }`}
+                          onLoad={() => handleImageLoad(index)}
+                        />
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  {images.length > 1 && (
+                    <>
+                      <CarouselPrevious className="absolute left-2 h-8 w-8" />
+                      <CarouselNext className="absolute right-2 h-8 w-8" />
+                    </>
+                  )}
+                </Carousel>
               </div>
               
               <div className="p-6">
