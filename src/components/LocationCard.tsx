@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, Clock, Phone, MessageSquare, Heart, Navigation2 } from 'lucide-react';
+import { MapPin, Star, Clock, Phone, Heart, Navigation2, Share2 } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -30,7 +29,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const inWishlist = isInWishlist(recommendation.id);
   const isMobile = useIsMobile();
 
-  // Helper function to get medal styling based on ranking
   const getMedalStyle = (rank: number) => {
     switch(rank) {
       case 1:
@@ -38,31 +36,30 @@ const LocationCard: React.FC<LocationCardProps> = ({
           wrapperClass: "relative top-2",
           medalClass: "bg-gradient-to-b from-yellow-300 to-yellow-500 border-yellow-300 text-yellow-900 shadow h-8 w-8 text-sm",
           ribbonColor: "bg-red-500"
-        }; // Gold
+        };
       case 2:
         return {
           wrapperClass: "relative top-2",
           medalClass: "bg-gradient-to-b from-gray-200 to-gray-400 border-gray-200 text-gray-800 shadow h-8 w-8 text-sm",
           ribbonColor: "bg-blue-500"
-        }; // Silver
+        };
       case 3:
         return {
           wrapperClass: "relative top-2",
           medalClass: "bg-gradient-to-b from-amber-300 to-amber-600 border-amber-300 text-amber-900 shadow h-8 w-8 text-sm",
           ribbonColor: "bg-green-500"
-        }; // Bronze
+        };
       default:
         return {
           wrapperClass: "relative top-2",
           medalClass: "bg-gradient-to-b from-blue-400 to-blue-600 border-blue-300 text-white shadow h-8 w-8 text-sm",
           ribbonColor: "bg-blue-300"
-        }; // Regular blue
+        };
     }
   };
 
   const handleCall = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click navigation
-    // Simulate phone functionality - would integrate with real phone API
+    e.stopPropagation();
     toast({
       title: "Calling",
       description: `Calling ${recommendation.name}...`,
@@ -71,8 +68,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
   };
 
   const handleWhatsApp = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click navigation
-    // Simulate WhatsApp integration - would open WhatsApp with predefined message
+    e.stopPropagation();
+    const phoneNumber = recommendation.phone || '';
+    const message = encodeURIComponent(`Hi, I'm interested in ${recommendation.name}`);
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
     toast({
       title: "Opening WhatsApp",
       description: `Messaging ${recommendation.name} via WhatsApp...`,
@@ -81,8 +81,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
   };
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click navigation
-    
+    e.stopPropagation();
     if (inWishlist) {
       removeFromWishlist(recommendation.id);
       toast({
@@ -101,18 +100,13 @@ const LocationCard: React.FC<LocationCardProps> = ({
   };
 
   const handleDirections = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click navigation
-    
-    // Get location coordinates or address
+    e.stopPropagation();
     const destination = encodeURIComponent(recommendation.address);
     let mapsUrl;
 
-    // Check if user is on iOS to determine which maps app to open
     if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      // Open Apple Maps on iOS devices
       mapsUrl = `maps://maps.apple.com/?q=${destination}`;
     } else {
-      // Open Google Maps for all other devices
       mapsUrl = `https://www.google.com/maps/search/?api=1&query=${destination}`;
     }
     
@@ -257,8 +251,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
             size="sm" 
             className="flex-1 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
           >
-            <Phone className="mr-1 h-4 w-4" />
-            Call
+            <Phone className="h-4 w-4" />
           </Button>
           <Button 
             onClick={handleWhatsApp} 
@@ -266,8 +259,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
             size="sm" 
             className="flex-1 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
           >
-            <MessageSquare className="mr-1 h-4 w-4" />
-            Message
+            <Share2 className="h-4 w-4" />
           </Button>
           <Button 
             onClick={handleDirections} 
@@ -275,8 +267,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
             size="sm" 
             className="flex-1 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
           >
-            <Navigation2 className="mr-1 h-4 w-4" />
-            Directions
+            <Navigation2 className="h-4 w-4" />
           </Button>
         </div>
       </div>
