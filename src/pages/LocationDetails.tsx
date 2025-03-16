@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -285,27 +284,7 @@ const LocationDetails = () => {
               )}
             </div>
             
-            {/* Horizontally scrollable suggested questions */}
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden p-6">
-              <h3 className="font-medium mb-4">Suggested Questions</h3>
-              <ScrollArea className="w-full whitespace-nowrap pb-4">
-                <div className="flex gap-2 w-max">
-                  {suggestedQuestions.map((q, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleAskQuestion(q)}
-                      className="flex items-center gap-2 text-sm py-2 px-4 rounded-full border border-border hover:bg-secondary/70 transition-colors whitespace-nowrap"
-                    >
-                      <HelpCircle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      <span>{q}</span>
-                    </button>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-            
-            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden p-6">
-              <h3 className="font-medium mb-4">Ask a question</h3>
               <div className="space-y-4">
                 <div className="relative">
                   <input
@@ -327,6 +306,21 @@ const LocationDetails = () => {
                     )}
                   </button>
                 </div>
+                
+                <ScrollArea className="w-full whitespace-nowrap pb-4">
+                  <div className="flex gap-2 w-max">
+                    {suggestedQuestions.map((q, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleAskQuestion(q)}
+                        className="flex items-center gap-2 text-sm py-2 px-4 rounded-full border border-border hover:bg-secondary/70 transition-colors whitespace-nowrap"
+                      >
+                        <HelpCircle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <span>{q}</span>
+                      </button>
+                    ))}
+                  </div>
+                </ScrollArea>
               </div>
             </div>
           </div>
