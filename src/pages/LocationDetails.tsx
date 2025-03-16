@@ -403,7 +403,7 @@ const LocationDetails = () => {
                     {askingQuestion ? (
                       <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <SendHorizontal className="h-5 w-5" />
+                      <SendHorizontal className="h-5 w-5 transform rotate-45" />
                     )}
                   </button>
                 </div>
