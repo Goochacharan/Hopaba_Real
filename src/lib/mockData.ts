@@ -8,8 +8,9 @@ export interface Recommendation {
   address: string;
   distance: string;
   image: string;
+  images?: string[]; // Add this optional images array
   description: string;
-  phone?: string; // Added phone property as optional
+  phone?: string;
   openNow?: boolean;
   hours?: string;
   priceLevel?: string;

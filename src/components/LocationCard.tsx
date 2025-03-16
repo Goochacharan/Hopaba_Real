@@ -41,7 +41,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const isMobile = useIsMobile();
 
   // Handle multiple images
-  const images = Array.isArray(recommendation.images) && recommendation.images.length > 0 
+  const images = recommendation.images && recommendation.images.length > 0 
     ? recommendation.images 
     : [recommendation.image]; // Fallback to single image if images array is empty
 

@@ -38,7 +38,7 @@ const useRecommendations = ({
         
         // Add multiple images to each result if not already present
         const resultsWithImages = results.map(result => {
-          if (Array.isArray(result.images) && result.images.length > 0) {
+          if (result.images && result.images.length > 0) {
             return result;
           }
           
