@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -32,26 +33,26 @@ const LocationCard: React.FC<LocationCardProps> = ({
     switch(rank) {
       case 1:
         return {
-          wrapperClass: "relative -top-1.5",
-          medalClass: "bg-gradient-to-b from-yellow-300 to-yellow-500 border-yellow-300 text-yellow-900 shadow",
+          wrapperClass: "relative top-2",
+          medalClass: "bg-gradient-to-b from-yellow-300 to-yellow-500 border-yellow-300 text-yellow-900 shadow h-8 w-8 text-sm",
           ribbonColor: "bg-red-500"
         }; // Gold
       case 2:
         return {
-          wrapperClass: "relative -top-1",
-          medalClass: "bg-gradient-to-b from-gray-200 to-gray-400 border-gray-200 text-gray-800 shadow",
+          wrapperClass: "relative top-2",
+          medalClass: "bg-gradient-to-b from-gray-200 to-gray-400 border-gray-200 text-gray-800 shadow h-8 w-8 text-sm",
           ribbonColor: "bg-blue-500"
         }; // Silver
       case 3:
         return {
-          wrapperClass: "relative -top-1",
-          medalClass: "bg-gradient-to-b from-amber-300 to-amber-600 border-amber-300 text-amber-900 shadow",
+          wrapperClass: "relative top-2",
+          medalClass: "bg-gradient-to-b from-amber-300 to-amber-600 border-amber-300 text-amber-900 shadow h-8 w-8 text-sm",
           ribbonColor: "bg-green-500"
         }; // Bronze
       default:
         return {
-          wrapperClass: "",
-          medalClass: "bg-gradient-to-b from-blue-400 to-blue-600 border-blue-300 text-white shadow",
+          wrapperClass: "relative top-2",
+          medalClass: "bg-gradient-to-b from-blue-400 to-blue-600 border-blue-300 text-white shadow h-8 w-8 text-sm",
           ribbonColor: "bg-blue-300"
         }; // Regular blue
     }
@@ -112,11 +113,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
     >
       <div className="relative w-full h-48 overflow-hidden">
         {ranking !== undefined && ranking <= 10 && (
-          <div className="absolute top-0 left-4 z-10">
+          <div className="absolute top-0 left-2 z-10">
             <div className={cn("flex flex-col items-center", getMedalStyle(ranking).wrapperClass)}>
               <div 
                 className={cn(
-                  "flex items-center justify-center h-10 w-10 rounded-full text-lg font-bold border-2",
+                  "flex items-center justify-center rounded-full text-sm font-bold border-2",
                   "transform transition-all duration-300 group-hover:scale-110",
                   getMedalStyle(ranking).medalClass
                 )}
@@ -125,9 +126,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
               </div>
               {ranking <= 3 && (
                 <div className="flex mt-1">
-                  <div className={cn("h-4 w-1.5 rounded-sm transform -rotate-20", getMedalStyle(ranking).ribbonColor)}></div>
-                  <div className={cn("h-5 w-1.5 mx-0.5 rounded-sm", getMedalStyle(ranking).ribbonColor)}></div>
-                  <div className={cn("h-4 w-1.5 rounded-sm transform rotate-20", getMedalStyle(ranking).ribbonColor)}></div>
+                  <div className={cn("h-3 w-1.5 rounded-sm transform -rotate-20", getMedalStyle(ranking).ribbonColor)}></div>
+                  <div className={cn("h-4 w-1.5 mx-0.5 rounded-sm", getMedalStyle(ranking).ribbonColor)}></div>
+                  <div className={cn("h-3 w-1.5 rounded-sm transform rotate-20", getMedalStyle(ranking).ribbonColor)}></div>
                 </div>
               )}
             </div>
