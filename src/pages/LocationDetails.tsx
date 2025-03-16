@@ -1,10 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { Phone, MessageCircle, MapPin, Clock, DollarSign, Languages, Award, Calendar, ExternalLink, ArrowLeft, Star, Navigation2, Share2 } from 'lucide-react';
+import { MessageCircle, MapPin, Clock, DollarSign, Languages, Award, Calendar, ExternalLink, ArrowLeft, Star, Navigation2, Share2 } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -242,12 +241,12 @@ const LocationDetails = () => {
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h1 className="text-2xl font-bold">{location.name}</h1>
-                  <div className="flex items-center">
-                    <div className="flex items-center bg-amber-50 text-amber-700 rounded-full px-3 py-1">
-                      <span className="text-lg font-semibold mr-1">{location.rating}</span>
-                      <span className="text-amber-500">★</span>
+                  <div className="flex flex-col items-end">
+                    <div className="flex items-center text-amber-500">
+                      <span className="text-lg font-semibold mr-1 text-amber-700">{location.rating}</span>
+                      <Star className="fill-amber-500 w-4 h-4" />
                     </div>
-                    <span className="ml-2 text-sm text-muted-foreground">
+                    <span className="text-xs text-muted-foreground">
                       {reviews.length} reviews
                     </span>
                   </div>
@@ -290,13 +289,7 @@ const LocationDetails = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-4 gap-3">
-                  <button 
-                    onClick={handleCall} 
-                    className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
-                  >
-                    <Phone className="h-5 w-5" />
-                  </button>
+                <div className="grid grid-cols-3 gap-3">
                   <button 
                     onClick={handleChat} 
                     className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
