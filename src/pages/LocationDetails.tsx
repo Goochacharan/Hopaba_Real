@@ -1,9 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { Phone, MessageSquare, MapPin, Clock, DollarSign, Languages, Award, Calendar, ExternalLink, ArrowLeft, HelpCircle, Star } from 'lucide-react';
+import { Phone, MessageCircle, MapPin, Clock, DollarSign, Languages, Award, Calendar, ExternalLink, ArrowLeft, HelpCircle, Star } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -213,14 +214,20 @@ const LocationDetails = () => {
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <Button onClick={handleCall} className="bg-blue-600 hover:bg-blue-700">
-                    <Phone className="mr-2 h-4 w-4" />
-                    Call
-                  </Button>
-                  <Button onClick={handleChat} className="bg-blue-600 hover:bg-blue-700">
-                    <MessageSquare className="mr-2 h-4 w-4" />
-                    Chat
-                  </Button>
+                  <button 
+                    onClick={handleCall} 
+                    className="flex items-center justify-center gap-2 h-12 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+                  >
+                    <Phone className="h-5 w-5" />
+                    <span>Call</span>
+                  </button>
+                  <button 
+                    onClick={handleChat} 
+                    className="flex items-center justify-center gap-2 h-12 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                    <span>Chat</span>
+                  </button>
                 </div>
               </div>
             </div>
