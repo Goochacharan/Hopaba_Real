@@ -8,6 +8,13 @@ interface UseRecommendationsProps {
   initialCategory?: CategoryType;
 }
 
+interface FilterOptions {
+  maxDistance: number;
+  minRating: number;
+  priceLevel: number;
+  openNowOnly: boolean;
+}
+
 const useRecommendations = ({ 
   initialQuery = '', 
   initialCategory = 'all' 
@@ -49,6 +56,41 @@ const useRecommendations = ({
     setCategory(newCategory);
   };
 
+  const filterRecommendations = (
+    recs: Recommendation[],
+    filterOptions: FilterOptions
+  ): Recommendation[] => {
+    return recs.filter(rec => {
+      // Filter by rating
+      if (rec.rating < filterOptions.minRating) {
+        return false;
+      }
+
+      // Filter by open now
+      if (filterOptions.openNowOnly && !rec.openNow) {
+        return false;
+      }
+
+      // Filter by distance (if available)
+      if (rec.distance) {
+        const distanceValue = parseFloat(rec.distance.split(' ')[0]);
+        if (!isNaN(distanceValue) && distanceValue > filterOptions.maxDistance) {
+          return false;
+        }
+      }
+
+      // Filter by price level
+      if (rec.priceLevel) {
+        const priceCount = rec.priceLevel.length;
+        if (priceCount > filterOptions.priceLevel) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  };
+
   return {
     recommendations,
     loading,
@@ -56,7 +98,8 @@ const useRecommendations = ({
     query,
     category,
     handleSearch,
-    handleCategoryChange
+    handleCategoryChange,
+    filterRecommendations
   };
 };
 

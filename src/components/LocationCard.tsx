@@ -2,10 +2,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, Clock, Phone, MessageSquare } from 'lucide-react';
+import { MapPin, Star, Clock, Phone, MessageSquare, Heart } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 interface LocationCardProps {
   recommendation: Recommendation;
@@ -19,6 +20,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
   const { toast } = useToast();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const inWishlist = isInWishlist(recommendation.id);
 
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click navigation
@@ -38,6 +41,26 @@ const LocationCard: React.FC<LocationCardProps> = ({
       description: `Messaging ${recommendation.name} via WhatsApp...`,
       duration: 3000,
     });
+  };
+
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click navigation
+    
+    if (inWishlist) {
+      removeFromWishlist(recommendation.id);
+      toast({
+        title: "Removed from wishlist",
+        description: `${recommendation.name} removed from your wishlist`,
+        duration: 2000,
+      });
+    } else {
+      addToWishlist(recommendation);
+      toast({
+        title: "Added to wishlist",
+        description: `${recommendation.name} added to your wishlist`,
+        duration: 2000,
+      });
+    }
   };
 
   const handleCardClick = () => {
@@ -72,6 +95,16 @@ const LocationCard: React.FC<LocationCardProps> = ({
             {recommendation.category}
           </span>
         </div>
+        
+        <button 
+          onClick={handleWishlistToggle}
+          className={cn(
+            "absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all",
+            inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500"
+          )}
+        >
+          <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} />
+        </button>
       </div>
 
       <div className="p-4">
@@ -112,6 +145,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </p>
 
         <div className="flex gap-2 mt-auto">
+          {recommendation.priceLevel && (
+            <span className="bg-secondary text-xs px-2 py-1 rounded-full text-muted-foreground">
+              {recommendation.priceLevel}
+            </span>
+          )}
           {recommendation.tags.map((tag, index) => (
             <span 
               key={index} 
