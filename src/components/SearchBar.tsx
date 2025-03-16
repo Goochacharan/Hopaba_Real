@@ -1,8 +1,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Search, X } from 'lucide-react';
+import { Search, X, Mic } from 'lucide-react';
 import { Input } from './ui/input';
+import { toast } from '@/components/ui/use-toast';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -14,18 +15,37 @@ interface SearchBarProps {
 const SearchBar: React.FC<SearchBarProps> = ({ 
   onSearch, 
   className, 
-  placeholder = "Try 'suggest me a good unisex salon near me'", 
+  placeholder = "Try 'plumbers near me' or 'good restaurants in Indiranagar'", 
   initialValue = '' 
 }) => {
   const [query, setQuery] = useState(initialValue);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  
+  const suggestionExamples = [
+    "hidden gem restaurants in Indiranagar",
+    "good flute teacher in Malleshwaram",
+    "places to visit in Nagarbhavi",
+    "best unisex salon near me",
+    "plumbers available right now"
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
       onSearch(query);
+      
+      // Show suggestions after search only if query is very short
+      if (query.trim().length < 8) {
+        const randomSuggestion = suggestionExamples[Math.floor(Math.random() * suggestionExamples.length)];
+        toast({
+          title: "Try natural language",
+          description: `Try being more specific like "${randomSuggestion}"`,
+          duration: 5000,
+        });
+      }
     }
   };
 
@@ -35,6 +55,53 @@ const SearchBar: React.FC<SearchBarProps> = ({
     if (inputRef.current) {
       inputRef.current.focus();
     }
+  };
+  
+  const startSpeechRecognition = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      toast({
+        title: "Not supported",
+        description: "Voice search is not supported in your browser",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    setIsListening(true);
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setQuery(transcript);
+      setIsListening(false);
+      
+      // Auto-submit after voice input
+      setTimeout(() => {
+        onSearch(transcript);
+      }, 500);
+    };
+    
+    recognition.onerror = () => {
+      setIsListening(false);
+      toast({
+        title: "Error",
+        description: "Could not recognize speech",
+        variant: "destructive",
+        duration: 3000,
+      });
+    };
+    
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+    
+    recognition.start();
   };
 
   // Handle clicks outside the search bar to collapse it
@@ -72,6 +139,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             onChange={(e) => setQuery(e.target.value)}
             placeholder={placeholder}
             className="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground py-2"
+            onFocus={() => setIsExpanded(true)}
           />
           
           {query && (
@@ -85,9 +153,23 @@ const SearchBar: React.FC<SearchBarProps> = ({
           )}
           
           <button
+            type="button"
+            onClick={startSpeechRecognition}
+            className={cn(
+              "p-2 rounded-full flex-shrink-0 transition-all duration-200",
+              isListening 
+                ? "text-primary bg-secondary animate-pulse" 
+                : "text-muted-foreground hover:text-primary hover:bg-secondary"
+            )}
+            title="Voice search"
+          >
+            <Mic className="h-4 w-4" />
+          </button>
+          
+          <button
             type="submit"
             className={cn(
-              "ml-2 p-2 rounded-full flex-shrink-0 transition-all-200",
+              "ml-2 p-2 rounded-full flex-shrink-0 transition-all duration-200",
               "text-muted-foreground hover:text-primary hover:bg-secondary"
             )}
             title="Search"
@@ -95,6 +177,27 @@ const SearchBar: React.FC<SearchBarProps> = ({
             <Search className="h-4 w-4" />
           </button>
         </div>
+        
+        {isExpanded && (
+          <div className="p-3 border-t border-border">
+            <p className="text-xs text-muted-foreground mb-2">Try asking about:</p>
+            <div className="flex flex-wrap gap-2">
+              {suggestionExamples.map((example, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className="text-xs px-2 py-1 bg-secondary rounded-full text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => {
+                    setQuery(example);
+                    onSearch(example);
+                  }}
+                >
+                  {example}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </form>
     </div>
   );
