@@ -1,24 +1,18 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import MainLayout from '@/components/MainLayout';
 import CategoryFilter from '@/components/CategoryFilter';
 import LocationCard from '@/components/LocationCard';
 import AnimatedLogo from '@/components/AnimatedLogo';
-import Filters from '@/components/Filters';
+import FilterTabs from '@/components/FilterTabs';
 import useRecommendations from '@/hooks/useRecommendations';
-import { useToast } from '@/components/ui/use-toast';
-import { Button } from '@/components/ui/button';
-import { FilterIcon } from 'lucide-react';
 
 const Index = () => {
-  const [initialLoad, setInitialLoad] = useState(true);
-  const [showFilters, setShowFilters] = useState(false);
   const [distance, setDistance] = useState<number[]>([5]);
   const [minRating, setMinRating] = useState<number[]>([4]);
   const [priceRange, setPriceRange] = useState<number>(2);
   const [openNowOnly, setOpenNowOnly] = useState<boolean>(false);
   
-  const { toast } = useToast();
   const {
     recommendations,
     loading,
@@ -41,34 +35,6 @@ const Index = () => {
     }
   );
 
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: "Error",
-        description: error,
-        variant: "destructive",
-      });
-    }
-  }, [error, toast]);
-
-  useEffect(() => {
-    // Simulating welcome message after initial render
-    const timer = setTimeout(() => {
-      toast({
-        title: "Welcome to Locale",
-        description: "Try searching for recommendations like 'suggest me a good unisex salon near me'",
-        duration: 5000,
-      });
-      setInitialLoad(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [toast]);
-
-  const toggleFilters = () => {
-    setShowFilters(prev => !prev);
-  };
-
   return (
     <MainLayout>
       <section className="flex flex-col items-center justify-center py-8 md:py-14">
@@ -80,26 +46,14 @@ const Index = () => {
           </p>
         </div>
 
-        <div className="w-full flex flex-col md:flex-row gap-4 md:items-center justify-between mb-6">
+        <div className="w-full mb-4">
           <CategoryFilter 
             selectedCategory={category} 
             onSelectCategory={handleCategoryChange}
-            className="animate-fade-in"
+            className="animate-fade-in mb-4"
           />
           
-          <Button 
-            onClick={toggleFilters}
-            variant="outline" 
-            size="sm"
-            className="ml-auto flex items-center gap-2"
-          >
-            <FilterIcon size={16} />
-            {showFilters ? 'Hide Filters' : 'Show Filters'}
-          </Button>
-        </div>
-
-        {showFilters && (
-          <Filters
+          <FilterTabs
             distance={distance}
             setDistance={setDistance}
             minRating={minRating}
@@ -109,7 +63,7 @@ const Index = () => {
             openNowOnly={openNowOnly}
             setOpenNowOnly={setOpenNowOnly}
           />
-        )}
+        </div>
 
         <div className="w-full">
           {loading ? (
@@ -131,12 +85,6 @@ const Index = () => {
                   />
                 </div>
               ))}
-            </div>
-          ) : initialLoad ? (
-            <div className="text-center py-10">
-              <p className="text-muted-foreground">
-                Start by searching for recommendations...
-              </p>
             </div>
           ) : (
             <div className="text-center py-10 animate-fade-in">
