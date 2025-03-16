@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -24,6 +25,20 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const { toast } = useToast();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(recommendation.id);
+
+  // Helper function to get medal styling based on ranking
+  const getMedalStyle = (rank: number) => {
+    switch(rank) {
+      case 1:
+        return "bg-gradient-to-b from-yellow-300 to-yellow-500 border-yellow-200 text-yellow-900 shadow-md shadow-yellow-200/50"; // Gold
+      case 2:
+        return "bg-gradient-to-b from-gray-200 to-gray-400 border-gray-100 text-gray-800 shadow-md shadow-gray-200/50"; // Silver
+      case 3:
+        return "bg-gradient-to-b from-amber-300 to-amber-600 border-amber-200 text-amber-900 shadow-md shadow-amber-200/50"; // Bronze
+      default:
+        return "bg-gradient-to-b from-blue-400 to-blue-600 border-blue-300 text-white shadow shadow-blue-300/30"; // Regular blue
+    }
+  };
 
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click navigation
@@ -81,12 +96,15 @@ const LocationCard: React.FC<LocationCardProps> = ({
       <div className="relative w-full h-48 overflow-hidden">
         {ranking !== undefined && (
           <div className="absolute top-3 left-3 z-10">
-            <Badge 
-              variant="default" 
-              className="flex items-center justify-center h-8 w-8 rounded-full text-lg font-bold p-0"
+            <div 
+              className={cn(
+                "flex items-center justify-center h-9 w-9 rounded-full text-lg font-bold border-2",
+                "transform transition-all duration-300 group-hover:scale-110",
+                getMedalStyle(ranking)
+              )}
             >
               {ranking}
-            </Badge>
+            </div>
           </div>
         )}
         
