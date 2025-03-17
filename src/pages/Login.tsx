@@ -6,6 +6,7 @@ import MainLayout from '@/components/MainLayout';
 import { useAuth } from '@/hooks/useAuth';
 import SocialLoginButtons from '@/components/SocialLoginButtons';
 import EmailLoginForm, { LoginFormValues } from '@/components/EmailLoginForm';
+import { Button } from '@/components/ui/button';
 
 export default function Login() {
   const { 
@@ -13,11 +14,17 @@ export default function Login() {
     socialLoading, 
     loginError, 
     loginWithEmail, 
-    loginWithSocial 
+    loginWithSocial,
+    getTestCredentials
   } = useAuth();
   
   const handleEmailSubmit = (values: LoginFormValues) => {
     loginWithEmail(values.email, values.password);
+  };
+
+  const handleDemoLogin = () => {
+    const { email, password } = getTestCredentials();
+    loginWithEmail(email, password);
   };
 
   return (
@@ -55,6 +62,21 @@ export default function Login() {
             onSubmit={handleEmailSubmit}
             isLoading={isLoading}
           />
+
+          {/* Demo Login Button */}
+          <div className="mt-4">
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={handleDemoLogin}
+              disabled={isLoading}
+            >
+              {isLoading ? "Logging in..." : "Use Demo Account"}
+            </Button>
+            <p className="text-xs text-center mt-2 text-muted-foreground">
+              Click to sign in with demo credentials (email: demo@example.com)
+            </p>
+          </div>
 
           <div className="mt-4 text-center">
             <p className="text-sm text-muted-foreground">

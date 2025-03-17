@@ -11,6 +11,7 @@ export function useAuth() {
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [user, setUser] = useState<any>(null);
   
   // Initial session check
   useEffect(() => {
@@ -25,26 +26,9 @@ export function useAuth() {
         }
         
         if (data.session) {
-          console.log("User already logged in, redirecting...");
+          console.log("User already logged in:", data.session.user);
           setIsAuthenticated(true);
-          
-          // Check if user is a business owner
-          const { data: businessData, error: businessError } = await supabase
-            .from('service_providers')
-            .select('id')
-            .eq('user_id', data.session.user.id);
-          
-          if (businessError) {
-            console.error("Business data error:", businessError);
-            navigate('/');
-            return;
-          }
-          
-          if (businessData && businessData.length > 0) {
-            navigate('/business-dashboard');
-          } else {
-            navigate('/');
-          }
+          setUser(data.session.user);
         }
       } catch (error) {
         console.error("Error checking user session:", error);
@@ -52,7 +36,7 @@ export function useAuth() {
     };
     
     checkUser();
-  }, [navigate]);
+  }, []);
   
   // Auth state change listener
   useEffect(() => {
@@ -64,6 +48,7 @@ export function useAuth() {
         
         if (event === 'SIGNED_IN' && session) {
           setIsAuthenticated(true);
+          setUser(session.user);
           
           // Show success toast
           toast({
@@ -94,8 +79,10 @@ export function useAuth() {
             navigate('/');
           }
         } else if (event === 'SIGNED_OUT') {
+          console.log("User signed out");
           setIsAuthenticated(false);
-          navigate('/');
+          setUser(null);
+          navigate('/login');
         }
       }
     );
@@ -125,6 +112,8 @@ export function useAuth() {
       }
       
       console.log("Login successful, user:", data.user?.id);
+      setUser(data.user);
+      setIsAuthenticated(true);
       // Navigation is handled by the auth state change listener
       
     } catch (error: any) {
@@ -165,13 +154,21 @@ export function useAuth() {
   
   const signOut = async () => {
     try {
+      console.log("Signing out user...");
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Error signing out:", error);
         throw error;
       }
+      console.log("Sign out successful");
       setIsAuthenticated(false);
-      navigate('/');
+      setUser(null);
+      navigate('/login');
+      
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out",
+      });
     } catch (error: any) {
       console.error("Sign out error:", error);
       toast({
@@ -182,14 +179,24 @@ export function useAuth() {
     }
   };
 
+  // For testing purposes: Generate random demo credentials
+  const getTestCredentials = () => {
+    return {
+      email: 'demo@example.com',
+      password: 'password123'
+    };
+  };
+
   return {
     isLoading,
     socialLoading,
     loginError,
     isAuthenticated,
+    user,
     loginWithEmail,
     loginWithSocial,
     signOut,
-    setLoginError
+    setLoginError,
+    getTestCredentials
   };
 }
