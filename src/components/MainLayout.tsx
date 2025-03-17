@@ -128,7 +128,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </Link>
           
           <div className="flex items-center gap-4">
-            {!user && (
+            {!user && !loading && (
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => navigate('/login')}>
                   Login
