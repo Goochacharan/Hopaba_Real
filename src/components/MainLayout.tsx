@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
@@ -57,24 +56,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     console.log("Navigating to home page from: ", location.pathname);
   };
 
-  const handleLogout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      toast({
-        title: "Logged out successfully",
-        description: "You have been logged out of your account",
-      });
-      navigate('/');
-    } catch (error: any) {
-      toast({
-        title: "Error logging out",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center">
       <header className="w-full sticky top-0 z-50 glass border-b border-border/50 px-6 py-4">
@@ -96,11 +77,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </Link>
           
           <div className="flex items-center gap-4">
-            {user ? (
-              <Button variant="ghost" size="sm" onClick={handleLogout}>
-                Logout
-              </Button>
-            ) : (
+            {!user && (
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => navigate('/login')}>
                   Login
