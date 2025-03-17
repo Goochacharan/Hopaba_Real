@@ -100,11 +100,14 @@ const Profile = () => {
           .eq('user_id', session.user.id);
         
         setIsBusinessOwner(businessData && businessData.length > 0);
+      } else {
+        // Redirect to login if not authenticated
+        navigate('/login');
       }
     };
     
     fetchUserData();
-  }, []);
+  }, [navigate]);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -120,30 +123,59 @@ const Profile = () => {
     console.log(data);
   }
 
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default behavior
+    console.log("Logout button clicked");
+    
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Error signing out:", error);
+        toast({
+          title: "Error signing out",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        console.log("Sign out successful");
+        toast({
+          title: "Signed out successfully",
+          description: "You have been signed out",
+        });
+        navigate('/');
+      }
+    } catch (err) {
+      console.error("Unexpected error during sign out:", err);
       toast({
         title: "Error signing out",
-        description: error.message,
+        description: "An unexpected error occurred",
         variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Signed out successfully",
-        description: "You have been signed out",
-      });
-      navigate('/');
     }
   };
 
-  const handleBusinessAction = () => {
+  const handleBusinessAction = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default behavior
     if (isBusinessOwner) {
       navigate('/business-dashboard');
     } else {
       navigate('/business-signup');
     }
   };
+
+  // If no user is logged in, show a loading state or redirect
+  if (!user) {
+    return (
+      <MainLayout>
+        <div className="py-8 text-center">
+          <p>Please log in to view your profile.</p>
+          <Button className="mt-4" onClick={() => navigate('/login')}>
+            Go to Login
+          </Button>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>

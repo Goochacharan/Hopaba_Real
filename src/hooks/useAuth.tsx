@@ -95,6 +95,7 @@ export function useAuth() {
           }
         } else if (event === 'SIGNED_OUT') {
           setIsAuthenticated(false);
+          navigate('/');
         }
       }
     );
@@ -161,6 +162,25 @@ export function useAuth() {
       setSocialLoading(null);
     }
   };
+  
+  const signOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Error signing out:", error);
+        throw error;
+      }
+      setIsAuthenticated(false);
+      navigate('/');
+    } catch (error: any) {
+      console.error("Sign out error:", error);
+      toast({
+        title: "Error signing out",
+        description: error.message || "Something went wrong",
+        variant: "destructive",
+      });
+    }
+  };
 
   return {
     isLoading,
@@ -169,6 +189,7 @@ export function useAuth() {
     isAuthenticated,
     loginWithEmail,
     loginWithSocial,
+    signOut,
     setLoginError
   };
 }
