@@ -75,7 +75,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             aria-label="Go to home page"
           >
             <AnimatedLogo size="sm" />
-            <h1 className="text-xl font-medium tracking-tight cursor-pointer">
+            <h1 className="text-xl font-medium tracking-tight">
               Hopaba
             </h1>
           </div>
