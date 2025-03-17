@@ -5,7 +5,6 @@ import AnimatedLogo from './AnimatedLogo';
 import { cn } from '@/lib/utils';
 import { Home, User, ListChecks, Calendar, LogIn } from 'lucide-react';
 import SearchBar from './SearchBar';
-import useRecommendations from '@/hooks/useRecommendations';
 import { Button } from './ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -18,7 +17,6 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { handleSearch, query } = useRecommendations();
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -46,17 +44,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   
   const onSearch = (query: string) => {
     console.log("MainLayout search triggered with:", query);
-    handleSearch(query);
-    if (location.pathname !== '/') {
-      navigate('/');
+    if (query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query)}`);
     }
   };
-  
-  useEffect(() => {
-    if (query) {
-      window.scrollTo(0, 0);
-    }
-  }, [query]);
   
   const navigateToHome = () => {
     navigate('/');
@@ -117,7 +108,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             onSearch={onSearch} 
             className="mb-0" 
             placeholder="What are you looking for today?"
-            initialValue={query}
+            initialValue=""
           />
         </div>
       </div>

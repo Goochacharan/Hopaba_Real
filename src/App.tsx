@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import Index from "./pages/Index";
+import SearchResults from "./pages/SearchResults";
 import LocationDetails from "./pages/LocationDetails";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
@@ -26,6 +27,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/search" element={<SearchResults />} />
             <Route path="/location/:id" element={<LocationDetails />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/my-list" element={<MyList />} />
