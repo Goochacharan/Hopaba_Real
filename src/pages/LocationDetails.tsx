@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { MessageCircle, MapPin, Clock, DollarSign, Languages, Award, Calendar, ArrowLeft, Star, Navigation2, Share2, Phone } from 'lucide-react';
+import { MessageCircle, MapPin, Clock, CircleRupee, Languages, Award, Calendar, ArrowLeft, Star, Navigation2, Share2, Phone } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -374,7 +374,7 @@ const LocationDetails = () => {
                   </div>
                   
                   <div className="flex items-start">
-                    <DollarSign className="h-5 w-5 text-muted-foreground mr-3 mt-0.5 flex-shrink-0" />
+                    <CircleRupee className="h-5 w-5 text-muted-foreground mr-3 mt-0.5 flex-shrink-0" />
                     <span>₹800 - ₹1200 per month</span>
                   </div>
                   

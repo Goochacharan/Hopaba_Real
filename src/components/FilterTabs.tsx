@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Star, Clock, DollarSign, FilterIcon, ChevronDown } from 'lucide-react';
+import { Star, Clock, CircleRupee, FilterIcon, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -96,12 +96,12 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
                 activeFilter === 'price' && "ring-2 ring-primary/20"
               )}
             >
-              <DollarSign className="w-4 h-4" /> 
+              <CircleRupee className="w-4 h-4" /> 
               Price
               <ChevronDown className="w-3.5 h-3.5 ml-0.5 opacity-70" />
               {priceRange < 3 && (
                 <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs font-normal">
-                  {Array(priceRange).fill('$').join('')}
+                  {Array(priceRange).fill('₹').join('')}
                 </Badge>
               )}
             </Button>
@@ -113,7 +113,7 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Show results priced</span>
                   <span className="text-sm font-medium">
-                    {Array(priceRange).fill('$').join('')}
+                    {Array(priceRange).fill('₹').join('')}
                   </span>
                 </div>
                 <Slider

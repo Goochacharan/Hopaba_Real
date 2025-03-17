@@ -3,7 +3,7 @@ import React from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Star, DollarSign } from 'lucide-react';
+import { Star, CircleRupee } from 'lucide-react';
 
 interface FiltersProps {
   distance: number[];
@@ -64,7 +64,7 @@ const Filters: React.FC<FiltersProps> = ({
         <div className="flex justify-between items-center">
           <Label htmlFor="price" className="text-sm font-medium">Price Range</Label>
           <div className="text-sm text-muted-foreground">
-            {Array(priceRange).fill('$').join('')}
+            {Array(priceRange).fill('₹').join('')}
           </div>
         </div>
         <Slider

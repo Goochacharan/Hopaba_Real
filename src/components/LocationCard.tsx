@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
   MapPin, Star, Clock, Phone, Heart, 
-  Navigation2, MessageCircle, Share2, LogIn 
+  Navigation2, MessageCircle, Share2, LogIn, CircleRupee 
 } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
@@ -59,10 +59,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
     };
   }, []);
 
-  // Handle multiple images
   const images = recommendation.images && recommendation.images.length > 0 
     ? recommendation.images 
-    : [recommendation.image]; // Fallback to single image if images array is empty
+    : [recommendation.image];
 
   React.useEffect(() => {
     setImageLoaded(Array(images.length).fill(false));
@@ -203,7 +202,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
         });
       });
     } else {
-      // Fallback for browsers that don't support the Web Share API
       const shareUrl = window.location.origin + `/location/${recommendation.id}`;
       navigator.clipboard.writeText(shareUrl).then(() => {
         toast({
@@ -348,7 +346,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         <div className="flex gap-2 mt-4">
           {recommendation.priceLevel && (
             <span className="bg-secondary text-xs px-2 py-1 rounded-full text-muted-foreground">
-              {recommendation.priceLevel}
+              {recommendation.priceLevel.replace(/\$/g, '₹')}
             </span>
           )}
           {recommendation.tags.map((tag, index) => (
