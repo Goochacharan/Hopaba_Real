@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import MainLayout from '@/components/MainLayout';
 import SearchBar from '@/components/SearchBar';
@@ -9,6 +10,7 @@ import FilterTabs from '@/components/FilterTabs';
 import useRecommendations from '@/hooks/useRecommendations';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+
 const Index = () => {
   const [distance, setDistance] = useState<number[]>([5]);
   const [minRating, setMinRating] = useState<number[]>([4]);
@@ -118,53 +120,105 @@ const Index = () => {
     // If ratings are equal, sort by reviewer count
     return b.reviewCount - a.reviewCount;
   });
+  
   const showResults = query && query.length > 0;
-  return <MainLayout>
-      <section className="flex flex-col items-center justify-center md:py-14 py-0 my-0">
-        {!showResults && <div className="text-center mb-12 animate-fade-in">
+  
+  return (
+    <MainLayout>
+      <section className="flex flex-col items-center justify-center py-8 md:py-14">
+        {!showResults && (
+          <div className="text-center mb-12 animate-fade-in">
             <AnimatedLogo size="lg" className="mx-auto mb-6" />
             <h1 className="text-3xl sm:text-4xl font-medium tracking-tight mb-3">Hopaba</h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               What are you looking for today? A hidden gem café, a skilled plumber, or the best salon in town? Just ask me!
             </p>
-          </div>}
+          </div>
+        )}
 
-        {!showResults && <div className="w-full max-w-2xl mx-auto mb-8">
+        {!showResults && (
+          <div className="w-full max-w-2xl mx-auto mb-8">
             <ScrollArea className="h-[300px] w-full px-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 pr-4">
-                {exampleQueries.map((example, idx) => <Button key={idx} variant="outline" onClick={() => handleSearch(example.text)} className="justify-start h-auto border-border/50 text-left px-[17px] py-0 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200">
+                {exampleQueries.map((example, idx) => (
+                  <Button 
+                    key={idx} 
+                    variant="outline" 
+                    onClick={() => handleSearch(example.text)} 
+                    className="justify-start h-auto border-border/50 text-left px-[17px] py-0 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200"
+                  >
                     <div className="mr-3 text-xl">{example.icon}</div>
-                    <span className="font-normal text-xs px-0">{example.text}</span>
-                  </Button>)}
+                    <span className="font-normal">{example.text}</span>
+                  </Button>
+                ))}
               </div>
             </ScrollArea>
-          </div>}
+          </div>
+        )}
 
         <div className="w-full mb-8">
-          {showResults && <>
-              <CategoryFilter selectedCategory={category} onSelectCategory={handleCategoryChange} className="animate-fade-in mb-4" />
+          {showResults && (
+            <>
+              <CategoryFilter 
+                selectedCategory={category} 
+                onSelectCategory={handleCategoryChange} 
+                className="animate-fade-in mb-4" 
+              />
               
-              <FilterTabs distance={distance} setDistance={setDistance} minRating={minRating} setMinRating={setMinRating} priceRange={priceRange} setPriceRange={setPriceRange} openNowOnly={openNowOnly} setOpenNowOnly={setOpenNowOnly} />
-            </>}
+              <FilterTabs 
+                distance={distance} 
+                setDistance={setDistance} 
+                minRating={minRating} 
+                setMinRating={setMinRating} 
+                priceRange={priceRange} 
+                setPriceRange={setPriceRange} 
+                openNowOnly={openNowOnly} 
+                setOpenNowOnly={setOpenNowOnly} 
+              />
+            </>
+          )}
         </div>
 
-        {showResults && <div className="w-full">
-            {loading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3].map(i => <div key={i} className="bg-white/50 h-96 rounded-xl border border-border/50 animate-pulse" />)}
-              </div> : rankedRecommendations.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {rankedRecommendations.map((recommendation, index) => <div key={recommendation.id} className="animate-fade-in" style={{
-            animationDelay: `${index * 100}ms`
-          }}>
-                    <LocationCard recommendation={recommendation} ranking={index < 10 ? index + 1 : undefined} reviewCount={recommendation.reviewCount} className="h-full" />
-                  </div>)}
-              </div> : <div className="text-center py-10 animate-fade-in">
+        {showResults && (
+          <div className="w-full">
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="bg-white/50 h-96 rounded-xl border border-border/50 animate-pulse" />
+                ))}
+              </div>
+            ) : rankedRecommendations.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {rankedRecommendations.map((recommendation, index) => (
+                  <div
+                    key={recommendation.id}
+                    className="animate-fade-in"
+                    style={{
+                      animationDelay: `${index * 100}ms`
+                    }}
+                  >
+                    <LocationCard
+                      recommendation={recommendation}
+                      ranking={index < 10 ? index + 1 : undefined}
+                      reviewCount={recommendation.reviewCount}
+                      className="h-full"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 animate-fade-in">
                 <p className="text-lg font-medium mb-2">No results found</p>
                 <p className="text-muted-foreground">
                   Try adjusting your search or filters
                 </p>
-              </div>}
-          </div>}
+              </div>
+            )}
+          </div>
+        )}
       </section>
-    </MainLayout>;
+    </MainLayout>
+  );
 };
+
 export default Index;
