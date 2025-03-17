@@ -1,3 +1,4 @@
+
 import React from 'react';
 import MainLayout from '@/components/MainLayout';
 import AnimatedLogo from '@/components/AnimatedLogo';
@@ -95,10 +96,10 @@ const Index = () => {
                   key={idx} 
                   variant="outline" 
                   onClick={() => handleSearch(example.text)} 
-                  className="justify-start h-auto border-border/50 text-left px-[17px] py-2 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200"
+                  className="justify-start h-auto border-border/50 text-left px-[17px] py-2 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200 overflow-hidden"
                 >
-                  <div className="mr-3 text-2xl">{example.icon}</div>
-                  <span className="font-normal">{example.text}</span>
+                  <div className="mr-3 text-base">{example.icon}</div>
+                  <span className="font-normal text-sm sm:text-base truncate">{example.text}</span>
                 </Button>
               ))}
             </div>
