@@ -1,8 +1,9 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
 import { cn } from '@/lib/utils';
-import { Home, User, ListChecks, Calendar, LogIn } from 'lucide-react';
+import { Home, User, ListChecks, Calendar } from 'lucide-react';
 import SearchBar from './SearchBar';
 import { Button } from './ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,9 +20,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -58,13 +57,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     console.log("Navigating to home page from: ", location.pathname);
   };
 
-  return <div className="min-h-screen w-full bg-background flex flex-col items-center">
+  return (
+    <div className="min-h-screen w-full bg-background flex flex-col items-center">
       <header className="w-full sticky top-0 z-50 glass border-b border-border/50 px-6 py-4">
         <div className="max-w-5xl mx-auto w-full flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 cursor-pointer" role="button" aria-label="Go to home page" onClick={e => {
-          e.preventDefault();
-          navigateToHome();
-        }}>
+          <Link 
+            to="/" 
+            className="flex items-center gap-3 cursor-pointer" 
+            role="button" 
+            aria-label="Go to home page" 
+            onClick={e => {
+              e.preventDefault();
+              navigateToHome();
+            }}
+          >
             <AnimatedLogo size="sm" />
             <h1 className="text-xl font-medium tracking-tight">
               Hopaba
@@ -78,14 +84,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-all-200">Help</a>
             </nav>
             
-            {user ? null : <div className="flex items-center gap-2">
+            {user ? null : (
+              <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => navigate('/login')}>
                   Login
                 </Button>
                 <Button size="sm" onClick={() => navigate('/signup')}>
                   Sign Up
                 </Button>
-              </div>}
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -102,16 +110,37 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 py-2 px-4 z-50">
         <div className="max-w-5xl mx-auto flex justify-around">
-          <NavButton to="/" icon={<Home className="h-5 w-5" />} label="Home" isActive={location.pathname === '/'} />
+          <NavButton 
+            to="/" 
+            icon={<Home className="h-5 w-5" />} 
+            label="Home" 
+            isActive={location.pathname === '/'} 
+          />
           
-          <NavButton to="/my-list" icon={<ListChecks className="h-5 w-5" />} label="My List" isActive={location.pathname === '/my-list'} />
+          <NavButton 
+            to="/my-list" 
+            icon={<ListChecks className="h-5 w-5" />} 
+            label="My List" 
+            isActive={location.pathname === '/my-list'} 
+          />
           
-          <NavButton to="/events" icon={<Calendar className="h-5 w-5" />} label="Events" isActive={location.pathname === '/events'} />
+          <NavButton 
+            to="/events" 
+            icon={<Calendar className="h-5 w-5" />} 
+            label="Events" 
+            isActive={location.pathname === '/events'} 
+          />
           
-          <NavButton to={user ? "/profile" : "/login"} icon={<User className="h-5 w-5" />} label={user ? "Profile" : "Login"} isActive={location.pathname === '/profile' || location.pathname === '/login'} />
+          <NavButton 
+            to={user ? "/profile" : "/login"} 
+            icon={<User className="h-5 w-5" />} 
+            label={user ? "Profile" : "Login"} 
+            isActive={location.pathname === '/profile' || location.pathname === '/login'} 
+          />
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
 
 interface NavButtonProps {
@@ -127,10 +156,19 @@ const NavButton: React.FC<NavButtonProps> = ({
   label,
   isActive
 }) => {
-  return <Link to={to} className={cn("flex flex-col items-center gap-1 px-3 py-2 rounded-md transition-colors", isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50")} aria-label={label}>
+  return (
+    <Link 
+      to={to} 
+      className={cn(
+        "flex flex-col items-center gap-1 px-3 py-2 rounded-md transition-colors", 
+        isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+      )} 
+      aria-label={label}
+    >
       {icon}
       <span className="text-xs">{label}</span>
-    </Link>;
+    </Link>
+  );
 };
 
 export default MainLayout;

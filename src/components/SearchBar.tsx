@@ -123,21 +123,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   return (
     <div className={cn("w-full max-w-2xl mx-auto", className)}>
-      <form ref={formRef} onSubmit={handleSubmit} className="w-full bg-white rounded-xl shadow-md border border-border">
+      <form ref={formRef} onSubmit={handleSubmit} className="w-full bg-white rounded-xl shadow-md border border-border/50">
         <div className="flex items-center p-2">
-          <button 
-            type="submit"
-            className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full"
-            aria-label="Search"
-          >
-            <Search className="h-5 w-5" />
-          </button>
-          
           <Input
             ref={inputRef}
             type="text"
             placeholder={placeholder}
-            className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-1"
+            className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-2"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsExpanded(true)}
@@ -166,6 +158,15 @@ const SearchBar: React.FC<SearchBarProps> = ({
             aria-label="Voice search"
           >
             <Mic className="h-5 w-5" />
+          </button>
+          
+          <button 
+            type="submit"
+            className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full"
+            aria-label="Search"
+            onClick={handleSearchButtonClick}
+          >
+            <Search className="h-5 w-5" />
           </button>
         </div>
       </form>
