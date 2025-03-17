@@ -1,11 +1,14 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
 import { cn } from '@/lib/utils';
-import { Home, User, ListChecks, Calendar } from 'lucide-react';
+import { Home, User, ListChecks, Calendar, LogIn } from 'lucide-react';
 import SearchBar from './SearchBar';
 import useRecommendations from '@/hooks/useRecommendations';
+import { Button } from './ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -16,6 +19,30 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { handleSearch, query } = useRecommendations();
+  const { toast } = useToast();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      setLoading(true);
+      const { data } = await supabase.auth.getSession();
+      setUser(data.session?.user || null);
+      setLoading(false);
+    };
+    
+    getCurrentUser();
+    
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setUser(session?.user || null);
+      }
+    );
+    
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, []);
   
   const onSearch = (query: string) => {
     console.log("MainLayout search triggered with:", query);
@@ -36,6 +63,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     navigate('/');
     window.scrollTo(0, 0);
   };
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error signing out",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out",
+      });
+      navigate('/');
+    }
+  };
   
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center">
@@ -50,11 +94,29 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             <AnimatedLogo size="sm" />
             <h1 className="text-xl font-medium tracking-tight">Hopaba</h1>
           </div>
-          <nav className="hidden md:flex items-center gap-6">
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-all-200">About</a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-all-200">Explore</a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-all-200">Help</a>
-          </nav>
+          
+          <div className="flex items-center gap-4">
+            <nav className="hidden md:flex items-center gap-6">
+              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-all-200">About</a>
+              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-all-200">Explore</a>
+              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-all-200">Help</a>
+            </nav>
+            
+            {user ? (
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                Sign Out
+              </Button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => navigate('/login')}>
+                  Login
+                </Button>
+                <Button size="sm" onClick={() => navigate('/signup')}>
+                  Sign Up
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
       
@@ -99,10 +161,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
           />
           
           <NavButton 
-            to="/profile" 
+            to={user ? "/profile" : "/login"} 
             icon={<User className="h-5 w-5" />} 
-            label="Profile" 
-            isActive={location.pathname === '/profile'} 
+            label={user ? "Profile" : "Login"} 
+            isActive={location.pathname === '/profile' || location.pathname === '/login'} 
           />
         </div>
       </div>

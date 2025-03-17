@@ -1,16 +1,14 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
   MapPin, Star, Clock, Phone, Heart, 
-  Navigation2, MessageCircle, Share2 
+  Navigation2, MessageCircle, Share2, LogIn 
 } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useWishlist } from '@/contexts/WishlistContext';
-import { Badge } from '@/components/ui/badge';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   Carousel, 
@@ -19,6 +17,7 @@ import {
   CarouselNext, 
   CarouselPrevious 
 } from '@/components/ui/carousel';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LocationCardProps {
   recommendation: Recommendation;
@@ -39,6 +38,26 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(recommendation.id);
   const isMobile = useIsMobile();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data } = await supabase.auth.getSession();
+      setUser(data.session?.user || null);
+    };
+    
+    getCurrentUser();
+    
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setUser(session?.user || null);
+      }
+    );
+    
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, []);
 
   // Handle multiple images
   const images = recommendation.images && recommendation.images.length > 0 
@@ -110,6 +129,17 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to add items to your wishlist",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+    
     if (inWishlist) {
       removeFromWishlist(recommendation.id);
       toast({
@@ -260,10 +290,14 @@ const LocationCard: React.FC<LocationCardProps> = ({
           onClick={handleWishlistToggle}
           className={cn(
             "absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10",
-            inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500"
+            user ? (inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500") : "text-muted-foreground"
           )}
         >
-          <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} />
+          {user ? (
+            <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} />
+          ) : (
+            <LogIn className="w-5 h-5" />
+          )}
         </button>
       </div>
 
