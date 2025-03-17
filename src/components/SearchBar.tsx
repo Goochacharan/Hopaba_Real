@@ -113,9 +113,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   };
   return <div className={cn("w-full max-w-2xl mx-auto", className)}>
-      <form ref={formRef} onSubmit={handleSubmit} className="w-full bg-white rounded-xl shadow-md border border-border">
-        
-      </form>
+      
     </div>;
 };
 export default SearchBar;
