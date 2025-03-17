@@ -28,43 +28,33 @@ const SearchResults = () => {
     filterRecommendations
   } = useRecommendations({ initialQuery: searchQuery });
 
-  // Apply filters to recommendations
   const filteredRecommendations = filterRecommendations(recommendations, {
     maxDistance: distance[0],
     minRating: minRating[0],
     priceLevel: priceRange,
     openNowOnly,
-    distanceUnit: 'km' // Set the distance unit to kilometers
+    distanceUnit: 'km'
   });
 
-  // Calculate rankings based on rating and generate consistent review counts
   const rankedRecommendations = [...filteredRecommendations].map(item => {
-    // Generate a consistent review count based on the item's id and rating
     const reviewCount = parseInt(item.id) * 10 + Math.floor(item.rating * 15);
-
-    // Return item with reviewCount
     return {
       ...item,
       reviewCount
     };
   }).sort((a, b) => {
-    // First sort by rating
     if (b.rating !== a.rating) {
       return b.rating - a.rating;
     }
-
-    // If ratings are equal, sort by reviewer count
     return b.reviewCount - a.reviewCount;
   });
 
-  // If the query changes in the URL, update our search
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
       handleSearch(searchQuery);
     }
   }, [searchQuery, query, handleSearch]);
 
-  // If there's no search query, redirect to the home page
   useEffect(() => {
     if (!searchQuery) {
       navigate('/');
@@ -74,7 +64,6 @@ const SearchResults = () => {
   const handleLocationChange = (location: string) => {
     console.log(`Location changed to: ${location}`);
     setSelectedLocation(location);
-    // In a real app, you might want to refetch recommendations based on the new location
   };
 
   return (
@@ -106,24 +95,34 @@ const SearchResults = () => {
               ))}
             </div>
           ) : rankedRecommendations.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {rankedRecommendations.map((recommendation, index) => (
-                <div
-                  key={recommendation.id}
-                  className="animate-fade-in"
-                  style={{
-                    animationDelay: `${index * 100}ms`
-                  }}
-                >
-                  <LocationCard
-                    recommendation={recommendation}
-                    ranking={index < 10 ? index + 1 : undefined}
-                    reviewCount={recommendation.reviewCount}
-                    className="h-full"
-                  />
+            <>
+              {query && query !== searchQuery && (
+                <div className="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-medium">AI-enhanced search:</span> {query}
+                  </p>
                 </div>
-              ))}
-            </div>
+              )}
+            
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {rankedRecommendations.map((recommendation, index) => (
+                  <div
+                    key={recommendation.id}
+                    className="animate-fade-in"
+                    style={{
+                      animationDelay: `${index * 100}ms`
+                    }}
+                  >
+                    <LocationCard
+                      recommendation={recommendation}
+                      ranking={index < 10 ? index + 1 : undefined}
+                      reviewCount={recommendation.reviewCount}
+                      className="h-full"
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
           ) : (
             <div className="text-center py-10 animate-fade-in">
               <p className="text-lg font-medium mb-2">No results found</p>
