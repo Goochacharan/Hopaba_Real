@@ -35,6 +35,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
+      console.log("Search bar submit with query:", query);
       onSearch(query);
       
       // Show suggestions after search only if query is very short
@@ -128,8 +129,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
   // This function will explicitly handle the search button click
   const handleSearchButtonClick = () => {
     if (query.trim()) {
-      onSearch(query);
       console.log("Search button clicked with query:", query);
+      onSearch(query);
     }
   };
 
@@ -176,8 +177,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           </button>
           
           <button
-            type="button" 
-            onClick={handleSearchButtonClick}
+            type="submit" 
             className={cn(
               "ml-2 p-2 rounded-full flex-shrink-0 transition-all duration-200",
               "text-muted-foreground hover:text-primary hover:bg-secondary"

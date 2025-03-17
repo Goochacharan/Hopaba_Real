@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
@@ -60,29 +61,28 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const navigateToHome = () => {
     navigate('/');
     window.scrollTo(0, 0);
+    console.log("Navigating to home page from: ", location.pathname);
   };
   
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center">
       <header className="w-full sticky top-0 z-50 glass border-b border-border/50 px-6 py-4">
         <div className="max-w-5xl mx-auto w-full flex items-center justify-between">
-          <div 
+          <Link 
+            to="/"
             className="flex items-center gap-3 cursor-pointer" 
-            onClick={navigateToHome}
             role="button"
             aria-label="Go to home page"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                navigateToHome();
-              }
+            onClick={(e) => {
+              e.preventDefault();
+              navigateToHome();
             }}
           >
             <AnimatedLogo size="sm" />
             <h1 className="text-xl font-medium tracking-tight">
               Hopaba
             </h1>
-          </div>
+          </Link>
           
           <div className="flex items-center gap-4">
             <nav className="hidden md:flex items-center gap-6">
