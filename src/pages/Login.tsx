@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -28,34 +27,18 @@ export default function Login() {
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   
   useEffect(() => {
-    // Check if user is already logged in
+    // Check if user is already logged in - this should redirect immediately if user has a session
     const checkUser = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        // Check if user is a business owner
-        const { data: businessData } = await supabase
-          .from('service_providers')
-          .select('id')
-          .eq('user_id', data.session.user.id);
+      try {
+        const { data } = await supabase.auth.getSession();
         
-        if (businessData && businessData.length > 0) {
-          navigate('/business-dashboard');
-        } else {
-          navigate('/');
-        }
-      }
-    };
-    
-    checkUser();
-    
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session) {
+        if (data.session) {
+          console.log("User already logged in, redirecting...");
           // Check if user is a business owner
           const { data: businessData } = await supabase
             .from('service_providers')
             .select('id')
-            .eq('user_id', session.user.id);
+            .eq('user_id', data.session.user.id);
           
           if (businessData && businessData.length > 0) {
             navigate('/business-dashboard');
@@ -63,13 +46,52 @@ export default function Login() {
             navigate('/');
           }
         }
+      } catch (error) {
+        console.error("Error checking user session:", error);
+      }
+    };
+    
+    checkUser();
+  }, [navigate]);
+  
+  // Set up auth state change listener
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.id);
+        
+        if (event === 'SIGNED_IN' && session) {
+          // Show success toast
+          toast({
+            title: "Login successful",
+            description: "Welcome back!",
+          });
+          
+          try {
+            // Check if user is a business owner
+            const { data: businessData } = await supabase
+              .from('service_providers')
+              .select('id')
+              .eq('user_id', session.user.id);
+            
+            if (businessData && businessData.length > 0) {
+              navigate('/business-dashboard');
+            } else {
+              navigate('/');
+            }
+          } catch (error) {
+            console.error("Error checking business data:", error);
+            navigate('/');
+          }
+        }
       }
     );
     
     return () => {
+      // Clean up subscription when component unmounts
       authListener?.subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -82,7 +104,7 @@ export default function Login() {
   const onSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
@@ -90,23 +112,9 @@ export default function Login() {
       if (error) {
         throw error;
       }
-
-      toast({
-        title: "Login successful",
-        description: "Welcome back!",
-      });
       
-      // Check if user is a business owner
-      const { data: businessData } = await supabase
-        .from('service_providers')
-        .select('id')
-        .eq('user_id', data.user.id);
+      // Note: We don't need to handle navigation here anymore as it's handled by the auth state change listener
       
-      if (businessData && businessData.length > 0) {
-        navigate('/business-dashboard');
-      } else {
-        navigate('/');
-      }
     } catch (error: any) {
       toast({
         title: "Login failed",
