@@ -63,7 +63,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         <div className="max-w-5xl mx-auto w-full flex items-center justify-between">
           <Link 
             to="/" 
-            className="flex items-center gap-3 cursor-pointer" 
+            className="flex items-center gap-2" 
             role="button" 
             aria-label="Go to home page" 
             onClick={e => {
