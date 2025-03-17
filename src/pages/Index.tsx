@@ -120,7 +120,7 @@ const Index = () => {
   });
   const showResults = query && query.length > 0;
   return <MainLayout>
-      <section className="flex flex-col items-center justify-center md:py-14 py-0">
+      <section className="flex flex-col items-center justify-center md:py-14 py-0 my-0">
         {!showResults && <div className="text-center mb-12 animate-fade-in">
             <AnimatedLogo size="lg" className="mx-auto mb-6" />
             <h1 className="text-3xl sm:text-4xl font-medium tracking-tight mb-3">Hopaba</h1>
