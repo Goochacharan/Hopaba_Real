@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useToast } from '@/hooks/use-toast';
+import AddBusinessForm from '@/components/AddBusinessForm';
 import { 
   Form, 
   FormControl, 
@@ -12,6 +12,7 @@ import {
   FormLabel, 
   FormMessage 
 } from '@/components/ui/form';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -29,7 +30,9 @@ import {
   Save, 
   Settings, 
   Moon,
-  LogOut
+  LogOut,
+  Plus,
+  Store
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -80,6 +83,7 @@ const Profile = () => {
   const [pushNotifications, setPushNotifications] = useState(true);
   const [locationServices, setLocationServices] = useState(true);
   const [dataSharing, setDataSharing] = useState(false);
+  const [activeTab, setActiveTab] = useState("account");
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -128,215 +132,251 @@ const Profile = () => {
           </Button>
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <UserCog className="h-5 w-5 mr-2" />
-                <h2 className="text-xl font-medium">Personal Information</h2>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="bg-muted/50 p-1">
+            <TabsTrigger value="account" className="flex items-center gap-1.5">
+              <User className="h-4 w-4" />
+              Account
+            </TabsTrigger>
+            <TabsTrigger value="services" className="flex items-center gap-1.5">
+              <Store className="h-4 w-4" />
+              Add Business/Service
+            </TabsTrigger>
+            <TabsTrigger value="preferences" className="flex items-center gap-1.5">
+              <Settings className="h-4 w-4" />
+              Preferences
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="account" className="space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center">
+                  <UserCog className="h-5 w-5 mr-2" />
+                  <h2 className="text-xl font-medium">Personal Information</h2>
+                </div>
               </div>
+              
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Your name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Your email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Your phone number" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Used for verification and important notifications
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <Separator />
+                  
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Password</h3>
+                    
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="currentPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Current Password</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="password" 
+                                placeholder="Current password" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="newPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>New Password</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="password" 
+                                placeholder="New password" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Confirm Password</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="password" 
+                                placeholder="Confirm new password" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                  
+                  <Button type="submit">
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Changes
+                  </Button>
+                </form>
+              </Form>
             </div>
-            
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Your name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Your email" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Your phone number" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Used for verification and important notifications
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          </TabsContent>
+
+          <TabsContent value="services" className="space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center">
+                  <Store className="h-5 w-5 mr-2" />
+                  <h2 className="text-xl font-medium">Add Business or Service</h2>
+                </div>
+              </div>
+              
+              <p className="text-muted-foreground mb-4">
+                Add your business or service to help others find you. All fields marked with * are required.
+              </p>
+              
+              <AddBusinessForm />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="preferences" className="space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                  <Settings className="h-5 w-5 mr-2" />
+                  <h2 className="text-xl font-medium">Preferences</h2>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center">
+                      <Moon className="h-4 w-4 mr-2" />
+                      <h3 className="font-medium">Dark Mode</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Use dark theme throughout the app</p>
+                  </div>
+                  <Switch 
+                    checked={darkMode}
+                    onCheckedChange={setDarkMode}
+                  />
+                </div>
                 
                 <Separator />
                 
-                <div>
-                  <h3 className="text-lg font-medium mb-4">Password</h3>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <h3 className="font-medium">Email Notifications</h3>
+                    <p className="text-sm text-muted-foreground">Receive email updates about your activity</p>
+                  </div>
+                  <Switch 
+                    checked={emailNotifications}
+                    onCheckedChange={setEmailNotifications}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <h3 className="font-medium">Push Notifications</h3>
+                    <p className="text-sm text-muted-foreground">Receive push notifications on your device</p>
+                  </div>
+                  <Switch 
+                    checked={pushNotifications}
+                    onCheckedChange={setPushNotifications}
+                  />
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-4">
+                  <h3 className="font-medium">Privacy Settings</h3>
                   
-                  <div className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="currentPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Current Password</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="password" 
-                              placeholder="Current password" 
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="location-services" 
+                      checked={locationServices}
+                      onCheckedChange={(checked) => setLocationServices(checked as boolean)}
                     />
-                    
-                    <FormField
-                      control={form.control}
-                      name="newPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>New Password</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="password" 
-                              placeholder="New password" 
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Confirm Password</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="password" 
-                              placeholder="Confirm new password" 
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <label
+                      htmlFor="location-services"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Enable location services
+                    </label>
                   </div>
-                </div>
-                
-                <Button type="submit">
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </Button>
-              </form>
-            </Form>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
-                <Settings className="h-5 w-5 mr-2" />
-                <h2 className="text-xl font-medium">Preferences</h2>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <div className="flex items-center">
-                    <Moon className="h-4 w-4 mr-2" />
-                    <h3 className="font-medium">Dark Mode</h3>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="data-sharing" 
+                      checked={dataSharing}
+                      onCheckedChange={(checked) => setDataSharing(checked as boolean)}
+                    />
+                    <label
+                      htmlFor="data-sharing"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Share usage data to improve service
+                    </label>
                   </div>
-                  <p className="text-sm text-muted-foreground">Use dark theme throughout the app</p>
-                </div>
-                <Switch 
-                  checked={darkMode}
-                  onCheckedChange={setDarkMode}
-                />
-              </div>
-              
-              <Separator />
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <h3 className="font-medium">Email Notifications</h3>
-                  <p className="text-sm text-muted-foreground">Receive email updates about your activity</p>
-                </div>
-                <Switch 
-                  checked={emailNotifications}
-                  onCheckedChange={setEmailNotifications}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <h3 className="font-medium">Push Notifications</h3>
-                  <p className="text-sm text-muted-foreground">Receive push notifications on your device</p>
-                </div>
-                <Switch 
-                  checked={pushNotifications}
-                  onCheckedChange={setPushNotifications}
-                />
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-4">
-                <h3 className="font-medium">Privacy Settings</h3>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="location-services" 
-                    checked={locationServices}
-                    onCheckedChange={(checked) => setLocationServices(checked as boolean)}
-                  />
-                  <label
-                    htmlFor="location-services"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Enable location services
-                  </label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="data-sharing" 
-                    checked={dataSharing}
-                    onCheckedChange={(checked) => setDataSharing(checked as boolean)}
-                  />
-                  <label
-                    htmlFor="data-sharing"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Share usage data to improve service
-                  </label>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </section>
     </MainLayout>
   );
