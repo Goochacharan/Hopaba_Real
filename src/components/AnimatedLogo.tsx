@@ -23,7 +23,7 @@ const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
       <div className="absolute inset-0 rounded-full bg-white/80 backdrop-blur-sm" />
       <div className="relative z-10 flex items-center justify-center w-full h-full p-1">
         <img 
-          src="/lovable-uploads/4658f488-35a0-464f-b3a2-0a10df888fdd.png" 
+          src="/lovable-uploads/d0e2cc43-097a-4f2d-9c8c-9ccadce28eb9.png" 
           alt="Hopaba Logo" 
           className="w-full h-full object-contain" 
         />
