@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
-import CategoryFilter from '@/components/CategoryFilter';
 import LocationCard from '@/components/LocationCard';
 import FilterTabs from '@/components/FilterTabs';
 import LocationSelector from '@/components/LocationSelector';
@@ -87,12 +86,6 @@ const SearchResults = () => {
         />
         
         <div className="w-full mb-8">
-          <CategoryFilter 
-            selectedCategory={category} 
-            onSelectCategory={handleCategoryChange} 
-            className="mb-4" 
-          />
-          
           <FilterTabs 
             distance={distance} 
             setDistance={setDistance} 
