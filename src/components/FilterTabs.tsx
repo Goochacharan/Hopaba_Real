@@ -47,15 +47,13 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               variant="outline" 
               size="sm" 
               className={cn(
-                "rounded-full border border-border/60 flex items-center gap-1.5 bg-background",
+                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10",
                 activeFilter === 'rating' && "ring-2 ring-primary/20"
               )}
             >
-              <Star className="w-4 h-4" /> 
-              Rating
-              <ChevronDown className="w-3.5 h-3.5 ml-0.5 opacity-70" />
+              <Star className="w-4 h-4" />
               {minRating[0] > 3 && (
-                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs font-normal">
+                <Badge variant="secondary" className="absolute -top-2 -right-2 h-5 px-1.5 text-xs font-normal">
                   {minRating[0]}+
                 </Badge>
               )}
@@ -92,15 +90,13 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               variant="outline" 
               size="sm" 
               className={cn(
-                "rounded-full border border-border/60 flex items-center gap-1.5 bg-background",
+                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10",
                 activeFilter === 'price' && "ring-2 ring-primary/20"
               )}
             >
-              <IndianRupee className="w-4 h-4" /> 
-              Price
-              <ChevronDown className="w-3.5 h-3.5 ml-0.5 opacity-70" />
+              <IndianRupee className="w-4 h-4" />
               {priceRange < 3 && (
-                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs font-normal">
+                <Badge variant="secondary" className="absolute -top-2 -right-2 h-5 px-1.5 text-xs font-normal">
                   {Array(priceRange).fill('₹').join('')}
                 </Badge>
               )}
@@ -136,17 +132,15 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               variant="outline" 
               size="sm" 
               className={cn(
-                "rounded-full border border-border/60 flex items-center gap-1.5 bg-background",
+                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10",
                 activeFilter === 'hours' && "ring-2 ring-primary/20",
                 openNowOnly && "border-primary/30 bg-primary/5"
               )}
             >
-              <Clock className="w-4 h-4" /> 
-              Hours
-              <ChevronDown className="w-3.5 h-3.5 ml-0.5 opacity-70" />
+              <Clock className="w-4 h-4" />
               {openNowOnly && (
-                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs font-normal">
-                  Open Now
+                <Badge variant="secondary" className="absolute -top-2 -right-2 h-5 px-1.5 text-xs font-normal">
+                  •
                 </Badge>
               )}
             </Button>
@@ -175,7 +169,7 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               variant="outline" 
               size="sm" 
               className={cn(
-                "rounded-full border border-border/60 flex items-center gap-1.5 bg-background",
+                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10",
                 activeFilter === 'distance' && "ring-2 ring-primary/20"
               )}
             >
@@ -194,11 +188,9 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
                 <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                 <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
               </svg>
-              Distance
-              <ChevronDown className="w-3.5 h-3.5 ml-0.5 opacity-70" />
               {distance[0] !== 5 && (
-                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs font-normal">
-                  {distance[0]} mi
+                <Badge variant="secondary" className="absolute -top-2 -right-2 h-5 px-1.5 text-xs font-normal">
+                  {distance[0]}
                 </Badge>
               )}
             </Button>
@@ -227,10 +219,9 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
         <Button 
           variant="outline" 
           size="sm" 
-          className="rounded-full border border-border/60 flex items-center gap-1.5 bg-background min-w-20"
+          className="rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10"
         >
-          <FilterIcon className="w-4 h-4" /> 
-          All filters
+          <FilterIcon className="w-4 h-4" />
         </Button>
       </div>
     </ScrollArea>
