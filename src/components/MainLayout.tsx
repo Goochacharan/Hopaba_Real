@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
@@ -99,22 +98,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     console.log("Navigating to home page from: ", location.pathname);
   };
 
-  const handleBusinessNav = () => {
-    if (user) {
-      if (isBusinessOwner) {
-        navigate('/business-dashboard');
-      } else {
-        navigate('/business-signup');
-      }
-    } else {
-      toast({
-        title: "Login Required",
-        description: "Please login to access business features",
-      });
-      navigate('/login');
-    }
-  };
-
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center">
       <header className="w-full sticky top-0 z-50 glass border-b border-border/50 px-6 py-4">
@@ -136,16 +119,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </Link>
           
           <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleBusinessNav}
-              className="flex items-center"
-            >
-              <Briefcase className="h-4 w-4 mr-2" />
-              {isBusinessOwner ? "Business Dashboard" : "For Business Owners"}
-            </Button>
-            
             {!user && (
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => navigate('/login')}>

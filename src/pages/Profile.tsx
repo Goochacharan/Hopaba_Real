@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useToast } from '@/hooks/use-toast';
@@ -29,7 +28,8 @@ import {
   Save, 
   Settings, 
   Moon,
-  LogOut
+  LogOut,
+  Briefcase
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -80,6 +80,31 @@ const Profile = () => {
   const [pushNotifications, setPushNotifications] = useState(true);
   const [locationServices, setLocationServices] = useState(true);
   const [dataSharing, setDataSharing] = useState(false);
+  const [isBusinessOwner, setIsBusinessOwner] = useState(false);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email || undefined
+        });
+        
+        // Check if user is a business owner
+        const { data: businessData } = await supabase
+          .from('service_providers')
+          .select('id')
+          .eq('user_id', session.user.id);
+        
+        setIsBusinessOwner(businessData && businessData.length > 0);
+      }
+    };
+    
+    fetchUserData();
+  }, []);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -112,6 +137,14 @@ const Profile = () => {
     }
   };
 
+  const handleBusinessAction = () => {
+    if (isBusinessOwner) {
+      navigate('/business-dashboard');
+    } else {
+      navigate('/business-signup');
+    }
+  };
+
   return (
     <MainLayout>
       <section className="py-8">
@@ -122,10 +155,16 @@ const Profile = () => {
               Manage your account settings and preferences
             </p>
           </div>
-          <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
-            <LogOut className="h-4 w-4" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleBusinessAction} className="flex items-center gap-2">
+              <Briefcase className="h-4 w-4" />
+              {isBusinessOwner ? "Business Dashboard" : "Register as Business Owner"}
+            </Button>
+            <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-6">
