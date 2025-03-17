@@ -204,15 +204,19 @@ export const searchRecommendations = (
     }
   }
   
+  // Handle "near me" queries
+  const isNearMeQuery = lowercaseQuery.includes('near me');
+  
   // For debugging
   console.log('Search query:', query);
   console.log('Normalized query:', normalizedQuery);
   console.log('Has location term:', hasLocationTerm, 'Location:', matchedLocation);
+  console.log('Is near me query:', isNearMeQuery);
+  
+  // Special handling for specific query types
   
   // If this is a unisex salon/saloon query
-  if ((normalizedQuery.includes('unisex') && normalizedQuery.includes('salon')) || 
-      (normalizedQuery.includes('salon')) ||
-      (normalizedQuery.includes('saloon'))) {
+  if (normalizedQuery.includes('salon') || normalizedQuery.includes('saloon')) {
     
     let filteredResults = mockRecommendations.filter(item => 
       (item.category === 'Salons' || category === 'all' || item.category.toLowerCase() === category.toLowerCase()) && 
@@ -239,8 +243,49 @@ export const searchRecommendations = (
     return filteredResults.length ? filteredResults : mockRecommendations.filter(item => item.category === 'Salons');
   }
 
+  // Handle cafe queries
+  if (normalizedQuery.includes('cafe') || normalizedQuery.includes('coffee')) {
+    const cafeResults = mockRecommendations.filter(item => 
+      item.category === 'Cafes' || item.name.toLowerCase().includes('coffee') || 
+      item.description.toLowerCase().includes('coffee') || item.description.toLowerCase().includes('cafe')
+    );
+    
+    return cafeResults.length ? cafeResults : mockRecommendations.filter(item => item.category === 'Cafes');
+  }
+
+  // Handle plumber queries
+  if (normalizedQuery.includes('plumber') || normalizedQuery.includes('plumbing')) {
+    // Since we don't have real plumber data, create some based on salons
+    const baseItems = mockRecommendations.filter(item => item.category === 'Salons').slice(0, 3);
+    return baseItems.map(item => ({
+      ...item,
+      id: `plumber-${item.id}`,
+      name: item.name.replace('Salon', 'Plumbing').replace('Cuts', 'Pipes').replace('Hair', 'Pipe'),
+      category: 'Services',
+      tags: ['Plumber', 'Emergency Service', '24/7'],
+      description: `Professional plumbing services including repairs, installations, and emergency fixes.${hasLocationTerm ? ` Available in ${matchedLocation}.` : ''}`,
+      address: hasLocationTerm ? item.address.replace(/San Francisco|Bangalore/, `${matchedLocation.charAt(0).toUpperCase() + matchedLocation.slice(1)}, Bangalore`) : item.address
+    }));
+  }
+
+  // Handle biryani queries
+  if (normalizedQuery.includes('biryani')) {
+    // Create restaurant listings focused on biryani
+    const baseItems = mockRecommendations.filter(item => item.category === 'Restaurants' || item.category === 'Cafes').slice(0, 4);
+    return baseItems.map(item => ({
+      ...item,
+      id: `biryani-${item.id}`,
+      name: `${['Royal', 'Paradise', 'Spicy', 'Authentic'][parseInt(item.id) % 4]} Biryani House`,
+      category: 'Restaurants',
+      tags: ['Biryani', 'Indian', 'Takeout'],
+      description: `Famous for authentic biryani varieties including chicken, mutton, and vegetable options.${hasLocationTerm ? ` Located in ${matchedLocation}.` : ''}`,
+      address: hasLocationTerm ? item.address.replace(/San Francisco|Bangalore/, `${matchedLocation.charAt(0).toUpperCase() + matchedLocation.slice(1)}, Bangalore`) : item.address
+    }));
+  }
+
   // Handle flute teacher searches
-  if (normalizedQuery.includes('flute') || normalizedQuery.includes('music') || normalizedQuery.includes('teacher')) {
+  if (normalizedQuery.includes('flute') || 
+      (normalizedQuery.includes('music') && normalizedQuery.includes('teacher'))) {
     const filteredResults = mockRecommendations.filter(item => 
       (item.category === 'Music' || category === 'all') &&
       (item.tags.some(tag => tag.toLowerCase() === 'flute') || 
@@ -267,6 +312,7 @@ export const searchRecommendations = (
                        : category === 'restaurants' ? 'Restaurants'
                        : category === 'health' ? 'Health'
                        : category === 'music' ? 'Music'
+                       : category === 'services' ? 'Services'
                        : category;
     
     filtered = filtered.filter(item => 
@@ -289,6 +335,9 @@ export const searchRecommendations = (
       // Check address match for location queries
       if (hasLocationTerm && item.address.toLowerCase().includes(matchedLocation)) score += 10;
       
+      // "Near me" is a special case - give points to all items since we're simulating location
+      if (isNearMeQuery) score += 3;
+      
       // Check tag matches
       const matchingTags = item.tags.filter(tag => 
         normalizedQuery.includes(tag.toLowerCase()) || tag.toLowerCase().includes(normalizedQuery)
@@ -302,7 +351,7 @@ export const searchRecommendations = (
       // results based on partial matches and category relevance
       const queryWords = normalizedQuery.split(' ');
       for (const word of queryWords) {
-        if (word.length > 3) { // Only consider substantive words
+        if (word.length > 2) { // Only consider substantive words, reduced from 3 to 2
           if (item.name.toLowerCase().includes(word)) score += 2;
           if (item.description.toLowerCase().includes(word)) score += 1;
           if (item.tags.some(tag => tag.toLowerCase().includes(word))) score += 1;
@@ -318,6 +367,29 @@ export const searchRecommendations = (
     
     // Extract just the items
     filtered = filteredScored.map(({ item }) => item);
+  }
+  
+  // If we got no results but this is a "near me" query, make sure we return something
+  if (filtered.length === 0 && isNearMeQuery) {
+    // Try to figure out what category they're looking for
+    let inferredCategory = '';
+    
+    if (normalizedQuery.includes('cafe') || normalizedQuery.includes('coffee')) {
+      inferredCategory = 'Cafes';
+    } else if (normalizedQuery.includes('salon') || normalizedQuery.includes('haircut')) {
+      inferredCategory = 'Salons';
+    } else if (normalizedQuery.includes('restaurant') || normalizedQuery.includes('food') || normalizedQuery.includes('biryani')) {
+      inferredCategory = 'Restaurants';
+    }
+    
+    if (inferredCategory) {
+      return mockRecommendations
+        .filter(item => item.category === inferredCategory)
+        .slice(0, 3);
+    }
+    
+    // If we couldn't infer a category, return a mix of results
+    return mockRecommendations.slice(0, 3);
   }
   
   // If location term was included but no results matched, return a subset as if they were in that location

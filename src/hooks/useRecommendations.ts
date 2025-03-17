@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Recommendation, mockRecommendations, searchRecommendations } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -26,10 +25,11 @@ const keywordMap = {
   'jayanagar': ['jayanagar', 'jaya nagar', 'jaynagar'],
   
   // Categories
-  'restaurant': ['restaurant', 'dining', 'place to eat', 'eatery', 'food place', 'dinner'],
+  'restaurant': ['restaurant', 'dining', 'place to eat', 'eatery', 'food place', 'dinner', 'biryani'],
   'cafe': ['cafe', 'coffee shop', 'coffee place', 'coffee house', 'bakery'],
   'salon': ['salon', 'saloon', 'haircut', 'hair stylist', 'spa', 'beauty parlor', 'barber'],
   'school': ['school', 'academy', 'class', 'teacher', 'tutor', 'instructor', 'lessons'],
+  'plumber': ['plumber', 'plumbing', 'pipe repair', 'water leak', 'tap repair'],
   
   // Attributes
   'good': ['good', 'best', 'top', 'great', 'excellent', 'amazing', 'fantastic', 'quality'],
@@ -41,6 +41,17 @@ const keywordMap = {
   'hidden gem': ['hidden gem', 'underrated', 'secret', 'unknown', 'not popular', 'undiscovered'],
   'popular': ['popular', 'crowded', 'well known', 'famous', 'trending', 'busy']
 };
+
+// Common search patterns to help categorize queries
+const searchPatterns = [
+  { pattern: /cafe|coffee/i, category: 'cafes' },
+  { pattern: /restaurant|food|eat|dining|biryani/i, category: 'restaurants' },
+  { pattern: /salon|haircut|barber|beauty|spa/i, category: 'salons' },
+  { pattern: /plumber|plumbing|pipe|leak|tap/i, category: 'services' },
+  { pattern: /doctor|clinic|hospital|health/i, category: 'health' },
+  { pattern: /shop|store|mall|buy/i, category: 'shopping' },
+  { pattern: /school|college|class|teacher|tutor/i, category: 'education' },
+];
 
 const useRecommendations = ({ 
   initialQuery = '', 
@@ -58,34 +69,43 @@ const useRecommendations = ({
     let processedQuery = lowercaseQuery;
     let inferredCategory: CategoryType = 'all';
     
-    // First, try to infer category from query
-    if (lowercaseQuery.includes('restaurant') || lowercaseQuery.includes('food') || 
-        lowercaseQuery.includes('eat') || lowercaseQuery.includes('dining')) {
-      inferredCategory = 'restaurants';
-    } else if (lowercaseQuery.includes('cafe') || lowercaseQuery.includes('coffee')) {
-      inferredCategory = 'cafes';
-    } else if (lowercaseQuery.includes('salon') || lowercaseQuery.includes('haircut') || 
-               lowercaseQuery.includes('beauty') || lowercaseQuery.includes('spa')) {
-      inferredCategory = 'salons';
-    } else if (lowercaseQuery.includes('doctor') || lowercaseQuery.includes('clinic') || 
-               lowercaseQuery.includes('hospital') || lowercaseQuery.includes('health')) {
-      inferredCategory = 'health';
-    } else if (lowercaseQuery.includes('shop') || lowercaseQuery.includes('store') || 
-               lowercaseQuery.includes('mall')) {
-      inferredCategory = 'shopping';
-    } else if (lowercaseQuery.includes('school') || lowercaseQuery.includes('college') || 
-               lowercaseQuery.includes('university') || lowercaseQuery.includes('class') ||
-               lowercaseQuery.includes('teacher') || lowercaseQuery.includes('tutor') ||
-               lowercaseQuery.includes('flute') || lowercaseQuery.includes('music')) {
-      inferredCategory = 'education';
-    } else if (lowercaseQuery.includes('plumber') || lowercaseQuery.includes('electrician') || 
-               lowercaseQuery.includes('repair') || lowercaseQuery.includes('service')) {
-      inferredCategory = 'services';
+    // First, try to infer category from query using patterns
+    for (const { pattern, category } of searchPatterns) {
+      if (pattern.test(lowercaseQuery)) {
+        inferredCategory = category as CategoryType;
+        break;
+      }
+    }
+
+    // If no pattern matched but query contains keywords, try to infer from them
+    if (inferredCategory === 'all') {
+      if (lowercaseQuery.includes('cafe') || lowercaseQuery.includes('coffee')) {
+        inferredCategory = 'cafes';
+      } else if (lowercaseQuery.includes('salon') || lowercaseQuery.includes('haircut')) {
+        inferredCategory = 'salons';
+      } else if (lowercaseQuery.includes('plumber')) {
+        inferredCategory = 'services';
+      } else if (lowercaseQuery.includes('biryani')) {
+        inferredCategory = 'restaurants';
+      }
     }
     
     // Set the category if we inferred one
     if (inferredCategory !== 'all') {
       setCategory(inferredCategory);
+    }
+    
+    // Add "near me" if user is just searching for a type of place
+    if (
+      !lowercaseQuery.includes('near') && 
+      !lowercaseQuery.includes('in ') &&
+      (lowercaseQuery.includes('cafe') || 
+       lowercaseQuery.includes('restaurant') || 
+       lowercaseQuery.includes('salon') || 
+       lowercaseQuery.includes('plumber') ||
+       lowercaseQuery.includes('biryani'))
+    ) {
+      processedQuery = `${processedQuery} near me`;
     }
     
     // Expand query with synonyms
