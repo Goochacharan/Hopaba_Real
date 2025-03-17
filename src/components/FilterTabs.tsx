@@ -47,13 +47,13 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               variant="outline" 
               size="sm" 
               className={cn(
-                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10",
+                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
                 activeFilter === 'rating' && "ring-2 ring-primary/20"
               )}
             >
               <Star className="w-4 h-4" />
               {minRating[0] > 3 && (
-                <Badge variant="secondary" className="absolute -top-2 -right-2 h-5 px-1.5 text-xs font-normal">
+                <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-primary text-white">
                   {minRating[0]}+
                 </Badge>
               )}
@@ -90,13 +90,13 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               variant="outline" 
               size="sm" 
               className={cn(
-                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10",
+                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
                 activeFilter === 'price' && "ring-2 ring-primary/20"
               )}
             >
               <IndianRupee className="w-4 h-4" />
               {priceRange < 3 && (
-                <Badge variant="secondary" className="absolute -top-2 -right-2 h-5 px-1.5 text-xs font-normal">
+                <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-primary text-white">
                   {Array(priceRange).fill('₹').join('')}
                 </Badge>
               )}
@@ -132,14 +132,14 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               variant="outline" 
               size="sm" 
               className={cn(
-                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10",
+                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
                 activeFilter === 'hours' && "ring-2 ring-primary/20",
                 openNowOnly && "border-primary/30 bg-primary/5"
               )}
             >
               <Clock className="w-4 h-4" />
               {openNowOnly && (
-                <Badge variant="secondary" className="absolute -top-2 -right-2 h-5 px-1.5 text-xs font-normal">
+                <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-primary text-white">
                   •
                 </Badge>
               )}
@@ -169,7 +169,7 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               variant="outline" 
               size="sm" 
               className={cn(
-                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10",
+                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
                 activeFilter === 'distance' && "ring-2 ring-primary/20"
               )}
             >
@@ -189,7 +189,7 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
                 <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
               </svg>
               {distance[0] !== 5 && (
-                <Badge variant="secondary" className="absolute -top-2 -right-2 h-5 px-1.5 text-xs font-normal">
+                <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-primary text-white">
                   {distance[0]}
                 </Badge>
               )}
@@ -201,7 +201,7 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Within</span>
-                  <span className="text-sm font-medium">{distance[0]} miles</span>
+                  <span className="text-sm font-medium">{distance[0]} km</span>
                 </div>
                 <Slider
                   id="distance"

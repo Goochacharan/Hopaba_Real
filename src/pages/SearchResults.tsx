@@ -34,7 +34,8 @@ const SearchResults = () => {
     maxDistance: distance[0],
     minRating: minRating[0],
     priceLevel: priceRange,
-    openNowOnly
+    openNowOnly,
+    distanceUnit: 'km' // Set the distance unit to kilometers
   });
 
   // Calculate rankings based on rating and generate consistent review counts

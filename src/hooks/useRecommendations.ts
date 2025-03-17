@@ -12,11 +12,10 @@ interface FilterOptions {
   minRating: number;
   priceLevel: number;
   openNowOnly: boolean;
+  distanceUnit?: 'km' | 'mi';
 }
 
-// Keywords for better natural language understanding
 const keywordMap = {
-  // Locations
   'near me': ['nearby', 'close', 'close by', 'around me', 'in my area', 'local'],
   'indiranagar': ['indiranagar', 'indira nagar', 'indranagar'],
   'koramangala': ['koramangala', 'kormangala'],
@@ -24,14 +23,12 @@ const keywordMap = {
   'nagarbhavi': ['nagarbhavi', 'nagar bhavi', 'nagarbavi'],
   'jayanagar': ['jayanagar', 'jaya nagar', 'jaynagar'],
   
-  // Categories
   'restaurant': ['restaurant', 'dining', 'place to eat', 'eatery', 'food place', 'dinner', 'biryani'],
   'cafe': ['cafe', 'coffee shop', 'coffee place', 'coffee house', 'bakery'],
   'salon': ['salon', 'saloon', 'haircut', 'hair stylist', 'spa', 'beauty parlor', 'barber'],
   'school': ['school', 'academy', 'class', 'teacher', 'tutor', 'instructor', 'lessons'],
   'plumber': ['plumber', 'plumbing', 'pipe repair', 'water leak', 'tap repair'],
   
-  // Attributes
   'good': ['good', 'best', 'top', 'great', 'excellent', 'amazing', 'fantastic', 'quality'],
   'cheap': ['cheap', 'affordable', 'budget', 'inexpensive', 'reasonable', 'economical'],
   'expensive': ['expensive', 'high-end', 'luxury', 'premium', 'upscale'],
@@ -42,7 +39,6 @@ const keywordMap = {
   'popular': ['popular', 'crowded', 'well known', 'famous', 'trending', 'busy']
 };
 
-// Common search patterns to help categorize queries
 const searchPatterns = [
   { pattern: /cafe|coffee/i, category: 'cafes' },
   { pattern: /restaurant|food|eat|dining|biryani/i, category: 'restaurants' },
@@ -63,13 +59,11 @@ const useRecommendations = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Process natural language query to extract intent
   const processNaturalLanguageQuery = (rawQuery: string) => {
     const lowercaseQuery = rawQuery.toLowerCase();
     let processedQuery = lowercaseQuery;
     let inferredCategory: CategoryType = 'all';
     
-    // First, try to infer category from query using patterns
     for (const { pattern, category } of searchPatterns) {
       if (pattern.test(lowercaseQuery)) {
         inferredCategory = category as CategoryType;
@@ -77,7 +71,6 @@ const useRecommendations = ({
       }
     }
 
-    // If no pattern matched but query contains keywords, try to infer from them
     if (inferredCategory === 'all') {
       if (lowercaseQuery.includes('cafe') || lowercaseQuery.includes('coffee')) {
         inferredCategory = 'cafes';
@@ -90,12 +83,10 @@ const useRecommendations = ({
       }
     }
     
-    // Set the category if we inferred one
     if (inferredCategory !== 'all') {
       setCategory(inferredCategory);
     }
     
-    // Add "near me" if user is just searching for a type of place
     if (
       !lowercaseQuery.includes('near') && 
       !lowercaseQuery.includes('in ') &&
@@ -108,11 +99,9 @@ const useRecommendations = ({
       processedQuery = `${processedQuery} near me`;
     }
     
-    // Expand query with synonyms
     Object.entries(keywordMap).forEach(([key, synonyms]) => {
       synonyms.forEach(synonym => {
         if (lowercaseQuery.includes(synonym)) {
-          // Replace all occurrences of the synonym with the key term
           processedQuery = processedQuery.replace(new RegExp(synonym, 'g'), key);
         }
       });
@@ -131,25 +120,19 @@ const useRecommendations = ({
       setError(null);
       
       try {
-        // Process the natural language query
         const processedQuery = processNaturalLanguageQuery(query);
         
-        // Simulate network request
         await new Promise(resolve => setTimeout(resolve, 800));
         
         const results = searchRecommendations(processedQuery, category);
         
-        // Add multiple images to each result if not already present
         const resultsWithImages = results.map(result => {
           if (result.images && result.images.length > 0) {
             return result;
           }
           
-          // Generate array of images based on the main image
-          // This creates variations based on the primary image URL
-          // In a real app, these would come from the backend
           const mainImage = result.image;
-          const baseUrl = mainImage.split('?')[0]; // Remove any query params
+          const baseUrl = mainImage.split('?')[0];
           const images = [
             mainImage,
             `${baseUrl}?v=2`,
@@ -175,7 +158,6 @@ const useRecommendations = ({
     if (query) {
       fetchRecommendations();
     } else {
-      // If no query, just load some default recommendations
       const defaultResults = mockRecommendations.slice(0, 6);
       setRecommendations(defaultResults);
       setLoading(false);
@@ -194,26 +176,27 @@ const useRecommendations = ({
     recs: Recommendation[],
     filterOptions: FilterOptions
   ): Recommendation[] => {
+    const { distanceUnit = 'mi' } = filterOptions;
+    
     return recs.filter(rec => {
-      // Filter by rating
       if (rec.rating < filterOptions.minRating) {
         return false;
       }
 
-      // Filter by open now
       if (filterOptions.openNowOnly && !rec.openNow) {
         return false;
       }
 
-      // Filter by distance (if available)
       if (rec.distance) {
         const distanceValue = parseFloat(rec.distance.split(' ')[0]);
-        if (!isNaN(distanceValue) && distanceValue > filterOptions.maxDistance) {
-          return false;
+        if (!isNaN(distanceValue)) {
+          const adjustedDistance = distanceUnit === 'km' ? distanceValue : distanceValue * 1.60934;
+          if (adjustedDistance > filterOptions.maxDistance) {
+            return false;
+          }
         }
       }
 
-      // Filter by price level
       if (rec.priceLevel) {
         const priceCount = rec.priceLevel.length;
         if (priceCount > filterOptions.priceLevel) {
