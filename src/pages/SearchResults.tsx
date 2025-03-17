@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
-import SearchBar from '@/components/SearchBar';
 import CategoryFilter from '@/components/CategoryFilter';
 import LocationCard from '@/components/LocationCard';
 import FilterTabs from '@/components/FilterTabs';
+import LocationSelector from '@/components/LocationSelector';
 import useRecommendations from '@/hooks/useRecommendations';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
@@ -17,6 +17,7 @@ const SearchResults = () => {
   const [minRating, setMinRating] = useState<number[]>([4]);
   const [priceRange, setPriceRange] = useState<number>(2);
   const [openNowOnly, setOpenNowOnly] = useState<boolean>(false);
+  const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
   
   const {
     recommendations,
@@ -71,9 +72,20 @@ const SearchResults = () => {
     }
   }, [searchQuery, navigate]);
 
+  const handleLocationChange = (location: string) => {
+    console.log(`Location changed to: ${location}`);
+    setSelectedLocation(location);
+    // In a real app, you might want to refetch recommendations based on the new location
+  };
+
   return (
     <MainLayout>
       <div className="w-full animate-fade-in">
+        <LocationSelector 
+          selectedLocation={selectedLocation}
+          onLocationChange={handleLocationChange}
+        />
+        
         <div className="w-full mb-8">
           <CategoryFilter 
             selectedCategory={category} 
