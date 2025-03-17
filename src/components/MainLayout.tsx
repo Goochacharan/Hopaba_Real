@@ -14,6 +14,12 @@ interface MainLayoutProps {
   className?: string;
 }
 
+// Define a simplified user type to prevent deep instantiation
+interface UserInfo {
+  id: string;
+  email?: string;
+}
+
 const MainLayout: React.FC<MainLayoutProps> = ({
   children,
   className
@@ -21,7 +27,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [isBusinessOwner, setIsBusinessOwner] = useState(false);
 
@@ -31,9 +37,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       const {
         data
       } = await supabase.auth.getSession();
-      setUser(data.session?.user || null);
       
       if (data.session?.user) {
+        setUser({
+          id: data.session.user.id,
+          email: data.session.user.email
+        });
+        
         // Check if user has a business
         const { data: businessData } = await supabase
           .from('service_providers')
@@ -41,16 +51,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           .eq('user_id', data.session.user.id);
         
         setIsBusinessOwner(businessData && businessData.length > 0);
+      } else {
+        setUser(null);
       }
       
       setLoading(false);
     };
     getCurrentUser();
+    
     const {
       data: authListener
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user || null);
       if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email
+        });
+        
         // Check if user has a business
         const { data: businessData } = await supabase
           .from('service_providers')
@@ -59,9 +76,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         
         setIsBusinessOwner(businessData && businessData.length > 0);
       } else {
+        setUser(null);
         setIsBusinessOwner(false);
       }
     });
+    
     return () => {
       authListener?.subscription.unsubscribe();
     };
