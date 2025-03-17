@@ -15,7 +15,7 @@ interface SearchBarProps {
 const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   className,
-  placeholder = "Try 'plumbers near me' or 'good restaurants in Indiranagar'",
+  placeholder = "What are you looking for today?",
   initialValue = ''
 }) => {
   const [query, setQuery] = useState(initialValue);
@@ -162,7 +162,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           
           <button 
             type="submit"
-            className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full"
+            className="p-2 text-primary hover:text-primary-foreground hover:bg-primary rounded-full transition-colors"
             aria-label="Search"
             onClick={handleSearchButtonClick}
           >

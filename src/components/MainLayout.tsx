@@ -98,11 +98,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         </div>
       </header>
       
-      <main className={cn("w-full flex-1 max-w-5xl mx-auto px-4 md:px-6 py-8 mb-16", className)}>
+      <main className={cn("w-full flex-1 max-w-5xl mx-auto px-4 md:px-6 py-8 mb-24", className)}>
         {children}
       </main>
       
-      <div className="fixed bottom-12 left-0 right-0 px-4 z-50">
+      <div className="fixed bottom-16 left-0 right-0 px-4 z-50">
         <div className="max-w-5xl mx-auto">
           <SearchBar onSearch={onSearch} className="mb-0" placeholder="What are you looking for today?" initialValue="" />
         </div>
