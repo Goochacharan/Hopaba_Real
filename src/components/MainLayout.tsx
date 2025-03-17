@@ -112,28 +112,28 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         <div className="max-w-5xl mx-auto flex justify-around">
           <NavButton 
             to="/" 
-            icon={<Home className="h-5 w-5" />} 
+            icon={<Home className="h-6 w-6" />} 
             label="Home" 
             isActive={location.pathname === '/'} 
           />
           
           <NavButton 
             to="/my-list" 
-            icon={<ListChecks className="h-5 w-5" />} 
+            icon={<ListChecks className="h-6 w-6" />} 
             label="My List" 
             isActive={location.pathname === '/my-list'} 
           />
           
           <NavButton 
             to="/events" 
-            icon={<Calendar className="h-5 w-5" />} 
+            icon={<Calendar className="h-6 w-6" />} 
             label="Events" 
             isActive={location.pathname === '/events'} 
           />
           
           <NavButton 
             to={user ? "/profile" : "/login"} 
-            icon={<User className="h-5 w-5" />} 
+            icon={<User className="h-6 w-6" />} 
             label={user ? "Profile" : "Login"} 
             isActive={location.pathname === '/profile' || location.pathname === '/login'} 
           />
@@ -166,7 +166,7 @@ const NavButton: React.FC<NavButtonProps> = ({
       aria-label={label}
     >
       {icon}
-      <span className="text-xs">{label}</span>
+      <span className="text-xs font-medium">{label}</span>
     </Link>
   );
 };
