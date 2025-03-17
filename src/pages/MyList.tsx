@@ -7,12 +7,22 @@ import { useWishlist } from '@/contexts/WishlistContext';
 import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from '@/components/ui/pagination';
 
 const MyList = () => {
   const { wishlist } = useWishlist();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   useEffect(() => {
     const checkUser = async () => {
@@ -43,6 +53,12 @@ const MyList = () => {
     };
   }, [navigate]);
 
+  // Calculate pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = wishlist.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(wishlist.length / itemsPerPage);
+
   if (loading) {
     return (
       <MainLayout>
@@ -59,11 +75,58 @@ const MyList = () => {
         <h1 className="text-3xl font-medium mb-6">My Wishlist</h1>
         
         {wishlist.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {wishlist.map((item) => (
-              <LocationCard key={item.id} recommendation={item} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {currentItems.map((item) => (
+                <LocationCard key={item.id} recommendation={item} />
+              ))}
+            </div>
+            
+            {totalPages > 1 && (
+              <Pagination className="mt-6">
+                <PaginationContent>
+                  {currentPage > 1 && (
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(prev => Math.max(prev - 1, 1));
+                        }} 
+                      />
+                    </PaginationItem>
+                  )}
+                  
+                  {Array.from({ length: totalPages }).map((_, i) => (
+                    <PaginationItem key={i}>
+                      <PaginationLink 
+                        href="#" 
+                        isActive={currentPage === i + 1}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(i + 1);
+                        }}
+                      >
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  
+                  {currentPage < totalPages && (
+                    <PaginationItem>
+                      <PaginationNext 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(prev => Math.min(prev + 1, totalPages));
+                        }} 
+                      />
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
+            )}
+          </>
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-border p-8 text-center">
             <Heart className="mx-auto h-12 w-12 text-muted-foreground mb-4 stroke-[1.5]" />
