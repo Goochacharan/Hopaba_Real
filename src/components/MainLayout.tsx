@@ -106,9 +106,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         </div>
       </div>
       
-      <footer className="w-full py-6 px-6 border-t border-border/50 mb-36">
-        
-      </footer>
+      
     </div>;
 };
 interface NavButtonProps {
