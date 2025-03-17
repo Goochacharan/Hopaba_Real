@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Star, CircleRupee } from 'lucide-react';
+import { Star, IndianRupee } from 'lucide-react';
 
 interface FiltersProps {
   distance: number[];

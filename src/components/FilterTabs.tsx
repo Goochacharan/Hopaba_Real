@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Star, Clock, CircleRupee, FilterIcon, ChevronDown } from 'lucide-react';
+import { Star, Clock, IndianRupee, FilterIcon, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -96,7 +96,7 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
                 activeFilter === 'price' && "ring-2 ring-primary/20"
               )}
             >
-              <CircleRupee className="w-4 h-4" /> 
+              <IndianRupee className="w-4 h-4" /> 
               Price
               <ChevronDown className="w-3.5 h-3.5 ml-0.5 opacity-70" />
               {priceRange < 3 && (

@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
   MapPin, Star, Clock, Phone, Heart, 
-  Navigation2, MessageCircle, Share2, LogIn, CircleRupee 
+  Navigation2, MessageCircle, Share2, LogIn, IndianRupee 
 } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
