@@ -28,13 +28,14 @@ serve(async (req) => {
     const url = 'https://api.deepseek.com/v1/chat/completions';
 
     // Prepare context for in-context learning
-    const systemPrompt = `You are an AI assistant that enhances search queries for a local business discovery platform.
+    const systemPrompt = `You are an AI assistant that enhances search queries for a local business and events discovery platform.
 Your task is to improve the search query by:
-1. Identifying intent (looking for restaurants, services, specific locations)
+1. Identifying intent (looking for restaurants, services, events, specific locations)
 2. Expanding on abbreviated or incomplete queries
 3. Normalizing location references
 4. Adding relevant context that might be missing
-5. Return ONLY the enhanced search query. Do not add any explanation or additional text.`;
+5. Consider both business locations and local events in your enhancements
+6. Return ONLY the enhanced search query. Do not add any explanation or additional text.`;
 
     // Create messages with context if provided
     const messages = [

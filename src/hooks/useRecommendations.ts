@@ -15,6 +15,60 @@ interface FilterOptions {
   distanceUnit?: 'km' | 'mi';
 }
 
+export interface Event {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  description: string;
+  image: string;
+  attendees: number;
+}
+
+const sampleEvents: Event[] = [
+  {
+    id: '1',
+    title: 'Summer Food Festival',
+    date: 'July 15, 2023',
+    time: '11:00 AM - 8:00 PM',
+    location: 'Central Park, San Francisco',
+    description: 'A culinary celebration featuring over 30 local restaurants, live cooking demonstrations, and music performances.',
+    image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
+    attendees: 215
+  },
+  {
+    id: '2',
+    title: 'Weekend Art Exhibition',
+    date: 'July 22-23, 2023',
+    time: '10:00 AM - 6:00 PM',
+    location: 'Modern Art Gallery, Indiranagar',
+    description: 'Showcasing works from emerging local artists with interactive sessions and workshops throughout the weekend.',
+    image: 'https://images.unsplash.com/photo-1591115765373-5207764f72e4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
+    attendees: 98
+  },
+  {
+    id: '3',
+    title: 'Wellness & Yoga Retreat',
+    date: 'August 5, 2023',
+    time: '7:00 AM - 4:00 PM',
+    location: 'Sunset Beach, Koramangala',
+    description: 'A day-long retreat with yoga sessions, meditation workshops, and healthy living seminars led by certified instructors.',
+    image: 'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    attendees: 42
+  },
+  {
+    id: '4',
+    title: 'Tech Startup Networking',
+    date: 'August 12, 2023',
+    time: '6:00 PM - 9:00 PM',
+    location: 'Innovation Hub, Whitefield',
+    description: 'Connect with founders, investors, and tech enthusiasts in a casual setting with keynote speakers and pitch opportunities.',
+    image: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1728&q=80',
+    attendees: 127
+  }
+];
+
 const keywordMap = {
   'near me': ['nearby', 'close', 'close by', 'around me', 'in my area', 'local'],
   'indiranagar': ['indiranagar', 'indira nagar', 'indranagar'],
@@ -56,6 +110,7 @@ const useRecommendations = ({
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState<CategoryType>(initialCategory);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -114,6 +169,17 @@ const useRecommendations = ({
     return processedQuery;
   };
 
+  const searchEvents = (searchQuery: string): Event[] => {
+    const lowercaseQuery = searchQuery.toLowerCase();
+    return sampleEvents.filter(event => {
+      return (
+        event.title.toLowerCase().includes(lowercaseQuery) ||
+        event.description.toLowerCase().includes(lowercaseQuery) ||
+        event.location.toLowerCase().includes(lowercaseQuery)
+      );
+    });
+  };
+
   useEffect(() => {
     const fetchRecommendations = async () => {
       setLoading(true);
@@ -124,9 +190,9 @@ const useRecommendations = ({
         
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        const results = searchRecommendations(processedQuery, category);
+        const locationResults = searchRecommendations(processedQuery, category);
         
-        const resultsWithImages = results.map(result => {
+        const resultsWithImages = locationResults.map(result => {
           if (result.images && result.images.length > 0) {
             return result;
           }
@@ -146,10 +212,14 @@ const useRecommendations = ({
         });
         
         setRecommendations(resultsWithImages);
+        
+        const matchingEvents = searchEvents(processedQuery);
+        setEvents(matchingEvents);
       } catch (err) {
         console.error('Error fetching recommendations:', err);
         setError('Failed to fetch recommendations. Please try again.');
         setRecommendations([]);
+        setEvents([]);
       } finally {
         setLoading(false);
       }
@@ -160,6 +230,7 @@ const useRecommendations = ({
     } else {
       const defaultResults = mockRecommendations.slice(0, 6);
       setRecommendations(defaultResults);
+      setEvents([]);
       setLoading(false);
     }
   }, [query, category]);
@@ -210,6 +281,7 @@ const useRecommendations = ({
 
   return {
     recommendations,
+    events,
     loading,
     error,
     query,

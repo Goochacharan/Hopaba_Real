@@ -1,15 +1,22 @@
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import LocationCard from '@/components/LocationCard';
 import FilterTabs from '@/components/FilterTabs';
 import LocationSelector from '@/components/LocationSelector';
-import useRecommendations from '@/hooks/useRecommendations';
+import useRecommendations, { Event } from '@/hooks/useRecommendations';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Calendar, MapPin, Clock, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const searchQuery = searchParams.get('q') || '';
+  const [activeTab, setActiveTab] = useState('locations');
   
   const [distance, setDistance] = useState<number[]>([5]);
   const [minRating, setMinRating] = useState<number[]>([4]);
@@ -19,6 +26,7 @@ const SearchResults = () => {
   
   const {
     recommendations,
+    events,
     loading,
     error,
     query,
@@ -66,6 +74,14 @@ const SearchResults = () => {
     setSelectedLocation(location);
   };
 
+  const handleRSVP = (eventTitle: string) => {
+    toast({
+      title: "RSVP Successful",
+      description: `You've RSVP'd to ${eventTitle}. We'll send you a reminder closer to the date.`,
+      duration: 3000,
+    });
+  };
+
   return (
     <MainLayout>
       <div className="w-full animate-fade-in">
@@ -94,7 +110,7 @@ const SearchResults = () => {
                 <div key={i} className="bg-white/50 h-96 rounded-xl border border-border/50 animate-pulse" />
               ))}
             </div>
-          ) : rankedRecommendations.length > 0 ? (
+          ) : (
             <>
               {query && query !== searchQuery && (
                 <div className="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
@@ -103,33 +119,115 @@ const SearchResults = () => {
                   </p>
                 </div>
               )}
-            
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {rankedRecommendations.map((recommendation, index) => (
-                  <div
-                    key={recommendation.id}
-                    className="animate-fade-in"
-                    style={{
-                      animationDelay: `${index * 100}ms`
-                    }}
-                  >
-                    <LocationCard
-                      recommendation={recommendation}
-                      ranking={index < 10 ? index + 1 : undefined}
-                      reviewCount={recommendation.reviewCount}
-                      className="h-full"
-                    />
-                  </div>
-                ))}
-              </div>
+              
+              <Tabs 
+                defaultValue="locations" 
+                className="w-full mb-6"
+                onValueChange={setActiveTab}
+                value={activeTab}
+              >
+                <TabsList className="grid w-full max-w-md grid-cols-2 mb-4">
+                  <TabsTrigger value="locations">
+                    Locations ({rankedRecommendations.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="events">
+                    Events ({events.length})
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="locations">
+                  {rankedRecommendations.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {rankedRecommendations.map((recommendation, index) => (
+                        <div
+                          key={recommendation.id}
+                          className="animate-fade-in"
+                          style={{
+                            animationDelay: `${index * 100}ms`
+                          }}
+                        >
+                          <LocationCard
+                            recommendation={recommendation}
+                            ranking={index < 10 ? index + 1 : undefined}
+                            reviewCount={recommendation.reviewCount}
+                            className="h-full"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-10 animate-fade-in">
+                      <p className="text-lg font-medium mb-2">No locations found</p>
+                      <p className="text-muted-foreground">
+                        Try adjusting your search or filters
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="events">
+                  {events.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {events.map((event) => (
+                        <div key={event.id} className="bg-white rounded-xl shadow-sm border border-border overflow-hidden animate-fade-in">
+                          <div className="relative h-48">
+                            <img 
+                              src={event.image} 
+                              alt={event.title} 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          
+                          <div className="p-5">
+                            <h3 className="text-xl font-medium mb-3">{event.title}</h3>
+                            
+                            <div className="flex flex-col gap-2 mb-4">
+                              <div className="flex items-center text-sm text-muted-foreground">
+                                <Calendar className="w-4 h-4 mr-2" />
+                                {event.date}
+                              </div>
+                              
+                              <div className="flex items-center text-sm text-muted-foreground">
+                                <Clock className="w-4 h-4 mr-2" />
+                                {event.time}
+                              </div>
+                              
+                              <div className="flex items-center text-sm text-muted-foreground">
+                                <MapPin className="w-4 h-4 mr-2" />
+                                {event.location}
+                              </div>
+                              
+                              <div className="flex items-center text-sm text-muted-foreground">
+                                <Users className="w-4 h-4 mr-2" />
+                                {event.attendees} attending
+                              </div>
+                            </div>
+                            
+                            <p className="text-sm text-muted-foreground mb-4">
+                              {event.description}
+                            </p>
+                            
+                            <Button 
+                              onClick={() => handleRSVP(event.title)}
+                              className="w-full"
+                            >
+                              RSVP to Event
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-10 animate-fade-in">
+                      <p className="text-lg font-medium mb-2">No events found</p>
+                      <p className="text-muted-foreground">
+                        Try adjusting your search criteria
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             </>
-          ) : (
-            <div className="text-center py-10 animate-fade-in">
-              <p className="text-lg font-medium mb-2">No results found</p>
-              <p className="text-muted-foreground">
-                Try adjusting your search or filters
-              </p>
-            </div>
           )}
         </div>
       </div>
