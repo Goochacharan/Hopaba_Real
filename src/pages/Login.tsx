@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -25,20 +26,32 @@ export default function Login() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
+  const [loginError, setLoginError] = useState<string | null>(null);
   
+  // Check if user is already logged in - this should redirect immediately if user has a session
   useEffect(() => {
-    // Check if user is already logged in - this should redirect immediately if user has a session
     const checkUser = async () => {
       try {
-        const { data } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Session check error:", error);
+          return;
+        }
         
         if (data.session) {
           console.log("User already logged in, redirecting...");
           // Check if user is a business owner
-          const { data: businessData } = await supabase
+          const { data: businessData, error: businessError } = await supabase
             .from('service_providers')
             .select('id')
             .eq('user_id', data.session.user.id);
+          
+          if (businessError) {
+            console.error("Business data error:", businessError);
+            navigate('/');
+            return;
+          }
           
           if (businessData && businessData.length > 0) {
             navigate('/business-dashboard');
@@ -56,6 +69,8 @@ export default function Login() {
   
   // Set up auth state change listener
   useEffect(() => {
+    console.log("Setting up auth state change listener");
+    
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("Auth state changed:", event, session?.user?.id);
@@ -69,10 +84,16 @@ export default function Login() {
           
           try {
             // Check if user is a business owner
-            const { data: businessData } = await supabase
+            const { data: businessData, error: businessError } = await supabase
               .from('service_providers')
               .select('id')
               .eq('user_id', session.user.id);
+            
+            if (businessError) {
+              console.error("Business data error:", businessError);
+              navigate('/');
+              return;
+            }
             
             if (businessData && businessData.length > 0) {
               navigate('/business-dashboard');
@@ -89,6 +110,7 @@ export default function Login() {
     
     return () => {
       // Clean up subscription when component unmounts
+      console.log("Cleaning up auth listener");
       authListener?.subscription.unsubscribe();
     };
   }, [navigate, toast]);
@@ -103,19 +125,27 @@ export default function Login() {
 
   const onSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
+    setLoginError(null);
+    
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log("Attempting login with:", values.email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
 
       if (error) {
+        console.error("Login error:", error);
         throw error;
       }
       
-      // Note: We don't need to handle navigation here anymore as it's handled by the auth state change listener
+      console.log("Login successful, user:", data.user?.id);
+      // Navigation is handled by the auth state change listener
       
     } catch (error: any) {
+      console.error("Login error details:", error);
+      setLoginError(error.message);
       toast({
         title: "Login failed",
         description: error.message || "Something went wrong",
@@ -163,7 +193,7 @@ export default function Login() {
               type="button" 
               className="w-full flex items-center justify-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-50"
               onClick={() => handleSocialLogin('google')}
-              disabled={!!socialLoading}
+              disabled={!!socialLoading || isLoading}
             >
               {socialLoading === 'google' ? (
                 <span>Connecting...</span>
@@ -186,7 +216,7 @@ export default function Login() {
               type="button" 
               className="w-full flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white"
               onClick={() => handleSocialLogin('facebook')}
-              disabled={!!socialLoading}
+              disabled={!!socialLoading || isLoading}
             >
               {socialLoading === 'facebook' ? (
                 <span>Connecting...</span>
@@ -205,6 +235,12 @@ export default function Login() {
               <span className="bg-white px-2 text-xs text-muted-foreground">or continue with email</span>
             </div>
           </div>
+
+          {loginError && (
+            <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+              {loginError}
+            </div>
+          )}
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
