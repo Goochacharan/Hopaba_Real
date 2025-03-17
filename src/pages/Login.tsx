@@ -1,9 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import MainLayout from '@/components/MainLayout';
@@ -23,20 +22,39 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
+  const [redirectTarget, setRedirectTarget] = useState('/');
   
   useEffect(() => {
+    // Get any redirect target from the query params
+    const params = new URLSearchParams(location.search);
+    const redirect = params.get('redirect');
+    if (redirect) {
+      setRedirectTarget(redirect);
+    }
+    
     const checkUser = async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
-        navigate('/');
+        // Check if user is a business owner
+        const { data: businessData } = await supabase
+          .from('service_providers')
+          .select('id')
+          .eq('user_id', data.session.user.id);
+        
+        if (businessData && businessData.length > 0) {
+          navigate('/business-dashboard');
+        } else {
+          navigate(redirectTarget);
+        }
       }
     };
     
     checkUser();
-  }, [navigate]);
+  }, [navigate, location.search, redirectTarget]);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -63,7 +81,17 @@ export default function Login() {
         description: "Welcome back!",
       });
       
-      navigate('/');
+      // Check if user is a business owner
+      const { data: businessData } = await supabase
+        .from('service_providers')
+        .select('id')
+        .eq('user_id', data.user.id);
+      
+      if (businessData && businessData.length > 0) {
+        navigate('/business-dashboard');
+      } else {
+        navigate(redirectTarget);
+      }
     } catch (error: any) {
       toast({
         title: "Login failed",

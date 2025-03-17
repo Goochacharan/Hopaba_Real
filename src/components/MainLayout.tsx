@@ -1,8 +1,9 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
 import { cn } from '@/lib/utils';
-import { Home, User, ListChecks, Calendar } from 'lucide-react';
+import { Home, User, ListChecks, Calendar, Briefcase } from 'lucide-react';
 import SearchBar from './SearchBar';
 import { Button } from './ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +23,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isBusinessOwner, setIsBusinessOwner] = useState(false);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -30,6 +32,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         data
       } = await supabase.auth.getSession();
       setUser(data.session?.user || null);
+      
+      if (data.session?.user) {
+        // Check if user has a business
+        const { data: businessData } = await supabase
+          .from('service_providers')
+          .select('id')
+          .eq('user_id', data.session.user.id);
+        
+        setIsBusinessOwner(businessData && businessData.length > 0);
+      }
+      
       setLoading(false);
     };
     getCurrentUser();
@@ -37,6 +50,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       data: authListener
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user || null);
+      if (session?.user) {
+        // Check if user has a business
+        const { data: businessData } = await supabase
+          .from('service_providers')
+          .select('id')
+          .eq('user_id', session.user.id);
+        
+        setIsBusinessOwner(businessData && businessData.length > 0);
+      } else {
+        setIsBusinessOwner(false);
+      }
     });
     return () => {
       authListener?.subscription.unsubscribe();
@@ -54,6 +78,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     navigate('/');
     window.scrollTo(0, 0);
     console.log("Navigating to home page from: ", location.pathname);
+  };
+
+  const handleBusinessNav = () => {
+    if (user) {
+      if (isBusinessOwner) {
+        navigate('/business-dashboard');
+      } else {
+        navigate('/business-signup');
+      }
+    } else {
+      toast({
+        title: "Login Required",
+        description: "Please login to access business features",
+      });
+      navigate('/login');
+    }
   };
 
   return (
@@ -77,6 +117,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </Link>
           
           <div className="flex items-center gap-4">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleBusinessNav}
+              className="flex items-center"
+            >
+              <Briefcase className="h-4 w-4 mr-2" />
+              {isBusinessOwner ? "Business Dashboard" : "For Business Owners"}
+            </Button>
+            
             {!user && (
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => navigate('/login')}>
