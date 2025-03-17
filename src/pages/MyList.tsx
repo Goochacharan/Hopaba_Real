@@ -64,8 +64,8 @@ const MyList = () => {
       (item.name?.toLowerCase().includes(lowercaseQuery)) ||
       (item.category?.toLowerCase().includes(lowercaseQuery)) ||
       (item.description?.toLowerCase().includes(lowercaseQuery)) ||
-      (item.location?.toLowerCase().includes(lowercaseQuery)) ||
-      (item.area?.toLowerCase().includes(lowercaseQuery))
+      (item.address?.toLowerCase().includes(lowercaseQuery)) ||
+      (item.city?.toLowerCase().includes(lowercaseQuery))
     );
   });
 

@@ -1,13 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import MainLayout from '@/components/MainLayout';
 import AnimatedLogo from '@/components/AnimatedLogo';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Sparkles } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isEnhancing, setIsEnhancing] = useState<string | null>(null);
 
   // Sample example queries
   const exampleQueries = [
@@ -74,9 +79,46 @@ const Index = () => {
     }
   ];
 
-  const handleSearch = (query: string) => {
+  const enhanceSearchQuery = async (rawQuery: string) => {
+    if (!rawQuery.trim()) return rawQuery;
+    
+    setIsEnhancing(rawQuery);
+    try {
+      const { data, error } = await supabase.functions.invoke('enhance-search', {
+        body: { query: rawQuery }
+      });
+      
+      if (error) {
+        console.error('Error enhancing search:', error);
+        return rawQuery;
+      }
+      
+      console.log('AI enhanced search:', data);
+      
+      if (data.enhanced && data.enhanced !== rawQuery) {
+        toast({
+          title: "Search enhanced with AI",
+          description: `We improved your search to: "${data.enhanced}"`,
+          duration: 5000
+        });
+        
+        return data.enhanced;
+      }
+      
+      return rawQuery;
+    } catch (err) {
+      console.error('Failed to enhance search:', err);
+      return rawQuery;
+    } finally {
+      setIsEnhancing(null);
+    }
+  };
+
+  const handleSearch = async (query: string) => {
     if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+      // Enhance the search query with DeepSeek AI
+      const enhancedQuery = await enhanceSearchQuery(query);
+      navigate(`/search?q=${encodeURIComponent(enhancedQuery)}`);
     }
   };
   
@@ -97,9 +139,13 @@ const Index = () => {
                   variant="outline" 
                   onClick={() => handleSearch(example.text)} 
                   className="justify-start h-auto border-border/50 text-left px-[17px] py-2 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200 overflow-hidden"
+                  disabled={isEnhancing === example.text}
                 >
                   <div className="mr-3 text-base">{example.icon}</div>
                   <span className="font-normal text-sm sm:text-base truncate">{example.text}</span>
+                  {isEnhancing === example.text && (
+                    <Sparkles className="h-4 w-4 ml-2 animate-pulse" />
+                  )}
                 </Button>
               ))}
             </div>
