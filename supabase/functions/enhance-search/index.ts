@@ -16,7 +16,22 @@ serve(async (req) => {
   try {
     const apiKey = Deno.env.get('DEEPSEEK_API_KEY');
     if (!apiKey) {
-      throw new Error('DeepSeek API key is not configured');
+      console.error('DeepSeek API key is not configured');
+      // Instead of throwing an error, just return the original query
+      const { query } = await req.json();
+      return new Response(
+        JSON.stringify({ 
+          original: query,
+          enhanced: query, // Return the same query
+          error: "DeepSeek API key is not configured"
+        }),
+        { 
+          headers: { 
+            ...corsHeaders,
+            'Content-Type': 'application/json' 
+          } 
+        }
+      );
     }
 
     const { query, context } = await req.json();
@@ -43,44 +58,76 @@ Your task is to improve the search query by:
       { role: "user", content: `Original search query: "${query}"${context ? `\nContext: ${context}` : ''}` }
     ];
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: "deepseek-chat",  // Using DeepSeek's chat model
-        messages: messages,
-        temperature: 0.3,  // Lower temperature for more focused results
-        max_tokens: 300
-      }),
-    });
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "deepseek-chat",  // Using DeepSeek's chat model
+          messages: messages,
+          temperature: 0.3,  // Lower temperature for more focused results
+          max_tokens: 300
+        }),
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('DeepSeek API error:', error);
-      throw new Error(`DeepSeek API error: ${JSON.stringify(error)}`);
-    }
-
-    const data = await response.json();
-    console.log('DeepSeek response:', data);
-    
-    // Extract the enhanced query from the response
-    const enhancedQuery = data.choices[0].message.content.trim();
-    
-    return new Response(
-      JSON.stringify({ 
-        original: query,
-        enhanced: enhancedQuery,
-      }),
-      { 
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json' 
-        } 
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('DeepSeek API error:', error);
+        
+        // Return the original query without enhancement if the API fails
+        return new Response(
+          JSON.stringify({ 
+            original: query,
+            enhanced: query, // Return the same query when API fails
+            error: `DeepSeek API error: ${JSON.stringify(error)}`
+          }),
+          { 
+            headers: { 
+              ...corsHeaders,
+              'Content-Type': 'application/json' 
+            } 
+          }
+        );
       }
-    );
+
+      const data = await response.json();
+      console.log('DeepSeek response:', data);
+      
+      // Extract the enhanced query from the response
+      const enhancedQuery = data.choices[0].message.content.trim();
+      
+      return new Response(
+        JSON.stringify({ 
+          original: query,
+          enhanced: enhancedQuery,
+        }),
+        { 
+          headers: { 
+            ...corsHeaders,
+            'Content-Type': 'application/json' 
+          } 
+        }
+      );
+    } catch (fetchError) {
+      console.error('Fetch error:', fetchError);
+      // Return the original query if fetch fails
+      return new Response(
+        JSON.stringify({ 
+          original: query,
+          enhanced: query,
+          error: `Fetch error: ${fetchError.message}`
+        }),
+        { 
+          headers: { 
+            ...corsHeaders,
+            'Content-Type': 'application/json' 
+          } 
+        }
+      );
+    }
   } catch (error) {
     console.error('Error in enhance-search function:', error);
     return new Response(

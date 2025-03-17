@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Recommendation, mockRecommendations, searchRecommendations } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -119,10 +120,20 @@ const useRecommendations = ({
     let processedQuery = lowercaseQuery;
     let inferredCategory: CategoryType = 'all';
     
-    for (const { pattern, category } of searchPatterns) {
-      if (pattern.test(lowercaseQuery)) {
-        inferredCategory = category as CategoryType;
-        break;
+    console.log('Original query:', `"${lowercaseQuery}"`);
+    
+    // First, check for key terms that should directly map to categories
+    if (lowercaseQuery.includes('café') || lowercaseQuery.includes('cafe') || lowercaseQuery.includes('coffee')) {
+      inferredCategory = 'cafes';
+      console.log('Detected café/coffee in query, setting category to cafes');
+    } else {
+      // Use the search patterns to determine a category
+      for (const { pattern, category } of searchPatterns) {
+        if (pattern.test(lowercaseQuery)) {
+          inferredCategory = category as CategoryType;
+          console.log(`Matched pattern ${pattern}, setting category to ${category}`);
+          break;
+        }
       }
     }
 
@@ -146,6 +157,7 @@ const useRecommendations = ({
       !lowercaseQuery.includes('near') && 
       !lowercaseQuery.includes('in ') &&
       (lowercaseQuery.includes('cafe') || 
+       lowercaseQuery.includes('café') ||
        lowercaseQuery.includes('restaurant') || 
        lowercaseQuery.includes('salon') || 
        lowercaseQuery.includes('plumber') ||

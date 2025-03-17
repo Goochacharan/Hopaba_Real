@@ -116,9 +116,19 @@ const Index = () => {
 
   const handleSearch = async (query: string) => {
     if (query.trim()) {
-      // Enhance the search query with DeepSeek AI
-      const enhancedQuery = await enhanceSearchQuery(query);
-      navigate(`/search?q=${encodeURIComponent(enhancedQuery)}`);
+      try {
+        // Enhance the search query with DeepSeek AI
+        const enhancedQuery = await enhanceSearchQuery(query);
+        
+        // Add a small delay to ensure the toast is visible
+        setTimeout(() => {
+          navigate(`/search?q=${encodeURIComponent(enhancedQuery)}`);
+        }, 100);
+      } catch (error) {
+        console.error('Search error:', error);
+        // If enhancement fails, still navigate with original query
+        navigate(`/search?q=${encodeURIComponent(query)}`);
+      }
     }
   };
   

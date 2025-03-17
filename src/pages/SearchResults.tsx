@@ -59,6 +59,7 @@ const SearchResults = () => {
 
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
+      console.log("SearchResults - Processing search query:", searchQuery);
       handleSearch(searchQuery);
     }
   }, [searchQuery, query, handleSearch]);
@@ -119,6 +120,16 @@ const SearchResults = () => {
                   </p>
                 </div>
               )}
+              
+              <div className="mb-4">
+                <h1 className="text-xl font-medium">
+                  Results for: <span className="text-primary">{query || searchQuery}</span>
+                  {category !== 'all' && <span className="ml-2 text-muted-foreground"> in {category}</span>}
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Found {rankedRecommendations.length} locations and {events.length} events
+                </p>
+              </div>
               
               <Tabs 
                 defaultValue="locations" 
