@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
 import { cn } from '@/lib/utils';
@@ -15,14 +15,22 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { handleSearch } = useRecommendations();
+  const { handleSearch, query } = useRecommendations();
   
   const onSearch = (query: string) => {
+    console.log("MainLayout search triggered with:", query);
     handleSearch(query);
     if (location.pathname !== '/') {
       navigate('/');
     }
   };
+  
+  // Force scroll to top when search is performed
+  useEffect(() => {
+    if (query) {
+      window.scrollTo(0, 0);
+    }
+  }, [query]);
   
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center">
@@ -51,6 +59,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             onSearch={onSearch} 
             className="mb-0" 
             placeholder="What are you looking for today?"
+            initialValue={query}
           />
         </div>
       </div>
