@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -25,16 +26,9 @@ export default function Login() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
-  const [redirectTarget, setRedirectTarget] = useState('/');
   
   useEffect(() => {
-    // Get any redirect target from the query params
-    const params = new URLSearchParams(location.search);
-    const redirect = params.get('redirect');
-    if (redirect) {
-      setRedirectTarget(redirect);
-    }
-    
+    // Check if user is already logged in
     const checkUser = async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
@@ -47,13 +41,35 @@ export default function Login() {
         if (businessData && businessData.length > 0) {
           navigate('/business-dashboard');
         } else {
-          navigate(redirectTarget);
+          navigate('/');
         }
       }
     };
     
     checkUser();
-  }, [navigate, location.search, redirectTarget]);
+    
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session) {
+          // Check if user is a business owner
+          const { data: businessData } = await supabase
+            .from('service_providers')
+            .select('id')
+            .eq('user_id', session.user.id);
+          
+          if (businessData && businessData.length > 0) {
+            navigate('/business-dashboard');
+          } else {
+            navigate('/');
+          }
+        }
+      }
+    );
+    
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -89,7 +105,7 @@ export default function Login() {
       if (businessData && businessData.length > 0) {
         navigate('/business-dashboard');
       } else {
-        navigate(redirectTarget);
+        navigate('/');
       }
     } catch (error: any) {
       toast({
