@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
@@ -98,6 +99,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     console.log("Navigating to home page from: ", location.pathname);
   };
 
+  const handleProfileNavigation = () => {
+    if (user) {
+      navigate('/profile');
+    } else {
+      navigate('/login');
+    }
+  };
+
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center">
       <header className="w-full sticky top-0 z-50 glass border-b border-border/50 px-6 py-4">
@@ -167,7 +176,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           />
           
           <NavButton 
-            to={user ? "/profile" : "/login"} 
+            onClick={handleProfileNavigation}
             icon={<User className="h-6 w-6" />} 
             label={user ? "Profile" : "Login"} 
             isActive={location.pathname === '/profile' || location.pathname === '/login'} 
@@ -179,21 +188,39 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 };
 
 interface NavButtonProps {
-  to: string;
+  to?: string;
   icon: React.ReactNode;
   label: string;
   isActive: boolean;
+  onClick?: () => void;
 }
 
 const NavButton: React.FC<NavButtonProps> = ({
   to,
   icon,
   label,
-  isActive
+  isActive,
+  onClick
 }) => {
+  if (onClick) {
+    return (
+      <button 
+        onClick={onClick}
+        className={cn(
+          "flex flex-col items-center gap-1 px-3 py-2 rounded-md transition-colors", 
+          isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+        )} 
+        aria-label={label}
+      >
+        {icon}
+        <span className="text-xs font-medium">{label}</span>
+      </button>
+    );
+  }
+  
   return (
     <Link 
-      to={to} 
+      to={to!} 
       className={cn(
         "flex flex-col items-center gap-1 px-3 py-2 rounded-md transition-colors", 
         isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
