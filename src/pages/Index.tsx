@@ -1,3 +1,4 @@
+
 import React from 'react';
 import MainLayout from '@/components/MainLayout';
 import SearchBar from '@/components/SearchBar';
@@ -5,6 +6,7 @@ import AnimatedLogo from '@/components/AnimatedLogo';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+
 const Index = () => {
   const navigate = useNavigate();
 
@@ -70,17 +72,20 @@ const Index = () => {
     text: "Schools with good sports programs",
     icon: "🏫"
   }];
+
   const handleSearch = (query: string) => {
     if (query.trim()) {
       navigate(`/search?q=${encodeURIComponent(query)}`);
     }
   };
-  return <MainLayout>
+  
+  return (
+    <MainLayout>
       <section className="flex flex-col items-center justify-center py-8 md:py-14">
         <div className="text-center mb-12 animate-fade-in">
           <AnimatedLogo size="lg" className="mx-auto mb-6" />
-          
-          <p className="text-muted-foreground max-w-2xl mx-auto text-sm">
+          <h1 className="text-3xl sm:text-4xl font-medium tracking-tight mb-3">Hopaba</h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             What are you looking for today? A hidden gem café, a skilled plumber, or the best salon in town? Just ask me!
           </p>
         </div>
@@ -92,14 +97,23 @@ const Index = () => {
         <div className="w-full max-w-2xl mx-auto mb-8">
           <ScrollArea className="h-[300px] w-full px-1">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 pr-4">
-              {exampleQueries.map((example, idx) => <Button key={idx} variant="outline" onClick={() => handleSearch(example.text)} className="justify-start h-auto border-border/50 text-left px-[17px] py-0 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200">
+              {exampleQueries.map((example, idx) => (
+                <Button 
+                  key={idx} 
+                  variant="outline" 
+                  onClick={() => handleSearch(example.text)} 
+                  className="justify-start h-auto border-border/50 text-left px-[17px] py-0 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200"
+                >
                   <div className="mr-3 text-xl">{example.icon}</div>
                   <span className="font-normal">{example.text}</span>
-                </Button>)}
+                </Button>
+              ))}
             </div>
           </ScrollArea>
         </div>
       </section>
-    </MainLayout>;
+    </MainLayout>
+  );
 };
+
 export default Index;
