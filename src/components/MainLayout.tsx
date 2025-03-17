@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
@@ -14,7 +13,6 @@ interface MainLayoutProps {
   className?: string;
 }
 
-// Define a simplified user type to prevent deep instantiation
 interface UserInfo {
   id: string;
   email?: string;
@@ -44,7 +42,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           email: data.session.user.email
         });
         
-        // Check if user has a business
         const { data: businessData } = await supabase
           .from('service_providers')
           .select('id')
@@ -68,7 +65,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           email: session.user.email
         });
         
-        // Check if user has a business
         const { data: businessData } = await supabase
           .from('service_providers')
           .select('id')
