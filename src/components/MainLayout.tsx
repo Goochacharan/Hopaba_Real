@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
@@ -52,7 +51,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     }
   };
   
-  // Force scroll to top when search is performed
   useEffect(() => {
     if (query) {
       window.scrollTo(0, 0);
@@ -73,6 +71,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             onClick={navigateToHome}
             role="button"
             aria-label="Go to home page"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                navigateToHome();
+              }
+            }}
           >
             <AnimatedLogo size="sm" />
             <h1 className="text-xl font-medium tracking-tight">
@@ -107,7 +111,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         {children}
       </main>
       
-      {/* Fixed Search Bar above the navigation */}
       <div className="fixed bottom-20 left-0 right-0 px-4 z-50">
         <div className="max-w-5xl mx-auto">
           <SearchBar 
@@ -119,7 +122,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
         </div>
       </div>
       
-      {/* Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 py-2 px-4 z-50">
         <div className="max-w-5xl mx-auto flex justify-around">
           <NavButton 
