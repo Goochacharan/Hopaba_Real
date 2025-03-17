@@ -179,26 +179,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           </button>
         </div>
         
-        {isExpanded && (
-          <div className="p-3 border-t border-border">
-            <p className="text-xs text-muted-foreground mb-2">Try asking about:</p>
-            <div className="flex flex-wrap gap-2">
-              {suggestionExamples.map((example, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  className="text-xs px-2 py-1 bg-secondary rounded-full text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={() => {
-                    setQuery(example);
-                    onSearch(example);
-                  }}
-                >
-                  {example}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Removed the expanded suggestions panel that was here */}
       </form>
     </div>
   );
