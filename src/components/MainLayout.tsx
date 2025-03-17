@@ -64,22 +64,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     window.scrollTo(0, 0);
   };
 
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Error signing out",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Signed out successfully",
-        description: "You have been signed out",
-      });
-      navigate('/');
-    }
-  };
+  // We're removing the handleLogout function since we're moving it to the Profile page
   
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center">
@@ -103,9 +88,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             </nav>
             
             {user ? (
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                Sign Out
-              </Button>
+              // We'll remove the sign out button from here
+              null
             ) : (
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => navigate('/login')}>

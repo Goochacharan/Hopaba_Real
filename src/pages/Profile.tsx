@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -27,8 +28,10 @@ import {
   UserCog, 
   Save, 
   Settings, 
-  Moon
+  Moon,
+  LogOut
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const profileFormSchema = z.object({
   name: z.string().min(2, {
@@ -71,6 +74,7 @@ const defaultValues: Partial<ProfileFormValues> = {
 
 const Profile = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
@@ -91,14 +95,37 @@ const Profile = () => {
     console.log(data);
   }
 
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error signing out",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out",
+      });
+      navigate('/');
+    }
+  };
+
   return (
     <MainLayout>
       <section className="py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-medium mb-2">My Profile</h1>
-          <p className="text-muted-foreground">
-            Manage your account settings and preferences
-          </p>
+        <div className="mb-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-medium mb-2">My Profile</h1>
+            <p className="text-muted-foreground">
+              Manage your account settings and preferences
+            </p>
+          </div>
+          <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </Button>
         </div>
 
         <div className="space-y-6">
