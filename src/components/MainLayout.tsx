@@ -32,11 +32,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     }
   }, [query]);
   
+  const navigateToHome = () => {
+    navigate('/');
+    window.scrollTo(0, 0);
+  };
+  
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center">
       <header className="w-full sticky top-0 z-50 glass border-b border-border/50 px-6 py-4">
         <div className="max-w-5xl mx-auto w-full flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div 
+            className="flex items-center gap-3 cursor-pointer" 
+            onClick={navigateToHome}
+            role="button"
+            aria-label="Go to home page"
+          >
             <AnimatedLogo size="sm" />
             <h1 className="text-xl font-medium tracking-tight">Hopaba</h1>
           </div>
