@@ -39,6 +39,24 @@ const Index = () => {
   }, {
     text: "Where can I buy a pre-owned bike?",
     icon: "🏍️"
+  }, {
+    text: "Recommend a good Italian restaurant",
+    icon: "🍕"
+  }, {
+    text: "Find a flower shop in Koramangala",
+    icon: "🌸"
+  }, {
+    text: "Best dance classes for kids",
+    icon: "💃"
+  }, {
+    text: "Need a plumber for water leak",
+    icon: "🔧"
+  }, {
+    text: "Bookstores with rare collections",
+    icon: "📚"
+  }, {
+    text: "Top rated hair salon near me",
+    icon: "💇"
   }];
 
   // Apply filters to recommendations
