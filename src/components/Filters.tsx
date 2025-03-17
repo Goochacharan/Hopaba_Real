@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
@@ -30,7 +31,7 @@ const Filters: React.FC<FiltersProps> = ({
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <Label htmlFor="distance" className="text-sm font-medium">Distance</Label>
-          <span className="text-sm text-muted-foreground">{distance[0]} miles</span>
+          <span className="text-sm text-muted-foreground">{distance[0]} km</span>
         </div>
         <Slider
           id="distance"
@@ -91,3 +92,4 @@ const Filters: React.FC<FiltersProps> = ({
 };
 
 export default Filters;
+

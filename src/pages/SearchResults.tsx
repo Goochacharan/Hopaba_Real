@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import LocationCard from '@/components/LocationCard';

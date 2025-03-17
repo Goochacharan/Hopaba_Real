@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -218,6 +217,16 @@ const LocationCard: React.FC<LocationCardProps> = ({
     navigate(`/location/${recommendation.id}`);
   };
 
+  const formatDistance = (distanceText: string | undefined) => {
+    if (!distanceText) return '';
+    
+    let formattedDistance = distanceText.replace('miles', 'km');
+    
+    formattedDistance = formattedDistance.replace('away away', 'away');
+    
+    return formattedDistance;
+  };
+
   return (
     <div 
       onClick={handleCardClick}
@@ -334,7 +343,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
             </div>
             {recommendation.distance && (
               <div className="text-muted-foreground pl-5 mt-1">
-                {recommendation.distance} away
+                {formatDistance(recommendation.distance)}
               </div>
             )}
           </div>
