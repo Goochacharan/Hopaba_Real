@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
 import { cn } from '@/lib/utils';
-import { Home, User, ListChecks, Calendar, Briefcase } from 'lucide-react';
+import { Home, User, ListChecks, Calendar } from 'lucide-react';
 import SearchBar from './SearchBar';
 import { Button } from './ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,11 +13,6 @@ interface MainLayoutProps {
   className?: string;
 }
 
-interface UserInfo {
-  id: string;
-  email?: string;
-}
-
 const MainLayout: React.FC<MainLayoutProps> = ({
   children,
   className
@@ -25,9 +20,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [user, setUser] = useState<UserInfo | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isBusinessOwner, setIsBusinessOwner] = useState(false);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -35,48 +29,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       const {
         data
       } = await supabase.auth.getSession();
-      
-      if (data.session?.user) {
-        setUser({
-          id: data.session.user.id,
-          email: data.session.user.email
-        });
-        
-        const { data: businessData } = await supabase
-          .from('service_providers')
-          .select('id')
-          .eq('user_id', data.session.user.id);
-        
-        setIsBusinessOwner(businessData && businessData.length > 0);
-      } else {
-        setUser(null);
-      }
-      
+      setUser(data.session?.user || null);
       setLoading(false);
     };
     getCurrentUser();
-    
     const {
       data: authListener
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email
-        });
-        
-        const { data: businessData } = await supabase
-          .from('service_providers')
-          .select('id')
-          .eq('user_id', session.user.id);
-        
-        setIsBusinessOwner(businessData && businessData.length > 0);
-      } else {
-        setUser(null);
-        setIsBusinessOwner(false);
-      }
+      setUser(session?.user || null);
     });
-    
     return () => {
       authListener?.subscription.unsubscribe();
     };
@@ -93,14 +54,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     navigate('/');
     window.scrollTo(0, 0);
     console.log("Navigating to home page from: ", location.pathname);
-  };
-
-  const handleProfileNavigation = () => {
-    if (user) {
-      navigate('/profile');
-    } else {
-      navigate('/login');
-    }
   };
 
   return (
@@ -124,7 +77,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </Link>
           
           <div className="flex items-center gap-4">
-            {!user && !loading && (
+            {!user && (
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => navigate('/login')}>
                   Login
@@ -172,7 +125,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           />
           
           <NavButton 
-            onClick={handleProfileNavigation}
+            to={user ? "/profile" : "/login"} 
             icon={<User className="h-6 w-6" />} 
             label={user ? "Profile" : "Login"} 
             isActive={location.pathname === '/profile' || location.pathname === '/login'} 
@@ -184,39 +137,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 };
 
 interface NavButtonProps {
-  to?: string;
+  to: string;
   icon: React.ReactNode;
   label: string;
   isActive: boolean;
-  onClick?: () => void;
 }
 
 const NavButton: React.FC<NavButtonProps> = ({
   to,
   icon,
   label,
-  isActive,
-  onClick
+  isActive
 }) => {
-  if (onClick) {
-    return (
-      <button 
-        onClick={onClick}
-        className={cn(
-          "flex flex-col items-center gap-1 px-3 py-2 rounded-md transition-colors", 
-          isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-        )} 
-        aria-label={label}
-      >
-        {icon}
-        <span className="text-xs font-medium">{label}</span>
-      </button>
-    );
-  }
-  
   return (
     <Link 
-      to={to!} 
+      to={to} 
       className={cn(
         "flex flex-col items-center gap-1 px-3 py-2 rounded-md transition-colors", 
         isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"

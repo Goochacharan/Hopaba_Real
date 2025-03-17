@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useToast } from '@/hooks/use-toast';
@@ -28,8 +29,7 @@ import {
   Save, 
   Settings, 
   Moon,
-  LogOut,
-  Briefcase
+  LogOut
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -80,34 +80,6 @@ const Profile = () => {
   const [pushNotifications, setPushNotifications] = useState(true);
   const [locationServices, setLocationServices] = useState(true);
   const [dataSharing, setDataSharing] = useState(false);
-  const [isBusinessOwner, setIsBusinessOwner] = useState(false);
-  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email || undefined
-        });
-        
-        // Check if user is a business owner
-        const { data: businessData } = await supabase
-          .from('service_providers')
-          .select('id')
-          .eq('user_id', session.user.id);
-        
-        setIsBusinessOwner(businessData && businessData.length > 0);
-      } else {
-        // Redirect to login if not authenticated
-        navigate('/login');
-      }
-    };
-    
-    fetchUserData();
-  }, [navigate]);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -123,59 +95,22 @@ const Profile = () => {
     console.log(data);
   }
 
-  const handleLogout = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent default behavior
-    console.log("Logout button clicked");
-    
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error("Error signing out:", error);
-        toast({
-          title: "Error signing out",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        console.log("Sign out successful");
-        toast({
-          title: "Signed out successfully",
-          description: "You have been signed out",
-        });
-        navigate('/');
-      }
-    } catch (err) {
-      console.error("Unexpected error during sign out:", err);
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
       toast({
         title: "Error signing out",
-        description: "An unexpected error occurred",
+        description: error.message,
         variant: "destructive",
       });
-    }
-  };
-
-  const handleBusinessAction = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent default behavior
-    if (isBusinessOwner) {
-      navigate('/business-dashboard');
     } else {
-      navigate('/business-signup');
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out",
+      });
+      navigate('/');
     }
   };
-
-  // If no user is logged in, show a loading state or redirect
-  if (!user) {
-    return (
-      <MainLayout>
-        <div className="py-8 text-center">
-          <p>Please log in to view your profile.</p>
-          <Button className="mt-4" onClick={() => navigate('/login')}>
-            Go to Login
-          </Button>
-        </div>
-      </MainLayout>
-    );
-  }
 
   return (
     <MainLayout>
@@ -187,16 +122,10 @@ const Profile = () => {
               Manage your account settings and preferences
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleBusinessAction} className="flex items-center gap-2">
-              <Briefcase className="h-4 w-4" />
-              {isBusinessOwner ? "Business Dashboard" : "Register as Business Owner"}
-            </Button>
-            <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
-              <LogOut className="h-4 w-4" />
-              Sign Out
-            </Button>
-          </div>
+          <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </Button>
         </div>
 
         <div className="space-y-6">
