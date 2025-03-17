@@ -63,8 +63,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
     navigate('/');
     window.scrollTo(0, 0);
   };
-
-  // We're removing the handleLogout function since we're moving it to the Profile page
   
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center">
@@ -77,7 +75,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             aria-label="Go to home page"
           >
             <AnimatedLogo size="sm" />
-            <h1 className="text-xl font-medium tracking-tight">Hopaba</h1>
+            <h1 
+              className="text-xl font-medium tracking-tight cursor-pointer" 
+              onClick={navigateToHome}
+            >
+              Hopaba
+            </h1>
           </div>
           
           <div className="flex items-center gap-4">
@@ -88,7 +91,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             </nav>
             
             {user ? (
-              // We'll remove the sign out button from here
               null
             ) : (
               <div className="flex items-center gap-2">
