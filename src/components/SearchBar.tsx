@@ -125,6 +125,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, [initialValue]);
 
+  // This function will explicitly handle the search button click
+  const handleSearchButtonClick = () => {
+    if (query.trim()) {
+      onSearch(query);
+      console.log("Search button clicked with query:", query);
+    }
+  };
+
   return (
     <div className={cn("w-full max-w-2xl mx-auto", className)}>
       <form 
@@ -168,7 +176,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
           </button>
           
           <button
-            type="submit"
+            type="button" 
+            onClick={handleSearchButtonClick}
             className={cn(
               "ml-2 p-2 rounded-full flex-shrink-0 transition-all duration-200",
               "text-muted-foreground hover:text-primary hover:bg-secondary"
@@ -178,8 +187,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
             <Search className="h-4 w-4" />
           </button>
         </div>
-        
-        {/* Removed the expanded suggestions panel that was here */}
       </form>
     </div>
   );
