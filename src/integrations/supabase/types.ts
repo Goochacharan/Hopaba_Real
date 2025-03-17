@@ -9,13 +9,144 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      service_providers: {
+        Row: {
+          address: string
+          area: string
+          availability: string | null
+          business_hours: Json | null
+          category: string
+          city: string
+          contact_email: string | null
+          contact_phone: string | null
+          coordinates: unknown | null
+          created_at: string | null
+          description: string | null
+          experience: string | null
+          id: string
+          image_url: string | null
+          images: string[] | null
+          languages: string[] | null
+          name: string
+          open_now: boolean | null
+          price_range_max: number | null
+          price_range_min: number | null
+          price_unit: string | null
+          rating: number | null
+          review_count: number | null
+          tags: string[] | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address: string
+          area: string
+          availability?: string | null
+          business_hours?: Json | null
+          category: string
+          city: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          coordinates?: unknown | null
+          created_at?: string | null
+          description?: string | null
+          experience?: string | null
+          id?: string
+          image_url?: string | null
+          images?: string[] | null
+          languages?: string[] | null
+          name: string
+          open_now?: boolean | null
+          price_range_max?: number | null
+          price_range_min?: number | null
+          price_unit?: string | null
+          rating?: number | null
+          review_count?: number | null
+          tags?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string
+          area?: string
+          availability?: string | null
+          business_hours?: Json | null
+          category?: string
+          city?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          coordinates?: unknown | null
+          created_at?: string | null
+          description?: string | null
+          experience?: string | null
+          id?: string
+          image_url?: string | null
+          images?: string[] | null
+          languages?: string[] | null
+          name?: string
+          open_now?: boolean | null
+          price_range_max?: number | null
+          price_range_min?: number | null
+          price_unit?: string | null
+          rating?: number | null
+          review_count?: number | null
+          tags?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      gtrgm_compress: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      gtrgm_decompress: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      gtrgm_in: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      gtrgm_options: {
+        Args: {
+          "": unknown
+        }
+        Returns: undefined
+      }
+      gtrgm_out: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      set_limit: {
+        Args: {
+          "": number
+        }
+        Returns: number
+      }
+      show_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      show_trgm: {
+        Args: {
+          "": string
+        }
+        Returns: string[]
+      }
     }
     Enums: {
       [_ in never]: never

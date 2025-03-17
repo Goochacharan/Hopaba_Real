@@ -1,113 +1,82 @@
 
-import React from 'react';
-import MainLayout from '@/components/MainLayout';
-import AnimatedLogo from '@/components/AnimatedLogo';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import MainLayout from '@/components/MainLayout';
+import SearchBar from '@/components/SearchBar';
+import Filters from '@/components/Filters';
+import LocationCard from '@/components/LocationCard';
+import { useServiceProviders } from '@/hooks/useServiceProviders';
 
-const Index = () => {
+export default function Index() {
   const navigate = useNavigate();
-
-  // Sample example queries
-  const exampleQueries = [
-    {
-      text: "Find me a cozy café nearby",
-      icon: "☕"
-    }, {
-      text: "Looking for a Kannada-speaking actor",
-      icon: "🎭"
-    }, {
-      text: "Best electrician in Jayanagar",
-      icon: "⚡"
-    }, {
-      text: "Where can I buy a pre-owned bike?",
-      icon: "🏍️"
-    }, {
-      text: "Recommend a good Italian restaurant",
-      icon: "🍕"
-    }, {
-      text: "Find a flower shop in Koramangala",
-      icon: "🌸"
-    }, {
-      text: "Best dance classes for kids",
-      icon: "💃"
-    }, {
-      text: "Need a plumber for water leak",
-      icon: "🔧"
-    }, {
-      text: "Bookstores with rare collections",
-      icon: "📚"
-    }, {
-      text: "Top rated hair salon near me",
-      icon: "💇"
-    }, {
-      text: "Auto repair shops open on Sunday",
-      icon: "🔧"
-    }, {
-      text: "Pet-friendly cafes in Indiranagar",
-      icon: "🐶"
-    }, {
-      text: "Yoga classes for beginners",
-      icon: "🧘"
-    }, {
-      text: "Wedding photographers with good reviews",
-      icon: "📸"
-    }, {
-      text: "Where to buy organic vegetables",
-      icon: "🥦"
-    }, {
-      text: "Best dentists that accept insurance",
-      icon: "🦷"
-    }, {
-      text: "Computer repair services near me",
-      icon: "💻"
-    }, {
-      text: "Piano teachers for adults",
-      icon: "🎹"
-    }, {
-      text: "Tailors who can alter ethnic wear",
-      icon: "👔"
-    }, {
-      text: "Schools with good sports programs",
-      icon: "🏫"
-    }
-  ];
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const { data: serviceProviders, isLoading, error } = useServiceProviders();
 
   const handleSearch = (query: string) => {
-    if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+    setSearchQuery(query);
+    if (query) {
+      navigate(`/search?query=${encodeURIComponent(query)}`);
     }
   };
-  
+
+  const filteredData = serviceProviders && serviceProviders.length > 0
+    ? serviceProviders
+        .filter(item => 
+          !searchQuery || 
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          (item.tags && item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+        )
+        .filter(item => 
+          selectedFilters.length === 0 || 
+          (item.category && selectedFilters.includes(item.category))
+        )
+    : [];
+
   return (
     <MainLayout>
-      <section className="flex flex-col items-center justify-center py-4 md:py-6">
-        <div className="text-center mb-8 animate-fade-in">
-          <AnimatedLogo size="lg" className="mx-auto mb-4" />
-          <h1 className="text-3xl sm:text-4xl font-medium tracking-tight">Hopaba</h1>
+      <div className="py-8">
+        <div className="text-center mb-10">
+          <h1 className="text-4xl font-bold mb-4">Find Local Service Providers</h1>
+          <p className="text-xl text-muted-foreground">
+            Discover quality services in your area
+          </p>
         </div>
+        
+        <div className="max-w-4xl mx-auto mb-8">
+          <SearchBar 
+            onSearch={handleSearch} 
+            placeholder="Search for services or categories..."
+          />
+        </div>
+        
+        <Filters 
+          selectedFilters={selectedFilters} 
+          setSelectedFilters={setSelectedFilters} 
+        />
 
-        <div className="w-full max-w-2xl mx-auto">
-          <ScrollArea className="h-[360px] w-full px-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2 pr-4">
-              {exampleQueries.map((example, idx) => (
-                <Button 
-                  key={idx} 
-                  variant="outline" 
-                  onClick={() => handleSearch(example.text)} 
-                  className="justify-start h-auto border-border/50 text-left px-[17px] py-2 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200 overflow-hidden"
-                >
-                  <div className="mr-3 text-base">{example.icon}</div>
-                  <span className="font-normal text-sm sm:text-base truncate">{example.text}</span>
-                </Button>
+        <div className="mt-8">
+          {isLoading ? (
+            <div className="flex justify-center">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+            </div>
+          ) : error ? (
+            <div className="text-center text-red-500">
+              Error loading data. Please try again.
+            </div>
+          ) : filteredData.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredData.map((item) => (
+                <LocationCard key={item.id} recommendation={item} />
               ))}
             </div>
-          </ScrollArea>
+          ) : (
+            <div className="text-center text-muted-foreground">
+              No matching service providers found. Try adjusting your filters.
+            </div>
+          )}
         </div>
-      </section>
+      </div>
     </MainLayout>
   );
-};
-
-export default Index;
+}
