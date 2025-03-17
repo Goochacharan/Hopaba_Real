@@ -57,6 +57,24 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     console.log("Navigating to home page from: ", location.pathname);
   };
 
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account",
+      });
+      navigate('/');
+    } catch (error: any) {
+      toast({
+        title: "Error logging out",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center">
       <header className="w-full sticky top-0 z-50 glass border-b border-border/50 px-6 py-4">
@@ -78,13 +96,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </Link>
           
           <div className="flex items-center gap-4">
-            <nav className="hidden md:flex items-center gap-6">
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-all-200">About</a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-all-200">Explore</a>
-              <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-all-200">Help</a>
-            </nav>
-            
-            {user ? null : (
+            {user ? (
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
+                Logout
+              </Button>
+            ) : (
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => navigate('/login')}>
                   Login
