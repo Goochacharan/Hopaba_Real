@@ -7,10 +7,12 @@ import SearchBar from './SearchBar';
 import { Button } from './ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+
 interface MainLayoutProps {
   children: React.ReactNode;
   className?: string;
 }
+
 const MainLayout: React.FC<MainLayoutProps> = ({
   children,
   className
@@ -22,6 +24,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   } = useToast();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const getCurrentUser = async () => {
       setLoading(true);
@@ -41,17 +44,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       authListener?.subscription.unsubscribe();
     };
   }, []);
+
   const onSearch = (query: string) => {
     console.log("MainLayout search triggered with:", query);
     if (query.trim()) {
       navigate(`/search?q=${encodeURIComponent(query)}`);
     }
   };
+
   const navigateToHome = () => {
     navigate('/');
     window.scrollTo(0, 0);
     console.log("Navigating to home page from: ", location.pathname);
   };
+
   return <div className="min-h-screen w-full bg-background flex flex-col items-center">
       <header className="w-full sticky top-0 z-50 glass border-b border-border/50 px-6 py-4">
         <div className="max-w-5xl mx-auto w-full flex items-center justify-between">
@@ -84,11 +90,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         </div>
       </header>
       
-      <main className={cn("w-full flex-1 max-w-5xl mx-auto px-4 md:px-6 py-8 mb-36", className)}>
+      <main className={cn("w-full flex-1 max-w-5xl mx-auto px-4 md:px-6 py-8 mb-16", className)}>
         {children}
       </main>
       
-      <div className="fixed bottom-20 left-0 right-0 px-4 z-50">
+      <div className="fixed bottom-12 left-0 right-0 px-4 z-50">
         <div className="max-w-5xl mx-auto">
           <SearchBar onSearch={onSearch} className="mb-0" placeholder="What are you looking for today?" initialValue="" />
         </div>
@@ -105,16 +111,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           <NavButton to={user ? "/profile" : "/login"} icon={<User className="h-5 w-5" />} label={user ? "Profile" : "Login"} isActive={location.pathname === '/profile' || location.pathname === '/login'} />
         </div>
       </div>
-      
-      
     </div>;
 };
+
 interface NavButtonProps {
   to: string;
   icon: React.ReactNode;
   label: string;
   isActive: boolean;
 }
+
 const NavButton: React.FC<NavButtonProps> = ({
   to,
   icon,
@@ -126,4 +132,5 @@ const NavButton: React.FC<NavButtonProps> = ({
       <span className="text-xs">{label}</span>
     </Link>;
 };
+
 export default MainLayout;

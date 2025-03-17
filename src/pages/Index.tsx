@@ -81,22 +81,22 @@ const Index = () => {
   
   return (
     <MainLayout>
-      <section className="flex flex-col items-center justify-center py-8 md:py-14">
-        <div className="text-center mb-12 animate-fade-in">
-          <AnimatedLogo size="lg" className="mx-auto mb-6" />
-          <h1 className="text-3xl sm:text-4xl font-medium tracking-tight mb-3">Hopaba</h1>
+      <section className="flex flex-col items-center justify-center py-4 md:py-6">
+        <div className="text-center mb-6 animate-fade-in">
+          <AnimatedLogo size="lg" className="mx-auto mb-4" />
+          <h1 className="text-3xl sm:text-4xl font-medium tracking-tight mb-2">Hopaba</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             What are you looking for today? A hidden gem café, a skilled plumber, or the best salon in town? Just ask me!
           </p>
         </div>
 
-        <div className="w-full max-w-2xl mx-auto mb-8">
+        <div className="w-full max-w-2xl mx-auto mb-4">
           <SearchBar onSearch={handleSearch} />
         </div>
 
-        <div className="w-full max-w-2xl mx-auto mb-8">
+        <div className="w-full max-w-2xl mx-auto mb-4">
           <ScrollArea className="h-[300px] w-full px-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 pr-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 pr-4">
               {exampleQueries.map((example, idx) => (
                 <Button 
                   key={idx} 
