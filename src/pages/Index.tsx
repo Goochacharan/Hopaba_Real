@@ -9,6 +9,7 @@ import AnimatedLogo from '@/components/AnimatedLogo';
 import FilterTabs from '@/components/FilterTabs';
 import useRecommendations from '@/hooks/useRecommendations';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const Index = () => {
   const [distance, setDistance] = useState<number[]>([5]);
@@ -57,6 +58,36 @@ const Index = () => {
   }, {
     text: "Top rated hair salon near me",
     icon: "💇"
+  }, {
+    text: "Auto repair shops open on Sunday",
+    icon: "🔧"
+  }, {
+    text: "Pet-friendly cafes in Indiranagar",
+    icon: "🐶"
+  }, {
+    text: "Yoga classes for beginners",
+    icon: "🧘"
+  }, {
+    text: "Wedding photographers with good reviews",
+    icon: "📸"
+  }, {
+    text: "Where to buy organic vegetables",
+    icon: "🥦"
+  }, {
+    text: "Best dentists that accept insurance",
+    icon: "🦷"
+  }, {
+    text: "Computer repair services near me",
+    icon: "💻"
+  }, {
+    text: "Piano teachers for adults",
+    icon: "🎹"
+  }, {
+    text: "Tailors who can alter ethnic wear",
+    icon: "👔"
+  }, {
+    text: "Schools with good sports programs",
+    icon: "🏫"
   }];
 
   // Apply filters to recommendations
@@ -107,19 +138,21 @@ const Index = () => {
 
         {!showResults && (
           <div className="w-full max-w-2xl mx-auto mb-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-              {exampleQueries.map((example, idx) => (
-                <Button 
-                  key={idx} 
-                  variant="outline" 
-                  onClick={() => handleSearch(example.text)} 
-                  className="justify-start h-auto border-border/50 text-left px-[17px] py-0 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200"
-                >
-                  <div className="mr-3 text-xl">{example.icon}</div>
-                  <span className="font-normal">{example.text}</span>
-                </Button>
-              ))}
-            </div>
+            <ScrollArea className="h-[300px] w-full px-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 pr-4">
+                {exampleQueries.map((example, idx) => (
+                  <Button 
+                    key={idx} 
+                    variant="outline" 
+                    onClick={() => handleSearch(example.text)} 
+                    className="justify-start h-auto border-border/50 text-left px-[17px] py-0 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200"
+                  >
+                    <div className="mr-3 text-xl">{example.icon}</div>
+                    <span className="font-normal">{example.text}</span>
+                  </Button>
+                ))}
+              </div>
+            </ScrollArea>
           </div>
         )}
 
