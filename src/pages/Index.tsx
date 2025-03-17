@@ -76,7 +76,7 @@ const Index = () => {
     }
   };
   return <MainLayout>
-      <section className="flex flex-col items-center justify-center py-8 md:py-14">
+      <section className="flex flex-col items-center justify-center md:py-14 py-[12px]">
         <div className="text-center mb-12 animate-fade-in">
           <AnimatedLogo size="lg" className="mx-auto mb-6" />
           
