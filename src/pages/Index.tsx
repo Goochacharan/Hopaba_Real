@@ -80,7 +80,7 @@ const Index = () => {
         <div className="text-center mb-12 animate-fade-in">
           <AnimatedLogo size="lg" className="mx-auto mb-6" />
           
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto text-sm">
             What are you looking for today? A hidden gem café, a skilled plumber, or the best salon in town? Just ask me!
           </p>
         </div>
