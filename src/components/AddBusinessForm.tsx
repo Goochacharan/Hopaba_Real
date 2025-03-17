@@ -1,10 +1,10 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 import { 
   Form, 
@@ -96,7 +96,7 @@ const businessFormSchema = z.object({
   }).optional(),
 });
 
-type BusinessFormValues = z.infer<typeof businessFormSchema>;
+export type BusinessFormValues = z.infer<typeof businessFormSchema>;
 
 const defaultValues: Partial<BusinessFormValues> = {
   price_unit: "per hour",
@@ -128,70 +128,116 @@ const categoryOptions = [
   "Other"
 ];
 
-const AddBusinessForm = () => {
+interface AddBusinessFormProps {
+  businessData?: BusinessFormValues & { id?: string };
+  onSaved?: () => void;
+}
+
+const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const isEditing = !!businessData?.id;
 
   const form = useForm<BusinessFormValues>({
     resolver: zodResolver(businessFormSchema),
-    defaultValues,
+    defaultValues: businessData || defaultValues,
     mode: "onChange",
   });
 
   const onSubmit = async (data: BusinessFormValues) => {
     setIsSubmitting(true);
-    console.log("Form data:", data);
-
+    
     try {
-      const user = (await supabase.auth.getUser()).data.user;
-      
       if (!user) {
         toast({
           title: "Authentication required",
-          description: "You must be logged in to create a service listing.",
+          description: "You must be logged in to create or edit a service listing.",
           variant: "destructive",
         });
         setIsSubmitting(false);
         return;
       }
 
-      const { error } = await supabase
-        .from('service_providers')
-        .insert({
-          user_id: user.id,
-          name: data.name,
-          category: data.category,
-          price_range_min: data.price_range_min,
-          price_range_max: data.price_range_max,
-          price_unit: data.price_unit,
-          availability: data.availability,
-          description: data.description,
-          experience: data.experience,
-          address: data.address,
-          city: data.city,
-          area: data.area,
-          contact_phone: data.contact_phone,
-          contact_email: data.contact_email,
-          website: data.website,
-        });
+      if (isEditing) {
+        // Update existing business
+        const { error } = await supabase
+          .from('service_providers')
+          .update({
+            name: data.name,
+            category: data.category,
+            price_range_min: data.price_range_min,
+            price_range_max: data.price_range_max,
+            price_unit: data.price_unit,
+            availability: data.availability,
+            description: data.description,
+            experience: data.experience,
+            address: data.address,
+            city: data.city,
+            area: data.area,
+            contact_phone: data.contact_phone,
+            contact_email: data.contact_email,
+            website: data.website,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', businessData.id)
+          .eq('user_id', user.id);
 
-      if (error) {
-        console.error("Error submitting form:", error);
-        toast({
-          title: "Error",
-          description: "There was an error creating your listing. Please try again.",
-          variant: "destructive",
-        });
+        if (error) {
+          console.error("Error updating business:", error);
+          toast({
+            title: "Error",
+            description: "There was an error updating your listing. Please try again.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Success",
+            description: "Your business listing has been updated successfully!",
+          });
+          if (onSaved) onSaved();
+        }
       } else {
-        form.reset();
-        setShowSuccessDialog(true);
+        // Create new business
+        const { error } = await supabase
+          .from('service_providers')
+          .insert({
+            user_id: user.id,
+            name: data.name,
+            category: data.category,
+            price_range_min: data.price_range_min,
+            price_range_max: data.price_range_max,
+            price_unit: data.price_unit,
+            availability: data.availability,
+            description: data.description,
+            experience: data.experience,
+            address: data.address,
+            city: data.city,
+            area: data.area,
+            contact_phone: data.contact_phone,
+            contact_email: data.contact_email,
+            website: data.website,
+          });
+
+        if (error) {
+          console.error("Error submitting form:", error);
+          toast({
+            title: "Error",
+            description: "There was an error creating your listing. Please try again.",
+            variant: "destructive",
+          });
+        } else {
+          form.reset();
+          setShowSuccessDialog(true);
+          if (onSaved) onSaved();
+        }
       }
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
         title: "Error",
-        description: "There was an error creating your listing. Please try again.",
+        description: "There was an error with your submission. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -519,7 +565,10 @@ const AddBusinessForm = () => {
             disabled={isSubmitting}
           >
             <Save className="mr-2 h-4 w-4" />
-            {isSubmitting ? "Submitting..." : "Save Business/Service"}
+            {isSubmitting 
+              ? isEditing ? "Updating..." : "Submitting..." 
+              : isEditing ? "Update Business/Service" : "Save Business/Service"
+            }
           </Button>
         </form>
       </Form>

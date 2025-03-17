@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useToast } from '@/hooks/use-toast';
 import AddBusinessForm from '@/components/AddBusinessForm';
+import BusinessesList from '@/components/BusinessesList';
 import { 
   Form, 
   FormControl, 
@@ -32,9 +34,12 @@ import {
   Moon,
   LogOut,
   Plus,
-  Store
+  Store,
+  ListPlus
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { BusinessFormValues } from '@/components/AddBusinessForm';
 
 const profileFormSchema = z.object({
   name: z.string().min(2, {
@@ -78,12 +83,16 @@ const defaultValues: Partial<ProfileFormValues> = {
 const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [locationServices, setLocationServices] = useState(true);
   const [dataSharing, setDataSharing] = useState(false);
   const [activeTab, setActiveTab] = useState("account");
+  const [businessToEdit, setBusinessToEdit] = useState<(BusinessFormValues & { id: string }) | null>(null);
+  const [refreshBusinessList, setRefreshBusinessList] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -116,6 +125,27 @@ const Profile = () => {
     }
   };
 
+  const handleEditBusiness = (business: BusinessFormValues & { id: string }) => {
+    setBusinessToEdit(business);
+    setShowAddForm(true);
+    setActiveTab("services");
+  };
+
+  const handleAddNewBusiness = () => {
+    setBusinessToEdit(null);
+    setShowAddForm(true);
+  };
+
+  const handleBusinessSaved = () => {
+    setShowAddForm(false);
+    setBusinessToEdit(null);
+    setRefreshBusinessList(!refreshBusinessList);
+    toast({
+      title: "Success",
+      description: "Your business listing has been saved successfully.",
+    });
+  };
+
   return (
     <MainLayout>
       <section className="py-8">
@@ -140,7 +170,7 @@ const Profile = () => {
             </TabsTrigger>
             <TabsTrigger value="services" className="flex items-center gap-1.5">
               <Store className="h-4 w-4" />
-              Add Business/Service
+              Business/Services
             </TabsTrigger>
             <TabsTrigger value="preferences" className="flex items-center gap-1.5">
               <Settings className="h-4 w-4" />
@@ -280,15 +310,59 @@ const Profile = () => {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                   <Store className="h-5 w-5 mr-2" />
-                  <h2 className="text-xl font-medium">Add Business or Service</h2>
+                  <h2 className="text-xl font-medium">
+                    {showAddForm 
+                      ? businessToEdit 
+                        ? "Edit Business or Service" 
+                        : "Add Business or Service"
+                      : "Your Businesses and Services"
+                    }
+                  </h2>
                 </div>
+                {!showAddForm && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleAddNewBusiness}
+                    className="flex items-center gap-1.5"
+                  >
+                    <ListPlus className="h-4 w-4" />
+                    Add New
+                  </Button>
+                )}
+                {showAddForm && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => {
+                      setShowAddForm(false);
+                      setBusinessToEdit(null);
+                    }}
+                  >
+                    Back to List
+                  </Button>
+                )}
               </div>
               
-              <p className="text-muted-foreground mb-4">
-                Add your business or service to help others find you. All fields marked with * are required.
-              </p>
-              
-              <AddBusinessForm />
+              {showAddForm ? (
+                <>
+                  <p className="text-muted-foreground mb-4">
+                    {businessToEdit 
+                      ? "Edit your business or service details below." 
+                      : "Add your business or service to help others find you. All fields marked with * are required."
+                    }
+                  </p>
+                  <AddBusinessForm 
+                    businessData={businessToEdit || undefined} 
+                    onSaved={handleBusinessSaved}
+                  />
+                </>
+              ) : (
+                <BusinessesList 
+                  onEdit={handleEditBusiness} 
+                  refresh={refreshBusinessList}
+                />
+              )}
             </div>
           </TabsContent>
 
