@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { MessageCircle, MapPin, Clock, IndianRupee, Languages, Award, Calendar, ArrowLeft, Star, Navigation2, Share2, Phone } from 'lucide-react';
+import { MessageCircle, MapPin, Clock, IndianRupee, Languages, Award, Calendar, ArrowLeft, Star, Navigation2, Share2, Phone, Instagram } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -185,7 +185,34 @@ const LocationDetails = () => {
       });
     }
   };
-  
+
+  const handleInstagram = () => {
+    if (!location?.instagram) {
+      toast({
+        title: "No Instagram Profile",
+        description: `${location?.name} hasn't provided an Instagram profile`,
+        duration: 2000,
+      });
+      return;
+    }
+    
+    let instagramUrl = location.instagram;
+    if (!instagramUrl.startsWith('http')) {
+      if (instagramUrl.startsWith('@')) {
+        instagramUrl = instagramUrl.substring(1);
+      }
+      instagramUrl = `https://instagram.com/${instagramUrl}`;
+    }
+    
+    window.open(instagramUrl, '_blank');
+    
+    toast({
+      title: "Opening Instagram",
+      description: `Opening Instagram profile for ${location?.name}...`,
+      duration: 2000,
+    });
+  };
+
   const handleAskQuestion = (text?: string) => {
     const questionText = text || question;
     if (!questionText.trim()) return;
@@ -394,7 +421,7 @@ const LocationDetails = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-5 gap-3">
                   <button 
                     onClick={handleCall} 
                     className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
@@ -412,6 +439,12 @@ const LocationDetails = () => {
                     className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
                   >
                     <Navigation2 className="h-5 w-5" />
+                  </button>
+                  <button 
+                    onClick={handleInstagram} 
+                    className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+                  >
+                    <Instagram className="h-5 w-5" />
                   </button>
                   <button 
                     onClick={handleShare} 
