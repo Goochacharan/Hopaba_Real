@@ -50,7 +50,10 @@ Your task is to improve the search query by:
 3. Normalizing location references
 4. Adding relevant context that might be missing
 5. Consider both business locations and local events in your enhancements
-6. Return ONLY the enhanced search query. Do not add any explanation or additional text.`;
+6. Adding search category tags to help categorization (e.g., #yoga, #restaurant, #education)
+7. Return ONLY the enhanced search query with appropriate category tags. Do not add any explanation or additional text.
+
+For specialized searches like "yoga classes", ensure the enhanced query contains terms that would match specifically with yoga studios or fitness centers, not general businesses.`;
 
     // Create messages with context if provided
     const messages = [

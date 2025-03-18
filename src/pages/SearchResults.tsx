@@ -17,6 +17,7 @@ const SearchResults = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const searchQuery = searchParams.get('q') || '';
+  const categoryParam = searchParams.get('category') || 'all';
   const [activeTab, setActiveTab] = useState('locations');
   
   const [distance, setDistance] = useState<number[]>([5]);
@@ -35,7 +36,10 @@ const SearchResults = () => {
     handleSearch,
     handleCategoryChange,
     filterRecommendations
-  } = useRecommendations({ initialQuery: searchQuery });
+  } = useRecommendations({ 
+    initialQuery: searchQuery,
+    initialCategory: categoryParam as any  // Pass the category from URL
+  });
 
   const filteredRecommendations = filterRecommendations(recommendations, {
     maxDistance: distance[0],
@@ -64,6 +68,13 @@ const SearchResults = () => {
       handleSearch(searchQuery);
     }
   }, [searchQuery, query, handleSearch]);
+
+  useEffect(() => {
+    if (categoryParam !== 'all' && categoryParam !== category) {
+      console.log("SearchResults - Setting category from URL:", categoryParam);
+      handleCategoryChange(categoryParam as any);
+    }
+  }, [categoryParam, category, handleCategoryChange]);
 
   useEffect(() => {
     if (!searchQuery) {

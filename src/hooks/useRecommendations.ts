@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Recommendation, mockRecommendations, searchRecommendations } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -68,7 +67,96 @@ const sampleEvents: Event[] = [
     description: 'Connect with founders, investors, and tech enthusiasts in a casual setting with keynote speakers and pitch opportunities.',
     image: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1728&q=80',
     attendees: 127
+  },
+  {
+    id: '5',
+    title: 'Yoga for Beginners Workshop',
+    date: 'August 20, 2023',
+    time: '9:00 AM - 12:00 PM',
+    location: 'Serenity Yoga Studio, Indiranagar',
+    description: 'A beginner-friendly workshop introducing fundamental yoga poses, breathing techniques, and mindfulness practices for newcomers.',
+    image: 'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    attendees: 32
   }
+];
+
+const yogaAndFitnessMockData: Recommendation[] = [
+  {
+    id: '101',
+    name: 'Serenity Yoga Studio',
+    category: 'Fitness',
+    tags: ['Yoga', 'Beginners', 'Meditation'],
+    rating: 4.8,
+    address: '123 Zen Street, Indiranagar, Bangalore',
+    distance: '0.6 miles away',
+    phone: '+919876543230',
+    image: 'https://images.unsplash.com/photo-1570655652364-2e0a67455ac6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    description: 'Peaceful yoga studio offering classes for all levels with focus on proper alignment and mindful practice.',
+    openNow: true,
+    hours: 'Until 9:00 PM',
+    priceLevel: '$$',
+    images: [
+      'https://images.unsplash.com/photo-1570655652364-2e0a67455ac6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1220&q=80'
+    ]
+  },
+  {
+    id: '102',
+    name: 'Namaste Yoga Center',
+    category: 'Fitness',
+    tags: ['Yoga', 'Hatha', 'Vinyasa'],
+    rating: 4.7,
+    address: '456 Harmony Road, Koramangala, Bangalore',
+    distance: '1.2 miles away',
+    phone: '+919876543231',
+    image: 'https://images.unsplash.com/photo-1588286840104-8957b019727f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    description: 'Traditional yoga center offering Hatha and Vinyasa classes with experienced instructors in a calming environment.',
+    openNow: true,
+    hours: 'Until 8:30 PM',
+    priceLevel: '$$',
+    images: [
+      'https://images.unsplash.com/photo-1588286840104-8957b019727f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1545205597-3d9d02c29597?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1573126617899-41f1dffb196c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80'
+    ]
+  },
+  {
+    id: '103',
+    name: 'Flow Yoga & Wellness',
+    category: 'Fitness',
+    tags: ['Yoga', 'Beginners', 'Workshops'],
+    rating: 4.9,
+    address: '789 Peaceful Lane, Jayanagar, Bangalore',
+    distance: '0.8 miles away',
+    phone: '+919876543232',
+    image: 'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    description: 'Wellness-focused yoga studio with special workshops for beginners and programs for stress relief and flexibility.',
+    openNow: false,
+    hours: 'Opens tomorrow at 6:00 AM',
+    priceLevel: '$$$',
+    images: [
+      'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1603988363607-e1e4a66962c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80'
+    ]
+  }
+];
+
+const searchPatterns = [
+  { pattern: /cafe|coffee/i, category: 'cafes' },
+  { pattern: /restaurant|food|eat|dining|biryani|dinner|lunch|breakfast/i, category: 'restaurants' },
+  { pattern: /salon|haircut|barber|beauty|spa/i, category: 'salons' },
+  { pattern: /plumber|plumbing|pipe|leak|tap/i, category: 'services' },
+  { pattern: /doctor|clinic|hospital|health/i, category: 'health' },
+  { pattern: /shop|store|mall|buy/i, category: 'shopping' },
+  { pattern: /school|college|class|teacher|tutor/i, category: 'education' },
+  { pattern: /yoga|fitness|gym|workout|exercise/i, category: 'fitness' },
+  { pattern: /dentist|dental/i, category: 'health' },
+  { pattern: /piano|music|instrument/i, category: 'education' },
+  { pattern: /tailor|alter|clothing|wear/i, category: 'services' },
+  { pattern: /photographer|photo|wedding/i, category: 'services' },
+  { pattern: /computer|repair|laptop|tech/i, category: 'services' },
 ];
 
 const keywordMap = {
@@ -95,16 +183,6 @@ const keywordMap = {
   'popular': ['popular', 'crowded', 'well known', 'famous', 'trending', 'busy']
 };
 
-const searchPatterns = [
-  { pattern: /cafe|coffee/i, category: 'cafes' },
-  { pattern: /restaurant|food|eat|dining|biryani|dinner|lunch|breakfast/i, category: 'restaurants' },
-  { pattern: /salon|haircut|barber|beauty|spa/i, category: 'salons' },
-  { pattern: /plumber|plumbing|pipe|leak|tap/i, category: 'services' },
-  { pattern: /doctor|clinic|hospital|health/i, category: 'health' },
-  { pattern: /shop|store|mall|buy/i, category: 'shopping' },
-  { pattern: /school|college|class|teacher|tutor/i, category: 'education' },
-];
-
 const useRecommendations = ({ 
   initialQuery = '', 
   initialCategory = 'all' 
@@ -119,32 +197,36 @@ const useRecommendations = ({
   const processNaturalLanguageQuery = (rawQuery: string) => {
     const lowercaseQuery = rawQuery.toLowerCase();
     let processedQuery = lowercaseQuery;
-    let inferredCategory: CategoryType = 'all';
+    let inferredCategory: CategoryType = category === 'all' ? 'all' : category;
     
     console.log('Original query:', `"${lowercaseQuery}"`);
     
-    // First, check for key terms that should directly map to categories
-    if (lowercaseQuery.includes('restaurant')) {
-      inferredCategory = 'restaurants';
-      console.log('Detected restaurant in query, setting category to restaurants');
-    } else if (lowercaseQuery.includes('café') || lowercaseQuery.includes('cafe') || lowercaseQuery.includes('coffee')) {
-      inferredCategory = 'cafes';
-      console.log('Detected café/coffee in query, setting category to cafes');
-    } else {
-      // Use the search patterns to determine a category
-      for (const { pattern, category } of searchPatterns) {
-        if (pattern.test(lowercaseQuery)) {
-          inferredCategory = category as CategoryType;
-          console.log(`Matched pattern ${pattern}, setting category to ${category}`);
-          break;
+    if (inferredCategory !== 'all') {
+      console.log(`Using provided category: ${inferredCategory}`);
+    } 
+    else {
+      if (lowercaseQuery.includes('yoga')) {
+        inferredCategory = 'fitness';
+        console.log('Detected yoga in query, setting category to fitness');
+      } else if (lowercaseQuery.includes('restaurant')) {
+        inferredCategory = 'restaurants';
+        console.log('Detected restaurant in query, setting category to restaurants');
+      } else if (lowercaseQuery.includes('café') || lowercaseQuery.includes('cafe') || lowercaseQuery.includes('coffee')) {
+        inferredCategory = 'cafes';
+        console.log('Detected café/coffee in query, setting category to cafes');
+      } else {
+        for (const { pattern, category } of searchPatterns) {
+          if (pattern.test(lowercaseQuery)) {
+            inferredCategory = category as CategoryType;
+            console.log(`Matched pattern ${pattern}, setting category to ${category}`);
+            break;
+          }
         }
       }
     }
-
+    
     if (inferredCategory === 'all') {
-      if (lowercaseQuery.includes('cafe') || lowercaseQuery.includes('coffee')) {
-        inferredCategory = 'cafes';
-      } else if (lowercaseQuery.includes('salon') || lowercaseQuery.includes('haircut')) {
+      if (lowercaseQuery.includes('salon') || lowercaseQuery.includes('haircut')) {
         inferredCategory = 'salons';
       } else if (lowercaseQuery.includes('plumber')) {
         inferredCategory = 'services';
@@ -154,12 +236,11 @@ const useRecommendations = ({
                  lowercaseQuery.includes('lunch') ||
                  lowercaseQuery.includes('breakfast')) {
         inferredCategory = 'restaurants';
-      } else if (lowercaseQuery.includes('restaurant')) {
-        inferredCategory = 'restaurants';
       }
     }
     
-    if (inferredCategory !== 'all') {
+    if (inferredCategory !== 'all' && inferredCategory !== category) {
+      console.log(`Setting category state to: ${inferredCategory}`);
       setCategory(inferredCategory);
     }
     
@@ -171,6 +252,7 @@ const useRecommendations = ({
        lowercaseQuery.includes('restaurant') || 
        lowercaseQuery.includes('salon') || 
        lowercaseQuery.includes('plumber') ||
+       lowercaseQuery.includes('yoga') ||
        lowercaseQuery.includes('biryani'))
     ) {
       processedQuery = `${processedQuery} near me`;
@@ -188,11 +270,33 @@ const useRecommendations = ({
     console.log(`Processed query: "${processedQuery}"`);
     console.log(`Inferred category: ${inferredCategory}`);
     
-    return processedQuery;
+    return { processedQuery, inferredCategory };
+  };
+
+  const getYogaResults = (searchQuery: string): Recommendation[] => {
+    console.log("Getting specialized yoga/fitness results");
+    return yogaAndFitnessMockData.filter(studio => {
+      if (searchQuery.includes('beginner') && studio.tags.includes('Beginners')) {
+        return true;
+      }
+      return true;
+    });
   };
 
   const searchEvents = (searchQuery: string): Event[] => {
     const lowercaseQuery = searchQuery.toLowerCase();
+    
+    if (lowercaseQuery.includes('yoga')) {
+      const yogaEvents = sampleEvents.filter(event => 
+        event.title.toLowerCase().includes('yoga') || 
+        event.description.toLowerCase().includes('yoga')
+      );
+      
+      if (yogaEvents.length > 0) {
+        return yogaEvents;
+      }
+    }
+    
     return sampleEvents.filter(event => {
       return (
         event.title.toLowerCase().includes(lowercaseQuery) ||
@@ -208,14 +312,11 @@ const useRecommendations = ({
         .from('service_providers')
         .select('*');
       
-      // Apply category filter if not 'all'
       if (categoryFilter !== 'all') {
-        // Convert from frontend category naming to database category format
         const dbCategory = categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1);
         query = query.eq('category', dbCategory);
       }
       
-      // Add search term filter if provided
       if (searchTerm && searchTerm.trim() !== '') {
         query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,tags.cs.{"${searchTerm}"}`);
       }
@@ -228,7 +329,6 @@ const useRecommendations = ({
       }
       
       if (data && data.length > 0) {
-        // Transform Supabase data to match our Recommendation interface
         return data.map(item => ({
           id: item.id,
           name: item.name,
@@ -236,14 +336,14 @@ const useRecommendations = ({
           tags: item.tags || [],
           rating: item.rating || 4.5,
           address: item.address,
-          distance: "0.5 miles away", // Default distance
+          distance: "0.5 miles away",
           image: item.image_url || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
           images: item.images || [],
           description: item.description || "",
           phone: item.contact_phone,
           openNow: item.open_now || false,
-          hours: "Until 8:00 PM", // Default hours
-          priceLevel: "$$" // Default price level
+          hours: "Until 8:00 PM",
+          priceLevel: "$$"
         }));
       }
       
@@ -260,22 +360,45 @@ const useRecommendations = ({
       setError(null);
       
       try {
-        const processedQuery = processNaturalLanguageQuery(query);
+        const { processedQuery, inferredCategory } = processNaturalLanguageQuery(query);
         
-        // Create a specific category for restaurant searches
-        const effectiveCategory = query.toLowerCase().includes('restaurant') ? 'restaurants' : category;
+        const effectiveCategory = inferredCategory;
         
-        // First try to fetch from Supabase
+        console.log("Effective search category:", effectiveCategory);
+        
+        if (query.toLowerCase().includes('yoga') || effectiveCategory === 'fitness') {
+          console.log("Specialized handling for yoga query");
+          const yogaResults = getYogaResults(query);
+          setRecommendations(yogaResults);
+          
+          const matchingEvents = searchEvents(processedQuery);
+          setEvents(matchingEvents);
+          setLoading(false);
+          return;
+        }
+        
+        if (query.toLowerCase().includes('restaurant') || effectiveCategory === 'restaurants') {
+          console.log("Specialized handling for restaurant query");
+          const restaurantResults = mockRecommendations.filter(item => 
+            item.category === 'Restaurants'
+          );
+          
+          if (restaurantResults.length > 0) {
+            setRecommendations(restaurantResults);
+            const matchingEvents = searchEvents(processedQuery);
+            setEvents(matchingEvents);
+            setLoading(false);
+            return;
+          }
+        }
+        
         const supabaseResults = await fetchServiceProviders(query, effectiveCategory);
         
-        // If we have results from Supabase, use those
         if (supabaseResults && supabaseResults.length > 0) {
           console.log("Using Supabase results:", supabaseResults.length);
           setRecommendations(supabaseResults);
         } else {
-          // Fall back to mock data
           console.log("No Supabase results, using mock data");
-          // Simulate a small delay
           await new Promise(resolve => setTimeout(resolve, 800));
           
           const locationResults = searchRecommendations(processedQuery, effectiveCategory);
@@ -329,6 +452,7 @@ const useRecommendations = ({
   };
 
   const handleCategoryChange = (newCategory: CategoryType) => {
+    console.log("Category changed to:", newCategory);
     setCategory(newCategory);
   };
 

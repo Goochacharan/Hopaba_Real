@@ -9,6 +9,30 @@ import { Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+// Category mapping for example queries
+const queryCategoryMap = {
+  "Find me a cozy café nearby": "cafes",
+  "Looking for a Kannada-speaking actor": "entertainment",
+  "Best electrician in Jayanagar": "services",
+  "Where can I buy a pre-owned bike?": "shopping",
+  "Recommend a good Italian restaurant": "restaurants",
+  "Find a flower shop in Koramangala": "shopping",
+  "Best dance classes for kids": "education",
+  "Need a plumber for water leak": "services",
+  "Bookstores with rare collections": "shopping",
+  "Top rated hair salon near me": "salons",
+  "Auto repair shops open on Sunday": "services",
+  "Pet-friendly cafes in Indiranagar": "cafes",
+  "Yoga classes for beginners": "fitness",
+  "Wedding photographers with good reviews": "services",
+  "Where to buy organic vegetables": "shopping",
+  "Best dentists that accept insurance": "health",
+  "Computer repair services near me": "services",
+  "Piano teachers for adults": "education",
+  "Tailors who can alter ethnic wear": "services",
+  "Schools with good sports programs": "education"
+};
+
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -84,8 +108,14 @@ const Index = () => {
     
     setIsEnhancing(rawQuery);
     try {
+      // Get the category hint from our map
+      const categoryHint = queryCategoryMap[rawQuery] || "";
+      
       const { data, error } = await supabase.functions.invoke('enhance-search', {
-        body: { query: rawQuery }
+        body: { 
+          query: rawQuery,
+          context: categoryHint ? `Category: ${categoryHint}` : undefined
+        }
       });
       
       if (error) {
@@ -120,9 +150,17 @@ const Index = () => {
         // Enhance the search query with DeepSeek AI
         const enhancedQuery = await enhanceSearchQuery(query);
         
+        // Get the category hint from our map for search params
+        const categoryHint = queryCategoryMap[query] || "";
+        
         // Add a small delay to ensure the toast is visible
         setTimeout(() => {
-          navigate(`/search?q=${encodeURIComponent(enhancedQuery)}`);
+          const searchParams = new URLSearchParams();
+          searchParams.set('q', enhancedQuery);
+          if (categoryHint) {
+            searchParams.set('category', categoryHint);
+          }
+          navigate(`/search?${searchParams.toString()}`);
         }, 100);
       } catch (error) {
         console.error('Search error:', error);
