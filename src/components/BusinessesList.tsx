@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Pencil, Trash2, DollarSign, Clock, MapPin, Phone } from 'lucide-react';
+import { Pencil, Trash2, DollarSign, Clock, MapPin, Phone, Instagram } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -154,6 +154,12 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
                 <Phone className="h-4 w-4 text-muted-foreground" />
                 <span>{business.contact_phone}</span>
               </div>
+              {business.instagram && (
+                <div className="flex items-center gap-2">
+                  <Instagram className="h-4 w-4 text-muted-foreground" />
+                  <span>{business.instagram}</span>
+                </div>
+              )}
             </CardContent>
             <CardFooter className="border-t bg-muted/10 gap-2 justify-end">
               <Button 

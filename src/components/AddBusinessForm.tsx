@@ -49,7 +49,8 @@ import {
   MessageCircle,
   Image,
   Save,
-  StoreIcon
+  StoreIcon,
+  Instagram
 } from 'lucide-react';
 
 const businessFormSchema = z.object({
@@ -94,6 +95,7 @@ const businessFormSchema = z.object({
   website: z.string().url({
     message: "Please enter a valid URL.",
   }).optional(),
+  instagram: z.string().optional(),
 });
 
 export type BusinessFormValues = z.infer<typeof businessFormSchema>;
@@ -104,6 +106,7 @@ const defaultValues: Partial<BusinessFormValues> = {
   description: "",
   website: "",
   whatsapp: "",
+  instagram: "",
 };
 
 const categoryOptions = [
@@ -179,6 +182,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
             contact_phone: data.contact_phone,
             contact_email: data.contact_email,
             website: data.website,
+            instagram: data.instagram,
             updated_at: new Date().toISOString(),
           })
           .eq('id', businessData.id)
@@ -218,6 +222,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
             contact_phone: data.contact_phone,
             contact_email: data.contact_email,
             website: data.website,
+            instagram: data.instagram,
           });
 
         if (error) {
@@ -553,6 +558,28 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
                   <FormControl>
                     <Input placeholder="Enter website URL" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="instagram"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    <div className="flex items-center gap-2">
+                      <Instagram className="h-4 w-4" />
+                      Instagram
+                    </div>
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter Instagram username or URL" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Add your Instagram profile to help showcase your business
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
