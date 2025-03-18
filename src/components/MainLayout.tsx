@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
@@ -56,6 +57,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     console.log("Navigating to home page from: ", location.pathname);
   };
 
+  // Determine the placeholder text based on current pathname
+  const getSearchPlaceholder = () => {
+    if (location.pathname === '/my-list') {
+      return "Search from your list...";
+    }
+    return "What are you looking for today?";
+  };
+
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center">
       <header className="w-full sticky top-0 z-50 glass border-b border-border/50 px-6 py-4">
@@ -97,7 +106,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       
       <div className="fixed bottom-16 left-0 right-0 px-4 z-50">
         <div className="max-w-5xl mx-auto">
-          <SearchBar onSearch={onSearch} className="mb-0" placeholder="What are you looking for today?" initialValue="" />
+          <SearchBar 
+            onSearch={onSearch} 
+            className="mb-0" 
+            placeholder={getSearchPlaceholder()} 
+            initialValue="" 
+            currentPath={location.pathname}
+          />
         </div>
       </div>
       

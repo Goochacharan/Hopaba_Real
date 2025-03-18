@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -95,7 +96,7 @@ const MyList = () => {
         
         {wishlist.length > 0 ? (
           <>
-            {/* Search input */}
+            {/* Search input specifically for this page */}
             <div className="mb-6">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />

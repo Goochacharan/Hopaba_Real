@@ -11,13 +11,15 @@ interface SearchBarProps {
   className?: string;
   placeholder?: string;
   initialValue?: string;
+  currentPath?: string;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   className,
   placeholder = "What are you looking for today?",
-  initialValue = ''
+  initialValue = '',
+  currentPath = ''
 }) => {
   const [query, setQuery] = useState(initialValue);
   const [isExpanded, setIsExpanded] = useState(false);
