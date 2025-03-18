@@ -215,6 +215,16 @@ export const searchRecommendations = (
   
   // Special handling for specific query types
   
+  // If this is a specific restaurant query
+  if (normalizedQuery.includes('restaurant')) {
+    // Only return restaurants
+    return mockRecommendations.filter(item => 
+      item.category === 'Restaurants' || 
+      item.name.toLowerCase().includes('restaurant') ||
+      item.description.toLowerCase().includes('restaurant')
+    );
+  }
+  
   // If this is a unisex salon/saloon query
   if (normalizedQuery.includes('salon') || normalizedQuery.includes('saloon')) {
     
@@ -318,6 +328,30 @@ export const searchRecommendations = (
     filtered = filtered.filter(item => 
       item.category.toLowerCase() === categoryName.toLowerCase()
     );
+  }
+
+  // Add special handling for restaurant-related queries
+  if (lowercaseQuery.includes('food') || 
+      lowercaseQuery.includes('eat') || 
+      lowercaseQuery.includes('dining') || 
+      lowercaseQuery.includes('dinner') ||
+      lowercaseQuery.includes('lunch') ||
+      lowercaseQuery.includes('breakfast')) {
+    filtered = mockRecommendations.filter(item => item.category === 'Restaurants');
+    if (filtered.length === 0) {
+      // No restaurant results, create mock restaurants
+      const baseItems = mockRecommendations.slice(0, 3);
+      return baseItems.map(item => ({
+        ...item,
+        id: `restaurant-${item.id}`,
+        name: `${['Tasty', 'Delicious', 'Gourmet', 'Fine'][parseInt(item.id) % 4]} Dining`,
+        category: 'Restaurants',
+        tags: ['Dinner', 'Lunch', 'Family-Friendly'],
+        description: `Quality restaurant offering a variety of dishes in a pleasant atmosphere.`,
+        address: item.address
+      }));
+    }
+    return filtered;
   }
   
   // Apply query filter with more flexible matching

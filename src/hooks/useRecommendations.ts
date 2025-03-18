@@ -97,7 +97,7 @@ const keywordMap = {
 
 const searchPatterns = [
   { pattern: /cafe|coffee/i, category: 'cafes' },
-  { pattern: /restaurant|food|eat|dining|biryani/i, category: 'restaurants' },
+  { pattern: /restaurant|food|eat|dining|biryani|dinner|lunch|breakfast/i, category: 'restaurants' },
   { pattern: /salon|haircut|barber|beauty|spa/i, category: 'salons' },
   { pattern: /plumber|plumbing|pipe|leak|tap/i, category: 'services' },
   { pattern: /doctor|clinic|hospital|health/i, category: 'health' },
@@ -124,7 +124,10 @@ const useRecommendations = ({
     console.log('Original query:', `"${lowercaseQuery}"`);
     
     // First, check for key terms that should directly map to categories
-    if (lowercaseQuery.includes('café') || lowercaseQuery.includes('cafe') || lowercaseQuery.includes('coffee')) {
+    if (lowercaseQuery.includes('restaurant')) {
+      inferredCategory = 'restaurants';
+      console.log('Detected restaurant in query, setting category to restaurants');
+    } else if (lowercaseQuery.includes('café') || lowercaseQuery.includes('cafe') || lowercaseQuery.includes('coffee')) {
       inferredCategory = 'cafes';
       console.log('Detected café/coffee in query, setting category to cafes');
     } else {
@@ -145,7 +148,11 @@ const useRecommendations = ({
         inferredCategory = 'salons';
       } else if (lowercaseQuery.includes('plumber')) {
         inferredCategory = 'services';
-      } else if (lowercaseQuery.includes('biryani')) {
+      } else if (lowercaseQuery.includes('biryani') || 
+                 lowercaseQuery.includes('food') || 
+                 lowercaseQuery.includes('dinner') || 
+                 lowercaseQuery.includes('lunch') ||
+                 lowercaseQuery.includes('breakfast')) {
         inferredCategory = 'restaurants';
       } else if (lowercaseQuery.includes('restaurant')) {
         inferredCategory = 'restaurants';
@@ -255,8 +262,11 @@ const useRecommendations = ({
       try {
         const processedQuery = processNaturalLanguageQuery(query);
         
+        // Create a specific category for restaurant searches
+        const effectiveCategory = query.toLowerCase().includes('restaurant') ? 'restaurants' : category;
+        
         // First try to fetch from Supabase
-        const supabaseResults = await fetchServiceProviders(query, category);
+        const supabaseResults = await fetchServiceProviders(query, effectiveCategory);
         
         // If we have results from Supabase, use those
         if (supabaseResults && supabaseResults.length > 0) {
@@ -268,7 +278,7 @@ const useRecommendations = ({
           // Simulate a small delay
           await new Promise(resolve => setTimeout(resolve, 800));
           
-          const locationResults = searchRecommendations(processedQuery, category);
+          const locationResults = searchRecommendations(processedQuery, effectiveCategory);
           
           const resultsWithImages = locationResults.map(result => {
             if (result.images && result.images.length > 0) {
