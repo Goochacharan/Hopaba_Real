@@ -53,26 +53,6 @@ import {
   Instagram
 } from 'lucide-react';
 
-export interface BusinessFormValues {
-  name: string;
-  category: string;
-  description: string;
-  price_range_min: number;
-  price_range_max: number;
-  price_unit: string;
-  contact_phone: string;
-  contact_email: string;
-  website: string;
-  address: string;
-  city: string;
-  area: string;
-  availability: string;
-  experience: string;
-  tags: string[];
-  languages: string[];
-  instagram: string;
-}
-
 const businessFormSchema = z.object({
   name: z.string().min(2, {
     message: "Business name must be at least 2 characters.",
@@ -111,11 +91,13 @@ const businessFormSchema = z.object({
   contact_email: z.string().email({
     message: "Please enter a valid email address.",
   }).optional(),
-  whatsapp: z.string().optional(),
   website: z.string().url({
     message: "Please enter a valid URL.",
   }).optional(),
   instagram: z.string().optional(),
+  whatsapp: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  languages: z.array(z.string()).optional(),
 });
 
 export type BusinessFormValues = z.infer<typeof businessFormSchema>;
@@ -127,6 +109,8 @@ const defaultValues: Partial<BusinessFormValues> = {
   website: "",
   whatsapp: "",
   instagram: "",
+  tags: [],
+  languages: [],
 };
 
 const categoryOptions = [
@@ -183,6 +167,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
       tags: businessData?.tags || [],
       languages: businessData?.languages || [],
       instagram: businessData?.instagram || '',
+      whatsapp: '',
     },
     mode: "onChange",
   });
