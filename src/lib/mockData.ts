@@ -1,19 +1,22 @@
-
 export interface Recommendation {
   id: string;
   name: string;
-  category: string;
-  tags: string[];
-  rating: number;
-  address: string;
-  distance: string;
   image: string;
-  images?: string[]; // Add this optional images array
+  images?: string[];
+  category: string;
   description: string;
+  address: string;
+  rating: number;
+  price?: string;
+  priceLevel?: string;
   phone?: string;
+  website?: string;
   openNow?: boolean;
   hours?: string;
-  priceLevel?: string;
+  distance?: string;
+  tags: string[];
+  city?: string;
+  instagram?: string;
 }
 
 // Mock recommendations data
@@ -168,7 +171,6 @@ export const mockRecommendations: Recommendation[] = [
     hours: 'Opens tomorrow at 9:00 AM',
     priceLevel: '$$$'
   },
-  // Adding two new restaurant entries
   {
     id: '11',
     name: 'Spice Garden Restaurant',

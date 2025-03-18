@@ -26,6 +26,7 @@ export type Database = {
           id: string
           image_url: string | null
           images: string[] | null
+          instagram: string | null
           languages: string[] | null
           name: string
           open_now: boolean | null
@@ -55,6 +56,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           images?: string[] | null
+          instagram?: string | null
           languages?: string[] | null
           name: string
           open_now?: boolean | null
@@ -84,6 +86,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           images?: string[] | null
+          instagram?: string | null
           languages?: string[] | null
           name?: string
           open_now?: boolean | null
