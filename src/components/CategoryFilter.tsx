@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Coffee, Utensils, Scissors, ShoppingBag, HeartPulse, Briefcase, BookOpen, Home, Users, MoreHorizontal } from 'lucide-react';
+import { Coffee, Utensils, Scissors, ShoppingBag, HeartPulse, Briefcase, BookOpen, Home, Users, MoreHorizontal, Dumbbell } from 'lucide-react';
 
 export type CategoryType = 
   | 'all' 
@@ -14,6 +14,7 @@ export type CategoryType =
   | 'education' 
   | 'real-estate' 
   | 'community' 
+  | 'fitness'  // Added 'fitness' category
   | 'more';
 
 interface CategoryFilterProps {
@@ -33,6 +34,7 @@ const categories: { id: CategoryType; label: string; icon: React.ReactNode }[] =
   { id: 'education', label: 'Education', icon: <BookOpen className="w-5 h-5" /> },
   { id: 'real-estate', label: 'Real Estate', icon: <Home className="w-5 h-5" /> },
   { id: 'community', label: 'Community', icon: <Users className="w-5 h-5" /> },
+  { id: 'fitness', label: 'Fitness', icon: <Dumbbell className="w-5 h-5" /> }, // Added fitness category with Dumbbell icon
   { id: 'more', label: 'More', icon: <MoreHorizontal className="w-5 h-5" /> },
 ];
 
