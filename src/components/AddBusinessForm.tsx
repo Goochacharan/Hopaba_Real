@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -6,52 +7,14 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue 
-} from '@/components/ui/select';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { Save } from 'lucide-react';
 
-import { 
-  ListChecks, 
-  Heading, 
-  DollarSign, 
-  Clock, 
-  FileText, 
-  Star, 
-  MapPin, 
-  Phone,
-  MessageCircle,
-  Image,
-  Save,
-  StoreIcon,
-  Instagram
-} from 'lucide-react';
+import BasicInfoSection from './business-form/BasicInfoSection';
+import LocationSection from './business-form/LocationSection';
+import ContactSection from './business-form/ContactSection';
+import SuccessDialog from './business-form/SuccessDialog';
 
 const businessFormSchema = z.object({
   name: z.string().min(2, {
@@ -113,28 +76,6 @@ const defaultValues: Partial<BusinessFormValues> = {
   languages: [],
 };
 
-const categoryOptions = [
-  "Cleaning Services",
-  "Home Repairs",
-  "Plumbing",
-  "Electrical",
-  "Landscaping",
-  "Tutoring",
-  "Personal Training",
-  "Child Care",
-  "Pet Care",
-  "Food Delivery",
-  "Transportation",
-  "Technology Support",
-  "Beauty & Wellness",
-  "Legal Services",
-  "Financial Services",
-  "Event Planning",
-  "Photography",
-  "Graphic Design",
-  "Other"
-];
-
 interface AddBusinessFormProps {
   businessData?: BusinessFormValues & { id?: string };
   onSaved?: () => void;
@@ -147,7 +88,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const isEditing = !!businessData?.id;
 
-  const form = useForm<z.infer<typeof businessFormSchema>>({
+  const form = useForm<BusinessFormValues>({
     resolver: zodResolver(businessFormSchema),
     defaultValues: {
       name: businessData?.name || '',
@@ -167,7 +108,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
       tags: businessData?.tags || [],
       languages: businessData?.languages || [],
       instagram: businessData?.instagram || '',
-      whatsapp: '',
+      whatsapp: businessData?.whatsapp || '',
     },
     mode: "onChange",
   });
@@ -187,6 +128,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
       }
 
       if (isEditing) {
+        // Update existing business
         const { error } = await supabase
           .from('service_providers')
           .update({
@@ -225,6 +167,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
           if (onSaved) onSaved();
         }
       } else {
+        // Create new business
         const { error } = await supabase
           .from('service_providers')
           .insert({
@@ -276,338 +219,9 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-6 md:col-span-2">
-              <h3 className="text-lg font-medium flex items-center gap-2">
-                <StoreIcon className="h-5 w-5 text-primary" />
-                Basic Information
-              </h3>
-            </div>
-
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <div className="flex items-center gap-2">
-                      <Heading className="h-4 w-4" />
-                      Business/Service Name*
-                    </div>
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your business or service name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <div className="flex items-center gap-2">
-                      <ListChecks className="h-4 w-4" />
-                      Category*
-                    </div>
-                  </FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categoryOptions.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="md:col-span-2 grid grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="price_range_min"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4" />
-                        Min Price*
-                      </div>
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="price_range_max"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4" />
-                        Max Price*
-                      </div>
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="price_unit"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price Unit</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select price unit" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="per hour">Per Hour</SelectItem>
-                        <SelectItem value="per day">Per Day</SelectItem>
-                        <SelectItem value="per service">Per Service</SelectItem>
-                        <SelectItem value="per month">Per Month</SelectItem>
-                        <SelectItem value="fixed price">Fixed Price</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="availability"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      Availability*
-                    </div>
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Mon-Fri 9AM-5PM" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="experience"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <div className="flex items-center gap-2">
-                      <Star className="h-4 w-4" />
-                      Experience
-                    </div>
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., 5 years of experience" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem className="md:col-span-2">
-                  <FormLabel>
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      Description*
-                    </div>
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Describe your business or service..." 
-                      className="min-h-[120px]" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Provide details about your business or service (10-500 characters).
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="space-y-6 md:col-span-2">
-              <h3 className="text-lg font-medium flex items-center gap-2 mt-4">
-                <MapPin className="h-5 w-5 text-primary" />
-                Location Information
-              </h3>
-            </div>
-
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem className="md:col-span-2">
-                  <FormLabel>Address*</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your street address" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="city"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>City*</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter city" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="area"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Area/Neighborhood*</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter neighborhood or area" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="space-y-6 md:col-span-2">
-              <h3 className="text-lg font-medium flex items-center gap-2 mt-4">
-                <Phone className="h-5 w-5 text-primary" />
-                Contact Information
-              </h3>
-            </div>
-
-            <FormField
-              control={form.control}
-              name="contact_phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone Number*</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter phone number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="whatsapp"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <div className="flex items-center gap-2">
-                      <MessageCircle className="h-4 w-4" />
-                      WhatsApp Number
-                    </div>
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter WhatsApp number (if different)" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="contact_email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter email address" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="website"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Website</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter website URL" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="instagram"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    <div className="flex items-center gap-2">
-                      <Instagram className="h-4 w-4" />
-                      Instagram
-                    </div>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="@yourusername or full URL"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Add your Instagram username or full profile URL
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <BasicInfoSection />
+            <LocationSection />
+            <ContactSection />
           </div>
 
           <Button 
@@ -624,21 +238,10 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
         </form>
       </Form>
 
-      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Success!</AlertDialogTitle>
-            <AlertDialogDescription>
-              Your business/service has been successfully added. It will now be available for others to discover.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowSuccessDialog(false)}>
-              Continue
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <SuccessDialog 
+        open={showSuccessDialog} 
+        onOpenChange={setShowSuccessDialog} 
+      />
     </>
   );
 };
