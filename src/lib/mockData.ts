@@ -168,6 +168,47 @@ export const mockRecommendations: Recommendation[] = [
     hours: 'Opens tomorrow at 9:00 AM',
     priceLevel: '$$$'
   },
+  // Adding two new restaurant entries
+  {
+    id: '11',
+    name: 'Spice Garden Restaurant',
+    category: 'Restaurants',
+    tags: ['Indian', 'Vegetarian', 'Buffet'],
+    rating: 4.6,
+    address: '123 Culinary Avenue, Koramangala, Bangalore',
+    distance: '0.4 miles away',
+    phone: '+919876543220',
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    description: 'Authentic Indian restaurant with a wide variety of vegetarian and non-vegetarian dishes served in a warm, welcoming atmosphere.',
+    openNow: true,
+    hours: 'Until 11:00 PM',
+    priceLevel: '$$',
+    images: [
+      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80',
+      'https://images.unsplash.com/photo-1542528180-a1208c5169a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1277&q=80'
+    ]
+  },
+  {
+    id: '12',
+    name: 'Ocean Blue Seafood',
+    category: 'Restaurants',
+    tags: ['Seafood', 'Fine Dining', 'Cocktails'],
+    rating: 4.8,
+    address: '456 Harbor Drive, Indiranagar, Bangalore',
+    distance: '0.9 miles away',
+    phone: '+919876543221',
+    image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    description: 'Premium seafood restaurant featuring fresh catch of the day, expertly prepared with global flavors and accompanied by signature cocktails.',
+    openNow: true,
+    hours: 'Until 10:30 PM',
+    priceLevel: '$$$',
+    images: [
+      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1559339352-11d035aa65de?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80'
+    ]
+  }
 ];
 
 // Function to filter recommendations based on search query
