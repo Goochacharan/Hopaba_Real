@@ -7,9 +7,10 @@ import LocationSelector from '@/components/LocationSelector';
 import useRecommendations, { Event } from '@/hooks/useRecommendations';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, MapPin, Clock, Users } from 'lucide-react';
+import { Calendar, MapPin, Clock, Users, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -45,7 +46,7 @@ const SearchResults = () => {
   });
 
   const rankedRecommendations = [...filteredRecommendations].map(item => {
-    const reviewCount = parseInt(item.id) * 10 + Math.floor(item.rating * 15);
+    const reviewCount = item.id ? parseInt(item.id) * 10 + Math.floor((item.rating || 4.5) * 15) : 100;
     return {
       ...item,
       reviewCount
@@ -83,6 +84,12 @@ const SearchResults = () => {
     });
   };
 
+  const handleNewSearch = (newQuery: string) => {
+    if (newQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(newQuery)}`);
+    }
+  };
+
   return (
     <MainLayout>
       <div className="w-full animate-fade-in">
@@ -105,6 +112,14 @@ const SearchResults = () => {
         </div>
 
         <div className="w-full">
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map(i => (
@@ -169,9 +184,22 @@ const SearchResults = () => {
                   ) : (
                     <div className="text-center py-10 animate-fade-in">
                       <p className="text-lg font-medium mb-2">No locations found</p>
-                      <p className="text-muted-foreground">
+                      <p className="text-muted-foreground mb-4">
                         Try adjusting your search or filters
                       </p>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => handleNewSearch("restaurant near me")}
+                        className="mr-2"
+                      >
+                        Try "Restaurant near me"
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => handleNewSearch("cafes in bangalore")}
+                      >
+                        Try "Cafes in Bangalore"
+                      </Button>
                     </div>
                   )}
                 </TabsContent>

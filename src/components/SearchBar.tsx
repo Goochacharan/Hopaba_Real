@@ -5,26 +5,39 @@ import { Search, X, Mic, Sparkles } from 'lucide-react';
 import { Input } from './ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useLocation } from 'react-router-dom';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
   className?: string;
   placeholder?: string;
   initialValue?: string;
+  currentRoute?: string;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   className,
-  placeholder = "What are you looking for today?",
-  initialValue = ''
+  placeholder,
+  initialValue = '',
+  currentRoute
 }) => {
+  const location = useLocation();
+  const currentPath = location.pathname;
   const [query, setQuery] = useState(initialValue);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  
+  // Determine correct placeholder based on current route
+  const getPlaceholder = () => {
+    if (currentRoute === '/my-list' || currentPath === '/my-list') {
+      return "Search from your list...";
+    }
+    return placeholder || "What are you looking for today?";
+  };
   
   const suggestionExamples = ["hidden gem restaurants in Indiranagar", "good flute teacher in Malleshwaram", "places to visit in Nagarbhavi", "best unisex salon near me", "plumbers available right now"];
   
@@ -184,7 +197,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           <Input
             ref={inputRef}
             type="text"
-            placeholder={placeholder}
+            placeholder={getPlaceholder()}
             className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-2"
             value={query}
             onChange={(e) => setQuery(e.target.value)}

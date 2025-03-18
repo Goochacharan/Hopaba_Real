@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Recommendation, mockRecommendations, searchRecommendations } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UseRecommendationsProps {
   initialQuery?: string;
@@ -146,6 +147,8 @@ const useRecommendations = ({
         inferredCategory = 'services';
       } else if (lowercaseQuery.includes('biryani')) {
         inferredCategory = 'restaurants';
+      } else if (lowercaseQuery.includes('restaurant')) {
+        inferredCategory = 'restaurants';
       }
     }
     
@@ -192,6 +195,58 @@ const useRecommendations = ({
     });
   };
 
+  const fetchServiceProviders = async (searchTerm: string, categoryFilter: string) => {
+    try {
+      let query = supabase
+        .from('service_providers')
+        .select('*');
+      
+      // Apply category filter if not 'all'
+      if (categoryFilter !== 'all') {
+        // Convert from frontend category naming to database category format
+        const dbCategory = categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1);
+        query = query.eq('category', dbCategory);
+      }
+      
+      // Add search term filter if provided
+      if (searchTerm && searchTerm.trim() !== '') {
+        query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,tags.cs.{"${searchTerm}"}`);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error("Error fetching from Supabase:", error);
+        return [];
+      }
+      
+      if (data && data.length > 0) {
+        // Transform Supabase data to match our Recommendation interface
+        return data.map(item => ({
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          tags: item.tags || [],
+          rating: item.rating || 4.5,
+          address: item.address,
+          distance: "0.5 miles away", // Default distance
+          image: item.image_url || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
+          images: item.images || [],
+          description: item.description || "",
+          phone: item.contact_phone,
+          openNow: item.open_now || false,
+          hours: "Until 8:00 PM", // Default hours
+          priceLevel: "$$" // Default price level
+        }));
+      }
+      
+      return [];
+    } catch (err) {
+      console.error("Failed to fetch from Supabase:", err);
+      return [];
+    }
+  };
+
   useEffect(() => {
     const fetchRecommendations = async () => {
       setLoading(true);
@@ -200,30 +255,42 @@ const useRecommendations = ({
       try {
         const processedQuery = processNaturalLanguageQuery(query);
         
-        await new Promise(resolve => setTimeout(resolve, 800));
+        // First try to fetch from Supabase
+        const supabaseResults = await fetchServiceProviders(query, category);
         
-        const locationResults = searchRecommendations(processedQuery, category);
-        
-        const resultsWithImages = locationResults.map(result => {
-          if (result.images && result.images.length > 0) {
-            return result;
-          }
+        // If we have results from Supabase, use those
+        if (supabaseResults && supabaseResults.length > 0) {
+          console.log("Using Supabase results:", supabaseResults.length);
+          setRecommendations(supabaseResults);
+        } else {
+          // Fall back to mock data
+          console.log("No Supabase results, using mock data");
+          // Simulate a small delay
+          await new Promise(resolve => setTimeout(resolve, 800));
           
-          const mainImage = result.image;
-          const baseUrl = mainImage.split('?')[0];
-          const images = [
-            mainImage,
-            `${baseUrl}?v=2`,
-            `${baseUrl}?v=3`,
-          ];
+          const locationResults = searchRecommendations(processedQuery, category);
           
-          return {
-            ...result,
-            images
-          };
-        });
-        
-        setRecommendations(resultsWithImages);
+          const resultsWithImages = locationResults.map(result => {
+            if (result.images && result.images.length > 0) {
+              return result;
+            }
+            
+            const mainImage = result.image;
+            const baseUrl = mainImage.split('?')[0];
+            const images = [
+              mainImage,
+              `${baseUrl}?v=2`,
+              `${baseUrl}?v=3`,
+            ];
+            
+            return {
+              ...result,
+              images
+            };
+          });
+          
+          setRecommendations(resultsWithImages);
+        }
         
         const matchingEvents = searchEvents(processedQuery);
         setEvents(matchingEvents);
