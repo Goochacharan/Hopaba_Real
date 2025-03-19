@@ -24,19 +24,19 @@ serve(async (req) => {
 
     if (!query || typeof query !== 'string' || query.trim() === '') {
       // Return popular or preset suggestions when no query is provided
-      const { data: recommendations, error: recError } = await supabase
-        .from('recommendations')
+      const { data: serviceProviders, error: recError } = await supabase
+        .from('service_providers')
         .select('name, category')
         .order('rating', { ascending: false })
         .limit(5);
 
       if (recError) {
-        console.error('Error fetching default recommendations:', recError);
+        console.error('Error fetching default service_providers:', recError);
         throw new Error('Failed to fetch default suggestions');
       }
 
       // Extract unique categories and names
-      const categories = [...new Set(recommendations?.map(r => r.category) || [])];
+      const categories = [...new Set(serviceProviders?.map(r => r.category) || [])];
       const defaultSuggestions = [
         { suggestion: 'Best restaurants in Bangalore', category: 'Restaurants', source: 'default' },
         { suggestion: 'Yoga classes near me', category: 'Fitness', source: 'default' },
@@ -46,7 +46,7 @@ serve(async (req) => {
           category, 
           source: 'category' 
         })),
-        ...(recommendations || []).slice(0, 3).map(rec => ({
+        ...(serviceProviders || []).slice(0, 3).map(rec => ({
           suggestion: rec.name,
           category: rec.category,
           source: 'place'
@@ -60,9 +60,9 @@ serve(async (req) => {
 
     console.log('Searching for suggestions with query:', query);
 
-    // Try direct search from recommendations table first
+    // Try direct search from service_providers table first
     const { data: directResults, error: directError } = await supabase
-      .from('recommendations')
+      .from('service_providers')
       .select('name, category, tags')
       .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
       .limit(5);
