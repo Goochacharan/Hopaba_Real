@@ -307,7 +307,7 @@ const LocationDetails = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="container mx-auto py-8">
+        <div className="container mx-auto py-8 px-4">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-gray-200 rounded w-1/3"></div>
             <div className="h-64 bg-gray-200 rounded"></div>
@@ -327,7 +327,7 @@ const LocationDetails = () => {
   
   return (
     <MainLayout>
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto py-4 px-4 max-w-none">
         <Button 
           variant="ghost" 
           size="sm" 
