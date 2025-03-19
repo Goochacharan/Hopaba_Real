@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -34,8 +35,7 @@ import {
   LogOut,
   Plus,
   Store,
-  ListPlus,
-  Car 
+  ListPlus
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -128,30 +128,11 @@ const Profile = () => {
   const handleEditBusiness = (business: BusinessFormValues & { id: string }) => {
     setBusinessToEdit(business);
     setShowAddForm(true);
-    setActiveTab("carshops");
+    setActiveTab("services");
   };
 
-  const handleAddNewCarListing = () => {
-    const newShopTemplate: BusinessFormValues & { id: string } = {
-      id: 'new',
-      name: '',
-      category: 'Cars',
-      price_range_min: 0,
-      price_range_max: 0,
-      price_unit: 'fixed',
-      availability: '',
-      description: '',
-      address: '',
-      city: '',
-      area: '',
-      contact_phone: '',
-      shop_name: '',
-      shop_type: 'car_dealership',
-      vehicle_make: '',
-      vehicle_model: '',
-    };
-    
-    setBusinessToEdit(newShopTemplate);
+  const handleAddNewBusiness = () => {
+    setBusinessToEdit(null);
     setShowAddForm(true);
   };
 
@@ -161,7 +142,7 @@ const Profile = () => {
     setRefreshBusinessList(!refreshBusinessList);
     toast({
       title: "Success",
-      description: "Your car listing has been saved successfully.",
+      description: "Your business listing has been saved successfully.",
     });
   };
 
@@ -172,7 +153,7 @@ const Profile = () => {
           <div>
             <h1 className="text-3xl font-medium mb-2">My Profile</h1>
             <p className="text-muted-foreground">
-              Manage your account settings and car shop listings
+              Manage your account settings and preferences
             </p>
           </div>
           <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
@@ -187,9 +168,9 @@ const Profile = () => {
               <User className="h-4 w-4" />
               Account
             </TabsTrigger>
-            <TabsTrigger value="carshops" className="flex items-center gap-1.5">
-              <Car className="h-4 w-4" />
-              Car Listings
+            <TabsTrigger value="services" className="flex items-center gap-1.5">
+              <Store className="h-4 w-4" />
+              Business/Services
             </TabsTrigger>
             <TabsTrigger value="preferences" className="flex items-center gap-1.5">
               <Settings className="h-4 w-4" />
@@ -324,29 +305,29 @@ const Profile = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="carshops" className="space-y-6">
+          <TabsContent value="services" className="space-y-6">
             <div className="bg-white rounded-xl shadow-sm border border-border p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                   <Store className="h-5 w-5 mr-2" />
                   <h2 className="text-xl font-medium">
                     {showAddForm 
-                      ? businessToEdit?.id !== 'new'
-                        ? "Edit Car Listing" 
-                        : "Add New Car Listing"
-                      : "Your Car Listings"
+                      ? businessToEdit 
+                        ? "Edit Business or Service" 
+                        : "Add Business or Service"
+                      : "Your Businesses and Services"
                     }
                   </h2>
                 </div>
                 {!showAddForm && (
                   <Button 
-                    variant="primary" 
+                    variant="outline" 
                     size="sm" 
-                    onClick={handleAddNewCarListing}
+                    onClick={handleAddNewBusiness}
                     className="flex items-center gap-1.5"
                   >
-                    <Plus className="h-4 w-4" />
-                    Add Car Listing
+                    <ListPlus className="h-4 w-4" />
+                    Add New
                   </Button>
                 )}
                 {showAddForm && (
@@ -366,9 +347,9 @@ const Profile = () => {
               {showAddForm ? (
                 <>
                   <p className="text-muted-foreground mb-4">
-                    {businessToEdit?.id !== 'new'
-                      ? "Edit your car listing details below." 
-                      : "Add your car listing to your dealership. All fields marked with * are required."
+                    {businessToEdit 
+                      ? "Edit your business or service details below." 
+                      : "Add your business or service to help others find you. All fields marked with * are required."
                     }
                   </p>
                   <AddBusinessForm 
