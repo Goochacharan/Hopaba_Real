@@ -3,12 +3,14 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Recommendation } from '@/lib/mockData';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 
-// Create a union type to support both recommendations and marketplace listings
-type WishlistItem = Recommendation | MarketplaceListing;
+// Use a discriminated union to properly type the wishlist items
+export type WishlistItem = 
+  | (Recommendation & { type: 'recommendation' })
+  | (MarketplaceListing & { type: 'marketplace' });
 
 interface WishlistContextType {
   wishlist: WishlistItem[];
-  addToWishlist: (item: WishlistItem) => void;
+  addToWishlist: (item: Recommendation | MarketplaceListing, type: 'recommendation' | 'marketplace') => void;
   removeFromWishlist: (id: string) => void;
   isInWishlist: (id: string) => boolean;
 }
@@ -35,9 +37,12 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
-  const addToWishlist = (item: WishlistItem) => {
+  const addToWishlist = (
+    item: Recommendation | MarketplaceListing, 
+    type: 'recommendation' | 'marketplace'
+  ) => {
     if (!isInWishlist(item.id)) {
-      setWishlist((prev) => [...prev, item]);
+      setWishlist((prev) => [...prev, { ...item, type }]);
     }
   };
 

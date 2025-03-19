@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import LocationCard from '@/components/LocationCard';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useWishlist, WishlistItem } from '@/contexts/WishlistContext';
 import { Heart, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/pagination';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Recommendation } from '@/lib/mockData';
+import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 
 const MyList = () => {
   const { wishlist } = useWishlist();
@@ -58,9 +60,9 @@ const MyList = () => {
     };
   }, [navigate]);
 
-  // Determine if an item is a marketplace listing or a recommendation
-  const isMarketplaceListing = (item: any) => {
-    return item.hasOwnProperty('seller_name') || item.hasOwnProperty('seller_id');
+  // Helper function to check item type
+  const isMarketplaceListing = (item: WishlistItem): item is WishlistItem & { type: 'marketplace' } => {
+    return item.type === 'marketplace';
   };
 
   // Filter wishlist items based on search query and active tab
@@ -154,9 +156,9 @@ const MyList = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                   {currentItems.map((item) => (
                     isMarketplaceListing(item) ? (
-                      <MarketplaceListingCard key={item.id} listing={item} />
+                      <MarketplaceListingCard key={item.id} listing={item as MarketplaceListing} />
                     ) : (
-                      <LocationCard key={item.id} recommendation={item} />
+                      <LocationCard key={item.id} recommendation={item as Recommendation} />
                     )
                   ))}
                 </div>
