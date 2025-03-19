@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
@@ -118,13 +117,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           />
           
           <NavButton 
-            to="/my-list" 
-            icon={<ListChecks className="h-6 w-6" />} 
-            label="My List" 
-            isActive={location.pathname === '/my-list'} 
-          />
-          
-          <NavButton 
             to="/marketplace" 
             icon={<ShoppingCart className="h-6 w-6" />} 
             label="Market" 
@@ -136,6 +128,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             icon={<Calendar className="h-6 w-6" />} 
             label="Events" 
             isActive={location.pathname === '/events'} 
+          />
+          
+          <NavButton 
+            to="/my-list" 
+            icon={<ListChecks className="h-6 w-6" />} 
+            label="My List" 
+            isActive={location.pathname === '/my-list'} 
           />
           
           <NavButton 
