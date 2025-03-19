@@ -291,7 +291,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         <Carousel className="w-full h-full">
           <CarouselContent className="h-full">
             {images.map((img, index) => (
-              <CarouselItem key={index} className="h-full">
+              <CarouselItem key={index} className="h-full p-0">
                 <div className={cn(
                   "absolute inset-0 bg-muted/30",
                   imageLoaded[index] ? "opacity-0" : "opacity-100"
@@ -301,7 +301,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
                   alt={`${recommendation.name} - image ${index + 1}`}
                   onLoad={() => handleImageLoad(index)}
                   className={cn(
-                    "w-full h-full object-cover transition-all-500",
+                    "w-full h-72 object-cover transition-all-500",
                     imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
                   )}
                 />
