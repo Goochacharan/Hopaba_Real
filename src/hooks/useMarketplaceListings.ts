@@ -45,10 +45,12 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
           query = query.eq('category', category);
         }
         
-        // Apply search query if provided - make it more flexible
+        // Apply search query if provided - with enhanced flexibility
         if (searchQuery && searchQuery.trim() !== '') {
           const searchTerms = searchQuery.trim().toLowerCase();
-          query = query.or(`title.ilike.%${searchTerms}%,description.ilike.%${searchTerms}%`);
+          
+          // Make search more flexible by using partial matches and looking in both title and description
+          query = query.or(`title.ilike.%${searchTerms}%,description.ilike.%${searchTerms}%,category.ilike.%${searchTerms}%`);
         }
 
         const { data, error } = await query.order('created_at', { ascending: false });
@@ -57,6 +59,7 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
           throw error;
         }
 
+        console.log(`Found ${data?.length || 0} marketplace listings for query "${searchQuery}"`);
         setListings(data as MarketplaceListing[]);
       } catch (err) {
         console.error('Error fetching marketplace listings:', err);

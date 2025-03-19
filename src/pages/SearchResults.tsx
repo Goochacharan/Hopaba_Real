@@ -1,13 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import LocationCard from '@/components/LocationCard';
 import FilterTabs from '@/components/FilterTabs';
 import LocationSelector from '@/components/LocationSelector';
 import useRecommendations, { Event } from '@/hooks/useRecommendations';
+import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
+import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, MapPin, Clock, Users, AlertCircle } from 'lucide-react';
+import { Calendar, MapPin, Clock, Users, AlertCircle, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -29,8 +30,8 @@ const SearchResults = () => {
   const {
     recommendations,
     events,
-    loading,
-    error,
+    loading: recommendationsLoading,
+    error: recommendationsError,
     query,
     category,
     handleSearch,
@@ -40,6 +41,17 @@ const SearchResults = () => {
     initialQuery: searchQuery,
     initialCategory: categoryParam as any  // Pass the category from URL
   });
+
+  const {
+    listings: marketplaceListings,
+    loading: marketplaceLoading,
+    error: marketplaceError
+  } = useMarketplaceListings({
+    searchQuery: searchQuery
+  });
+
+  const loading = recommendationsLoading || marketplaceLoading;
+  const error = recommendationsError || marketplaceError;
 
   const filteredRecommendations = filterRecommendations(recommendations, {
     maxDistance: distance[0],
@@ -153,7 +165,7 @@ const SearchResults = () => {
                   {category !== 'all' && <span className="ml-2 text-muted-foreground"> in {category}</span>}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Found {rankedRecommendations.length} locations and {events.length} events
+                  Found {rankedRecommendations.length} locations, {events.length} events, and {marketplaceListings.length} marketplace items
                 </p>
               </div>
               
@@ -163,12 +175,15 @@ const SearchResults = () => {
                 onValueChange={setActiveTab}
                 value={activeTab}
               >
-                <TabsList className="grid w-full max-w-md grid-cols-2 mb-4">
+                <TabsList className="grid w-full max-w-md grid-cols-3 mb-4">
                   <TabsTrigger value="locations">
                     Locations ({rankedRecommendations.length})
                   </TabsTrigger>
                   <TabsTrigger value="events">
                     Events ({events.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="marketplace">
+                    Marketplace ({marketplaceListings.length})
                   </TabsTrigger>
                 </TabsList>
                 
@@ -273,6 +288,40 @@ const SearchResults = () => {
                       <p className="text-muted-foreground">
                         Try adjusting your search criteria
                       </p>
+                    </div>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="marketplace">
+                  {marketplaceListings.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                      {marketplaceListings.map((listing, index) => (
+                        <div
+                          key={listing.id}
+                          className="animate-fade-in"
+                          style={{
+                            animationDelay: `${index * 100}ms`
+                          }}
+                        >
+                          <MarketplaceListingCard 
+                            listing={listing}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-10 animate-fade-in">
+                      <p className="text-lg font-medium mb-2">No marketplace items found</p>
+                      <p className="text-muted-foreground mb-4">
+                        Try searching with different terms or browsing the marketplace directly
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => navigate("/marketplace")}
+                      >
+                        <ShoppingBag className="mr-2 h-4 w-4" />
+                        Browse Marketplace
+                      </Button>
                     </div>
                   )}
                 </TabsContent>
