@@ -6,7 +6,6 @@ import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Calendar, ArrowL
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { toast } from '@/components/ui/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { format } from 'date-fns';
@@ -269,33 +268,43 @@ const MarketplaceListingDetails = () => {
               onOpenChange={setImageViewerOpen}
             />
             
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-3">Description</h2>
-              <p className="text-muted-foreground whitespace-pre-line">{listing.description}</p>
+            <div className="mb-6 bg-white rounded-xl border p-6 shadow-sm">
+              <h3 className="text-lg font-semibold mb-4">Seller Information</h3>
+              <div className="flex items-center gap-3">
+                <div className="bg-[#1EAEDB]/10 h-12 w-12 rounded-full flex items-center justify-center text-[#1EAEDB] font-semibold">
+                  {listing.seller_name.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-medium">{listing.seller_name}</p>
+                  <div className="flex items-center gap-1 text-sm text-amber-500">
+                    {renderStarRating(listing.seller_rating)}
+                    <span className="ml-1">({listing.seller_rating.toFixed(1)})</span>
+                  </div>
+                </div>
+              </div>
             </div>
             
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-3">Details</h2>
-              <Table>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">Category</TableCell>
-                    <TableCell>{listing.category}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Condition</TableCell>
-                    <TableCell>{listing.condition}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Location</TableCell>
-                    <TableCell>{listing.location}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Listed</TableCell>
-                    <TableCell>{format(createdDate, 'PPP')}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+            <div className="mb-8 bg-white rounded-xl border p-6 shadow-sm">
+              <h2 className="text-xl font-semibold mb-3">Description</h2>
+              <div className="space-y-4">
+                <p className="text-muted-foreground whitespace-pre-line">{listing.description}</p>
+                
+                <div className="mt-6 pt-4 border-t border-gray-100">
+                  <div className="grid grid-cols-2 gap-y-3">
+                    <div className="text-sm font-medium">Category</div>
+                    <div className="text-sm text-muted-foreground">{listing.category}</div>
+                    
+                    <div className="text-sm font-medium">Condition</div>
+                    <div className="text-sm text-muted-foreground">{listing.condition}</div>
+                    
+                    <div className="text-sm font-medium">Location</div>
+                    <div className="text-sm text-muted-foreground">{listing.location}</div>
+                    
+                    <div className="text-sm font-medium">Listed on</div>
+                    <div className="text-sm text-muted-foreground">{format(createdDate, 'PPP')}</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           
@@ -359,22 +368,6 @@ const MarketplaceListingDetails = () => {
                 </div>
               </div>
               
-              <div className="bg-white rounded-xl border p-6 shadow-sm">
-                <h3 className="text-lg font-semibold mb-4">Seller Information</h3>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="bg-[#1EAEDB]/10 h-12 w-12 rounded-full flex items-center justify-center text-[#1EAEDB] font-semibold">
-                    {listing.seller_name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="font-medium">{listing.seller_name}</p>
-                    <div className="flex items-center gap-1 text-sm text-amber-500">
-                      {renderStarRating(listing.seller_rating)}
-                      <span className="ml-1">({listing.seller_rating.toFixed(1)})</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
               <div className="bg-[#1EAEDB]/5 rounded-xl p-4 border border-[#1EAEDB]/10">
                 <div className="flex gap-3">
                   <Shield className="h-5 w-5 text-[#1EAEDB]/70 shrink-0 mt-0.5" />
@@ -398,3 +391,4 @@ const MarketplaceListingDetails = () => {
 };
 
 export default MarketplaceListingDetails;
+
