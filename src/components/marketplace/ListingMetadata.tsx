@@ -1,15 +1,45 @@
+
 import React from 'react';
+import { MapPin, Calendar, BadgeCheck } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
 
 interface ListingMetadataProps {
   location: string;
   createdAt: string;
   condition: string;
+  showInCard?: boolean;
 }
 
-// This component now doesn't display any metadata visually
-// But keeps the props interface for backward compatibility
-const ListingMetadata: React.FC<ListingMetadataProps> = () => {
-  return null;
+const ListingMetadata: React.FC<ListingMetadataProps> = ({ 
+  location, 
+  createdAt, 
+  condition,
+  showInCard = false
+}) => {
+  // When used in listing cards, return null for backward compatibility
+  if (showInCard) {
+    return null;
+  }
+  
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+      <div className="flex items-center gap-1">
+        <MapPin className="h-4 w-4" />
+        <span>{location}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <Calendar className="h-4 w-4" />
+        <span>Listed on {format(new Date(createdAt), 'PPP')}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <Badge variant="outline" className="flex items-center gap-1 text-amber-600 bg-amber-50">
+          <BadgeCheck className="h-3 w-3" />
+          <span>{condition}</span>
+        </Badge>
+      </div>
+    </div>
+  );
 };
 
 export default ListingMetadata;
