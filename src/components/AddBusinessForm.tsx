@@ -314,7 +314,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
             {isCarsCategory && <VehicleDetailsSection />}
             <BasicInfoSection />
             <LocationSection />
-            <ContactSection />
+            {!isCarsCategory && <ContactSection />}
           </div>
 
           <Button 

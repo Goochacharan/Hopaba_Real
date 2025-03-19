@@ -12,6 +12,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { Phone, MessageCircle, Instagram, Globe, Mail } from 'lucide-react';
 import { BusinessFormValues } from '../AddBusinessForm';
 
 const ShopSection = () => {
@@ -108,13 +110,118 @@ const ShopSection = () => {
             <FormItem>
               <FormLabel>Shop Description</FormLabel>
               <FormControl>
-                <textarea 
-                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[80px]"
+                <Textarea 
                   placeholder="Tell us about your shop, specialization, etc."
                   {...field}
                   value={field.value || ''}
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <Separator className="my-3" />
+        
+        {/* Contact Information Section */}
+        <div className="mb-2">
+          <h4 className="text-md font-medium flex items-center gap-2">
+            <Phone className="h-4 w-4 text-primary" />
+            Contact Information
+          </h4>
+        </div>
+
+        <FormField
+          control={form.control}
+          name="contact_phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number*</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter phone number" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="whatsapp"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4" />
+                  WhatsApp Number
+                </div>
+              </FormLabel>
+              <FormControl>
+                <Input placeholder="Enter WhatsApp number (if different)" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="contact_email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Email
+                </div>
+              </FormLabel>
+              <FormControl>
+                <Input placeholder="Enter email address" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="website"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  Website
+                </div>
+              </FormLabel>
+              <FormControl>
+                <Input placeholder="Enter website URL" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="instagram"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                <div className="flex items-center gap-2">
+                  <Instagram className="h-4 w-4" />
+                  Instagram
+                </div>
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="@yourusername or full URL"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                Add your Instagram username or full profile URL
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
