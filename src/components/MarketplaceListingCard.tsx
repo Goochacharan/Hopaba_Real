@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Navigation2, Heart, Calendar, Check } from 'lucide-react';
@@ -232,17 +233,15 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
           )}
         </Carousel>
         
-        <div className="absolute top-3 right-3 z-10">
-          <button 
-            onClick={handleWishlistToggle}
-            className={cn(
-              "p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10",
-              inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500"
-            )}
-          >
-            <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} />
-          </button>
-        </div>
+        <button 
+          onClick={handleWishlistToggle}
+          className={cn(
+            "absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10",
+            inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500"
+          )}
+        >
+          <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} />
+        </button>
       </div>
       
       <div className="p-4">
@@ -265,11 +264,11 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
           </span>
         </div>
 
-        <div className="flex justify-between items-center mb-3">
-          <p className="text-lg font-bold text-[#1EAEDB]">{formatPrice(listing.price)}</p>
+        <div className="flex justify-between items-start mb-4">
+          <p className="text-xl font-bold text-[#1EAEDB]">{formatPrice(listing.price)}</p>
           
-          <div>
-            <span className="text-sm font-medium">{listing.seller_name}</span>
+          <div className="flex flex-col items-end">
+            <span className="font-medium">{listing.seller_name}</span>
             <div className="flex items-center gap-1">
               {renderStarRating(listing.seller_rating)}
               <span className="text-xs text-muted-foreground ml-1">
@@ -283,34 +282,39 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
           {listing.description}
         </p>
 
-        <div className="flex gap-2 mt-auto">
+        <div className="grid grid-cols-2 gap-3 mt-auto">
           <button 
             onClick={handleCall}
-            className="flex-1 h-10 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
+            className="h-12 rounded-full bg-[#1EAEDB] text-white hover:bg-[#1EAEDB]/90 transition-colors flex items-center justify-center gap-2"
             title="Call"
             aria-label="Call seller"
           >
             <Phone className="h-5 w-5" />
+            <span>Contact Seller</span>
           </button>
           <button 
             onClick={handleWhatsApp}
-            className="flex-1 h-10 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
+            className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center gap-2"
             title="WhatsApp"
             aria-label="Contact on WhatsApp"
           >
             <MessageSquare className="h-5 w-5" />
+            <span>WhatsApp</span>
           </button>
+        </div>
+        
+        <div className="grid grid-cols-3 gap-2 mt-3">
           <button 
             onClick={handleLocation}
-            className="flex-1 h-10 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
+            className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
             title="Location"
             aria-label="View location"
           >
-            <Navigation2 className="h-5 w-5" />
+            <MapPin className="h-5 w-5" />
           </button>
           <button 
             onClick={handleInstagram}
-            className="flex-1 h-10 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
+            className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
             title="Instagram"
             aria-label="View Instagram profile"
           >
@@ -318,7 +322,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
           </button>
           <button 
             onClick={handleShare}
-            className="flex-1 h-10 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
+            className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
             title="Share"
             aria-label="Share listing"
           >
