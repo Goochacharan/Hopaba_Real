@@ -48,7 +48,7 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
                 className="relative w-full"
                 onClick={(e) => handleImageClickWrapper(e, index)}
               >
-                <AspectRatio ratio={4/3}>
+                <AspectRatio ratio={16/9}>
                   <div className={cn(
                     "absolute inset-0 bg-muted/30",
                     imageLoaded[index] ? "opacity-0" : "opacity-100"
@@ -58,7 +58,7 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
                     alt={`Image ${index + 1}`}
                     onLoad={() => handleImageLoad(index)}
                     className={cn(
-                      "w-full h-full object-cover transition-all",
+                      "w-full h-full object-cover transition-all cursor-pointer",
                       imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
                     )}
                   />

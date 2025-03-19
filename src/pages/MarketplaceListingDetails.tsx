@@ -70,7 +70,7 @@ const MarketplaceListingDetails = () => {
 
   return (
     <MainLayout>
-      <div className="container mx-auto py-8 px-4 max-w-6xl">
+      <div className="container mx-auto py-8 px-4">
         <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
           <ArrowLeft className="h-4 w-4" />
           <span>Back to Marketplace</span>
@@ -88,20 +88,22 @@ const MarketplaceListingDetails = () => {
               />
             </div>
             
-            <div className="mb-6 bg-black/5 p-4 rounded-xl shadow-sm">
+            <div className="mb-6 bg-black/5 rounded-xl shadow-sm overflow-hidden">
               <ListingImageCarousel 
                 images={listing.images}
                 onImageClick={openImageViewer}
               />
               
-              <ListingThumbnails
-                images={listing.images}
-                selectedIndex={selectedImageIndex}
-                onSelect={(index) => {
-                  setSelectedImageIndex(index);
-                  openImageViewer(index);
-                }}
-              />
+              <div className="p-4">
+                <ListingThumbnails
+                  images={listing.images}
+                  selectedIndex={selectedImageIndex}
+                  onSelect={(index) => {
+                    setSelectedImageIndex(index);
+                    openImageViewer(index);
+                  }}
+                />
+              </div>
             </div>
             
             {listing && (
