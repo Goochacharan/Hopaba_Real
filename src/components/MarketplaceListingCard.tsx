@@ -196,6 +196,27 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
         className
       )}
     >
+      <div className="p-4 pb-2">
+        <h3 className="font-medium text-lg md:text-xl">{listing.title}</h3>
+        
+        <div className="flex items-center text-muted-foreground my-2 text-sm">
+          <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+          <span className="truncate">{listing.location}</span>
+        </div>
+        
+        <div className="flex items-center text-muted-foreground mb-2 text-sm">
+          <Calendar className="w-4 h-4 mr-1 flex-shrink-0" />
+          <span>Listed on {formatDate(listing.created_at)}</span>
+        </div>
+        
+        <div className="flex items-center mb-2">
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 flex items-center">
+            <Check className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
+            {listing.condition}
+          </span>
+        </div>
+      </div>
+      
       <div className="relative w-full overflow-hidden">
         <Carousel className="w-full">
           <CarouselContent>
@@ -232,45 +253,23 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
           )}
         </Carousel>
         
-        <div className="absolute top-3 left-3 z-10">
-          <span className="px-2 py-1 rounded-full text-xs font-medium bg-black/40 backdrop-blur-sm text-white">
-            {listing.category}
-          </span>
+        <div className="absolute top-3 right-3 z-10">
+          <button 
+            onClick={handleWishlistToggle}
+            className={cn(
+              "p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10",
+              inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500"
+            )}
+          >
+            <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} />
+          </button>
         </div>
-        
-        <button 
-          onClick={handleWishlistToggle}
-          className={cn(
-            "absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10",
-            inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500"
-          )}
-        >
-          <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} />
-        </button>
       </div>
       
       <div className="p-4">
-        <div className="mb-2">
-          <h3 className="font-medium text-lg">{listing.title}</h3>
+        <div className="flex justify-between items-center mb-3">
           <p className="text-lg font-bold text-[#1EAEDB]">{formatPrice(listing.price)}</p>
-        </div>
-        
-        <div className="flex items-center text-muted-foreground mb-2 text-sm">
-          <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-          <span className="truncate">{listing.location}</span>
-        </div>
-        
-        <div className="flex items-center text-muted-foreground mb-2 text-sm">
-          <Calendar className="w-4 h-4 mr-1 flex-shrink-0" />
-          <span>Listed on {formatDate(listing.created_at)}</span>
-        </div>
-        
-        <div className="flex items-center text-muted-foreground mb-3 text-sm">
-          <Check className="w-4 h-4 mr-1 flex-shrink-0" />
-          <span>{listing.condition}</span>
-        </div>
-        
-        <div className="flex items-center mb-3">
+          
           <div>
             <span className="text-sm font-medium">{listing.seller_name}</span>
             <div className="flex items-center gap-1">
