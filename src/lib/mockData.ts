@@ -30,11 +30,12 @@ export const mockRecommendations: Recommendation[] = [
     address: '123 Style Avenue, Indiranagar, Bangalore',
     distance: '0.5 miles away',
     phone: '+919876543210',
-    image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
+    image: 'https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?q=80&w=1932&auto=format&fit=crop',
     description: 'Modern unisex salon offering premium haircuts, styling, and coloring services in a relaxed atmosphere.',
     openNow: true,
     hours: 'Until 8:00 PM',
-    priceLevel: '$$'
+    priceLevel: '$$',
+    instagram: '@chiccuts'
   },
   {
     id: '2',
@@ -45,11 +46,12 @@ export const mockRecommendations: Recommendation[] = [
     address: '456 Beauty Lane, San Francisco',
     distance: '0.8 miles away',
     phone: '+919876543211',
-    image: 'https://images.unsplash.com/photo-1470259078422-826894b933aa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1174&q=80',
+    image: 'https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?q=80&w=1972&auto=format&fit=crop',
     description: 'Eco-friendly salon focusing on sustainable beauty practices and personalized haircare treatments.',
     openNow: true,
     hours: 'Until 7:00 PM',
-    priceLevel: '$$$'
+    priceLevel: '$$$',
+    instagram: 'harmonyhair'
   },
   {
     id: '3',
@@ -60,11 +62,12 @@ export const mockRecommendations: Recommendation[] = [
     address: '789 Fashion Street, San Francisco',
     distance: '1.2 miles away',
     phone: '+919876543212',
-    image: 'https://images.unsplash.com/photo-1532710093739-9470acff878f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=1969&auto=format&fit=crop',
     description: 'Boutique salon specializing in contemporary cuts and styles for all genders in an upscale environment.',
     openNow: false,
     hours: 'Opens tomorrow at 9:00 AM',
-    priceLevel: '$$'
+    priceLevel: '$$',
+    instagram: '@urbanmane'
   },
   {
     id: '4',
@@ -75,11 +78,12 @@ export const mockRecommendations: Recommendation[] = [
     address: '321 Brew Street, San Francisco',
     distance: '0.3 miles away',
     phone: '+919876543213',
-    image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1178&q=80',
+    image: 'https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?q=80&w=2070&auto=format&fit=crop',
     description: 'Artisanal coffee shop serving single-origin espresso drinks and house-made pastries in a cozy atmosphere.',
     openNow: true,
     hours: 'Until 6:00 PM',
-    priceLevel: '$$'
+    priceLevel: '$$',
+    instagram: 'craftcoffee'
   },
   {
     id: '5',
