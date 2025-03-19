@@ -9,111 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      events: {
-        Row: {
-          attendees: number | null
-          created_at: string
-          date: string
-          description: string
-          id: string
-          image: string
-          location: string
-          time: string
-          title: string
-        }
-        Insert: {
-          attendees?: number | null
-          created_at?: string
-          date: string
-          description: string
-          id?: string
-          image: string
-          location: string
-          time: string
-          title: string
-        }
-        Update: {
-          attendees?: number | null
-          created_at?: string
-          date?: string
-          description?: string
-          id?: string
-          image?: string
-          location?: string
-          time?: string
-          title?: string
-        }
-        Relationships: []
-      }
-      recommendations: {
-        Row: {
-          address: string
-          category: string
-          city: string | null
-          created_at: string
-          description: string
-          distance: string | null
-          hours: string | null
-          id: string
-          image: string
-          images: string[] | null
-          instagram: string | null
-          name: string
-          open_now: boolean | null
-          phone: string | null
-          price: string | null
-          price_level: string | null
-          rating: number | null
-          review_count: number | null
-          tags: string[] | null
-          website: string | null
-        }
-        Insert: {
-          address: string
-          category: string
-          city?: string | null
-          created_at?: string
-          description: string
-          distance?: string | null
-          hours?: string | null
-          id?: string
-          image: string
-          images?: string[] | null
-          instagram?: string | null
-          name: string
-          open_now?: boolean | null
-          phone?: string | null
-          price?: string | null
-          price_level?: string | null
-          rating?: number | null
-          review_count?: number | null
-          tags?: string[] | null
-          website?: string | null
-        }
-        Update: {
-          address?: string
-          category?: string
-          city?: string | null
-          created_at?: string
-          description?: string
-          distance?: string | null
-          hours?: string | null
-          id?: string
-          image?: string
-          images?: string[] | null
-          instagram?: string | null
-          name?: string
-          open_now?: boolean | null
-          phone?: string | null
-          price?: string | null
-          price_level?: string | null
-          rating?: number | null
-          review_count?: number | null
-          tags?: string[] | null
-          website?: string | null
-        }
-        Relationships: []
-      }
       service_providers: {
         Row: {
           address: string
@@ -127,9 +22,7 @@ export type Database = {
           coordinates: unknown | null
           created_at: string | null
           description: string | null
-          distance: string | null
           experience: string | null
-          hours: string | null
           id: string
           image_url: string | null
           images: string[] | null
@@ -137,7 +30,6 @@ export type Database = {
           languages: string[] | null
           name: string
           open_now: boolean | null
-          price: string | null
           price_range_max: number | null
           price_range_min: number | null
           price_unit: string | null
@@ -160,9 +52,7 @@ export type Database = {
           coordinates?: unknown | null
           created_at?: string | null
           description?: string | null
-          distance?: string | null
           experience?: string | null
-          hours?: string | null
           id?: string
           image_url?: string | null
           images?: string[] | null
@@ -170,7 +60,6 @@ export type Database = {
           languages?: string[] | null
           name: string
           open_now?: boolean | null
-          price?: string | null
           price_range_max?: number | null
           price_range_min?: number | null
           price_unit?: string | null
@@ -193,9 +82,7 @@ export type Database = {
           coordinates?: unknown | null
           created_at?: string | null
           description?: string | null
-          distance?: string | null
           experience?: string | null
-          hours?: string | null
           id?: string
           image_url?: string | null
           images?: string[] | null
@@ -203,7 +90,6 @@ export type Database = {
           languages?: string[] | null
           name?: string
           open_now?: boolean | null
-          price?: string | null
           price_range_max?: number | null
           price_range_min?: number | null
           price_unit?: string | null
@@ -250,44 +136,6 @@ export type Database = {
           "": unknown
         }
         Returns: unknown
-      }
-      search_recommendations: {
-        Args: {
-          search_query: string
-          category_filter?: string
-        }
-        Returns: {
-          id: string
-          name: string
-          image: string
-          images: string[]
-          category: string
-          description: string
-          address: string
-          rating: number
-          price: string
-          price_level: string
-          phone: string
-          website: string
-          open_now: boolean
-          hours: string
-          distance: string
-          tags: string[]
-          city: string
-          instagram: string
-          review_count: number
-          similarity: number
-        }[]
-      }
-      search_suggestions: {
-        Args: {
-          search_term: string
-        }
-        Returns: {
-          suggestion: string
-          category: string
-          source: string
-        }[]
       }
       set_limit: {
         Args: {

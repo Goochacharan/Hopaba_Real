@@ -15,8 +15,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import EmptyState from '@/components/EmptyState';
 
 interface Review {
   id: string;
@@ -65,7 +63,6 @@ const LocationDetails = () => {
   const { toast } = useToast();
   const [location, setLocation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [question, setQuestion] = useState('');
   const [questionAnswers, setQuestionAnswers] = useState<{ question: string; answer: string; timestamp: string }[]>([]);
   const [askingQuestion, setAskingQuestion] = useState(false);
@@ -91,29 +88,23 @@ const LocationDetails = () => {
     }
     
     setLoading(true);
-    console.log("Fetching location with ID:", id);
-    
     setTimeout(() => {
-      try {
-        const foundLocation = getRecommendationById(id);
-        console.log("Found location:", foundLocation);
-        
-        if (foundLocation) {
-          setLocation(foundLocation);
-          const locationImages = foundLocation.images && foundLocation.images.length > 0
-            ? foundLocation.images
-            : [foundLocation.image];
-          setImageLoaded(Array(locationImages.length).fill(false));
-        } else {
-          console.error("Location not found for ID:", id);
-          setError("We couldn't find the location you're looking for");
-        }
-      } catch (err) {
-        console.error("Error fetching location:", err);
-        setError("An error occurred while retrieving location details");
-      } finally {
-        setLoading(false);
+      const foundLocation = getRecommendationById(id);
+      if (foundLocation) {
+        setLocation(foundLocation);
+        const locationImages = foundLocation.images && foundLocation.images.length > 0
+          ? foundLocation.images
+          : [foundLocation.image];
+        setImageLoaded(Array(locationImages.length).fill(false));
+      } else {
+        toast({
+          title: "Location not found",
+          description: "We couldn't find the location you're looking for",
+          variant: "destructive",
+        });
+        navigate('/');
       }
+      setLoading(false);
     }, 500);
   }, [id, navigate, toast]);
   
@@ -323,36 +314,6 @@ const LocationDetails = () => {
             <div className="h-8 bg-gray-200 rounded w-2/3"></div>
             <div className="h-8 bg-gray-200 rounded w-1/2"></div>
           </div>
-        </div>
-      </MainLayout>
-    );
-  }
-  
-  if (error) {
-    return (
-      <MainLayout>
-        <div className="container max-w-4xl mx-auto py-8 px-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mb-4 pl-0 text-muted-foreground" 
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeft className="mr-1 h-4 w-4" />
-            Back to results
-          </Button>
-          
-          <Alert variant="destructive" className="mb-6">
-            <AlertTitle>Location Not Found</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-          
-          <EmptyState 
-            title="Location details unavailable"
-            description="The location you're looking for might have been removed or doesn't exist. Try searching for something else."
-            actionText="Back to Search"
-            onAction={() => navigate('/')}
-          />
         </div>
       </MainLayout>
     );

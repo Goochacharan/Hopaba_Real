@@ -1,11 +1,9 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Pencil, Trash2 } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -14,38 +12,56 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import ConfirmDialog from './ConfirmDialog';
+import { Pencil, Trash2, DollarSign, Clock, MapPin, Phone, Instagram } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { BusinessFormValues } from './AddBusinessForm';
 
 interface BusinessesListProps {
-  userId?: string;
+  onEdit: (business: BusinessFormValues & { id: string }) => void;
+  refresh: boolean;
 }
 
-const BusinessesList: React.FC<BusinessesListProps> = ({ userId }) => {
-  const [businesses, setBusinesses] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [businessToDelete, setBusinessToDelete] = useState<string | null>(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
+const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
+  const { user } = useAuth();
   const { toast } = useToast();
+  const [businesses, setBusinesses] = useState<Array<any>>([]);
+  const [loading, setLoading] = useState(true);
+  const [businessToDelete, setBusinessToDelete] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const fetchBusinesses = async () => {
-    if (!userId) {
-      setLoading(false);
-      return;
-    }
-
+    if (!user) return;
+    
+    setLoading(true);
     try {
-      setLoading(true);
       const { data, error } = await supabase
         .from('service_providers')
         .select('*')
-        .eq('user_id', userId);
-
-      if (error) throw error;
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        throw error;
+      }
+      
       setBusinesses(data || []);
-    } catch (err: any) {
-      console.error('Error fetching businesses:', err);
-      setError(err.message || 'Failed to fetch your businesses');
+    } catch (error: any) {
+      console.error('Error fetching businesses:', error);
+      toast({
+        title: 'Error',
+        description: 'Unable to load your businesses. Please try again later.',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
@@ -53,148 +69,143 @@ const BusinessesList: React.FC<BusinessesListProps> = ({ userId }) => {
 
   useEffect(() => {
     fetchBusinesses();
-  }, [userId]);
+  }, [user, refresh]);
 
-  const handleDelete = (id: string) => {
-    setBusinessToDelete(id);
-    setConfirmOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!businessToDelete) return;
-    
+  const handleDelete = async (id: string) => {
     try {
       const { error } = await supabase
         .from('service_providers')
         .delete()
-        .eq('id', businessToDelete);
-
-      if (error) throw error;
+        .eq('id', id)
+        .eq('user_id', user?.id);
       
-      setBusinesses(businesses.filter(b => b.id !== businessToDelete));
+      if (error) {
+        throw error;
+      }
+      
+      setBusinesses(businesses.filter(business => business.id !== id));
       toast({
-        title: "Business deleted",
-        description: "The business has been successfully removed",
+        title: 'Success',
+        description: 'Business listing deleted successfully',
       });
-    } catch (err: any) {
-      console.error('Error deleting business:', err);
+    } catch (error: any) {
+      console.error('Error deleting business:', error);
       toast({
-        title: "Delete failed",
-        description: err.message || "Could not delete the business",
-        variant: "destructive",
+        title: 'Error',
+        description: 'There was a problem deleting your business listing.',
+        variant: 'destructive',
       });
     } finally {
-      setBusinessToDelete(null);
-      setConfirmOpen(false);
+      setIsDeleteDialogOpen(false);
     }
   };
 
-  const handleEdit = (business: any) => {
-    // Implementation for editing would go here
-    toast({
-      title: "Edit not implemented",
-      description: "Business editing functionality is coming soon",
-    });
+  const confirmDelete = (id: string) => {
+    setBusinessToDelete(id);
+    setIsDeleteDialogOpen(true);
   };
 
   if (loading) {
-    return (
-      <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader>
-              <div className="h-6 w-1/3 bg-muted rounded"></div>
-              <div className="h-4 w-1/2 bg-muted rounded"></div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-4 w-full bg-muted rounded mb-2"></div>
-              <div className="h-4 w-3/4 bg-muted rounded"></div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
-    );
+    return <div className="text-center py-8">Loading your businesses...</div>;
   }
 
   if (businesses.length === 0) {
     return (
-      <div className="text-center py-8">
-        <h3 className="text-lg font-medium mb-2">You haven't added any businesses yet</h3>
-        <p className="text-muted-foreground mb-4">
-          Start managing your business listings to grow your customer base
-        </p>
-        <Button variant="default" onClick={() => window.location.href = "/add-business"}>
-          Add Your First Business
-        </Button>
+      <div className="text-center py-8 space-y-4">
+        <p className="text-muted-foreground">You haven't added any businesses or services yet.</p>
+        <p>Use the form above to add your first business or service!</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {businesses.map((business) => (
-        <Card key={business.id}>
-          <CardHeader>
-            <CardTitle>{business.name}</CardTitle>
-            <CardDescription>
-              <Badge variant="outline">{business.category}</Badge>
-              {business.city && (
-                <span className="ml-2 text-muted-foreground">{business.city}</span>
-              )}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">{business.description}</p>
-            {business.tags && business.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-2">
-                {business.tags.map((tag: string, i: number) => (
-                  <Badge key={i} variant="secondary" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
+    <div className="space-y-6">
+      <h3 className="text-xl font-medium">Your Businesses and Services</h3>
+      <div className="grid grid-cols-1 gap-6">
+        {businesses.map((business) => (
+          <Card key={business.id} className="overflow-hidden">
+            <CardHeader className="bg-muted/30">
+              <CardTitle className="flex justify-between items-start">
+                <span>{business.name}</span>
+                <span className="text-sm font-normal text-muted-foreground px-2 py-1 bg-muted rounded-md">
+                  {business.category}
+                </span>
+              </CardTitle>
+              <CardDescription className="line-clamp-2">{business.description}</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <span>
+                    ${business.price_range_min} - ${business.price_range_max} {business.price_unit}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span>{business.availability}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span>{business.area}, {business.city}</span>
+                </div>
               </div>
-            )}
-          </CardContent>
-          <CardFooter className="flex justify-end gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => handleEdit(business)}
-            >
-              <Pencil className="h-4 w-4 mr-1" />
-              Edit
-            </Button>
-            <Button 
-              variant="destructive" 
-              size="sm"
-              onClick={() => handleDelete(business.id)}
-            >
-              <Trash2 className="h-4 w-4 mr-1" />
-              Delete
-            </Button>
-          </CardFooter>
-        </Card>
-      ))}
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-muted-foreground" />
+                <span>{business.contact_phone}</span>
+              </div>
+              {business.instagram && (
+                <div className="flex items-center gap-2">
+                  <Instagram className="h-4 w-4 text-muted-foreground" />
+                  <span>{business.instagram}</span>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="border-t bg-muted/10 gap-2 justify-end">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => onEdit(business)}
+                className="flex items-center gap-1"
+              >
+                <Pencil className="h-4 w-4" />
+                Edit
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={() => confirmDelete(business.id)}
+                className="flex items-center gap-1"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
 
-      <ConfirmDialog
-        open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        title="Delete Business"
-        description="Are you sure you want to delete this business? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
-        onConfirm={confirmDelete}
-      />
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete your business listing. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => businessToDelete && handleDelete(businessToDelete)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

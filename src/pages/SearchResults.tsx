@@ -1,17 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import LocationCard from '@/components/LocationCard';
 import FilterTabs from '@/components/FilterTabs';
 import LocationSelector from '@/components/LocationSelector';
-import useRecommendations from '@/hooks/useRecommendations';
-import { AppEvent } from '@/types/recommendation';
+import useRecommendations, { Event } from '@/hooks/useRecommendations';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, MapPin, Clock, Users, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import EmptyState from '@/components/EmptyState';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -39,7 +38,7 @@ const SearchResults = () => {
     filterRecommendations
   } = useRecommendations({ 
     initialQuery: searchQuery,
-    initialCategory: categoryParam as any
+    initialCategory: categoryParam as any  // Pass the category from URL
   });
 
   const filteredRecommendations = filterRecommendations(recommendations, {
@@ -51,12 +50,9 @@ const SearchResults = () => {
   });
 
   const rankedRecommendations = [...filteredRecommendations].map(item => {
-    const id = item.id ? String(item.id) : `rec-${Math.random().toString(36).substr(2, 9)}`;
-    const reviewCount = parseInt(id) * 10 + Math.floor((item.rating || 4.5) * 15);
-    
+    const reviewCount = item.id ? parseInt(item.id) * 10 + Math.floor((item.rating || 4.5) * 15) : 100;
     return {
       ...item,
-      id,
       reviewCount
     };
   }).sort((a, b) => {
@@ -197,11 +193,25 @@ const SearchResults = () => {
                       ))}
                     </div>
                   ) : (
-                    <EmptyState 
-                      title="No locations found"
-                      description="Try adjusting your search or filters"
-                      icon={<AlertCircle className="h-10 w-10 text-muted-foreground opacity-40" />}
-                    />
+                    <div className="text-center py-10 animate-fade-in">
+                      <p className="text-lg font-medium mb-2">No locations found</p>
+                      <p className="text-muted-foreground mb-4">
+                        Try adjusting your search or filters
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => handleNewSearch("restaurant near me")}
+                        className="mr-2"
+                      >
+                        Try "Restaurant near me"
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => handleNewSearch("cafes in bangalore")}
+                      >
+                        Try "Cafes in Bangalore"
+                      </Button>
+                    </div>
                   )}
                 </TabsContent>
                 
