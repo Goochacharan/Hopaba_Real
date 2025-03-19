@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -131,7 +132,8 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
     );
   }
 
-  const shopGroups = businesses.reduce((groups, business) => {
+  // Fix the TypeScript error by properly typing the shopGroups
+  const shopGroups: Record<string, any[]> = businesses.reduce((groups: Record<string, any[]>, business) => {
     if (business.category === 'Cars' && business.shop_name) {
       if (!groups[business.shop_name]) {
         groups[business.shop_name] = [];
