@@ -42,7 +42,14 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     type: 'recommendation' | 'marketplace'
   ) => {
     if (!isInWishlist(item.id)) {
-      setWishlist((prev) => [...prev, { ...item, type }]);
+      // Create a properly typed item based on the type parameter
+      if (type === 'recommendation') {
+        const recommendationItem = item as Recommendation;
+        setWishlist((prev) => [...prev, { ...recommendationItem, type }]);
+      } else {
+        const marketplaceItem = item as MarketplaceListing;
+        setWishlist((prev) => [...prev, { ...marketplaceItem, type }]);
+      }
     }
   };
 

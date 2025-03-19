@@ -198,7 +198,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         duration: 2000,
       });
     } else {
-      addToWishlist(recommendation);
+      addToWishlist(recommendation, 'recommendation');
       toast({
         title: "Added to wishlist",
         description: `${recommendation.name} added to your wishlist`,
