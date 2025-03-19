@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Recommendation, mockRecommendations, searchRecommendations } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
 import { supabase } from '@/integrations/supabase/client';
+import { useDebounce } from './useDebounce';
 
 interface UseRecommendationsProps {
   initialQuery?: string;
@@ -27,162 +28,6 @@ export interface Event {
   attendees: number;
 }
 
-const sampleEvents: Event[] = [
-  {
-    id: '1',
-    title: 'Summer Food Festival',
-    date: 'July 15, 2023',
-    time: '11:00 AM - 8:00 PM',
-    location: 'Central Park, San Francisco',
-    description: 'A culinary celebration featuring over 30 local restaurants, live cooking demonstrations, and music performances.',
-    image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-    attendees: 215
-  },
-  {
-    id: '2',
-    title: 'Weekend Art Exhibition',
-    date: 'July 22-23, 2023',
-    time: '10:00 AM - 6:00 PM',
-    location: 'Modern Art Gallery, Indiranagar',
-    description: 'Showcasing works from emerging local artists with interactive sessions and workshops throughout the weekend.',
-    image: 'https://images.unsplash.com/photo-1591115765373-5207764f72e4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-    attendees: 98
-  },
-  {
-    id: '3',
-    title: 'Wellness & Yoga Retreat',
-    date: 'August 5, 2023',
-    time: '7:00 AM - 4:00 PM',
-    location: 'Sunset Beach, Koramangala',
-    description: 'A day-long retreat with yoga sessions, meditation workshops, and healthy living seminars led by certified instructors.',
-    image: 'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-    attendees: 42
-  },
-  {
-    id: '4',
-    title: 'Tech Startup Networking',
-    date: 'August 12, 2023',
-    time: '6:00 PM - 9:00 PM',
-    location: 'Innovation Hub, Whitefield',
-    description: 'Connect with founders, investors, and tech enthusiasts in a casual setting with keynote speakers and pitch opportunities.',
-    image: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1728&q=80',
-    attendees: 127
-  },
-  {
-    id: '5',
-    title: 'Yoga for Beginners Workshop',
-    date: 'August 20, 2023',
-    time: '9:00 AM - 12:00 PM',
-    location: 'Serenity Yoga Studio, Indiranagar',
-    description: 'A beginner-friendly workshop introducing fundamental yoga poses, breathing techniques, and mindfulness practices for newcomers.',
-    image: 'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-    attendees: 32
-  }
-];
-
-const yogaAndFitnessMockData: Recommendation[] = [
-  {
-    id: '101',
-    name: 'Serenity Yoga Studio',
-    category: 'Fitness',
-    tags: ['Yoga', 'Beginners', 'Meditation'],
-    rating: 4.8,
-    address: '123 Zen Street, Indiranagar, Bangalore',
-    distance: '0.6 miles away',
-    phone: '+919876543230',
-    image: 'https://images.unsplash.com/photo-1570655652364-2e0a67455ac6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-    description: 'Peaceful yoga studio offering classes for all levels with focus on proper alignment and mindful practice.',
-    openNow: true,
-    hours: 'Until 9:00 PM',
-    priceLevel: '$$',
-    images: [
-      'https://images.unsplash.com/photo-1570655652364-2e0a67455ac6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-      'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-      'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1220&q=80'
-    ]
-  },
-  {
-    id: '102',
-    name: 'Namaste Yoga Center',
-    category: 'Fitness',
-    tags: ['Yoga', 'Hatha', 'Vinyasa'],
-    rating: 4.7,
-    address: '456 Harmony Road, Koramangala, Bangalore',
-    distance: '1.2 miles away',
-    phone: '+919876543231',
-    image: 'https://images.unsplash.com/photo-1588286840104-8957b019727f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-    description: 'Traditional yoga center offering Hatha and Vinyasa classes with experienced instructors in a calming environment.',
-    openNow: true,
-    hours: 'Until 8:30 PM',
-    priceLevel: '$$',
-    images: [
-      'https://images.unsplash.com/photo-1588286840104-8957b019727f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-      'https://images.unsplash.com/photo-1545205597-3d9d02c29597?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-      'https://images.unsplash.com/photo-1573126617899-41f1dffb196c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80'
-    ]
-  },
-  {
-    id: '103',
-    name: 'Flow Yoga & Wellness',
-    category: 'Fitness',
-    tags: ['Yoga', 'Beginners', 'Workshops'],
-    rating: 4.9,
-    address: '789 Peaceful Lane, Jayanagar, Bangalore',
-    distance: '0.8 miles away',
-    phone: '+919876543232',
-    image: 'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-    description: 'Wellness-focused yoga studio with special workshops for beginners and programs for stress relief and flexibility.',
-    openNow: false,
-    hours: 'Opens tomorrow at 6:00 AM',
-    priceLevel: '$$$',
-    images: [
-      'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-      'https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-      'https://images.unsplash.com/photo-1603988363607-e1e4a66962c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80'
-    ]
-  }
-];
-
-const searchPatterns = [
-  { pattern: /cafe|coffee/i, category: 'cafes' },
-  { pattern: /restaurant|food|eat|dining|biryani|dinner|lunch|breakfast/i, category: 'restaurants' },
-  { pattern: /salon|haircut|barber|beauty|spa/i, category: 'salons' },
-  { pattern: /plumber|plumbing|pipe|leak|tap/i, category: 'services' },
-  { pattern: /doctor|clinic|hospital|health/i, category: 'health' },
-  { pattern: /shop|store|mall|buy/i, category: 'shopping' },
-  { pattern: /school|college|class|teacher|tutor/i, category: 'education' },
-  { pattern: /yoga|fitness|gym|workout|exercise/i, category: 'fitness' },
-  { pattern: /dentist|dental/i, category: 'health' },
-  { pattern: /piano|music|instrument/i, category: 'education' },
-  { pattern: /tailor|alter|clothing|wear/i, category: 'services' },
-  { pattern: /photographer|photo|wedding/i, category: 'services' },
-  { pattern: /computer|repair|laptop|tech/i, category: 'services' },
-];
-
-const keywordMap = {
-  'near me': ['nearby', 'close', 'close by', 'around me', 'in my area', 'local'],
-  'indiranagar': ['indiranagar', 'indira nagar', 'indranagar'],
-  'koramangala': ['koramangala', 'kormangala'],
-  'malleshwaram': ['malleshwaram', 'malleswaram', 'malleshwar'],
-  'nagarbhavi': ['nagarbhavi', 'nagar bhavi', 'nagarbavi'],
-  'jayanagar': ['jayanagar', 'jaya nagar', 'jaynagar'],
-  
-  'restaurant': ['restaurant', 'dining', 'place to eat', 'eatery', 'food place', 'dinner', 'biryani'],
-  'cafe': ['cafe', 'coffee shop', 'coffee place', 'coffee house', 'bakery'],
-  'salon': ['salon', 'saloon', 'haircut', 'hair stylist', 'spa', 'beauty parlor', 'barber'],
-  'school': ['school', 'academy', 'class', 'teacher', 'tutor', 'instructor', 'lessons'],
-  'plumber': ['plumber', 'plumbing', 'pipe repair', 'water leak', 'tap repair'],
-  
-  'good': ['good', 'best', 'top', 'great', 'excellent', 'amazing', 'fantastic', 'quality'],
-  'cheap': ['cheap', 'affordable', 'budget', 'inexpensive', 'reasonable', 'economical'],
-  'expensive': ['expensive', 'high-end', 'luxury', 'premium', 'upscale'],
-  'open': ['open', 'available', 'open now', 'available now', 'right now', 'currently'],
-  'veg': ['veg', 'vegetarian', 'pure veg'],
-  'non-veg': ['non-veg', 'non vegetarian', 'nonveg', 'meat', 'chicken', 'beef', 'pork'],
-  'hidden gem': ['hidden gem', 'underrated', 'secret', 'unknown', 'not popular', 'undiscovered'],
-  'popular': ['popular', 'crowded', 'well known', 'famous', 'trending', 'busy']
-};
-
 const useRecommendations = ({ 
   initialQuery = '', 
   initialCategory = 'all' 
@@ -193,6 +38,8 @@ const useRecommendations = ({
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  const debouncedQuery = useDebounce(query, 500);
   
   const processNaturalLanguageQuery = (rawQuery: string) => {
     const lowercaseQuery = rawQuery.toLowerCase();
@@ -354,79 +201,137 @@ const useRecommendations = ({
     }
   };
 
+  const fetchRecommendationsFromSupabase = async (searchQuery: string, categoryFilter: string) => {
+    try {
+      const { data, error } = await supabase
+        .rpc('search_recommendations', { 
+          search_query: searchQuery,
+          category_filter: categoryFilter.toLowerCase() 
+        });
+      
+      if (error) {
+        console.error("Error fetching recommendations from Supabase:", error);
+        return null;
+      }
+      
+      if (data && data.length > 0) {
+        return data.map(item => ({
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          tags: item.tags || [],
+          rating: item.rating || 4.5,
+          address: item.address,
+          distance: item.distance || "0.5 miles away",
+          image: item.image,
+          images: item.images || [item.image],
+          description: item.description || "",
+          phone: item.phone,
+          openNow: item.open_now || false,
+          hours: item.hours || "Until 8:00 PM",
+          priceLevel: item.price_level || "$$",
+          reviewCount: item.review_count || 0
+        }));
+      }
+      
+      return [];
+    } catch (err) {
+      console.error("Failed to fetch recommendations from Supabase:", err);
+      return null;
+    }
+  };
+
+  const fetchEventsFromSupabase = async (searchQuery: string) => {
+    try {
+      let query = supabase.from('events').select('*');
+      
+      if (searchQuery && searchQuery.trim() !== '') {
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%`);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error("Error fetching events from Supabase:", error);
+        return null;
+      }
+      
+      if (data && data.length > 0) {
+        return data.map(item => ({
+          id: item.id,
+          title: item.title,
+          date: item.date,
+          time: item.time,
+          location: item.location,
+          description: item.description,
+          image: item.image,
+          attendees: item.attendees || 0
+        }));
+      }
+      
+      return [];
+    } catch (err) {
+      console.error("Failed to fetch events from Supabase:", err);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const fetchRecommendations = async () => {
       setLoading(true);
       setError(null);
       
       try {
-        const { processedQuery, inferredCategory } = processNaturalLanguageQuery(query);
+        const { processedQuery, inferredCategory } = processNaturalLanguageQuery(debouncedQuery);
         
         const effectiveCategory = inferredCategory;
         
         console.log("Effective search category:", effectiveCategory);
         
-        if (query.toLowerCase().includes('yoga') || effectiveCategory === 'fitness') {
-          console.log("Specialized handling for yoga query");
-          const yogaResults = getYogaResults(query);
-          setRecommendations(yogaResults);
-          
-          const matchingEvents = searchEvents(processedQuery);
-          setEvents(matchingEvents);
-          setLoading(false);
-          return;
-        }
+        const supabaseRecommendations = await fetchRecommendationsFromSupabase(
+          processedQuery, 
+          effectiveCategory
+        );
         
-        if (query.toLowerCase().includes('restaurant') || effectiveCategory === 'restaurants') {
-          console.log("Specialized handling for restaurant query");
-          const restaurantResults = mockRecommendations.filter(item => 
-            item.category === 'Restaurants'
-          );
+        const supabaseEvents = await fetchEventsFromSupabase(processedQuery);
+        
+        if (supabaseRecommendations && supabaseRecommendations.length > 0) {
+          console.log("Using Supabase recommendations data");
+          setRecommendations(supabaseRecommendations);
+        } else {
+          console.log("No Supabase results, using specialized handlers or mock data");
           
-          if (restaurantResults.length > 0) {
-            setRecommendations(restaurantResults);
-            const matchingEvents = searchEvents(processedQuery);
-            setEvents(matchingEvents);
-            setLoading(false);
-            return;
+          if (debouncedQuery.toLowerCase().includes('yoga') || effectiveCategory === 'fitness') {
+            console.log("Specialized handling for yoga query");
+            const yogaResults = getYogaResults(debouncedQuery);
+            setRecommendations(yogaResults);
+          } else if (debouncedQuery.toLowerCase().includes('restaurant') || effectiveCategory === 'restaurants') {
+            console.log("Specialized handling for restaurant query");
+            const restaurantResults = mockRecommendations.filter(item => 
+              item.category === 'Restaurants'
+            );
+            
+            if (restaurantResults.length > 0) {
+              setRecommendations(restaurantResults);
+            } else {
+              const results = searchRecommendations(processedQuery, effectiveCategory);
+              setRecommendations(results);
+            }
+          } else {
+            await new Promise(resolve => setTimeout(resolve, 800));
+            const locationResults = searchRecommendations(processedQuery, effectiveCategory);
+            setRecommendations(locationResults);
           }
         }
         
-        const supabaseResults = await fetchServiceProviders(query, effectiveCategory);
-        
-        if (supabaseResults && supabaseResults.length > 0) {
-          console.log("Using Supabase results:", supabaseResults.length);
-          setRecommendations(supabaseResults);
+        if (supabaseEvents && supabaseEvents.length > 0) {
+          console.log("Using Supabase events data");
+          setEvents(supabaseEvents);
         } else {
-          console.log("No Supabase results, using mock data");
-          await new Promise(resolve => setTimeout(resolve, 800));
-          
-          const locationResults = searchRecommendations(processedQuery, effectiveCategory);
-          
-          const resultsWithImages = locationResults.map(result => {
-            if (result.images && result.images.length > 0) {
-              return result;
-            }
-            
-            const mainImage = result.image;
-            const baseUrl = mainImage.split('?')[0];
-            const images = [
-              mainImage,
-              `${baseUrl}?v=2`,
-              `${baseUrl}?v=3`,
-            ];
-            
-            return {
-              ...result,
-              images
-            };
-          });
-          
-          setRecommendations(resultsWithImages);
+          console.log("No Supabase events, using mock events data");
+          const matchingEvents = searchEvents(processedQuery);
+          setEvents(matchingEvents);
         }
-        
-        const matchingEvents = searchEvents(processedQuery);
-        setEvents(matchingEvents);
       } catch (err) {
         console.error('Error fetching recommendations:', err);
         setError('Failed to fetch recommendations. Please try again.');
@@ -437,15 +342,57 @@ const useRecommendations = ({
       }
     };
 
-    if (query) {
+    if (debouncedQuery) {
       fetchRecommendations();
     } else {
-      const defaultResults = mockRecommendations.slice(0, 6);
-      setRecommendations(defaultResults);
+      const fetchDefaultResults = async () => {
+        setLoading(true);
+        try {
+          const { data, error } = await supabase
+            .from('recommendations')
+            .select('*')
+            .order('rating', { ascending: false })
+            .limit(6);
+            
+          if (error) {
+            console.error("Error fetching default results:", error);
+            throw error;
+          }
+          
+          if (data && data.length > 0) {
+            const mappedResults = data.map(item => ({
+              id: item.id,
+              name: item.name,
+              category: item.category,
+              tags: item.tags || [],
+              rating: item.rating || 4.5,
+              address: item.address,
+              distance: item.distance || "0.5 miles away",
+              image: item.image,
+              images: item.images || [item.image],
+              description: item.description || "",
+              phone: item.phone,
+              openNow: item.open_now || false,
+              hours: item.hours || "Until 8:00 PM",
+              priceLevel: item.price_level || "$$",
+              reviewCount: item.review_count || 0
+            }));
+            setRecommendations(mappedResults);
+          } else {
+            setRecommendations(mockRecommendations.slice(0, 6));
+          }
+        } catch (err) {
+          console.error("Failed to fetch default recommendations:", err);
+          setRecommendations(mockRecommendations.slice(0, 6));
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchDefaultResults();
       setEvents([]);
-      setLoading(false);
     }
-  }, [query, category]);
+  }, [debouncedQuery, category]);
 
   const handleSearch = (searchQuery: string) => {
     setQuery(searchQuery);

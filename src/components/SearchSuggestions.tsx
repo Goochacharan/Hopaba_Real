@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Compass, Search, Tag, MessageCircle, MapPin, Clock } from 'lucide-react';
+import { Compass, Search, Tag, MessageCircle, MapPin, Clock, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface Suggestion {
@@ -43,6 +43,17 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
     }
   };
 
+  const highlightMatchingText = (text: string, query: string) => {
+    if (!query || query.length < 2) return <span>{text}</span>;
+
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return parts.map((part, index) => 
+      part.toLowerCase() === query.toLowerCase() 
+        ? <span key={index} className="font-medium text-primary">{part}</span> 
+        : <span key={index}>{part}</span>
+    );
+  };
+
   return (
     <div className="absolute left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-border/50 z-50 overflow-hidden">
       {isLoading ? (
@@ -55,7 +66,7 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
       ) : suggestions.length === 0 ? (
         <div className="p-3 text-sm text-muted-foreground">No suggestions found</div>
       ) : (
-        <ul className="max-h-[300px] overflow-y-auto">
+        <ul className="max-h-[350px] overflow-y-auto">
           {suggestions.map((suggestion, index) => (
             <li
               key={index}
@@ -64,7 +75,9 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
             >
               <div className="flex items-center">
                 {getIcon(suggestion.source)}
-                <span className="text-sm">{suggestion.suggestion}</span>
+                <span className="text-sm">
+                  {highlightMatchingText(suggestion.suggestion, suggestion.suggestion.split(' ')[0])}
+                </span>
               </div>
               {suggestion.category && (
                 <div className="ml-6 text-xs text-muted-foreground">
