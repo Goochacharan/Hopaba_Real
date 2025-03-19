@@ -15,6 +15,7 @@ import {
   CarouselPrevious 
 } from '@/components/ui/carousel';
 import ImageViewer from '@/components/ImageViewer';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
@@ -186,28 +187,30 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
         className
       )}
     >
-      <div className="relative w-full h-80 sm:h-96 overflow-hidden">
-        <Carousel className="w-full h-full">
-          <CarouselContent className="h-full">
+      <div className="relative w-full overflow-hidden">
+        <Carousel className="w-full">
+          <CarouselContent>
             {listing.images.map((img, index) => (
-              <CarouselItem key={index} className="h-full p-0">
+              <CarouselItem key={index} className="p-0">
                 <div 
-                  className="w-full h-full relative"
+                  className="relative w-full"
                   onClick={(e) => handleImageClick(e, index)}
                 >
-                  <div className={cn(
-                    "absolute inset-0 bg-muted/30",
-                    imageLoaded[index] ? "opacity-0" : "opacity-100"
-                  )} />
-                  <img
-                    src={img || '/placeholder.svg'} 
-                    alt={`${listing.title} - image ${index + 1}`}
-                    onLoad={() => handleImageLoad(index)}
-                    className={cn(
-                      "w-full h-full object-cover transition-all",
-                      imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
-                    )}
-                  />
+                  <AspectRatio ratio={16/9}>
+                    <div className={cn(
+                      "absolute inset-0 bg-muted/30",
+                      imageLoaded[index] ? "opacity-0" : "opacity-100"
+                    )} />
+                    <img
+                      src={img || '/placeholder.svg'} 
+                      alt={`${listing.title} - image ${index + 1}`}
+                      onLoad={() => handleImageLoad(index)}
+                      className={cn(
+                        "w-full h-full object-cover transition-all",
+                        imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
+                      )}
+                    />
+                  </AspectRatio>
                 </div>
               </CarouselItem>
             ))}

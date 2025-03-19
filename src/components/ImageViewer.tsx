@@ -5,8 +5,9 @@ import {
   DialogContent,
   DialogClose
 } from '@/components/ui/dialog';
-import { X, ZoomIn, ZoomOut, RotateCw, Download } from 'lucide-react';
+import { X, ZoomIn, ZoomOut, RotateCw, Download, ArrowLeft, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface ImageViewerProps {
   images: string[];
@@ -151,28 +152,32 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
           <button 
             onClick={handleZoomIn} 
             className="p-2 rounded-full bg-black/50 text-white hover:bg-black/70"
+            aria-label="Zoom in"
           >
             <ZoomIn size={20} />
           </button>
           <button 
             onClick={handleZoomOut} 
             className="p-2 rounded-full bg-black/50 text-white hover:bg-black/70"
+            aria-label="Zoom out"
           >
             <ZoomOut size={20} />
           </button>
           <button 
             onClick={handleRotate} 
             className="p-2 rounded-full bg-black/50 text-white hover:bg-black/70"
+            aria-label="Rotate"
           >
             <RotateCw size={20} />
           </button>
           <button 
             onClick={handleDownload} 
             className="p-2 rounded-full bg-black/50 text-white hover:bg-black/70"
+            aria-label="Download"
           >
             <Download size={20} />
           </button>
-          <DialogClose className="p-2 rounded-full bg-black/50 text-white hover:bg-black/70">
+          <DialogClose className="p-2 rounded-full bg-black/50 text-white hover:bg-black/70" aria-label="Close">
             <X size={20} />
           </DialogClose>
         </div>
@@ -202,13 +207,13 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
 
         {images.length > 1 && (
           <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-            <div className="flex gap-2 p-2 bg-black/50 rounded-full overflow-x-auto max-w-[90vw]">
+            <div className="flex gap-2 p-3 bg-black/60 rounded-full overflow-x-auto max-w-[90vw]">
               {images.map((img, idx) => (
                 <div
                   key={idx}
                   className={cn(
-                    "w-16 h-16 rounded-md overflow-hidden cursor-pointer border-2",
-                    currentIndex === idx ? "border-primary" : "border-transparent"
+                    "w-16 h-16 rounded-lg overflow-hidden cursor-pointer border-2",
+                    currentIndex === idx ? "border-[#1EAEDB]" : "border-transparent"
                   )}
                   onClick={() => {
                     resetView();
@@ -231,14 +236,16 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
             <button
               onClick={goPrevious}
               className="absolute left-4 top-1/2 transform -translate-y-1/2 p-3 rounded-full bg-black/50 text-white hover:bg-black/70"
+              aria-label="Previous image"
             >
-              &lt;
+              <ArrowLeft className="h-6 w-6" />
             </button>
             <button
               onClick={goNext}
               className="absolute right-4 top-1/2 transform -translate-y-1/2 p-3 rounded-full bg-black/50 text-white hover:bg-black/70"
+              aria-label="Next image"
             >
-              &gt;
+              <ArrowRight className="h-6 w-6" />
             </button>
           </>
         )}

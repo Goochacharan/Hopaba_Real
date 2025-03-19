@@ -11,6 +11,7 @@ import { toast } from '@/components/ui/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { format } from 'date-fns';
 import ImageViewer from '@/components/ImageViewer';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 const formatPrice = (price: number): string => {
   return '₹' + price.toLocaleString('en-IN');
@@ -133,14 +134,14 @@ const MarketplaceListingDetails = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="container mx-auto py-8 max-w-5xl animate-pulse">
+        <div className="container mx-auto py-8 px-4 max-w-6xl animate-pulse">
           <div className="mb-8 h-6 bg-gray-200 rounded w-1/4"></div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="col-span-1 lg:col-span-2">
-              <div className="h-96 bg-gray-200 rounded mb-4"></div>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="h-[450px] bg-gray-200 rounded-xl mb-4"></div>
+              <div className="grid grid-cols-4 gap-3">
                 {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="h-20 bg-gray-200 rounded"></div>
+                  <div key={i} className="h-24 bg-gray-200 rounded-xl"></div>
                 ))}
               </div>
             </div>
@@ -160,7 +161,7 @@ const MarketplaceListingDetails = () => {
   if (error || !listing) {
     return (
       <MainLayout>
-        <div className="container mx-auto py-8 max-w-5xl">
+        <div className="container mx-auto py-8 px-4 max-w-6xl">
           <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Marketplace</span>
@@ -184,7 +185,7 @@ const MarketplaceListingDetails = () => {
 
   return (
     <MainLayout>
-      <div className="container mx-auto py-8 max-w-5xl">
+      <div className="container mx-auto py-8 px-4 max-w-6xl">
         <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
           <ArrowLeft className="h-4 w-4" />
           <span>Back to Marketplace</span>
@@ -213,20 +214,22 @@ const MarketplaceListingDetails = () => {
               </div>
             </div>
             
-            <div className="mb-6 bg-black/5 p-3 rounded-xl">
+            <div className="mb-6 bg-black/5 p-4 rounded-xl shadow-sm">
               <Carousel className="w-full">
                 <CarouselContent>
                   {listing.images.map((image, index) => (
                     <CarouselItem key={index}>
                       <div 
-                        className="relative rounded-lg overflow-hidden h-[350px] sm:h-[450px] md:h-[550px] cursor-pointer"
+                        className="relative overflow-hidden rounded-xl cursor-pointer"
                         onClick={() => openImageViewer(index)}
                       >
-                        <img 
-                          src={image || '/placeholder.svg'} 
-                          alt={`${listing.title} - image ${index + 1}`}
-                          className="w-full h-full object-contain bg-black/5"
-                        />
+                        <AspectRatio ratio={16/9} className="bg-muted">
+                          <img 
+                            src={image || '/placeholder.svg'} 
+                            alt={`${listing.title} - image ${index + 1}`}
+                            className="w-full h-full object-contain bg-black/5"
+                          />
+                        </AspectRatio>
                       </div>
                     </CarouselItem>
                   ))}
@@ -235,7 +238,7 @@ const MarketplaceListingDetails = () => {
                 <CarouselNext className="right-2" />
               </Carousel>
               
-              <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 mt-3">
+              <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 mt-4">
                 {listing.images.map((image, index) => (
                   <div
                     key={index}
@@ -243,8 +246,8 @@ const MarketplaceListingDetails = () => {
                       setSelectedImageIndex(index);
                       openImageViewer(index);
                     }}
-                    className={`cursor-pointer rounded-md overflow-hidden h-20 sm:h-24 md:h-28 border-2 transition-all ${
-                      selectedImageIndex === index ? 'border-primary' : 'border-transparent'
+                    className={`cursor-pointer rounded-xl overflow-hidden transition-all h-24 sm:h-28 md:h-30 border-2 ${
+                      selectedImageIndex === index ? 'border-[#1EAEDB] shadow-md' : 'border-transparent'
                     }`}
                   >
                     <img
@@ -310,12 +313,12 @@ const MarketplaceListingDetails = () => {
                 </div>
                 
                 <div className="space-y-3 mb-6">
-                  <Button onClick={handleCall} className="w-full gap-2 bg-[#1EAEDB] hover:bg-[#1EAEDB]/90">
+                  <Button onClick={handleCall} className="w-full gap-2 bg-[#1EAEDB] hover:bg-[#1EAEDB]/90 rounded-full">
                     <Phone className="h-5 w-5" />
                     Contact Seller
                   </Button>
                   
-                  <Button variant="outline" onClick={handleWhatsApp} className="w-full gap-2 text-gray-700">
+                  <Button variant="outline" onClick={handleWhatsApp} className="w-full gap-2 text-gray-700 rounded-full">
                     <MessageSquare className="h-5 w-5" />
                     WhatsApp
                   </Button>
