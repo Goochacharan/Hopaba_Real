@@ -1,0 +1,96 @@
+
+import React from 'react';
+import { Heart } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselNext, 
+  CarouselPrevious 
+} from '@/components/ui/carousel';
+
+interface ListingImageCarouselProps {
+  images: string[];
+  onImageClick: (index: number) => void;
+  inWishlist: boolean;
+  onWishlistToggle: (e: React.MouseEvent) => void;
+}
+
+const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
+  images,
+  onImageClick,
+  inWishlist,
+  onWishlistToggle
+}) => {
+  const [imageLoaded, setImageLoaded] = React.useState<boolean[]>([]);
+  
+  React.useEffect(() => {
+    setImageLoaded(Array(images.length).fill(false));
+  }, [images.length]);
+
+  const handleImageLoad = (index: number) => {
+    setImageLoaded(prev => {
+      const newState = [...prev];
+      newState[index] = true;
+      return newState;
+    });
+  };
+
+  const handleImageClickWrapper = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
+    onImageClick(index);
+  };
+
+  return (
+    <div className="relative w-full overflow-hidden">
+      <Carousel className="w-full">
+        <CarouselContent>
+          {images.map((img, index) => (
+            <CarouselItem key={index} className="p-0">
+              <div 
+                className="relative w-full"
+                onClick={(e) => handleImageClickWrapper(e, index)}
+              >
+                <AspectRatio ratio={4/3}>
+                  <div className={cn(
+                    "absolute inset-0 bg-muted/30",
+                    imageLoaded[index] ? "opacity-0" : "opacity-100"
+                  )} />
+                  <img
+                    src={img || '/placeholder.svg'} 
+                    alt={`Image ${index + 1}`}
+                    onLoad={() => handleImageLoad(index)}
+                    className={cn(
+                      "w-full h-full object-cover transition-all",
+                      imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
+                    )}
+                  />
+                </AspectRatio>
+                
+                <button 
+                  onClick={onWishlistToggle}
+                  className={cn(
+                    "absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10",
+                    inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500"
+                  )}
+                >
+                  <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} />
+                </button>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        {images.length > 1 && (
+          <>
+            <CarouselPrevious className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2" />
+            <CarouselNext className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2" />
+          </>
+        )}
+      </Carousel>
+    </div>
+  );
+};
+
+export default ListingImageCarousel;
