@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Search, X, Mic, Sparkles } from 'lucide-react';
@@ -37,7 +36,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const formRef = useRef<HTMLFormElement>(null);
   const debouncedQuery = useDebounce(query, 300);
   
-  // Determine correct placeholder based on current route
   const getPlaceholder = () => {
     if (currentRoute === '/my-list' || currentPath === '/my-list') {
       return "Search from your list...";
@@ -113,22 +111,31 @@ const SearchBar: React.FC<SearchBarProps> = ({
     setShowSuggestions(true);
     
     try {
+      console.log('Fetching suggestions for query:', searchQuery);
       const { data, error } = await supabase.functions.invoke('search-suggestions', {
         body: { query: searchQuery }
       });
       
       if (error) {
         console.error('Error fetching suggestions:', error);
-        setSuggestions([]);
-        return;
-      }
-      
-      if (data?.suggestions) {
+        // Fallback suggestions
+        setSuggestions([
+          { suggestion: `${searchQuery} restaurants near me`, category: 'Restaurants', source: 'fallback' },
+          { suggestion: `Best ${searchQuery} in Bangalore`, category: 'Places', source: 'fallback' },
+          { suggestion: `${searchQuery} services`, category: 'Services', source: 'fallback' }
+        ]);
+      } else if (data?.suggestions) {
+        console.log('Got suggestions:', data.suggestions);
         setSuggestions(data.suggestions);
       }
     } catch (err) {
       console.error('Failed to fetch suggestions:', err);
-      setSuggestions([]);
+      // Fallback suggestions
+      setSuggestions([
+        { suggestion: `${searchQuery} restaurants near me`, category: 'Restaurants', source: 'fallback' },
+        { suggestion: `Best ${searchQuery} in Bangalore`, category: 'Places', source: 'fallback' },
+        { suggestion: `${searchQuery} services`, category: 'Services', source: 'fallback' }
+      ]);
     } finally {
       setIsLoadingSuggestions(false);
     }
@@ -140,18 +147,15 @@ const SearchBar: React.FC<SearchBarProps> = ({
       console.log("Original search query:", query);
       setShowSuggestions(false);
       
-      // Enhance the search query with AI
       const enhancedQuery = await enhanceSearchQuery(query);
       console.log("Enhanced search query:", enhancedQuery);
       
-      // Update the visible query if it was enhanced
       if (enhancedQuery !== query) {
         setQuery(enhancedQuery);
       }
       
       onSearch(enhancedQuery);
 
-      // Show suggestions after search only if query is very short
       if (query.trim().length < 8) {
         const randomSuggestion = suggestionExamples[Math.floor(Math.random() * suggestionExamples.length)];
         toast({
@@ -183,7 +187,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
     setIsListening(true);
 
-    // Use the appropriate constructor based on browser support
     const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognitionConstructor();
     recognition.lang = 'en-US';
@@ -193,7 +196,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
       setQuery(transcript);
       setIsListening(false);
 
-      // Auto-submit after voice input
       setTimeout(() => {
         onSearch(transcript);
       }, 500);
@@ -213,7 +215,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
     recognition.start();
   };
 
-  // Handle clicks outside the search bar to collapse it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node) && isExpanded) {
@@ -233,23 +234,19 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, [initialValue]);
 
-  // Fetch suggestions when the debounced query changes
   useEffect(() => {
     if (isExpanded) {
       fetchSuggestions(debouncedQuery);
     }
   }, [debouncedQuery, isExpanded]);
 
-  // This function will explicitly handle the search button click
   const handleSearchButtonClick = async () => {
     if (query.trim()) {
       console.log("Search button clicked with query:", query);
       setShowSuggestions(false);
       
-      // Enhance the search query with AI
       const enhancedQuery = await enhanceSearchQuery(query);
       
-      // Update the visible query if it was enhanced
       if (enhancedQuery !== query) {
         setQuery(enhancedQuery);
       }
@@ -280,6 +277,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
               setShowSuggestions(true);
               if (!query.trim()) {
                 fetchSuggestions('');
+              } else {
+                fetchSuggestions(query);
               }
             }}
           />
@@ -332,6 +331,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           isLoading={isLoadingSuggestions}
           onSelect={handleSuggestionSelect}
           visible={showSuggestions && isExpanded}
+          searchQuery={query}
         />
       </form>
     </div>

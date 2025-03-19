@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Compass, Search, Tag, MessageCircle, MapPin, Clock, Star } from 'lucide-react';
+import { Compass, Search, Tag, MessageCircle, MapPin, Clock, Star, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface Suggestion {
@@ -14,13 +14,15 @@ interface SearchSuggestionsProps {
   isLoading: boolean;
   onSelect: (suggestion: string) => void;
   visible: boolean;
+  searchQuery?: string;
 }
 
 const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
   suggestions,
   isLoading,
   onSelect,
-  visible
+  visible,
+  searchQuery = ''
 }) => {
   if (!visible) return null;
 
@@ -38,6 +40,12 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
         return <MessageCircle className="h-4 w-4 mr-2 text-muted-foreground" />;
       case 'event':
         return <Clock className="h-4 w-4 mr-2 text-muted-foreground" />;
+      case 'search':
+        return <Zap className="h-4 w-4 mr-2 text-primary" />;
+      case 'default':
+        return <Star className="h-4 w-4 mr-2 text-muted-foreground" />;
+      case 'fallback':
+        return <Star className="h-4 w-4 mr-2 text-muted-foreground" />;
       default:
         return <Search className="h-4 w-4 mr-2 text-muted-foreground" />;
     }
@@ -46,12 +54,19 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
   const highlightMatchingText = (text: string, query: string) => {
     if (!query || query.length < 2) return <span>{text}</span>;
 
-    const parts = text.split(new RegExp(`(${query})`, 'gi'));
-    return parts.map((part, index) => 
-      part.toLowerCase() === query.toLowerCase() 
-        ? <span key={index} className="font-medium text-primary">{part}</span> 
-        : <span key={index}>{part}</span>
-    );
+    try {
+      const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      const parts = text.split(regex);
+      
+      return parts.map((part, index) => 
+        part.toLowerCase() === query.toLowerCase() 
+          ? <span key={index} className="font-medium text-primary">{part}</span> 
+          : <span key={index}>{part}</span>
+      );
+    } catch (error) {
+      // Fallback if regex fails
+      return <span>{text}</span>;
+    }
   };
 
   return (
@@ -76,7 +91,7 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
               <div className="flex items-center">
                 {getIcon(suggestion.source)}
                 <span className="text-sm">
-                  {highlightMatchingText(suggestion.suggestion, suggestion.suggestion.split(' ')[0])}
+                  {highlightMatchingText(suggestion.suggestion, searchQuery)}
                 </span>
               </div>
               {suggestion.category && (
