@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Filter, Layers } from 'lucide-react';
+import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Pagination, 
@@ -79,33 +78,26 @@ const Marketplace = () => {
     });
   };
   
-  // Filter listings based on selected criteria
   const filteredListings = listings.filter(listing => {
-    // Price filter
     const price = listing.price;
     if (price < priceRange[0] || price > priceRange[1]) return false;
     
-    // Year filter (if available in the data)
     const listingYear = new Date(listing.created_at).getFullYear();
     if (listingYear < yearRange[0] || listingYear > yearRange[1]) return false;
     
-    // Rating filter
     if (ratingFilter > 0 && listing.seller_rating < ratingFilter) return false;
     
-    // Condition filter
     if (conditionFilter !== 'all' && listing.condition.toLowerCase() !== conditionFilter.toLowerCase()) return false;
     
     return true;
   });
   
-  // Pagination
   const totalPages = Math.ceil(filteredListings.length / itemsPerPage);
   const paginatedListings = filteredListings.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
   
-  // Format price for display
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -124,7 +116,35 @@ const Marketplace = () => {
         
         <ScrollArea className="w-full">
           <div className="flex items-center gap-4 mb-6 overflow-x-auto py-2 px-1">
-            {/* Rating Filter */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="rounded-full border border-border/60 flex items-center gap-2"
+                >
+                  <span>Sort</span>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-48 p-2">
+                <div className="space-y-1">
+                  <Button variant="ghost" size="sm" className="w-full justify-start">
+                    Newest First
+                  </Button>
+                  <Button variant="ghost" size="sm" className="w-full justify-start">
+                    Price: Low to High
+                  </Button>
+                  <Button variant="ghost" size="sm" className="w-full justify-start">
+                    Price: High to Low
+                  </Button>
+                  <Button variant="ghost" size="sm" className="w-full justify-start">
+                    Top Rated
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+
             <Popover open={activeFilter === 'rating'} onOpenChange={(open) => setActiveFilter(open ? 'rating' : null)}>
               <PopoverTrigger asChild>
                 <Button 
@@ -167,7 +187,6 @@ const Marketplace = () => {
               </PopoverContent>
             </Popover>
 
-            {/* Price Filter */}
             <Popover open={activeFilter === 'price'} onOpenChange={(open) => setActiveFilter(open ? 'price' : null)}>
               <PopoverTrigger asChild>
                 <Button 
@@ -218,7 +237,6 @@ const Marketplace = () => {
               </PopoverContent>
             </Popover>
 
-            {/* Year Filter */}
             <Popover open={activeFilter === 'year'} onOpenChange={(open) => setActiveFilter(open ? 'year' : null)}>
               <PopoverTrigger asChild>
                 <Button 
@@ -269,7 +287,6 @@ const Marketplace = () => {
               </PopoverContent>
             </Popover>
 
-            {/* Condition Filter */}
             <Popover open={activeFilter === 'condition'} onOpenChange={(open) => setActiveFilter(open ? 'condition' : null)}>
               <PopoverTrigger asChild>
                 <Button 
@@ -336,45 +353,6 @@ const Marketplace = () => {
                       Poor
                     </Button>
                   </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            {/* All Filters Button */}
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="rounded-full border border-border/60 flex items-center justify-center bg-background w-12 h-12 p-0"
-            >
-              <Filter className="h-5 w-5" />
-            </Button>
-
-            {/* Sort Options */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="rounded-full border border-border/60 flex items-center gap-2 ml-auto"
-                >
-                  <span>Sort</span>
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-48 p-2">
-                <div className="space-y-1">
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
-                    Newest First
-                  </Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
-                    Price: Low to High
-                  </Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
-                    Price: High to Low
-                  </Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
-                    Top Rated
-                  </Button>
                 </div>
               </PopoverContent>
             </Popover>
