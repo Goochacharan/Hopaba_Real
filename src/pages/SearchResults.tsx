@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import LocationCard from '@/components/LocationCard';
 import FilterTabs from '@/components/FilterTabs';
 import LocationSelector from '@/components/LocationSelector';
-import useRecommendations, { AppEvent } from '@/hooks/useRecommendations';
+import useRecommendations from '@/hooks/useRecommendations';
+import { AppEvent } from '@/types/recommendation'; // Import from types, not from hook
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, MapPin, Clock, Users, AlertCircle } from 'lucide-react';

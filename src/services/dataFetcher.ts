@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Recommendation, AppEvent } from '@/types/recommendation';
 import { yogaAndFitnessMockData, sampleEvents } from '@/data/yogaData';
@@ -60,7 +59,6 @@ export const fetchRecommendationsFromSupabase = async (
 ): Promise<Recommendation[]> => {
   try {
     console.log("Searching recommendations table for:", searchQuery);
-    // Modify this query to use a more comprehensive search
     const { data, error } = await supabase
       .from('recommendations')
       .select('*')
@@ -166,13 +164,13 @@ export const fetchDefaultRecommendations = async (): Promise<Recommendation[]> =
         hours: item.hours || "Until 8:00 PM",
         priceLevel: item.price_level || "$$",
         reviewCount: item.review_count || 0
-      }));
+      })) as Recommendation[];
     }
     
-    return mockRecommendations.slice(0, 6);
+    return mockRecommendations.slice(0, 6) as unknown as Recommendation[];
   } catch (err) {
     console.error("Failed to fetch default recommendations:", err);
-    return mockRecommendations.slice(0, 6);
+    return mockRecommendations.slice(0, 6) as unknown as Recommendation[];
   }
 };
 
@@ -183,7 +181,7 @@ export const getYogaResults = (searchQuery: string): Recommendation[] => {
       return true;
     }
     return true;
-  });
+  }) as Recommendation[];
 };
 
 export const searchEvents = (searchQuery: string): AppEvent[] => {

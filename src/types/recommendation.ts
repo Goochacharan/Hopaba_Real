@@ -8,14 +8,14 @@ export interface Recommendation {
   tags: string[];
   rating: number;
   address: string;
-  distance: string;
+  distance?: string; // Made optional to match mockData implementation
   image: string;
-  images: string[];
+  images?: string[]; // Made optional for consistency
   description: string;
-  phone: string;
-  openNow: boolean;
-  hours: string;
-  priceLevel: string;
+  phone?: string; // Made optional for consistency
+  openNow?: boolean; // Made optional for consistency
+  hours?: string; // Made optional for consistency
+  priceLevel?: string; // Made optional for consistency
   reviewCount?: number;
 }
 

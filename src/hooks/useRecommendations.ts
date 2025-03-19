@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { CategoryType } from '@/components/CategoryFilter';
 import { useDebounce } from './useDebounce';
@@ -14,6 +13,8 @@ import {
 } from '@/services/dataFetcher';
 import { filterRecommendations } from '@/utils/filterUtils';
 import { searchRecommendations } from '@/lib/mockData';
+
+export type { AppEvent }; // Explicitly export AppEvent type
 
 const useRecommendations = ({ 
   initialQuery = '', 
@@ -68,18 +69,18 @@ const useRecommendations = ({
         
         if (combinedResults.length > 0) {
           console.log("Using combined Supabase data with", combinedResults.length, "results");
-          setRecommendations(combinedResults);
+          setRecommendations(combinedResults as Recommendation[]);
         } else {
           console.log("No Supabase results, using specialized handlers or mock data");
           
           if (debouncedQuery.toLowerCase().includes('yoga') || effectiveCategory === 'fitness') {
             console.log("Specialized handling for yoga query");
             const yogaResults = getYogaResults(debouncedQuery);
-            setRecommendations(yogaResults);
+            setRecommendations(yogaResults as Recommendation[]);
           } else if (debouncedQuery.toLowerCase().includes('restaurant') || debouncedQuery.toLowerCase().includes('food') || effectiveCategory === 'restaurants') {
             console.log("Specialized handling for restaurant query");
             const restaurantResults = searchRecommendations(processedQuery, effectiveCategory);
-            setRecommendations(restaurantResults);
+            setRecommendations(restaurantResults as Recommendation[]);
           } else {
             console.log("Search query:", processedQuery);
             console.log("Normalized query:", processedQuery.toLowerCase());
@@ -89,7 +90,7 @@ const useRecommendations = ({
             
             await new Promise(resolve => setTimeout(resolve, 500));
             const locationResults = searchRecommendations(processedQuery, effectiveCategory);
-            setRecommendations(locationResults);
+            setRecommendations(locationResults as Recommendation[]);
           }
         }
         
