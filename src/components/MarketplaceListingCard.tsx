@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Navigation2, Heart } from 'lucide-react';
@@ -34,6 +35,9 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
   const [inWishlist, setInWishlist] = React.useState(false);
   const [imageViewerOpen, setImageViewerOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
+  
+  // Generate a random number of reviews between 50 and 200
+  const reviewCount = React.useMemo(() => Math.floor(Math.random() * 150) + 50, []);
   
   React.useEffect(() => {
     setImageLoaded(Array(listing.images.length).fill(false));
@@ -253,8 +257,8 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
             <div className="flex items-center gap-1 text-sm text-amber-500">
               {renderStarRating(listing.seller_rating)}
               <span className="ml-1">({listing.seller_rating.toFixed(1)})</span>
-              <span className="text-xs text-muted-foreground ml-1">
-                Total number of reviews
+              <span className="text-muted-foreground ml-1">
+                ({reviewCount})
               </span>
             </div>
           </div>
