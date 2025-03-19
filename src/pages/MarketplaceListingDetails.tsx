@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -325,19 +326,34 @@ const MarketplaceListingDetails = () => {
                 </div>
                 
                 <div className="grid grid-cols-3 gap-2">
-                  <Button variant="outline" onClick={handleLocation} className="w-full h-12 gap-1 text-gray-700 rounded-full">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleLocation} 
+                    className="w-full h-12 flex justify-center items-center text-gray-700 rounded-full"
+                    title="Location"
+                    aria-label="View location"
+                  >
                     <MapPin className="h-5 w-5" />
-                    <span>Location</span>
                   </Button>
                   
-                  <Button variant="outline" onClick={handleInstagram} className="w-full h-12 gap-1 text-gray-700 rounded-full">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleInstagram} 
+                    className="w-full h-12 flex justify-center items-center text-gray-700 rounded-full"
+                    title="Instagram"
+                    aria-label="View Instagram profile"
+                  >
                     <Instagram className="h-5 w-5" />
-                    <span>Instagram</span>
                   </Button>
                   
-                  <Button variant="outline" onClick={handleShare} className="w-full h-12 gap-1 text-gray-700 rounded-full">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleShare} 
+                    className="w-full h-12 flex justify-center items-center text-gray-700 rounded-full"
+                    title="Share"
+                    aria-label="Share listing"
+                  >
                     <Share2 className="h-5 w-5" />
-                    <span>Share</span>
                   </Button>
                 </div>
               </div>

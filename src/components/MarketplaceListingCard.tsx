@@ -274,30 +274,40 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
           <button 
             onClick={handleCall}
             className="flex-1 h-10 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
+            title="Call"
+            aria-label="Call seller"
           >
             <Phone className="h-5 w-5" />
           </button>
           <button 
             onClick={handleWhatsApp}
             className="flex-1 h-10 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
+            title="WhatsApp"
+            aria-label="Contact on WhatsApp"
           >
             <MessageSquare className="h-5 w-5" />
           </button>
           <button 
             onClick={handleLocation}
             className="flex-1 h-10 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
+            title="Location"
+            aria-label="View location"
           >
             <Navigation2 className="h-5 w-5" />
           </button>
           <button 
             onClick={handleInstagram}
             className="flex-1 h-10 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
+            title="Instagram"
+            aria-label="View Instagram profile"
           >
             <Instagram className="h-5 w-5" />
           </button>
           <button 
             onClick={handleShare}
             className="flex-1 h-10 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
+            title="Share"
+            aria-label="Share listing"
           >
             <Share2 className="h-5 w-5" />
           </button>
