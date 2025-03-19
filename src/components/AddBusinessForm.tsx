@@ -18,7 +18,6 @@ import ShopSection from './business-form/ShopSection';
 import VehicleDetailsSection from './business-form/VehicleDetailsSection';
 import SuccessDialog from './business-form/SuccessDialog';
 
-// Fix for the Zod schema - properly handle union types
 const businessFormSchema = z.object({
   name: z.string().min(2, {
     message: "Business or vehicle name must be at least 2 characters.",
@@ -65,18 +64,16 @@ const businessFormSchema = z.object({
   // Shop details
   shop_name: z.string().optional(),
   shop_type: z.string().optional(),
-  // Fixed: Don't apply min() on union type
-  established: z.union([z.coerce.number(), z.string()]).optional(),
+  established: z.union([z.number(), z.string()]).optional(),
   shop_description: z.string().optional(),
   // Vehicle details
   vehicle_make: z.string().optional(),
   vehicle_model: z.string().optional(),
-  // Fixed: Don't apply min() on union type
-  vehicle_year: z.union([z.coerce.number(), z.string()]).optional(),
+  vehicle_year: z.union([z.number(), z.string()]).optional(),
   vehicle_color: z.string().optional(),
   vehicle_fuel: z.string().optional(),
   vehicle_transmission: z.string().optional(),
-  vehicle_kms: z.union([z.coerce.number(), z.string()]).optional(),
+  vehicle_kms: z.union([z.number(), z.string()]).optional(),
 }).refine((data) => {
   // If category is Cars, require shop name
   if (data.category === 'Cars' && !data.shop_name) {
@@ -152,17 +149,16 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
       // Shop details
       shop_name: businessData?.shop_name || '',
       shop_type: businessData?.shop_type || '',
-      // Fix type errors by adding explicit type assertions
-      established: (businessData?.established as string) || '',
+      established: businessData?.established || '',
       shop_description: businessData?.shop_description || '',
       // Vehicle details
       vehicle_make: businessData?.vehicle_make || '',
       vehicle_model: businessData?.vehicle_model || '',
-      vehicle_year: (businessData?.vehicle_year as string) || '',
+      vehicle_year: businessData?.vehicle_year || '',
       vehicle_color: businessData?.vehicle_color || '',
       vehicle_fuel: businessData?.vehicle_fuel || '',
       vehicle_transmission: businessData?.vehicle_transmission || '',
-      vehicle_kms: (businessData?.vehicle_kms as string) || '',
+      vehicle_kms: businessData?.vehicle_kms || '',
     },
     mode: "onChange",
   });
@@ -233,7 +229,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
             vehicle_transmission: data.vehicle_transmission,
             vehicle_kms: data.vehicle_kms,
           })
-          .eq('id', businessData?.id || '')
+          .eq('id', businessData.id)
           .eq('user_id', user.id);
 
         if (error) {
@@ -251,11 +247,10 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
           if (onSaved) onSaved();
         }
       } else {
-        // Create new business - Fix for the Supabase INSERT issue
-        // Correctly handling the insert with proper column mapping
+        // Create new business
         const { error } = await supabase
           .from('service_providers')
-          .insert([{
+          .insert({
             user_id: user.id,
             name: data.name,
             category: data.category,
@@ -283,7 +278,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
             vehicle_fuel: data.vehicle_fuel,
             vehicle_transmission: data.vehicle_transmission,
             vehicle_kms: data.vehicle_kms,
-          }]);
+          });
 
         if (error) {
           console.error("Error submitting form:", error);
@@ -319,7 +314,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
             {isCarsCategory && <VehicleDetailsSection />}
             <BasicInfoSection />
             <LocationSection />
-            {!isCarsCategory && <ContactSection />}
+            <ContactSection />
           </div>
 
           <Button 

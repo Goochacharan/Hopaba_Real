@@ -22,8 +22,7 @@ import {
   Car,
   Store,
   Fuel,
-  Gauge,
-  PlusCircle
+  Gauge
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -119,29 +118,6 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleAddShop = () => {
-    const newShopTemplate: BusinessFormValues & { id: string } = {
-      id: 'new',
-      name: '',
-      category: 'Cars',
-      price_range_min: 0,
-      price_range_max: 0,
-      price_unit: 'fixed',
-      availability: '',
-      description: '',
-      address: '',
-      city: '',
-      area: '',
-      contact_phone: '',
-      shop_name: '',
-      shop_type: 'car_dealership',
-      vehicle_make: '',
-      vehicle_model: '',
-    };
-    
-    onEdit(newShopTemplate);
-  };
-
   if (loading) {
     return <div className="text-center py-8">Loading your listings...</div>;
   }
@@ -150,28 +126,12 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
     return (
       <div className="text-center py-8 space-y-4">
         <p className="text-muted-foreground">You haven't added any listings yet.</p>
-        <div className="flex flex-col gap-3 mt-6 items-center">
-          <Button 
-            onClick={() => onEdit({ id: 'new', name: '', category: '', description: '', price_range_min: 0, availability: '', address: '', city: '', area: '', contact_phone: '' })}
-            className="flex items-center gap-2"
-          >
-            <PlusCircle className="h-4 w-4" />
-            Add a Service
-          </Button>
-          <Button 
-            onClick={handleAddShop}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Store className="h-4 w-4" />
-            Add a Car Shop
-          </Button>
-        </div>
+        <p>Use the form above to add your first listing!</p>
       </div>
     );
   }
 
-  const shopGroups: Record<string, any[]> = businesses.reduce((groups: Record<string, any[]>, business) => {
+  const shopGroups = businesses.reduce((groups, business) => {
     if (business.category === 'Cars' && business.shop_name) {
       if (!groups[business.shop_name]) {
         groups[business.shop_name] = [];
@@ -188,28 +148,7 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-xl font-medium">Your Listings</h3>
-        <div className="space-x-2">
-          <Button 
-            onClick={() => onEdit({ id: 'new', name: '', category: '', description: '', price_range_min: 0, availability: '', address: '', city: '', area: '', contact_phone: '' })}
-            size="sm"
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <PlusCircle className="h-4 w-4" />
-            Add Service
-          </Button>
-          <Button 
-            onClick={handleAddShop}
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <Store className="h-4 w-4" />
-            Add Shop
-          </Button>
-        </div>
-      </div>
+      <h3 className="text-xl font-medium">Your Listings</h3>
       
       {Object.entries(shopGroups).map(([shopName, shopBusinesses]) => (
         shopName !== 'Other' && (
