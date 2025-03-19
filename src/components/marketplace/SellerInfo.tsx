@@ -15,9 +15,9 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
 }) => {
   return (
     <div className="flex flex-col items-end">
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2 mb-1">
         <span className="text-muted-foreground text-sm">Seller</span>
-        <span className="font-medium">{sellerName}</span>
+        <span className="font-medium text-base">{sellerName}</span>
       </div>
       <div className="flex items-center gap-1">
         <StarRating rating={sellerRating} showCount={true} count={reviewCount} />
