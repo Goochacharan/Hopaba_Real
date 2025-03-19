@@ -35,6 +35,7 @@ const useRecommendations = ({
       setError(null);
       
       try {
+        console.log("Starting search with query:", debouncedQuery);
         const { processedQuery, inferredCategory } = processNaturalLanguageQuery(debouncedQuery, category);
         
         const effectiveCategory = inferredCategory;
@@ -42,13 +43,13 @@ const useRecommendations = ({
         console.log("Effective search category:", effectiveCategory);
         console.log("Searching for:", processedQuery);
         
-        // First fetch from recommendations table
+        // First fetch from recommendations table with improved search
         const supabaseRecommendations = await fetchRecommendationsFromSupabase(
           processedQuery, 
           effectiveCategory
         );
         
-        // Then fetch from service_providers table
+        // Then fetch from service_providers table with improved search
         const serviceProviders = await fetchServiceProviders(
           processedQuery,
           effectiveCategory
@@ -65,11 +66,16 @@ const useRecommendations = ({
           combinedResults = [...combinedResults, ...serviceProviders];
         }
         
+        // Remove duplicates by ID (in case the same entity appears in both tables)
+        const uniqueResults = Array.from(
+          new Map(combinedResults.map(item => [item.id, item])).values()
+        );
+        
         const supabaseEvents = await fetchEventsFromSupabase(processedQuery);
         
-        if (combinedResults.length > 0) {
-          console.log("Using combined Supabase data with", combinedResults.length, "results");
-          setRecommendations(combinedResults as Recommendation[]);
+        if (uniqueResults.length > 0) {
+          console.log("Using combined Supabase data with", uniqueResults.length, "results");
+          setRecommendations(uniqueResults as Recommendation[]);
         } else {
           console.log("No Supabase results, using specialized handlers or mock data");
           
@@ -77,16 +83,22 @@ const useRecommendations = ({
             console.log("Specialized handling for yoga query");
             const yogaResults = getYogaResults(debouncedQuery);
             setRecommendations(yogaResults as Recommendation[]);
-          } else if (debouncedQuery.toLowerCase().includes('restaurant') || debouncedQuery.toLowerCase().includes('food') || effectiveCategory === 'restaurants') {
-            console.log("Specialized handling for restaurant query");
+          } else if (
+            debouncedQuery.toLowerCase().includes('restaurant') || 
+            debouncedQuery.toLowerCase().includes('food') || 
+            debouncedQuery.toLowerCase().includes('fusion') || 
+            debouncedQuery.toLowerCase().includes('seafood') || 
+            debouncedQuery.toLowerCase().includes('spice') || 
+            debouncedQuery.toLowerCase().includes('garden') || 
+            debouncedQuery.toLowerCase().includes('ocean') || 
+            effectiveCategory === 'restaurants'
+          ) {
+            console.log("Specialized handling for restaurant/food query");
             const restaurantResults = searchRecommendations(processedQuery, effectiveCategory);
             setRecommendations(restaurantResults as Recommendation[]);
           } else {
             console.log("Search query:", processedQuery);
             console.log("Normalized query:", processedQuery.toLowerCase());
-            console.log("Has location term:", processedQuery.toLowerCase().includes('near') || processedQuery.toLowerCase().includes('in '));
-            console.log("Location:", processedQuery.toLowerCase().match(/(near|in) ([a-z\s]+)/i)?.[2] || '');
-            console.log("Is near me query:", processedQuery.toLowerCase().includes('near me'));
             
             await new Promise(resolve => setTimeout(resolve, 500));
             const locationResults = searchRecommendations(processedQuery, effectiveCategory);
@@ -133,6 +145,7 @@ const useRecommendations = ({
     }
   }, [debouncedQuery, category]);
 
+  
   const handleSearch = (searchQuery: string) => {
     setQuery(searchQuery);
   };

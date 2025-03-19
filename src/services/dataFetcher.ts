@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Recommendation, AppEvent } from '@/types/recommendation';
 import { yogaAndFitnessMockData, sampleEvents } from '@/data/yogaData';
@@ -16,7 +17,14 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
     }
     
     if (searchTerm && searchTerm.trim() !== '') {
-      query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,tags.cs.{"${searchTerm}"}`);
+      // Improved search query with more flexible matching
+      query = query.or(
+        `name.ilike.%${searchTerm}%,` +
+        `description.ilike.%${searchTerm}%,` +
+        `tags.cs.{"${searchTerm}"},` +
+        `name.ilike.${searchTerm}%,` + // Start of name match
+        `category.ilike.%${searchTerm}%` // Category contains search term
+      );
     }
     
     const { data, error } = await query;
@@ -43,7 +51,7 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
         openNow: item.open_now || false,
         hours: "Until 8:00 PM",
         priceLevel: "$$"
-      }));
+      })) as Recommendation[];
     }
     
     return [];
@@ -59,11 +67,42 @@ export const fetchRecommendationsFromSupabase = async (
 ): Promise<Recommendation[]> => {
   try {
     console.log("Searching recommendations table for:", searchQuery);
-    const { data, error } = await supabase
-      .from('recommendations')
-      .select('*')
-      .or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,tags.cs.{"${searchQuery}"}`)
-      .order('rating', { ascending: false });
+    
+    // Split the search query into words for better matching
+    const searchTerms = searchQuery.toLowerCase().split(/\s+/).filter(term => term.length > 2);
+    console.log("Search terms:", searchTerms);
+    
+    let query = supabase.from('recommendations').select('*');
+    
+    // Build a more comprehensive search query
+    if (searchQuery && searchQuery.trim() !== '') {
+      let searchConditions = [];
+      
+      // Add exact match condition
+      searchConditions.push(`name.ilike.%${searchQuery}%`);
+      searchConditions.push(`description.ilike.%${searchQuery}%`);
+      
+      // Add partial matches for each word in the search query
+      searchTerms.forEach(term => {
+        searchConditions.push(`name.ilike.%${term}%`);
+        searchConditions.push(`category.ilike.%${term}%`);
+        searchConditions.push(`description.ilike.%${term}%`);
+        searchConditions.push(`tags.cs.{"${term}"}`);
+      });
+      
+      // Combine all conditions with OR
+      query = query.or(searchConditions.join(','));
+    }
+    
+    if (categoryFilter !== 'all') {
+      // Add category filter
+      query = query.eq('category', categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1));
+    }
+    
+    // Order by rating for better results
+    query = query.order('rating', { ascending: false });
+    
+    const { data, error } = await query;
     
     if (error) {
       console.error("Error fetching recommendations from Supabase:", error);
@@ -89,7 +128,7 @@ export const fetchRecommendationsFromSupabase = async (
         hours: item.hours || "Until 8:00 PM",
         priceLevel: item.price_level || "$$",
         reviewCount: item.review_count || 0
-      }));
+      })) as Recommendation[];
     }
     
     return [];
