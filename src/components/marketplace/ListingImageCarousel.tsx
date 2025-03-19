@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { 
@@ -14,15 +13,11 @@ import {
 interface ListingImageCarouselProps {
   images: string[];
   onImageClick: (index: number) => void;
-  inWishlist: boolean;
-  onWishlistToggle: (e: React.MouseEvent) => void;
 }
 
 const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
   images,
-  onImageClick,
-  inWishlist,
-  onWishlistToggle
+  onImageClick
 }) => {
   const [imageLoaded, setImageLoaded] = React.useState<boolean[]>([]);
   
@@ -68,16 +63,6 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
                     )}
                   />
                 </AspectRatio>
-                
-                <button 
-                  onClick={onWishlistToggle}
-                  className={cn(
-                    "absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10",
-                    inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500"
-                  )}
-                >
-                  <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} />
-                </button>
               </div>
             </CarouselItem>
           ))}

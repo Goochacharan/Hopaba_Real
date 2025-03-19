@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useMarketplaceListing } from '@/hooks/useMarketplaceListings';
-import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Calendar, ArrowLeft, Info, Shield, BadgeCheck, AlertCircle, Heart } from 'lucide-react';
+import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Calendar, ArrowLeft, Info, Shield, BadgeCheck, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -21,7 +21,6 @@ const MarketplaceListingDetails = () => {
   const { id = '' } = useParams<{ id: string }>();
   const { listing, loading, error } = useMarketplaceListing(id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [inWishlist, setInWishlist] = useState(false);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   
   const handleShare = () => {
@@ -87,16 +86,6 @@ const MarketplaceListingDetails = () => {
     if (listing?.location) {
       window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(listing.location)}`);
     }
-  };
-
-  const toggleWishlist = () => {
-    setInWishlist(!inWishlist);
-    
-    toast({
-      title: inWishlist ? "Removed from wishlist" : "Added to wishlist",
-      description: `${listing?.title} ${inWishlist ? "removed from" : "added to"} your wishlist`,
-      duration: 2000,
-    });
   };
 
   const openImageViewer = (index: number) => {
@@ -355,15 +344,6 @@ const MarketplaceListingDetails = () => {
                   >
                     <Share2 className="h-5 w-5" />
                   </Button>
-                </div>
-                
-                <div className="flex justify-end mt-4">
-                  <button 
-                    onClick={toggleWishlist}
-                    className={`p-2 rounded-full transition-colors ${inWishlist ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-500'}`}
-                  >
-                    <Heart className={`w-5 h-5 ${inWishlist && 'fill-rose-500'}`} />
-                  </button>
                 </div>
               </div>
               
