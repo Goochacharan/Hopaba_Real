@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Navigation2, Heart } from 'lucide-react';
@@ -248,12 +249,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
         </div>
         
         <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1">
-            {renderStarRating(listing.seller_rating)}
-            <span className="text-xs text-muted-foreground ml-1">
-              (Seller)
-            </span>
-          </div>
           <p className="text-lg font-bold text-[#1EAEDB]">{formatPrice(listing.price)}</p>
         </div>
 
@@ -267,7 +262,13 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
         </p>
         
         <div className="flex flex-col mb-3">
-          <span className="text-sm font-medium">Seller: {listing.seller_name}</span>
+          <span className="text-sm font-medium mb-1">Seller: {listing.seller_name}</span>
+          <div className="flex items-center gap-1">
+            {renderStarRating(listing.seller_rating)}
+            <span className="text-xs text-muted-foreground ml-1">
+              (24)
+            </span>
+          </div>
         </div>
 
         <div className="flex gap-2 mt-auto">
@@ -325,3 +326,4 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
 };
 
 export default MarketplaceListingCard;
+

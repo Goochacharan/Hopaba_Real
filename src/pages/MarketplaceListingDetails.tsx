@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -11,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { format } from 'date-fns';
 import ImageViewer from '@/components/ImageViewer';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const formatPrice = (price: number): string => {
   return '₹' + price.toLocaleString('en-IN');
@@ -193,21 +195,21 @@ const MarketplaceListingDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="col-span-1 lg:col-span-2">
             <div className="mb-6">
-              <Badge className="mb-2">{listing.category}</Badge>
-              <h1 className="text-2xl sm:text-3xl font-bold mb-2">{listing.title}</h1>
+              <Badge className="mb-2">{listing?.category}</Badge>
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2">{listing?.title}</h1>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
-                  <span>{listing.location}</span>
+                  <span>{listing?.location}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
-                  <span>Listed on {format(createdDate, 'PPP')}</span>
+                  <span>Listed on {listing ? format(new Date(listing.created_at), 'PPP') : ''}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Badge variant="outline" className="flex items-center gap-1 text-amber-600 bg-amber-50">
                     <BadgeCheck className="h-3 w-3" />
-                    <span>{listing.condition}</span>
+                    <span>{listing?.condition}</span>
                   </Badge>
                 </div>
               </div>
@@ -216,7 +218,7 @@ const MarketplaceListingDetails = () => {
             <div className="mb-6 bg-black/5 p-4 rounded-xl shadow-sm">
               <Carousel className="w-full">
                 <CarouselContent>
-                  {listing.images.map((image, index) => (
+                  {listing?.images.map((image, index) => (
                     <CarouselItem key={index}>
                       <div 
                         className="relative overflow-hidden rounded-lg cursor-pointer w-full"
@@ -238,7 +240,7 @@ const MarketplaceListingDetails = () => {
               </Carousel>
               
               <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 mt-4">
-                {listing.images.map((image, index) => (
+                {listing?.images.map((image, index) => (
                   <div
                     key={index}
                     onClick={() => {
@@ -261,24 +263,28 @@ const MarketplaceListingDetails = () => {
               </div>
             </div>
             
-            <ImageViewer 
-              images={listing.images} 
-              initialIndex={selectedImageIndex}
-              open={imageViewerOpen}
-              onOpenChange={setImageViewerOpen}
-            />
+            {listing && (
+              <ImageViewer 
+                images={listing.images} 
+                initialIndex={selectedImageIndex}
+                open={imageViewerOpen}
+                onOpenChange={setImageViewerOpen}
+              />
+            )}
             
             <div className="mb-6 bg-white rounded-xl border p-6 shadow-sm">
               <h3 className="text-lg font-semibold mb-4">Seller Information</h3>
               <div className="flex items-center gap-3">
-                <div className="bg-[#1EAEDB]/10 h-12 w-12 rounded-full flex items-center justify-center text-[#1EAEDB] font-semibold">
-                  {listing.seller_name.charAt(0)}
-                </div>
+                <Avatar className="h-12 w-12 bg-[#1EAEDB]/10 text-[#1EAEDB]">
+                  <AvatarFallback>
+                    {listing?.seller_name.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
-                  <p className="font-medium">{listing.seller_name}</p>
-                  <div className="flex items-center gap-1 text-sm text-amber-500">
-                    {renderStarRating(listing.seller_rating)}
-                    <span className="ml-1">({listing.seller_rating.toFixed(1)})</span>
+                  <p className="font-medium mb-1">{listing?.seller_name}</p>
+                  <div className="flex items-center gap-1">
+                    {listing && renderStarRating(listing.seller_rating)}
+                    <span className="ml-1 text-xs text-muted-foreground">(24)</span>
                   </div>
                 </div>
               </div>
@@ -287,21 +293,21 @@ const MarketplaceListingDetails = () => {
             <div className="mb-8 bg-white rounded-xl border p-6 shadow-sm">
               <h2 className="text-xl font-semibold mb-3">Description</h2>
               <div className="space-y-4">
-                <p className="text-muted-foreground whitespace-pre-line">{listing.description}</p>
+                <p className="text-muted-foreground whitespace-pre-line">{listing?.description}</p>
                 
                 <div className="mt-6 pt-4 border-t border-gray-100">
                   <div className="grid grid-cols-2 gap-y-3">
                     <div className="text-sm font-medium">Category</div>
-                    <div className="text-sm text-muted-foreground">{listing.category}</div>
+                    <div className="text-sm text-muted-foreground">{listing?.category}</div>
                     
                     <div className="text-sm font-medium">Condition</div>
-                    <div className="text-sm text-muted-foreground">{listing.condition}</div>
+                    <div className="text-sm text-muted-foreground">{listing?.condition}</div>
                     
                     <div className="text-sm font-medium">Location</div>
-                    <div className="text-sm text-muted-foreground">{listing.location}</div>
+                    <div className="text-sm text-muted-foreground">{listing?.location}</div>
                     
                     <div className="text-sm font-medium">Listed on</div>
-                    <div className="text-sm text-muted-foreground">{format(createdDate, 'PPP')}</div>
+                    <div className="text-sm text-muted-foreground">{listing ? format(new Date(listing.created_at), 'PPP') : ''}</div>
                   </div>
                 </div>
               </div>
@@ -313,7 +319,7 @@ const MarketplaceListingDetails = () => {
               <div className="bg-white rounded-xl border p-6 shadow-sm">
                 <div className="mb-4 flex justify-between items-center">
                   <h2 className="text-3xl font-bold text-[#1EAEDB]">
-                    {formatPrice(listing.price)}
+                    {listing ? formatPrice(listing.price) : ''}
                   </h2>
                   <button 
                     onClick={toggleWishlist}
@@ -391,4 +397,3 @@ const MarketplaceListingDetails = () => {
 };
 
 export default MarketplaceListingDetails;
-
