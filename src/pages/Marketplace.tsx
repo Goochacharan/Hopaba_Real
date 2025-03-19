@@ -5,10 +5,8 @@ import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChevronDown, Filter, AlertCircle, Clock, TrendingUp } from 'lucide-react';
+import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { 
   Pagination, 
   PaginationContent, 
@@ -26,6 +24,16 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const Marketplace = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -34,6 +42,12 @@ const Marketplace = () => {
   
   const [currentCategory, setCurrentCategory] = useState<string>(categoryParam);
   const [currentPage, setCurrentPage] = useState(1);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500000]);
+  const [yearRange, setYearRange] = useState<[number, number]>([2010, new Date().getFullYear()]);
+  const [ratingFilter, setRatingFilter] = useState<number>(0);
+  const [conditionFilter, setConditionFilter] = useState<string>('all');
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  
   const itemsPerPage = 9;
   
   const { listings, loading, error } = useMarketplaceListings({
@@ -64,27 +78,40 @@ const Marketplace = () => {
     });
   };
   
-  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const query = formData.get('query') as string;
+  // Filter listings based on selected criteria
+  const filteredListings = listings.filter(listing => {
+    // Price filter
+    const price = listing.price;
+    if (price < priceRange[0] || price > priceRange[1]) return false;
     
-    setSearchParams(params => {
-      if (query) {
-        params.set('q', query);
-      } else {
-        params.delete('q');
-      }
-      return params;
-    });
-  };
+    // Year filter (if available in the data)
+    const listingYear = new Date(listing.created_at).getFullYear();
+    if (listingYear < yearRange[0] || listingYear > yearRange[1]) return false;
+    
+    // Rating filter
+    if (ratingFilter > 0 && listing.seller_rating < ratingFilter) return false;
+    
+    // Condition filter
+    if (conditionFilter !== 'all' && listing.condition.toLowerCase() !== conditionFilter.toLowerCase()) return false;
+    
+    return true;
+  });
   
   // Pagination
-  const totalPages = Math.ceil(listings.length / itemsPerPage);
-  const paginatedListings = listings.slice(
+  const totalPages = Math.ceil(filteredListings.length / itemsPerPage);
+  const paginatedListings = filteredListings.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+  
+  // Format price for display
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(price);
+  };
   
   return (
     <MainLayout>
@@ -94,90 +121,247 @@ const Marketplace = () => {
           <p className="text-muted-foreground">Browse and buy pre-owned items from trusted sellers</p>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <form onSubmit={handleSearch} className="flex-1">
-            <div className="relative">
-              <Input 
-                type="text" 
-                name="query" 
-                placeholder="Search marketplace..." 
-                defaultValue={searchQuery}
-                className="pr-12"
-              />
+        <div className="flex items-center gap-2 mb-6 overflow-x-auto py-2">
+          {/* Price Filter */}
+          <Popover open={activeFilter === 'price'} onOpenChange={(open) => setActiveFilter(open ? 'price' : null)}>
+            <PopoverTrigger asChild>
               <Button 
-                type="submit" 
-                variant="ghost" 
+                variant="outline" 
                 size="sm" 
-                className="absolute right-0 top-0 h-full"
+                className={cn(
+                  "rounded-full border border-border/60 flex items-center gap-2",
+                  activeFilter === 'price' && "ring-2 ring-primary/20"
+                )}
               >
-                Search
+                <IndianRupee className="h-4 w-4" />
+                <span>Price</span>
+                {(priceRange[0] > 0 || priceRange[1] < 500000) && (
+                  <Badge variant="secondary" className="ml-1">
+                    {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
+                  </Badge>
+                )}
               </Button>
-            </div>
-          </form>
-          
-          <div className="flex gap-2">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="flex gap-2">
-                  <Filter className="h-4 w-4" />
-                  <span className="hidden sm:inline">Filters</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
-                  <SheetDescription>
-                    Narrow down your search results
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6 space-y-6">
-                  <div>
-                    <Label className="text-base">Categories</Label>
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                      {categories.slice(1).map(category => (
-                        <Button
-                          key={category.id}
-                          variant={currentCategory === category.id ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => handleCategoryChange(category.id)}
-                          className="justify-start"
-                        >
-                          {category.name}
-                        </Button>
-                      ))}
-                    </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4">
+              <div className="space-y-4">
+                <h4 className="font-medium">Price Range</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">From</span>
+                    <span className="text-sm font-medium">{formatPrice(priceRange[0])}</span>
                   </div>
-                  
-                  <div>
-                    <Label className="text-base">Price Range</Label>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Input type="number" placeholder="Min" />
-                      <span>to</span>
-                      <Input type="number" placeholder="Max" />
-                    </div>
+                  <Slider
+                    value={[priceRange[0]]}
+                    min={0}
+                    max={500000}
+                    step={5000}
+                    onValueChange={(value) => setPriceRange([value[0], priceRange[1]])}
+                  />
+                  <div className="flex justify-between mt-4">
+                    <span className="text-sm text-muted-foreground">To</span>
+                    <span className="text-sm font-medium">{formatPrice(priceRange[1])}</span>
                   </div>
-                  
-                  <div>
-                    <Label className="text-base">Condition</Label>
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                      <Button variant="outline" size="sm">Like New</Button>
-                      <Button variant="outline" size="sm">Good</Button>
-                      <Button variant="outline" size="sm">Fair</Button>
-                      <Button variant="outline" size="sm">Poor</Button>
-                    </div>
-                  </div>
+                  <Slider
+                    value={[priceRange[1]]}
+                    min={0}
+                    max={500000}
+                    step={5000}
+                    onValueChange={(value) => setPriceRange([priceRange[0], value[0]])}
+                  />
                 </div>
-              </SheetContent>
-            </Sheet>
-            
-            <div className="relative">
-              <Button variant="outline" className="flex gap-2">
-                <TrendingUp className="h-4 w-4" />
-                <span className="hidden sm:inline">Sort</span>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* Year Filter */}
+          <Popover open={activeFilter === 'year'} onOpenChange={(open) => setActiveFilter(open ? 'year' : null)}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className={cn(
+                  "rounded-full border border-border/60 flex items-center gap-2",
+                  activeFilter === 'year' && "ring-2 ring-primary/20"
+                )}
+              >
+                <Calendar className="h-4 w-4" />
+                <span>Year</span>
+                {(yearRange[0] > 2010 || yearRange[1] < new Date().getFullYear()) && (
+                  <Badge variant="secondary" className="ml-1">
+                    {yearRange[0]} - {yearRange[1]}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4">
+              <div className="space-y-4">
+                <h4 className="font-medium">Year Range</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">From</span>
+                    <span className="text-sm font-medium">{yearRange[0]}</span>
+                  </div>
+                  <Slider
+                    value={[yearRange[0]]}
+                    min={2000}
+                    max={new Date().getFullYear()}
+                    step={1}
+                    onValueChange={(value) => setYearRange([value[0], yearRange[1]])}
+                  />
+                  <div className="flex justify-between mt-4">
+                    <span className="text-sm text-muted-foreground">To</span>
+                    <span className="text-sm font-medium">{yearRange[1]}</span>
+                  </div>
+                  <Slider
+                    value={[yearRange[1]]}
+                    min={2000}
+                    max={new Date().getFullYear()}
+                    step={1}
+                    onValueChange={(value) => setYearRange([yearRange[0], value[0]])}
+                  />
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* Seller Rating Filter */}
+          <Popover open={activeFilter === 'rating'} onOpenChange={(open) => setActiveFilter(open ? 'rating' : null)}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className={cn(
+                  "rounded-full border border-border/60 flex items-center gap-2",
+                  activeFilter === 'rating' && "ring-2 ring-primary/20"
+                )}
+              >
+                <Star className="h-4 w-4" />
+                <span>Rating</span>
+                {ratingFilter > 0 && (
+                  <Badge variant="secondary" className="ml-1">
+                    {ratingFilter}+
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4">
+              <div className="space-y-4">
+                <h4 className="font-medium">Minimum Seller Rating</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Show results rated</span>
+                    <div className="flex items-center">
+                      <Star className="h-3 w-3 fill-amber-500 text-amber-500 mr-1" />
+                      <span className="text-sm font-medium">{ratingFilter}+</span>
+                    </div>
+                  </div>
+                  <Slider
+                    value={[ratingFilter]}
+                    min={0}
+                    max={5}
+                    step={0.5}
+                    onValueChange={(value) => setRatingFilter(value[0])}
+                  />
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* Condition Filter */}
+          <Popover open={activeFilter === 'condition'} onOpenChange={(open) => setActiveFilter(open ? 'condition' : null)}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className={cn(
+                  "rounded-full border border-border/60 flex items-center gap-2",
+                  activeFilter === 'condition' && "ring-2 ring-primary/20"
+                )}
+              >
+                <span>Condition</span>
+                {conditionFilter !== 'all' && (
+                  <Badge variant="secondary" className="ml-1">
+                    {conditionFilter}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4">
+              <div className="space-y-4">
+                <h4 className="font-medium">Item Condition</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button 
+                    variant={conditionFilter === 'all' ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => setConditionFilter('all')}
+                  >
+                    All
+                  </Button>
+                  <Button 
+                    variant={conditionFilter === 'new' ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => setConditionFilter('new')}
+                  >
+                    New
+                  </Button>
+                  <Button 
+                    variant={conditionFilter === 'like new' ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => setConditionFilter('like new')}
+                  >
+                    Like New
+                  </Button>
+                  <Button 
+                    variant={conditionFilter === 'good' ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => setConditionFilter('good')}
+                  >
+                    Good
+                  </Button>
+                  <Button 
+                    variant={conditionFilter === 'fair' ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => setConditionFilter('fair')}
+                  >
+                    Fair
+                  </Button>
+                  <Button 
+                    variant={conditionFilter === 'poor' ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => setConditionFilter('poor')}
+                  >
+                    Poor
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* Sort Options */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="rounded-full border border-border/60 flex items-center gap-2 ml-auto">
+                <span>Sort</span>
                 <ChevronDown className="h-4 w-4" />
               </Button>
-            </div>
-          </div>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-48 p-2">
+              <div className="space-y-1">
+                <Button variant="ghost" size="sm" className="w-full justify-start">
+                  Newest First
+                </Button>
+                <Button variant="ghost" size="sm" className="w-full justify-start">
+                  Price: Low to High
+                </Button>
+                <Button variant="ghost" size="sm" className="w-full justify-start">
+                  Price: High to Low
+                </Button>
+                <Button variant="ghost" size="sm" className="w-full justify-start">
+                  Top Rated
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
         
         <Tabs defaultValue={currentCategory} value={currentCategory} onValueChange={handleCategoryChange} className="mb-6">
@@ -258,8 +442,14 @@ const Marketplace = () => {
                   <p className="text-muted-foreground max-w-md mx-auto mb-6">
                     We couldn't find any items matching your criteria. Try changing your search or filter settings.
                   </p>
-                  <Button onClick={() => handleCategoryChange('all')}>
-                    Show all listings
+                  <Button onClick={() => {
+                    setCurrentCategory('all');
+                    setPriceRange([0, 500000]);
+                    setYearRange([2010, new Date().getFullYear()]);
+                    setRatingFilter(0);
+                    setConditionFilter('all');
+                  }}>
+                    Reset all filters
                   </Button>
                 </div>
               )}
