@@ -79,10 +79,20 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     setIsSubmitting(true);
 
     try {
+      // Ensure all required fields are present with their correct types
       const listingData = {
-        ...data,
+        title: data.title,
+        description: data.description,
+        price: data.price,
+        category: data.category,
+        condition: data.condition,
+        location: data.location,
         seller_name: user.user_metadata?.full_name || "Anonymous Seller",
         seller_id: user.id,
+        seller_phone: data.seller_phone || null,
+        seller_whatsapp: data.seller_whatsapp || null,
+        seller_instagram: data.seller_instagram || null,
+        images: data.images || []
       };
 
       if (listing?.id) {
@@ -100,7 +110,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
           description: "Your marketplace listing has been updated successfully.",
         });
       } else {
-        // Create new listing - FIX: passing a single object, not an array
+        // Create new listing
         const { error } = await supabase
           .from('marketplace_listings')
           .insert(listingData);

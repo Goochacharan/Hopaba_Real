@@ -37,14 +37,14 @@ export const getSellerName = async (sellerId?: string, fallbackName?: string) =>
   
   try {
     // Use auth.getUser instead of trying to access the profiles table directly
-    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(sellerId);
+    const { data, error } = await supabase.auth.getUser(sellerId);
     
-    if (userError || !user) {
-      console.error("Error fetching user:", userError);
+    if (error || !data.user) {
+      console.error("Error fetching user:", error);
       return fallbackName || "Anonymous Seller";
     }
     
-    return user.user_metadata?.full_name || fallbackName || "Anonymous Seller";
+    return data.user.user_metadata?.full_name || fallbackName || "Anonymous Seller";
   } catch (err) {
     console.error("Error fetching seller name:", err);
     return fallbackName || "Anonymous Seller";
