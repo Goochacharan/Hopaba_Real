@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
 import { cn } from '@/lib/utils';
-import { Home, User, ListChecks, Calendar } from 'lucide-react';
+import { Home, User, ListChecks, Calendar, ShoppingCart } from 'lucide-react';
 import SearchBar from './SearchBar';
 import { Button } from './ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -122,6 +122,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             icon={<ListChecks className="h-6 w-6" />} 
             label="My List" 
             isActive={location.pathname === '/my-list'} 
+          />
+          
+          <NavButton 
+            to="/marketplace" 
+            icon={<ShoppingCart className="h-6 w-6" />} 
+            label="Market" 
+            isActive={location.pathname === '/marketplace'} 
           />
           
           <NavButton 
