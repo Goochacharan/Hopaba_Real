@@ -341,7 +341,7 @@ const LocationDetails = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6">
-              <div className="h-64 w-full relative overflow-hidden">
+              <div className="w-full h-72 relative overflow-hidden">
                 <Carousel className="w-full h-full">
                   <CarouselContent className="h-full">
                     {locationImages.map((img: string, index: number) => (
@@ -352,7 +352,7 @@ const LocationDetails = () => {
                         <img 
                           src={img} 
                           alt={`${location.name} - image ${index + 1}`}
-                          className={`w-full h-full object-cover transition-all duration-500 ${
+                          className={`w-full h-72 object-cover transition-all duration-500 ${
                             imageLoaded[index] ? 'opacity-100 blur-0' : 'opacity-0 blur-sm'
                           }`}
                           onLoad={() => handleImageLoad(index)}
@@ -362,8 +362,8 @@ const LocationDetails = () => {
                   </CarouselContent>
                   {locationImages.length > 1 && (
                     <>
-                      <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white/90" />
-                      <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white/90" />
+                      <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white/90" />
+                      <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white/90" />
                     </>
                   )}
                 </Carousel>
