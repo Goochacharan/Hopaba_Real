@@ -264,7 +264,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         className
       )}
     >
-      <div className="relative w-full h-64 overflow-hidden">
+      <div className="relative w-full h-72 overflow-hidden">
         {ranking !== undefined && ranking <= 10 && (
           <div className="absolute top-0 left-2 z-10">
             <div className={cn("flex flex-col items-center", getMedalStyle(ranking).wrapperClass)}>
