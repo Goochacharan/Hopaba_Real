@@ -150,10 +150,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
       const enhancedQuery = await enhanceSearchQuery(query);
       console.log("Enhanced search query:", enhancedQuery);
       
-      if (enhancedQuery !== query) {
-        setQuery(enhancedQuery);
-      }
-      
       onSearch(enhancedQuery);
 
       if (query.trim().length < 8) {
@@ -164,6 +160,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
           duration: 5000
         });
       }
+      
+      setQuery('');
     }
   };
   
@@ -247,11 +245,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
       
       const enhancedQuery = await enhanceSearchQuery(query);
       
-      if (enhancedQuery !== query) {
-        setQuery(enhancedQuery);
-      }
-      
       onSearch(enhancedQuery);
+      
+      setQuery('');
     }
   };
 
@@ -259,6 +255,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
     setQuery(suggestion);
     setShowSuggestions(false);
     onSearch(suggestion);
+    
+    setTimeout(() => {
+      setQuery('');
+    }, 100);
   };
 
   return (
