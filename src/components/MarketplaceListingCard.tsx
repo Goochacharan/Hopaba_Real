@@ -196,7 +196,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
                   className="relative w-full"
                   onClick={(e) => handleImageClick(e, index)}
                 >
-                  <AspectRatio ratio={16/9}>
+                  <AspectRatio ratio={4/3}>
                     <div className={cn(
                       "absolute inset-0 bg-muted/30",
                       imageLoaded[index] ? "opacity-0" : "opacity-100"
@@ -206,7 +206,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
                       alt={`${listing.title} - image ${index + 1}`}
                       onLoad={() => handleImageLoad(index)}
                       className={cn(
-                        "w-full h-96 object-cover transition-all",
+                        "w-full h-full object-cover transition-all",
                         imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
                       )}
                     />
