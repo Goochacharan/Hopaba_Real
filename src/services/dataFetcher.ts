@@ -43,17 +43,14 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
         tags: item.tags || [],
         rating: item.rating || 4.5,
         address: item.address,
-        distance: item.distance || "0.5 miles away",
+        distance: "0.5 miles away",
         image: item.image_url || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
         images: item.images || [],
         description: item.description || "",
         phone: item.contact_phone,
         openNow: item.open_now || false,
-        hours: item.hours || "Until 8:00 PM",
-        priceLevel: item.price_range_min && item.price_range_max ? 
-          (item.price_range_max > 2000 ? "$$$$" : 
-          (item.price_range_max > 1000 ? "$$$" : 
-          (item.price_range_max > 500 ? "$$" : "$"))) : "$$"
+        hours: "Until 8:00 PM",
+        priceLevel: "$$"
       })) as Recommendation[];
     }
     
@@ -69,13 +66,13 @@ export const fetchRecommendationsFromSupabase = async (
   categoryFilter: string
 ): Promise<Recommendation[]> => {
   try {
-    console.log("Searching service_providers table for:", searchQuery);
+    console.log("Searching recommendations table for:", searchQuery);
     
     // Split the search query into words for better matching
     const searchTerms = searchQuery.toLowerCase().split(/\s+/).filter(term => term.length > 2);
     console.log("Search terms:", searchTerms);
     
-    let query = supabase.from('service_providers').select('*');
+    let query = supabase.from('recommendations').select('*');
     
     // Build a more comprehensive search query
     if (searchQuery && searchQuery.trim() !== '') {
@@ -108,11 +105,11 @@ export const fetchRecommendationsFromSupabase = async (
     const { data, error } = await query;
     
     if (error) {
-      console.error("Error fetching service_providers from Supabase:", error);
+      console.error("Error fetching recommendations from Supabase:", error);
       return [];
     }
     
-    console.log("Found service_providers:", data?.length || 0);
+    console.log("Found recommendations:", data?.length || 0);
     
     if (data && data.length > 0) {
       return data.map(item => ({
@@ -123,23 +120,20 @@ export const fetchRecommendationsFromSupabase = async (
         rating: item.rating || 4.5,
         address: item.address,
         distance: item.distance || "0.5 miles away",
-        image: item.image_url || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
-        images: item.images || [item.image_url],
+        image: item.image,
+        images: item.images || [item.image],
         description: item.description || "",
-        phone: item.contact_phone,
+        phone: item.phone,
         openNow: item.open_now || false,
         hours: item.hours || "Until 8:00 PM",
-        priceLevel: item.price_range_min && item.price_range_max ? 
-          (item.price_range_max > 2000 ? "$$$$" : 
-          (item.price_range_max > 1000 ? "$$$" : 
-          (item.price_range_max > 500 ? "$$" : "$"))) : "$$",
+        priceLevel: item.price_level || "$$",
         reviewCount: item.review_count || 0
       })) as Recommendation[];
     }
     
     return [];
   } catch (err) {
-    console.error("Failed to fetch service_providers from Supabase:", err);
+    console.error("Failed to fetch recommendations from Supabase:", err);
     return [];
   }
 };
@@ -182,7 +176,7 @@ export const fetchEventsFromSupabase = async (searchQuery: string): Promise<AppE
 export const fetchDefaultRecommendations = async (): Promise<Recommendation[]> => {
   try {
     const { data, error } = await supabase
-      .from('service_providers')
+      .from('recommendations')
       .select('*')
       .order('rating', { ascending: false })
       .limit(6);
@@ -201,16 +195,13 @@ export const fetchDefaultRecommendations = async (): Promise<Recommendation[]> =
         rating: item.rating || 4.5,
         address: item.address,
         distance: item.distance || "0.5 miles away",
-        image: item.image_url || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
-        images: item.images || [item.image_url],
+        image: item.image,
+        images: item.images || [item.image],
         description: item.description || "",
-        phone: item.contact_phone,
+        phone: item.phone,
         openNow: item.open_now || false,
         hours: item.hours || "Until 8:00 PM",
-        priceLevel: item.price_range_min && item.price_range_max ? 
-          (item.price_range_max > 2000 ? "$$$$" : 
-          (item.price_range_max > 1000 ? "$$$" : 
-          (item.price_range_max > 500 ? "$$" : "$"))) : "$$",
+        priceLevel: item.price_level || "$$",
         reviewCount: item.review_count || 0
       })) as Recommendation[];
     }

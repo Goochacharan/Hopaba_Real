@@ -24,37 +24,29 @@ serve(async (req) => {
 
     if (!query || typeof query !== 'string' || query.trim() === '') {
       // Return popular or preset suggestions when no query is provided
-      const { data: serviceProviders, error: recError } = await supabase
-        .from('service_providers')
-        .select('name, category, shop_name')
+      const { data: recommendations, error: recError } = await supabase
+        .from('recommendations')
+        .select('name, category')
         .order('rating', { ascending: false })
         .limit(5);
 
       if (recError) {
-        console.error('Error fetching default service_providers:', recError);
+        console.error('Error fetching default recommendations:', recError);
         throw new Error('Failed to fetch default suggestions');
       }
 
       // Extract unique categories and names
-      const categories = [...new Set(serviceProviders?.map(r => r.category) || [])];
-      const shopNames = [...new Set(serviceProviders?.filter(sp => sp.shop_name).map(sp => sp.shop_name) || [])];
+      const categories = [...new Set(recommendations?.map(r => r.category) || [])];
       const defaultSuggestions = [
         { suggestion: 'Best restaurants in Bangalore', category: 'Restaurants', source: 'default' },
         { suggestion: 'Yoga classes near me', category: 'Fitness', source: 'default' },
         { suggestion: 'Haircut salons in Indiranagar', category: 'Salons', source: 'default' },
-        { suggestion: 'Used cars in Bangalore', category: 'Cars', source: 'default' },
-        { suggestion: 'Maruti Suzuki cars in Delhi', category: 'Cars', source: 'default' },
         ...(categories || []).map(category => ({ 
           suggestion: `Top rated ${category.toLowerCase()}`, 
           category, 
           source: 'category' 
         })),
-        ...(shopNames || []).map(shop => ({
-          suggestion: `Cars at ${shop}`,
-          category: 'Cars',
-          source: 'shop'
-        })),
-        ...(serviceProviders || []).slice(0, 3).map(rec => ({
+        ...(recommendations || []).slice(0, 3).map(rec => ({
           suggestion: rec.name,
           category: rec.category,
           source: 'place'
@@ -68,11 +60,11 @@ serve(async (req) => {
 
     console.log('Searching for suggestions with query:', query);
 
-    // Try direct search from service_providers table first
+    // Try direct search from recommendations table first
     const { data: directResults, error: directError } = await supabase
-      .from('service_providers')
-      .select('name, category, tags, shop_name')
-      .or(`name.ilike.%${query}%,description.ilike.%${query}%,shop_name.ilike.%${query}%`)
+      .from('recommendations')
+      .select('name, category, tags')
+      .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
       .limit(5);
 
     if (directError) {
@@ -83,15 +75,13 @@ serve(async (req) => {
       { suggestion: `${query} restaurants in Bangalore`, category: 'Restaurants', source: 'search' },
       { suggestion: `Best ${query} places near me`, category: 'Places', source: 'search' },
       { suggestion: `${query} in Indiranagar`, category: 'Location', source: 'search' },
-      { suggestion: `Top rated ${query}`, category: 'Rating', source: 'search' },
-      { suggestion: `${query} cars under 5 Lakhs`, category: 'Cars', source: 'search' },
-      { suggestion: `Used ${query} cars in Bangalore`, category: 'Cars', source: 'search' }
+      { suggestion: `Top rated ${query}`, category: 'Rating', source: 'search' }
     ];
 
     // If we have direct results, add them as top suggestions
     if (directResults && directResults.length > 0) {
       const directSuggestions = directResults.map(item => ({
-        suggestion: item.shop_name ? `${item.name} at ${item.shop_name}` : item.name,
+        suggestion: item.name,
         category: item.category,
         source: 'place'
       }));
@@ -159,8 +149,7 @@ serve(async (req) => {
       suggestions: [
         { suggestion: 'Best restaurants in Bangalore', category: 'Restaurants', source: 'fallback' },
         { suggestion: 'Cafes near me', category: 'Cafes', source: 'fallback' },
-        { suggestion: 'Plumbers in Koramangala', category: 'Services', source: 'fallback' },
-        { suggestion: 'Used cars in Bangalore', category: 'Cars', source: 'fallback' }
+        { suggestion: 'Plumbers in Koramangala', category: 'Services', source: 'fallback' }
       ] 
     }), {
       status: 200, // Return 200 with fallback suggestions instead of 500

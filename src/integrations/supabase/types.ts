@@ -127,9 +127,7 @@ export type Database = {
           coordinates: unknown | null
           created_at: string | null
           description: string | null
-          distance: string | null
           experience: string | null
-          hours: string | null
           id: string
           image_url: string | null
           images: string[] | null
@@ -137,7 +135,6 @@ export type Database = {
           languages: string[] | null
           name: string
           open_now: boolean | null
-          price: string | null
           price_range_max: number | null
           price_range_min: number | null
           price_unit: string | null
@@ -160,9 +157,7 @@ export type Database = {
           coordinates?: unknown | null
           created_at?: string | null
           description?: string | null
-          distance?: string | null
           experience?: string | null
-          hours?: string | null
           id?: string
           image_url?: string | null
           images?: string[] | null
@@ -170,7 +165,6 @@ export type Database = {
           languages?: string[] | null
           name: string
           open_now?: boolean | null
-          price?: string | null
           price_range_max?: number | null
           price_range_min?: number | null
           price_unit?: string | null
@@ -193,9 +187,7 @@ export type Database = {
           coordinates?: unknown | null
           created_at?: string | null
           description?: string | null
-          distance?: string | null
           experience?: string | null
-          hours?: string | null
           id?: string
           image_url?: string | null
           images?: string[] | null
@@ -203,7 +195,6 @@ export type Database = {
           languages?: string[] | null
           name?: string
           open_now?: boolean | null
-          price?: string | null
           price_range_max?: number | null
           price_range_min?: number | null
           price_unit?: string | null

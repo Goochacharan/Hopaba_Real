@@ -51,7 +51,7 @@ const SearchResults = () => {
   });
 
   const rankedRecommendations = [...filteredRecommendations].map(item => {
-    const reviewCount = item.id ? parseInt(item.id.toString().replace(/[^0-9]/g, '')) % 100 + 50 : 100;
+    const reviewCount = item.id ? parseInt(item.id) * 10 + Math.floor((item.rating || 4.5) * 15) : 100;
     return {
       ...item,
       reviewCount
@@ -61,17 +61,6 @@ const SearchResults = () => {
       return b.rating - a.rating;
     }
     return b.reviewCount - a.reviewCount;
-  });
-
-  // Make sure each recommendation has an ID
-  const recommendationsWithIds = rankedRecommendations.map(item => {
-    if (!item.id) {
-      return {
-        ...item,
-        id: `rec-${Math.random().toString(36).substring(2, 9)}`
-      };
-    }
-    return item;
   });
 
   useEffect(() => {
@@ -113,9 +102,6 @@ const SearchResults = () => {
     }
   };
 
-  // Display a fallback message if there are no results and no error
-  const showNoResults = !loading && !error && recommendationsWithIds.length === 0 && events.length === 0;
-
   return (
     <MainLayout>
       <div className="w-full animate-fade-in">
@@ -146,14 +132,6 @@ const SearchResults = () => {
             </Alert>
           )}
 
-          {showNoResults && (
-            <Alert variant="destructive" className="mb-4 bg-red-500 text-white">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Location not found</AlertTitle>
-              <AlertDescription>We couldn't find the location you're looking for</AlertDescription>
-            </Alert>
-          )}
-
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {[1, 2, 3].map(i => (
@@ -170,196 +148,136 @@ const SearchResults = () => {
                 </div>
               )}
               
-              {!showNoResults && !error && (
-                <div className="mb-4">
-                  <h1 className="text-xl font-medium">
-                    Results for: <span className="text-primary">{query || searchQuery}</span>
-                    {category !== 'all' && <span className="ml-2 text-muted-foreground"> in {category}</span>}
-                  </h1>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Found {recommendationsWithIds.length} locations and {events.length} events
-                  </p>
-                </div>
-              )}
+              <div className="mb-4">
+                <h1 className="text-xl font-medium">
+                  Results for: <span className="text-primary">{query || searchQuery}</span>
+                  {category !== 'all' && <span className="ml-2 text-muted-foreground"> in {category}</span>}
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Found {rankedRecommendations.length} locations and {events.length} events
+                </p>
+              </div>
               
-              {!showNoResults && !error && (
-                <Tabs 
-                  defaultValue="locations" 
-                  className="w-full mb-6"
-                  onValueChange={setActiveTab}
-                  value={activeTab}
-                >
-                  <TabsList className="grid w-full max-w-md grid-cols-2 mb-4">
-                    <TabsTrigger value="locations">
-                      Locations ({recommendationsWithIds.length})
-                    </TabsTrigger>
-                    <TabsTrigger value="events">
-                      Events ({events.length})
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="locations">
-                    {recommendationsWithIds.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        {recommendationsWithIds.map((recommendation, index) => (
-                          <div
-                            key={recommendation.id}
-                            className="animate-fade-in"
-                            style={{
-                              animationDelay: `${index * 100}ms`
-                            }}
-                          >
-                            <LocationCard
-                              recommendation={recommendation}
-                              ranking={index < 10 ? index + 1 : undefined}
-                              reviewCount={recommendation.reviewCount}
-                              className="h-full"
+              <Tabs 
+                defaultValue="locations" 
+                className="w-full mb-6"
+                onValueChange={setActiveTab}
+                value={activeTab}
+              >
+                <TabsList className="grid w-full max-w-md grid-cols-2 mb-4">
+                  <TabsTrigger value="locations">
+                    Locations ({rankedRecommendations.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="events">
+                    Events ({events.length})
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="locations">
+                  {rankedRecommendations.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                      {rankedRecommendations.map((recommendation, index) => (
+                        <div
+                          key={recommendation.id}
+                          className="animate-fade-in"
+                          style={{
+                            animationDelay: `${index * 100}ms`
+                          }}
+                        >
+                          <LocationCard
+                            recommendation={recommendation}
+                            ranking={index < 10 ? index + 1 : undefined}
+                            reviewCount={recommendation.reviewCount}
+                            className="h-full"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-10 animate-fade-in">
+                      <p className="text-lg font-medium mb-2">No locations found</p>
+                      <p className="text-muted-foreground mb-4">
+                        Try adjusting your search or filters
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => handleNewSearch("restaurant near me")}
+                        className="mr-2"
+                      >
+                        Try "Restaurant near me"
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => handleNewSearch("cafes in bangalore")}
+                      >
+                        Try "Cafes in Bangalore"
+                      </Button>
+                    </div>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="events">
+                  {events.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {events.map((event) => (
+                        <div key={event.id} className="bg-white rounded-xl shadow-sm border border-border overflow-hidden animate-fade-in">
+                          <div className="relative h-48">
+                            <img 
+                              src={event.image} 
+                              alt={event.title} 
+                              className="w-full h-full object-cover"
                             />
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-10 animate-fade-in">
-                        <p className="text-lg font-medium mb-2">No locations found</p>
-                        <p className="text-muted-foreground mb-4">
-                          Try adjusting your search or filters
-                        </p>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => handleNewSearch("restaurant near me")}
-                          className="mr-2"
-                        >
-                          Try "Restaurant near me"
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => handleNewSearch("cafes in bangalore")}
-                        >
-                          Try "Cafes in Bangalore"
-                        </Button>
-                      </div>
-                    )}
-                  </TabsContent>
-                  
-                  <TabsContent value="events">
-                    {events.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {events.map((event) => (
-                          <div key={event.id} className="bg-white rounded-xl shadow-sm border border-border overflow-hidden animate-fade-in">
-                            <div className="relative h-48">
-                              <img 
-                                src={event.image} 
-                                alt={event.title} 
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
+                          
+                          <div className="p-5">
+                            <h3 className="text-xl font-medium mb-3">{event.title}</h3>
                             
-                            <div className="p-5">
-                              <h3 className="text-xl font-medium mb-3">{event.title}</h3>
-                              
-                              <div className="flex flex-col gap-2 mb-4">
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                  <Calendar className="w-4 h-4 mr-2" />
-                                  {event.date}
-                                </div>
-                                
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                  <Clock className="w-4 h-4 mr-2" />
-                                  {event.time}
-                                </div>
-                                
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                  <MapPin className="w-4 h-4 mr-2" />
-                                  {event.location}
-                                </div>
-                                
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                  <Users className="w-4 h-4 mr-2" />
-                                  {event.attendees} attending
-                                </div>
+                            <div className="flex flex-col gap-2 mb-4">
+                              <div className="flex items-center text-sm text-muted-foreground">
+                                <Calendar className="w-4 h-4 mr-2" />
+                                {event.date}
                               </div>
                               
-                              <p className="text-sm text-muted-foreground mb-4">
-                                {event.description}
-                              </p>
+                              <div className="flex items-center text-sm text-muted-foreground">
+                                <Clock className="w-4 h-4 mr-2" />
+                                {event.time}
+                              </div>
                               
-                              <Button 
-                                onClick={() => handleRSVP(event.title)}
-                                className="w-full"
-                              >
-                                RSVP to Event
-                              </Button>
+                              <div className="flex items-center text-sm text-muted-foreground">
+                                <MapPin className="w-4 h-4 mr-2" />
+                                {event.location}
+                              </div>
+                              
+                              <div className="flex items-center text-sm text-muted-foreground">
+                                <Users className="w-4 h-4 mr-2" />
+                                {event.attendees} attending
+                              </div>
                             </div>
+                            
+                            <p className="text-sm text-muted-foreground mb-4">
+                              {event.description}
+                            </p>
+                            
+                            <Button 
+                              onClick={() => handleRSVP(event.title)}
+                              className="w-full"
+                            >
+                              RSVP to Event
+                            </Button>
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-10 animate-fade-in">
-                        <p className="text-lg font-medium mb-2">No events found</p>
-                        <p className="text-muted-foreground">
-                          Try adjusting your search criteria
-                        </p>
-                      </div>
-                    )}
-                  </TabsContent>
-                </Tabs>
-              )}
-
-              {showNoResults && (
-                <div className="mt-6 text-center">
-                  <h2 className="text-lg font-medium mb-6">Try one of these popular searches instead</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => handleNewSearch("Find me a cozy café nearby")}
-                      className="flex items-center justify-start px-4 py-6 h-auto"
-                    >
-                      <span className="mr-3 text-xl">☕</span>
-                      <span>Find me a cozy café nearby</span>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => handleNewSearch("Looking for a Kannada-speaking accountant")}
-                      className="flex items-center justify-start px-4 py-6 h-auto"
-                    >
-                      <span className="mr-3 text-xl">🧮</span>
-                      <span>Looking for a Kannada-speaking accountant</span>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => handleNewSearch("Best electrician in Jayanagar")}
-                      className="flex items-center justify-start px-4 py-6 h-auto"
-                    >
-                      <span className="mr-3 text-xl">⚡</span>
-                      <span>Best electrician in Jayanagar</span>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => handleNewSearch("Where can I buy a pre-owned bike?")}
-                      className="flex items-center justify-start px-4 py-6 h-auto"
-                    >
-                      <span className="mr-3 text-xl">🏍️</span>
-                      <span>Where can I buy a pre-owned bike?</span>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => handleNewSearch("Recommend a good Italian restaurant")}
-                      className="flex items-center justify-start px-4 py-6 h-auto"
-                    >
-                      <span className="mr-3 text-xl">🍕</span>
-                      <span>Recommend a good Italian restaurant</span>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => handleNewSearch("Find a flower shop in Koramangala")}
-                      className="flex items-center justify-start px-4 py-6 h-auto"
-                    >
-                      <span className="mr-3 text-xl">🌸</span>
-                      <span>Find a flower shop in Koramangala</span>
-                    </Button>
-                  </div>
-                </div>
-              )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-10 animate-fade-in">
+                      <p className="text-lg font-medium mb-2">No events found</p>
+                      <p className="text-muted-foreground">
+                        Try adjusting your search criteria
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             </>
           )}
         </div>
