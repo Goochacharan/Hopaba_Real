@@ -122,8 +122,8 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
           title="Call"
           aria-label="Call seller"
         >
-          <Phone className="h-5 w-5" />
-          <span>Contact Seller</span>
+          <Phone className="h-5 w-5 shrink-0" />
+          <span className="text-sm whitespace-nowrap">Contact Seller</span>
         </button>
         <button 
           onClick={handleWhatsApp}
@@ -131,8 +131,8 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
           title="WhatsApp"
           aria-label="Contact on WhatsApp"
         >
-          <MessageSquare className="h-5 w-5" />
-          <span>WhatsApp</span>
+          <MessageSquare className="h-5 w-5 shrink-0" />
+          <span className="text-sm whitespace-nowrap">WhatsApp</span>
         </button>
       </div>
       
