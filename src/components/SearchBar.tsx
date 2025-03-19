@@ -6,6 +6,8 @@ import { Input } from './ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useLocation } from 'react-router-dom';
+import SearchSuggestions, { Suggestion } from './SearchSuggestions';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -28,8 +30,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const debouncedQuery = useDebounce(query, 300);
   
   // Determine correct placeholder based on current route
   const getPlaceholder = () => {
@@ -76,10 +82,63 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   };
   
+  const fetchSuggestions = async (searchQuery: string) => {
+    if (!searchQuery.trim()) {
+      setShowSuggestions(true);
+      setIsLoadingSuggestions(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('search-suggestions', {
+          body: { query: '' }
+        });
+        
+        if (error) {
+          console.error('Error fetching default suggestions:', error);
+          setSuggestions([]);
+          return;
+        }
+        
+        if (data?.suggestions) {
+          setSuggestions(data.suggestions);
+        }
+      } catch (err) {
+        console.error('Failed to fetch default suggestions:', err);
+        setSuggestions([]);
+      } finally {
+        setIsLoadingSuggestions(false);
+      }
+      return;
+    }
+    
+    setIsLoadingSuggestions(true);
+    setShowSuggestions(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('search-suggestions', {
+        body: { query: searchQuery }
+      });
+      
+      if (error) {
+        console.error('Error fetching suggestions:', error);
+        setSuggestions([]);
+        return;
+      }
+      
+      if (data?.suggestions) {
+        setSuggestions(data.suggestions);
+      }
+    } catch (err) {
+      console.error('Failed to fetch suggestions:', err);
+      setSuggestions([]);
+    } finally {
+      setIsLoadingSuggestions(false);
+    }
+  };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
       console.log("Original search query:", query);
+      setShowSuggestions(false);
       
       // Enhance the search query with AI
       const enhancedQuery = await enhanceSearchQuery(query);
@@ -159,6 +218,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node) && isExpanded) {
         setIsExpanded(false);
+        setShowSuggestions(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -173,10 +233,18 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, [initialValue]);
 
+  // Fetch suggestions when the debounced query changes
+  useEffect(() => {
+    if (isExpanded) {
+      fetchSuggestions(debouncedQuery);
+    }
+  }, [debouncedQuery, isExpanded]);
+
   // This function will explicitly handle the search button click
   const handleSearchButtonClick = async () => {
     if (query.trim()) {
       console.log("Search button clicked with query:", query);
+      setShowSuggestions(false);
       
       // Enhance the search query with AI
       const enhancedQuery = await enhanceSearchQuery(query);
@@ -190,9 +258,15 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   };
 
+  const handleSuggestionSelect = (suggestion: string) => {
+    setQuery(suggestion);
+    setShowSuggestions(false);
+    onSearch(suggestion);
+  };
+
   return (
     <div className={cn("w-full max-w-2xl mx-auto", className)}>
-      <form ref={formRef} onSubmit={handleSubmit} className="w-full bg-white rounded-xl shadow-md border border-border/50">
+      <form ref={formRef} onSubmit={handleSubmit} className="w-full bg-white rounded-xl shadow-md border border-border/50 relative">
         <div className="flex items-center p-2">
           <Input
             ref={inputRef}
@@ -201,7 +275,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
             className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-2"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setIsExpanded(true)}
+            onFocus={() => {
+              setIsExpanded(true);
+              setShowSuggestions(true);
+              if (!query.trim()) {
+                fetchSuggestions('');
+              }
+            }}
           />
           
           {query && (
@@ -246,6 +326,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
             )}
           </button>
         </div>
+        
+        <SearchSuggestions
+          suggestions={suggestions}
+          isLoading={isLoadingSuggestions}
+          onSelect={handleSuggestionSelect}
+          visible={showSuggestions && isExpanded}
+        />
       </form>
     </div>
   );
