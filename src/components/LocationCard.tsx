@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -19,6 +18,7 @@ import {
   CarouselPrevious 
 } from '@/components/ui/carousel';
 import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
 
 interface LocationCardProps {
   recommendation: Recommendation;
@@ -80,29 +80,52 @@ const LocationCard: React.FC<LocationCardProps> = ({
     switch(rank) {
       case 1:
         return {
-          wrapperClass: "relative top-2",
-          medalClass: "bg-gradient-to-b from-yellow-300 to-yellow-500 border-yellow-300 text-yellow-900 shadow h-8 w-8 text-sm",
+          medalClass: "bg-gradient-to-b from-yellow-300 to-yellow-500 border-yellow-300 text-yellow-900 shadow h-6 w-6 text-xs",
           ribbonColor: "bg-red-500"
         };
       case 2:
         return {
-          wrapperClass: "relative top-2",
-          medalClass: "bg-gradient-to-b from-gray-200 to-gray-400 border-gray-200 text-gray-800 shadow h-8 w-8 text-sm",
+          medalClass: "bg-gradient-to-b from-gray-200 to-gray-400 border-gray-200 text-gray-800 shadow h-6 w-6 text-xs",
           ribbonColor: "bg-blue-500"
         };
       case 3:
         return {
-          wrapperClass: "relative top-2",
-          medalClass: "bg-gradient-to-b from-amber-300 to-amber-600 border-amber-300 text-amber-900 shadow h-8 w-8 text-sm",
+          medalClass: "bg-gradient-to-b from-amber-300 to-amber-600 border-amber-300 text-amber-900 shadow h-6 w-6 text-xs",
           ribbonColor: "bg-green-500"
         };
       default:
         return {
-          wrapperClass: "relative top-2",
-          medalClass: "bg-gradient-to-b from-blue-400 to-blue-600 border-blue-300 text-white shadow h-8 w-8 text-sm",
+          medalClass: "bg-gradient-to-b from-blue-400 to-blue-600 border-blue-300 text-white shadow h-6 w-6 text-xs",
           ribbonColor: "bg-blue-300"
         };
     }
+  };
+
+  const renderStarRating = (rating: number) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const totalStars = 5;
+    
+    return (
+      <div className="flex items-center">
+        {[...Array(fullStars)].map((_, i) => (
+          <Star key={`full-${i}`} className="fill-amber-500 stroke-amber-500 w-3.5 h-3.5" />
+        ))}
+        
+        {hasHalfStar && (
+          <div className="relative w-3.5 h-3.5">
+            <Star className="absolute stroke-amber-500 w-3.5 h-3.5" />
+            <div className="absolute overflow-hidden w-[50%]">
+              <Star className="fill-amber-500 stroke-amber-500 w-3.5 h-3.5" />
+            </div>
+          </div>
+        )}
+        
+        {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
+          <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />
+        ))}
+      </div>
+    );
   };
 
   const handleCall = (e: React.MouseEvent) => {
@@ -265,29 +288,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       )}
     >
       <div className="relative w-full h-72 overflow-hidden">
-        {ranking !== undefined && ranking <= 10 && (
-          <div className="absolute top-0 left-2 z-10">
-            <div className={cn("flex flex-col items-center", getMedalStyle(ranking).wrapperClass)}>
-              <div 
-                className={cn(
-                  "flex items-center justify-center rounded-full text-sm font-bold border-2",
-                  "transform transition-all duration-300 group-hover:scale-110",
-                  getMedalStyle(ranking).medalClass
-                )}
-              >
-                {ranking}
-              </div>
-              {ranking <= 3 && (
-                <div className="flex mt-1">
-                  <div className={cn("h-3 w-1.5 rounded-sm transform -rotate-20", getMedalStyle(ranking).ribbonColor)}></div>
-                  <div className={cn("h-4 w-1.5 mx-0.5 rounded-sm", getMedalStyle(ranking).ribbonColor)}></div>
-                  <div className={cn("h-3 w-1.5 rounded-sm transform rotate-20", getMedalStyle(ranking).ribbonColor)}></div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-        
         <Carousel className="w-full h-full">
           <CarouselContent className="h-full">
             {images.map((img, index) => (
@@ -338,17 +338,27 @@ const LocationCard: React.FC<LocationCardProps> = ({
       </div>
 
       <div className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-medium text-lg">{recommendation.name}</h3>
-          <div className="flex flex-col items-end">
-            <div className="flex items-center gap-1 text-amber-500">
-              <Star className="fill-amber-500 w-4 h-4" />
-              <span className="text-sm">{recommendation.rating}</span>
-            </div>
-            <span className="text-xs text-muted-foreground">
-              {reviewCount} reviews
-            </span>
+        <div className="flex justify-between items-start gap-2 mb-2">
+          <div className="flex items-center gap-1.5">
+            {ranking !== undefined && ranking <= 10 && (
+              <div 
+                className={cn(
+                  "flex items-center justify-center rounded-full border-2 flex-shrink-0",
+                  getMedalStyle(ranking).medalClass
+                )}
+              >
+                {ranking}
+              </div>
+            )}
+            <h3 className="font-medium text-lg">{recommendation.name}</h3>
           </div>
+        </div>
+
+        <div className="flex items-center gap-1 mb-2">
+          {renderStarRating(recommendation.rating)}
+          <span className="text-xs text-muted-foreground ml-1">
+            ({reviewCount})
+          </span>
         </div>
 
         <div className="flex items-center text-muted-foreground mb-3 text-sm">
