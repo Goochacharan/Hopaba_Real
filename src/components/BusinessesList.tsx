@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -62,6 +63,7 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
         .from('service_providers')
         .select('*')
         .eq('user_id', user.id)
+        .eq('category', 'Cars')
         .order('created_at', { ascending: false });
       
       if (error) {
@@ -73,7 +75,7 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
       console.error('Error fetching businesses:', error);
       toast({
         title: 'Error',
-        description: 'Unable to load your businesses. Please try again later.',
+        description: 'Unable to load your shop listings. Please try again later.',
         variant: 'destructive',
       });
     } finally {
@@ -100,7 +102,7 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
       setBusinesses(businesses.filter(business => business.id !== id));
       toast({
         title: 'Success',
-        description: 'Listing deleted successfully',
+        description: 'Car listing deleted successfully',
       });
     } catch (error: any) {
       console.error('Error deleting business:', error);
@@ -143,24 +145,16 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
   };
 
   if (loading) {
-    return <div className="text-center py-8">Loading your listings...</div>;
+    return <div className="text-center py-8">Loading your car shop listings...</div>;
   }
 
   if (businesses.length === 0) {
     return (
       <div className="text-center py-8 space-y-4">
-        <p className="text-muted-foreground">You haven't added any listings yet.</p>
+        <p className="text-muted-foreground">You haven't added any car shop listings yet.</p>
         <div className="flex flex-col gap-3 mt-6 items-center">
           <Button 
-            onClick={() => onEdit({ id: 'new', name: '', category: '', description: '', price_range_min: 0, availability: '', address: '', city: '', area: '', contact_phone: '' })}
-            className="flex items-center gap-2"
-          >
-            <PlusCircle className="h-4 w-4" />
-            Add a Service
-          </Button>
-          <Button 
             onClick={handleAddShop}
-            variant="outline"
             className="flex items-center gap-2"
           >
             <Store className="h-4 w-4" />
@@ -172,7 +166,7 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
   }
 
   const shopGroups: Record<string, any[]> = businesses.reduce((groups: Record<string, any[]>, business) => {
-    if (business.category === 'Cars' && business.shop_name) {
+    if (business.shop_name) {
       if (!groups[business.shop_name]) {
         groups[business.shop_name] = [];
       }
@@ -189,24 +183,15 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-medium">Your Listings</h3>
-        <div className="space-x-2">
-          <Button 
-            onClick={() => onEdit({ id: 'new', name: '', category: '', description: '', price_range_min: 0, availability: '', address: '', city: '', area: '', contact_phone: '' })}
-            size="sm"
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <PlusCircle className="h-4 w-4" />
-            Add Service
-          </Button>
+        <h3 className="text-xl font-medium">Your Car Shop Listings</h3>
+        <div>
           <Button 
             onClick={handleAddShop}
             size="sm"
             className="flex items-center gap-2"
           >
             <Store className="h-4 w-4" />
-            Add Shop
+            Add Car Listing
           </Button>
         </div>
       </div>
@@ -217,7 +202,7 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
             <div className="flex items-center gap-2">
               <Store className="h-5 w-5" />
               <h4 className="text-lg font-medium">{shopName}</h4>
-              <Badge variant="outline">{shopBusinesses.length} {shopBusinesses.length === 1 ? 'listing' : 'listings'}</Badge>
+              <Badge variant="outline">{shopBusinesses.length} {shopBusinesses.length === 1 ? 'vehicle' : 'vehicles'}</Badge>
             </div>
             <div className="grid grid-cols-1 gap-6">
               {shopBusinesses.map((business) => (
@@ -239,51 +224,28 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
                     <CardDescription className="line-clamp-2">{business.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-4 space-y-3">
-                    {business.category === 'Cars' && (
-                      <>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="flex items-center gap-2">
-                            <Car className="h-4 w-4 text-muted-foreground" />
-                            <span>
-                              {business.vehicle_year} {business.vehicle_make} {business.vehicle_model}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Fuel className="h-4 w-4 text-muted-foreground" />
-                            <span className="capitalize">{business.vehicle_fuel}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Gauge className="h-4 w-4 text-muted-foreground" />
-                            <span>{business.vehicle_kms} km</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">
-                            {business.price_range_min ? formatIndianRupees(business.price_range_min.toString()) : '₹0'}
-                          </span>
-                        </div>
-                      </>
-                    )}
-                    
-                    {business.category !== 'Cars' && (
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-muted-foreground" />
-                          <span>
-                            ${business.price_range_min} - ${business.price_range_max} {business.price_unit}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>{business.availability}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <span>{business.area}, {business.city}</span>
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="flex items-center gap-2">
+                        <Car className="h-4 w-4 text-muted-foreground" />
+                        <span>
+                          {business.vehicle_year} {business.vehicle_make} {business.vehicle_model}
+                        </span>
                       </div>
-                    )}
+                      <div className="flex items-center gap-2">
+                        <Fuel className="h-4 w-4 text-muted-foreground" />
+                        <span className="capitalize">{business.vehicle_fuel}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Gauge className="h-4 w-4 text-muted-foreground" />
+                        <span>{business.vehicle_kms} km</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">
+                        {business.price_range_min ? formatIndianRupees(business.price_range_min.toString()) : '₹0'}
+                      </span>
+                    </div>
                     
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -329,14 +291,14 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
       
       {shopGroups['Other'] && shopGroups['Other'].length > 0 && (
         <div className="grid grid-cols-1 gap-6">
-          <h4 className="text-lg font-medium">Other Listings</h4>
+          <h4 className="text-lg font-medium">Other Vehicles</h4>
           {shopGroups['Other'].map((business) => (
             <Card key={business.id} className="overflow-hidden">
               <CardHeader className="bg-muted/30">
                 <CardTitle className="flex justify-between items-start">
                   <span>{business.name}</span>
                   <span className="text-sm font-normal text-muted-foreground px-2 py-1 bg-muted rounded-md">
-                    {business.category}
+                    {business.vehicle_make} {business.vehicle_model}
                   </span>
                 </CardTitle>
                 <CardDescription className="line-clamp-2">{business.description}</CardDescription>
@@ -344,14 +306,16 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
               <CardContent className="pt-4 space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    <Car className="h-4 w-4 text-muted-foreground" />
                     <span>
-                      ${business.price_range_min} - ${business.price_range_max} {business.price_unit}
+                      {business.vehicle_year} {business.vehicle_make} {business.vehicle_model}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span>{business.availability}</span>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">
+                      {business.price_range_min ? formatIndianRupees(business.price_range_min.toString()) : '₹0'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -362,12 +326,6 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
                   <Phone className="h-4 w-4 text-muted-foreground" />
                   <span>{business.contact_phone}</span>
                 </div>
-                {business.instagram && (
-                  <div className="flex items-center gap-2">
-                    <Instagram className="h-4 w-4 text-muted-foreground" />
-                    <span>{business.instagram}</span>
-                  </div>
-                )}
               </CardContent>
               <CardFooter className="border-t bg-muted/10 gap-2 justify-end">
                 <Button 
@@ -399,7 +357,7 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete your listing. This action cannot be undone.
+              This will permanently delete your car listing. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

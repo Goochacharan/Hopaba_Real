@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -9,18 +8,16 @@ import { useAuth } from '@/hooks/useAuth';
 
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import { Save } from 'lucide-react';
+import { Save, Car } from 'lucide-react';
 
-import BasicInfoSection from './business-form/BasicInfoSection';
 import LocationSection from './business-form/LocationSection';
-import ContactSection from './business-form/ContactSection';
 import ShopSection from './business-form/ShopSection';
 import VehicleDetailsSection from './business-form/VehicleDetailsSection';
 import SuccessDialog from './business-form/SuccessDialog';
 
 const businessFormSchema = z.object({
   name: z.string().min(2, {
-    message: "Business or vehicle name must be at least 2 characters.",
+    message: "Vehicle name must be at least 2 characters.",
   }),
   category: z.string().min(1, {
     message: "Please select a category.",
@@ -62,45 +59,39 @@ const businessFormSchema = z.object({
   tags: z.array(z.string()).optional(),
   languages: z.array(z.string()).optional(),
   // Shop details
-  shop_name: z.string().optional(),
-  shop_type: z.string().optional(),
+  shop_name: z.string().min(2, {
+    message: "Shop name is required.",
+  }),
+  shop_type: z.string().min(1, {
+    message: "Please select a shop type.",
+  }),
   established: z.union([z.number(), z.string()]).optional(),
   shop_description: z.string().optional(),
   // Vehicle details
-  vehicle_make: z.string().optional(),
-  vehicle_model: z.string().optional(),
-  vehicle_year: z.union([z.number(), z.string()]).optional(),
+  vehicle_make: z.string().min(1, {
+    message: "Vehicle make is required.",
+  }),
+  vehicle_model: z.string().min(1, {
+    message: "Vehicle model is required.",
+  }),
+  vehicle_year: z.union([z.number(), z.string()]).min(1, {
+    message: "Vehicle year is required.",
+  }),
   vehicle_color: z.string().optional(),
-  vehicle_fuel: z.string().optional(),
-  vehicle_transmission: z.string().optional(),
+  vehicle_fuel: z.string().min(1, {
+    message: "Fuel type is required.",
+  }),
+  vehicle_transmission: z.string().min(1, {
+    message: "Transmission type is required.",
+  }),
   vehicle_kms: z.union([z.number(), z.string()]).optional(),
-}).refine((data) => {
-  // If category is Cars, require shop name
-  if (data.category === 'Cars' && !data.shop_name) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Shop name is required for vehicle listings",
-  path: ["shop_name"],
-}).refine((data) => {
-  // If category is Cars, validate vehicle details
-  if (data.category === 'Cars') {
-    if (!data.vehicle_make || !data.vehicle_model || !data.vehicle_year || 
-        !data.vehicle_fuel || !data.vehicle_transmission) {
-      return false;
-    }
-  }
-  return true;
-}, {
-  message: "All required vehicle details must be provided",
-  path: ["vehicle_make"],
 });
 
 export type BusinessFormValues = z.infer<typeof businessFormSchema>;
 
 const defaultValues: Partial<BusinessFormValues> = {
-  price_unit: "per hour",
+  category: "Cars",
+  price_unit: "fixed",
   experience: "",
   description: "",
   website: "",
@@ -109,6 +100,7 @@ const defaultValues: Partial<BusinessFormValues> = {
   tags: [],
   languages: [],
   shop_name: "",
+  shop_type: "car_dealership",
   vehicle_make: "",
   vehicle_model: "",
 };
@@ -129,11 +121,11 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
     resolver: zodResolver(businessFormSchema),
     defaultValues: {
       name: businessData?.name || '',
-      category: businessData?.category || '',
+      category: 'Cars', // Always set to Cars
       description: businessData?.description || '',
       price_range_min: businessData?.price_range_min || 0,
       price_range_max: businessData?.price_range_max || 0,
-      price_unit: businessData?.price_unit || 'per service',
+      price_unit: 'fixed', // Always fixed for cars
       contact_phone: businessData?.contact_phone || '',
       contact_email: businessData?.contact_email || '',
       website: businessData?.website || '',
@@ -148,7 +140,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
       whatsapp: businessData?.whatsapp || '',
       // Shop details
       shop_name: businessData?.shop_name || '',
-      shop_type: businessData?.shop_type || '',
+      shop_type: businessData?.shop_type || 'car_dealership',
       established: businessData?.established || '',
       shop_description: businessData?.shop_description || '',
       // Vehicle details
@@ -163,19 +155,6 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
     mode: "onChange",
   });
 
-  const category = form.watch('category');
-  const isCarsCategory = category === 'Cars';
-
-  useEffect(() => {
-    // If category is Cars, update price_unit to be fixed
-    if (category === 'Cars') {
-      form.setValue('price_unit', 'fixed');
-      // Set price_range_max to equal price_range_min for car listings
-      const priceMin = form.getValues('price_range_min');
-      form.setValue('price_range_max', priceMin);
-    }
-  }, [category, form]);
-
   const onSubmit = async (data: BusinessFormValues) => {
     setIsSubmitting(true);
     
@@ -188,12 +167,6 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
         });
         setIsSubmitting(false);
         return;
-      }
-
-      // Ensure price_range_max equals price_range_min for car listings
-      if (data.category === 'Cars') {
-        data.price_range_max = data.price_range_min;
-        data.price_unit = 'fixed';
       }
 
       if (isEditing) {
@@ -310,11 +283,9 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 gap-6">
-            {isCarsCategory && <ShopSection />}
-            {isCarsCategory && <VehicleDetailsSection />}
-            <BasicInfoSection />
+            <ShopSection />
+            <VehicleDetailsSection />
             <LocationSection />
-            {!isCarsCategory && <ContactSection />}
           </div>
 
           <Button 
@@ -322,10 +293,10 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
             className="w-full" 
             disabled={isSubmitting}
           >
-            <Save className="mr-2 h-4 w-4" />
+            <Car className="mr-2 h-4 w-4" />
             {isSubmitting 
               ? isEditing ? "Updating..." : "Submitting..." 
-              : isEditing ? "Update Listing" : "Save Listing"
+              : isEditing ? "Update Car Listing" : "Save Car Listing"
             }
           </Button>
         </form>
