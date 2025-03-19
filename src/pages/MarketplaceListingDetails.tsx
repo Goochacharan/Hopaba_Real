@@ -70,13 +70,13 @@ const MarketplaceListingDetails = () => {
 
   return (
     <MainLayout>
-      <div className="container mx-auto py-8 px-4">
-        <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
+      <div className="container mx-auto py-4 px-4">
+        <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="h-4 w-4" />
           <span>Back to Marketplace</span>
         </Link>
         
-        <div className="grid grid-cols-1 gap-8">
+        <div className="grid grid-cols-1 gap-6">
           <div>
             <div className="mb-6">
               <Badge className="mb-2">{listing?.category}</Badge>
@@ -88,13 +88,13 @@ const MarketplaceListingDetails = () => {
               />
             </div>
             
-            <div className="mb-6 bg-black/5 rounded-xl shadow-sm overflow-hidden">
+            <div className="mb-6 overflow-hidden">
               <ListingImageCarousel 
                 images={listing.images}
                 onImageClick={openImageViewer}
               />
               
-              <div className="p-4">
+              <div className="mt-4 bg-white p-4 rounded-xl shadow-sm">
                 <ListingThumbnails
                   images={listing.images}
                   selectedIndex={selectedImageIndex}
@@ -115,17 +115,19 @@ const MarketplaceListingDetails = () => {
               />
             )}
             
-            <ListingDescription
-              description={listing.description}
-              category={listing.category}
-              condition={listing.condition}
-              location={listing.location}
-              createdAt={listing.created_at}
-              showMetadata={false}
-            />
-            
-            <div className="mt-6">
-              <SafeTradingTips />
+            <div className="mt-6 bg-white p-6 rounded-xl shadow-sm">
+              <ListingDescription
+                description={listing.description}
+                category={listing.category}
+                condition={listing.condition}
+                location={listing.location}
+                createdAt={listing.created_at}
+                showMetadata={false}
+              />
+              
+              <div className="mt-8">
+                <SafeTradingTips />
+              </div>
             </div>
           </div>
         </div>

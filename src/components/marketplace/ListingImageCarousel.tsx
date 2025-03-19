@@ -39,7 +39,7 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
   };
 
   return (
-    <div className="relative w-full overflow-hidden">
+    <div className="relative w-screen -ml-[calc(50vw-50%+1rem)] overflow-hidden">
       <Carousel className="w-full">
         <CarouselContent>
           {images.map((img, index) => (
@@ -48,7 +48,7 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
                 className="relative w-full"
                 onClick={(e) => handleImageClickWrapper(e, index)}
               >
-                <AspectRatio ratio={4/3}>
+                <AspectRatio ratio={16/9}>
                   <div className={cn(
                     "absolute inset-0 bg-muted/30",
                     imageLoaded[index] ? "opacity-0" : "opacity-100"
@@ -69,8 +69,8 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
         </CarouselContent>
         {images.length > 1 && (
           <>
-            <CarouselPrevious className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2" />
-            <CarouselNext className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2" />
+            <CarouselPrevious className="absolute left-6 top-1/2 h-10 w-10 -translate-y-1/2 z-10" />
+            <CarouselNext className="absolute right-6 top-1/2 h-10 w-10 -translate-y-1/2 z-10" />
           </>
         )}
       </Carousel>
