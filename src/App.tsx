@@ -16,6 +16,8 @@ import Events from "./pages/Events";
 import Map from "./pages/Map";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Marketplace from "./pages/Marketplace";
+import MarketplaceListingDetails from "./pages/MarketplaceListingDetails";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +39,8 @@ const App = () => (
               <Route path="/map" element={<Map />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/marketplace/:id" element={<MarketplaceListingDetails />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
