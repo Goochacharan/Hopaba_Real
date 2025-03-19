@@ -48,12 +48,12 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
       <ListingImageCarousel 
         images={listing.images}
         onImageClick={handleImageClick}
+        listing={listing}
       />
       
       <div className="p-4">
         <h3 className="font-medium text-lg md:text-xl mb-2">{listing.title}</h3>
         
-        {/* ListingMetadata component is still included but doesn't render anything */}
         <ListingMetadata 
           location={listing.location}
           createdAt={listing.created_at}

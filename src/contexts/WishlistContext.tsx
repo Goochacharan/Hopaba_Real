@@ -1,10 +1,14 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Recommendation } from '@/lib/mockData';
+import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+
+// Create a union type to support both recommendations and marketplace listings
+type WishlistItem = Recommendation | MarketplaceListing;
 
 interface WishlistContextType {
-  wishlist: Recommendation[];
-  addToWishlist: (item: Recommendation) => void;
+  wishlist: WishlistItem[];
+  addToWishlist: (item: WishlistItem) => void;
   removeFromWishlist: (id: string) => void;
   isInWishlist: (id: string) => boolean;
 }
@@ -12,7 +16,7 @@ interface WishlistContextType {
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
 export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [wishlist, setWishlist] = useState<Recommendation[]>([]);
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
 
   // Load wishlist from localStorage on mount
   useEffect(() => {
@@ -31,7 +35,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
-  const addToWishlist = (item: Recommendation) => {
+  const addToWishlist = (item: WishlistItem) => {
     if (!isInWishlist(item.id)) {
       setWishlist((prev) => [...prev, item]);
     }

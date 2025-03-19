@@ -92,6 +92,7 @@ const MarketplaceListingDetails = () => {
               <ListingImageCarousel 
                 images={listing.images}
                 onImageClick={openImageViewer}
+                listing={listing}
               />
               
               <div className="p-4">

@@ -1,7 +1,10 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { Heart } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { useWishlist } from '@/contexts/WishlistContext';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Carousel, 
   CarouselContent, 
@@ -13,13 +16,17 @@ import {
 interface ListingImageCarouselProps {
   images: string[];
   onImageClick: (index: number) => void;
+  listing?: any; // Add listing prop for wishlist functionality
 }
 
 const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
   images,
-  onImageClick
+  onImageClick,
+  listing
 }) => {
   const [imageLoaded, setImageLoaded] = React.useState<boolean[]>([]);
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { toast } = useToast();
   
   React.useEffect(() => {
     setImageLoaded(Array(images.length).fill(false));
@@ -38,8 +45,47 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
     onImageClick(index);
   };
 
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!listing) return;
+    
+    if (isInWishlist(listing.id)) {
+      removeFromWishlist(listing.id);
+      toast({
+        title: "Removed from wishlist",
+        description: `${listing.title} has been removed from your wishlist`
+      });
+    } else {
+      addToWishlist(listing);
+      toast({
+        title: "Added to wishlist",
+        description: `${listing.title} has been added to your wishlist`
+      });
+    }
+  };
+
   return (
     <div className="relative w-full overflow-hidden">
+      {listing && (
+        <button
+          onClick={handleWishlistToggle}
+          className={cn(
+            "absolute right-4 top-4 z-10 rounded-full bg-white/80 p-2 shadow-md transition-colors",
+            "hover:bg-white focus:outline-none focus:ring-2 focus:ring-primary",
+            isInWishlist(listing.id) ? "text-red-500" : "text-gray-500"
+          )}
+          aria-label={isInWishlist(listing.id) ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          <Heart 
+            className={cn(
+              "h-6 w-6",
+              isInWishlist(listing.id) ? "fill-current" : ""
+            )} 
+          />
+        </button>
+      )}
+      
       <Carousel className="w-full">
         <CarouselContent>
           {images.map((img, index) => (

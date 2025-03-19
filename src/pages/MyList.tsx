@@ -1,7 +1,9 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import LocationCard from '@/components/LocationCard';
+import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Heart, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,6 +17,7 @@ import {
   PaginationPrevious 
 } from '@/components/ui/pagination';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const MyList = () => {
   const { wishlist } = useWishlist();
@@ -23,6 +26,7 @@ const MyList = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
   const itemsPerPage = 6;
 
   useEffect(() => {
@@ -54,17 +58,45 @@ const MyList = () => {
     };
   }, [navigate]);
 
-  // Filter wishlist items based on search query
+  // Determine if an item is a marketplace listing or a recommendation
+  const isMarketplaceListing = (item: any) => {
+    return item.hasOwnProperty('seller_name') || item.hasOwnProperty('seller_id');
+  };
+
+  // Filter wishlist items based on search query and active tab
   const filteredWishlist = wishlist.filter((item) => {
+    // First filter by active tab
+    if (activeTab === 'locations' && isMarketplaceListing(item)) {
+      return false;
+    }
+    if (activeTab === 'marketplace' && !isMarketplaceListing(item)) {
+      return false;
+    }
+    
+    // Then filter by search query
     if (!searchQuery.trim()) return true;
     
     const lowercaseQuery = searchQuery.toLowerCase();
-    return (
-      (item.name?.toLowerCase().includes(lowercaseQuery)) ||
-      (item.category?.toLowerCase().includes(lowercaseQuery)) ||
-      (item.description?.toLowerCase().includes(lowercaseQuery)) ||
-      (item.address?.toLowerCase().includes(lowercaseQuery))
-    );
+    
+    // Handle different properties based on item type
+    if (isMarketplaceListing(item)) {
+      // Marketplace listing properties
+      return (
+        (item.title?.toLowerCase().includes(lowercaseQuery)) ||
+        (item.category?.toLowerCase().includes(lowercaseQuery)) ||
+        (item.description?.toLowerCase().includes(lowercaseQuery)) ||
+        (item.location?.toLowerCase().includes(lowercaseQuery)) ||
+        (item.condition?.toLowerCase().includes(lowercaseQuery))
+      );
+    } else {
+      // Recommendation properties
+      return (
+        (item.name?.toLowerCase().includes(lowercaseQuery)) ||
+        (item.category?.toLowerCase().includes(lowercaseQuery)) ||
+        (item.description?.toLowerCase().includes(lowercaseQuery)) ||
+        (item.address?.toLowerCase().includes(lowercaseQuery))
+      );
+    }
   });
 
   // Calculate pagination
@@ -73,10 +105,10 @@ const MyList = () => {
   const currentItems = filteredWishlist.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredWishlist.length / itemsPerPage);
 
-  // Reset to first page when search query changes
+  // Reset to first page when search query or tab changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, activeTab]);
 
   if (loading) {
     return (
@@ -95,8 +127,16 @@ const MyList = () => {
         
         {wishlist.length > 0 ? (
           <>
-            {/* Search input */}
-            <div className="mb-6">
+            {/* Tabs and search input */}
+            <div className="mb-6 space-y-4">
+              <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-3 mb-4">
+                  <TabsTrigger value="all">All Items</TabsTrigger>
+                  <TabsTrigger value="locations">Locations</TabsTrigger>
+                  <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
+                </TabsList>
+              </Tabs>
+              
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input 
@@ -113,7 +153,11 @@ const MyList = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                   {currentItems.map((item) => (
-                    <LocationCard key={item.id} recommendation={item} />
+                    isMarketplaceListing(item) ? (
+                      <MarketplaceListingCard key={item.id} listing={item} />
+                    ) : (
+                      <LocationCard key={item.id} recommendation={item} />
+                    )
                   ))}
                 </div>
                 
@@ -180,11 +224,16 @@ const MyList = () => {
             <Heart className="mx-auto h-12 w-12 text-muted-foreground mb-4 stroke-[1.5]" />
             <h2 className="text-xl font-medium mb-2">Your wishlist is empty</h2>
             <p className="text-muted-foreground mb-6">
-              Add items to your wishlist by clicking the heart icon on any location card.
+              Add items to your wishlist by clicking the heart icon on any location card or marketplace listing.
             </p>
-            <Button onClick={() => navigate('/')}>
-              Explore locations
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button onClick={() => navigate('/')}>
+                Explore locations
+              </Button>
+              <Button onClick={() => navigate('/marketplace')} variant="outline">
+                Browse marketplace
+              </Button>
+            </div>
           </div>
         )}
       </section>
