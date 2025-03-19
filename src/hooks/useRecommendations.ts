@@ -76,7 +76,18 @@ const yogaAndFitnessMockData: Recommendation[] = [
   }
 ];
 
-const sampleEvents: Event[] = [
+export interface AppEvent {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  description: string;
+  image: string;
+  attendees: number;
+}
+
+const sampleEvents: AppEvent[] = [
   {
     id: 'event1',
     title: 'Summer Food Festival',
@@ -139,7 +150,7 @@ const useRecommendations = ({
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState<CategoryType>(initialCategory);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<AppEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -234,7 +245,7 @@ const useRecommendations = ({
     });
   };
 
-  const searchEvents = (searchQuery: string): Event[] => {
+  const searchEvents = (searchQuery: string): AppEvent[] => {
     const lowercaseQuery = searchQuery.toLowerCase();
     
     if (lowercaseQuery.includes('yoga')) {
