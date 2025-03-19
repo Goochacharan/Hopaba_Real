@@ -12,6 +12,7 @@ import ListingThumbnails from '@/components/marketplace/ListingThumbnails';
 import ListingDescription from '@/components/marketplace/ListingDescription';
 import ListingMetadata from '@/components/marketplace/ListingMetadata';
 import ImageViewer from '@/components/ImageViewer';
+import SafeTradingTips from '@/components/marketplace/SafeTradingTips';
 
 const MarketplaceListingDetails = () => {
   const { id = '' } = useParams<{ id: string }>();
@@ -120,6 +121,10 @@ const MarketplaceListingDetails = () => {
               createdAt={listing.created_at}
               showMetadata={false}
             />
+            
+            <div className="mt-6">
+              <SafeTradingTips />
+            </div>
           </div>
         </div>
       </div>
