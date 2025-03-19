@@ -30,6 +30,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [imageLoaded, setImageLoaded] = React.useState<boolean[]>([]);
+  const [inWishlist, setInWishlist] = React.useState(false);
   
   React.useEffect(() => {
     setImageLoaded(Array(listing.images.length).fill(false));
@@ -126,6 +127,17 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
     });
   };
 
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setInWishlist(!inWishlist);
+    
+    toast({
+      title: inWishlist ? "Removed from wishlist" : "Added to wishlist",
+      description: `${listing.title} ${inWishlist ? "removed from" : "added to"} your wishlist`,
+      duration: 2000,
+    });
+  };
+
   const handleCardClick = () => {
     navigate(`/marketplace/${listing.id}`);
   };
@@ -195,13 +207,23 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
           )}
         </Carousel>
         
-        <div className="absolute top-3 left-20 z-10">
+        <div className="absolute top-3 left-3 z-10">
           <span className="px-2 py-1 rounded-full text-xs font-medium bg-black/40 backdrop-blur-sm text-white">
             {listing.category}
           </span>
         </div>
         
-        <Badge className="absolute top-3 right-3 bg-primary/90">{listing.condition}</Badge>
+        <button 
+          onClick={handleWishlistToggle}
+          className={cn(
+            "absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10",
+            inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500"
+          )}
+        >
+          <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} />
+        </button>
+        
+        <Badge className="absolute top-12 right-3 bg-[#1EAEDB]/90">{listing.condition}</Badge>
       </div>
       
       <div className="p-4">
@@ -216,7 +238,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
               (Seller)
             </span>
           </div>
-          <p className="text-lg font-bold text-primary">{formatPrice(listing.price)}</p>
+          <p className="text-lg font-bold text-[#1EAEDB]">{formatPrice(listing.price)}</p>
         </div>
 
         <div className="flex items-center text-muted-foreground mb-3 text-sm">
@@ -235,31 +257,31 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
         <div className="flex gap-2 mt-auto">
           <button 
             onClick={handleCall}
-            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+            className="flex-1 h-10 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
           >
             <Phone className="h-5 w-5" />
           </button>
           <button 
             onClick={handleWhatsApp}
-            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+            className="flex-1 h-10 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
           >
             <MessageSquare className="h-5 w-5" />
           </button>
           <button 
             onClick={handleLocation}
-            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+            className="flex-1 h-10 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
           >
             <Navigation2 className="h-5 w-5" />
           </button>
           <button 
             onClick={handleInstagram}
-            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+            className="flex-1 h-10 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
           >
             <Instagram className="h-5 w-5" />
           </button>
           <button 
             onClick={handleShare}
-            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+            className="flex-1 h-10 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
           >
             <Share2 className="h-5 w-5" />
           </button>

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useMarketplaceListing } from '@/hooks/useMarketplaceListings';
-import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Calendar, ArrowLeft, Info, Shield, BadgeCheck, AlertCircle } from 'lucide-react';
+import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Calendar, ArrowLeft, Info, Shield, BadgeCheck, AlertCircle, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -20,6 +20,7 @@ const MarketplaceListingDetails = () => {
   const { id = '' } = useParams<{ id: string }>();
   const { listing, loading, error } = useMarketplaceListing(id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [inWishlist, setInWishlist] = useState(false);
   
   const handleShare = () => {
     if (navigator.share) {
@@ -84,6 +85,43 @@ const MarketplaceListingDetails = () => {
     if (listing?.location) {
       window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(listing.location)}`);
     }
+  };
+
+  const toggleWishlist = () => {
+    setInWishlist(!inWishlist);
+    
+    toast({
+      title: inWishlist ? "Removed from wishlist" : "Added to wishlist",
+      description: `${listing?.title} ${inWishlist ? "removed from" : "added to"} your wishlist`,
+      duration: 2000,
+    });
+  };
+
+  const renderStarRating = (rating: number) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const totalStars = 5;
+    
+    return (
+      <div className="flex items-center">
+        {[...Array(fullStars)].map((_, i) => (
+          <Star key={`full-${i}`} className="fill-amber-500 stroke-amber-500 w-3.5 h-3.5" />
+        ))}
+        
+        {hasHalfStar && (
+          <div className="relative w-3.5 h-3.5">
+            <Star className="absolute stroke-amber-500 w-3.5 h-3.5" />
+            <div className="absolute overflow-hidden w-[50%]">
+              <Star className="fill-amber-500 stroke-amber-500 w-3.5 h-3.5" />
+            </div>
+          </div>
+        )}
+        
+        {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
+          <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />
+        ))}
+      </div>
+    );
   };
 
   if (loading) {
@@ -240,38 +278,44 @@ const MarketplaceListingDetails = () => {
           <div className="col-span-1">
             <div className="sticky top-24 space-y-6">
               <div className="bg-white rounded-xl border p-6 shadow-sm">
-                <div className="mb-4">
-                  <h2 className="text-3xl font-bold text-primary">
+                <div className="mb-4 flex justify-between items-center">
+                  <h2 className="text-3xl font-bold text-[#1EAEDB]">
                     {formatPrice(listing.price)}
                   </h2>
+                  <button 
+                    onClick={toggleWishlist}
+                    className={`p-2 rounded-full transition-colors ${inWishlist ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-500'}`}
+                  >
+                    <Heart className={`w-5 h-5 ${inWishlist && 'fill-rose-500'}`} />
+                  </button>
                 </div>
                 
                 <div className="space-y-3 mb-6">
-                  <Button onClick={handleCall} className="w-full gap-2">
-                    <Phone className="h-4 w-4" />
+                  <Button onClick={handleCall} className="w-full gap-2 bg-[#1EAEDB] hover:bg-[#1EAEDB]/90">
+                    <Phone className="h-5 w-5" />
                     Contact Seller
                   </Button>
                   
-                  <Button variant="outline" onClick={handleWhatsApp} className="w-full gap-2">
-                    <MessageSquare className="h-4 w-4" />
+                  <Button variant="outline" onClick={handleWhatsApp} className="w-full gap-2 text-gray-700">
+                    <MessageSquare className="h-5 w-5" />
                     WhatsApp
                   </Button>
                 </div>
                 
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={handleLocation} className="flex-1 gap-1">
-                    <MapPin className="h-4 w-4" />
-                    Location
+                <div className="grid grid-cols-3 gap-2">
+                  <Button variant="outline" onClick={handleLocation} className="w-full h-12 gap-1 text-gray-700 rounded-full">
+                    <MapPin className="h-5 w-5" />
+                    <span>Location</span>
                   </Button>
                   
-                  <Button variant="outline" onClick={handleInstagram} className="flex-1 gap-1">
-                    <Instagram className="h-4 w-4" />
-                    Instagram
+                  <Button variant="outline" onClick={handleInstagram} className="w-full h-12 gap-1 text-gray-700 rounded-full">
+                    <Instagram className="h-5 w-5" />
+                    <span>Instagram</span>
                   </Button>
                   
-                  <Button variant="outline" onClick={handleShare} className="flex-1 gap-1">
-                    <Share2 className="h-4 w-4" />
-                    Share
+                  <Button variant="outline" onClick={handleShare} className="w-full h-12 gap-1 text-gray-700 rounded-full">
+                    <Share2 className="h-5 w-5" />
+                    <span>Share</span>
                   </Button>
                 </div>
               </div>
@@ -279,22 +323,22 @@ const MarketplaceListingDetails = () => {
               <div className="bg-white rounded-xl border p-6 shadow-sm">
                 <h3 className="text-lg font-semibold mb-4">Seller Information</h3>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="bg-primary/10 h-12 w-12 rounded-full flex items-center justify-center text-primary font-semibold">
+                  <div className="bg-[#1EAEDB]/10 h-12 w-12 rounded-full flex items-center justify-center text-[#1EAEDB] font-semibold">
                     {listing.seller_name.charAt(0)}
                   </div>
                   <div>
                     <p className="font-medium">{listing.seller_name}</p>
                     <div className="flex items-center gap-1 text-sm text-amber-500">
-                      <Star className="h-3 w-3 fill-amber-500" />
-                      <span>{listing.seller_rating.toFixed(1)}</span>
+                      {renderStarRating(listing.seller_rating)}
+                      <span className="ml-1">({listing.seller_rating.toFixed(1)})</span>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
+              <div className="bg-[#1EAEDB]/5 rounded-xl p-4 border border-[#1EAEDB]/10">
                 <div className="flex gap-3">
-                  <Shield className="h-5 w-5 text-primary/70 shrink-0 mt-0.5" />
+                  <Shield className="h-5 w-5 text-[#1EAEDB]/70 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-medium text-sm mb-1">Safe trading tips</h4>
                     <ul className="text-xs text-muted-foreground space-y-1">
