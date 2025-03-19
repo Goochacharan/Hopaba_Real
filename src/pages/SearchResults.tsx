@@ -109,7 +109,7 @@ const SearchResults = () => {
           onLocationChange={handleLocationChange}
         />
         
-        <div className="w-full mb-8">
+        <div className="w-full mb-6">
           <FilterTabs 
             distance={distance} 
             setDistance={setDistance} 
@@ -132,7 +132,7 @@ const SearchResults = () => {
           )}
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {[1, 2, 3].map(i => (
                 <div key={i} className="bg-white/50 h-96 rounded-xl border border-border/50 animate-pulse" />
               ))}
@@ -174,7 +174,7 @@ const SearchResults = () => {
                 
                 <TabsContent value="locations">
                   {rankedRecommendations.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                       {rankedRecommendations.map((recommendation, index) => (
                         <div
                           key={recommendation.id}
