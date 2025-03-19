@@ -48,7 +48,7 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
                 className="relative w-full"
                 onClick={(e) => handleImageClickWrapper(e, index)}
               >
-                <AspectRatio ratio={16/9}>
+                <AspectRatio ratio={4/3}>
                   <div className={cn(
                     "absolute inset-0 bg-muted/30",
                     imageLoaded[index] ? "opacity-0" : "opacity-100"
