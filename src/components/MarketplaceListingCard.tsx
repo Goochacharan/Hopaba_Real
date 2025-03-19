@@ -24,24 +24,12 @@ const formatPrice = (price: number): string => {
 const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing, className }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [inWishlist, setInWishlist] = React.useState(false);
   const [imageViewerOpen, setImageViewerOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
 
   const handleImageClick = (index: number) => {
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
-  };
-
-  const handleWishlistToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setInWishlist(!inWishlist);
-    
-    toast({
-      title: inWishlist ? "Removed from wishlist" : "Added to wishlist",
-      description: `${listing.title} ${inWishlist ? "removed from" : "added to"} your wishlist`,
-      duration: 2000,
-    });
   };
 
   const handleCardClick = () => {
@@ -60,8 +48,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
       <ListingImageCarousel 
         images={listing.images}
         onImageClick={handleImageClick}
-        inWishlist={inWishlist}
-        onWishlistToggle={handleWishlistToggle}
       />
       
       <div className="p-4">
