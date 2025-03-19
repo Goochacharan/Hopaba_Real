@@ -1,448 +1,130 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Star, StarHalf, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { 
-  MapPin, Star, Clock, Phone, Heart, 
-  Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Instagram 
-} from 'lucide-react';
-import { Recommendation } from '@/lib/mockData';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { useWishlist } from '@/contexts/WishlistContext';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
-} from '@/components/ui/carousel';
-import { supabase } from '@/integrations/supabase/client';
+import { Recommendation } from '@/types/recommendation';
 import { Badge } from '@/components/ui/badge';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 interface LocationCardProps {
   recommendation: Recommendation;
-  className?: string;
   ranking?: number;
   reviewCount?: number;
+  className?: string;
 }
 
-const LocationCard: React.FC<LocationCardProps> = ({ 
+const LocationCard = ({ 
   recommendation, 
-  className,
-  ranking,
-  reviewCount = Math.floor(Math.random() * 300) + 50
-}) => {
-  const navigate = useNavigate();
-  const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
-  const { toast } = useToast();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-  const inWishlist = isInWishlist(recommendation.id);
-  const isMobile = useIsMobile();
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      const { data } = await supabase.auth.getSession();
-      setUser(data.session?.user || null);
-    };
-    
-    getCurrentUser();
-    
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user || null);
-      }
-    );
-    
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
-  }, []);
-
-  const images = recommendation.images && recommendation.images.length > 0 
-    ? recommendation.images 
-    : [recommendation.image];
-
-  React.useEffect(() => {
-    setImageLoaded(Array(images.length).fill(false));
-  }, [images.length]);
-
-  const handleImageLoad = (index: number) => {
-    setImageLoaded(prev => {
-      const newState = [...prev];
-      newState[index] = true;
-      return newState;
-    });
-  };
-
-  const getMedalStyle = (rank: number) => {
-    switch(rank) {
-      case 1:
-        return {
-          medalClass: "bg-gradient-to-b from-yellow-300 to-yellow-500 border-yellow-300 text-yellow-900 shadow h-6 w-6 text-xs",
-          ribbonColor: "bg-red-500"
-        };
-      case 2:
-        return {
-          medalClass: "bg-gradient-to-b from-gray-200 to-gray-400 border-gray-200 text-gray-800 shadow h-6 w-6 text-xs",
-          ribbonColor: "bg-blue-500"
-        };
-      case 3:
-        return {
-          medalClass: "bg-gradient-to-b from-amber-300 to-amber-600 border-amber-300 text-amber-900 shadow h-6 w-6 text-xs",
-          ribbonColor: "bg-green-500"
-        };
-      default:
-        return {
-          medalClass: "bg-gradient-to-b from-blue-400 to-blue-600 border-blue-300 text-white shadow h-6 w-6 text-xs",
-          ribbonColor: "bg-blue-300"
-        };
-    }
-  };
-
-  const renderStarRating = (rating: number) => {
+  ranking, 
+  reviewCount,
+  className
+}: LocationCardProps) => {
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const isWishlisted = isInWishlist(recommendation.id);
+  
+  // Ensure we have a valid ID for the location
+  const locationId = recommendation.id || `rec-${Math.random().toString(36).substring(2, 9)}`;
+  
+  const renderRating = (rating: number) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
-    const totalStars = 5;
     
     return (
       <div className="flex items-center">
         {[...Array(fullStars)].map((_, i) => (
-          <Star key={`full-${i}`} className="fill-amber-500 stroke-amber-500 w-3.5 h-3.5" />
+          <Star key={i} className="w-4 h-4 fill-amber-500 text-amber-500" />
         ))}
-        
         {hasHalfStar && (
-          <div className="relative w-3.5 h-3.5">
-            <Star className="absolute stroke-amber-500 w-3.5 h-3.5" />
-            <div className="absolute overflow-hidden w-[50%]">
-              <Star className="fill-amber-500 stroke-amber-500 w-3.5 h-3.5" />
-            </div>
-          </div>
+          <StarHalf className="w-4 h-4 fill-amber-500 text-amber-500" />
         )}
-        
-        {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
-          <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />
+        {[...Array(5 - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
+          <Star key={i + fullStars + (hasHalfStar ? 1 : 0)} className="w-4 h-4 text-gray-300" />
         ))}
       </div>
     );
   };
 
-  const handleCall = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    toast({
-      title: "Calling",
-      description: `Calling ${recommendation.name}...`,
-      duration: 3000,
-    });
-  };
-
-  const handleWhatsApp = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const phoneNumber = recommendation.phone || '';
-    const message = encodeURIComponent(`Hi, I'm interested in ${recommendation.name}`);
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
-    toast({
-      title: "Opening WhatsApp",
-      description: `Messaging ${recommendation.name} via WhatsApp...`,
-      duration: 3000,
-    });
-  };
-
-  const handleInstagram = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!recommendation.instagram) {
-      toast({
-        title: "No Instagram",
-        description: `${recommendation.name} hasn't provided an Instagram profile`,
-        duration: 2000,
-      });
-      return;
-    }
-    
-    let instagramUrl = recommendation.instagram;
-    if (!instagramUrl.startsWith('http')) {
-      if (instagramUrl.startsWith('@')) {
-        instagramUrl = instagramUrl.substring(1);
-      }
-      instagramUrl = `https://instagram.com/${instagramUrl}`;
-    }
-    
-    window.open(instagramUrl, '_blank');
-    toast({
-      title: "Opening Instagram",
-      description: `Opening Instagram for ${recommendation.name}...`,
-      duration: 2000,
-    });
-  };
-
-  const handleWishlistToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to add items to your wishlist",
-        variant: "destructive",
-      });
-      navigate('/login');
-      return;
-    }
-    
-    if (inWishlist) {
-      removeFromWishlist(recommendation.id);
-      toast({
-        title: "Removed from wishlist",
-        description: `${recommendation.name} removed from your wishlist`,
-        duration: 2000,
-      });
-    } else {
-      addToWishlist(recommendation);
-      toast({
-        title: "Added to wishlist",
-        description: `${recommendation.name} added to your wishlist`,
-        duration: 2000,
-      });
-    }
-  };
-
-  const handleDirections = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const destination = encodeURIComponent(recommendation.address);
-    let mapsUrl;
-
-    if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      mapsUrl = `maps://maps.apple.com/?q=${destination}`;
-    } else {
-      mapsUrl = `https://www.google.com/maps/search/?api=1&query=${destination}`;
-    }
-    
-    window.open(mapsUrl, '_blank');
-    
-    toast({
-      title: "Opening Directions",
-      description: `Getting directions to ${recommendation.name}...`,
-      duration: 2000,
-    });
-  };
-
-  const handleShare = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    if (navigator.share) {
-      navigator.share({
-        title: recommendation.name,
-        text: `Check out ${recommendation.name}`,
-        url: window.location.origin + `/location/${recommendation.id}`,
-      })
-      .then(() => {
-        toast({
-          title: "Shared successfully",
-          description: `You've shared ${recommendation.name}`,
-          duration: 2000,
-        });
-      })
-      .catch((error) => {
-        console.error('Error sharing:', error);
-        toast({
-          title: "Sharing failed",
-          description: "Could not share this location",
-          variant: "destructive",
-          duration: 2000,
-        });
-      });
-    } else {
-      const shareUrl = window.location.origin + `/location/${recommendation.id}`;
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        toast({
-          title: "Link copied",
-          description: "The link has been copied to your clipboard",
-          duration: 2000,
-        });
-      });
-    }
-  };
-
-  const handleCardClick = () => {
-    navigate(`/location/${recommendation.id}`);
-  };
-
-  const formatDistance = (distanceText: string | undefined) => {
-    if (!distanceText) return '';
-    
-    let formattedDistance = distanceText.replace('miles', 'km');
-    
-    formattedDistance = formattedDistance.replace('away away', 'away');
-    
-    return formattedDistance;
-  };
-
-  const displayAddress = recommendation.address || 'Address information not available';
-
   return (
-    <div 
-      onClick={handleCardClick}
+    <Link 
+      to={`/location/${locationId}`} 
       className={cn(
-        "group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer",
-        "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]",
+        "group block rounded-xl bg-white shadow-sm border border-border overflow-hidden transform transition-all duration-300 hover:shadow-md hover:-translate-y-1",
         className
       )}
     >
-      <div className="relative w-full h-72 overflow-hidden">
-        <Carousel className="w-full h-full">
-          <CarouselContent className="h-full">
-            {images.map((img, index) => (
-              <CarouselItem key={index} className="h-full p-0">
-                <div className={cn(
-                  "absolute inset-0 bg-muted/30",
-                  imageLoaded[index] ? "opacity-0" : "opacity-100"
-                )} />
-                <img
-                  src={img}
-                  alt={`${recommendation.name} - image ${index + 1}`}
-                  onLoad={() => handleImageLoad(index)}
-                  className={cn(
-                    "w-full h-72 object-cover transition-all-500",
-                    imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
-                  )}
-                />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          {images.length > 1 && (
-            <>
-              <CarouselPrevious className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2" />
-              <CarouselNext className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2" />
-            </>
-          )}
-        </Carousel>
-
-        <div className="absolute top-3 left-20 z-10">
-          <span className="px-2 py-1 rounded-full text-xs font-medium bg-black/40 backdrop-blur-sm text-white">
-            {recommendation.category}
-          </span>
-        </div>
-        
-        <button 
-          onClick={handleWishlistToggle}
-          className={cn(
-            "absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10",
-            user ? (inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500") : "text-muted-foreground"
-          )}
-        >
-          {user ? (
-            <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} />
-          ) : (
-            <LogIn className="w-5 h-5" />
-          )}
-        </button>
-      </div>
-
-      <div className="p-4">
-        <div className="flex justify-between items-start gap-2 mb-2">
-          <div className="flex items-center gap-1.5">
-            {ranking !== undefined && ranking <= 10 && (
-              <div 
-                className={cn(
-                  "flex items-center justify-center rounded-full border-2 flex-shrink-0",
-                  getMedalStyle(ranking).medalClass
-                )}
-              >
-                {ranking}
-              </div>
-            )}
-            <h3 className="font-medium text-lg">{recommendation.name}</h3>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1 mb-2">
-          {renderStarRating(recommendation.rating)}
-          <span className="text-xs text-muted-foreground ml-1">
-            ({reviewCount})
-          </span>
-        </div>
-
-        <div className="flex items-center text-muted-foreground mb-3 text-sm">
-          <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-          <span className="truncate">{displayAddress}</span>
-        </div>
-
-        {recommendation.openNow !== undefined && (
-          <div className="flex flex-col text-sm mb-3">
-            <div className="flex items-center">
-              <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
-              <span className={recommendation.openNow ? "text-emerald-600" : "text-rose-600"}>
-                {recommendation.openNow ? "Open now" : "Closed"}
-              </span>
-              {recommendation.hours && (
-                <span className="text-muted-foreground ml-1">
-                  {recommendation.hours}
-                </span>
-              )}
-            </div>
-            {recommendation.distance && (
-              <div className="text-muted-foreground pl-5 mt-1">
-                {formatDistance(recommendation.distance)}
-              </div>
-            )}
+      <div className="relative w-full aspect-video bg-gray-100 overflow-hidden">
+        {ranking && (
+          <div className="absolute top-2 left-2 z-10 flex items-center justify-center w-8 h-8 bg-black/70 text-white text-sm font-medium rounded-full">
+            {ranking}
           </div>
         )}
-
-        <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-          {recommendation.description}
-        </p>
-
-        <div className="flex gap-2 mt-4 flex-wrap">
-          {recommendation.priceLevel && (
-            <span className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
-              {recommendation.priceLevel.replace(/\$/g, '₹')}
-            </span>
+        
+        <button 
+          className={cn(
+            "absolute top-2 right-2 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+            isWishlisted 
+              ? "bg-red-500 text-white" 
+              : "bg-black/30 text-white hover:bg-black/50"
           )}
-          {recommendation.tags.map((tag, index) => (
-            <span 
-              key={index} 
-              className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full"
-            >
-              {tag}
+          onClick={(e) => {
+            e.preventDefault();
+            toggleWishlist(recommendation);
+          }}
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 24 24" 
+            fill={isWishlisted ? "currentColor" : "none"} 
+            stroke="currentColor" 
+            className="w-5 h-5"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+          </svg>
+        </button>
+        
+        <img 
+          src={recommendation.image || '/placeholder.svg'} 
+          alt={recommendation.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          loading="lazy"
+        />
+      </div>
+      
+      <div className="p-4">
+        <div className="flex flex-col h-full">
+          <h3 className="font-medium text-gray-900 text-lg mb-1 line-clamp-1">
+            {recommendation.name}
+          </h3>
+          
+          <div className="flex items-center mb-2">
+            <div className="flex items-center mr-1">
+              {renderRating(recommendation.rating)}
+            </div>
+            <span className="text-xs text-gray-500">
+              {reviewCount || Math.floor(Math.random() * 100) + 50} reviews
             </span>
-          ))}
-        </div>
-
-        <div className="flex gap-2 mt-4">
-          <button 
-            onClick={handleCall}
-            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
-          >
-            <Phone className="h-5 w-5" />
-          </button>
-          <button 
-            onClick={handleWhatsApp}
-            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
-          >
-            <MessageCircle className="h-5 w-5" />
-          </button>
-          <button 
-            onClick={handleDirections}
-            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
-          >
-            <Navigation2 className="h-5 w-5" />
-          </button>
-          <button 
-            onClick={handleInstagram}
-            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
-          >
-            <Instagram className="h-5 w-5" />
-          </button>
-          <button 
-            onClick={handleShare}
-            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
-          >
-            <Share2 className="h-5 w-5" />
-          </button>
+          </div>
+          
+          {recommendation.tags && recommendation.tags.length > 0 && (
+            <div className="mb-3 flex flex-wrap gap-1">
+              {recommendation.tags.slice(0, 3).map((tag, index) => (
+                <Badge key={index} variant="outline" className="text-xs bg-secondary/50">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+          
+          {recommendation.address && (
+            <div className="flex items-start text-sm text-gray-500 mt-auto">
+              <MapPin className="w-4 h-4 mr-1 flex-shrink-0 mt-0.5" />
+              <span className="line-clamp-2">{recommendation.address}</span>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

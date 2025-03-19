@@ -63,6 +63,17 @@ const SearchResults = () => {
     return b.reviewCount - a.reviewCount;
   });
 
+  // Make sure each recommendation has an ID
+  const recommendationsWithIds = rankedRecommendations.map(item => {
+    if (!item.id) {
+      return {
+        ...item,
+        id: `rec-${Math.random().toString(36).substring(2, 9)}`
+      };
+    }
+    return item;
+  });
+
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
       console.log("SearchResults - Processing search query:", searchQuery);
@@ -103,7 +114,7 @@ const SearchResults = () => {
   };
 
   // Display a fallback message if there are no results and no error
-  const showNoResults = !loading && !error && rankedRecommendations.length === 0 && events.length === 0;
+  const showNoResults = !loading && !error && recommendationsWithIds.length === 0 && events.length === 0;
 
   return (
     <MainLayout>
@@ -166,7 +177,7 @@ const SearchResults = () => {
                     {category !== 'all' && <span className="ml-2 text-muted-foreground"> in {category}</span>}
                   </h1>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Found {rankedRecommendations.length} locations and {events.length} events
+                    Found {recommendationsWithIds.length} locations and {events.length} events
                   </p>
                 </div>
               )}
@@ -180,7 +191,7 @@ const SearchResults = () => {
                 >
                   <TabsList className="grid w-full max-w-md grid-cols-2 mb-4">
                     <TabsTrigger value="locations">
-                      Locations ({rankedRecommendations.length})
+                      Locations ({recommendationsWithIds.length})
                     </TabsTrigger>
                     <TabsTrigger value="events">
                       Events ({events.length})
@@ -188,9 +199,9 @@ const SearchResults = () => {
                   </TabsList>
                   
                   <TabsContent value="locations">
-                    {rankedRecommendations.length > 0 ? (
+                    {recommendationsWithIds.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        {rankedRecommendations.map((recommendation, index) => (
+                        {recommendationsWithIds.map((recommendation, index) => (
                           <div
                             key={recommendation.id}
                             className="animate-fade-in"
