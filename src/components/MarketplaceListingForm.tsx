@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -99,10 +100,10 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
           description: "Your marketplace listing has been updated successfully.",
         });
       } else {
-        // Create new listing
+        // Create new listing - FIX: passing a single object, not an array
         const { error } = await supabase
           .from('marketplace_listings')
-          .insert([listingData]);
+          .insert(listingData);
 
         if (error) throw error;
         
