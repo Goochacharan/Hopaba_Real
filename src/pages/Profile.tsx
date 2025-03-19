@@ -5,6 +5,7 @@ import MainLayout from '@/components/MainLayout';
 import { useToast } from '@/hooks/use-toast';
 import AddBusinessForm from '@/components/AddBusinessForm';
 import BusinessesList from '@/components/BusinessesList';
+import UserMarketplaceListings from '@/components/UserMarketplaceListings';
 import { 
   Form, 
   FormControl, 
@@ -35,11 +36,13 @@ import {
   LogOut,
   Plus,
   Store,
-  ListPlus
+  ListPlus,
+  ShoppingBag
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { BusinessFormValues } from '@/components/AddBusinessForm';
+import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 
 const profileFormSchema = z.object({
   name: z.string().min(2, {
@@ -93,6 +96,8 @@ const Profile = () => {
   const [businessToEdit, setBusinessToEdit] = useState<(BusinessFormValues & { id: string }) | null>(null);
   const [refreshBusinessList, setRefreshBusinessList] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [marketplaceListingToEdit, setMarketplaceListingToEdit] = useState<MarketplaceListing | null>(null);
+  const [showMarketplaceForm, setShowMarketplaceForm] = useState(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -131,6 +136,12 @@ const Profile = () => {
     setActiveTab("services");
   };
 
+  const handleEditMarketplaceListing = (listing: MarketplaceListing) => {
+    setMarketplaceListingToEdit(listing);
+    setShowMarketplaceForm(true);
+    setActiveTab("marketplace");
+  };
+
   const handleAddNewBusiness = () => {
     setBusinessToEdit(null);
     setShowAddForm(true);
@@ -143,6 +154,15 @@ const Profile = () => {
     toast({
       title: "Success",
       description: "Your business listing has been saved successfully.",
+    });
+  };
+
+  const handleMarketplaceListingSaved = () => {
+    setShowMarketplaceForm(false);
+    setMarketplaceListingToEdit(null);
+    toast({
+      title: "Success",
+      description: "Your marketplace listing has been saved successfully.",
     });
   };
 
@@ -171,6 +191,10 @@ const Profile = () => {
             <TabsTrigger value="services" className="flex items-center gap-1.5">
               <Store className="h-4 w-4" />
               Business/Services
+            </TabsTrigger>
+            <TabsTrigger value="marketplace" className="flex items-center gap-1.5">
+              <ShoppingBag className="h-4 w-4" />
+              Marketplace
             </TabsTrigger>
             <TabsTrigger value="preferences" className="flex items-center gap-1.5">
               <Settings className="h-4 w-4" />
@@ -363,6 +387,12 @@ const Profile = () => {
                   refresh={refreshBusinessList}
                 />
               )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="marketplace" className="space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+              <UserMarketplaceListings />
             </div>
           </TabsContent>
 
