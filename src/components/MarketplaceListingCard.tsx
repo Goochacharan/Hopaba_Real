@@ -196,27 +196,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
         className
       )}
     >
-      <div className="p-4 pb-2">
-        <h3 className="font-medium text-lg md:text-xl">{listing.title}</h3>
-        
-        <div className="flex items-center text-muted-foreground my-2 text-sm">
-          <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-          <span className="truncate">{listing.location}</span>
-        </div>
-        
-        <div className="flex items-center text-muted-foreground mb-2 text-sm">
-          <Calendar className="w-4 h-4 mr-1 flex-shrink-0" />
-          <span>Listed on {formatDate(listing.created_at)}</span>
-        </div>
-        
-        <div className="flex items-center mb-2">
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 flex items-center">
-            <Check className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
-            {listing.condition}
-          </span>
-        </div>
-      </div>
-      
       <div className="relative w-full overflow-hidden">
         <Carousel className="w-full">
           <CarouselContent>
@@ -267,6 +246,25 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
       </div>
       
       <div className="p-4">
+        <h3 className="font-medium text-lg md:text-xl mb-2">{listing.title}</h3>
+        
+        <div className="flex items-center text-muted-foreground mb-2 text-sm">
+          <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+          <span className="truncate">{listing.location}</span>
+        </div>
+        
+        <div className="flex items-center text-muted-foreground mb-2 text-sm">
+          <Calendar className="w-4 h-4 mr-1 flex-shrink-0" />
+          <span>Listed on {formatDate(listing.created_at)}</span>
+        </div>
+        
+        <div className="flex items-center mb-3">
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 flex items-center">
+            <Check className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
+            {listing.condition}
+          </span>
+        </div>
+
         <div className="flex justify-between items-center mb-3">
           <p className="text-lg font-bold text-[#1EAEDB]">{formatPrice(listing.price)}</p>
           
