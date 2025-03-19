@@ -26,19 +26,17 @@ serve(async (req) => {
       // Return popular or preset suggestions when no query is provided
       const { data: recommendations, error: recError } = await supabase
         .from('recommendations')
-        .select('category')
+        .select('name, category')
         .order('rating', { ascending: false })
         .limit(5);
 
       if (recError) {
-        console.error('Error fetching default categories:', recError);
+        console.error('Error fetching default recommendations:', recError);
         throw new Error('Failed to fetch default suggestions');
       }
 
-      // Extract unique categories
+      // Extract unique categories and names
       const categories = [...new Set(recommendations?.map(r => r.category) || [])];
-      
-      // Return default suggestions
       const defaultSuggestions = [
         { suggestion: 'Best restaurants in Bangalore', category: 'Restaurants', source: 'default' },
         { suggestion: 'Yoga classes near me', category: 'Fitness', source: 'default' },
@@ -47,6 +45,11 @@ serve(async (req) => {
           suggestion: `Top rated ${category.toLowerCase()}`, 
           category, 
           source: 'category' 
+        })),
+        ...(recommendations || []).slice(0, 3).map(rec => ({
+          suggestion: rec.name,
+          category: rec.category,
+          source: 'place'
         }))
       ];
 
@@ -57,24 +60,45 @@ serve(async (req) => {
 
     console.log('Searching for suggestions with query:', query);
 
-    // For direct searches
-    const searchSuggestions = [
+    // Try direct search from recommendations table first
+    const { data: directResults, error: directError } = await supabase
+      .from('recommendations')
+      .select('name, category, tags')
+      .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
+      .limit(5);
+
+    if (directError) {
+      console.error('Error with direct search:', directError);
+    }
+
+    let generatedSuggestions = [
       { suggestion: `${query} restaurants in Bangalore`, category: 'Restaurants', source: 'search' },
       { suggestion: `Best ${query} places near me`, category: 'Places', source: 'search' },
       { suggestion: `${query} in Indiranagar`, category: 'Location', source: 'search' },
       { suggestion: `Top rated ${query}`, category: 'Rating', source: 'search' }
     ];
 
-    // Try to fetch from database if possible, otherwise use generated suggestions
+    // If we have direct results, add them as top suggestions
+    if (directResults && directResults.length > 0) {
+      const directSuggestions = directResults.map(item => ({
+        suggestion: item.name,
+        category: item.category,
+        source: 'place'
+      }));
+      
+      // Combine direct results with generated suggestions
+      generatedSuggestions = [...directSuggestions, ...generatedSuggestions];
+    }
+
+    // Try to fetch from search_suggestions function if available
     try {
-      // Call the search_suggestions function with error handling
       const { data, error } = await supabase
         .rpc('search_suggestions', { search_term: query });
 
       if (error) {
-        console.error('Error from RPC function:', error);
-        // Return generated suggestions instead of failing
-        return new Response(JSON.stringify({ suggestions: searchSuggestions }), {
+        console.error('Error from search_suggestions RPC:', error);
+        // Return our generated suggestions instead of failing
+        return new Response(JSON.stringify({ suggestions: generatedSuggestions }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
@@ -107,14 +131,14 @@ serve(async (req) => {
         });
       } else {
         // No database suggestions found, return generated ones
-        return new Response(JSON.stringify({ suggestions: searchSuggestions }), {
+        return new Response(JSON.stringify({ suggestions: generatedSuggestions }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
     } catch (innerError) {
       console.error('Error in search_suggestions RPC call:', innerError);
       // Return generated suggestions instead of failing
-      return new Response(JSON.stringify({ suggestions: searchSuggestions }), {
+      return new Response(JSON.stringify({ suggestions: generatedSuggestions }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }

@@ -4,7 +4,6 @@ import { CategoryType } from '@/components/CategoryFilter';
 import { supabase } from '@/integrations/supabase/client';
 import { useDebounce } from './useDebounce';
 
-// Define the missing searchPatterns variable
 const searchPatterns = [
   { pattern: /yoga|meditation|fitness|gym/, category: 'fitness' },
   { pattern: /restaurant|food|dinner|lunch|eat/, category: 'restaurants' },
@@ -15,7 +14,6 @@ const searchPatterns = [
   { pattern: /hotel|stay|accommodation/, category: 'hotels' }
 ];
 
-// Define the missing keywordMap variable
 const keywordMap: Record<string, string[]> = {
   'restaurant': ['dining', 'eatery', 'bistro', 'diner'],
   'cafe': ['coffee shop', 'café', 'espresso bar'],
@@ -24,7 +22,6 @@ const keywordMap: Record<string, string[]> = {
   'best': ['top', 'highly rated', 'excellent', 'premium']
 };
 
-// Define the missing yogaAndFitnessMockData 
 const yogaAndFitnessMockData: Recommendation[] = [
   {
     id: 'yoga1',
@@ -78,18 +75,6 @@ const yogaAndFitnessMockData: Recommendation[] = [
     reviewCount: 102
   }
 ];
-
-// Define the missing sampleEvents variable
-export interface Event {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  description: string;
-  image: string;
-  attendees: number;
-}
 
 const sampleEvents: Event[] = [
   {
@@ -323,10 +308,10 @@ const useRecommendations = ({
   const fetchRecommendationsFromSupabase = async (searchQuery: string, categoryFilter: string) => {
     try {
       const { data, error } = await supabase
-        .rpc('search_recommendations', { 
-          search_query: searchQuery,
-          category_filter: categoryFilter.toLowerCase() 
-        });
+        .from('recommendations')
+        .select('*')
+        .or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,tags.cs.{"${searchQuery}"}`)
+        .order('rating', { ascending: false });
       
       if (error) {
         console.error("Error fetching recommendations from Supabase:", error);
@@ -406,6 +391,7 @@ const useRecommendations = ({
         const effectiveCategory = inferredCategory;
         
         console.log("Effective search category:", effectiveCategory);
+        console.log("Searching for:", processedQuery);
         
         const supabaseRecommendations = await fetchRecommendationsFromSupabase(
           processedQuery, 
@@ -424,7 +410,7 @@ const useRecommendations = ({
             console.log("Specialized handling for yoga query");
             const yogaResults = getYogaResults(debouncedQuery);
             setRecommendations(yogaResults);
-          } else if (debouncedQuery.toLowerCase().includes('restaurant') || effectiveCategory === 'restaurants') {
+          } else if (debouncedQuery.toLowerCase().includes('restaurant') || debouncedQuery.toLowerCase().includes('food') || effectiveCategory === 'restaurants') {
             console.log("Specialized handling for restaurant query");
             const restaurantResults = mockRecommendations.filter(item => 
               item.category === 'Restaurants'
@@ -437,7 +423,13 @@ const useRecommendations = ({
               setRecommendations(results);
             }
           } else {
-            await new Promise(resolve => setTimeout(resolve, 800));
+            console.log("Search query:", processedQuery);
+            console.log("Normalized query:", processedQuery.toLowerCase());
+            console.log("Has location term:", processedQuery.toLowerCase().includes('near') || processedQuery.toLowerCase().includes('in '));
+            console.log("Location:", processedQuery.toLowerCase().match(/(near|in) ([a-z\s]+)/i)?.[2] || '');
+            console.log("Is near me query:", processedQuery.toLowerCase().includes('near me'));
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
             const locationResults = searchRecommendations(processedQuery, effectiveCategory);
             setRecommendations(locationResults);
           }

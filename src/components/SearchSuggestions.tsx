@@ -55,11 +55,12 @@ const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
     if (!query || query.length < 2) return <span>{text}</span>;
 
     try {
-      const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escapedQuery})`, 'gi');
       const parts = text.split(regex);
       
       return parts.map((part, index) => 
-        part.toLowerCase() === query.toLowerCase() 
+        regex.test(part) 
           ? <span key={index} className="font-medium text-primary">{part}</span> 
           : <span key={index}>{part}</span>
       );
