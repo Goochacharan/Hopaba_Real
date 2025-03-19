@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -272,24 +271,6 @@ const MarketplaceListingDetails = () => {
               />
             )}
             
-            <div className="mb-6 bg-white rounded-xl border p-6 shadow-sm">
-              <h3 className="text-lg font-semibold mb-4">Seller Information</h3>
-              <div className="flex items-center gap-3">
-                <Avatar className="h-12 w-12 bg-[#1EAEDB]/10 text-[#1EAEDB]">
-                  <AvatarFallback>
-                    {listing?.seller_name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium mb-1">{listing?.seller_name}</p>
-                  <div className="flex items-center gap-1">
-                    {listing && renderStarRating(listing.seller_rating)}
-                    <span className="ml-1 text-xs text-muted-foreground">(24)</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
             <div className="mb-8 bg-white rounded-xl border p-6 shadow-sm">
               <h2 className="text-xl font-semibold mb-3">Description</h2>
               <div className="space-y-4">
@@ -317,16 +298,19 @@ const MarketplaceListingDetails = () => {
           <div className="col-span-1">
             <div className="sticky top-24 space-y-6">
               <div className="bg-white rounded-xl border p-6 shadow-sm">
-                <div className="mb-4 flex justify-between items-center">
-                  <h2 className="text-3xl font-bold text-[#1EAEDB]">
-                    {listing ? formatPrice(listing.price) : ''}
-                  </h2>
-                  <button 
-                    onClick={toggleWishlist}
-                    className={`p-2 rounded-full transition-colors ${inWishlist ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-500'}`}
-                  >
-                    <Heart className={`w-5 h-5 ${inWishlist && 'fill-rose-500'}`} />
-                  </button>
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-3xl font-bold text-[#1EAEDB]">
+                      {listing ? formatPrice(listing.price) : ''}
+                    </h2>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <p className="font-medium">{listing?.seller_name}</p>
+                    <div className="flex items-center gap-1">
+                      {listing && renderStarRating(listing.seller_rating)}
+                      <span className="text-xs text-muted-foreground ml-1">(24)</span>
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="space-y-3 mb-6">
@@ -371,6 +355,15 @@ const MarketplaceListingDetails = () => {
                   >
                     <Share2 className="h-5 w-5" />
                   </Button>
+                </div>
+                
+                <div className="flex justify-end mt-4">
+                  <button 
+                    onClick={toggleWishlist}
+                    className={`p-2 rounded-full transition-colors ${inWishlist ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-500'}`}
+                  >
+                    <Heart className={`w-5 h-5 ${inWishlist && 'fill-rose-500'}`} />
+                  </button>
                 </div>
               </div>
               
