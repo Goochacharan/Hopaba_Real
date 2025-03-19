@@ -278,6 +278,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
     return formattedDistance;
   };
 
+  const displayAddress = recommendation.address || 'Address information not available';
+
   return (
     <div 
       onClick={handleCardClick}
@@ -363,7 +365,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
         <div className="flex items-center text-muted-foreground mb-3 text-sm">
           <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-          <span className="truncate">{recommendation.address}</span>
+          <span className="truncate">{displayAddress}</span>
         </div>
 
         {recommendation.openNow !== undefined && (
