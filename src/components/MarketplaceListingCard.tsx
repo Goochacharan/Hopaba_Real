@@ -1,13 +1,20 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Phone, MessageSquare, MapPin, Instagram, Share2, Star } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Link, useNavigate } from 'react-router-dom';
+import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Navigation2, Heart } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselNext, 
+  CarouselPrevious 
+} from '@/components/ui/carousel';
 
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
@@ -19,17 +26,35 @@ const formatPrice = (price: number): string => {
 };
 
 const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing, className }) => {
-  const handleShare = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const isMobile = useIsMobile();
+  const [imageLoaded, setImageLoaded] = React.useState<boolean[]>([]);
+  
+  React.useEffect(() => {
+    setImageLoaded(Array(listing.images.length).fill(false));
+  }, [listing.images.length]);
+
+  const handleImageLoad = (index: number) => {
+    setImageLoaded(prev => {
+      const newState = [...prev];
+      newState[index] = true;
+      return newState;
+    });
+  };
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (navigator.share) {
       navigator.share({
         title: listing.title,
         text: `Check out this ${listing.title} for ${formatPrice(listing.price)}`,
-        url: window.location.href,
+        url: window.location.origin + `/marketplace/${listing.id}`,
       }).catch(error => {
         console.log('Error sharing', error);
       });
     } else {
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeText(window.location.origin + `/marketplace/${listing.id}`);
       toast({
         title: "Link copied to clipboard",
         description: "You can now share this listing with others",
@@ -38,7 +63,8 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
     }
   };
 
-  const handleCall = () => {
+  const handleCall = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (listing.seller_phone) {
       window.location.href = `tel:${listing.seller_phone}`;
     } else {
@@ -51,7 +77,8 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
     }
   };
 
-  const handleWhatsApp = () => {
+  const handleWhatsApp = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (listing.seller_whatsapp) {
       const message = `Hi, I'm interested in your listing "${listing.title}" for ${formatPrice(listing.price)}. Is it still available?`;
       window.open(`https://wa.me/${listing.seller_whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`);
@@ -65,7 +92,8 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
     }
   };
 
-  const handleInstagram = () => {
+  const handleInstagram = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (listing.seller_instagram) {
       window.open(`https://instagram.com/${listing.seller_instagram}`);
     } else {
@@ -78,65 +106,166 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
     }
   };
 
-  const handleLocation = () => {
-    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(listing.location)}`);
+  const handleLocation = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const destination = encodeURIComponent(listing.location);
+    let mapsUrl;
+
+    if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      mapsUrl = `maps://maps.apple.com/?q=${destination}`;
+    } else {
+      mapsUrl = `https://www.google.com/maps/search/?api=1&query=${destination}`;
+    }
+    
+    window.open(mapsUrl, '_blank');
+    
+    toast({
+      title: "Opening Directions",
+      description: `Getting directions to ${listing.location}...`,
+      duration: 2000,
+    });
+  };
+
+  const handleCardClick = () => {
+    navigate(`/marketplace/${listing.id}`);
+  };
+
+  const renderStarRating = (rating: number) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const totalStars = 5;
+    
+    return (
+      <div className="flex items-center">
+        {[...Array(fullStars)].map((_, i) => (
+          <Star key={`full-${i}`} className="fill-amber-500 stroke-amber-500 w-3.5 h-3.5" />
+        ))}
+        
+        {hasHalfStar && (
+          <div className="relative w-3.5 h-3.5">
+            <Star className="absolute stroke-amber-500 w-3.5 h-3.5" />
+            <div className="absolute overflow-hidden w-[50%]">
+              <Star className="fill-amber-500 stroke-amber-500 w-3.5 h-3.5" />
+            </div>
+          </div>
+        )}
+        
+        {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
+          <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />
+        ))}
+      </div>
+    );
   };
 
   return (
-    <Card className={cn("h-full flex flex-col overflow-hidden transition-all hover:shadow-md", className)}>
-      <div className="relative overflow-hidden h-48">
-        <Link to={`/marketplace/${listing.id}`}>
-          <img 
-            src={listing.images[0] || '/placeholder.svg'} 
-            alt={listing.title} 
-            className="w-full h-full object-cover transition-transform hover:scale-105"
-          />
-          <Badge className="absolute top-2 right-2 bg-primary/90">{listing.condition}</Badge>
-        </Link>
+    <div 
+      onClick={handleCardClick}
+      className={cn(
+        "group bg-white rounded-xl border border-border/50 overflow-hidden transition-all cursor-pointer",
+        "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]",
+        className
+      )}
+    >
+      <div className="relative w-full h-72 overflow-hidden">
+        <Carousel className="w-full h-full">
+          <CarouselContent className="h-full">
+            {listing.images.map((img, index) => (
+              <CarouselItem key={index} className="h-full p-0">
+                <div className={cn(
+                  "absolute inset-0 bg-muted/30",
+                  imageLoaded[index] ? "opacity-0" : "opacity-100"
+                )} />
+                <img
+                  src={img || '/placeholder.svg'} 
+                  alt={`${listing.title} - image ${index + 1}`}
+                  onLoad={() => handleImageLoad(index)}
+                  className={cn(
+                    "w-full h-72 object-cover transition-all",
+                    imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
+                  )}
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          {listing.images.length > 1 && (
+            <>
+              <CarouselPrevious className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2" />
+              <CarouselNext className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2" />
+            </>
+          )}
+        </Carousel>
+        
+        <div className="absolute top-3 left-20 z-10">
+          <span className="px-2 py-1 rounded-full text-xs font-medium bg-black/40 backdrop-blur-sm text-white">
+            {listing.category}
+          </span>
+        </div>
+        
+        <Badge className="absolute top-3 right-3 bg-primary/90">{listing.condition}</Badge>
       </div>
       
-      <CardHeader className="p-4 pb-0">
-        <Link to={`/marketplace/${listing.id}`} className="no-underline">
-          <h3 className="text-lg font-semibold line-clamp-2 hover:text-primary transition-colors">{listing.title}</h3>
-        </Link>
-        <p className="text-xl font-bold text-primary mt-1">{formatPrice(listing.price)}</p>
-      </CardHeader>
-      
-      <CardContent className="p-4 pt-2 flex-grow">
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{listing.description}</p>
-        
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-1">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">{listing.location}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Star className="h-4 w-4 text-amber-500" />
-            <span className="text-sm">{listing.seller_rating.toFixed(1)}</span>
-          </div>
+      <div className="p-4">
+        <div className="flex justify-between items-start gap-2 mb-2">
+          <h3 className="font-medium text-lg">{listing.title}</h3>
         </div>
         
-        <p className="text-sm font-medium mb-3">Seller: {listing.seller_name}</p>
-        
-        <div className="grid grid-cols-5 gap-1 mt-auto">
-          <Button variant="outline" size="sm" className="h-10" onClick={handleCall}>
-            <Phone className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" className="h-10" onClick={handleWhatsApp}>
-            <MessageSquare className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" className="h-10" onClick={handleLocation}>
-            <MapPin className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" className="h-10" onClick={handleInstagram}>
-            <Instagram className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" className="h-10" onClick={handleShare}>
-            <Share2 className="h-4 w-4" />
-          </Button>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1">
+            {renderStarRating(listing.seller_rating)}
+            <span className="text-xs text-muted-foreground ml-1">
+              (Seller)
+            </span>
+          </div>
+          <p className="text-lg font-bold text-primary">{formatPrice(listing.price)}</p>
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="flex items-center text-muted-foreground mb-3 text-sm">
+          <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+          <span className="truncate">{listing.location}</span>
+        </div>
+        
+        <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+          {listing.description}
+        </p>
+        
+        <div className="flex flex-col mb-3">
+          <span className="text-sm font-medium">Seller: {listing.seller_name}</span>
+        </div>
+
+        <div className="flex gap-2 mt-auto">
+          <button 
+            onClick={handleCall}
+            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+          >
+            <Phone className="h-5 w-5" />
+          </button>
+          <button 
+            onClick={handleWhatsApp}
+            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+          >
+            <MessageSquare className="h-5 w-5" />
+          </button>
+          <button 
+            onClick={handleLocation}
+            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+          >
+            <Navigation2 className="h-5 w-5" />
+          </button>
+          <button 
+            onClick={handleInstagram}
+            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+          >
+            <Instagram className="h-5 w-5" />
+          </button>
+          <button 
+            onClick={handleShare}
+            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+          >
+            <Share2 className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
