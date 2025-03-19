@@ -1,44 +1,46 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useMarketplaceListing } from '@/hooks/useMarketplaceListings';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Navigation2, Heart, ChevronLeft } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Calendar, ArrowLeft, Info, Shield, BadgeCheck, AlertCircle, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { toast } from '@/components/ui/use-toast';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { format } from 'date-fns';
 import ImageViewer from '@/components/ImageViewer';
-import { Avatar } from '@/components/ui/avatar';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 const formatPrice = (price: number): string => {
   return '₹' + price.toLocaleString('en-IN');
 };
 
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric', year: 'numeric' };
-  return date.toLocaleDateString(undefined, options);
-};
-
-const getInitials = (name: string): string => {
-  const nameParts = name.split(' ');
-  const initials = nameParts.map((part) => part.charAt(0).toUpperCase()).join('');
-  return initials;
-};
-
 const MarketplaceListingDetails = () => {
-  const { id } = useParams<{ id: string }>();
-  const { listing, loading, error } = useMarketplaceListing(id || '');
-  const { toast } = useToast();
+  const { id = '' } = useParams<{ id: string }>();
+  const { listing, loading, error } = useMarketplaceListing(id);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [inWishlist, setInWishlist] = useState(false);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   
-  // Generate a random number of reviews
-  const reviewCount = React.useMemo(() => Math.floor(Math.random() * 150) + 50, []);
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: listing?.title || 'Marketplace Listing',
+        text: `Check out this ${listing?.title} for ${listing ? formatPrice(listing.price) : ''}`,
+        url: window.location.href,
+      }).catch(error => {
+        console.log('Error sharing', error);
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link copied to clipboard",
+        description: "You can now share this listing with others",
+        duration: 3000,
+      });
+    }
+  };
 
   const handleCall = () => {
     if (listing?.seller_phone) {
@@ -81,42 +83,24 @@ const MarketplaceListingDetails = () => {
   };
 
   const handleLocation = () => {
-    const destination = encodeURIComponent(listing?.location || '');
-    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${destination}`;
-    window.open(mapsUrl, '_blank');
-    toast({
-      title: "Opening Directions",
-      description: `Getting directions to ${listing?.location}...`,
-      duration: 2000,
-    });
-  };
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: listing?.title || '',
-        text: `Check out this ${listing?.title} for ${formatPrice(listing?.price || 0)}`,
-        url: window.location.origin + `/marketplace/${listing?.id}`,
-      }).catch(error => {
-        console.log('Error sharing', error);
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.origin + `/marketplace/${listing?.id}`);
-      toast({
-        title: "Link copied to clipboard",
-        description: "You can now share this listing with others",
-        duration: 3000,
-      });
+    if (listing?.location) {
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(listing.location)}`);
     }
   };
 
-  const handleWishlistToggle = () => {
+  const toggleWishlist = () => {
     setInWishlist(!inWishlist);
+    
     toast({
       title: inWishlist ? "Removed from wishlist" : "Added to wishlist",
       description: `${listing?.title} ${inWishlist ? "removed from" : "added to"} your wishlist`,
       duration: 2000,
     });
+  };
+
+  const openImageViewer = (index: number) => {
+    setSelectedImageIndex(index);
+    setImageViewerOpen(true);
   };
 
   const renderStarRating = (rating: number) => {
@@ -125,22 +109,22 @@ const MarketplaceListingDetails = () => {
     const totalStars = 5;
     
     return (
-      <div className="flex">
+      <div className="flex items-center">
         {[...Array(fullStars)].map((_, i) => (
-          <Star key={`full-${i}`} className="fill-amber-500 stroke-amber-500 w-5 h-5" />
+          <Star key={`full-${i}`} className="fill-amber-500 stroke-amber-500 w-3.5 h-3.5" />
         ))}
         
         {hasHalfStar && (
-          <div className="relative w-5 h-5">
-            <Star className="absolute stroke-amber-500 w-5 h-5" />
+          <div className="relative w-3.5 h-3.5">
+            <Star className="absolute stroke-amber-500 w-3.5 h-3.5" />
             <div className="absolute overflow-hidden w-[50%]">
-              <Star className="fill-amber-500 stroke-amber-500 w-5 h-5" />
+              <Star className="fill-amber-500 stroke-amber-500 w-3.5 h-3.5" />
             </div>
           </div>
         )}
         
         {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
-          <Star key={`empty-${i}`} className="stroke-amber-500 w-5 h-5" />
+          <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />
         ))}
       </div>
     );
@@ -149,12 +133,24 @@ const MarketplaceListingDetails = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="container mx-auto py-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-80 bg-muted/50 rounded-xl"></div>
-            <div className="h-10 w-2/3 bg-muted/50 rounded-lg"></div>
-            <div className="h-20 bg-muted/50 rounded-lg"></div>
-            <div className="h-40 bg-muted/50 rounded-lg"></div>
+        <div className="container mx-auto py-8 px-4 max-w-6xl animate-pulse">
+          <div className="mb-8 h-6 bg-gray-200 rounded w-1/4"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="col-span-1 lg:col-span-2">
+              <div className="h-[450px] bg-gray-200 rounded-xl mb-4"></div>
+              <div className="grid grid-cols-4 gap-3">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="h-24 bg-gray-200 rounded-xl"></div>
+                ))}
+              </div>
+            </div>
+            <div className="col-span-1">
+              <div className="h-12 bg-gray-200 rounded mb-4"></div>
+              <div className="h-8 bg-gray-200 rounded mb-4 w-1/2"></div>
+              <div className="h-40 bg-gray-200 rounded mb-6"></div>
+              <div className="h-12 bg-gray-200 rounded mb-2"></div>
+              <div className="h-12 bg-gray-200 rounded"></div>
+            </div>
           </div>
         </div>
       </MainLayout>
@@ -164,206 +160,225 @@ const MarketplaceListingDetails = () => {
   if (error || !listing) {
     return (
       <MainLayout>
-        <div className="container mx-auto py-6">
-          <div className="bg-destructive/10 p-4 rounded-lg">
-            <h2 className="text-lg font-semibold text-destructive">Error Loading Listing</h2>
-            <p className="text-muted-foreground">{error || 'Listing not found'}</p>
-            <Link to="/marketplace" className="text-primary hover:underline mt-2 inline-block">
-              Return to Marketplace
-            </Link>
-          </div>
+        <div className="container mx-auto py-8 px-4 max-w-6xl">
+          <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Marketplace</span>
+          </Link>
+          
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error || "Failed to load listing details"}</AlertDescription>
+          </Alert>
+          
+          <Button asChild>
+            <Link to="/marketplace">Browse other listings</Link>
+          </Button>
         </div>
       </MainLayout>
     );
   }
 
+  const createdDate = new Date(listing.created_at);
+
   return (
     <MainLayout>
-      <div className="w-full bg-background min-h-screen">
-        <div className="container mx-auto px-4 py-6">
-          <Link 
-            to="/marketplace" 
-            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to Marketplace
-          </Link>
-          
-          {/* Main content */}
-          <div className="bg-white rounded-xl border border-border overflow-hidden shadow-sm">
-            <div className="p-6">
-              {/* Title and price section */}
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                <div className="space-y-2">
-                  <h1 className="text-3xl font-bold">{listing.title}</h1>
-                  <div className="flex flex-wrap gap-2 items-center">
-                    <Badge className="bg-[#1EAEDB] text-white">
-                      {listing.condition}
-                    </Badge>
-                    <Badge variant="outline" className="text-muted-foreground">
-                      {listing.category}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="text-3xl font-bold text-[#1EAEDB]">
-                  {formatPrice(listing.price)}
-                </div>
-              </div>
-              
-              {/* Date listed */}
-              <div className="mb-6 text-muted-foreground">
-                Listed {formatDate(listing.created_at)}
-              </div>
-              
-              {/* Seller information */}
-              <div className="mb-8 p-6 bg-gray-50 rounded-xl">
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-16 w-16 bg-blue-100 text-blue-600">
-                    <span className="font-medium text-xl">
-                      {getInitials(listing.seller_name)}
-                    </span>
-                  </Avatar>
-                  
-                  <div className="flex-1">
-                    <h2 className="text-xl font-semibold mb-1">{listing.seller_name}</h2>
-                    <div className="flex items-center gap-2">
-                      {renderStarRating(listing.seller_rating)}
-                      <span className="text-gray-600 ml-1">
-                        ({reviewCount})
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className={cn(
-                      "flex items-center gap-2",
-                      inWishlist ? "text-rose-500" : "text-muted-foreground"
-                    )}
-                    onClick={handleWishlistToggle}
-                  >
-                    <Heart className={cn("h-5 w-5", inWishlist && "fill-rose-500")} />
-                    Save
-                  </Button>
-                </div>
-              </div>
-              
-              {/* Images carousel */}
-              <div className="mb-8">
-                <Carousel className="w-full">
-                  <CarouselContent>
-                    {listing.images.map((img, index) => (
-                      <CarouselItem key={index} className="p-0">
-                        <div 
-                          className="relative aspect-[16/9] rounded-xl overflow-hidden"
-                          onClick={() => {
-                            setSelectedImageIndex(index);
-                            setImageViewerOpen(true);
-                          }}
-                        >
-                          <img 
-                            src={img} 
-                            alt={`${listing.title} - image ${index + 1}`}
-                            className="w-full h-full object-cover cursor-pointer"
-                          />
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  {listing.images.length > 1 && (
-                    <>
-                      <CarouselPrevious className="left-2" />
-                      <CarouselNext className="right-2" />
-                    </>
-                  )}
-                </Carousel>
-              </div>
-              
-              {/* Description */}
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold mb-4">Description</h2>
-                <p className="text-muted-foreground whitespace-pre-line">
-                  {listing.description}
-                </p>
-              </div>
-              
-              {/* Location */}
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold mb-4">Location</h2>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <MapPin className="w-5 h-5 flex-shrink-0" />
+      <div className="container mx-auto py-8 px-4 max-w-6xl">
+        <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Marketplace</span>
+        </Link>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="col-span-1 lg:col-span-2">
+            <div className="mb-6">
+              <Badge className="mb-2">{listing.category}</Badge>
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2">{listing.title}</h1>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-4 w-4" />
                   <span>{listing.location}</span>
                 </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  <span>Listed on {format(createdDate, 'PPP')}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Badge variant="outline" className="flex items-center gap-1 text-amber-600 bg-amber-50">
+                    <BadgeCheck className="h-3 w-3" />
+                    <span>{listing.condition}</span>
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mb-6 bg-black/5 p-4 rounded-xl shadow-sm">
+              <Carousel className="w-full">
+                <CarouselContent>
+                  {listing.images.map((image, index) => (
+                    <CarouselItem key={index}>
+                      <div 
+                        className="relative overflow-hidden rounded-lg cursor-pointer w-full"
+                        onClick={() => openImageViewer(index)}
+                      >
+                        <AspectRatio ratio={16/9} className="bg-muted">
+                          <img 
+                            src={image || '/placeholder.svg'} 
+                            alt={`${listing.title} - image ${index + 1}`}
+                            className="w-full h-full object-cover bg-black/5"
+                          />
+                        </AspectRatio>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="left-2" />
+                <CarouselNext className="right-2" />
+              </Carousel>
+              
+              <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 mt-4">
+                {listing.images.map((image, index) => (
+                  <div
+                    key={index}
+                    onClick={() => {
+                      setSelectedImageIndex(index);
+                      openImageViewer(index);
+                    }}
+                    className={`cursor-pointer rounded-lg overflow-hidden transition-all border-2 ${
+                      selectedImageIndex === index ? 'border-[#1EAEDB] shadow-md' : 'border-transparent'
+                    }`}
+                  >
+                    <AspectRatio ratio={1/1} className="bg-muted">
+                      <img
+                        src={image || '/placeholder.svg'}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </AspectRatio>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <ImageViewer 
+              images={listing.images} 
+              initialIndex={selectedImageIndex}
+              open={imageViewerOpen}
+              onOpenChange={setImageViewerOpen}
+            />
+            
+            <div className="mb-6 bg-white rounded-xl border p-6 shadow-sm">
+              <h3 className="text-lg font-semibold mb-4">Seller Information</h3>
+              <div className="flex items-center gap-3">
+                <div className="bg-[#1EAEDB]/10 h-12 w-12 rounded-full flex items-center justify-center text-[#1EAEDB] font-semibold">
+                  {listing.seller_name.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-medium">{listing.seller_name}</p>
+                  <div className="flex items-center gap-1 text-sm text-amber-500">
+                    {renderStarRating(listing.seller_rating)}
+                    <span className="ml-1">({listing.seller_rating.toFixed(1)})</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mb-8 bg-white rounded-xl border p-6 shadow-sm">
+              <h2 className="text-xl font-semibold mb-3">Description</h2>
+              <div className="space-y-4">
+                <p className="text-muted-foreground whitespace-pre-line">{listing.description}</p>
+                
+                <div className="mt-6 pt-4 border-t border-gray-100">
+                  <div className="grid grid-cols-2 gap-y-3">
+                    <div className="text-sm font-medium">Category</div>
+                    <div className="text-sm text-muted-foreground">{listing.category}</div>
+                    
+                    <div className="text-sm font-medium">Condition</div>
+                    <div className="text-sm text-muted-foreground">{listing.condition}</div>
+                    
+                    <div className="text-sm font-medium">Location</div>
+                    <div className="text-sm text-muted-foreground">{listing.location}</div>
+                    
+                    <div className="text-sm font-medium">Listed on</div>
+                    <div className="text-sm text-muted-foreground">{format(createdDate, 'PPP')}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="col-span-1">
+            <div className="sticky top-24 space-y-6">
+              <div className="bg-white rounded-xl border p-6 shadow-sm">
+                <div className="mb-4 flex justify-between items-center">
+                  <h2 className="text-3xl font-bold text-[#1EAEDB]">
+                    {formatPrice(listing.price)}
+                  </h2>
+                  <button 
+                    onClick={toggleWishlist}
+                    className={`p-2 rounded-full transition-colors ${inWishlist ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-500'}`}
+                  >
+                    <Heart className={`w-5 h-5 ${inWishlist && 'fill-rose-500'}`} />
+                  </button>
+                </div>
+                
+                <div className="space-y-3 mb-6">
+                  <Button onClick={handleCall} className="w-full gap-2 bg-[#1EAEDB] hover:bg-[#1EAEDB]/90 rounded-full">
+                    <Phone className="h-5 w-5" />
+                    Contact Seller
+                  </Button>
+                  
+                  <Button variant="outline" onClick={handleWhatsApp} className="w-full gap-2 text-gray-700 rounded-full">
+                    <MessageSquare className="h-5 w-5" />
+                    WhatsApp
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleLocation} 
+                    className="w-full h-12 flex justify-center items-center text-gray-700 rounded-full"
+                    title="Location"
+                    aria-label="View location"
+                  >
+                    <MapPin className="h-5 w-5" />
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    onClick={handleInstagram} 
+                    className="w-full h-12 flex justify-center items-center text-gray-700 rounded-full"
+                    title="Instagram"
+                    aria-label="View Instagram profile"
+                  >
+                    <Instagram className="h-5 w-5" />
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    onClick={handleShare} 
+                    className="w-full h-12 flex justify-center items-center text-gray-700 rounded-full"
+                    title="Share"
+                    aria-label="Share listing"
+                  >
+                    <Share2 className="h-5 w-5" />
+                  </Button>
+                </div>
               </div>
               
-              {/* Contact buttons */}
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold mb-4">Contact Seller</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {listing.seller_phone && (
-                    <Button 
-                      onClick={handleCall}
-                      size="lg"
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-                    >
-                      <Phone className="h-5 w-5 mr-2" />
-                      Call Seller
-                    </Button>
-                  )}
-                  
-                  {listing.seller_whatsapp && (
-                    <Button 
-                      onClick={handleWhatsApp}
-                      size="lg"
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-                    >
-                      <MessageSquare className="h-5 w-5 mr-2" />
-                      WhatsApp
-                    </Button>
-                  )}
-                </div>
-                
-                <Separator className="my-4" />
-                
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <Button 
-                    variant="outline"
-                    size="lg"
-                    onClick={handleLocation}
-                    className="w-full"
-                  >
-                    <Navigation2 className="h-5 w-5 mr-2" />
-                    Location
-                  </Button>
-                  
-                  {listing.seller_instagram && (
-                    <Button 
-                      variant="outline"
-                      size="lg"
-                      onClick={handleInstagram}
-                      className="w-full"
-                    >
-                      <Instagram className="h-5 w-5 mr-2" />
-                      Instagram
-                    </Button>
-                  )}
-                  
-                  <Button 
-                    variant="outline"
-                    size="lg"
-                    onClick={handleShare}
-                    className="w-full"
-                  >
-                    <Share2 className="h-5 w-5 mr-2" />
-                    Share
-                  </Button>
-                </div>
-                
-                <div className="mt-6 pt-4 border-t border-border">
-                  <div className="text-sm text-muted-foreground">
-                    <p>Listing ID: {listing.id.slice(0, 8)}</p>
-                    <p>Posted on {formatDate(listing.created_at)}</p>
+              <div className="bg-[#1EAEDB]/5 rounded-xl p-4 border border-[#1EAEDB]/10">
+                <div className="flex gap-3">
+                  <Shield className="h-5 w-5 text-[#1EAEDB]/70 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-sm mb-1">Safe trading tips</h4>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>• Meet in a public place</li>
+                      <li>• Verify the item before paying</li>
+                      <li>• Pay only after inspecting the item</li>
+                      <li>• Don't share personal financial information</li>
+                    </ul>
                   </div>
                 </div>
               </div>
@@ -371,15 +386,9 @@ const MarketplaceListingDetails = () => {
           </div>
         </div>
       </div>
-      
-      <ImageViewer 
-        images={listing.images} 
-        initialIndex={selectedImageIndex}
-        open={imageViewerOpen}
-        onOpenChange={setImageViewerOpen}
-      />
     </MainLayout>
   );
 };
 
 export default MarketplaceListingDetails;
+
