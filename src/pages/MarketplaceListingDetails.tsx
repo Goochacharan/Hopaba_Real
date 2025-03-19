@@ -133,17 +133,25 @@ const MarketplaceListingDetails = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="container mx-auto py-8 px-4 max-w-7xl animate-pulse">
+        <div className="container mx-auto py-8 px-4 max-w-6xl animate-pulse">
           <div className="mb-8 h-6 bg-gray-200 rounded w-1/4"></div>
-          <div className="bg-gray-200 rounded-xl h-[450px] mb-6"></div>
-          <div className="grid grid-cols-5 gap-3 mb-6">
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="h-24 bg-gray-200 rounded-xl"></div>
-            ))}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="col-span-1 lg:col-span-2">
+              <div className="h-[450px] bg-gray-200 rounded-xl mb-4"></div>
+              <div className="grid grid-cols-4 gap-3">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="h-24 bg-gray-200 rounded-xl"></div>
+                ))}
+              </div>
+            </div>
+            <div className="col-span-1">
+              <div className="h-12 bg-gray-200 rounded mb-4"></div>
+              <div className="h-8 bg-gray-200 rounded mb-4 w-1/2"></div>
+              <div className="h-40 bg-gray-200 rounded mb-6"></div>
+              <div className="h-12 bg-gray-200 rounded mb-2"></div>
+              <div className="h-12 bg-gray-200 rounded"></div>
+            </div>
           </div>
-          <div className="h-12 bg-gray-200 rounded mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded mb-4 w-1/2"></div>
-          <div className="h-40 bg-gray-200 rounded mb-6"></div>
         </div>
       </MainLayout>
     );
@@ -152,7 +160,7 @@ const MarketplaceListingDetails = () => {
   if (error || !listing) {
     return (
       <MainLayout>
-        <div className="container mx-auto py-8 px-4 max-w-7xl">
+        <div className="container mx-auto py-8 px-4 max-w-6xl">
           <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Marketplace</span>
@@ -176,109 +184,92 @@ const MarketplaceListingDetails = () => {
 
   return (
     <MainLayout>
-      <div className="container mx-auto py-8 px-4 max-w-7xl">
+      <div className="container mx-auto py-8 px-4 max-w-6xl">
         <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
           <ArrowLeft className="h-4 w-4" />
           <span>Back to Marketplace</span>
         </Link>
         
-        <div className="w-full space-y-6">
-          <div className="bg-black/5 p-4 rounded-xl shadow-sm w-full">
-            <Carousel className="w-full">
-              <CarouselContent>
-                {listing.images.map((image, index) => (
-                  <CarouselItem key={index}>
-                    <div 
-                      className="relative overflow-hidden rounded-lg cursor-pointer w-full"
-                      onClick={() => openImageViewer(index)}
-                    >
-                      <AspectRatio ratio={16/9} className="bg-muted">
-                        <img 
-                          src={image || '/placeholder.svg'} 
-                          alt={`${listing.title} - image ${index + 1}`}
-                          className="w-full h-full object-cover bg-black/5"
-                        />
-                      </AspectRatio>
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="left-2" />
-              <CarouselNext className="right-2" />
-            </Carousel>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="col-span-1 lg:col-span-2">
+            <div className="mb-6">
+              <Badge className="mb-2">{listing.category}</Badge>
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2">{listing.title}</h1>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-4 w-4" />
+                  <span>{listing.location}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  <span>Listed on {format(createdDate, 'PPP')}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Badge variant="outline" className="flex items-center gap-1 text-amber-600 bg-amber-50">
+                    <BadgeCheck className="h-3 w-3" />
+                    <span>{listing.condition}</span>
+                  </Badge>
+                </div>
+              </div>
+            </div>
             
-            <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-3 mt-4">
-              {listing.images.map((image, index) => (
-                <div
-                  key={index}
-                  onClick={() => {
-                    setSelectedImageIndex(index);
-                    openImageViewer(index);
-                  }}
-                  className={`cursor-pointer rounded-lg overflow-hidden transition-all border-2 ${
-                    selectedImageIndex === index ? 'border-[#1EAEDB] shadow-md' : 'border-transparent'
-                  }`}
-                >
-                  <AspectRatio ratio={1/1} className="bg-muted">
-                    <img
-                      src={image || '/placeholder.svg'}
-                      alt={`Thumbnail ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </AspectRatio>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <ImageViewer 
-            images={listing.images} 
-            initialIndex={selectedImageIndex}
-            open={imageViewerOpen}
-            onOpenChange={setImageViewerOpen}
-          />
-          
-          <div className="bg-white rounded-xl border p-6 shadow-sm w-full">
-            <div className="flex justify-between items-start">
-              <div>
-                <Badge className="mb-2">{listing.category}</Badge>
-                <h1 className="text-2xl sm:text-3xl font-bold mb-2">{listing.title}</h1>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4" />
-                    <span>{listing.location}</span>
+            <div className="mb-6 bg-black/5 p-4 rounded-xl shadow-sm">
+              <Carousel className="w-full">
+                <CarouselContent>
+                  {listing.images.map((image, index) => (
+                    <CarouselItem key={index}>
+                      <div 
+                        className="relative overflow-hidden rounded-lg cursor-pointer w-full"
+                        onClick={() => openImageViewer(index)}
+                      >
+                        <AspectRatio ratio={16/9} className="bg-muted">
+                          <img 
+                            src={image || '/placeholder.svg'} 
+                            alt={`${listing.title} - image ${index + 1}`}
+                            className="w-full h-full object-cover bg-black/5"
+                          />
+                        </AspectRatio>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="left-2" />
+                <CarouselNext className="right-2" />
+              </Carousel>
+              
+              <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 mt-4">
+                {listing.images.map((image, index) => (
+                  <div
+                    key={index}
+                    onClick={() => {
+                      setSelectedImageIndex(index);
+                      openImageViewer(index);
+                    }}
+                    className={`cursor-pointer rounded-lg overflow-hidden transition-all border-2 ${
+                      selectedImageIndex === index ? 'border-[#1EAEDB] shadow-md' : 'border-transparent'
+                    }`}
+                  >
+                    <AspectRatio ratio={1/1} className="bg-muted">
+                      <img
+                        src={image || '/placeholder.svg'}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </AspectRatio>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    <span>Listed on {format(createdDate, 'PPP')}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Badge variant="outline" className="flex items-center gap-1 text-amber-600 bg-amber-50">
-                      <BadgeCheck className="h-3 w-3" />
-                      <span>{listing.condition}</span>
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                <h2 className="text-3xl font-bold text-[#1EAEDB]">
-                  {formatPrice(listing.price)}
-                </h2>
-                <button 
-                  onClick={toggleWishlist}
-                  className={`p-2 rounded-full transition-colors ${inWishlist ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-500'}`}
-                  aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-                  title={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-                >
-                  <Heart className={`w-5 h-5 ${inWishlist && 'fill-rose-500'}`} />
-                </button>
+                ))}
               </div>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-xl border p-6 shadow-sm w-full">
-            <h3 className="text-lg font-semibold mb-4">Seller Information</h3>
-            <div className="flex items-center justify-between">
+            
+            <ImageViewer 
+              images={listing.images} 
+              initialIndex={selectedImageIndex}
+              open={imageViewerOpen}
+              onOpenChange={setImageViewerOpen}
+            />
+            
+            <div className="mb-6 bg-white rounded-xl border p-6 shadow-sm">
+              <h3 className="text-lg font-semibold mb-4">Seller Information</h3>
               <div className="flex items-center gap-3">
                 <div className="bg-[#1EAEDB]/10 h-12 w-12 rounded-full flex items-center justify-center text-[#1EAEDB] font-semibold">
                   {listing.seller_name.charAt(0)}
@@ -291,89 +282,105 @@ const MarketplaceListingDetails = () => {
                   </div>
                 </div>
               </div>
-              
-              <div className="flex gap-2">
-                <Button onClick={handleCall} className="gap-2 bg-[#1EAEDB] hover:bg-[#1EAEDB]/90 rounded-full h-10 w-10 p-0"
-                  title="Contact Seller" 
-                  aria-label="Contact Seller"
-                >
-                  <Phone className="h-5 w-5" />
-                </Button>
-                
-                <Button variant="outline" onClick={handleWhatsApp} className="gap-2 text-gray-700 rounded-full h-10 w-10 p-0"
-                  title="WhatsApp" 
-                  aria-label="Contact via WhatsApp"
-                >
-                  <MessageSquare className="h-5 w-5" />
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  onClick={handleLocation} 
-                  className="h-10 w-10 p-0 flex justify-center items-center text-gray-700 rounded-full"
-                  title="Location"
-                  aria-label="View location"
-                >
-                  <MapPin className="h-5 w-5" />
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  onClick={handleInstagram} 
-                  className="h-10 w-10 p-0 flex justify-center items-center text-gray-700 rounded-full"
-                  title="Instagram"
-                  aria-label="View Instagram profile"
-                >
-                  <Instagram className="h-5 w-5" />
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  onClick={handleShare} 
-                  className="h-10 w-10 p-0 flex justify-center items-center text-gray-700 rounded-full"
-                  title="Share"
-                  aria-label="Share listing"
-                >
-                  <Share2 className="h-5 w-5" />
-                </Button>
-              </div>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-xl border p-6 shadow-sm w-full">
-            <h2 className="text-xl font-semibold mb-3">Description</h2>
-            <div className="space-y-4">
-              <p className="text-muted-foreground whitespace-pre-line">{listing.description}</p>
-              
-              <div className="mt-6 pt-4 border-t border-gray-100">
-                <div className="grid grid-cols-2 gap-y-3">
-                  <div className="text-sm font-medium">Category</div>
-                  <div className="text-sm text-muted-foreground">{listing.category}</div>
-                  
-                  <div className="text-sm font-medium">Condition</div>
-                  <div className="text-sm text-muted-foreground">{listing.condition}</div>
-                  
-                  <div className="text-sm font-medium">Location</div>
-                  <div className="text-sm text-muted-foreground">{listing.location}</div>
-                  
-                  <div className="text-sm font-medium">Listed on</div>
-                  <div className="text-sm text-muted-foreground">{format(createdDate, 'PPP')}</div>
+            
+            <div className="mb-8 bg-white rounded-xl border p-6 shadow-sm">
+              <h2 className="text-xl font-semibold mb-3">Description</h2>
+              <div className="space-y-4">
+                <p className="text-muted-foreground whitespace-pre-line">{listing.description}</p>
+                
+                <div className="mt-6 pt-4 border-t border-gray-100">
+                  <div className="grid grid-cols-2 gap-y-3">
+                    <div className="text-sm font-medium">Category</div>
+                    <div className="text-sm text-muted-foreground">{listing.category}</div>
+                    
+                    <div className="text-sm font-medium">Condition</div>
+                    <div className="text-sm text-muted-foreground">{listing.condition}</div>
+                    
+                    <div className="text-sm font-medium">Location</div>
+                    <div className="text-sm text-muted-foreground">{listing.location}</div>
+                    
+                    <div className="text-sm font-medium">Listed on</div>
+                    <div className="text-sm text-muted-foreground">{format(createdDate, 'PPP')}</div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           
-          <div className="bg-[#1EAEDB]/5 rounded-xl p-4 border border-[#1EAEDB]/10 w-full">
-            <div className="flex gap-3">
-              <Shield className="h-5 w-5 text-[#1EAEDB]/70 shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-medium text-sm mb-1">Safe trading tips</h4>
-                <ul className="text-xs text-muted-foreground space-y-1">
-                  <li>• Meet in a public place</li>
-                  <li>• Verify the item before paying</li>
-                  <li>• Pay only after inspecting the item</li>
-                  <li>• Don't share personal financial information</li>
-                </ul>
+          <div className="col-span-1">
+            <div className="sticky top-24 space-y-6">
+              <div className="bg-white rounded-xl border p-6 shadow-sm">
+                <div className="mb-4 flex justify-between items-center">
+                  <h2 className="text-3xl font-bold text-[#1EAEDB]">
+                    {formatPrice(listing.price)}
+                  </h2>
+                  <button 
+                    onClick={toggleWishlist}
+                    className={`p-2 rounded-full transition-colors ${inWishlist ? 'text-rose-500' : 'text-muted-foreground hover:text-rose-500'}`}
+                  >
+                    <Heart className={`w-5 h-5 ${inWishlist && 'fill-rose-500'}`} />
+                  </button>
+                </div>
+                
+                <div className="space-y-3 mb-6">
+                  <Button onClick={handleCall} className="w-full gap-2 bg-[#1EAEDB] hover:bg-[#1EAEDB]/90 rounded-full">
+                    <Phone className="h-5 w-5" />
+                    Contact Seller
+                  </Button>
+                  
+                  <Button variant="outline" onClick={handleWhatsApp} className="w-full gap-2 text-gray-700 rounded-full">
+                    <MessageSquare className="h-5 w-5" />
+                    WhatsApp
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleLocation} 
+                    className="w-full h-12 flex justify-center items-center text-gray-700 rounded-full"
+                    title="Location"
+                    aria-label="View location"
+                  >
+                    <MapPin className="h-5 w-5" />
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    onClick={handleInstagram} 
+                    className="w-full h-12 flex justify-center items-center text-gray-700 rounded-full"
+                    title="Instagram"
+                    aria-label="View Instagram profile"
+                  >
+                    <Instagram className="h-5 w-5" />
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    onClick={handleShare} 
+                    className="w-full h-12 flex justify-center items-center text-gray-700 rounded-full"
+                    title="Share"
+                    aria-label="Share listing"
+                  >
+                    <Share2 className="h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="bg-[#1EAEDB]/5 rounded-xl p-4 border border-[#1EAEDB]/10">
+                <div className="flex gap-3">
+                  <Shield className="h-5 w-5 text-[#1EAEDB]/70 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-sm mb-1">Safe trading tips</h4>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>• Meet in a public place</li>
+                      <li>• Verify the item before paying</li>
+                      <li>• Pay only after inspecting the item</li>
+                      <li>• Don't share personal financial information</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -384,3 +391,4 @@ const MarketplaceListingDetails = () => {
 };
 
 export default MarketplaceListingDetails;
+
