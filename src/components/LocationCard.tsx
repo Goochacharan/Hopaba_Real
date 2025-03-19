@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -265,6 +266,19 @@ const LocationCard: React.FC<LocationCardProps> = ({
   };
 
   const handleCardClick = () => {
+    // Ensure the ID is valid before navigating
+    if (!recommendation.id) {
+      console.error("Cannot navigate: Location ID is missing", recommendation);
+      toast({
+        title: "Navigation Error",
+        description: "Unable to view location details due to missing ID",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Add logging to track navigation attempts
+    console.log("Navigating to location:", recommendation.id, recommendation.name);
     navigate(`/location/${recommendation.id}`);
   };
 
