@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -221,14 +220,14 @@ const MarketplaceListingDetails = () => {
                   {listing.images.map((image, index) => (
                     <CarouselItem key={index}>
                       <div 
-                        className="relative overflow-hidden rounded-xl cursor-pointer"
+                        className="relative overflow-hidden rounded-lg cursor-pointer w-full"
                         onClick={() => openImageViewer(index)}
                       >
                         <AspectRatio ratio={16/9} className="bg-muted">
                           <img 
                             src={image || '/placeholder.svg'} 
                             alt={`${listing.title} - image ${index + 1}`}
-                            className="w-full h-full object-contain bg-black/5"
+                            className="w-full h-full object-cover bg-black/5"
                           />
                         </AspectRatio>
                       </div>
@@ -247,15 +246,17 @@ const MarketplaceListingDetails = () => {
                       setSelectedImageIndex(index);
                       openImageViewer(index);
                     }}
-                    className={`cursor-pointer rounded-xl overflow-hidden transition-all h-24 sm:h-28 md:h-30 border-2 ${
+                    className={`cursor-pointer rounded-lg overflow-hidden transition-all border-2 ${
                       selectedImageIndex === index ? 'border-[#1EAEDB] shadow-md' : 'border-transparent'
                     }`}
                   >
-                    <img
-                      src={image || '/placeholder.svg'}
-                      alt={`Thumbnail ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+                    <AspectRatio ratio={1/1} className="bg-muted">
+                      <img
+                        src={image || '/placeholder.svg'}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </AspectRatio>
                   </div>
                 ))}
               </div>

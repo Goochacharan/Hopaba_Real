@@ -212,7 +212,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
                 <div
                   key={idx}
                   className={cn(
-                    "w-16 h-16 rounded-lg overflow-hidden cursor-pointer border-2",
+                    "rounded-lg overflow-hidden cursor-pointer border-2",
                     currentIndex === idx ? "border-[#1EAEDB]" : "border-transparent"
                   )}
                   onClick={() => {
@@ -220,11 +220,13 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
                     setCurrentIndex(idx);
                   }}
                 >
-                  <img 
-                    src={img} 
-                    alt={`Thumbnail ${idx + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+                  <AspectRatio ratio={1/1} className="w-12 h-12">
+                    <img 
+                      src={img} 
+                      alt={`Thumbnail ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </AspectRatio>
                 </div>
               ))}
             </div>
