@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Navigation2, Heart } from 'lucide-react';
@@ -206,7 +207,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
                       alt={`${listing.title} - image ${index + 1}`}
                       onLoad={() => handleImageLoad(index)}
                       className={cn(
-                        "w-full h-full object-cover transition-all",
+                        "w-full h-72 object-cover transition-all",
                         imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
                       )}
                     />
@@ -325,4 +326,3 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
 };
 
 export default MarketplaceListingCard;
-
