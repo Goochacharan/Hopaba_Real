@@ -72,7 +72,7 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
 
   return (
     <div className={cn("relative group", className)}>
-      <AspectRatio ratio={16/9} className="bg-muted">
+      <AspectRatio ratio={4/3} className="bg-muted">
         <img
           src={imageArray[currentImageIndex]}
           alt={`Product image ${currentImageIndex + 1}`}
