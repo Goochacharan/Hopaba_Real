@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
@@ -34,6 +35,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+
+// Define sorting types
+type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
 
 const Marketplace = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -47,6 +52,7 @@ const Marketplace = () => {
   const [ratingFilter, setRatingFilter] = useState<number>(0);
   const [conditionFilter, setConditionFilter] = useState<string>('all');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [sortOption, setSortOption] = useState<SortOption>('newest');
   
   const itemsPerPage = 9;
   
@@ -77,6 +83,27 @@ const Marketplace = () => {
       return params;
     });
   };
+
+  const sortListings = (items: MarketplaceListing[]): MarketplaceListing[] => {
+    return [...items].sort((a, b) => {
+      switch (sortOption) {
+        case 'newest':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case 'price-low-high':
+          return a.price - b.price;
+        case 'price-high-low':
+          return b.price - a.price;
+        case 'top-rated':
+          return b.seller_rating - a.seller_rating;
+        default:
+          return 0;
+      }
+    });
+  };
+  
+  const handleSortChange = (option: SortOption) => {
+    setSortOption(option);
+  };
   
   const filteredListings = listings.filter(listing => {
     const price = listing.price;
@@ -92,8 +119,10 @@ const Marketplace = () => {
     return true;
   });
   
-  const totalPages = Math.ceil(filteredListings.length / itemsPerPage);
-  const paginatedListings = filteredListings.slice(
+  const sortedListings = sortListings(filteredListings);
+  
+  const totalPages = Math.ceil(sortedListings.length / itemsPerPage);
+  const paginatedListings = sortedListings.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -129,16 +158,36 @@ const Marketplace = () => {
               </PopoverTrigger>
               <PopoverContent align="start" className="w-48 p-2">
                 <div className="space-y-1">
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
+                  <Button 
+                    variant={sortOption === 'newest' ? "default" : "ghost"} 
+                    size="sm" 
+                    className="w-full justify-start"
+                    onClick={() => handleSortChange('newest')}
+                  >
                     Newest First
                   </Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
+                  <Button 
+                    variant={sortOption === 'price-low-high' ? "default" : "ghost"} 
+                    size="sm" 
+                    className="w-full justify-start"
+                    onClick={() => handleSortChange('price-low-high')}
+                  >
                     Price: Low to High
                   </Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
+                  <Button 
+                    variant={sortOption === 'price-high-low' ? "default" : "ghost"} 
+                    size="sm" 
+                    className="w-full justify-start"
+                    onClick={() => handleSortChange('price-high-low')}
+                  >
                     Price: High to Low
                   </Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
+                  <Button 
+                    variant={sortOption === 'top-rated' ? "default" : "ghost"} 
+                    size="sm" 
+                    className="w-full justify-start"
+                    onClick={() => handleSortChange('top-rated')}
+                  >
                     Top Rated
                   </Button>
                 </div>
