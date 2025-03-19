@@ -221,6 +221,16 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
                       )}
                     />
                   </AspectRatio>
+                  
+                  <button 
+                    onClick={handleWishlistToggle}
+                    className={cn(
+                      "absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10",
+                      inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500"
+                    )}
+                  >
+                    <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} />
+                  </button>
                 </div>
               </CarouselItem>
             ))}
@@ -232,16 +242,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
             </>
           )}
         </Carousel>
-        
-        <button 
-          onClick={handleWishlistToggle}
-          className={cn(
-            "absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10",
-            inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500"
-          )}
-        >
-          <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} />
-        </button>
       </div>
       
       <div className="p-4">
