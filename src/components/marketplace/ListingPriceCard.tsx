@@ -34,7 +34,7 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   return (
     <div className="sticky top-24 space-y-6">
       <div className="bg-white rounded-xl border p-6 shadow-sm">
-        <div className="flex justify-between items-start mb-5">
+        <div className="flex justify-between items-start mb-4">
           <div>
             <h2 className="text-3xl font-bold text-[#1EAEDB]">
               {formatPrice(price)}
@@ -46,17 +46,15 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
           />
         </div>
         
-        <div className="mt-6">
-          <ListingActionButtons
-            listingId={id}
-            title={title}
-            price={price}
-            sellerPhone={sellerPhone}
-            sellerWhatsapp={sellerWhatsapp}
-            sellerInstagram={sellerInstagram}
-            location={location}
-          />
-        </div>
+        <ListingActionButtons
+          listingId={id}
+          title={title}
+          price={price}
+          sellerPhone={sellerPhone}
+          sellerWhatsapp={sellerWhatsapp}
+          sellerInstagram={sellerInstagram}
+          location={location}
+        />
       </div>
       
       <div className="bg-[#1EAEDB]/5 rounded-xl p-4 border border-[#1EAEDB]/10">

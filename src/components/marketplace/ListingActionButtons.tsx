@@ -118,29 +118,25 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
       <div className="grid grid-cols-2 gap-3 mt-auto">
         <button 
           onClick={handleCall}
-          className="h-12 rounded-full bg-[#1EAEDB] text-white hover:bg-[#1EAEDB]/90 transition-colors flex items-center justify-center"
+          className="h-12 rounded-full bg-[#1EAEDB] text-white hover:bg-[#1EAEDB]/90 transition-colors flex items-center justify-center gap-2"
           title="Call"
           aria-label="Call seller"
         >
-          <div className="flex items-center justify-center gap-2 px-4">
-            <Phone className="h-5 w-5 flex-shrink-0" />
-            <span className="whitespace-nowrap">Contact Seller</span>
-          </div>
+          <Phone className="h-5 w-5" />
+          <span>Contact Seller</span>
         </button>
         <button 
           onClick={handleWhatsApp}
-          className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
+          className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center gap-2"
           title="WhatsApp"
           aria-label="Contact on WhatsApp"
         >
-          <div className="flex items-center justify-center gap-2 px-4">
-            <MessageSquare className="h-5 w-5 flex-shrink-0" />
-            <span className="whitespace-nowrap">WhatsApp</span>
-          </div>
+          <MessageSquare className="h-5 w-5" />
+          <span>WhatsApp</span>
         </button>
       </div>
       
-      <div className="grid grid-cols-3 gap-3 mt-3">
+      <div className="grid grid-cols-3 gap-2 mt-3">
         <button 
           onClick={handleLocation}
           className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
