@@ -170,8 +170,6 @@ const MarketplaceListingDetails = () => {
     );
   }
 
-  const createdDate = new Date(listing.created_at);
-
   return (
     <MainLayout>
       <div className="container mx-auto py-8 px-4 max-w-6xl">
@@ -185,22 +183,6 @@ const MarketplaceListingDetails = () => {
             <div className="mb-6">
               <Badge className="mb-2">{listing?.category}</Badge>
               <h1 className="text-2xl sm:text-3xl font-bold mb-2">{listing?.title}</h1>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
-                  <span>{listing?.location}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>Listed on {listing ? format(new Date(listing.created_at), 'PPP') : ''}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Badge variant="outline" className="flex items-center gap-1 text-amber-600 bg-amber-50">
-                    <BadgeCheck className="h-3 w-3" />
-                    <span>{listing?.condition}</span>
-                  </Badge>
-                </div>
-              </div>
             </div>
             
             <div className="mb-6 bg-black/5 p-4 rounded-xl shadow-sm">
@@ -264,22 +246,6 @@ const MarketplaceListingDetails = () => {
               <h2 className="text-xl font-semibold mb-3">Description</h2>
               <div className="space-y-4">
                 <p className="text-muted-foreground whitespace-pre-line">{listing?.description}</p>
-                
-                <div className="mt-6 pt-4 border-t border-gray-100">
-                  <div className="grid grid-cols-2 gap-y-3">
-                    <div className="text-sm font-medium">Category</div>
-                    <div className="text-sm text-muted-foreground">{listing?.category}</div>
-                    
-                    <div className="text-sm font-medium">Condition</div>
-                    <div className="text-sm text-muted-foreground">{listing?.condition}</div>
-                    
-                    <div className="text-sm font-medium">Location</div>
-                    <div className="text-sm text-muted-foreground">{listing?.location}</div>
-                    
-                    <div className="text-sm font-medium">Listed on</div>
-                    <div className="text-sm text-muted-foreground">{listing ? format(new Date(listing.created_at), 'PPP') : ''}</div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
