@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Navigation2, Heart } from 'lucide-react';
+import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Navigation2, Heart, Calendar, Check } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
@@ -178,6 +178,15 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
     );
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric',
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
   return (
     <div 
       onClick={handleCardClick}
@@ -238,19 +247,31 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
         >
           <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} />
         </button>
-        
-        <Badge className="absolute top-12 right-3 bg-[#1EAEDB]/90">{listing.condition}</Badge>
       </div>
       
       <div className="p-4">
-        <div className="flex justify-between items-start gap-2 mb-2">
+        <div className="mb-2">
           <h3 className="font-medium text-lg">{listing.title}</h3>
+          <p className="text-lg font-bold text-[#1EAEDB]">{formatPrice(listing.price)}</p>
         </div>
         
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-lg font-bold text-[#1EAEDB]">{formatPrice(listing.price)}</p>
-          
-          <div className="flex flex-col items-end">
+        <div className="flex items-center text-muted-foreground mb-2 text-sm">
+          <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+          <span className="truncate">{listing.location}</span>
+        </div>
+        
+        <div className="flex items-center text-muted-foreground mb-2 text-sm">
+          <Calendar className="w-4 h-4 mr-1 flex-shrink-0" />
+          <span>Listed on {formatDate(listing.created_at)}</span>
+        </div>
+        
+        <div className="flex items-center text-muted-foreground mb-3 text-sm">
+          <Check className="w-4 h-4 mr-1 flex-shrink-0" />
+          <span>{listing.condition}</span>
+        </div>
+        
+        <div className="flex items-center mb-3">
+          <div>
             <span className="text-sm font-medium">{listing.seller_name}</span>
             <div className="flex items-center gap-1">
               {renderStarRating(listing.seller_rating)}
@@ -259,11 +280,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
               </span>
             </div>
           </div>
-        </div>
-
-        <div className="flex items-center text-muted-foreground mb-3 text-sm">
-          <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-          <span className="truncate">{listing.location}</span>
         </div>
         
         <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
