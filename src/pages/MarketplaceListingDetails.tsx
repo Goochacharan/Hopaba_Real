@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -256,7 +257,6 @@ const MarketplaceListingDetails = () => {
                           <p className="font-medium">{listing.seller_name}</p>
                           <div className="flex items-center gap-2">
                             {renderStarRating(listing.seller_rating)}
-                            <span className="ml-1 text-sm">({listing.seller_rating.toFixed(1)})</span>
                             <span className="text-sm text-muted-foreground">
                               ({reviewCount})
                             </span>

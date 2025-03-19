@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Navigation2, Heart } from 'lucide-react';
@@ -256,7 +255,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
             <p className="font-medium">{listing.seller_name}</p>
             <div className="flex items-center gap-1 text-sm text-amber-500">
               {renderStarRating(listing.seller_rating)}
-              <span className="ml-1">({listing.seller_rating.toFixed(1)})</span>
               <span className="text-muted-foreground ml-1">
                 ({reviewCount})
               </span>
