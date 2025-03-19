@@ -5,7 +5,7 @@ import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar } from 'lucide-react';
+import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Filter, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Pagination, 
@@ -34,6 +34,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Marketplace = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -121,248 +122,264 @@ const Marketplace = () => {
           <p className="text-muted-foreground">Browse and buy pre-owned items from trusted sellers</p>
         </div>
         
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto py-2">
-          {/* Price Filter */}
-          <Popover open={activeFilter === 'price'} onOpenChange={(open) => setActiveFilter(open ? 'price' : null)}>
-            <PopoverTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className={cn(
-                  "rounded-full border border-border/60 flex items-center gap-2",
-                  activeFilter === 'price' && "ring-2 ring-primary/20"
-                )}
-              >
-                <IndianRupee className="h-4 w-4" />
-                <span>Price</span>
-                {(priceRange[0] > 0 || priceRange[1] < 500000) && (
-                  <Badge variant="secondary" className="ml-1">
-                    {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
-                  </Badge>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-4">
-              <div className="space-y-4">
-                <h4 className="font-medium">Price Range</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">From</span>
-                    <span className="text-sm font-medium">{formatPrice(priceRange[0])}</span>
-                  </div>
-                  <Slider
-                    value={[priceRange[0]]}
-                    min={0}
-                    max={500000}
-                    step={5000}
-                    onValueChange={(value) => setPriceRange([value[0], priceRange[1]])}
-                  />
-                  <div className="flex justify-between mt-4">
-                    <span className="text-sm text-muted-foreground">To</span>
-                    <span className="text-sm font-medium">{formatPrice(priceRange[1])}</span>
-                  </div>
-                  <Slider
-                    value={[priceRange[1]]}
-                    min={0}
-                    max={500000}
-                    step={5000}
-                    onValueChange={(value) => setPriceRange([priceRange[0], value[0]])}
-                  />
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          {/* Year Filter */}
-          <Popover open={activeFilter === 'year'} onOpenChange={(open) => setActiveFilter(open ? 'year' : null)}>
-            <PopoverTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className={cn(
-                  "rounded-full border border-border/60 flex items-center gap-2",
-                  activeFilter === 'year' && "ring-2 ring-primary/20"
-                )}
-              >
-                <Calendar className="h-4 w-4" />
-                <span>Year</span>
-                {(yearRange[0] > 2010 || yearRange[1] < new Date().getFullYear()) && (
-                  <Badge variant="secondary" className="ml-1">
-                    {yearRange[0]} - {yearRange[1]}
-                  </Badge>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-4">
-              <div className="space-y-4">
-                <h4 className="font-medium">Year Range</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">From</span>
-                    <span className="text-sm font-medium">{yearRange[0]}</span>
-                  </div>
-                  <Slider
-                    value={[yearRange[0]]}
-                    min={2000}
-                    max={new Date().getFullYear()}
-                    step={1}
-                    onValueChange={(value) => setYearRange([value[0], yearRange[1]])}
-                  />
-                  <div className="flex justify-between mt-4">
-                    <span className="text-sm text-muted-foreground">To</span>
-                    <span className="text-sm font-medium">{yearRange[1]}</span>
-                  </div>
-                  <Slider
-                    value={[yearRange[1]]}
-                    min={2000}
-                    max={new Date().getFullYear()}
-                    step={1}
-                    onValueChange={(value) => setYearRange([yearRange[0], value[0]])}
-                  />
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          {/* Seller Rating Filter */}
-          <Popover open={activeFilter === 'rating'} onOpenChange={(open) => setActiveFilter(open ? 'rating' : null)}>
-            <PopoverTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className={cn(
-                  "rounded-full border border-border/60 flex items-center gap-2",
-                  activeFilter === 'rating' && "ring-2 ring-primary/20"
-                )}
-              >
-                <Star className="h-4 w-4" />
-                <span>Rating</span>
-                {ratingFilter > 0 && (
-                  <Badge variant="secondary" className="ml-1">
-                    {ratingFilter}+
-                  </Badge>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-4">
-              <div className="space-y-4">
-                <h4 className="font-medium">Minimum Seller Rating</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Show results rated</span>
-                    <div className="flex items-center">
-                      <Star className="h-3 w-3 fill-amber-500 text-amber-500 mr-1" />
-                      <span className="text-sm font-medium">{ratingFilter}+</span>
+        <ScrollArea className="w-full">
+          <div className="flex items-center gap-4 mb-6 overflow-x-auto py-2 px-1">
+            {/* Rating Filter */}
+            <Popover open={activeFilter === 'rating'} onOpenChange={(open) => setActiveFilter(open ? 'rating' : null)}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className={cn(
+                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-12 h-12 relative p-0",
+                    activeFilter === 'rating' && "border-primary ring-2 ring-primary/20",
+                    ratingFilter > 0 && "border-primary/30 bg-primary/5"
+                  )}
+                >
+                  <Star className="h-5 w-5" />
+                  {ratingFilter > 0 && (
+                    <Badge variant="default" className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-medium">
+                      {ratingFilter}+
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4">
+                <div className="space-y-4">
+                  <h4 className="font-medium">Minimum Seller Rating</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Show results rated</span>
+                      <div className="flex items-center">
+                        <Star className="h-3 w-3 fill-amber-500 text-amber-500 mr-1" />
+                        <span className="text-sm font-medium">{ratingFilter}+</span>
+                      </div>
                     </div>
+                    <Slider
+                      value={[ratingFilter]}
+                      min={0}
+                      max={5}
+                      step={0.5}
+                      onValueChange={(value) => setRatingFilter(value[0])}
+                    />
                   </div>
-                  <Slider
-                    value={[ratingFilter]}
-                    min={0}
-                    max={5}
-                    step={0.5}
-                    onValueChange={(value) => setRatingFilter(value[0])}
-                  />
                 </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+              </PopoverContent>
+            </Popover>
 
-          {/* Condition Filter */}
-          <Popover open={activeFilter === 'condition'} onOpenChange={(open) => setActiveFilter(open ? 'condition' : null)}>
-            <PopoverTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className={cn(
-                  "rounded-full border border-border/60 flex items-center gap-2",
-                  activeFilter === 'condition' && "ring-2 ring-primary/20"
-                )}
-              >
-                <span>Condition</span>
-                {conditionFilter !== 'all' && (
-                  <Badge variant="secondary" className="ml-1">
-                    {conditionFilter}
-                  </Badge>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-4">
-              <div className="space-y-4">
-                <h4 className="font-medium">Item Condition</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button 
-                    variant={conditionFilter === 'all' ? "default" : "outline"} 
-                    size="sm" 
-                    onClick={() => setConditionFilter('all')}
-                  >
-                    All
+            {/* Price Filter */}
+            <Popover open={activeFilter === 'price'} onOpenChange={(open) => setActiveFilter(open ? 'price' : null)}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className={cn(
+                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-12 h-12 relative p-0",
+                    activeFilter === 'price' && "border-primary ring-2 ring-primary/20",
+                    (priceRange[0] > 0 || priceRange[1] < 500000) && "border-primary/30 bg-primary/5"
+                  )}
+                >
+                  <IndianRupee className="h-5 w-5" />
+                  {(priceRange[0] > 0 || priceRange[1] < 500000) && (
+                    <Badge variant="default" className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-medium">
+                      ₹₹
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4">
+                <div className="space-y-4">
+                  <h4 className="font-medium">Price Range</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">From</span>
+                      <span className="text-sm font-medium">{formatPrice(priceRange[0])}</span>
+                    </div>
+                    <Slider
+                      value={[priceRange[0]]}
+                      min={0}
+                      max={500000}
+                      step={5000}
+                      onValueChange={(value) => setPriceRange([value[0], priceRange[1]])}
+                    />
+                    <div className="flex justify-between mt-4">
+                      <span className="text-sm text-muted-foreground">To</span>
+                      <span className="text-sm font-medium">{formatPrice(priceRange[1])}</span>
+                    </div>
+                    <Slider
+                      value={[priceRange[1]]}
+                      min={0}
+                      max={500000}
+                      step={5000}
+                      onValueChange={(value) => setPriceRange([priceRange[0], value[0]])}
+                    />
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* Year Filter */}
+            <Popover open={activeFilter === 'year'} onOpenChange={(open) => setActiveFilter(open ? 'year' : null)}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className={cn(
+                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-12 h-12 relative p-0",
+                    activeFilter === 'year' && "border-primary ring-2 ring-primary/20",
+                    (yearRange[0] > 2010 || yearRange[1] < new Date().getFullYear()) && "border-primary/30 bg-primary/5"
+                  )}
+                >
+                  <Calendar className="h-5 w-5" />
+                  {(yearRange[0] > 2010 || yearRange[1] < new Date().getFullYear()) && (
+                    <Badge variant="default" className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-medium">
+                      {yearRange[0].toString().slice(-2)}
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4">
+                <div className="space-y-4">
+                  <h4 className="font-medium">Year Range</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">From</span>
+                      <span className="text-sm font-medium">{yearRange[0]}</span>
+                    </div>
+                    <Slider
+                      value={[yearRange[0]]}
+                      min={2000}
+                      max={new Date().getFullYear()}
+                      step={1}
+                      onValueChange={(value) => setYearRange([value[0], yearRange[1]])}
+                    />
+                    <div className="flex justify-between mt-4">
+                      <span className="text-sm text-muted-foreground">To</span>
+                      <span className="text-sm font-medium">{yearRange[1]}</span>
+                    </div>
+                    <Slider
+                      value={[yearRange[1]]}
+                      min={2000}
+                      max={new Date().getFullYear()}
+                      step={1}
+                      onValueChange={(value) => setYearRange([yearRange[0], value[0]])}
+                    />
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* Condition Filter */}
+            <Popover open={activeFilter === 'condition'} onOpenChange={(open) => setActiveFilter(open ? 'condition' : null)}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className={cn(
+                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-12 h-12 relative p-0",
+                    activeFilter === 'condition' && "border-primary ring-2 ring-primary/20",
+                    conditionFilter !== 'all' && "border-primary/30 bg-primary/5"
+                  )}
+                >
+                  <Layers className="h-5 w-5" />
+                  {conditionFilter !== 'all' && (
+                    <Badge variant="default" className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-medium">
+                      •
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4">
+                <div className="space-y-4">
+                  <h4 className="font-medium">Item Condition</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button 
+                      variant={conditionFilter === 'all' ? "default" : "outline"} 
+                      size="sm" 
+                      onClick={() => setConditionFilter('all')}
+                    >
+                      All
+                    </Button>
+                    <Button 
+                      variant={conditionFilter === 'new' ? "default" : "outline"} 
+                      size="sm" 
+                      onClick={() => setConditionFilter('new')}
+                    >
+                      New
+                    </Button>
+                    <Button 
+                      variant={conditionFilter === 'like new' ? "default" : "outline"} 
+                      size="sm" 
+                      onClick={() => setConditionFilter('like new')}
+                    >
+                      Like New
+                    </Button>
+                    <Button 
+                      variant={conditionFilter === 'good' ? "default" : "outline"} 
+                      size="sm" 
+                      onClick={() => setConditionFilter('good')}
+                    >
+                      Good
+                    </Button>
+                    <Button 
+                      variant={conditionFilter === 'fair' ? "default" : "outline"} 
+                      size="sm" 
+                      onClick={() => setConditionFilter('fair')}
+                    >
+                      Fair
+                    </Button>
+                    <Button 
+                      variant={conditionFilter === 'poor' ? "default" : "outline"} 
+                      size="sm" 
+                      onClick={() => setConditionFilter('poor')}
+                    >
+                      Poor
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* All Filters Button */}
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="rounded-full border border-border/60 flex items-center justify-center bg-background w-12 h-12 p-0"
+            >
+              <Filter className="h-5 w-5" />
+            </Button>
+
+            {/* Sort Options */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="rounded-full border border-border/60 flex items-center gap-2 ml-auto"
+                >
+                  <span>Sort</span>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-48 p-2">
+                <div className="space-y-1">
+                  <Button variant="ghost" size="sm" className="w-full justify-start">
+                    Newest First
                   </Button>
-                  <Button 
-                    variant={conditionFilter === 'new' ? "default" : "outline"} 
-                    size="sm" 
-                    onClick={() => setConditionFilter('new')}
-                  >
-                    New
+                  <Button variant="ghost" size="sm" className="w-full justify-start">
+                    Price: Low to High
                   </Button>
-                  <Button 
-                    variant={conditionFilter === 'like new' ? "default" : "outline"} 
-                    size="sm" 
-                    onClick={() => setConditionFilter('like new')}
-                  >
-                    Like New
+                  <Button variant="ghost" size="sm" className="w-full justify-start">
+                    Price: High to Low
                   </Button>
-                  <Button 
-                    variant={conditionFilter === 'good' ? "default" : "outline"} 
-                    size="sm" 
-                    onClick={() => setConditionFilter('good')}
-                  >
-                    Good
-                  </Button>
-                  <Button 
-                    variant={conditionFilter === 'fair' ? "default" : "outline"} 
-                    size="sm" 
-                    onClick={() => setConditionFilter('fair')}
-                  >
-                    Fair
-                  </Button>
-                  <Button 
-                    variant={conditionFilter === 'poor' ? "default" : "outline"} 
-                    size="sm" 
-                    onClick={() => setConditionFilter('poor')}
-                  >
-                    Poor
+                  <Button variant="ghost" size="sm" className="w-full justify-start">
+                    Top Rated
                   </Button>
                 </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          {/* Sort Options */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="rounded-full border border-border/60 flex items-center gap-2 ml-auto">
-                <span>Sort</span>
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-48 p-2">
-              <div className="space-y-1">
-                <Button variant="ghost" size="sm" className="w-full justify-start">
-                  Newest First
-                </Button>
-                <Button variant="ghost" size="sm" className="w-full justify-start">
-                  Price: Low to High
-                </Button>
-                <Button variant="ghost" size="sm" className="w-full justify-start">
-                  Price: High to Low
-                </Button>
-                <Button variant="ghost" size="sm" className="w-full justify-start">
-                  Top Rated
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </ScrollArea>
         
         <Tabs defaultValue={currentCategory} value={currentCategory} onValueChange={handleCategoryChange} className="mb-6">
           <TabsList className="mb-4 flex flex-nowrap overflow-auto pb-1 scrollbar-none">
