@@ -33,6 +33,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
   
   // Determine correct placeholder based on current route
   const getPlaceholder = () => {
+    if (currentPath === '/marketplace' || currentPath.startsWith('/marketplace')) {
+      return "Search for cars, bikes, mobiles...";
+    }
     if (currentRoute === '/my-list' || currentPath === '/my-list') {
       return "Search from your list...";
     }

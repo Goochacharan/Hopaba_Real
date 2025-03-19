@@ -45,9 +45,10 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
           query = query.eq('category', category);
         }
         
-        // Apply search query if provided
+        // Apply search query if provided - make it more flexible
         if (searchQuery && searchQuery.trim() !== '') {
-          query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
+          const searchTerms = searchQuery.trim().toLowerCase();
+          query = query.or(`title.ilike.%${searchTerms}%,description.ilike.%${searchTerms}%`);
         }
 
         const { data, error } = await query.order('created_at', { ascending: false });
