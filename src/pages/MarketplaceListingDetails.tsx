@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -11,6 +10,7 @@ import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { toast } from '@/components/ui/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { format } from 'date-fns';
+import ImageViewer from '@/components/ImageViewer';
 
 const formatPrice = (price: number): string => {
   return '₹' + price.toLocaleString('en-IN');
@@ -21,6 +21,7 @@ const MarketplaceListingDetails = () => {
   const { listing, loading, error } = useMarketplaceListing(id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [inWishlist, setInWishlist] = useState(false);
+  const [imageViewerOpen, setImageViewerOpen] = useState(false);
   
   const handleShare = () => {
     if (navigator.share) {
@@ -95,6 +96,11 @@ const MarketplaceListingDetails = () => {
       description: `${listing?.title} ${inWishlist ? "removed from" : "added to"} your wishlist`,
       duration: 2000,
     });
+  };
+
+  const openImageViewer = (index: number) => {
+    setSelectedImageIndex(index);
+    setImageViewerOpen(true);
   };
 
   const renderStarRating = (rating: number) => {
@@ -207,12 +213,15 @@ const MarketplaceListingDetails = () => {
               </div>
             </div>
             
-            <div className="mb-6 bg-black/5 p-1 rounded-xl">
+            <div className="mb-6 bg-black/5 p-3 rounded-xl">
               <Carousel className="w-full">
                 <CarouselContent>
                   {listing.images.map((image, index) => (
                     <CarouselItem key={index}>
-                      <div className="relative rounded-lg overflow-hidden h-[300px] sm:h-[400px] md:h-[500px]">
+                      <div 
+                        className="relative rounded-lg overflow-hidden h-[350px] sm:h-[450px] md:h-[550px] cursor-pointer"
+                        onClick={() => openImageViewer(index)}
+                      >
                         <img 
                           src={image || '/placeholder.svg'} 
                           alt={`${listing.title} - image ${index + 1}`}
@@ -226,12 +235,15 @@ const MarketplaceListingDetails = () => {
                 <CarouselNext className="right-2" />
               </Carousel>
               
-              <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 mt-2">
+              <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 mt-3">
                 {listing.images.map((image, index) => (
                   <div
                     key={index}
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`cursor-pointer rounded-md overflow-hidden h-16 sm:h-20 border-2 transition-all ${
+                    onClick={() => {
+                      setSelectedImageIndex(index);
+                      openImageViewer(index);
+                    }}
+                    className={`cursor-pointer rounded-md overflow-hidden h-20 sm:h-24 md:h-28 border-2 transition-all ${
                       selectedImageIndex === index ? 'border-primary' : 'border-transparent'
                     }`}
                   >
@@ -244,6 +256,13 @@ const MarketplaceListingDetails = () => {
                 ))}
               </div>
             </div>
+            
+            <ImageViewer 
+              images={listing.images} 
+              initialIndex={selectedImageIndex}
+              open={imageViewerOpen}
+              onOpenChange={setImageViewerOpen}
+            />
             
             <div className="mb-8">
               <h2 className="text-xl font-semibold mb-3">Description</h2>

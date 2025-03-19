@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Phone, MessageSquare, MapPin, Instagram, Share2, Star, Navigation2, Heart } from 'lucide-react';
@@ -15,6 +14,7 @@ import {
   CarouselNext, 
   CarouselPrevious 
 } from '@/components/ui/carousel';
+import ImageViewer from '@/components/ImageViewer';
 
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
@@ -31,6 +31,8 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
   const isMobile = useIsMobile();
   const [imageLoaded, setImageLoaded] = React.useState<boolean[]>([]);
   const [inWishlist, setInWishlist] = React.useState(false);
+  const [imageViewerOpen, setImageViewerOpen] = React.useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   
   React.useEffect(() => {
     setImageLoaded(Array(listing.images.length).fill(false));
@@ -42,6 +44,12 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
       newState[index] = true;
       return newState;
     });
+  };
+
+  const handleImageClick = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
+    setSelectedImageIndex(index);
+    setImageViewerOpen(true);
   };
 
   const handleShare = (e: React.MouseEvent) => {
@@ -178,24 +186,29 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
         className
       )}
     >
-      <div className="relative w-full h-72 overflow-hidden">
+      <div className="relative w-full h-80 sm:h-96 overflow-hidden">
         <Carousel className="w-full h-full">
           <CarouselContent className="h-full">
             {listing.images.map((img, index) => (
               <CarouselItem key={index} className="h-full p-0">
-                <div className={cn(
-                  "absolute inset-0 bg-muted/30",
-                  imageLoaded[index] ? "opacity-0" : "opacity-100"
-                )} />
-                <img
-                  src={img || '/placeholder.svg'} 
-                  alt={`${listing.title} - image ${index + 1}`}
-                  onLoad={() => handleImageLoad(index)}
-                  className={cn(
-                    "w-full h-72 object-cover transition-all",
-                    imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
-                  )}
-                />
+                <div 
+                  className="w-full h-full relative"
+                  onClick={(e) => handleImageClick(e, index)}
+                >
+                  <div className={cn(
+                    "absolute inset-0 bg-muted/30",
+                    imageLoaded[index] ? "opacity-0" : "opacity-100"
+                  )} />
+                  <img
+                    src={img || '/placeholder.svg'} 
+                    alt={`${listing.title} - image ${index + 1}`}
+                    onLoad={() => handleImageLoad(index)}
+                    className={cn(
+                      "w-full h-full object-cover transition-all",
+                      imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
+                    )}
+                  />
+                </div>
               </CarouselItem>
             ))}
           </CarouselContent>
@@ -287,6 +300,13 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
           </button>
         </div>
       </div>
+
+      <ImageViewer 
+        images={listing.images} 
+        initialIndex={selectedImageIndex}
+        open={imageViewerOpen}
+        onOpenChange={setImageViewerOpen}
+      />
     </div>
   );
 };
