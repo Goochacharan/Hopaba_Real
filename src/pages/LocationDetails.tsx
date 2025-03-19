@@ -307,7 +307,7 @@ const LocationDetails = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="container max-w-4xl mx-auto py-8">
+        <div className="container mx-auto py-8">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-gray-200 rounded w-1/3"></div>
             <div className="h-64 bg-gray-200 rounded"></div>
@@ -327,7 +327,7 @@ const LocationDetails = () => {
   
   return (
     <MainLayout>
-      <div className="container max-w-4xl mx-auto py-8 px-4">
+      <div className="container mx-auto py-8 px-4">
         <Button 
           variant="ghost" 
           size="sm" 
@@ -338,8 +338,8 @@ const LocationDetails = () => {
           Back to results
         </Button>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6">
               <div className="w-full h-72 relative overflow-hidden">
                 <Carousel className="w-full h-full">
