@@ -22,13 +22,17 @@ export interface MarketplaceListing {
 interface UseMarketplaceListingsOptions {
   category?: string;
   searchQuery?: string;
+  condition?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
 }
 
 export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = {}) => {
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { category, searchQuery } = options;
+  const { category, searchQuery, condition, minPrice, maxPrice, minRating } = options;
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -45,6 +49,25 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
           query = query.eq('category', category);
         }
         
+        // Apply condition filter if provided
+        if (condition && condition !== 'all') {
+          query = query.ilike('condition', condition);
+        }
+        
+        // Apply price range filters if provided
+        if (minPrice !== undefined) {
+          query = query.gte('price', minPrice);
+        }
+        
+        if (maxPrice !== undefined) {
+          query = query.lte('price', maxPrice);
+        }
+        
+        // Apply minimum seller rating filter if provided
+        if (minRating !== undefined && minRating > 0) {
+          query = query.gte('seller_rating', minRating);
+        }
+        
         // Apply search query if provided - with enhanced flexibility
         if (searchQuery && searchQuery.trim() !== '') {
           const searchTerms = searchQuery.trim().toLowerCase();
@@ -59,7 +82,10 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
           throw error;
         }
 
-        console.log(`Found ${data?.length || 0} marketplace listings for query "${searchQuery}"`);
+        console.log(`Found ${data?.length || 0} marketplace listings for query "${searchQuery || ''}"`);
+        if (condition && condition !== 'all') {
+          console.log(`Filtering by condition: "${condition}"`);
+        }
         setListings(data as MarketplaceListing[]);
       } catch (err) {
         console.error('Error fetching marketplace listings:', err);
@@ -70,7 +96,7 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
     };
 
     fetchListings();
-  }, [category, searchQuery]);
+  }, [category, searchQuery, condition, minPrice, maxPrice, minRating]);
 
   return { listings, loading, error };
 };

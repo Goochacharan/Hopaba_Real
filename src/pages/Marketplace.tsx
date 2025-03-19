@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
@@ -37,7 +36,6 @@ import { cn } from '@/lib/utils';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 
-// Define sorting types
 type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
 
 const Marketplace = () => {
@@ -58,8 +56,16 @@ const Marketplace = () => {
   
   const { listings, loading, error } = useMarketplaceListings({
     category: currentCategory !== 'all' ? currentCategory : undefined,
-    searchQuery: searchQuery
+    searchQuery: searchQuery,
+    condition: conditionFilter !== 'all' ? conditionFilter : undefined,
+    minPrice: priceRange[0] > 0 ? priceRange[0] : undefined,
+    maxPrice: priceRange[1] < 500000 ? priceRange[1] : undefined,
+    minRating: ratingFilter > 0 ? ratingFilter : undefined
   });
+  
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [currentCategory, searchQuery, conditionFilter, priceRange, ratingFilter, sortOption]);
   
   const categories = [
     { id: 'all', name: 'All Categories' },
