@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -321,7 +320,7 @@ const Profile = () => {
                 </div>
                 {!showAddForm && (
                   <Button 
-                    variant="outline" 
+                    variant="default" 
                     size="sm" 
                     onClick={handleAddNewBusiness}
                     className="flex items-center gap-1.5"
