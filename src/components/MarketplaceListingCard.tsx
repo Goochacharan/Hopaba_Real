@@ -53,6 +53,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
       <div className="p-4">
         <h3 className="font-medium text-lg md:text-xl mb-2">{listing.title}</h3>
         
+        {/* ListingMetadata component is still included but doesn't render anything */}
         <ListingMetadata 
           location={listing.location}
           createdAt={listing.created_at}
@@ -68,7 +69,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
           />
         </div>
         
-        <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+        <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
           {listing.description}
         </p>
 
