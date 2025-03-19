@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -263,7 +264,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         className
       )}
     >
-      <div className="relative w-full h-48 overflow-hidden">
+      <div className="relative w-full h-64 overflow-hidden">
         {ranking !== undefined && ranking <= 10 && (
           <div className="absolute top-0 left-2 z-10">
             <div className={cn("flex flex-col items-center", getMedalStyle(ranking).wrapperClass)}>
@@ -380,16 +381,16 @@ const LocationCard: React.FC<LocationCardProps> = ({
           {recommendation.description}
         </p>
 
-        <div className="flex gap-2 mt-4">
+        <div className="flex gap-2 mt-4 flex-wrap">
           {recommendation.priceLevel && (
-            <span className="bg-secondary text-xs px-2 py-1 rounded-full text-muted-foreground">
+            <span className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
               {recommendation.priceLevel.replace(/\$/g, '₹')}
             </span>
           )}
           {recommendation.tags.map((tag, index) => (
             <span 
               key={index} 
-              className="bg-secondary text-xs px-2 py-1 rounded-full text-muted-foreground"
+              className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full"
             >
               {tag}
             </span>
