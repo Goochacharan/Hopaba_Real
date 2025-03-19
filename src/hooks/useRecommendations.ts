@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Recommendation, mockRecommendations, searchRecommendations } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -270,6 +271,7 @@ const useRecommendations = ({
 
   const fetchServiceProviders = async (searchTerm: string, categoryFilter: string) => {
     try {
+      console.log("Searching service_providers for:", searchTerm);
       let query = supabase
         .from('service_providers')
         .select('*');
@@ -291,6 +293,7 @@ const useRecommendations = ({
       }
       
       if (data && data.length > 0) {
+        console.log("Found service providers:", data.length);
         return data.map(item => ({
           id: item.id,
           name: item.name,
@@ -318,6 +321,8 @@ const useRecommendations = ({
 
   const fetchRecommendationsFromSupabase = async (searchQuery: string, categoryFilter: string) => {
     try {
+      console.log("Searching recommendations table for:", searchQuery);
+      // Modify this query to use a more comprehensive search
       const { data, error } = await supabase
         .from('recommendations')
         .select('*')
@@ -328,6 +333,8 @@ const useRecommendations = ({
         console.error("Error fetching recommendations from Supabase:", error);
         return null;
       }
+      
+      console.log("Found recommendations:", data?.length || 0);
       
       if (data && data.length > 0) {
         return data.map(item => ({
@@ -404,16 +411,34 @@ const useRecommendations = ({
         console.log("Effective search category:", effectiveCategory);
         console.log("Searching for:", processedQuery);
         
+        // First fetch from recommendations table
         const supabaseRecommendations = await fetchRecommendationsFromSupabase(
           processedQuery, 
           effectiveCategory
         );
         
-        const supabaseEvents = await fetchEventsFromSupabase(processedQuery);
+        // Then fetch from service_providers table
+        const serviceProviders = await fetchServiceProviders(
+          processedQuery,
+          effectiveCategory
+        );
+        
+        // Combine results from both tables
+        let combinedResults: Recommendation[] = [];
         
         if (supabaseRecommendations && supabaseRecommendations.length > 0) {
-          console.log("Using Supabase recommendations data");
-          setRecommendations(supabaseRecommendations);
+          combinedResults = [...supabaseRecommendations];
+        }
+        
+        if (serviceProviders && serviceProviders.length > 0) {
+          combinedResults = [...combinedResults, ...serviceProviders];
+        }
+        
+        const supabaseEvents = await fetchEventsFromSupabase(processedQuery);
+        
+        if (combinedResults.length > 0) {
+          console.log("Using combined Supabase data with", combinedResults.length, "results");
+          setRecommendations(combinedResults);
         } else {
           console.log("No Supabase results, using specialized handlers or mock data");
           
