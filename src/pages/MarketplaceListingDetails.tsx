@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -9,7 +10,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import ListingImageCarousel from '@/components/marketplace/ListingImageCarousel';
 import ListingThumbnails from '@/components/marketplace/ListingThumbnails';
 import ListingDescription from '@/components/marketplace/ListingDescription';
-import ListingPriceCard from '@/components/marketplace/ListingPriceCard';
 import ListingMetadata from '@/components/marketplace/ListingMetadata';
 import ImageViewer from '@/components/ImageViewer';
 
@@ -29,21 +29,14 @@ const MarketplaceListingDetails = () => {
       <MainLayout>
         <div className="container mx-auto py-8 px-4 max-w-6xl animate-pulse">
           <div className="mb-8 h-6 bg-gray-200 rounded w-1/4"></div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="col-span-1 lg:col-span-2">
+          <div className="grid grid-cols-1 gap-8">
+            <div>
               <div className="h-[450px] bg-gray-200 rounded-xl mb-4"></div>
               <div className="grid grid-cols-4 gap-3">
                 {[1, 2, 3, 4].map(i => (
                   <div key={i} className="h-24 bg-gray-200 rounded-xl"></div>
                 ))}
               </div>
-            </div>
-            <div className="col-span-1">
-              <div className="h-12 bg-gray-200 rounded mb-4"></div>
-              <div className="h-8 bg-gray-200 rounded mb-4 w-1/2"></div>
-              <div className="h-40 bg-gray-200 rounded mb-6"></div>
-              <div className="h-12 bg-gray-200 rounded mb-2"></div>
-              <div className="h-12 bg-gray-200 rounded"></div>
             </div>
           </div>
         </div>
@@ -82,8 +75,8 @@ const MarketplaceListingDetails = () => {
           <span>Back to Marketplace</span>
         </Link>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="col-span-1 lg:col-span-2">
+        <div className="grid grid-cols-1 gap-8">
+          <div>
             <div className="mb-6">
               <Badge className="mb-2">{listing?.category}</Badge>
               <h1 className="text-2xl sm:text-3xl font-bold mb-2">{listing?.title}</h1>
@@ -126,20 +119,6 @@ const MarketplaceListingDetails = () => {
               location={listing.location}
               createdAt={listing.created_at}
               showMetadata={false}
-            />
-          </div>
-          
-          <div className="col-span-1">
-            <ListingPriceCard
-              id={listing.id}
-              title={listing.title}
-              price={listing.price}
-              sellerName={listing.seller_name}
-              sellerRating={listing.seller_rating}
-              sellerPhone={listing.seller_phone}
-              sellerWhatsapp={listing.seller_whatsapp}
-              sellerInstagram={listing.seller_instagram}
-              location={listing.location}
             />
           </div>
         </div>
