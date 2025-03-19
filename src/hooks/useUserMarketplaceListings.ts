@@ -32,7 +32,7 @@ export const useUserMarketplaceListings = () => {
         throw error;
       }
 
-      setListings(data as MarketplaceListing[]);
+      setListings(data || []);
     } catch (err: any) {
       console.error('Error fetching user marketplace listings:', err);
       setError('Failed to fetch your listings. Please try again later.');

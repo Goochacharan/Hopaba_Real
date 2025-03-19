@@ -35,6 +35,23 @@ export const isAuthenticated = async () => {
 export const getSellerName = async (sellerId?: string, fallbackName?: string) => {
   if (!sellerId) return fallbackName || "Anonymous Seller";
   
-  const { data: { user } } = await supabase.auth.admin.getUserById(sellerId);
-  return user?.user_metadata?.full_name || fallbackName || "Anonymous Seller";
+  try {
+    // We can't access admin functions from the client, so let's use a different approach
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('first_name, last_name')
+      .eq('id', sellerId)
+      .single();
+    
+    if (error || !data) return fallbackName || "Anonymous Seller";
+    
+    if (data.first_name && data.last_name) {
+      return `${data.first_name} ${data.last_name}`;
+    }
+    
+    return fallbackName || "Anonymous Seller";
+  } catch (err) {
+    console.error("Error fetching seller name:", err);
+    return fallbackName || "Anonymous Seller";
+  }
 };
