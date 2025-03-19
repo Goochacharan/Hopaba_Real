@@ -248,11 +248,15 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
         </div>
         
         <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1">
-            {renderStarRating(listing.seller_rating)}
-            <span className="text-xs text-muted-foreground ml-1">
-              (Seller)
-            </span>
+          <div>
+            <p className="font-medium">{listing.seller_name}</p>
+            <div className="flex items-center gap-1 text-sm text-amber-500">
+              {renderStarRating(listing.seller_rating)}
+              <span className="ml-1">({listing.seller_rating.toFixed(1)})</span>
+              <span className="text-xs text-muted-foreground ml-1">
+                Total number of reviews
+              </span>
+            </div>
           </div>
           <p className="text-lg font-bold text-[#1EAEDB]">{formatPrice(listing.price)}</p>
         </div>
@@ -265,10 +269,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ listing
         <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
           {listing.description}
         </p>
-        
-        <div className="flex flex-col mb-3">
-          <span className="text-sm font-medium">Seller: {listing.seller_name}</span>
-        </div>
 
         <div className="flex gap-2 mt-auto">
           <button 
