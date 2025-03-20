@@ -97,10 +97,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email,
         password,
         options: {
-          // Use queryParams for captcha_token since captchaToken isn't in the type definition
-          queryParams: {
-            captcha_token: token
-          }
+          captchaToken: token
         },
       });
       
@@ -142,10 +139,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         provider,
         options: {
           redirectTo: `${window.location.origin}/profile`,
-          // Use queryParams for captcha_token
-          queryParams: {
-            captcha_token: token
-          }
+          captchaToken: token
         },
       });
       
@@ -184,10 +178,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           data: {
             full_name: name,
           },
-          // Use queryParams for captcha_token
-          queryParams: {
-            captcha_token: token
-          }
+          captchaToken: token
         },
       });
       

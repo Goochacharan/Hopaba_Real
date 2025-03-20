@@ -85,10 +85,7 @@ export default function Login() {
         email: values.email,
         password: values.password,
         options: {
-          // Use queryParams for captcha_token
-          queryParams: {
-            captcha_token: token
-          }
+          captchaToken: token
         },
       });
 
@@ -123,10 +120,7 @@ export default function Login() {
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
-          // Use queryParams for captcha_token
-          queryParams: {
-            captcha_token: token
-          }
+          captchaToken: token
         },
       });
 
