@@ -17,7 +17,6 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
   sellerInstagram,
   onInstagramClick
 }) => {
-  // Remove the handleInstagramClick function and the video button from this component
   return (
     <div className="flex flex-col items-end">
       <div className="flex items-center gap-2 mb-2">

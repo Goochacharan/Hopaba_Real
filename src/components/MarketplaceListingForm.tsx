@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -23,6 +24,7 @@ const marketplaceListingSchema = z.object({
   category: z.string().min(1, { message: "Category is required" }),
   condition: z.string().min(1, { message: "Condition is required" }),
   location: z.string().min(1, { message: "Location is required" }),
+  seller_name: z.string().min(2, { message: "Seller name is required" }),
   seller_phone: z.string().optional(),
   seller_whatsapp: z.string().optional(),
   seller_instagram: z.string().optional(),
@@ -54,6 +56,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     category: listing?.category || '',
     condition: listing?.condition || '',
     location: listing?.location || '',
+    seller_name: listing?.seller_name || user?.user_metadata?.full_name || '',
     seller_phone: listing?.seller_phone || '',
     seller_whatsapp: listing?.seller_whatsapp || '',
     seller_instagram: listing?.seller_instagram || '',
@@ -94,7 +97,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         category: data.category,
         condition: data.condition,
         location: data.location,
-        seller_name: user.user_metadata?.full_name || "Anonymous Seller",
+        seller_name: data.seller_name || "Anonymous Seller",
         seller_id: user.id,
         seller_phone: data.seller_phone || null,
         seller_whatsapp: data.seller_whatsapp || null,
@@ -280,6 +283,23 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="seller_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Your Name*</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Your name (will be displayed with listing)" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      This name will be visible to potential buyers
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
