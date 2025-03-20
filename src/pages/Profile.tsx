@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -16,6 +15,7 @@ import {
   FormMessage 
 } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -183,24 +183,28 @@ const Profile = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-muted/50 p-1">
-            <TabsTrigger value="account" className="flex items-center gap-1.5">
-              <User className="h-4 w-4" />
-              Account
-            </TabsTrigger>
-            <TabsTrigger value="services" className="flex items-center gap-1.5">
-              <Store className="h-4 w-4" />
-              Business/Services
-            </TabsTrigger>
-            <TabsTrigger value="marketplace" className="flex items-center gap-1.5">
-              <ShoppingBag className="h-4 w-4" />
-              Marketplace
-            </TabsTrigger>
-            <TabsTrigger value="preferences" className="flex items-center gap-1.5">
-              <Settings className="h-4 w-4" />
-              Preferences
-            </TabsTrigger>
-          </TabsList>
+          <div className="relative">
+            <ScrollArea className="w-full" orientation="horizontal">
+              <TabsList className="bg-muted/50 p-1 w-full inline-flex whitespace-nowrap">
+                <TabsTrigger value="account" className="flex items-center gap-1.5">
+                  <User className="h-4 w-4" />
+                  Account
+                </TabsTrigger>
+                <TabsTrigger value="services" className="flex items-center gap-1.5">
+                  <Store className="h-4 w-4" />
+                  Business/Services
+                </TabsTrigger>
+                <TabsTrigger value="marketplace" className="flex items-center gap-1.5">
+                  <ShoppingBag className="h-4 w-4" />
+                  Marketplace
+                </TabsTrigger>
+                <TabsTrigger value="preferences" className="flex items-center gap-1.5">
+                  <Settings className="h-4 w-4" />
+                  Preferences
+                </TabsTrigger>
+              </TabsList>
+            </ScrollArea>
+          </div>
 
           <TabsContent value="account" className="space-y-6">
             <div className="bg-white rounded-xl shadow-sm border border-border p-6">
