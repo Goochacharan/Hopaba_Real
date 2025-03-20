@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Pencil, Trash2, DollarSign, Clock, MapPin, Phone, Instagram } from 'lucide-react';
+import { Pencil, Trash2, DollarSign, Clock, MapPin, Phone, Instagram, Film } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -105,6 +105,25 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
     setIsDeleteDialogOpen(true);
   };
 
+  const handleInstagramClick = (e: React.MouseEvent, instagram: string | undefined, businessName: string) => {
+    e.stopPropagation();
+    if (instagram) {
+      window.open(instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram.replace('@', '')}`);
+      toast({
+        title: "Opening video content",
+        description: `Visiting ${businessName}'s video content`,
+        duration: 2000
+      });
+    } else {
+      toast({
+        title: "Video content not available",
+        description: "The business has not provided any video links",
+        variant: "destructive",
+        duration: 2000
+      });
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-8">Loading your businesses...</div>;
   }
@@ -154,12 +173,24 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
                 <Phone className="h-4 w-4 text-muted-foreground" />
                 <span>{business.contact_phone}</span>
               </div>
-              {business.instagram && (
-                <div className="flex items-center gap-2">
-                  <Instagram className="h-4 w-4 text-muted-foreground" />
-                  <span>{business.instagram}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <Instagram className="h-4 w-4 text-muted-foreground" />
+                <span>{business.instagram || "Not provided"}</span>
+                {business.instagram && (
+                  <button 
+                    onClick={(e) => handleInstagramClick(e, business.instagram, business.name)} 
+                    title="Watch video content" 
+                    className="rounded-full border-2 border-transparent bg-white p-1 shadow-sm hover:shadow-md transition-all ml-2"
+                    style={{ 
+                      backgroundImage: 'linear-gradient(#fff, #fff), linear-gradient(to right, #fa7e1e, #d62976, #962fbf)',
+                      backgroundOrigin: 'border-box',
+                      backgroundClip: 'content-box, border-box' 
+                    }}
+                  >
+                    <Film className="h-5 w-5 text-[#962fbf]" />
+                  </button>
+                )}
+              </div>
             </CardContent>
             <CardFooter className="border-t bg-muted/10 gap-2 justify-end">
               <Button 
