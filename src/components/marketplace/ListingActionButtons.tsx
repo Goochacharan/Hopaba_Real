@@ -82,20 +82,32 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
   const handleInstagram = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerInstagram) {
-      // Just use the handle as provided, without adding https prefix
-      let instagramUrl = sellerInstagram;
+      // Extract username from Instagram URL or handle
+      let username = sellerInstagram;
       
-      // If it doesn't start with @ and doesn't contain instagram.com, prepend @
-      if (!instagramUrl.startsWith('@') && !instagramUrl.includes('instagram.com')) {
-        instagramUrl = '@' + instagramUrl;
+      // Remove https://instagram.com/ or https://www.instagram.com/ if present
+      if (username.includes('instagram.com/')) {
+        username = username.split('instagram.com/')[1];
+        // Remove trailing slashes if any
+        username = username.replace(/\/+$/, '');
       }
       
-      // Open directly on Instagram
-      window.open(`instagram://user?username=${instagramUrl.replace('@', '')}`);
+      // Remove @ if present
+      if (username.startsWith('@')) {
+        username = username.substring(1);
+      }
       
-      // Fallback to web version if the app URL doesn't work
+      // Handle query parameters if present (like ?igshid=...)
+      if (username.includes('?')) {
+        username = username.split('?')[0];
+      }
+      
+      // Open in Instagram app if on mobile
+      window.open(`instagram://user?username=${username}`);
+      
+      // Fallback to web version after a short delay
       setTimeout(() => {
-        window.open(`https://instagram.com/${instagramUrl.replace('@', '')}`);
+        window.open(`https://instagram.com/${username}`);
       }, 300);
     } else {
       toast({
