@@ -186,33 +186,6 @@ const LocationDetails = () => {
     }
   };
 
-  const handleInstagram = () => {
-    if (!location?.instagram) {
-      toast({
-        title: "No Instagram Profile",
-        description: `${location?.name} hasn't provided an Instagram profile`,
-        duration: 2000,
-      });
-      return;
-    }
-    
-    let instagramUrl = location.instagram;
-    if (!instagramUrl.startsWith('http')) {
-      if (instagramUrl.startsWith('@')) {
-        instagramUrl = instagramUrl.substring(1);
-      }
-      instagramUrl = `https://instagram.com/${instagramUrl}`;
-    }
-    
-    window.open(instagramUrl, '_blank');
-    
-    toast({
-      title: "Opening Instagram",
-      description: `Opening Instagram profile for ${location?.name}...`,
-      duration: 2000,
-    });
-  };
-
   const handleAskQuestion = (text?: string) => {
     const questionText = text || question;
     if (!questionText.trim()) return;
@@ -447,17 +420,6 @@ const LocationDetails = () => {
                     <Share2 className="h-5 w-5" />
                   </button>
                 </div>
-                
-                {location.instagram && (
-                  <div className="mt-4 flex justify-center">
-                    <button 
-                      onClick={handleInstagram}
-                      className="h-12 px-6 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 text-white hover:shadow-md transition-all flex items-center justify-center gap-2"
-                    >
-                      <span>View Instagram Profile</span>
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
             
