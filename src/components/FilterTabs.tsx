@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Star, Clock, IndianRupee, FilterIcon, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,12 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+
+// Default filter values
+const DEFAULT_DISTANCE = [5];
+const DEFAULT_RATING = [4];
+const DEFAULT_PRICE_RANGE = 2;
+const DEFAULT_OPEN_NOW = false;
 
 interface FilterTabsProps {
   distance: number[];
@@ -36,6 +41,15 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
   setOpenNowOnly
 }) => {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+  // Reset filters to default values
+  const resetFilters = () => {
+    setDistance(DEFAULT_DISTANCE);
+    setMinRating(DEFAULT_RATING);
+    setPriceRange(DEFAULT_PRICE_RANGE);
+    setOpenNowOnly(DEFAULT_OPEN_NOW);
+    setActiveFilter(null);
+  };
   
   return (
     <ScrollArea className="w-full">
@@ -215,11 +229,13 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
           </PopoverContent>
         </Popover>
 
-        {/* All Filters Button */}
+        {/* All Filters Button / Reset Button */}
         <Button 
           variant="outline" 
           size="sm" 
           className="rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10"
+          onClick={resetFilters}
+          title="Reset Filters"
         >
           <FilterIcon className="w-4 h-4" />
         </Button>

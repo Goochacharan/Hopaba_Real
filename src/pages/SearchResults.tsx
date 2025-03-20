@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import LocationCard from '@/components/LocationCard';
@@ -13,6 +14,12 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
+// Default filter values
+const DEFAULT_DISTANCE = [5];
+const DEFAULT_RATING = [4];
+const DEFAULT_PRICE_RANGE = 2;
+const DEFAULT_OPEN_NOW = false;
+
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -21,10 +28,11 @@ const SearchResults = () => {
   const categoryParam = searchParams.get('category') || 'all';
   const [activeTab, setActiveTab] = useState('locations');
   
-  const [distance, setDistance] = useState<number[]>([5]);
-  const [minRating, setMinRating] = useState<number[]>([4]);
-  const [priceRange, setPriceRange] = useState<number>(2);
-  const [openNowOnly, setOpenNowOnly] = useState<boolean>(false);
+  // Initialize with default values
+  const [distance, setDistance] = useState<number[]>(DEFAULT_DISTANCE);
+  const [minRating, setMinRating] = useState<number[]>(DEFAULT_RATING);
+  const [priceRange, setPriceRange] = useState<number>(DEFAULT_PRICE_RANGE);
+  const [openNowOnly, setOpenNowOnly] = useState<boolean>(DEFAULT_OPEN_NOW);
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
   
   const {
@@ -39,7 +47,7 @@ const SearchResults = () => {
     filterRecommendations
   } = useRecommendations({ 
     initialQuery: searchQuery,
-    initialCategory: categoryParam as any  // Pass the category from URL
+    initialCategory: categoryParam as any
   });
 
   const {
@@ -52,6 +60,14 @@ const SearchResults = () => {
 
   const loading = recommendationsLoading || marketplaceLoading;
   const error = recommendationsError || marketplaceError;
+
+  // Reset filters whenever the component mounts
+  useEffect(() => {
+    setDistance(DEFAULT_DISTANCE);
+    setMinRating(DEFAULT_RATING);
+    setPriceRange(DEFAULT_PRICE_RANGE);
+    setOpenNowOnly(DEFAULT_OPEN_NOW);
+  }, []);
 
   const filteredRecommendations = filterRecommendations(recommendations, {
     maxDistance: distance[0],
