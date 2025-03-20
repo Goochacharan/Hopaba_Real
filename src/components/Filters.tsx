@@ -1,15 +1,9 @@
-import React, { useEffect } from 'react';
+
+import React from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Star, IndianRupee, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-
-// Default filter values
-const DEFAULT_DISTANCE = [5];
-const DEFAULT_RATING = [4];
-const DEFAULT_PRICE_RANGE = 2;
-const DEFAULT_OPEN_NOW = false;
+import { Star, IndianRupee } from 'lucide-react';
 
 interface FiltersProps {
   distance: number[];
@@ -32,34 +26,8 @@ const Filters: React.FC<FiltersProps> = ({
   openNowOnly,
   setOpenNowOnly
 }) => {
-  // Reset filters on component mount (when the page is refreshed)
-  useEffect(() => {
-    resetFilters();
-  }, []);
-  
-  // Function to reset filters manually
-  const resetFilters = () => {
-    setDistance(DEFAULT_DISTANCE);
-    setMinRating(DEFAULT_RATING);
-    setPriceRange(DEFAULT_PRICE_RANGE);
-    setOpenNowOnly(DEFAULT_OPEN_NOW);
-  };
-
   return (
     <div className="bg-white rounded-xl border border-border p-4 mb-6 space-y-5">
-      <div className="flex justify-between items-center">
-        <h3 className="text-sm font-semibold">Filters</h3>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={resetFilters}
-          className="h-8 px-2 text-xs"
-        >
-          <RefreshCw className="h-3 w-3 mr-1" />
-          Reset
-        </Button>
-      </div>
-      
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <Label htmlFor="distance" className="text-sm font-medium">Distance</Label>
@@ -124,3 +92,4 @@ const Filters: React.FC<FiltersProps> = ({
 };
 
 export default Filters;
+

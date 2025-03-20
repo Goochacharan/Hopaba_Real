@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
   MapPin, Star, Clock, Phone, Heart, 
-  Navigation2, MessageCircle, Share2, LogIn 
+  Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film 
 } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
@@ -150,6 +150,35 @@ const LocationCard: React.FC<LocationCardProps> = ({
     });
   };
 
+  const handleInstagram = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!recommendation.instagram) {
+      toast({
+        title: "No Instagram",
+        description: `${recommendation.name} hasn't provided an Instagram profile`,
+        duration: 2000,
+      });
+      return;
+    }
+    
+    let instagramHandle = recommendation.instagram;
+    if (instagramHandle.startsWith('@')) {
+      instagramHandle = instagramHandle.substring(1);
+    }
+    
+    window.open(`instagram://user?username=${instagramHandle}`);
+    
+    setTimeout(() => {
+      window.open(`https://instagram.com/${instagramHandle}`);
+    }, 300);
+    
+    toast({
+      title: "Opening Instagram",
+      description: `Opening Instagram for ${recommendation.name}...`,
+      duration: 2000,
+    });
+  };
+
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     
@@ -203,56 +232,37 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    const shareUrl = window.location.origin + `/location/${recommendation.id}`;
-    const shareTitle = recommendation.name;
-    const shareText = `Check out ${recommendation.name}`;
-    
-    // Try to use the Web Share API first
     if (navigator.share) {
-      try {
-        navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: shareUrl,
-        })
-        .then(() => {
-          toast({
-            title: "Shared successfully",
-            description: `You've shared ${recommendation.name}`,
-            duration: 2000,
-          });
-        })
-        .catch((error) => {
-          console.error('Error sharing:', error);
-          // Fall back to clipboard if share API fails
-          fallbackToClipboard();
+      navigator.share({
+        title: recommendation.name,
+        text: `Check out ${recommendation.name}`,
+        url: window.location.origin + `/location/${recommendation.id}`,
+      })
+      .then(() => {
+        toast({
+          title: "Shared successfully",
+          description: `You've shared ${recommendation.name}`,
+          duration: 2000,
         });
-      } catch (error) {
-        console.error('Error in share API:', error);
-        fallbackToClipboard();
-      }
+      })
+      .catch((error) => {
+        console.error('Error sharing:', error);
+        toast({
+          title: "Sharing failed",
+          description: "Could not share this location",
+          variant: "destructive",
+          duration: 2000,
+        });
+      });
     } else {
-      fallbackToClipboard();
-    }
-    
-    function fallbackToClipboard() {
-      navigator.clipboard.writeText(shareUrl)
-        .then(() => {
-          toast({
-            title: "Link copied",
-            description: "The link has been copied to your clipboard",
-            duration: 2000,
-          });
-        })
-        .catch(error => {
-          console.error('Failed to copy:', error);
-          toast({
-            title: "Unable to share",
-            description: "Please try again later",
-            variant: "destructive",
-            duration: 2000,
-          });
+      const shareUrl = window.location.origin + `/location/${recommendation.id}`;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        toast({
+          title: "Link copied",
+          description: "The link has been copied to your clipboard",
+          duration: 2000,
         });
+      });
     }
   };
 
@@ -369,6 +379,15 @@ const LocationCard: React.FC<LocationCardProps> = ({
                 <span className="text-muted-foreground ml-1">
                   {recommendation.hours}
                 </span>
+              )}
+              {recommendation.instagram && (
+                <button 
+                  onClick={handleInstagram}
+                  title="Watch video content" 
+                  className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-3 px-4 py-2"
+                >
+                  <Film className="h-5 w-5 text-white" />
+                </button>
               )}
             </div>
             {recommendation.distance && (

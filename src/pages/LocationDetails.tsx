@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { MessageCircle, MapPin, Clock, IndianRupee, Languages, Award, Calendar, ArrowLeft, Star, Navigation2, Share2, Phone } from 'lucide-react';
+import { MessageCircle, MapPin, Clock, IndianRupee, Languages, Award, Calendar, ArrowLeft, Star, Navigation2, Share2, Phone, Instagram, Film } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -152,56 +152,37 @@ const LocationDetails = () => {
   };
 
   const handleShare = () => {
-    const shareUrl = window.location.origin + `/location/${location.id}`;
-    const shareTitle = location.name;
-    const shareText = `Check out ${location.name}`;
-    
-    // Try to use the Web Share API first
     if (navigator.share) {
-      try {
-        navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: shareUrl,
-        })
-        .then(() => {
-          toast({
-            title: "Shared successfully",
-            description: `You've shared ${location.name}`,
-            duration: 2000,
-          });
-        })
-        .catch((error) => {
-          console.error('Error sharing:', error);
-          // Fall back to clipboard if share API fails
-          fallbackToClipboard();
+      navigator.share({
+        title: location.name,
+        text: `Check out ${location.name}`,
+        url: window.location.origin + `/location/${location.id}`,
+      })
+      .then(() => {
+        toast({
+          title: "Shared successfully",
+          description: `You've shared ${location.name}`,
+          duration: 2000,
         });
-      } catch (error) {
-        console.error('Error in share API:', error);
-        fallbackToClipboard();
-      }
+      })
+      .catch((error) => {
+        console.error('Error sharing:', error);
+        toast({
+          title: "Sharing failed",
+          description: "Could not share this location",
+          variant: "destructive",
+          duration: 2000,
+        });
+      });
     } else {
-      fallbackToClipboard();
-    }
-    
-    function fallbackToClipboard() {
-      navigator.clipboard.writeText(shareUrl)
-        .then(() => {
-          toast({
-            title: "Link copied",
-            description: "The link has been copied to your clipboard",
-            duration: 2000,
-          });
-        })
-        .catch(error => {
-          console.error('Failed to copy:', error);
-          toast({
-            title: "Unable to share",
-            description: "Please try again later",
-            variant: "destructive",
-            duration: 2000,
-          });
+      const shareUrl = window.location.origin + `/location/${location.id}`;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        toast({
+          title: "Link copied",
+          description: "The link has been copied to your clipboard",
+          duration: 2000,
         });
+      });
     }
   };
 
@@ -466,6 +447,18 @@ const LocationDetails = () => {
                     <Share2 className="h-5 w-5" />
                   </button>
                 </div>
+                
+                {location.instagram && (
+                  <div className="mt-4 flex justify-center">
+                    <button 
+                      onClick={handleInstagram}
+                      className="h-12 px-6 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 text-white hover:shadow-md transition-all flex items-center justify-center gap-2"
+                    >
+                      <Film className="h-5 w-5" />
+                      <span>Watch Video Content</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
             
@@ -659,3 +652,4 @@ const LocationDetails = () => {
 };
 
 export default LocationDetails;
+

@@ -33,57 +33,25 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    const shareUrl = window.location.origin + `/marketplace/${listingId}`;
-    const shareTitle = title;
-    const shareText = `Check out this ${title} for ${formatPrice(price)}`;
-    
-    // Try to use the Web Share API first
-    if (navigator.share) {
-      try {
-        navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: shareUrl,
-        })
-        .then(() => {
-          toast({
-            title: "Shared successfully",
-            description: `You've shared ${title}`,
-            duration: 2000,
-          });
-        })
-        .catch((error) => {
-          console.error('Error sharing:', error);
-          // Fall back to clipboard if share API fails
-          fallbackToClipboard();
+    // Skip navigator.share which causes errors in iframe environments
+    // Go directly to clipboard approach
+    navigator.clipboard.writeText(window.location.origin + `/marketplace/${listingId}`)
+      .then(() => {
+        toast({
+          title: "Link copied to clipboard",
+          description: "You can now share this listing with others",
+          duration: 3000,
         });
-      } catch (error) {
-        console.error('Error in share API:', error);
-        fallbackToClipboard();
-      }
-    } else {
-      fallbackToClipboard();
-    }
-    
-    function fallbackToClipboard() {
-      navigator.clipboard.writeText(shareUrl)
-        .then(() => {
-          toast({
-            title: "Link copied to clipboard",
-            description: "You can now share this listing with others",
-            duration: 3000,
-          });
-        })
-        .catch(error => {
-          console.error('Failed to copy:', error);
-          toast({
-            title: "Unable to share",
-            description: "Please try again later",
-            variant: "destructive",
-            duration: 3000,
-          });
+      })
+      .catch(error => {
+        console.error('Failed to copy:', error);
+        toast({
+          title: "Unable to copy link",
+          description: "Please try again later",
+          variant: "destructive",
+          duration: 3000,
         });
-    }
+      });
   };
 
   const handleCall = (e: React.MouseEvent) => {

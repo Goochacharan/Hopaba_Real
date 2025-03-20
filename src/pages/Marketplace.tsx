@@ -38,13 +38,6 @@ import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 
 type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
 
-// Default filter values
-const DEFAULT_PRICE_RANGE: [number, number] = [0, 500000];
-const DEFAULT_YEAR_RANGE: [number, number] = [2010, new Date().getFullYear()];
-const DEFAULT_RATING_FILTER = 0;
-const DEFAULT_CONDITION_FILTER = 'all';
-const DEFAULT_SORT_OPTION: SortOption = 'newest';
-
 const Marketplace = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
@@ -52,12 +45,12 @@ const Marketplace = () => {
   
   const [currentCategory, setCurrentCategory] = useState<string>(categoryParam);
   const [currentPage, setCurrentPage] = useState(1);
-  const [priceRange, setPriceRange] = useState<[number, number]>(DEFAULT_PRICE_RANGE);
-  const [yearRange, setYearRange] = useState<[number, number]>(DEFAULT_YEAR_RANGE);
-  const [ratingFilter, setRatingFilter] = useState<number>(DEFAULT_RATING_FILTER);
-  const [conditionFilter, setConditionFilter] = useState<string>(DEFAULT_CONDITION_FILTER);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500000]);
+  const [yearRange, setYearRange] = useState<[number, number]>([2010, new Date().getFullYear()]);
+  const [ratingFilter, setRatingFilter] = useState<number>(0);
+  const [conditionFilter, setConditionFilter] = useState<string>('all');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
-  const [sortOption, setSortOption] = useState<SortOption>(DEFAULT_SORT_OPTION);
+  const [sortOption, setSortOption] = useState<SortOption>('newest');
   
   const itemsPerPage = 9;
   
@@ -69,16 +62,6 @@ const Marketplace = () => {
     maxPrice: priceRange[1] < 500000 ? priceRange[1] : undefined,
     minRating: ratingFilter > 0 ? ratingFilter : undefined
   });
-
-  // Reset filters when the component mounts
-  useEffect(() => {
-    setPriceRange(DEFAULT_PRICE_RANGE);
-    setYearRange(DEFAULT_YEAR_RANGE);
-    setRatingFilter(DEFAULT_RATING_FILTER);
-    setConditionFilter(DEFAULT_CONDITION_FILTER);
-    setSortOption(DEFAULT_SORT_OPTION);
-    setActiveFilter(null);
-  }, []);
   
   useEffect(() => {
     setCurrentPage(1);
