@@ -430,15 +430,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </button>
           <button 
             onClick={handleInstagram}
-            className="flex-1 h-10 rounded-full border border-transparent bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
-            style={{ 
-              backgroundImage: recommendation.instagram ? 'linear-gradient(#fff, #fff), linear-gradient(to right, #fa7e1e, #d62976, #962fbf)' : '',
-              backgroundOrigin: 'border-box',
-              backgroundClip: recommendation.instagram ? 'content-box, border-box' : '',
-              border: recommendation.instagram ? '2px solid transparent' : '1px solid #d1fae5'
-            }}
+            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
           >
-            <Instagram className={`h-5 w-5 ${recommendation.instagram ? 'text-[#962fbf]' : ''}`} />
+            <Instagram className="h-5 w-5" />
           </button>
           <button 
             onClick={handleShare}
