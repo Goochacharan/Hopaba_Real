@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { MessageCircle, MapPin, Clock, IndianRupee, Languages, Award, Calendar, ArrowLeft, Star, Navigation2, Share2, Phone, Instagram, Film } from 'lucide-react';
+import { MessageCircle, MapPin, Clock, IndianRupee, Languages, Award, Calendar, ArrowLeft, Star, Navigation2, Share2, Phone } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -454,8 +454,7 @@ const LocationDetails = () => {
                       onClick={handleInstagram}
                       className="h-12 px-6 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 text-white hover:shadow-md transition-all flex items-center justify-center gap-2"
                     >
-                      <Film className="h-5 w-5" />
-                      <span>Watch Video Content</span>
+                      <span>View Instagram Profile</span>
                     </button>
                   </div>
                 )}
@@ -652,4 +651,3 @@ const LocationDetails = () => {
 };
 
 export default LocationDetails;
-
