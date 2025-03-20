@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Phone, MessageSquare, MapPin, Film, Share2 } from 'lucide-react';
+import { Phone, MessageSquare, MapPin, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -146,7 +146,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
         </button>
       </div>
       
-      <div className="grid grid-cols-3 gap-2 mt-3">
+      <div className="grid grid-cols-2 gap-2 mt-3">
         <button 
           onClick={handleLocation}
           className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
@@ -155,16 +155,6 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
         >
           <MapPin className="h-5 w-5" />
         </button>
-        {sellerInstagram && (
-          <button 
-            onClick={handleInstagram}
-            className="h-12 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 text-white hover:opacity-90 transition-colors flex items-center justify-center"
-            title="Video content"
-            aria-label="Watch video content"
-          >
-            <Film className="h-5 w-5" />
-          </button>
-        )}
         <button 
           onClick={handleShare}
           className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
