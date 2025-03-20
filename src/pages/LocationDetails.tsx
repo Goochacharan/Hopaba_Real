@@ -443,8 +443,16 @@ const LocationDetails = () => {
                   <button 
                     onClick={handleInstagram} 
                     className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+                    style={location?.instagram ? {
+                      background: 'white',
+                      backgroundImage: 'linear-gradient(#fff, #fff), linear-gradient(to right, #fa7e1e, #d62976, #962fbf)',
+                      backgroundOrigin: 'border-box',
+                      backgroundClip: 'content-box, border-box',
+                      borderColor: 'transparent',
+                      borderWidth: '2px'
+                    } : {}}
                   >
-                    <Instagram className="h-5 w-5" />
+                    <Instagram className={`h-5 w-5 ${location?.instagram ? 'text-[#962fbf]' : ''}`} />
                   </button>
                   <button 
                     onClick={handleShare} 
