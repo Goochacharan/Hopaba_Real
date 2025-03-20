@@ -89,7 +89,10 @@ export default function Signup() {
         email: values.email,
         password: values.password,
         options: {
-          captchaToken: token
+          // Use queryParams for captcha_token
+          queryParams: {
+            captcha_token: token
+          }
         },
       });
 
@@ -124,7 +127,10 @@ export default function Signup() {
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
-          captchaToken: token
+          // Use queryParams for captcha_token
+          queryParams: {
+            captcha_token: token
+          }
         },
       });
 
@@ -267,7 +273,7 @@ export default function Signup() {
               
               <div className="text-xs text-center mt-2">
                 <div className="text-muted-foreground">
-                  This site is protected by reCAPTCHA v3
+                  This site is protected by reCAPTCHA
                 </div>
                 <div className="text-muted-foreground mt-1">
                   <a 
