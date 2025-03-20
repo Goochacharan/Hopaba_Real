@@ -79,7 +79,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
     }
   };
 
-  const handleVideoContent = (e: React.MouseEvent) => {
+  const handleInstagram = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerInstagram) {
       window.open(sellerInstagram);
@@ -157,7 +157,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
         </button>
         {sellerInstagram && (
           <button 
-            onClick={handleVideoContent}
+            onClick={handleInstagram}
             className="h-12 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 text-white hover:opacity-90 transition-colors flex items-center justify-center"
             title="Video content"
             aria-label="Watch video content"
