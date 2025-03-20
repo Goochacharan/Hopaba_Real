@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { MessageCircle, MapPin, Clock, IndianRupee, Languages, Award, Calendar, ArrowLeft, Star, Navigation2, Share2, Phone, Instagram } from 'lucide-react';
+import { MessageCircle, MapPin, Clock, IndianRupee, Languages, Award, Calendar, ArrowLeft, Star, Navigation2, Share2, Phone, Instagram, Film } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -421,7 +421,7 @@ const LocationDetails = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-5 gap-3">
+                <div className="grid grid-cols-4 gap-3">
                   <button 
                     onClick={handleCall} 
                     className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
@@ -441,18 +441,24 @@ const LocationDetails = () => {
                     <Navigation2 className="h-5 w-5" />
                   </button>
                   <button 
-                    onClick={handleInstagram} 
-                    className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
-                  >
-                    <Instagram className="h-5 w-5" />
-                  </button>
-                  <button 
                     onClick={handleShare} 
                     className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
                   >
                     <Share2 className="h-5 w-5" />
                   </button>
                 </div>
+                
+                {location.instagram && (
+                  <div className="mt-4 flex justify-center">
+                    <button 
+                      onClick={handleInstagram}
+                      className="h-12 px-6 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 text-white hover:shadow-md transition-all flex items-center justify-center gap-2"
+                    >
+                      <Film className="h-5 w-5" />
+                      <span>Watch Video Content</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
             
@@ -646,3 +652,4 @@ const LocationDetails = () => {
 };
 
 export default LocationDetails;
+

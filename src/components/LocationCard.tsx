@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
   MapPin, Star, Clock, Phone, Heart, 
-  Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Instagram, Film 
+  Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film 
 } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
@@ -436,12 +436,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
             className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
           >
             <Navigation2 className="h-5 w-5" />
-          </button>
-          <button 
-            onClick={handleInstagram}
-            className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
-          >
-            <Instagram className="h-5 w-5" />
           </button>
           <button 
             onClick={handleShare}
