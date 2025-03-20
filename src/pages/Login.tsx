@@ -13,6 +13,8 @@ import { useForm } from 'react-hook-form';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Facebook, Mail } from 'lucide-react';
+import { Auth } from '@supabase/auth-ui-react';
+import { ThemeSupa } from '@supabase/auth-ui-shared';
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -26,6 +28,22 @@ export default function Login() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  
+  // Set up invisible reCAPTCHA
+  useEffect(() => {
+    const loadRecaptcha = async () => {
+      if (typeof window !== 'undefined' && !window.grecaptcha) {
+        const script = document.createElement('script');
+        script.src = 'https://www.google.com/recaptcha/api.js?render=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+      }
+    };
+    
+    loadRecaptcha();
+  }, []);
   
   useEffect(() => {
     const checkUser = async () => {
@@ -46,12 +64,36 @@ export default function Login() {
     },
   });
 
+  const executeRecaptcha = (): Promise<string> => {
+    return new Promise((resolve) => {
+      if (window.grecaptcha) {
+        window.grecaptcha.ready(() => {
+          window.grecaptcha
+            .execute('6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', { action: 'login' })
+            .then((token: string) => {
+              resolve(token);
+            });
+        });
+      } else {
+        // If recaptcha isn't loaded yet, resolve with empty string
+        // Supabase will handle this case
+        resolve('');
+      }
+    });
+  };
+
   const onSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
     try {
+      // Get reCAPTCHA token
+      const token = await executeRecaptcha();
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
+        options: {
+          captchaToken: token,
+        },
       });
 
       if (error) {
@@ -70,6 +112,7 @@ export default function Login() {
         description: error.message || "Something went wrong",
         variant: "destructive",
       });
+      console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -78,10 +121,14 @@ export default function Login() {
   const handleSocialLogin = async (provider: 'google' | 'facebook') => {
     setSocialLoading(provider);
     try {
+      // Get reCAPTCHA token
+      const token = await executeRecaptcha();
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
+          captchaToken: token,
         },
       });
 
@@ -94,6 +141,7 @@ export default function Login() {
         description: error.message || "Something went wrong with social login",
         variant: "destructive",
       });
+      console.error("Social login error:", error);
       setSocialLoading(null);
     }
   };
@@ -200,6 +248,11 @@ export default function Login() {
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Log in with Email"}
               </Button>
+              
+              {/* Invisible reCAPTCHA badge - required by Google's TOS */}
+              <div className="text-xs text-center text-muted-foreground mt-2">
+                This site is protected by reCAPTCHA
+              </div>
             </form>
           </Form>
 

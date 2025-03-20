@@ -30,6 +30,21 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   
+  // Set up invisible reCAPTCHA
+  useEffect(() => {
+    const loadRecaptcha = async () => {
+      if (typeof window !== 'undefined' && !window.grecaptcha) {
+        const script = document.createElement('script');
+        script.src = 'https://www.google.com/recaptcha/api.js?render=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+      }
+    };
+    
+    loadRecaptcha();
+  }, []);
+  
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getSession();
@@ -50,12 +65,36 @@ export default function Signup() {
     },
   });
 
+  const executeRecaptcha = (): Promise<string> => {
+    return new Promise((resolve) => {
+      if (window.grecaptcha) {
+        window.grecaptcha.ready(() => {
+          window.grecaptcha
+            .execute('6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', { action: 'signup' })
+            .then((token: string) => {
+              resolve(token);
+            });
+        });
+      } else {
+        // If recaptcha isn't loaded yet, resolve with empty string
+        // Supabase will handle this case
+        resolve('');
+      }
+    });
+  };
+
   const onSubmit = async (values: SignupFormValues) => {
     setIsLoading(true);
     try {
+      // Get reCAPTCHA token
+      const token = await executeRecaptcha();
+      
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
+        options: {
+          captchaToken: token,
+        },
       });
 
       if (error) {
@@ -74,6 +113,7 @@ export default function Signup() {
         description: error.message || "Something went wrong",
         variant: "destructive",
       });
+      console.error("Signup error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -82,10 +122,14 @@ export default function Signup() {
   const handleSocialSignup = async (provider: 'google' | 'facebook') => {
     setSocialLoading(provider);
     try {
+      // Get reCAPTCHA token
+      const token = await executeRecaptcha();
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
+          captchaToken: token,
         },
       });
 
@@ -98,6 +142,7 @@ export default function Signup() {
         description: error.message || "Something went wrong with social sign up",
         variant: "destructive",
       });
+      console.error("Social signup error:", error);
       setSocialLoading(null);
     }
   };
