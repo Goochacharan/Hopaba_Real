@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -168,8 +169,8 @@ const Profile = () => {
 
   return (
     <MainLayout>
-      <section className="py-8">
-        <div className="mb-6 flex justify-between items-center">
+      <section className="py-8 max-w-6xl mx-auto px-4">
+        <div className="mb-6 flex flex-wrap justify-between items-center gap-4">
           <div>
             <h1 className="text-3xl font-medium mb-2">My Profile</h1>
             <p className="text-muted-foreground">
@@ -186,19 +187,19 @@ const Profile = () => {
           <div className="relative">
             <ScrollArea className="w-full" orientation="horizontal">
               <TabsList className="bg-muted/50 p-1 w-full inline-flex whitespace-nowrap">
-                <TabsTrigger value="account" className="flex items-center gap-1.5">
+                <TabsTrigger value="account" className="flex items-center gap-1.5 px-4 py-2">
                   <User className="h-4 w-4" />
                   Account
                 </TabsTrigger>
-                <TabsTrigger value="services" className="flex items-center gap-1.5">
+                <TabsTrigger value="services" className="flex items-center gap-1.5 px-4 py-2">
                   <Store className="h-4 w-4" />
                   Business/Services
                 </TabsTrigger>
-                <TabsTrigger value="marketplace" className="flex items-center gap-1.5">
+                <TabsTrigger value="marketplace" className="flex items-center gap-1.5 px-4 py-2">
                   <ShoppingBag className="h-4 w-4" />
                   Marketplace
                 </TabsTrigger>
-                <TabsTrigger value="preferences" className="flex items-center gap-1.5">
+                <TabsTrigger value="preferences" className="flex items-center gap-1.5 px-4 py-2">
                   <Settings className="h-4 w-4" />
                   Preferences
                 </TabsTrigger>
@@ -207,7 +208,7 @@ const Profile = () => {
           </div>
 
           <TabsContent value="account" className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-border p-6 w-full">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                   <UserCog className="h-5 w-5 mr-2" />
@@ -216,34 +217,36 @@ const Profile = () => {
               </div>
               
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-2xl">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Your name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Your email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   
                   <FormField
                     control={form.control}
@@ -262,7 +265,7 @@ const Profile = () => {
                     )}
                   />
                   
-                  <Separator />
+                  <Separator className="my-6" />
                   
                   <div>
                     <h3 className="text-lg font-medium mb-4">Password</h3>
@@ -286,45 +289,47 @@ const Profile = () => {
                         )}
                       />
                       
-                      <FormField
-                        control={form.control}
-                        name="newPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>New Password</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="password" 
-                                placeholder="New password" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="confirmPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Confirm Password</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="password" 
-                                placeholder="Confirm new password" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="newPassword"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>New Password</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="password" 
+                                  placeholder="New password" 
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="confirmPassword"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Confirm Password</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="password" 
+                                  placeholder="Confirm new password" 
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     </div>
                   </div>
                   
-                  <Button type="submit">
+                  <Button type="submit" className="mt-4">
                     <Save className="mr-2 h-4 w-4" />
                     Save Changes
                   </Button>
@@ -334,7 +339,7 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="services" className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-border p-6 w-full">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                   <Store className="h-5 w-5 mr-2" />
@@ -395,13 +400,13 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="marketplace" className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-border p-6 w-full">
               <UserMarketplaceListings />
             </div>
           </TabsContent>
 
           <TabsContent value="preferences" className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-border p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-border p-6 w-full">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">
                   <Settings className="h-5 w-5 mr-2" />
@@ -409,8 +414,8 @@ const Profile = () => {
                 </div>
               </div>
               
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
+              <div className="max-w-2xl space-y-6">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="space-y-0.5">
                     <div className="flex items-center">
                       <Moon className="h-4 w-4 mr-2" />
@@ -426,59 +431,65 @@ const Profile = () => {
                 
                 <Separator />
                 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <h3 className="font-medium">Email Notifications</h3>
-                    <p className="text-sm text-muted-foreground">Receive email updates about your activity</p>
+                <div className="space-y-4">
+                  <h3 className="font-medium text-lg">Notifications</h3>
+                  
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="space-y-0.5">
+                      <h3 className="font-medium">Email Notifications</h3>
+                      <p className="text-sm text-muted-foreground">Receive email updates about your activity</p>
+                    </div>
+                    <Switch 
+                      checked={emailNotifications}
+                      onCheckedChange={setEmailNotifications}
+                    />
                   </div>
-                  <Switch 
-                    checked={emailNotifications}
-                    onCheckedChange={setEmailNotifications}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <h3 className="font-medium">Push Notifications</h3>
-                    <p className="text-sm text-muted-foreground">Receive push notifications on your device</p>
+                  
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="space-y-0.5">
+                      <h3 className="font-medium">Push Notifications</h3>
+                      <p className="text-sm text-muted-foreground">Receive push notifications on your device</p>
+                    </div>
+                    <Switch 
+                      checked={pushNotifications}
+                      onCheckedChange={setPushNotifications}
+                    />
                   </div>
-                  <Switch 
-                    checked={pushNotifications}
-                    onCheckedChange={setPushNotifications}
-                  />
                 </div>
                 
                 <Separator />
                 
                 <div className="space-y-4">
-                  <h3 className="font-medium">Privacy Settings</h3>
+                  <h3 className="font-medium text-lg">Privacy Settings</h3>
                   
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="location-services" 
-                      checked={locationServices}
-                      onCheckedChange={(checked) => setLocationServices(checked as boolean)}
-                    />
-                    <label
-                      htmlFor="location-services"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Enable location services
-                    </label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="data-sharing" 
-                      checked={dataSharing}
-                      onCheckedChange={(checked) => setDataSharing(checked as boolean)}
-                    />
-                    <label
-                      htmlFor="data-sharing"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Share usage data to improve service
-                    </label>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+                      <Checkbox 
+                        id="location-services" 
+                        checked={locationServices}
+                        onCheckedChange={(checked) => setLocationServices(checked as boolean)}
+                      />
+                      <label
+                        htmlFor="location-services"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Enable location services
+                      </label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+                      <Checkbox 
+                        id="data-sharing" 
+                        checked={dataSharing}
+                        onCheckedChange={(checked) => setDataSharing(checked as boolean)}
+                      />
+                      <label
+                        htmlFor="data-sharing"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Share usage data to improve service
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
