@@ -53,7 +53,7 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
       <div className="flex items-center gap-1">
         <Calendar className="h-4 w-4" />
         <span>Listed on {format(new Date(createdAt), 'PPP')}</span>
-        {sellerInstagram && <button onClick={handleInstagramClick} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 p-1.5 rounded-md hover:shadow-md transition-all ml-2 font-thin text-justify px-[19px] py-[17px] my-[8px] mx-[13px]">
+        {sellerInstagram && <button onClick={handleInstagramClick} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 p-1.5 rounded-md hover:shadow-md transition-all ml-2 font-thin text-justify mx-[13px] py-[5px] my-0 px-[31px]">
             <Film className="h-7 w-7 text-white" />
           </button>}
       </div>
