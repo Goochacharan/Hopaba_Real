@@ -4,7 +4,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { ChevronLeft, MessageCircle, AlertCircle } from 'lucide-react';
@@ -40,11 +39,11 @@ const SellerDetails = () => {
 
   return (
     <MainLayout>
-      <div className="container max-w-5xl py-6">
+      <div className="container max-w-6xl py-8">
         <Button 
           variant="ghost" 
           size="sm" 
-          className="mb-6"
+          className="mb-8"
           onClick={() => navigate(-1)}
         >
           <ChevronLeft className="h-4 w-4 mr-2" />
@@ -66,8 +65,8 @@ const SellerDetails = () => {
           </Card>
         ) : sellerDetails ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="md:col-span-2">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-10">
+              <div className="lg:col-span-3">
                 <SellerProfileCard 
                   sellerName={sellerDetails.name}
                   sellerRating={sellerDetails.rating}
@@ -76,14 +75,14 @@ const SellerDetails = () => {
                 />
               </div>
               <div className="flex flex-col gap-4">
-                <Card className="p-4 shadow-md">
-                  <h3 className="font-medium mb-2">Contact Seller</h3>
-                  <Button className="w-full mb-2" size="sm">
-                    <MessageCircle className="h-4 w-4 mr-2" />
+                <Card className="p-6 shadow-md">
+                  <h3 className="font-medium text-lg mb-4">Contact Seller</h3>
+                  <Button className="w-full mb-3" size="lg">
+                    <MessageCircle className="h-5 w-5 mr-2" />
                     Message
                   </Button>
-                  <Button variant="outline" className="w-full" size="sm" onClick={handleReport}>
-                    <AlertCircle className="h-4 w-4 mr-2" />
+                  <Button variant="outline" className="w-full" size="lg" onClick={handleReport}>
+                    <AlertCircle className="h-5 w-5 mr-2" />
                     Report Seller
                   </Button>
                 </Card>
@@ -91,16 +90,16 @@ const SellerDetails = () => {
             </div>
 
             <Tabs defaultValue="listings" className="w-full">
-              <TabsList className="mb-6">
-                <TabsTrigger value="listings">Listings ({sellerDetails.listings.length})</TabsTrigger>
-                <TabsTrigger value="reviews">Reviews ({sellerDetails.reviews.length})</TabsTrigger>
+              <TabsList className="mb-8 w-full justify-start border-b">
+                <TabsTrigger value="listings" className="text-base px-6 py-3">Listings ({sellerDetails.listings.length})</TabsTrigger>
+                <TabsTrigger value="reviews" className="text-base px-6 py-3">Reviews ({sellerDetails.reviews.length})</TabsTrigger>
               </TabsList>
               
               <TabsContent value="listings">
                 {sellerDetails.listings.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 gap-8">
                     {sellerDetails.listings.map((listing) => (
-                      <MarketplaceListingCard key={listing.id} listing={listing} />
+                      <MarketplaceListingCard key={listing.id} listing={listing} className="w-full" />
                     ))}
                   </div>
                 ) : (

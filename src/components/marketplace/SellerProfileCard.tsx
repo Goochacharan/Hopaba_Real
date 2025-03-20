@@ -34,26 +34,26 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
   };
 
   return (
-    <Card className="shadow-md">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-semibold">Seller Profile</CardTitle>
+    <Card className="shadow-md w-full">
+      <CardHeader className="pb-4 px-8">
+        <CardTitle className="text-2xl font-semibold">Seller Profile</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="flex items-center space-x-4">
-          <Avatar className="h-16 w-16">
-            <AvatarFallback className="bg-primary/10 text-primary text-lg">
+      <CardContent className="px-8 pb-8">
+        <div className="flex items-center space-x-6">
+          <Avatar className="h-24 w-24">
+            <AvatarFallback className="bg-primary/10 text-primary text-2xl">
               {getInitials(sellerName)}
             </AvatarFallback>
           </Avatar>
           
-          <div className="space-y-1">
-            <h3 className="text-xl font-medium">{sellerName}</h3>
+          <div className="space-y-3">
+            <h3 className="text-2xl font-medium">{sellerName}</h3>
             <div className="flex items-center">
-              <StarRating rating={sellerRating} className="mr-2" />
-              <span className="text-sm text-muted-foreground">({reviewCount} reviews)</span>
+              <StarRating rating={sellerRating} className="mr-3" showCount={false} />
+              <span className="text-base text-muted-foreground">({reviewCount} reviews)</span>
             </div>
-            <p className="text-sm text-muted-foreground flex items-center gap-1">
-              <UserCircle className="h-4 w-4" />
+            <p className="text-base text-muted-foreground flex items-center gap-2">
+              <UserCircle className="h-5 w-5" />
               Member since {formattedJoinedDate}
             </p>
           </div>
