@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Film } from 'lucide-react';
 import StarRating from './StarRating';
 
 interface SellerInfoProps {
@@ -18,27 +17,12 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
   sellerInstagram,
   onInstagramClick
 }) => {
-  const handleInstagramClick = (e: React.MouseEvent) => {
-    if (onInstagramClick) {
-      e.stopPropagation();
-      onInstagramClick(e);
-    }
-  };
-
+  // Remove the handleInstagramClick function and the video button from this component
   return (
     <div className="flex flex-col items-end">
       <div className="flex items-center gap-2 mb-2">
         <span className="text-muted-foreground text-sm">Seller</span>
         <span className="font-medium text-base">{sellerName}</span>
-        {sellerInstagram && (
-          <button
-            onClick={handleInstagramClick}
-            className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 text-white p-1 rounded-md hover:shadow-md transition-all"
-            title="Watch video content"
-          >
-            <Film className="h-4 w-4" />
-          </button>
-        )}
       </div>
       <div className="flex items-center gap-2">
         <StarRating rating={sellerRating} showCount={true} count={reviewCount} />
