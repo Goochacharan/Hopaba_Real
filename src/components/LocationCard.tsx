@@ -161,15 +161,17 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return;
     }
     
-    let instagramUrl = recommendation.instagram;
-    if (!instagramUrl.startsWith('http')) {
-      if (instagramUrl.startsWith('@')) {
-        instagramUrl = instagramUrl.substring(1);
-      }
-      instagramUrl = `https://instagram.com/${instagramUrl}`;
+    let instagramHandle = recommendation.instagram;
+    if (instagramHandle.startsWith('@')) {
+      instagramHandle = instagramHandle.substring(1);
     }
     
-    window.open(instagramUrl, '_blank');
+    window.open(`instagram://user?username=${instagramHandle}`);
+    
+    setTimeout(() => {
+      window.open(`https://instagram.com/${instagramHandle}`);
+    }, 300);
+    
     toast({
       title: "Opening Instagram",
       description: `Opening Instagram for ${recommendation.name}...`,

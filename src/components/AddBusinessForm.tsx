@@ -15,6 +15,7 @@ import BasicInfoSection from './business-form/BasicInfoSection';
 import LocationSection from './business-form/LocationSection';
 import ContactSection from './business-form/ContactSection';
 import SuccessDialog from './business-form/SuccessDialog';
+import { ImageUpload } from './ui/image-upload';
 
 const businessFormSchema = z.object({
   name: z.string().min(2, {
@@ -61,6 +62,9 @@ const businessFormSchema = z.object({
   whatsapp: z.string().optional(),
   tags: z.array(z.string()).optional(),
   languages: z.array(z.string()).optional(),
+  images: z.array(z.string()).min(1, {
+    message: "Please upload at least one image.",
+  }),
 });
 
 export type BusinessFormValues = z.infer<typeof businessFormSchema>;
@@ -74,6 +78,7 @@ const defaultValues: Partial<BusinessFormValues> = {
   instagram: "",
   tags: [],
   languages: [],
+  images: [],
 };
 
 interface AddBusinessFormProps {
@@ -109,6 +114,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
       languages: businessData?.languages || [],
       instagram: businessData?.instagram || '',
       whatsapp: businessData?.whatsapp || '',
+      images: businessData?.images || [],
     },
     mode: "onChange",
   });
@@ -147,6 +153,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
             contact_email: data.contact_email,
             website: data.website,
             instagram: data.instagram,
+            images: data.images,
             updated_at: new Date().toISOString(),
           })
           .eq('id', businessData.id)
@@ -187,6 +194,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
             contact_email: data.contact_email,
             website: data.website,
             instagram: data.instagram,
+            images: data.images,
           });
 
         if (error) {
@@ -222,6 +230,22 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
             <BasicInfoSection />
             <LocationSection />
             <ContactSection />
+            
+            <div className="space-y-4 col-span-1 md:col-span-2">
+              <h3 className="text-lg font-medium">Images</h3>
+              <div className="bg-white p-4 rounded-md shadow-sm border">
+                <ImageUpload 
+                  images={form.watch('images')}
+                  onImagesChange={(images) => form.setValue('images', images, { shouldValidate: true })}
+                  maxImages={5}
+                />
+                {form.formState.errors.images && (
+                  <p className="text-sm font-medium text-destructive mt-2">
+                    {form.formState.errors.images.message}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
 
           <Button 

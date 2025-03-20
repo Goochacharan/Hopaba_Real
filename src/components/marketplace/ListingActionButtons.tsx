@@ -82,7 +82,21 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
   const handleInstagram = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerInstagram) {
-      window.open(`https://instagram.com/${sellerInstagram}`);
+      // Just use the handle as provided, without adding https prefix
+      let instagramUrl = sellerInstagram;
+      
+      // If it doesn't start with @ and doesn't contain instagram.com, prepend @
+      if (!instagramUrl.startsWith('@') && !instagramUrl.includes('instagram.com')) {
+        instagramUrl = '@' + instagramUrl;
+      }
+      
+      // Open directly on Instagram
+      window.open(`instagram://user?username=${instagramUrl.replace('@', '')}`);
+      
+      // Fallback to web version if the app URL doesn't work
+      setTimeout(() => {
+        window.open(`https://instagram.com/${instagramUrl.replace('@', '')}`);
+      }, 300);
     } else {
       toast({
         title: "Instagram not available",

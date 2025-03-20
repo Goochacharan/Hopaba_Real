@@ -15,6 +15,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Card } from '@/components/ui/card';
 import { Loader2, Save, X } from 'lucide-react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 const marketplaceListingSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
@@ -26,7 +27,7 @@ const marketplaceListingSchema = z.object({
   seller_phone: z.string().optional(),
   seller_whatsapp: z.string().optional(),
   seller_instagram: z.string().optional(),
-  images: z.array(z.string()).optional(),
+  images: z.array(z.string()).min(1, { message: "Please upload at least one image" }),
 });
 
 type MarketplaceListingFormData = z.infer<typeof marketplaceListingSchema>;
@@ -92,7 +93,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         seller_phone: data.seller_phone || null,
         seller_whatsapp: data.seller_whatsapp || null,
         seller_instagram: data.seller_instagram || null,
-        images: data.images || []
+        images: data.images
       };
 
       if (listing?.id) {
@@ -317,6 +318,27 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
               </div>
             </div>
           </div>
+
+          <FormField
+            control={form.control}
+            name="images"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Images*</FormLabel>
+                <FormControl>
+                  <ImageUpload 
+                    images={field.value}
+                    onImagesChange={(images) => form.setValue('images', images, { shouldValidate: true })}
+                    maxImages={5}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Upload up to 5 images of your item. At least one image is required.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <div className="flex justify-end gap-2 pt-4">
             {onCancel && (
