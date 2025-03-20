@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Shield, Film } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import SellerInfo from './SellerInfo';
 import ListingActionButtons from './ListingActionButtons';
-import { useToast } from '@/hooks/use-toast';
+import ListingMetadata from './ListingMetadata';
 
 interface ListingPriceCardProps {
   id: string;
@@ -15,6 +15,8 @@ interface ListingPriceCardProps {
   sellerWhatsapp: string | null;
   sellerInstagram: string | null;
   location: string;
+  createdAt: string;
+  condition: string;
 }
 
 const formatPrice = (price: number): string => {
@@ -30,32 +32,23 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   sellerPhone,
   sellerWhatsapp,
   sellerInstagram,
-  location
+  location,
+  createdAt,
+  condition
 }) => {
-  const { toast } = useToast();
-
-  const handleInstagramClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (sellerInstagram) {
-      window.open(sellerInstagram);
-      toast({
-        title: "Opening video content",
-        description: `Visiting ${sellerName}'s video content`,
-        duration: 2000,
-      });
-    } else {
-      toast({
-        title: "Video content not available",
-        description: "The seller has not provided any video links",
-        variant: "destructive",
-        duration: 2000,
-      });
-    }
-  };
-
   return (
     <div className="sticky top-24 space-y-6">
       <div className="bg-white rounded-xl border p-6 shadow-sm">
+        <div className="mb-4">
+          <ListingMetadata
+            location={location}
+            createdAt={createdAt}
+            condition={condition}
+            sellerInstagram={sellerInstagram}
+            sellerName={sellerName}
+          />
+        </div>
+        
         <div className="flex justify-between items-start mb-8">
           <div>
             <h2 className="text-3xl font-bold text-[#1EAEDB]">
@@ -63,15 +56,6 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
             </h2>
           </div>
           <div className="flex flex-col items-end">
-            {sellerInstagram && (
-              <button
-                onClick={handleInstagramClick}
-                className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 p-2 rounded-md hover:shadow-md transition-all mb-2"
-                title="Watch video content"
-              >
-                <Film className="h-5 w-5 text-white" />
-              </button>
-            )}
             <SellerInfo 
               sellerName={sellerName} 
               sellerRating={sellerRating}
