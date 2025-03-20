@@ -97,7 +97,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email,
         password,
         options: {
-          captchaToken: token,
+          queryParams: {
+            captcha_token: token
+          }
         },
       });
       
@@ -139,7 +141,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         provider,
         options: {
           redirectTo: `${window.location.origin}/profile`,
-          captchaToken: token,
+          queryParams: {
+            captcha_token: token
+          }
         },
       });
       
@@ -178,7 +182,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           data: {
             full_name: name,
           },
-          captchaToken: token,
+          queryParams: {
+            captcha_token: token
+          }
         },
       });
       

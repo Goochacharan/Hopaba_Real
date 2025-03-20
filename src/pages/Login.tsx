@@ -13,8 +13,6 @@ import { useForm } from 'react-hook-form';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Facebook, Mail } from 'lucide-react';
-import { Auth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -92,7 +90,9 @@ export default function Login() {
         email: values.email,
         password: values.password,
         options: {
-          captchaToken: token,
+          queryParams: {
+            captcha_token: token
+          }
         },
       });
 
@@ -128,7 +128,9 @@ export default function Login() {
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
-          captchaToken: token,
+          queryParams: {
+            captcha_token: token
+          }
         },
       });
 

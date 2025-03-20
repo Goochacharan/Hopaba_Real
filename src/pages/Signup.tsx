@@ -93,7 +93,9 @@ export default function Signup() {
         email: values.email,
         password: values.password,
         options: {
-          captchaToken: token,
+          queryParams: {
+            captcha_token: token
+          }
         },
       });
 
@@ -129,7 +131,9 @@ export default function Signup() {
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
-          captchaToken: token,
+          queryParams: {
+            captcha_token: token
+          }
         },
       });
 
