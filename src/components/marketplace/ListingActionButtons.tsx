@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Phone, MessageSquare, MapPin, Instagram, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -82,33 +81,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
   const handleInstagram = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerInstagram) {
-      // Extract username from Instagram URL or handle
-      let username = sellerInstagram;
-      
-      // Remove https://instagram.com/ or https://www.instagram.com/ if present
-      if (username.includes('instagram.com/')) {
-        username = username.split('instagram.com/')[1];
-        // Remove trailing slashes if any
-        username = username.replace(/\/+$/, '');
-      }
-      
-      // Remove @ if present
-      if (username.startsWith('@')) {
-        username = username.substring(1);
-      }
-      
-      // Handle query parameters if present (like ?igshid=...)
-      if (username.includes('?')) {
-        username = username.split('?')[0];
-      }
-      
-      // Open in Instagram app if on mobile
-      window.open(`instagram://user?username=${username}`);
-      
-      // Fallback to web version after a short delay
-      setTimeout(() => {
-        window.open(`https://instagram.com/${username}`);
-      }, 300);
+      window.open(sellerInstagram);
     } else {
       toast({
         title: "Instagram not available",
