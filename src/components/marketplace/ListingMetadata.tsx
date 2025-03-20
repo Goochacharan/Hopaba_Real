@@ -57,7 +57,7 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
             <Film className="h-7 w-7 text-white" />
           </button>}
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 py-0 my-0 mx-0">
         <Badge variant="outline" className="flex items-center gap-1 text-amber-600 bg-amber-50">
           <BadgeCheck className="h-3 w-3" />
           <span>{condition}</span>
