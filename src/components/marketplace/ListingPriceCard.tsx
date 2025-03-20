@@ -57,26 +57,26 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
     <div className="sticky top-24 space-y-6">
       <div className="bg-white rounded-xl border p-6 shadow-sm">
         <div className="flex justify-between items-start mb-8">
-          <div className="flex items-center gap-3">
+          <div>
             <h2 className="text-3xl font-bold text-[#1EAEDB]">
               {formatPrice(price)}
             </h2>
+          </div>
+          <div className="flex flex-col items-end">
             {sellerInstagram && (
               <button
                 onClick={handleInstagramClick}
-                className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 p-2 rounded-md hover:shadow-md transition-all"
+                className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 p-2 rounded-md hover:shadow-md transition-all mb-2"
                 title="Watch video content"
               >
                 <Film className="h-5 w-5 text-white" />
               </button>
             )}
+            <SellerInfo 
+              sellerName={sellerName} 
+              sellerRating={sellerRating}
+            />
           </div>
-          <SellerInfo 
-            sellerName={sellerName} 
-            sellerRating={sellerRating} 
-            sellerInstagram={sellerInstagram}
-            onInstagramClick={handleInstagramClick}
-          />
         </div>
         
         <ListingActionButtons

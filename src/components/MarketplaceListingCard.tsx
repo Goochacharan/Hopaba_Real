@@ -74,22 +74,23 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-center gap-2">
             <p className="text-2xl font-bold text-[#1EAEDB] py-[12px]">{formatPrice(listing.price)}</p>
-            
+          </div>
+          
+          <div className="flex flex-col items-end">
             {listing.seller_instagram && (
               <button
                 onClick={handleInstagramClick}
-                className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 p-2 rounded-md hover:shadow-md transition-all"
+                className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 p-2 rounded-md hover:shadow-md transition-all mb-2"
                 title="Watch video content"
               >
                 <Film className="h-5 w-5 text-white" />
               </button>
             )}
+            <SellerInfo 
+              sellerName={listing.seller_name} 
+              sellerRating={listing.seller_rating}
+            />
           </div>
-          
-          <SellerInfo 
-            sellerName={listing.seller_name} 
-            sellerRating={listing.seller_rating}
-          />
         </div>
         
         <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
