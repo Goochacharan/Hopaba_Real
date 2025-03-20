@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { Shield } from 'lucide-react';
+import { Shield, Instagram } from 'lucide-react';
 import SellerInfo from './SellerInfo';
 import ListingActionButtons from './ListingActionButtons';
+import { useToast } from '@/hooks/use-toast';
 
 interface ListingPriceCardProps {
   id: string;
@@ -31,18 +32,50 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   sellerInstagram,
   location
 }) => {
+  const { toast } = useToast();
+
+  const handleInstagramClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (sellerInstagram) {
+      window.open(sellerInstagram);
+      toast({
+        title: "Opening Instagram",
+        description: `Visiting ${sellerName}'s Instagram`,
+        duration: 2000,
+      });
+    } else {
+      toast({
+        title: "Instagram not available",
+        description: "The seller has not provided an Instagram profile",
+        variant: "destructive",
+        duration: 2000,
+      });
+    }
+  };
+
   return (
     <div className="sticky top-24 space-y-6">
       <div className="bg-white rounded-xl border p-6 shadow-sm">
         <div className="flex justify-between items-start mb-8">
-          <div>
+          <div className="flex items-center gap-3">
             <h2 className="text-3xl font-bold text-[#1EAEDB]">
               {formatPrice(price)}
             </h2>
+            {sellerInstagram && (
+              <button
+                onClick={handleInstagramClick}
+                className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 p-2 rounded-md hover:shadow-md transition-all"
+                title="Visit Instagram"
+              >
+                <Instagram className="h-5 w-5 text-white" />
+              </button>
+            )}
           </div>
           <SellerInfo 
             sellerName={sellerName} 
             sellerRating={sellerRating} 
+            sellerInstagram={sellerInstagram}
+            onInstagramClick={handleInstagramClick}
           />
         </div>
         
