@@ -27,7 +27,7 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
   const handleInstagramClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerInstagram) {
-      window.open(sellerInstagram);
+      window.open(sellerInstagram.startsWith('http') ? sellerInstagram : `https://instagram.com/${sellerInstagram.replace('@', '')}`);
       toast({
         title: "Opening video content",
         description: `Visiting ${sellerName}'s video content`,
