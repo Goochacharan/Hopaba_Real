@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Facebook, Mail } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -26,6 +27,7 @@ export default function Login() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
+  const { getTestCredentials } = useAuth();
   
   useEffect(() => {
     const loadRecaptcha = async () => {
@@ -85,10 +87,7 @@ export default function Login() {
         email: values.email,
         password: values.password,
         options: {
-          // Use queryParams for captcha_token
-          queryParams: {
-            captcha_token: token
-          }
+          captchaToken: token
         },
       });
 
@@ -123,10 +122,7 @@ export default function Login() {
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
-          // Use queryParams for captcha_token
-          queryParams: {
-            captcha_token: token
-          }
+          captchaToken: token
         },
       });
 
@@ -142,6 +138,12 @@ export default function Login() {
       console.error("Social login error:", error);
       setSocialLoading(null);
     }
+  };
+
+  const useTestCredentials = () => {
+    const credentials = getTestCredentials();
+    form.setValue("email", credentials.email);
+    form.setValue("password", credentials.password);
   };
 
   return (
@@ -243,13 +245,23 @@ export default function Login() {
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Log in with Email"}
-              </Button>
+              <div className="flex justify-between items-center">
+                <Button 
+                  type="button" 
+                  variant="link" 
+                  className="px-0 text-xs text-muted-foreground"
+                  onClick={useTestCredentials}
+                >
+                  Use demo account
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "Logging in..." : "Log in with Email"}
+                </Button>
+              </div>
               
               <div className="text-xs text-center mt-2">
                 <div className="text-muted-foreground">
-                  This site is protected by reCAPTCHA
+                  This site is protected by reCAPTCHA v3
                 </div>
                 <div className="text-muted-foreground mt-1">
                   <a 
