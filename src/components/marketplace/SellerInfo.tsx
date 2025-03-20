@@ -28,13 +28,13 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
         {sellerId ? (
           <Link 
             to={`/seller/${sellerId}`} 
-            className="font-medium text-lg hover:text-primary hover:underline"
+            className="font-medium text-lg hover:text-primary hover:underline truncate max-w-[200px]"
             onClick={(e) => e.stopPropagation()} // Prevent triggering parent card click
           >
             {sellerName}
           </Link>
         ) : (
-          <span className="font-medium text-lg">{sellerName}</span>
+          <span className="font-medium text-lg truncate max-w-[200px]">{sellerName}</span>
         )}
       </div>
       <div className="flex items-center gap-4 w-full">
@@ -42,7 +42,7 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
         {sellerInstagram && onInstagramClick && (
           <button 
             onClick={onInstagramClick}
-            className="text-muted-foreground hover:text-primary"
+            className="text-muted-foreground hover:text-primary flex-shrink-0"
           >
             <Instagram className="h-5 w-5" />
           </button>

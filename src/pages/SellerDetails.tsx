@@ -37,7 +37,7 @@ const SellerDetails = () => {
 
   return (
     <MainLayout>
-      <div className="container max-w-7xl py-10">
+      <div className="w-full max-w-[1200px] mx-auto px-4 py-10">
         <Button 
           variant="ghost" 
           size="sm" 
@@ -63,7 +63,7 @@ const SellerDetails = () => {
           </Card>
         ) : sellerDetails ? (
           <>
-            <div className="grid grid-cols-1 gap-8 mb-12">
+            <div className="w-full gap-8 mb-12">
               <SellerProfileCard 
                 sellerName={sellerDetails.name}
                 sellerRating={sellerDetails.rating}
@@ -71,7 +71,7 @@ const SellerDetails = () => {
                 joinedDate={sellerDetails.listings[0]?.created_at}
               />
 
-              <Card className="p-8 shadow-md">
+              <Card className="p-8 shadow-md w-full mt-8">
                 <h3 className="font-medium text-xl mb-6">Contact Options</h3>
                 <div className="flex flex-col md:flex-row gap-6">
                   <Button className="w-full py-6 text-lg" size="lg">
@@ -102,9 +102,9 @@ const SellerDetails = () => {
                 </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="listings">
+              <TabsContent value="listings" className="w-full">
                 {sellerDetails.listings.length > 0 ? (
-                  <div className="flex flex-col gap-8">
+                  <div className="w-full space-y-8">
                     {sellerDetails.listings.map((listing) => (
                       <MarketplaceListingCard key={listing.id} listing={listing} className="w-full" />
                     ))}
@@ -116,7 +116,7 @@ const SellerDetails = () => {
                 )}
               </TabsContent>
               
-              <TabsContent value="reviews">
+              <TabsContent value="reviews" className="w-full">
                 <SellerReviews 
                   sellerId={sellerDetails.id}
                   sellerName={sellerDetails.name}
