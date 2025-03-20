@@ -23,28 +23,28 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
 }) => {
   return (
     <div className="flex flex-col w-full">
-      <div className="flex items-center gap-3 mb-3 w-full">
-        <span className="text-muted-foreground">Seller</span>
+      <div className="flex items-center gap-4 mb-4 w-full">
+        <span className="text-muted-foreground text-lg">Seller</span>
         {sellerId ? (
           <Link 
             to={`/seller/${sellerId}`} 
-            className="font-medium text-lg hover:text-primary hover:underline"
+            className="font-medium text-xl hover:text-primary hover:underline"
             onClick={(e) => e.stopPropagation()} // Prevent triggering parent card click
           >
             {sellerName}
           </Link>
         ) : (
-          <span className="font-medium text-lg">{sellerName}</span>
+          <span className="font-medium text-xl">{sellerName}</span>
         )}
       </div>
-      <div className="flex items-center gap-6 w-full">
-        <StarRating rating={sellerRating} showCount={true} count={reviewCount} size="small" />
+      <div className="flex items-center gap-8 w-full">
+        <StarRating rating={sellerRating} showCount={true} count={reviewCount} size="medium" />
         {sellerInstagram && onInstagramClick && (
           <button 
             onClick={onInstagramClick}
             className="text-muted-foreground hover:text-primary flex-shrink-0"
           >
-            <Instagram className="h-5 w-5" />
+            <Instagram className="h-6 w-6" />
           </button>
         )}
       </div>

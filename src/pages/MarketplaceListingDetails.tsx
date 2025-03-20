@@ -28,7 +28,7 @@ const MarketplaceListingDetails = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="container mx-auto py-8 px-4 max-w-6xl animate-pulse">
+        <div className="w-full px-4 py-8 animate-pulse">
           <div className="mb-8 h-6 bg-gray-200 rounded w-1/4"></div>
           <div className="grid grid-cols-1 gap-8">
             <div>
@@ -48,7 +48,7 @@ const MarketplaceListingDetails = () => {
   if (error || !listing) {
     return (
       <MainLayout>
-        <div className="container mx-auto py-8 px-4 max-w-6xl">
+        <div className="w-full px-6 py-8">
           <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Marketplace</span>
@@ -70,17 +70,17 @@ const MarketplaceListingDetails = () => {
 
   return (
     <MainLayout>
-      <div className="container mx-auto py-8 px-4">
+      <div className="w-full px-6 py-8">
         <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
           <ArrowLeft className="h-4 w-4" />
           <span>Back to Marketplace</span>
         </Link>
         
-        <div className="grid grid-cols-1 gap-8">
+        <div className="grid grid-cols-1 gap-10">
           <div>
-            <div className="mb-6">
+            <div className="mb-8">
               <Badge className="mb-2">{listing?.category}</Badge>
-              <h1 className="text-2xl sm:text-3xl font-bold mb-2">{listing?.title}</h1>
+              <h1 className="text-3xl sm:text-4xl font-bold mb-3">{listing?.title}</h1>
               <ListingMetadata 
                 location={listing.location}
                 createdAt={listing.created_at}
@@ -88,14 +88,14 @@ const MarketplaceListingDetails = () => {
               />
             </div>
             
-            <div className="mb-6 bg-black/5 rounded-xl shadow-sm overflow-hidden">
+            <div className="mb-8 bg-black/5 rounded-xl shadow-sm overflow-hidden w-full">
               <ListingImageCarousel 
                 images={listing.images}
                 onImageClick={openImageViewer}
                 listing={listing}
               />
               
-              <div className="p-4">
+              <div className="p-6">
                 <ListingThumbnails
                   images={listing.images}
                   selectedIndex={selectedImageIndex}
@@ -125,7 +125,7 @@ const MarketplaceListingDetails = () => {
               showMetadata={false}
             />
             
-            <div className="mt-6">
+            <div className="mt-8">
               <SafeTradingTips />
             </div>
           </div>
