@@ -19,11 +19,9 @@ const SellerDetails = () => {
   const { sellerDetails, loading, error } = useSellerDetails(id || '');
 
   const handleAddReview = async (review: { rating: number; comment: string }) => {
-    // This would normally send the review to the backend
-    // For now, we'll just mock it with a delay
+    // Mock implementation with a delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Show success message
     toast({
       title: 'Review submitted',
       description: 'Thank you for your feedback!',
@@ -39,7 +37,7 @@ const SellerDetails = () => {
 
   return (
     <MainLayout>
-      <div className="container max-w-6xl py-8">
+      <div className="container max-w-7xl py-10">
         <Button 
           variant="ghost" 
           size="sm" 
@@ -47,64 +45,73 @@ const SellerDetails = () => {
           onClick={() => navigate(-1)}
         >
           <ChevronLeft className="h-4 w-4 mr-2" />
-          Back
+          Back to Marketplace
         </Button>
 
         {loading ? (
-          <div className="text-center py-12">
-            <p>Loading seller details...</p>
+          <div className="text-center py-16">
+            <p className="text-lg">Loading seller details...</p>
           </div>
         ) : error ? (
-          <Card className="p-8 text-center">
-            <AlertCircle className="h-12 w-12 mx-auto text-destructive" />
-            <h3 className="mt-4 text-xl font-semibold">Error Loading Seller</h3>
-            <p className="mt-2 text-muted-foreground">{error}</p>
-            <Button className="mt-6" onClick={() => navigate('/marketplace')}>
+          <Card className="p-12 text-center my-8">
+            <AlertCircle className="h-16 w-16 mx-auto text-destructive" />
+            <h3 className="mt-6 text-2xl font-semibold">Error Loading Seller</h3>
+            <p className="mt-4 text-lg text-muted-foreground">{error}</p>
+            <Button className="mt-8 px-8 py-6 text-lg" onClick={() => navigate('/marketplace')}>
               Return to Marketplace
             </Button>
           </Card>
         ) : sellerDetails ? (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-10">
-              <div className="lg:col-span-3">
-                <SellerProfileCard 
-                  sellerName={sellerDetails.name}
-                  sellerRating={sellerDetails.rating}
-                  reviewCount={sellerDetails.review_count}
-                  joinedDate={sellerDetails.listings[0]?.created_at}
-                />
-              </div>
-              <div className="flex flex-col gap-4">
-                <Card className="p-6 shadow-md">
-                  <h3 className="font-medium text-lg mb-4">Contact Seller</h3>
-                  <Button className="w-full mb-3" size="lg">
-                    <MessageCircle className="h-5 w-5 mr-2" />
-                    Message
+            <div className="grid grid-cols-1 gap-8 mb-12">
+              <SellerProfileCard 
+                sellerName={sellerDetails.name}
+                sellerRating={sellerDetails.rating}
+                reviewCount={sellerDetails.review_count}
+                joinedDate={sellerDetails.listings[0]?.created_at}
+              />
+
+              <Card className="p-8 shadow-md">
+                <h3 className="font-medium text-xl mb-6">Contact Options</h3>
+                <div className="flex flex-col md:flex-row gap-6">
+                  <Button className="w-full py-6 text-lg" size="lg">
+                    <MessageCircle className="h-6 w-6 mr-3" />
+                    Message Seller
                   </Button>
-                  <Button variant="outline" className="w-full" size="lg" onClick={handleReport}>
-                    <AlertCircle className="h-5 w-5 mr-2" />
+                  <Button variant="outline" className="w-full py-6 text-lg" size="lg" onClick={handleReport}>
+                    <AlertCircle className="h-6 w-6 mr-3" />
                     Report Seller
                   </Button>
-                </Card>
-              </div>
+                </div>
+              </Card>
             </div>
 
             <Tabs defaultValue="listings" className="w-full">
-              <TabsList className="mb-8 w-full justify-start border-b">
-                <TabsTrigger value="listings" className="text-base px-6 py-3">Listings ({sellerDetails.listings.length})</TabsTrigger>
-                <TabsTrigger value="reviews" className="text-base px-6 py-3">Reviews ({sellerDetails.reviews.length})</TabsTrigger>
+              <TabsList className="w-full bg-background border-b mb-8">
+                <TabsTrigger 
+                  value="listings" 
+                  className="text-lg px-8 py-4 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+                >
+                  Listings ({sellerDetails.listings.length})
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="reviews" 
+                  className="text-lg px-8 py-4 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+                >
+                  Reviews ({sellerDetails.reviews.length})
+                </TabsTrigger>
               </TabsList>
               
               <TabsContent value="listings">
                 {sellerDetails.listings.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-8">
+                  <div className="flex flex-col gap-8">
                     {sellerDetails.listings.map((listing) => (
                       <MarketplaceListingCard key={listing.id} listing={listing} className="w-full" />
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">This seller has no active listings.</p>
+                  <div className="text-center py-16">
+                    <p className="text-xl text-muted-foreground">This seller has no active listings.</p>
                   </div>
                 )}
               </TabsContent>
@@ -120,8 +127,8 @@ const SellerDetails = () => {
             </Tabs>
           </>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Seller not found.</p>
+          <div className="text-center py-16">
+            <p className="text-xl text-muted-foreground">Seller not found.</p>
           </div>
         )}
       </div>
