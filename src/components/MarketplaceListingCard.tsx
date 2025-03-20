@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { useToast } from '@/hooks/use-toast';
 import ImageViewer from '@/components/ImageViewer';
-import { Instagram } from 'lucide-react';
+import { Film } from 'lucide-react';
 
 // Import our new components
 import ListingImageCarousel from './marketplace/ListingImageCarousel';
@@ -45,14 +45,14 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
     if (listing.seller_instagram) {
       window.open(listing.seller_instagram);
       toast({
-        title: "Opening Instagram",
-        description: `Visiting ${listing.seller_name}'s Instagram`,
+        title: "Opening video content",
+        description: `Visiting ${listing.seller_name}'s video content`,
         duration: 2000,
       });
     } else {
       toast({
-        title: "Instagram not available",
-        description: "The seller has not provided an Instagram profile",
+        title: "Video content not available",
+        description: "The seller has not provided any video links",
         variant: "destructive",
         duration: 2000,
       });
@@ -79,9 +79,9 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
               <button
                 onClick={handleInstagramClick}
                 className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 p-2 rounded-md hover:shadow-md transition-all"
-                title="Visit Instagram"
+                title="Watch video content"
               >
-                <Instagram className="h-5 w-5 text-white" />
+                <Film className="h-5 w-5 text-white" />
               </button>
             )}
           </div>

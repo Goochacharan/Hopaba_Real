@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Instagram } from 'lucide-react';
+import { Film } from 'lucide-react';
 import StarRating from './StarRating';
 
 interface SellerInfoProps {
@@ -34,9 +34,9 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
           <button
             onClick={handleInstagramClick}
             className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 text-white p-1 rounded-md hover:shadow-md transition-all"
-            title="Visit Instagram"
+            title="Watch video content"
           >
-            <Instagram className="h-4 w-4" />
+            <Film className="h-4 w-4" />
           </button>
         )}
       </div>

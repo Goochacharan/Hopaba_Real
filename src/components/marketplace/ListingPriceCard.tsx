@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Shield, Instagram } from 'lucide-react';
+import { Shield, Film } from 'lucide-react';
 import SellerInfo from './SellerInfo';
 import ListingActionButtons from './ListingActionButtons';
 import { useToast } from '@/hooks/use-toast';
@@ -39,14 +39,14 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
     if (sellerInstagram) {
       window.open(sellerInstagram);
       toast({
-        title: "Opening Instagram",
-        description: `Visiting ${sellerName}'s Instagram`,
+        title: "Opening video content",
+        description: `Visiting ${sellerName}'s video content`,
         duration: 2000,
       });
     } else {
       toast({
-        title: "Instagram not available",
-        description: "The seller has not provided an Instagram profile",
+        title: "Video content not available",
+        description: "The seller has not provided any video links",
         variant: "destructive",
         duration: 2000,
       });
@@ -65,9 +65,9 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
               <button
                 onClick={handleInstagramClick}
                 className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 p-2 rounded-md hover:shadow-md transition-all"
-                title="Visit Instagram"
+                title="Watch video content"
               >
-                <Instagram className="h-5 w-5 text-white" />
+                <Film className="h-5 w-5 text-white" />
               </button>
             )}
           </div>

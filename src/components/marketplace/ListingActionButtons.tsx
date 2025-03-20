@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Phone, MessageSquare, MapPin, Instagram, Share2 } from 'lucide-react';
+import { Phone, MessageSquare, MapPin, Film, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -83,10 +83,15 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
     e.stopPropagation();
     if (sellerInstagram) {
       window.open(sellerInstagram);
+      toast({
+        title: "Opening video content",
+        description: "Visiting video content...",
+        duration: 2000,
+      });
     } else {
       toast({
-        title: "Instagram not available",
-        description: "The seller has not provided an Instagram handle",
+        title: "Video content not available",
+        description: "The seller has not provided any video links",
         variant: "destructive",
         duration: 3000,
       });
@@ -153,10 +158,10 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
         <button 
           onClick={handleInstagram}
           className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
-          title="Instagram"
-          aria-label="View Instagram profile"
+          title="Video content"
+          aria-label="Watch video content"
         >
-          <Instagram className="h-5 w-5" />
+          <Film className="h-5 w-5" />
         </button>
         <button 
           onClick={handleShare}
