@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -120,7 +119,9 @@ export default function Login() {
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
-          captchaToken: token
+          queryParams: {
+            captcha_token: token
+          }
         },
       });
 
