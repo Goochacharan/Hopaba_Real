@@ -39,44 +39,44 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
         <CardTitle className="text-3xl font-bold">Seller Profile</CardTitle>
       </CardHeader>
       <CardContent className="px-6 md:px-10 py-8">
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-          <Avatar className="h-32 w-32 border-4 border-background">
-            <AvatarFallback className="bg-primary/10 text-primary text-4xl">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-10">
+          <Avatar className="h-40 w-40 border-4 border-background">
+            <AvatarFallback className="bg-primary/10 text-primary text-5xl">
               {getInitials(sellerName)}
             </AvatarFallback>
           </Avatar>
           
-          <div className="space-y-6 text-center md:text-left w-full">
-            <h3 className="text-3xl font-bold">{sellerName}</h3>
+          <div className="space-y-8 text-center md:text-left w-full">
+            <h3 className="text-4xl font-bold">{sellerName}</h3>
             
-            <div className="flex flex-col md:flex-row items-center gap-4">
+            <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="flex items-center">
-                <StarRating rating={sellerRating} className="mr-3" showCount={false} size="medium" />
-                <span className="text-lg text-muted-foreground">({reviewCount} reviews)</span>
+                <StarRating rating={sellerRating} className="mr-4" showCount={false} size="medium" />
+                <span className="text-xl text-muted-foreground">({reviewCount} reviews)</span>
               </div>
               
               <span className="hidden md:block text-muted-foreground">•</span>
               
-              <p className="text-lg text-muted-foreground flex items-center gap-2">
-                <UserCircle className="h-5 w-5" />
+              <p className="text-xl text-muted-foreground flex items-center gap-3">
+                <UserCircle className="h-6 w-6" />
                 Member since {formattedJoinedDate}
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 pt-4">
-              <div className="flex items-center gap-2 text-lg">
-                <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                <span className="truncate">San Francisco, CA</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12 pt-4">
+              <div className="flex items-center gap-3 text-xl">
+                <MapPin className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                <span>San Francisco, CA</span>
               </div>
               
-              <div className="flex items-center gap-2 text-lg">
-                <Mail className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                <span className="truncate">Contact via Message</span>
+              <div className="flex items-center gap-3 text-xl">
+                <Mail className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                <span>Contact via Message</span>
               </div>
               
-              <div className="flex items-center gap-2 text-lg">
-                <Instagram className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                <span className="truncate">@{sellerName.toLowerCase().replace(/\s/g, '')}</span>
+              <div className="flex items-center gap-3 text-xl">
+                <Instagram className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                <span>@{sellerName.toLowerCase().replace(/\s/g, '')}</span>
               </div>
             </div>
           </div>
