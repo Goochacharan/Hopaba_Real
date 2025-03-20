@@ -60,10 +60,10 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
         {sellerInstagram && (
           <button
             onClick={handleInstagramClick}
-            className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 p-1.5 rounded-md hover:shadow-md transition-all ml-1"
+            className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 p-1.5 rounded-md hover:shadow-md transition-all ml-2"
             title="Watch video content"
           >
-            <Film className="h-3.5 w-3.5 text-white" />
+            <Film className="h-7 w-7 text-white" />
           </button>
         )}
       </div>
