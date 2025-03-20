@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
@@ -33,12 +32,9 @@ const Filters: React.FC<FiltersProps> = ({
   openNowOnly,
   setOpenNowOnly
 }) => {
-  // Reset filters on component mount
+  // Reset filters on component mount (when the page is refreshed)
   useEffect(() => {
-    setDistance(DEFAULT_DISTANCE);
-    setMinRating(DEFAULT_RATING);
-    setPriceRange(DEFAULT_PRICE_RANGE);
-    setOpenNowOnly(DEFAULT_OPEN_NOW);
+    resetFilters();
   }, []);
   
   // Function to reset filters manually

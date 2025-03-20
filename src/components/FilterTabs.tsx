@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Star, Clock, IndianRupee, FilterIcon, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -41,6 +42,11 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
   setOpenNowOnly
 }) => {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+  // Reset filters to default values when the component mounts
+  useEffect(() => {
+    resetFilters();
+  }, []);
 
   // Reset filters to default values
   const resetFilters = () => {

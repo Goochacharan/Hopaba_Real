@@ -61,13 +61,18 @@ const SearchResults = () => {
   const loading = recommendationsLoading || marketplaceLoading;
   const error = recommendationsError || marketplaceError;
 
-  // Reset filters whenever the component mounts
+  // Reset filters whenever the component mounts (when page refreshes) or when searchQuery changes
   useEffect(() => {
+    resetFilters();
+  }, [searchQuery]);
+
+  // Function to reset all filters to default values
+  const resetFilters = () => {
     setDistance(DEFAULT_DISTANCE);
     setMinRating(DEFAULT_RATING);
     setPriceRange(DEFAULT_PRICE_RANGE);
     setOpenNowOnly(DEFAULT_OPEN_NOW);
-  }, []);
+  };
 
   const filteredRecommendations = filterRecommendations(recommendations, {
     maxDistance: distance[0],
