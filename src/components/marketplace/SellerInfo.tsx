@@ -7,17 +7,14 @@ interface SellerInfoProps {
   sellerRating: number;
   reviewCount?: number;
   sellerInstagram?: string | null;
-  onInstagramClick?: (e: React.MouseEvent) => void;
 }
 
 const SellerInfo: React.FC<SellerInfoProps> = ({
   sellerName,
   sellerRating,
   reviewCount = 24,
-  sellerInstagram,
-  onInstagramClick
+  sellerInstagram
 }) => {
-  // Remove the handleInstagramClick function and the video button from this component
   return (
     <div className="flex flex-col items-end">
       <div className="flex items-center gap-2 mb-2">
