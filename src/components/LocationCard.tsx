@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -232,37 +233,56 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     
+    const shareUrl = window.location.origin + `/location/${recommendation.id}`;
+    const shareTitle = recommendation.name;
+    const shareText = `Check out ${recommendation.name}`;
+    
+    // Try to use the Web Share API first
     if (navigator.share) {
-      navigator.share({
-        title: recommendation.name,
-        text: `Check out ${recommendation.name}`,
-        url: window.location.origin + `/location/${recommendation.id}`,
-      })
-      .then(() => {
-        toast({
-          title: "Shared successfully",
-          description: `You've shared ${recommendation.name}`,
-          duration: 2000,
+      try {
+        navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        })
+        .then(() => {
+          toast({
+            title: "Shared successfully",
+            description: `You've shared ${recommendation.name}`,
+            duration: 2000,
+          });
+        })
+        .catch((error) => {
+          console.error('Error sharing:', error);
+          // Fall back to clipboard if share API fails
+          fallbackToClipboard();
         });
-      })
-      .catch((error) => {
-        console.error('Error sharing:', error);
-        toast({
-          title: "Sharing failed",
-          description: "Could not share this location",
-          variant: "destructive",
-          duration: 2000,
-        });
-      });
+      } catch (error) {
+        console.error('Error in share API:', error);
+        fallbackToClipboard();
+      }
     } else {
-      const shareUrl = window.location.origin + `/location/${recommendation.id}`;
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        toast({
-          title: "Link copied",
-          description: "The link has been copied to your clipboard",
-          duration: 2000,
+      fallbackToClipboard();
+    }
+    
+    function fallbackToClipboard() {
+      navigator.clipboard.writeText(shareUrl)
+        .then(() => {
+          toast({
+            title: "Link copied",
+            description: "The link has been copied to your clipboard",
+            duration: 2000,
+          });
+        })
+        .catch(error => {
+          console.error('Failed to copy:', error);
+          toast({
+            title: "Unable to share",
+            description: "Please try again later",
+            variant: "destructive",
+            duration: 2000,
+          });
         });
-      });
     }
   };
 
