@@ -10,7 +10,7 @@ import {
   FormDescription 
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Phone, MessageCircle, Instagram } from 'lucide-react';
+import { Phone, MessageCircle, Instagram, Film } from 'lucide-react';
 import { BusinessFormValues } from '../AddBusinessForm';
 
 const ContactSection = () => {
@@ -94,7 +94,8 @@ const ContactSection = () => {
             <FormLabel>
               <div className="flex items-center gap-2">
                 <Instagram className="h-4 w-4" />
-                Instagram
+                Instagram / Video Content
+                <Film className="h-4 w-4 ml-1 text-purple-500" />
               </div>
             </FormLabel>
             <FormControl>
@@ -104,7 +105,7 @@ const ContactSection = () => {
               />
             </FormControl>
             <FormDescription>
-              Add your Instagram username or full profile URL
+              Add your Instagram username or video content URL
             </FormDescription>
             <FormMessage />
           </FormItem>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
   MapPin, Star, Clock, Phone, Heart, 
-  Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Instagram 
+  Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Instagram, Film 
 } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
@@ -379,6 +379,15 @@ const LocationCard: React.FC<LocationCardProps> = ({
                 <span className="text-muted-foreground ml-1">
                   {recommendation.hours}
                 </span>
+              )}
+              {recommendation.instagram && (
+                <button 
+                  onClick={handleInstagram}
+                  title="Watch video content" 
+                  className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-3 px-4 py-2"
+                >
+                  <Film className="h-5 w-5 text-white" />
+                </button>
               )}
             </div>
             {recommendation.distance && (

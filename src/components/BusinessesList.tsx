@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Pencil, Trash2, DollarSign, Clock, MapPin, Phone, Instagram } from 'lucide-react';
+import { Pencil, Trash2, DollarSign, Clock, MapPin, Phone, Instagram, Film } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -104,6 +104,25 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
     setBusinessToDelete(id);
     setIsDeleteDialogOpen(true);
   };
+  
+  const handleInstagramClick = (e: React.MouseEvent, instagram: string, businessName: string) => {
+    e.stopPropagation();
+    if (instagram) {
+      window.open(instagram);
+      toast({
+        title: "Opening video content",
+        description: `Visiting ${businessName}'s video content`,
+        duration: 2000
+      });
+    } else {
+      toast({
+        title: "Video content not available",
+        description: "This business has not provided any video links",
+        variant: "destructive",
+        duration: 2000
+      });
+    }
+  };
 
   if (loading) {
     return <div className="text-center py-8">Loading your businesses...</div>;
@@ -154,12 +173,19 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
                 <Phone className="h-4 w-4 text-muted-foreground" />
                 <span>{business.contact_phone}</span>
               </div>
-              {business.instagram && (
-                <div className="flex items-center gap-2">
-                  <Instagram className="h-4 w-4 text-muted-foreground" />
-                  <span>{business.instagram}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <Instagram className="h-4 w-4 text-muted-foreground" />
+                <span>{business.instagram}</span>
+                {business.instagram && (
+                  <button 
+                    onClick={(e) => handleInstagramClick(e, business.instagram, business.name)}
+                    title="Watch video content" 
+                    className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 px-4 py-2"
+                  >
+                    <Film className="h-5 w-5 text-white" />
+                  </button>
+                )}
+              </div>
             </CardContent>
             <CardFooter className="border-t bg-muted/10 gap-2 justify-end">
               <Button 
