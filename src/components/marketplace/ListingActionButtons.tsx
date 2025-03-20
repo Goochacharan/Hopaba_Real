@@ -32,28 +32,46 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (navigator.share) {
-      navigator.share({
-        title: title,
-        text: `Check out this ${title} for ${formatPrice(price)}`,
-        url: window.location.origin + `/marketplace/${listingId}`,
-      }).catch(error => {
-        console.log('Error sharing', error);
+    
+    // Skip navigator.share which causes errors in iframe environments
+    // Go directly to clipboard approach
+    navigator.clipboard.writeText(window.location.origin + `/marketplace/${listingId}`)
+      .then(() => {
+        toast({
+          title: "Link copied to clipboard",
+          description: "You can now share this listing with others",
+          duration: 3000,
+        });
+      })
+      .catch(error => {
+        console.error('Failed to copy:', error);
+        toast({
+          title: "Unable to copy link",
+          description: "Please try again later",
+          variant: "destructive",
+          duration: 3000,
+        });
       });
-    } else {
-      navigator.clipboard.writeText(window.location.origin + `/marketplace/${listingId}`);
-      toast({
-        title: "Link copied to clipboard",
-        description: "You can now share this listing with others",
-        duration: 3000,
-      });
-    }
   };
 
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerPhone) {
-      window.location.href = `tel:${sellerPhone}`;
+      // Instead of changing window.location which might not work in some environments,
+      // create a temporary link element and click it
+      const link = document.createElement('a');
+      link.href = `tel:${sellerPhone}`;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Calling seller",
+        description: `Dialing ${sellerPhone}...`,
+        duration: 2000,
+      });
     } else {
       toast({
         title: "Phone number not available",
@@ -68,30 +86,26 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
     e.stopPropagation();
     if (sellerWhatsapp) {
       const message = `Hi, I'm interested in your listing "${title}" for ${formatPrice(price)}. Is it still available?`;
-      window.open(`https://wa.me/${sellerWhatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`);
-    } else {
+      const whatsappUrl = `https://wa.me/${sellerWhatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+      
+      // Use the safer approach with a temporary link
+      const link = document.createElement('a');
+      link.href = whatsappUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
       toast({
-        title: "WhatsApp not available",
-        description: "The seller has not provided a WhatsApp number",
-        variant: "destructive",
-        duration: 3000,
-      });
-    }
-  };
-
-  const handleInstagram = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (sellerInstagram) {
-      window.open(sellerInstagram);
-      toast({
-        title: "Opening video content",
-        description: "Visiting video content...",
+        title: "Opening WhatsApp",
+        description: "Starting WhatsApp conversation...",
         duration: 2000,
       });
     } else {
       toast({
-        title: "Video content not available",
-        description: "The seller has not provided any video links",
+        title: "WhatsApp not available",
+        description: "The seller has not provided a WhatsApp number",
         variant: "destructive",
         duration: 3000,
       });
@@ -114,7 +128,14 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
       }
     }
     
-    window.open(mapsUrl, '_blank');
+    // Use the safer approach with a temporary link
+    const link = document.createElement('a');
+    link.href = mapsUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     
     toast({
       title: "Opening Directions",
