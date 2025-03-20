@@ -15,6 +15,7 @@ export interface MarketplaceListing {
   seller_phone: string | null;
   seller_whatsapp: string | null;
   seller_instagram: string | null;
+  seller_id: string | null;
   location: string;
   created_at: string;
 }

@@ -76,7 +76,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
             <SellerInfo 
               sellerName={listing.seller_name} 
               sellerRating={listing.seller_rating} 
-              sellerId={listing.seller_id || undefined}
+              sellerId={listing.seller_id}
             />
           </div>
         </div>
