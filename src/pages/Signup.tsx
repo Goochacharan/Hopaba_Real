@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -30,7 +29,6 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   
-  // Set up invisible reCAPTCHA
   useEffect(() => {
     const loadRecaptcha = async () => {
       if (typeof window !== 'undefined' && !window.grecaptcha) {
@@ -76,8 +74,6 @@ export default function Signup() {
             });
         });
       } else {
-        // If recaptcha isn't loaded yet, resolve with empty string
-        // Supabase will handle this case
         resolve('');
       }
     });
@@ -86,16 +82,13 @@ export default function Signup() {
   const onSubmit = async (values: SignupFormValues) => {
     setIsLoading(true);
     try {
-      // Get reCAPTCHA token
       const token = await executeRecaptcha();
       
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
-          queryParams: {
-            captcha_token: token
-          }
+          captchaToken: token
         },
       });
 
@@ -124,16 +117,13 @@ export default function Signup() {
   const handleSocialSignup = async (provider: 'google' | 'facebook') => {
     setSocialLoading(provider);
     try {
-      // Get reCAPTCHA token
       const token = await executeRecaptcha();
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
-          queryParams: {
-            captcha_token: token
-          }
+          captchaToken: token
         },
       });
 

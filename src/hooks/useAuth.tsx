@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -97,9 +96,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email,
         password,
         options: {
-          queryParams: {
-            captcha_token: token
-          }
+          captchaToken: token
         },
       });
       
@@ -141,9 +138,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         provider,
         options: {
           redirectTo: `${window.location.origin}/profile`,
-          queryParams: {
-            captcha_token: token
-          }
+          captchaToken: token
         },
       });
       
@@ -182,9 +177,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           data: {
             full_name: name,
           },
-          queryParams: {
-            captcha_token: token
-          }
+          captchaToken: token
         },
       });
       
