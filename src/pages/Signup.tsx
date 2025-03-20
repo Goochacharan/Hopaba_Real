@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -88,7 +89,10 @@ export default function Signup() {
         email: values.email,
         password: values.password,
         options: {
-          captchaToken: token
+          // Use queryParams for captcha_token
+          queryParams: {
+            captcha_token: token
+          }
         },
       });
 
@@ -123,7 +127,10 @@ export default function Signup() {
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
-          captchaToken: token
+          // Use queryParams for captcha_token
+          queryParams: {
+            captcha_token: token
+          }
         },
       });
 
@@ -263,6 +270,31 @@ export default function Signup() {
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Creating account..." : "Sign up with Email"}
               </Button>
+              
+              <div className="text-xs text-center mt-2">
+                <div className="text-muted-foreground">
+                  This site is protected by reCAPTCHA
+                </div>
+                <div className="text-muted-foreground mt-1">
+                  <a 
+                    href="https://policies.google.com/privacy" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    Privacy Policy
+                  </a>
+                  {' '}&{' '}
+                  <a 
+                    href="https://policies.google.com/terms" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    Terms of Service
+                  </a>
+                </div>
+              </div>
             </form>
           </Form>
 
