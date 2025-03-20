@@ -94,13 +94,18 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
 
   const handleLocation = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const destination = encodeURIComponent(location);
     let mapsUrl;
-
-    if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      mapsUrl = `maps://maps.apple.com/?q=${destination}`;
+    
+    if (location.includes('google.com/maps') || location.includes('goo.gl/maps')) {
+      mapsUrl = location;
     } else {
-      mapsUrl = `https://www.google.com/maps/search/?api=1&query=${destination}`;
+      const destination = encodeURIComponent(location);
+      
+      if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        mapsUrl = `maps://maps.apple.com/?q=${destination}`;
+      } else {
+        mapsUrl = `https://www.google.com/maps/search/?api=1&query=${destination}`;
+      }
     }
     
     window.open(mapsUrl, '_blank');

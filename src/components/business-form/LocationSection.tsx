@@ -6,7 +6,8 @@ import {
   FormItem, 
   FormLabel, 
   FormControl, 
-  FormMessage 
+  FormMessage,
+  FormDescription
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { MapPin } from 'lucide-react';
@@ -14,6 +15,17 @@ import { BusinessFormValues } from '../AddBusinessForm';
 
 const LocationSection = () => {
   const form = useFormContext<BusinessFormValues>();
+  
+  const handleLocationChange = (value: string, onChange: (value: string) => void) => {
+    // Check if the input is a Google Maps URL
+    if (value.includes('google.com/maps') || value.includes('goo.gl/maps')) {
+      // Just store the URL directly - this preserves the exact link pasted by user
+      onChange(value);
+    } else {
+      // For regular text, just use it directly
+      onChange(value);
+    }
+  };
   
   return (
     <>
@@ -31,8 +43,15 @@ const LocationSection = () => {
           <FormItem className="md:col-span-2">
             <FormLabel>Address*</FormLabel>
             <FormControl>
-              <Input placeholder="Enter your street address" {...field} />
+              <Input 
+                placeholder="Enter your street address or Google Maps link" 
+                value={field.value} 
+                onChange={(e) => handleLocationChange(e.target.value, field.onChange)}
+              />
             </FormControl>
+            <FormDescription>
+              You can paste a Google Maps link directly
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}

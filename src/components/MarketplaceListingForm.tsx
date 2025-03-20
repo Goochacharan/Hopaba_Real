@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -67,6 +66,14 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     mode: "onBlur",
   });
 
+  const handleLocationChange = (value: string, onChange: (value: string) => void) => {
+    if (value.includes('google.com/maps') || value.includes('goo.gl/maps')) {
+      onChange(value);
+    } else {
+      onChange(value);
+    }
+  };
+
   const onSubmit = async (data: MarketplaceListingFormData) => {
     if (!user) {
       toast({
@@ -80,7 +87,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Ensure all required fields are present with their correct types
       const listingData = {
         title: data.title,
         description: data.description,
@@ -97,7 +103,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
       };
 
       if (listing?.id) {
-        // Update existing listing
         const { error } = await supabase
           .from('marketplace_listings')
           .update(listingData)
@@ -111,7 +116,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
           description: "Your marketplace listing has been updated successfully.",
         });
       } else {
-        // Create new listing
         const { error } = await supabase
           .from('marketplace_listings')
           .insert(listingData);
@@ -200,8 +204,15 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                     <FormItem>
                       <FormLabel>Location*</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. Mumbai, Delhi" {...field} />
+                        <Input 
+                          placeholder="e.g. Mumbai, Delhi or Google Maps link" 
+                          value={field.value}
+                          onChange={(e) => handleLocationChange(e.target.value, field.onChange)}
+                        />
                       </FormControl>
+                      <FormDescription>
+                        You can paste a Google Maps link directly
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
