@@ -12,8 +12,6 @@ import { Calendar, MapPin, Clock, Users, AlertCircle, ShoppingBag } from 'lucide
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ScrollArea } from '@/components/ui/scroll-area';
-
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -28,7 +26,6 @@ const SearchResults = () => {
   const [priceRange, setPriceRange] = useState<number>(2);
   const [openNowOnly, setOpenNowOnly] = useState<boolean>(false);
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
-
   const {
     recommendations,
     events,
@@ -43,7 +40,6 @@ const SearchResults = () => {
     initialQuery: searchQuery,
     initialCategory: categoryParam as any // Pass the category from URL
   });
-
   const {
     listings: marketplaceListings,
     loading: marketplaceLoading,
@@ -51,10 +47,8 @@ const SearchResults = () => {
   } = useMarketplaceListings({
     searchQuery: searchQuery
   });
-
   const loading = recommendationsLoading || marketplaceLoading;
   const error = recommendationsError || marketplaceError;
-
   const filteredRecommendations = filterRecommendations(recommendations, {
     maxDistance: distance[0],
     minRating: minRating[0],
@@ -62,7 +56,6 @@ const SearchResults = () => {
     openNowOnly,
     distanceUnit: 'km'
   });
-
   const rankedRecommendations = [...filteredRecommendations].map(item => {
     const reviewCount = item.id ? parseInt(item.id) * 10 + Math.floor((item.rating || 4.5) * 15) : 100;
     return {
@@ -75,32 +68,27 @@ const SearchResults = () => {
     }
     return b.reviewCount - a.reviewCount;
   });
-
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
       console.log("SearchResults - Processing search query:", searchQuery);
       handleSearch(searchQuery);
     }
   }, [searchQuery, query, handleSearch]);
-
   useEffect(() => {
     if (categoryParam !== 'all' && categoryParam !== category) {
       console.log("SearchResults - Setting category from URL:", categoryParam);
       handleCategoryChange(categoryParam as any);
     }
   }, [categoryParam, category, handleCategoryChange]);
-
   useEffect(() => {
     if (!searchQuery) {
       navigate('/');
     }
   }, [searchQuery, navigate]);
-
   const handleLocationChange = (location: string) => {
     console.log(`Location changed to: ${location}`);
     setSelectedLocation(location);
   };
-
   const handleRSVP = (eventTitle: string) => {
     toast({
       title: "RSVP Successful",
@@ -108,23 +96,20 @@ const SearchResults = () => {
       duration: 3000
     });
   };
-
   const handleNewSearch = (newQuery: string) => {
     if (newQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(newQuery)}`);
     }
   };
-
-  return (
-    <MainLayout>
-      <div className="w-full animate-fade-in mx-0 px-[6px] overflow-y-auto">
+  return <MainLayout>
+      <div className="w-full animate-fade-in mx-0 px-[6px]">
         <LocationSelector selectedLocation={selectedLocation} onLocationChange={handleLocationChange} />
         
         <div className="w-full mb-6">
           <FilterTabs distance={distance} setDistance={setDistance} minRating={minRating} setMinRating={setMinRating} priceRange={priceRange} setPriceRange={setPriceRange} openNowOnly={openNowOnly} setOpenNowOnly={setOpenNowOnly} />
         </div>
 
-        <div className="w-full pb-8">
+        <div className="w-full">
           {error && <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
@@ -255,8 +240,6 @@ const SearchResults = () => {
             </>}
         </div>
       </div>
-    </MainLayout>
-  );
+    </MainLayout>;
 };
-
 export default SearchResults;
