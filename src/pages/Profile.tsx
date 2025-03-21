@@ -171,40 +171,40 @@ const Profile = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-            <ScrollArea className="w-full overflow-x-auto">
+            <div className="overflow-x-auto pb-2">
               <div className="bg-muted/30 rounded-lg p-1 mb-2">
-                <TabsList className="w-full min-w-max grid grid-cols-4 h-auto p-0">
+                <TabsList className="w-full min-w-max flex h-auto p-0">
                   <TabsTrigger 
                     value="account" 
-                    className="flex items-center gap-2 py-3 text-sm md:text-base whitespace-nowrap px-2"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 text-sm md:text-base whitespace-nowrap px-4"
                   >
                     <User className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                     <span className="truncate">Account</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="services" 
-                    className="flex items-center gap-2 py-3 text-sm md:text-base whitespace-nowrap px-2"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 text-sm md:text-base whitespace-nowrap px-4"
                   >
                     <Store className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                     <span className="truncate">Business/Services</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="marketplace" 
-                    className="flex items-center gap-2 py-3 text-sm md:text-base whitespace-nowrap px-2"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 text-sm md:text-base whitespace-nowrap px-4"
                   >
                     <ShoppingBag className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                     <span className="truncate">Marketplace</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="preferences" 
-                    className="flex items-center gap-2 py-3 text-sm md:text-base whitespace-nowrap px-2"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 text-sm md:text-base whitespace-nowrap px-4"
                   >
                     <Settings className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                     <span className="truncate">Preferences</span>
                   </TabsTrigger>
                 </TabsList>
               </div>
-            </ScrollArea>
+            </div>
 
             <TabsContent value="account" className="space-y-6 pb-8">
               <div className="bg-white rounded-xl shadow-md border border-border p-6 md:p-8 w-full">
