@@ -469,11 +469,17 @@ const LocationDetails = () => {
                   </button>
                 </div>
                 
-                <ScrollArea className="w-full whitespace-nowrap pb-4">
-                  <div className="flex gap-2 w-max">
-                    {suggestedQuestions.map((q, index) => <button key={index} onClick={() => handleAskQuestion(q)} className="flex items-center gap-2 text-sm py-2 px-4 rounded-full border border-border hover:bg-secondary/70 transition-colors whitespace-nowrap">
+                <ScrollArea className="w-full" orientation="horizontal">
+                  <div className="flex gap-2 pb-2 px-1">
+                    {suggestedQuestions.map((q, index) => (
+                      <button 
+                        key={index} 
+                        onClick={() => handleAskQuestion(q)} 
+                        className="flex-shrink-0 items-center gap-2 text-sm py-2 px-4 rounded-full border border-border hover:bg-secondary/70 transition-colors whitespace-nowrap"
+                      >
                         <span>{q}</span>
-                      </button>)}
+                      </button>
+                    ))}
                   </div>
                 </ScrollArea>
               </div>
