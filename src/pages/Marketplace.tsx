@@ -119,7 +119,7 @@ const Marketplace = () => {
     }).format(price);
   };
   return <MainLayout>
-      <div className="animate-fade-in">
+      <div className="animate-fade-in px-[7px]">
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-2">Marketplace</h1>
           <p className="text-muted-foreground">Browse and buy pre-owned items from trusted sellers</p>
