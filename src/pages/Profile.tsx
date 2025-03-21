@@ -171,33 +171,33 @@ const Profile = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-            <ScrollArea className="w-full">
+            <ScrollArea className="w-full overflow-x-auto">
               <div className="bg-muted/30 rounded-lg p-1 mb-2">
-                <TabsList className="w-full grid grid-cols-4 h-auto p-0">
+                <TabsList className="w-full min-w-max grid grid-cols-4 h-auto p-0">
                   <TabsTrigger 
                     value="account" 
-                    className="flex items-center gap-2 py-3 text-base whitespace-nowrap"
+                    className="flex items-center gap-2 py-3 text-sm md:text-base whitespace-nowrap px-2"
                   >
                     <User className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                     <span className="truncate">Account</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="services" 
-                    className="flex items-center gap-2 py-3 text-base whitespace-nowrap"
+                    className="flex items-center gap-2 py-3 text-sm md:text-base whitespace-nowrap px-2"
                   >
                     <Store className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                     <span className="truncate">Business/Services</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="marketplace" 
-                    className="flex items-center gap-2 py-3 text-base whitespace-nowrap"
+                    className="flex items-center gap-2 py-3 text-sm md:text-base whitespace-nowrap px-2"
                   >
                     <ShoppingBag className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                     <span className="truncate">Marketplace</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="preferences" 
-                    className="flex items-center gap-2 py-3 text-base whitespace-nowrap"
+                    className="flex items-center gap-2 py-3 text-sm md:text-base whitespace-nowrap px-2"
                   >
                     <Settings className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
                     <span className="truncate">Preferences</span>
@@ -312,12 +312,12 @@ const Profile = () => {
                       {showAddForm ? businessToEdit ? "Edit Business or Service" : "Add Business or Service" : "Your Businesses and Services"}
                     </h2>
                   </div>
-                  {!showAddForm && <Button size="sm" md="lg" onClick={handleAddNewBusiness} className="flex items-center gap-2">
+                  {!showAddForm && <Button size="sm" onClick={handleAddNewBusiness} className="flex items-center gap-2">
                       <ListPlus className="h-4 w-4" />
                       <span className="hidden sm:inline">Add New Business</span>
                       <span className="sm:hidden">Add</span>
                     </Button>}
-                  {showAddForm && <Button variant="outline" size="sm" md="lg" onClick={() => {
+                  {showAddForm && <Button variant="outline" size="sm" onClick={() => {
                   setShowAddForm(false);
                   setBusinessToEdit(null);
                 }}>
