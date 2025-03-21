@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -6,15 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import AddBusinessForm from '@/components/AddBusinessForm';
 import BusinessesList from '@/components/BusinessesList';
 import UserMarketplaceListings from '@/components/UserMarketplaceListings';
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
@@ -25,150 +16,132 @@ import { Separator } from '@/components/ui/separator';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { 
-  User, 
-  Bell, 
-  Shield, 
-  Globe, 
-  UserCog, 
-  Save, 
-  Settings, 
-  Moon,
-  LogOut,
-  Plus,
-  Store,
-  ListPlus,
-  ShoppingBag
-} from 'lucide-react';
+import { User, Bell, Shield, Globe, UserCog, Save, Settings, Moon, LogOut, Plus, Store, ListPlus, ShoppingBag } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { BusinessFormValues } from '@/components/AddBusinessForm';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
-
 const profileFormSchema = z.object({
   name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
+    message: "Name must be at least 2 characters."
   }),
   email: z.string().email({
-    message: "Please enter a valid email address.",
+    message: "Please enter a valid email address."
   }),
   phone: z.string().optional(),
   currentPassword: z.string().optional(),
   newPassword: z.string().min(8, {
-    message: "Password must be at least 8 characters.",
+    message: "Password must be at least 8 characters."
   }).optional(),
-  confirmPassword: z.string().optional(),
-}).refine((data) => {
+  confirmPassword: z.string().optional()
+}).refine(data => {
   if (data.newPassword && !data.currentPassword) {
     return false;
   }
   return true;
 }, {
   message: "Current password is required when setting a new password.",
-  path: ["currentPassword"],
-}).refine((data) => {
+  path: ["currentPassword"]
+}).refine(data => {
   if (data.newPassword && data.newPassword !== data.confirmPassword) {
     return false;
   }
   return true;
 }, {
   message: "Passwords don't match.",
-  path: ["confirmPassword"],
+  path: ["confirmPassword"]
 });
-
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
-
 const defaultValues: Partial<ProfileFormValues> = {
   name: "John Doe",
   email: "john.doe@example.com",
-  phone: "+1 (555) 123-4567",
+  phone: "+1 (555) 123-4567"
 };
-
 const Profile = () => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [locationServices, setLocationServices] = useState(true);
   const [dataSharing, setDataSharing] = useState(false);
   const [activeTab, setActiveTab] = useState("account");
-  const [businessToEdit, setBusinessToEdit] = useState<(BusinessFormValues & { id: string }) | null>(null);
+  const [businessToEdit, setBusinessToEdit] = useState<(BusinessFormValues & {
+    id: string;
+  }) | null>(null);
   const [refreshBusinessList, setRefreshBusinessList] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [marketplaceListingToEdit, setMarketplaceListingToEdit] = useState<MarketplaceListing | null>(null);
   const [showMarketplaceForm, setShowMarketplaceForm] = useState(false);
-
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
-    mode: "onChange",
+    mode: "onChange"
   });
-
   function onSubmit(data: ProfileFormValues) {
     toast({
       title: "Profile updated",
-      description: "Your profile information has been updated successfully.",
+      description: "Your profile information has been updated successfully."
     });
     console.log(data);
   }
-
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
+    const {
+      error
+    } = await supabase.auth.signOut();
     if (error) {
       toast({
         title: "Error signing out",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } else {
       toast({
         title: "Signed out successfully",
-        description: "You have been signed out",
+        description: "You have been signed out"
       });
       navigate('/');
     }
   };
-
-  const handleEditBusiness = (business: BusinessFormValues & { id: string }) => {
+  const handleEditBusiness = (business: BusinessFormValues & {
+    id: string;
+  }) => {
     setBusinessToEdit(business);
     setShowAddForm(true);
     setActiveTab("services");
   };
-
   const handleEditMarketplaceListing = (listing: MarketplaceListing) => {
     setMarketplaceListingToEdit(listing);
     setShowMarketplaceForm(true);
     setActiveTab("marketplace");
   };
-
   const handleAddNewBusiness = () => {
     setBusinessToEdit(null);
     setShowAddForm(true);
   };
-
   const handleBusinessSaved = () => {
     setShowAddForm(false);
     setBusinessToEdit(null);
     setRefreshBusinessList(!refreshBusinessList);
     toast({
       title: "Success",
-      description: "Your business listing has been saved successfully.",
+      description: "Your business listing has been saved successfully."
     });
   };
-
   const handleMarketplaceListingSaved = () => {
     setShowMarketplaceForm(false);
     setMarketplaceListingToEdit(null);
     toast({
       title: "Success",
-      description: "Your marketplace listing has been saved successfully.",
+      description: "Your marketplace listing has been saved successfully."
     });
   };
-
-  return (
-    <MainLayout>
+  return <MainLayout>
       <section className="w-full py-8 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 flex flex-wrap justify-between items-center gap-4">
@@ -195,7 +168,7 @@ const Profile = () => {
                   <Store className="h-5 w-5" />
                   Business/Services
                 </TabsTrigger>
-                <TabsTrigger value="marketplace" className="flex items-center gap-2 py-3 px-4 text-base">
+                <TabsTrigger value="marketplace" className="flex items-center gap-2 py-0 text-sm px-[48px]">
                   <ShoppingBag className="h-5 w-5" />
                   Marketplace
                 </TabsTrigger>
@@ -218,40 +191,30 @@ const Profile = () => {
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-4xl">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="name" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel className="text-base">Full Name</FormLabel>
                             <FormControl>
                               <Input placeholder="Your name" className="h-12" {...field} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                       
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
+                      <FormField control={form.control} name="email" render={({
+                      field
+                    }) => <FormItem>
                             <FormLabel className="text-base">Email Address</FormLabel>
                             <FormControl>
                               <Input placeholder="Your email" className="h-12" {...field} />
                             </FormControl>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          </FormItem>} />
                     </div>
                     
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
+                    <FormField control={form.control} name="phone" render={({
+                    field
+                  }) => <FormItem>
                           <FormLabel className="text-base">Phone Number</FormLabel>
                           <FormControl>
                             <Input placeholder="Your phone number" className="h-12" {...field} />
@@ -260,9 +223,7 @@ const Profile = () => {
                             Used for verification and important notifications
                           </FormDescription>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        </FormItem>} />
                     
                     <Separator className="my-8" />
                     
@@ -270,63 +231,36 @@ const Profile = () => {
                       <h3 className="text-xl font-semibold mb-6">Change Password</h3>
                       
                       <div className="space-y-6">
-                        <FormField
-                          control={form.control}
-                          name="currentPassword"
-                          render={({ field }) => (
-                            <FormItem>
+                        <FormField control={form.control} name="currentPassword" render={({
+                        field
+                      }) => <FormItem>
                               <FormLabel className="text-base">Current Password</FormLabel>
                               <FormControl>
-                                <Input 
-                                  type="password" 
-                                  placeholder="Current password" 
-                                  className="h-12"
-                                  {...field} 
-                                />
+                                <Input type="password" placeholder="Current password" className="h-12" {...field} />
                               </FormControl>
                               <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                            </FormItem>} />
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          <FormField
-                            control={form.control}
-                            name="newPassword"
-                            render={({ field }) => (
-                              <FormItem>
+                          <FormField control={form.control} name="newPassword" render={({
+                          field
+                        }) => <FormItem>
                                 <FormLabel className="text-base">New Password</FormLabel>
                                 <FormControl>
-                                  <Input 
-                                    type="password" 
-                                    placeholder="New password" 
-                                    className="h-12"
-                                    {...field} 
-                                  />
+                                  <Input type="password" placeholder="New password" className="h-12" {...field} />
                                 </FormControl>
                                 <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                              </FormItem>} />
                           
-                          <FormField
-                            control={form.control}
-                            name="confirmPassword"
-                            render={({ field }) => (
-                              <FormItem>
+                          <FormField control={form.control} name="confirmPassword" render={({
+                          field
+                        }) => <FormItem>
                                 <FormLabel className="text-base">Confirm Password</FormLabel>
                                 <FormControl>
-                                  <Input 
-                                    type="password" 
-                                    placeholder="Confirm new password" 
-                                    className="h-12"
-                                    {...field} 
-                                  />
+                                  <Input type="password" placeholder="Confirm new password" className="h-12" {...field} />
                                 </FormControl>
                                 <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                              </FormItem>} />
                         </div>
                       </div>
                     </div>
@@ -348,57 +282,27 @@ const Profile = () => {
                   <div className="flex items-center">
                     <Store className="h-6 w-6 mr-2 text-primary" />
                     <h2 className="text-2xl font-semibold">
-                      {showAddForm 
-                        ? businessToEdit 
-                          ? "Edit Business or Service" 
-                          : "Add Business or Service"
-                        : "Your Businesses and Services"
-                      }
+                      {showAddForm ? businessToEdit ? "Edit Business or Service" : "Add Business or Service" : "Your Businesses and Services"}
                     </h2>
                   </div>
-                  {!showAddForm && (
-                    <Button 
-                      size="lg"
-                      onClick={handleAddNewBusiness}
-                      className="flex items-center gap-2"
-                    >
+                  {!showAddForm && <Button size="lg" onClick={handleAddNewBusiness} className="flex items-center gap-2">
                       <ListPlus className="h-5 w-5" />
                       Add New Business
-                    </Button>
-                  )}
-                  {showAddForm && (
-                    <Button 
-                      variant="outline" 
-                      size="lg"
-                      onClick={() => {
-                        setShowAddForm(false);
-                        setBusinessToEdit(null);
-                      }}
-                    >
+                    </Button>}
+                  {showAddForm && <Button variant="outline" size="lg" onClick={() => {
+                  setShowAddForm(false);
+                  setBusinessToEdit(null);
+                }}>
                       Back to List
-                    </Button>
-                  )}
+                    </Button>}
                 </div>
                 
-                {showAddForm ? (
-                  <>
+                {showAddForm ? <>
                     <p className="text-muted-foreground text-lg mb-6">
-                      {businessToEdit 
-                        ? "Edit your business or service details below." 
-                        : "Add your business or service to help others find you. All fields marked with * are required."
-                      }
+                      {businessToEdit ? "Edit your business or service details below." : "Add your business or service to help others find you. All fields marked with * are required."}
                     </p>
-                    <AddBusinessForm 
-                      businessData={businessToEdit || undefined} 
-                      onSaved={handleBusinessSaved}
-                    />
-                  </>
-                ) : (
-                  <BusinessesList 
-                    onEdit={handleEditBusiness} 
-                    refresh={refreshBusinessList}
-                  />
-                )}
+                    <AddBusinessForm businessData={businessToEdit || undefined} onSaved={handleBusinessSaved} />
+                  </> : <BusinessesList onEdit={handleEditBusiness} refresh={refreshBusinessList} />}
               </div>
             </TabsContent>
 
@@ -426,11 +330,7 @@ const Profile = () => {
                       </div>
                       <p className="text-base text-muted-foreground">Use dark theme throughout the app</p>
                     </div>
-                    <Switch 
-                      checked={darkMode}
-                      onCheckedChange={setDarkMode}
-                      className="scale-125"
-                    />
+                    <Switch checked={darkMode} onCheckedChange={setDarkMode} className="scale-125" />
                   </div>
                   
                   <Separator className="my-6" />
@@ -443,11 +343,7 @@ const Profile = () => {
                         <h3 className="text-lg font-medium">Email Notifications</h3>
                         <p className="text-base text-muted-foreground">Receive email updates about your activity</p>
                       </div>
-                      <Switch 
-                        checked={emailNotifications}
-                        onCheckedChange={setEmailNotifications}
-                        className="scale-125"
-                      />
+                      <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} className="scale-125" />
                     </div>
                     
                     <div className="flex items-center justify-between p-6 bg-muted rounded-lg border border-border/60">
@@ -455,11 +351,7 @@ const Profile = () => {
                         <h3 className="text-lg font-medium">Push Notifications</h3>
                         <p className="text-base text-muted-foreground">Receive push notifications on your device</p>
                       </div>
-                      <Switch 
-                        checked={pushNotifications}
-                        onCheckedChange={setPushNotifications}
-                        className="scale-125"
-                      />
+                      <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} className="scale-125" />
                     </div>
                   </div>
                   
@@ -474,12 +366,7 @@ const Profile = () => {
                           <h3 className="text-lg font-medium">Location Services</h3>
                           <p className="text-base text-muted-foreground">Allow the app to access your location</p>
                         </div>
-                        <Switch 
-                          id="location-services" 
-                          checked={locationServices}
-                          onCheckedChange={(checked) => setLocationServices(checked as boolean)}
-                          className="scale-125"
-                        />
+                        <Switch id="location-services" checked={locationServices} onCheckedChange={checked => setLocationServices(checked as boolean)} className="scale-125" />
                       </div>
                       
                       <div className="flex items-center justify-between p-6 bg-muted rounded-lg border border-border/60">
@@ -487,12 +374,7 @@ const Profile = () => {
                           <h3 className="text-lg font-medium">Data Sharing</h3>
                           <p className="text-base text-muted-foreground">Share usage data to improve service</p>
                         </div>
-                        <Switch 
-                          id="data-sharing" 
-                          checked={dataSharing}
-                          onCheckedChange={(checked) => setDataSharing(checked as boolean)}
-                          className="scale-125"
-                        />
+                        <Switch id="data-sharing" checked={dataSharing} onCheckedChange={checked => setDataSharing(checked as boolean)} className="scale-125" />
                       </div>
                     </div>
                   </div>
@@ -502,8 +384,6 @@ const Profile = () => {
           </Tabs>
         </div>
       </section>
-    </MainLayout>
-  );
+    </MainLayout>;
 };
-
 export default Profile;
