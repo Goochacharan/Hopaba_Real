@@ -12,6 +12,7 @@ import { Calendar, MapPin, Clock, Users, AlertCircle, ShoppingBag } from 'lucide
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ const SearchResults = () => {
   const [priceRange, setPriceRange] = useState<number>(2);
   const [openNowOnly, setOpenNowOnly] = useState<boolean>(false);
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
+
   const {
     recommendations,
     events,
@@ -38,8 +40,9 @@ const SearchResults = () => {
     filterRecommendations
   } = useRecommendations({
     initialQuery: searchQuery,
-    initialCategory: categoryParam as any // Pass the category from URL
+    initialCategory: categoryParam as any
   });
+
   const {
     listings: marketplaceListings,
     loading: marketplaceLoading,
@@ -47,8 +50,10 @@ const SearchResults = () => {
   } = useMarketplaceListings({
     searchQuery: searchQuery
   });
+
   const loading = recommendationsLoading || marketplaceLoading;
   const error = recommendationsError || marketplaceError;
+
   const filteredRecommendations = filterRecommendations(recommendations, {
     maxDistance: distance[0],
     minRating: minRating[0],
@@ -56,6 +61,7 @@ const SearchResults = () => {
     openNowOnly,
     distanceUnit: 'km'
   });
+
   const rankedRecommendations = [...filteredRecommendations].map(item => {
     const reviewCount = item.id ? parseInt(item.id) * 10 + Math.floor((item.rating || 4.5) * 15) : 100;
     return {
@@ -68,27 +74,32 @@ const SearchResults = () => {
     }
     return b.reviewCount - a.reviewCount;
   });
+
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
       console.log("SearchResults - Processing search query:", searchQuery);
       handleSearch(searchQuery);
     }
   }, [searchQuery, query, handleSearch]);
+
   useEffect(() => {
     if (categoryParam !== 'all' && categoryParam !== category) {
       console.log("SearchResults - Setting category from URL:", categoryParam);
       handleCategoryChange(categoryParam as any);
     }
   }, [categoryParam, category, handleCategoryChange]);
+
   useEffect(() => {
     if (!searchQuery) {
       navigate('/');
     }
   }, [searchQuery, navigate]);
+
   const handleLocationChange = (location: string) => {
     console.log(`Location changed to: ${location}`);
     setSelectedLocation(location);
   };
+
   const handleRSVP = (eventTitle: string) => {
     toast({
       title: "RSVP Successful",
@@ -96,11 +107,13 @@ const SearchResults = () => {
       duration: 3000
     });
   };
+
   const handleNewSearch = (newQuery: string) => {
     if (newQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(newQuery)}`);
     }
   };
+
   return <MainLayout>
       <div className="w-full animate-fade-in mx-0 px-[6px]">
         <LocationSelector selectedLocation={selectedLocation} onLocationChange={handleLocationChange} />
@@ -137,13 +150,13 @@ const SearchResults = () => {
               
               <Tabs defaultValue="locations" className="w-full mb-6" onValueChange={setActiveTab} value={activeTab}>
                 <TabsList className="grid w-full max-w-md grid-cols-3 mb-4">
-                  <TabsTrigger value="locations">
+                  <TabsTrigger value="locations" className="font-medium">
                     Locations ({rankedRecommendations.length})
                   </TabsTrigger>
-                  <TabsTrigger value="events">
+                  <TabsTrigger value="events" className="font-medium">
                     Events ({events.length})
                   </TabsTrigger>
-                  <TabsTrigger value="marketplace">
+                  <TabsTrigger value="marketplace" className="font-medium">
                     Marketplace ({marketplaceListings.length})
                   </TabsTrigger>
                 </TabsList>
@@ -242,4 +255,5 @@ const SearchResults = () => {
       </div>
     </MainLayout>;
 };
+
 export default SearchResults;
