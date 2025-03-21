@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
@@ -286,7 +287,7 @@ const Marketplace = () => {
         
         <Tabs defaultValue={currentCategory} value={currentCategory} onValueChange={handleCategoryChange} className="mb-6">
           <TabsList className="mb-4 flex flex-nowrap overflow-auto pb-1 scrollbar-none h-14 bg-gray-50 rounded-xl border border-gray-200/50 p-2 shadow-sm">
-            {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify px-4 font-semibold text-sm mx-2 hover:bg-gray-100/80 transition-colors min-w-[120px] rounded-lg">
+            {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify px-2 font-semibold text-sm mx-1 hover:bg-gray-100/80 transition-colors min-w-[100px] rounded-lg">
                 {category.name}
               </TabsTrigger>)}
           </TabsList>
