@@ -21,6 +21,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { BusinessFormValues } from '@/components/AddBusinessForm';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+
 const profileFormSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters."
@@ -51,12 +52,15 @@ const profileFormSchema = z.object({
   message: "Passwords don't match.",
   path: ["confirmPassword"]
 });
+
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
+
 const defaultValues: Partial<ProfileFormValues> = {
   name: "John Doe",
   email: "john.doe@example.com",
   phone: "+1 (555) 123-4567"
 };
+
 const Profile = () => {
   const {
     toast
@@ -78,11 +82,13 @@ const Profile = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [marketplaceListingToEdit, setMarketplaceListingToEdit] = useState<MarketplaceListing | null>(null);
   const [showMarketplaceForm, setShowMarketplaceForm] = useState(false);
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
     mode: "onChange"
   });
+
   function onSubmit(data: ProfileFormValues) {
     toast({
       title: "Profile updated",
@@ -90,6 +96,7 @@ const Profile = () => {
     });
     console.log(data);
   }
+
   const handleLogout = async () => {
     const {
       error
@@ -108,6 +115,7 @@ const Profile = () => {
       navigate('/');
     }
   };
+
   const handleEditBusiness = (business: BusinessFormValues & {
     id: string;
   }) => {
@@ -115,15 +123,18 @@ const Profile = () => {
     setShowAddForm(true);
     setActiveTab("services");
   };
+
   const handleEditMarketplaceListing = (listing: MarketplaceListing) => {
     setMarketplaceListingToEdit(listing);
     setShowMarketplaceForm(true);
     setActiveTab("marketplace");
   };
+
   const handleAddNewBusiness = () => {
     setBusinessToEdit(null);
     setShowAddForm(true);
   };
+
   const handleBusinessSaved = () => {
     setShowAddForm(false);
     setBusinessToEdit(null);
@@ -133,6 +144,7 @@ const Profile = () => {
       description: "Your business listing has been saved successfully."
     });
   };
+
   const handleMarketplaceListingSaved = () => {
     setShowMarketplaceForm(false);
     setMarketplaceListingToEdit(null);
@@ -141,8 +153,9 @@ const Profile = () => {
       description: "Your marketplace listing has been saved successfully."
     });
   };
+
   return <MainLayout>
-      <section className="w-full py-8 px-4">
+      <section className="w-full py-8 px-4 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 flex flex-wrap justify-between items-center gap-4">
             <div>
@@ -158,45 +171,59 @@ const Profile = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-            <div className="bg-muted/30 rounded-lg p-1 mb-2">
-              <TabsList className="w-full grid grid-cols-4 h-auto p-0">
-                <TabsTrigger value="account" className="flex items-center gap-2 py-3 px-4 text-base">
-                  <User className="h-5 w-5" />
-                  Account
-                </TabsTrigger>
-                <TabsTrigger value="services" className="flex items-center gap-2 py-3 px-4 text-base">
-                  <Store className="h-5 w-5" />
-                  Business/Services
-                </TabsTrigger>
-                <TabsTrigger value="marketplace" className="flex items-center gap-2 py-0 text-sm px-[48px]">
-                  <ShoppingBag className="h-5 w-5" />
-                  Marketplace
-                </TabsTrigger>
-                <TabsTrigger value="preferences" className="flex items-center gap-2 py-3 px-4 text-base">
-                  <Settings className="h-5 w-5" />
-                  Preferences
-                </TabsTrigger>
-              </TabsList>
-            </div>
+            <ScrollArea className="w-full">
+              <div className="bg-muted/30 rounded-lg p-1 mb-2">
+                <TabsList className="w-full grid grid-cols-4 h-auto p-0">
+                  <TabsTrigger 
+                    value="account" 
+                    className="flex items-center gap-2 py-3 text-base whitespace-nowrap"
+                  >
+                    <User className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+                    <span className="truncate">Account</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="services" 
+                    className="flex items-center gap-2 py-3 text-base whitespace-nowrap"
+                  >
+                    <Store className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+                    <span className="truncate">Business/Services</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="marketplace" 
+                    className="flex items-center gap-2 py-3 text-base whitespace-nowrap"
+                  >
+                    <ShoppingBag className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+                    <span className="truncate">Marketplace</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="preferences" 
+                    className="flex items-center gap-2 py-3 text-base whitespace-nowrap"
+                  >
+                    <Settings className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+                    <span className="truncate">Preferences</span>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+            </ScrollArea>
 
-            <TabsContent value="account" className="space-y-6">
-              <div className="bg-white rounded-xl shadow-md border border-border p-8 w-full">
+            <TabsContent value="account" className="space-y-6 pb-8">
+              <div className="bg-white rounded-xl shadow-md border border-border p-6 md:p-8 w-full">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center">
-                    <UserCog className="h-6 w-6 mr-2 text-primary" />
-                    <h2 className="text-2xl font-semibold">Personal Information</h2>
+                    <UserCog className="h-5 w-5 mr-2 text-primary" />
+                    <h2 className="text-xl md:text-2xl font-semibold">Personal Information</h2>
                   </div>
                 </div>
                 
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-4xl">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 md:space-y-8 max-w-4xl">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                       <FormField control={form.control} name="name" render={({
                       field
                     }) => <FormItem>
-                            <FormLabel className="text-base">Full Name</FormLabel>
+                            <FormLabel className="text-sm md:text-base">Full Name</FormLabel>
                             <FormControl>
-                              <Input placeholder="Your name" className="h-12" {...field} />
+                              <Input placeholder="Your name" className="h-10 md:h-12" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>} />
@@ -204,9 +231,9 @@ const Profile = () => {
                       <FormField control={form.control} name="email" render={({
                       field
                     }) => <FormItem>
-                            <FormLabel className="text-base">Email Address</FormLabel>
+                            <FormLabel className="text-sm md:text-base">Email Address</FormLabel>
                             <FormControl>
-                              <Input placeholder="Your email" className="h-12" {...field} />
+                              <Input placeholder="Your email" className="h-10 md:h-12" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>} />
@@ -215,39 +242,39 @@ const Profile = () => {
                     <FormField control={form.control} name="phone" render={({
                     field
                   }) => <FormItem>
-                          <FormLabel className="text-base">Phone Number</FormLabel>
+                          <FormLabel className="text-sm md:text-base">Phone Number</FormLabel>
                           <FormControl>
-                            <Input placeholder="Your phone number" className="h-12" {...field} />
+                            <Input placeholder="Your phone number" className="h-10 md:h-12" {...field} />
                           </FormControl>
-                          <FormDescription className="text-sm">
+                          <FormDescription className="text-xs md:text-sm">
                             Used for verification and important notifications
                           </FormDescription>
                           <FormMessage />
                         </FormItem>} />
                     
-                    <Separator className="my-8" />
+                    <Separator className="my-6 md:my-8" />
                     
                     <div>
-                      <h3 className="text-xl font-semibold mb-6">Change Password</h3>
+                      <h3 className="text-lg md:text-xl font-semibold mb-6">Change Password</h3>
                       
-                      <div className="space-y-6">
+                      <div className="space-y-4 md:space-y-6">
                         <FormField control={form.control} name="currentPassword" render={({
                         field
                       }) => <FormItem>
-                              <FormLabel className="text-base">Current Password</FormLabel>
+                              <FormLabel className="text-sm md:text-base">Current Password</FormLabel>
                               <FormControl>
-                                <Input type="password" placeholder="Current password" className="h-12" {...field} />
+                                <Input type="password" placeholder="Current password" className="h-10 md:h-12" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>} />
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                           <FormField control={form.control} name="newPassword" render={({
                           field
                         }) => <FormItem>
-                                <FormLabel className="text-base">New Password</FormLabel>
+                                <FormLabel className="text-sm md:text-base">New Password</FormLabel>
                                 <FormControl>
-                                  <Input type="password" placeholder="New password" className="h-12" {...field} />
+                                  <Input type="password" placeholder="New password" className="h-10 md:h-12" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>} />
@@ -255,9 +282,9 @@ const Profile = () => {
                           <FormField control={form.control} name="confirmPassword" render={({
                           field
                         }) => <FormItem>
-                                <FormLabel className="text-base">Confirm Password</FormLabel>
+                                <FormLabel className="text-sm md:text-base">Confirm Password</FormLabel>
                                 <FormControl>
-                                  <Input type="password" placeholder="Confirm new password" className="h-12" {...field} />
+                                  <Input type="password" placeholder="Confirm new password" className="h-10 md:h-12" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>} />
@@ -267,7 +294,7 @@ const Profile = () => {
                     
                     <div className="pt-4">
                       <Button type="submit" size="lg" className="px-8">
-                        <Save className="mr-2 h-5 w-5" />
+                        <Save className="mr-2 h-4 w-4 md:h-5 md:w-5" />
                         Save Changes
                       </Button>
                     </div>
@@ -276,20 +303,21 @@ const Profile = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="services" className="space-y-6">
-              <div className="bg-white rounded-xl shadow-md border border-border p-8 w-full">
+            <TabsContent value="services" className="space-y-6 pb-8">
+              <div className="bg-white rounded-xl shadow-md border border-border p-6 md:p-8 w-full">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center">
-                    <Store className="h-6 w-6 mr-2 text-primary" />
-                    <h2 className="text-2xl font-semibold">
+                    <Store className="h-5 w-5 mr-2 text-primary" />
+                    <h2 className="text-xl md:text-2xl font-semibold">
                       {showAddForm ? businessToEdit ? "Edit Business or Service" : "Add Business or Service" : "Your Businesses and Services"}
                     </h2>
                   </div>
-                  {!showAddForm && <Button size="lg" onClick={handleAddNewBusiness} className="flex items-center gap-2">
-                      <ListPlus className="h-5 w-5" />
-                      Add New Business
+                  {!showAddForm && <Button size="sm" md="lg" onClick={handleAddNewBusiness} className="flex items-center gap-2">
+                      <ListPlus className="h-4 w-4" />
+                      <span className="hidden sm:inline">Add New Business</span>
+                      <span className="sm:hidden">Add</span>
                     </Button>}
-                  {showAddForm && <Button variant="outline" size="lg" onClick={() => {
+                  {showAddForm && <Button variant="outline" size="sm" md="lg" onClick={() => {
                   setShowAddForm(false);
                   setBusinessToEdit(null);
                 }}>
@@ -298,7 +326,7 @@ const Profile = () => {
                 </div>
                 
                 {showAddForm ? <>
-                    <p className="text-muted-foreground text-lg mb-6">
+                    <p className="text-muted-foreground text-sm md:text-lg mb-6">
                       {businessToEdit ? "Edit your business or service details below." : "Add your business or service to help others find you. All fields marked with * are required."}
                     </p>
                     <AddBusinessForm businessData={businessToEdit || undefined} onSaved={handleBusinessSaved} />
@@ -306,75 +334,75 @@ const Profile = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="marketplace" className="space-y-6">
-              <div className="bg-white rounded-xl shadow-md border border-border p-8 w-full">
+            <TabsContent value="marketplace" className="space-y-6 pb-8">
+              <div className="bg-white rounded-xl shadow-md border border-border p-6 md:p-8 w-full">
                 <UserMarketplaceListings />
               </div>
             </TabsContent>
 
-            <TabsContent value="preferences" className="space-y-6">
-              <div className="bg-white rounded-xl shadow-md border border-border p-8 w-full">
+            <TabsContent value="preferences" className="space-y-6 pb-8">
+              <div className="bg-white rounded-xl shadow-md border border-border p-6 md:p-8 w-full">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center">
-                    <Settings className="h-6 w-6 mr-2 text-primary" />
-                    <h2 className="text-2xl font-semibold">Preferences</h2>
+                    <Settings className="h-5 w-5 mr-2 text-primary" />
+                    <h2 className="text-xl md:text-2xl font-semibold">Preferences</h2>
                   </div>
                 </div>
                 
-                <div className="max-w-4xl space-y-8">
-                  <div className="flex items-center justify-between p-6 bg-muted rounded-lg border border-border/60">
+                <div className="max-w-4xl space-y-6 md:space-y-8">
+                  <div className="flex items-center justify-between p-4 md:p-6 bg-muted rounded-lg border border-border/60">
                     <div className="space-y-1">
                       <div className="flex items-center">
-                        <Moon className="h-5 w-5 mr-2 text-primary" />
-                        <h3 className="text-lg font-medium">Dark Mode</h3>
+                        <Moon className="h-4 w-4 md:h-5 md:w-5 mr-2 text-primary" />
+                        <h3 className="text-base md:text-lg font-medium">Dark Mode</h3>
                       </div>
-                      <p className="text-base text-muted-foreground">Use dark theme throughout the app</p>
+                      <p className="text-sm md:text-base text-muted-foreground">Use dark theme throughout the app</p>
                     </div>
-                    <Switch checked={darkMode} onCheckedChange={setDarkMode} className="scale-125" />
+                    <Switch checked={darkMode} onCheckedChange={setDarkMode} className="md:scale-125" />
                   </div>
                   
-                  <Separator className="my-6" />
+                  <Separator className="my-4 md:my-6" />
                   
-                  <div className="space-y-6">
-                    <h3 className="text-xl font-semibold">Notifications</h3>
+                  <div className="space-y-4 md:space-y-6">
+                    <h3 className="text-lg md:text-xl font-semibold">Notifications</h3>
                     
-                    <div className="flex items-center justify-between p-6 bg-muted rounded-lg border border-border/60">
+                    <div className="flex items-center justify-between p-4 md:p-6 bg-muted rounded-lg border border-border/60">
                       <div className="space-y-1">
-                        <h3 className="text-lg font-medium">Email Notifications</h3>
-                        <p className="text-base text-muted-foreground">Receive email updates about your activity</p>
+                        <h3 className="text-base md:text-lg font-medium">Email Notifications</h3>
+                        <p className="text-sm md:text-base text-muted-foreground">Receive email updates about your activity</p>
                       </div>
-                      <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} className="scale-125" />
+                      <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} className="md:scale-125" />
                     </div>
                     
-                    <div className="flex items-center justify-between p-6 bg-muted rounded-lg border border-border/60">
+                    <div className="flex items-center justify-between p-4 md:p-6 bg-muted rounded-lg border border-border/60">
                       <div className="space-y-1">
-                        <h3 className="text-lg font-medium">Push Notifications</h3>
-                        <p className="text-base text-muted-foreground">Receive push notifications on your device</p>
+                        <h3 className="text-base md:text-lg font-medium">Push Notifications</h3>
+                        <p className="text-sm md:text-base text-muted-foreground">Receive push notifications on your device</p>
                       </div>
-                      <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} className="scale-125" />
+                      <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} className="md:scale-125" />
                     </div>
                   </div>
                   
-                  <Separator className="my-6" />
+                  <Separator className="my-4 md:my-6" />
                   
-                  <div className="space-y-6">
-                    <h3 className="text-xl font-semibold">Privacy Settings</h3>
+                  <div className="space-y-4 md:space-y-6">
+                    <h3 className="text-lg md:text-xl font-semibold">Privacy Settings</h3>
                     
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between p-6 bg-muted rounded-lg border border-border/60">
+                      <div className="flex items-center justify-between p-4 md:p-6 bg-muted rounded-lg border border-border/60">
                         <div className="space-y-1">
-                          <h3 className="text-lg font-medium">Location Services</h3>
-                          <p className="text-base text-muted-foreground">Allow the app to access your location</p>
+                          <h3 className="text-base md:text-lg font-medium">Location Services</h3>
+                          <p className="text-sm md:text-base text-muted-foreground">Allow the app to access your location</p>
                         </div>
-                        <Switch id="location-services" checked={locationServices} onCheckedChange={checked => setLocationServices(checked as boolean)} className="scale-125" />
+                        <Switch id="location-services" checked={locationServices} onCheckedChange={checked => setLocationServices(checked as boolean)} className="md:scale-125" />
                       </div>
                       
-                      <div className="flex items-center justify-between p-6 bg-muted rounded-lg border border-border/60">
+                      <div className="flex items-center justify-between p-4 md:p-6 bg-muted rounded-lg border border-border/60">
                         <div className="space-y-1">
-                          <h3 className="text-lg font-medium">Data Sharing</h3>
-                          <p className="text-base text-muted-foreground">Share usage data to improve service</p>
+                          <h3 className="text-base md:text-lg font-medium">Data Sharing</h3>
+                          <p className="text-sm md:text-base text-muted-foreground">Share usage data to improve service</p>
                         </div>
-                        <Switch id="data-sharing" checked={dataSharing} onCheckedChange={checked => setDataSharing(checked as boolean)} className="scale-125" />
+                        <Switch id="data-sharing" checked={dataSharing} onCheckedChange={checked => setDataSharing(checked as boolean)} className="md:scale-125" />
                       </div>
                     </div>
                   </div>
@@ -386,4 +414,5 @@ const Profile = () => {
       </section>
     </MainLayout>;
 };
+
 export default Profile;
