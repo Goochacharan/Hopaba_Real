@@ -44,7 +44,7 @@ const SellerDetails = () => {
   };
   return <MainLayout>
       <div className="w-full max-w-full mx-auto px-4 py-8">
-        <div className="max-w-[1400px] px-0 mx-0">
+        <div className="max-w-[1400px] mx-0 px-[2px] py-0 my-0">
           <Button variant="ghost" size="sm" className="mb-6" onClick={() => navigate(-1)}>
             <ChevronLeft className="h-4 w-4 mr-2" />
             Back to Marketplace
