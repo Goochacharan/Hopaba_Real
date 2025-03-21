@@ -17,7 +17,9 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+
 type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
+
 const Marketplace = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
@@ -31,6 +33,7 @@ const Marketplace = () => {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   const itemsPerPage = 9;
+
   const {
     listings,
     loading,
@@ -43,9 +46,11 @@ const Marketplace = () => {
     maxPrice: priceRange[1] < 500000 ? priceRange[1] : undefined,
     minRating: ratingFilter > 0 ? ratingFilter : undefined
   });
+
   useEffect(() => {
     setCurrentPage(1);
   }, [currentCategory, searchQuery, conditionFilter, priceRange, ratingFilter, sortOption]);
+
   const categories = [{
     id: 'all',
     name: 'All Categories'
@@ -68,6 +73,7 @@ const Marketplace = () => {
     id: 'home_appliances',
     name: 'Home Appliances'
   }];
+
   const handleCategoryChange = (category: string) => {
     setCurrentCategory(category);
     setCurrentPage(1);
@@ -80,6 +86,7 @@ const Marketplace = () => {
       return params;
     });
   };
+
   const sortListings = (items: MarketplaceListing[]): MarketplaceListing[] => {
     return [...items].sort((a, b) => {
       switch (sortOption) {
@@ -96,9 +103,11 @@ const Marketplace = () => {
       }
     });
   };
+
   const handleSortChange = (option: SortOption) => {
     setSortOption(option);
   };
+
   const filteredListings = listings.filter(listing => {
     const price = listing.price;
     if (price < priceRange[0] || price > priceRange[1]) return false;
@@ -108,9 +117,11 @@ const Marketplace = () => {
     if (conditionFilter !== 'all' && listing.condition.toLowerCase() !== conditionFilter.toLowerCase()) return false;
     return true;
   });
+
   const sortedListings = sortListings(filteredListings);
   const totalPages = Math.ceil(sortedListings.length / itemsPerPage);
   const paginatedListings = sortedListings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -118,6 +129,7 @@ const Marketplace = () => {
       maximumFractionDigits: 0
     }).format(price);
   };
+
   return <MainLayout>
       <div className="animate-fade-in px-[7px]">
         <div className="mb-6">
@@ -273,8 +285,8 @@ const Marketplace = () => {
         </ScrollArea>
         
         <Tabs defaultValue={currentCategory} value={currentCategory} onValueChange={handleCategoryChange} className="mb-6">
-          <TabsList className="mb-4 flex flex-nowrap overflow-auto pb-1 scrollbar-none">
-            {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify px-0 font-semibold text-sm mx-[11px]">
+          <TabsList className="mb-4 flex flex-nowrap overflow-auto pb-1 scrollbar-none h-14 bg-gray-50 rounded-xl border border-gray-200/50 p-2 shadow-sm">
+            {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify px-4 font-semibold text-sm mx-2 hover:bg-gray-100/80 transition-colors min-w-[120px] rounded-lg">
                 {category.name}
               </TabsTrigger>)}
           </TabsList>
@@ -333,4 +345,5 @@ const Marketplace = () => {
       </div>
     </MainLayout>;
 };
+
 export default Marketplace;
