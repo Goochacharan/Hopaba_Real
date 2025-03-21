@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -171,32 +172,32 @@ const Profile = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-            <div className="bg-muted/30 rounded-lg p-1 mb-2">
-              <TabsList className="w-full grid grid-cols-4 h-auto p-0">
+            <div className="bg-muted/30 rounded-lg p-1 mb-2 overflow-x-auto">
+              <TabsList className="w-full min-w-max grid grid-cols-4 h-auto p-0">
                 <TabsTrigger 
                   value="account" 
-                  className="flex items-center gap-2 py-3 px-2 text-sm md:text-base whitespace-nowrap"
+                  className="flex items-center gap-2 py-3 px-4 text-sm md:text-base whitespace-nowrap"
                 >
                   <User className="h-4 w-4 md:h-5 md:w-5" />
                   <span className="truncate">Account</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="services" 
-                  className="flex items-center gap-2 py-3 px-2 text-sm md:text-base whitespace-nowrap"
+                  className="flex items-center gap-2 py-3 px-4 text-sm md:text-base whitespace-nowrap"
                 >
                   <Store className="h-4 w-4 md:h-5 md:w-5" />
                   <span className="truncate">Business/Services</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="marketplace" 
-                  className="flex items-center gap-2 py-3 px-2 text-sm md:text-base whitespace-nowrap"
+                  className="flex items-center gap-2 py-3 px-4 text-sm md:text-base whitespace-nowrap"
                 >
                   <ShoppingBag className="h-4 w-4 md:h-5 md:w-5" />
                   <span className="truncate">Marketplace</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="preferences" 
-                  className="flex items-center gap-2 py-3 px-2 text-sm md:text-base whitespace-nowrap"
+                  className="flex items-center gap-2 py-3 px-4 text-sm md:text-base whitespace-nowrap"
                 >
                   <Settings className="h-4 w-4 md:h-5 md:w-5" />
                   <span className="truncate">Preferences</span>
