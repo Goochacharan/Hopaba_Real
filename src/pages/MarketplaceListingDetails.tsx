@@ -82,7 +82,7 @@ const MarketplaceListingDetails = () => {
             <div className="mb-6 bg-black/5 rounded-xl shadow-sm overflow-hidden">
               <ListingImageCarousel images={listing.images} onImageClick={openImageViewer} listing={listing} />
               
-              <div className="p-4">
+              <div className="p-4 py-0 my-[10px] px-0 mx-[4px]">
                 <ListingThumbnails images={listing.images} selectedIndex={selectedImageIndex} onSelect={index => {
                 setSelectedImageIndex(index);
                 openImageViewer(index);
