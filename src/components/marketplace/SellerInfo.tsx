@@ -20,7 +20,7 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
 }) => {
   return <div className="flex flex-col w-full">
       <div className="flex items-center gap-3 mb-3 w-full">
-        <span className="text-muted-foreground">Seller</span>
+        <span className="text-muted-foreground mx-[52px] text-sm">Seller</span>
         {sellerId ? <Link to={`/seller/${sellerId}`} onClick={e => e.stopPropagation()} // Prevent triggering parent card click
       className="font-medium text-lg hover:text-primary hover:underline px-0 mx-[54px]">
             {sellerName}
