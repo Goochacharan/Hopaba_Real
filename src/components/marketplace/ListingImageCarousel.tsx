@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -21,10 +21,13 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
   className,
   listing
 }) => {
-  const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { toast } = useToast();
   const isInWishlistAlready = isInWishlist(listing.id);
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+  const minSwipeDistance = 50;
 
   // Use default image if no images are provided
   const imageArray = images && images.length > 0 
@@ -70,6 +73,40 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
     }
   };
 
+  // Touch event handlers for swipe gestures
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchEndX.current = null;
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    
+    const distance = touchStartX.current - touchEndX.current;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe && imageArray.length > 1) {
+      e.stopPropagation();
+      setCurrentImageIndex(prev => 
+        prev === imageArray.length - 1 ? 0 : prev + 1
+      );
+    } else if (isRightSwipe && imageArray.length > 1) {
+      e.stopPropagation();
+      setCurrentImageIndex(prev => 
+        prev === 0 ? imageArray.length - 1 : prev - 1
+      );
+    }
+    
+    // Reset touch coordinates
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+
   return (
     <div className={cn("relative group", className)}>
       <AspectRatio ratio={4/3} className="bg-muted">
@@ -78,6 +115,9 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
           alt={`Product image ${currentImageIndex + 1}`}
           className="object-cover w-full h-full"
           onClick={(e) => handleImageClick(currentImageIndex, e)}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
         />
         
         {/* Wishlist button */}

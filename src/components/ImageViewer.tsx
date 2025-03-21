@@ -28,6 +28,9 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [rotation, setRotation] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+  const minSwipeDistance = 50;
   
   const imageRef = useRef<HTMLImageElement>(null);
 
@@ -92,6 +95,8 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    
     if (scale > 1) {
       setIsDragging(true);
       setDragStart({ 
@@ -102,6 +107,8 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+    
     if (isDragging && scale > 1) {
       const x = e.touches[0].clientX - dragStart.x;
       const y = e.touches[0].clientY - dragStart.y;
@@ -109,8 +116,26 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
     }
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent) => {
     setIsDragging(false);
+    
+    if (scale > 1) return; // Don't process swipes if zoomed in
+    
+    if (!touchStartX.current || !touchEndX.current) return;
+    
+    const distance = touchStartX.current - touchEndX.current;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe) {
+      goNext();
+    } else if (isRightSwipe) {
+      goPrevious();
+    }
+    
+    // Reset touch coordinates
+    touchStartX.current = null;
+    touchEndX.current = null;
   };
 
   const goPrevious = () => {
