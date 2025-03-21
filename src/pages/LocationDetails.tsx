@@ -15,6 +15,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import ImageViewer from '@/components/ImageViewer';
+
 interface Review {
   id: string;
   name: string;
@@ -22,6 +24,7 @@ interface Review {
   rating: number;
   text: string;
 }
+
 const reviews: Review[] = [{
   id: '1',
   name: 'Priya Singh',
@@ -41,22 +44,20 @@ const reviews: Review[] = [{
   rating: 5,
   text: 'Best flute classes in Bangalore! The instructor is very skilled and has a great way of teaching complex techniques in simple ways.'
 }];
+
 const TOTAL_REVIEW_COUNT = 153;
+
 const reviewSchema = z.object({
   rating: z.number().min(1).max(5),
   reviewText: z.string().min(3, "Review must be at least 3 characters").max(500, "Review cannot exceed 500 characters")
 });
+
 type ReviewFormValues = z.infer<typeof reviewSchema>;
+
 const LocationDetails = () => {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
+  const { id } = useParams<{ id: string; }>();
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [location, setLocation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [question, setQuestion] = useState('');
@@ -71,7 +72,10 @@ const LocationDetails = () => {
   const [reviewFormVisible, setReviewFormVisible] = useState(false);
   const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
   const [currentImage, setCurrentImage] = useState(0);
+  const [imageViewerOpen, setImageViewerOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const isMobile = useIsMobile();
+
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewSchema),
     defaultValues: {
@@ -79,6 +83,7 @@ const LocationDetails = () => {
       reviewText: ""
     }
   });
+
   useEffect(() => {
     if (!id) {
       navigate('/');
@@ -102,6 +107,7 @@ const LocationDetails = () => {
       setLoading(false);
     }, 500);
   }, [id, navigate, toast]);
+
   const handleImageLoad = (index: number) => {
     setImageLoaded(prev => {
       const newState = [...prev];
@@ -109,6 +115,12 @@ const LocationDetails = () => {
       return newState;
     });
   };
+
+  const handleImageClick = (index: number) => {
+    setSelectedImageIndex(index);
+    setImageViewerOpen(true);
+  };
+
   const handleCall = () => {
     toast({
       title: "Calling",
@@ -116,6 +128,7 @@ const LocationDetails = () => {
       duration: 3000
     });
   };
+
   const handleChat = () => {
     toast({
       title: "Opening Chat",
@@ -123,6 +136,7 @@ const LocationDetails = () => {
       duration: 3000
     });
   };
+
   const handleDirections = () => {
     const destination = encodeURIComponent(location.address);
     let mapsUrl;
@@ -138,6 +152,7 @@ const LocationDetails = () => {
       duration: 2000
     });
   };
+
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -170,6 +185,7 @@ const LocationDetails = () => {
       });
     }
   };
+
   const handleAskQuestion = (text?: string) => {
     const questionText = text || question;
     if (!questionText.trim()) return;
@@ -208,7 +224,9 @@ const LocationDetails = () => {
       });
     }, 1000);
   };
+
   const suggestedQuestions = ["What services do they offer?", "What are their qualifications?", "Do they offer trial classes?", "What age groups do they teach?", "Do they have experience with beginners?", "What is the class duration?", "What is their teaching style?", "How much experience do they have?", "Do they teach online?", "What is their cancellation policy?"];
+
   const toggleReviewForm = () => {
     setReviewFormVisible(!reviewFormVisible);
     if (reviewFormVisible) {
@@ -216,10 +234,12 @@ const LocationDetails = () => {
       setSelectedRating(0);
     }
   };
+
   const handleRatingSelect = (rating: number) => {
     setSelectedRating(rating);
     form.setValue("rating", rating);
   };
+
   const onSubmitReview = (values: ReviewFormValues) => {
     const reviewId = Math.random().toString(36).substring(2, 9);
     const currentDate = "Just now";
@@ -240,7 +260,9 @@ const LocationDetails = () => {
     setSelectedRating(0);
     setReviewFormVisible(false);
   };
+
   const allReviews = [...userReviews, ...reviews];
+
   if (loading) {
     return <MainLayout>
         <div className="container mx-auto py-4 px-4 max-w-none">
@@ -253,8 +275,11 @@ const LocationDetails = () => {
         </div>
       </MainLayout>;
   }
+
   if (!location) return null;
+
   const locationImages = location.images && location.images.length > 0 ? location.images : [location.image];
+
   return <MainLayout>
       <div className="container mx-auto py-4 max-w-none px-[7px]">
         <Button variant="ghost" size="sm" className="mb-4 pl-0 text-muted-foreground" onClick={() => navigate(-1)}>
@@ -268,10 +293,18 @@ const LocationDetails = () => {
               <div className="w-full h-72 relative overflow-hidden">
                 <Carousel className="w-full h-full">
                   <CarouselContent className="h-full">
-                    {locationImages.map((img: string, index: number) => <CarouselItem key={index} className="h-full relative">
+                    {locationImages.map((img: string, index: number) => (
+                      <CarouselItem key={index} className="h-full relative">
                         <div className={`absolute inset-0 bg-muted/30 ${imageLoaded[index] ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`} />
-                        <img src={img} alt={`${location.name} - image ${index + 1}`} className={`w-full h-72 object-cover transition-all duration-500 ${imageLoaded[index] ? 'opacity-100 blur-0' : 'opacity-0 blur-sm'}`} onLoad={() => handleImageLoad(index)} />
-                      </CarouselItem>)}
+                        <img 
+                          src={img} 
+                          alt={`${location.name} - image ${index + 1}`} 
+                          className={`w-full h-72 object-cover transition-all duration-500 ${imageLoaded[index] ? 'opacity-100 blur-0' : 'opacity-0 blur-sm'} cursor-pointer`} 
+                          onLoad={() => handleImageLoad(index)}
+                          onClick={() => handleImageClick(index)}
+                        />
+                      </CarouselItem>
+                    ))}
                   </CarouselContent>
                   {locationImages.length > 1 && <>
                       <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white/90" />
@@ -347,99 +380,84 @@ const LocationDetails = () => {
                   </button>
                 </div>
               </div>
-            </div>
             
-            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
-              <h2 className="text-xl font-semibold mb-4">{location.name}</h2>
-              <p className="text-muted-foreground">{location.description}</p>
-              
-              <div className="mt-4">
-                {location.tags.map((tag: string, i: number) => <span key={i} className="inline-block bg-secondary text-xs px-2 py-1 rounded-full text-muted-foreground mr-2 mb-2">
-                    {tag}
-                  </span>)}
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Reviews</h2>
-                <Button variant="outline" size="sm" onClick={toggleReviewForm} className="text-sm">
-                  {reviewFormVisible ? "Cancel" : "Write a review"}
-                </Button>
-              </div>
-
-              {reviewFormVisible && <div className="mb-6 p-4 bg-secondary/30 rounded-lg">
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmitReview)} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label>Your rating</Label>
-                        <div className="flex items-center gap-1">
-                          {[1, 2, 3, 4, 5].map(rating => <button key={rating} type="button" onClick={() => handleRatingSelect(rating)} className="focus:outline-none">
-                              <Star className={`w-6 h-6 ${rating <= selectedRating ? "text-amber-500 fill-amber-500" : "text-gray-300"}`} />
-                            </button>)}
-                          {form.formState.errors.rating && <p className="text-destructive text-xs ml-2">Please select a rating</p>}
-                        </div>
-                      </div>
-
-                      <FormField control={form.control} name="reviewText" render={({
-                    field
-                  }) => <FormItem>
-                            <FormLabel>Your review</FormLabel>
-                            <FormControl>
-                              <Textarea placeholder="Share your experience with this place..." className="min-h-[100px]" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>} />
-
-                      <div className="flex justify-end">
-                        <Button type="submit" className="w-full sm:w-auto">
-                          Submit review
-                        </Button>
-                      </div>
-                    </form>
-                  </Form>
-                </div>}
-
-              <div className="flex items-center mb-4">
-                <span className="font-medium">
-                  {TOTAL_REVIEW_COUNT} reviews
-                </span>
-                <div className="flex items-center ml-3 text-amber-500">
-                  {[...Array(5)].map((_, i) => <Star key={i} size={16} className={i < Math.floor(location.rating) ? "fill-amber-500" : ""} />)}
+              <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
+                <h2 className="text-xl font-semibold mb-4">{location.name}</h2>
+                <p className="text-muted-foreground">{location.description}</p>
+                
+                <div className="mt-4">
+                  {location.tags.map((tag: string, i: number) => <span key={i} className="inline-block bg-secondary text-xs px-2 py-1 rounded-full text-muted-foreground mr-2 mb-2">
+                      {tag}
+                    </span>)}
                 </div>
               </div>
-              <div className="space-y-4">
-                {allReviews.map(review => <div key={review.id} className="border-b border-border/50 pb-4 last:border-0 last:pb-0">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <div className="font-medium">{review.name}</div>
-                        <div className="text-xs text-muted-foreground">{review.date}</div>
+            
+              <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">Reviews</h2>
+                  <Button variant="outline" size="sm" onClick={toggleReviewForm} className="text-sm">
+                    {reviewFormVisible ? "Cancel" : "Write a review"}
+                  </Button>
+                </div>
+
+                {reviewFormVisible && <div className="mb-6 p-4 bg-secondary/30 rounded-lg">
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(onSubmitReview)} className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Your rating</Label>
+                          <div className="flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map(rating => <button key={rating} type="button" onClick={() => handleRatingSelect(rating)} className="focus:outline-none">
+                                <Star className={`w-6 h-6 ${rating <= selectedRating ? "text-amber-500 fill-amber-500" : "text-gray-300"}`} />
+                              </button>)}
+                            {form.formState.errors.rating && <p className="text-destructive text-xs ml-2">Please select a rating</p>}
+                          </div>
+                        </div>
+
+                        <FormField control={form.control} name="reviewText" render={({
+                          field
+                        }) => <FormItem>
+                              <FormLabel>Your review</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="Share your experience with this place..." className="min-h-[100px]" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>} />
+
+                        <div className="flex justify-end">
+                          <Button type="submit" className="w-full sm:w-auto">
+                            Submit review
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </div>}
+
+                <div className="flex items-center mb-4">
+                  <span className="font-medium">
+                    {TOTAL_REVIEW_COUNT} reviews
+                  </span>
+                  <div className="flex items-center ml-3 text-amber-500">
+                    {[...Array(5)].map((_, i) => <Star key={i} size={16} className={i < Math.floor(location.rating) ? "fill-amber-500" : ""} />)}
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {allReviews.map(review => <div key={review.id} className="border-b border-border/50 pb-4 last:border-0 last:pb-0">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <div className="font-medium">{review.name}</div>
+                          <div className="text-xs text-muted-foreground">{review.date}</div>
+                        </div>
+                        <div className="flex items-center text-amber-500">
+                          {[...Array(5)].map((_, i) => <Star key={i} size={14} className={i < review.rating ? "fill-amber-500" : ""} />)}
+                        </div>
                       </div>
-                      <div className="flex items-center text-amber-500">
-                        {[...Array(5)].map((_, i) => <Star key={i} size={14} className={i < review.rating ? "fill-amber-500" : ""} />)}
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{review.text}</p>
-                  </div>)}
+                      <p className="text-sm text-muted-foreground">{review.text}</p>
+                    </div>)}
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden p-6">
-              <h3 className="font-medium mb-4">Questions & Answers</h3>
-              {questionAnswers.length > 0 && <div className="mb-4 space-y-3 max-h-80 overflow-y-auto">
-                  {questionAnswers.map((item, index) => <div key={index} className="p-4 bg-secondary/70 rounded-lg">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-xs font-medium text-primary">{item.question}</p>
-                        <span className="text-xs text-muted-foreground">{item.timestamp}</span>
-                      </div>
-                      <p className="text-sm">{item.answer}</p>
-                    </div>)}
-                </div>}
-            </div>
             
-            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
               <div className="space-y-4">
                 <div className="relative">
                   <Input type="text" value={question} onChange={e => setQuestion(e.target.value)} placeholder="Ask a question about this place" className="w-full pr-12 bg-[#F6F6F7] text-sm" />
@@ -461,8 +479,33 @@ const LocationDetails = () => {
               </div>
             </div>
           </div>
+          
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden p-6">
+              <h3 className="font-medium mb-4">Questions & Answers</h3>
+              {questionAnswers.length > 0 && <div className="mb-4 space-y-3 max-h-80 overflow-y-auto">
+                  {questionAnswers.map((item, index) => <div key={index} className="p-4 bg-secondary/70 rounded-lg">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-xs font-medium text-primary">{item.question}</p>
+                        <span className="text-xs text-muted-foreground">{item.timestamp}</span>
+                      </div>
+                      <p className="text-sm">{item.answer}</p>
+                    </div>)}
+                </div>}
+            </div>
+          </div>
         </div>
+        
+        {locationImages.length > 0 && (
+          <ImageViewer 
+            images={locationImages} 
+            initialIndex={selectedImageIndex} 
+            open={imageViewerOpen} 
+            onOpenChange={setImageViewerOpen} 
+          />
+        )}
       </div>
     </MainLayout>;
 };
+
 export default LocationDetails;
