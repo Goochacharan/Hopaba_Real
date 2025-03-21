@@ -58,6 +58,11 @@ const ListingThumbnails: React.FC<ListingThumbnailsProps> = ({
     touchEndX.current = null;
   };
 
+  const handleThumbnailClick = (index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect(index);
+  };
+
   if (images.length <= 1) return null;
 
   return (
@@ -92,7 +97,7 @@ const ListingThumbnails: React.FC<ListingThumbnailsProps> = ({
         {images.map((image, index) => (
           <div
             key={index}
-            onClick={() => onSelect(index)}
+            onClick={(e) => handleThumbnailClick(index, e)}
             className={`cursor-pointer rounded-lg overflow-hidden transition-all border-2 ${
               selectedIndex === index ? 'border-[#1EAEDB] shadow-md' : 'border-transparent'
             }`}

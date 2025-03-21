@@ -48,10 +48,10 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
     );
   };
 
-  const handleImageClick = (index: number, e: React.MouseEvent) => {
+  const handleImageClick = (e: React.MouseEvent) => {
     if (onImageClick) {
       e.stopPropagation();
-      onImageClick(index);
+      onImageClick(currentImageIndex);
     }
   };
 
@@ -113,8 +113,8 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
         <img
           src={imageArray[currentImageIndex]}
           alt={`Product image ${currentImageIndex + 1}`}
-          className="object-cover w-full h-full"
-          onClick={(e) => handleImageClick(currentImageIndex, e)}
+          className="object-cover w-full h-full cursor-pointer"
+          onClick={handleImageClick}
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}

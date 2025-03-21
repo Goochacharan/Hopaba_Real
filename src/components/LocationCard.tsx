@@ -10,12 +10,15 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
+import ImageViewer from '@/components/ImageViewer';
+
 interface LocationCardProps {
   recommendation: Recommendation;
   className?: string;
   ranking?: number;
   reviewCount?: number;
 }
+
 const LocationCard: React.FC<LocationCardProps> = ({
   recommendation,
   className,
@@ -24,17 +27,14 @@ const LocationCard: React.FC<LocationCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
-  const {
-    toast
-  } = useToast();
-  const {
-    addToWishlist,
-    removeFromWishlist,
-    isInWishlist
-  } = useWishlist();
+  const { toast } = useToast();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(recommendation.id);
   const isMobile = useIsMobile();
   const [user, setUser] = useState<any>(null);
+  const [imageViewerOpen, setImageViewerOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
   useEffect(() => {
     const getCurrentUser = async () => {
       const {
@@ -52,10 +52,13 @@ const LocationCard: React.FC<LocationCardProps> = ({
       authListener?.subscription.unsubscribe();
     };
   }, []);
+
   const images = recommendation.images && recommendation.images.length > 0 ? recommendation.images : [recommendation.image];
+  
   React.useEffect(() => {
     setImageLoaded(Array(images.length).fill(false));
   }, [images.length]);
+
   const handleImageLoad = (index: number) => {
     setImageLoaded(prev => {
       const newState = [...prev];
@@ -63,6 +66,13 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return newState;
     });
   };
+
+  const handleImageClick = (index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedImageIndex(index);
+    setImageViewerOpen(true);
+  };
+
   const getMedalStyle = (rank: number) => {
     switch (rank) {
       case 1:
@@ -87,6 +97,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         };
     }
   };
+
   const renderStarRating = (rating: number) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
@@ -104,6 +115,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />)}
       </div>;
   };
+
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast({
@@ -112,6 +124,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
+
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     const phoneNumber = recommendation.phone || '';
@@ -124,6 +137,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
+
   const handleInstagram = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!recommendation.instagram) {
@@ -148,6 +162,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 2000
     });
   };
+
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) {
@@ -175,6 +190,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
+
   const handleDirections = (e: React.MouseEvent) => {
     e.stopPropagation();
     const destination = encodeURIComponent(recommendation.address);
@@ -191,6 +207,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 2000
     });
   };
+
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (navigator.share) {
@@ -224,28 +241,45 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
+
   const handleCardClick = () => {
     navigate(`/location/${recommendation.id}`);
   };
+
   const formatDistance = (distanceText: string | undefined) => {
     if (!distanceText) return '';
     let formattedDistance = distanceText.replace('miles', 'km');
     formattedDistance = formattedDistance.replace('away away', 'away');
     return formattedDistance;
   };
-  return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
+
+  return (
+    <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <div className="relative w-full h-72 overflow-hidden">
         <Carousel className="w-full h-full">
           <CarouselContent className="h-full">
-            {images.map((img, index) => <CarouselItem key={index} className="h-full p-0">
+            {images.map((img, index) => (
+              <CarouselItem key={index} className="h-full p-0">
                 <div className={cn("absolute inset-0 bg-muted/30", imageLoaded[index] ? "opacity-0" : "opacity-100")} />
-                <img src={img} alt={`${recommendation.name} - image ${index + 1}`} onLoad={() => handleImageLoad(index)} className={cn("w-full h-72 object-cover transition-all-500", imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm")} />
-              </CarouselItem>)}
+                <img 
+                  src={img} 
+                  alt={`${recommendation.name} - image ${index + 1}`} 
+                  onLoad={() => handleImageLoad(index)} 
+                  onClick={(e) => handleImageClick(index, e)}
+                  className={cn(
+                    "w-full h-72 object-cover transition-all-500 cursor-pointer", 
+                    imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
+                  )} 
+                />
+              </CarouselItem>
+            ))}
           </CarouselContent>
-          {images.length > 1 && <>
+          {images.length > 1 && (
+            <>
               <CarouselPrevious className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2" />
               <CarouselNext className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2" />
-            </>}
+            </>
+          )}
         </Carousel>
 
         <div className="absolute top-3 left-20 z-10">
@@ -327,6 +361,17 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </button>
         </div>
       </div>
-    </div>;
+
+      {images.length > 0 && (
+        <ImageViewer 
+          images={images} 
+          initialIndex={selectedImageIndex} 
+          open={imageViewerOpen} 
+          onOpenChange={setImageViewerOpen} 
+        />
+      )}
+    </div>
+  );
 };
+
 export default LocationCard;
