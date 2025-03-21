@@ -65,7 +65,7 @@ const MarketplaceListingDetails = () => {
       </MainLayout>;
   }
   return <MainLayout>
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto py-8 px-[3px]">
         <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
           <ArrowLeft className="h-4 w-4" />
           <span>Back to Marketplace</span>
