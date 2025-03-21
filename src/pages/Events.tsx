@@ -72,58 +72,60 @@ const Events = () => {
 
   return (
     <MainLayout>
-      <section className="py-8">
-        <h1 className="text-3xl font-medium mb-6">Upcoming Events</h1>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {sampleEvents.map((event) => (
-            <div key={event.id} className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
-              <div className="relative h-48">
-                <img 
-                  src={event.image} 
-                  alt={event.title} 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              
-              <div className="p-5">
-                <h3 className="text-xl font-medium mb-3">{event.title}</h3>
-                
-                <div className="flex flex-col gap-2 mb-4">
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {event.date}
-                  </div>
-                  
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Clock className="w-4 h-4 mr-2" />
-                    {event.time}
-                  </div>
-                  
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    {event.location}
-                  </div>
-                  
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Users className="w-4 h-4 mr-2" />
-                    {event.attendees} attending
-                  </div>
+      <section className="py-8 px-4 w-full pb-32">
+        <div className="max-w-[1400px] mx-auto">
+          <h1 className="text-3xl font-medium mb-6">Upcoming Events</h1>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {sampleEvents.map((event) => (
+              <div key={event.id} className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
+                <div className="relative h-48">
+                  <img 
+                    src={event.image} 
+                    alt={event.title} 
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 
-                <p className="text-sm text-muted-foreground mb-4">
-                  {event.description}
-                </p>
-                
-                <Button 
-                  onClick={() => handleRSVP(event.title)}
-                  className="w-full"
-                >
-                  RSVP to Event
-                </Button>
+                <div className="p-5">
+                  <h3 className="text-xl font-medium mb-3">{event.title}</h3>
+                  
+                  <div className="flex flex-col gap-2 mb-4">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      {event.date}
+                    </div>
+                    
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Clock className="w-4 h-4 mr-2" />
+                      {event.time}
+                    </div>
+                    
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <MapPin className="w-4 h-4 mr-2" />
+                      {event.location}
+                    </div>
+                    
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Users className="w-4 h-4 mr-2" />
+                      {event.attendees} attending
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {event.description}
+                  </p>
+                  
+                  <Button 
+                    onClick={() => handleRSVP(event.title)}
+                    className="w-full"
+                  >
+                    RSVP to Event
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
     </MainLayout>

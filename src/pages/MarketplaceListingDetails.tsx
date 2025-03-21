@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -12,25 +13,21 @@ import ListingDescription from '@/components/marketplace/ListingDescription';
 import ListingMetadata from '@/components/marketplace/ListingMetadata';
 import ImageViewer from '@/components/ImageViewer';
 import SafeTradingTips from '@/components/marketplace/SafeTradingTips';
+
 const MarketplaceListingDetails = () => {
-  const {
-    id = ''
-  } = useParams<{
-    id: string;
-  }>();
-  const {
-    listing,
-    loading,
-    error
-  } = useMarketplaceListing(id);
+  const { id = '' } = useParams<{ id: string; }>();
+  const { listing, loading, error } = useMarketplaceListing(id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
+
   const openImageViewer = (index: number) => {
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
+
   if (loading) {
-    return <MainLayout>
+    return (
+      <MainLayout>
         <div className="container mx-auto py-8 px-4 max-w-6xl animate-pulse">
           <div className="mb-8 h-6 bg-gray-200 rounded w-1/4"></div>
           <div className="grid grid-cols-1 gap-8">
@@ -42,10 +39,13 @@ const MarketplaceListingDetails = () => {
             </div>
           </div>
         </div>
-      </MainLayout>;
+      </MainLayout>
+    );
   }
+
   if (error || !listing) {
-    return <MainLayout>
+    return (
+      <MainLayout>
         <div className="container mx-auto py-8 px-4 max-w-6xl">
           <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
             <ArrowLeft className="h-4 w-4" />
@@ -62,44 +62,69 @@ const MarketplaceListingDetails = () => {
             <Link to="/marketplace">Browse other listings</Link>
           </Button>
         </div>
-      </MainLayout>;
+      </MainLayout>
+    );
   }
-  return <MainLayout>
-      <div className="container mx-auto py-8 px-0">
-        <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
-          <ArrowLeft className="h-4 w-4" />
-          <span>Back to Marketplace</span>
-        </Link>
-        
-        <div className="grid grid-cols-1 gap-8">
-          <div className="py-0 px-0">
-            <div className="mb-6">
-              <Badge className="mb-2">{listing?.category}</Badge>
-              <h1 className="text-2xl sm:text-3xl font-bold mb-2">{listing?.title}</h1>
-              <ListingMetadata location={listing.location} createdAt={listing.created_at} condition={listing.condition} />
-            </div>
-            
-            <div className="mb-6 bg-black/5 rounded-xl shadow-sm overflow-hidden">
-              <ListingImageCarousel images={listing.images} onImageClick={openImageViewer} listing={listing} />
-              
-              <div className="p-4 py-0 my-[10px] px-0 mx-[4px]">
-                <ListingThumbnails images={listing.images} selectedIndex={selectedImageIndex} onSelect={index => {
-                setSelectedImageIndex(index);
-                openImageViewer(index);
-              }} />
+
+  return (
+    <MainLayout>
+      <div className="w-full px-4 py-8 overflow-y-auto pb-32">
+        <div className="max-w-[1400px] mx-auto">
+          <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Marketplace</span>
+          </Link>
+          
+          <div className="grid grid-cols-1 gap-8">
+            <div>
+              <div className="mb-6">
+                <Badge className="mb-2">{listing?.category}</Badge>
+                <h1 className="text-2xl sm:text-3xl font-bold mb-2">{listing?.title}</h1>
+                <ListingMetadata location={listing.location} createdAt={listing.created_at} condition={listing.condition} />
               </div>
-            </div>
-            
-            {listing && <ImageViewer images={listing.images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
-            
-            <ListingDescription description={listing.description} category={listing.category} condition={listing.condition} location={listing.location} createdAt={listing.created_at} showMetadata={false} />
-            
-            <div className="mt-6">
-              <SafeTradingTips />
+              
+              <div className="mb-6 bg-black/5 rounded-xl shadow-sm overflow-hidden">
+                <ListingImageCarousel images={listing.images} onImageClick={openImageViewer} listing={listing} />
+                
+                <div className="p-4">
+                  <ListingThumbnails 
+                    images={listing.images} 
+                    selectedIndex={selectedImageIndex} 
+                    onSelect={index => {
+                      setSelectedImageIndex(index);
+                      openImageViewer(index);
+                    }} 
+                  />
+                </div>
+              </div>
+              
+              {listing && (
+                <ImageViewer 
+                  images={listing.images} 
+                  initialIndex={selectedImageIndex} 
+                  open={imageViewerOpen} 
+                  onOpenChange={setImageViewerOpen} 
+                />
+              )}
+              
+              <ListingDescription 
+                description={listing.description} 
+                category={listing.category} 
+                condition={listing.condition} 
+                location={listing.location} 
+                createdAt={listing.created_at} 
+                showMetadata={false} 
+              />
+              
+              <div className="mt-6 mb-16">
+                <SafeTradingTips />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </MainLayout>;
+    </MainLayout>
+  );
 };
+
 export default MarketplaceListingDetails;
