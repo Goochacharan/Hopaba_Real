@@ -21,6 +21,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { BusinessFormValues } from '@/components/AddBusinessForm';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+
 const profileFormSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters."
@@ -51,12 +52,15 @@ const profileFormSchema = z.object({
   message: "Passwords don't match.",
   path: ["confirmPassword"]
 });
+
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
+
 const defaultValues: Partial<ProfileFormValues> = {
   name: "John Doe",
   email: "john.doe@example.com",
   phone: "+1 (555) 123-4567"
 };
+
 const Profile = () => {
   const {
     toast
@@ -78,11 +82,13 @@ const Profile = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [marketplaceListingToEdit, setMarketplaceListingToEdit] = useState<MarketplaceListing | null>(null);
   const [showMarketplaceForm, setShowMarketplaceForm] = useState(false);
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
     mode: "onChange"
   });
+
   function onSubmit(data: ProfileFormValues) {
     toast({
       title: "Profile updated",
@@ -90,6 +96,7 @@ const Profile = () => {
     });
     console.log(data);
   }
+
   const handleLogout = async () => {
     const {
       error
@@ -108,6 +115,7 @@ const Profile = () => {
       navigate('/');
     }
   };
+
   const handleEditBusiness = (business: BusinessFormValues & {
     id: string;
   }) => {
@@ -115,15 +123,18 @@ const Profile = () => {
     setShowAddForm(true);
     setActiveTab("services");
   };
+
   const handleEditMarketplaceListing = (listing: MarketplaceListing) => {
     setMarketplaceListingToEdit(listing);
     setShowMarketplaceForm(true);
     setActiveTab("marketplace");
   };
+
   const handleAddNewBusiness = () => {
     setBusinessToEdit(null);
     setShowAddForm(true);
   };
+
   const handleBusinessSaved = () => {
     setShowAddForm(false);
     setBusinessToEdit(null);
@@ -133,6 +144,7 @@ const Profile = () => {
       description: "Your business listing has been saved successfully."
     });
   };
+
   const handleMarketplaceListingSaved = () => {
     setShowMarketplaceForm(false);
     setMarketplaceListingToEdit(null);
@@ -141,6 +153,7 @@ const Profile = () => {
       description: "Your marketplace listing has been saved successfully."
     });
   };
+
   return <MainLayout>
       <section className="w-full py-8 px-4 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
@@ -158,21 +171,33 @@ const Profile = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-            <div className="bg-muted/30 rounded-lg p-1 mb-2 overflow-x-auto">
-              <TabsList className="w-full min-w-max grid grid-cols-4 h-auto p-0">
-                <TabsTrigger value="account" className="flex items-center gap-2 py-3 text-sm md:text-base whitespace-nowrap px-[16px] mx-[56px]">
+            <div className="bg-muted/30 rounded-lg p-1 mb-2">
+              <TabsList className="w-full grid grid-cols-4 h-auto p-0">
+                <TabsTrigger 
+                  value="account" 
+                  className="flex items-center gap-2 py-3 px-2 text-sm md:text-base whitespace-nowrap"
+                >
                   <User className="h-4 w-4 md:h-5 md:w-5" />
                   <span className="truncate">Account</span>
                 </TabsTrigger>
-                <TabsTrigger value="services" className="flex items-center gap-2 py-3 px-4 text-sm md:text-base whitespace-nowrap">
+                <TabsTrigger 
+                  value="services" 
+                  className="flex items-center gap-2 py-3 px-2 text-sm md:text-base whitespace-nowrap"
+                >
                   <Store className="h-4 w-4 md:h-5 md:w-5" />
                   <span className="truncate">Business/Services</span>
                 </TabsTrigger>
-                <TabsTrigger value="marketplace" className="flex items-center gap-2 py-3 px-4 text-sm md:text-base whitespace-nowrap">
+                <TabsTrigger 
+                  value="marketplace" 
+                  className="flex items-center gap-2 py-3 px-2 text-sm md:text-base whitespace-nowrap"
+                >
                   <ShoppingBag className="h-4 w-4 md:h-5 md:w-5" />
                   <span className="truncate">Marketplace</span>
                 </TabsTrigger>
-                <TabsTrigger value="preferences" className="flex items-center gap-2 py-3 px-4 text-sm md:text-base whitespace-nowrap">
+                <TabsTrigger 
+                  value="preferences" 
+                  className="flex items-center gap-2 py-3 px-2 text-sm md:text-base whitespace-nowrap"
+                >
                   <Settings className="h-4 w-4 md:h-5 md:w-5" />
                   <span className="truncate">Preferences</span>
                 </TabsTrigger>
@@ -386,4 +411,5 @@ const Profile = () => {
       </section>
     </MainLayout>;
 };
+
 export default Profile;
