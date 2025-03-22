@@ -14,17 +14,7 @@ interface FilterOptions {
   priceLevel: number;
   openNowOnly: boolean;
   distanceUnit?: 'km' | 'mi';
-}
-
-export interface Event {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  description: string;
-  image: string;
-  attendees: number;
+  newOnly?: boolean;
 }
 
 const sampleEvents: Event[] = [
@@ -460,7 +450,7 @@ const useRecommendations = ({
     recs: Recommendation[],
     filterOptions: FilterOptions
   ): Recommendation[] => {
-    const { distanceUnit = 'mi' } = filterOptions;
+    const { distanceUnit = 'mi', newOnly = false } = filterOptions;
     
     return recs.filter(rec => {
       if (rec.rating < filterOptions.minRating) {
@@ -484,6 +474,14 @@ const useRecommendations = ({
       if (rec.priceLevel) {
         const priceCount = rec.priceLevel.length;
         if (priceCount > filterOptions.priceLevel) {
+          return false;
+        }
+      }
+
+      if (newOnly && rec.created_at) {
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        if (new Date(rec.created_at) <= oneWeekAgo) {
           return false;
         }
       }
