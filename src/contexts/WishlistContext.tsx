@@ -13,6 +13,8 @@ interface WishlistContextType {
   addToWishlist: (item: Recommendation | MarketplaceListing, type: 'recommendation' | 'marketplace') => void;
   removeFromWishlist: (id: string) => void;
   isInWishlist: (id: string) => boolean;
+  toggleWishlist: (item: Recommendation | MarketplaceListing) => void;
+  isItemWishlisted: (id: string) => boolean;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
@@ -61,8 +63,32 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return wishlist.some((item) => item.id === id);
   };
 
+  // Add the toggleWishlist method
+  const toggleWishlist = (item: Recommendation | MarketplaceListing) => {
+    // Determine item type based on presence of certain properties
+    const type = 'title' in item ? 'marketplace' : 'recommendation';
+    
+    if (isInWishlist(item.id)) {
+      removeFromWishlist(item.id);
+    } else {
+      addToWishlist(item, type);
+    }
+  };
+
+  // Add the isItemWishlisted method (alias for isInWishlist for backwards compatibility)
+  const isItemWishlisted = (id: string) => {
+    return isInWishlist(id);
+  };
+
   return (
-    <WishlistContext.Provider value={{ wishlist, addToWishlist, removeFromWishlist, isInWishlist }}>
+    <WishlistContext.Provider value={{ 
+      wishlist, 
+      addToWishlist, 
+      removeFromWishlist, 
+      isInWishlist,
+      toggleWishlist,
+      isItemWishlisted
+    }}>
       {children}
     </WishlistContext.Provider>
   );

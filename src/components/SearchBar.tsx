@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Search, X, Mic, Sparkles } from 'lucide-react';
@@ -11,6 +10,7 @@ interface SearchBarProps {
   onSearch: (query: string) => void;
   className?: string;
   placeholder?: string;
+  initialQuery?: string;
   initialValue?: string;
   currentRoute?: string;
 }
@@ -19,12 +19,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   className,
   placeholder,
+  initialQuery = '',
   initialValue = '',
   currentRoute
 }) => {
   const location = useLocation();
   const currentPath = location.pathname;
-  const [query, setQuery] = useState(initialValue);
+  const [query, setQuery] = useState(initialQuery || initialValue);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
@@ -170,11 +171,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
     };
   }, [isExpanded]);
 
+  // Update query when initialQuery or initialValue changes
   useEffect(() => {
-    if (initialValue) {
+    if (initialQuery) {
+      setQuery(initialQuery);
+    } else if (initialValue) {
       setQuery(initialValue);
     }
-  }, [initialValue]);
+  }, [initialQuery, initialValue]);
 
   // This function will explicitly handle the search button click
   const handleSearchButtonClick = async () => {
