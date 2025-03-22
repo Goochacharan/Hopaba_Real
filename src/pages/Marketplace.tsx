@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
@@ -30,7 +31,9 @@ const Marketplace = () => {
   const [conditionFilter, setConditionFilter] = useState<string>('all');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('newest');
+  const [showNewOnly, setShowNewOnly] = useState<boolean>(false); // New state for filtering new listings
   const itemsPerPage = 9;
+  
   const {
     listings,
     loading,
@@ -43,9 +46,19 @@ const Marketplace = () => {
     maxPrice: priceRange[1] < 500000 ? priceRange[1] : undefined,
     minRating: ratingFilter > 0 ? ratingFilter : undefined
   });
+  
   useEffect(() => {
     setCurrentPage(1);
-  }, [currentCategory, searchQuery, conditionFilter, priceRange, ratingFilter, sortOption]);
+  }, [currentCategory, searchQuery, conditionFilter, priceRange, ratingFilter, sortOption, showNewOnly]);
+  
+  // Effect to handle 'new' category selection
+  useEffect(() => {
+    if (currentCategory === 'new') {
+      setShowNewOnly(true);
+      setCurrentCategory('all');
+    }
+  }, [currentCategory]);
+  
   const categories = [{
     id: 'all',
     name: 'All Categories'
@@ -68,6 +81,7 @@ const Marketplace = () => {
     id: 'home_appliances',
     name: 'Home Appliances'
   }];
+  
   const handleCategoryChange = (category: string) => {
     setCurrentCategory(category);
     setCurrentPage(1);
@@ -80,6 +94,7 @@ const Marketplace = () => {
       return params;
     });
   };
+  
   const sortListings = (items: MarketplaceListing[]): MarketplaceListing[] => {
     return [...items].sort((a, b) => {
       switch (sortOption) {
@@ -96,21 +111,40 @@ const Marketplace = () => {
       }
     });
   };
+  
   const handleSortChange = (option: SortOption) => {
     setSortOption(option);
   };
+  
+  // Function to check if a listing is new (less than a week old)
+  const isNewListing = (listing: MarketplaceListing) => {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    return new Date(listing.created_at) > oneWeekAgo;
+  };
+  
   const filteredListings = listings.filter(listing => {
+    // Apply existing filters
     const price = listing.price;
     if (price < priceRange[0] || price > priceRange[1]) return false;
+    
     const listingYear = new Date(listing.created_at).getFullYear();
     if (listingYear < yearRange[0] || listingYear > yearRange[1]) return false;
+    
     if (ratingFilter > 0 && listing.seller_rating < ratingFilter) return false;
+    
     if (conditionFilter !== 'all' && listing.condition.toLowerCase() !== conditionFilter.toLowerCase()) return false;
+    
+    // Apply new filter for listings less than a week old
+    if (showNewOnly && !isNewListing(listing)) return false;
+    
     return true;
   });
+  
   const sortedListings = sortListings(filteredListings);
   const totalPages = Math.ceil(sortedListings.length / itemsPerPage);
   const paginatedListings = sortedListings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -118,6 +152,7 @@ const Marketplace = () => {
       maximumFractionDigits: 0
     }).format(price);
   };
+  
   return <MainLayout>
       <div className="animate-fade-in px-[7px]">
         <div className="mb-6">
@@ -151,6 +186,16 @@ const Marketplace = () => {
                 </div>
               </PopoverContent>
             </Popover>
+
+            <Button 
+              variant={showNewOnly ? "default" : "outline"} 
+              size="sm" 
+              className="rounded-full border border-border/60 flex items-center gap-2"
+              onClick={() => setShowNewOnly(!showNewOnly)}
+            >
+              <span>New</span>
+              {showNewOnly && <Badge variant="outline" className="bg-background text-primary h-5 w-5 p-0 flex items-center justify-center">✓</Badge>}
+            </Button>
 
             <Popover open={activeFilter === 'rating'} onOpenChange={open => setActiveFilter(open ? 'rating' : null)}>
               <PopoverTrigger asChild>
@@ -324,6 +369,7 @@ const Marketplace = () => {
               setYearRange([2010, new Date().getFullYear()]);
               setRatingFilter(0);
               setConditionFilter('all');
+              setShowNewOnly(false);
             }}>
                     Reset all filters
                   </Button>

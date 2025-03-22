@@ -27,13 +27,14 @@ interface UseMarketplaceListingsOptions {
   minPrice?: number;
   maxPrice?: number;
   minRating?: number;
+  newOnly?: boolean; // New option to filter for listings less than a week old
 }
 
 export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = {}) => {
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { category, searchQuery, condition, minPrice, maxPrice, minRating } = options;
+  const { category, searchQuery, condition, minPrice, maxPrice, minRating, newOnly } = options;
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -69,6 +70,13 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
           query = query.gte('seller_rating', minRating);
         }
         
+        // Apply filter for new listings (less than a week old)
+        if (newOnly) {
+          const oneWeekAgo = new Date();
+          oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+          query = query.gte('created_at', oneWeekAgo.toISOString());
+        }
+        
         // Apply search query if provided - with enhanced flexibility
         if (searchQuery && searchQuery.trim() !== '') {
           const searchTerms = searchQuery.trim().toLowerCase();
@@ -87,6 +95,9 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         if (condition && condition !== 'all') {
           console.log(`Filtering by condition: "${condition}"`);
         }
+        if (newOnly) {
+          console.log('Filtering by new only (less than a week old)');
+        }
         setListings(data as MarketplaceListing[]);
       } catch (err) {
         console.error('Error fetching marketplace listings:', err);
@@ -97,7 +108,7 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
     };
 
     fetchListings();
-  }, [category, searchQuery, condition, minPrice, maxPrice, minRating]);
+  }, [category, searchQuery, condition, minPrice, maxPrice, minRating, newOnly]);
 
   return { listings, loading, error };
 };

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Coffee, Utensils, Scissors, ShoppingBag, HeartPulse, Briefcase, BookOpen, Home, Users, MoreHorizontal, Dumbbell } from 'lucide-react';
+import { Coffee, Utensils, Scissors, ShoppingBag, HeartPulse, Briefcase, BookOpen, Home, Users, MoreHorizontal, Dumbbell, Sparkles } from 'lucide-react';
 
 export type CategoryType = 
   | 'all' 
@@ -14,7 +14,8 @@ export type CategoryType =
   | 'education' 
   | 'real-estate' 
   | 'community' 
-  | 'fitness'  // Added 'fitness' category
+  | 'fitness'
+  | 'new'  // Added 'new' category
   | 'more';
 
 interface CategoryFilterProps {
@@ -25,6 +26,7 @@ interface CategoryFilterProps {
 
 const categories: { id: CategoryType; label: string; icon: React.ReactNode }[] = [
   { id: 'all', label: 'All', icon: <div className="w-5 h-5 rounded-full bg-primary opacity-70"></div> },
+  { id: 'new', label: 'New', icon: <Sparkles className="w-5 h-5" /> }, // Added new category with Sparkles icon
   { id: 'restaurants', label: 'Restaurants', icon: <Utensils className="w-5 h-5" /> },
   { id: 'cafes', label: 'Cafes', icon: <Coffee className="w-5 h-5" /> },
   { id: 'salons', label: 'Salons', icon: <Scissors className="w-5 h-5" /> },
@@ -34,7 +36,7 @@ const categories: { id: CategoryType; label: string; icon: React.ReactNode }[] =
   { id: 'education', label: 'Education', icon: <BookOpen className="w-5 h-5" /> },
   { id: 'real-estate', label: 'Real Estate', icon: <Home className="w-5 h-5" /> },
   { id: 'community', label: 'Community', icon: <Users className="w-5 h-5" /> },
-  { id: 'fitness', label: 'Fitness', icon: <Dumbbell className="w-5 h-5" /> }, // Added fitness category with Dumbbell icon
+  { id: 'fitness', label: 'Fitness', icon: <Dumbbell className="w-5 h-5" /> },
   { id: 'more', label: 'More', icon: <MoreHorizontal className="w-5 h-5" /> },
 ];
 
