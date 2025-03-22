@@ -280,7 +280,10 @@ const useRecommendations = ({
         return true;
       }
       return true;
-    });
+    }).map(result => ({
+      ...result,
+      created_at: new Date().toISOString() // Ensure created_at exists for sorting
+    }));
   };
 
   const searchEvents = (searchQuery: string): Event[] => {
@@ -381,7 +384,10 @@ const useRecommendations = ({
           console.log("Specialized handling for restaurant query");
           const restaurantResults = mockRecommendations.filter(item => 
             item.category === 'Restaurants'
-          );
+          ).map(result => ({
+            ...result,
+            created_at: new Date().toISOString() // Ensure created_at exists for sorting
+          }));
           
           if (restaurantResults.length > 0) {
             setRecommendations(restaurantResults);
@@ -405,7 +411,10 @@ const useRecommendations = ({
           
           const resultsWithImages = locationResults.map(result => {
             if (result.images && result.images.length > 0) {
-              return result;
+              return {
+                ...result,
+                created_at: result.created_at || new Date().toISOString() // Ensure created_at exists for sorting
+              };
             }
             
             const mainImage = result.image;
@@ -418,7 +427,8 @@ const useRecommendations = ({
             
             return {
               ...result,
-              images
+              images,
+              created_at: result.created_at || new Date().toISOString() // Ensure created_at exists for sorting
             };
           });
           
@@ -440,7 +450,10 @@ const useRecommendations = ({
     if (query) {
       fetchRecommendations();
     } else {
-      const defaultResults = mockRecommendations.slice(0, 6);
+      const defaultResults = mockRecommendations.slice(0, 6).map(result => ({
+        ...result,
+        created_at: new Date().toISOString() // Ensure created_at exists for sorting
+      }));
       setRecommendations(defaultResults);
       setEvents([]);
       setLoading(false);

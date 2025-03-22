@@ -12,6 +12,7 @@ import { Calendar, MapPin, Clock, Users, AlertCircle, ShoppingBag } from 'lucide
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import SortButton, { SortOption } from '@/components/SortButton';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -27,6 +28,7 @@ const SearchResults = () => {
   const [priceRange, setPriceRange] = useState<number>(2);
   const [openNowOnly, setOpenNowOnly] = useState<boolean>(false);
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
+  const [sortBy, setSortBy] = useState<SortOption>('rating');
 
   const {
     recommendations,
@@ -62,18 +64,28 @@ const SearchResults = () => {
     distanceUnit: 'km'
   });
 
-  const rankedRecommendations = [...filteredRecommendations].map(item => {
-    const reviewCount = item.id ? parseInt(item.id) * 10 + Math.floor((item.rating || 4.5) * 15) : 100;
-    return {
-      ...item,
-      reviewCount
-    };
-  }).sort((a, b) => {
-    if (b.rating !== a.rating) {
-      return b.rating - a.rating;
-    }
-    return b.reviewCount - a.reviewCount;
-  });
+  const sortRecommendations = (recommendations) => {
+    return [...recommendations].sort((a, b) => {
+      switch (sortBy) {
+        case 'rating':
+          return b.rating - a.rating;
+        case 'distance':
+          const distanceA = parseFloat(a.distance?.split(' ')[0] || '0');
+          const distanceB = parseFloat(b.distance?.split(' ')[0] || '0');
+          return distanceA - distanceB;
+        case 'reviewCount':
+          return (b.reviewCount || 0) - (a.reviewCount || 0);
+        case 'newest':
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return dateB - dateA;
+        default:
+          return 0;
+      }
+    });
+  };
+
+  const rankedRecommendations = sortRecommendations(filteredRecommendations);
 
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
@@ -114,6 +126,10 @@ const SearchResults = () => {
     }
   };
 
+  const handleSortChange = (option: SortOption) => {
+    setSortBy(option);
+  };
+
   return <MainLayout>
       <div className="w-full animate-fade-in mx-0 px-[6px]">
         <LocationSelector selectedLocation={selectedLocation} onLocationChange={handleLocationChange} />
@@ -138,14 +154,20 @@ const SearchResults = () => {
                   </p>
                 </div>}
               
-              <div className="mb-4">
-                <h1 className="text-xl font-medium">
-                  Results for: <span className="text-primary">{query || searchQuery}</span>
-                  {category !== 'all' && <span className="ml-2 text-muted-foreground"> in {category}</span>}
-                </h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Found {rankedRecommendations.length} locations, {events.length} events, and {marketplaceListings.length} marketplace items
-                </p>
+              <div className="mb-4 flex flex-wrap justify-between items-center gap-3">
+                <div>
+                  <h1 className="text-xl font-medium">
+                    Results for: <span className="text-primary">{query || searchQuery}</span>
+                    {category !== 'all' && <span className="ml-2 text-muted-foreground"> in {category}</span>}
+                  </h1>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Found {rankedRecommendations.length} locations, {events.length} events, and {marketplaceListings.length} marketplace items
+                  </p>
+                </div>
+                
+                {activeTab === 'locations' && (
+                  <SortButton currentSort={sortBy} onSortChange={handleSortChange} />
+                )}
               </div>
               
               <Tabs defaultValue="locations" className="w-full mb-6" onValueChange={setActiveTab} value={activeTab}>
