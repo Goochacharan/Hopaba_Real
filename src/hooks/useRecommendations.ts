@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Recommendation, mockRecommendations, searchRecommendations } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -344,8 +343,7 @@ const useRecommendations = ({
           phone: item.contact_phone,
           openNow: item.open_now || false,
           hours: "Until 8:00 PM",
-          priceLevel: "$$",
-          created_at: item.created_at || new Date().toISOString() // Ensure we have created_at
+          priceLevel: "$$"
         }));
       }
       
@@ -406,15 +404,6 @@ const useRecommendations = ({
           const locationResults = searchRecommendations(processedQuery, effectiveCategory);
           
           const resultsWithImages = locationResults.map(result => {
-            // Add created_at timestamp if missing (for testing "new" badge)
-            if (!result.created_at) {
-              // Generate a random date within the last 30 days (some will be within a week)
-              const randomDaysAgo = Math.floor(Math.random() * 30);
-              const randomDate = new Date();
-              randomDate.setDate(randomDate.getDate() - randomDaysAgo);
-              result.created_at = randomDate.toISOString();
-            }
-            
             if (result.images && result.images.length > 0) {
               return result;
             }

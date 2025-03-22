@@ -4,7 +4,7 @@ import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers, Sparkles } from 'lucide-react';
+import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -17,9 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
-
 type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
-
 const Marketplace = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
@@ -30,11 +28,9 @@ const Marketplace = () => {
   const [yearRange, setYearRange] = useState<[number, number]>([2010, new Date().getFullYear()]);
   const [ratingFilter, setRatingFilter] = useState<number>(0);
   const [conditionFilter, setConditionFilter] = useState<string>('all');
-  const [showNewestOnly, setShowNewestOnly] = useState<boolean>(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   const itemsPerPage = 9;
-  
   const {
     listings,
     loading,
@@ -47,42 +43,31 @@ const Marketplace = () => {
     maxPrice: priceRange[1] < 500000 ? priceRange[1] : undefined,
     minRating: ratingFilter > 0 ? ratingFilter : undefined
   });
-  
   useEffect(() => {
     setCurrentPage(1);
-  }, [currentCategory, searchQuery, conditionFilter, priceRange, ratingFilter, sortOption, showNewestOnly]);
-  
-  const categories = [
-    {
-      id: 'all',
-      name: 'All Categories'
-    },
-    {
-      id: 'cars',
-      name: 'Cars'
-    },
-    {
-      id: 'bikes',
-      name: 'Bikes'
-    },
-    {
-      id: 'mobiles',
-      name: 'Mobiles'
-    },
-    {
-      id: 'electronics',
-      name: 'Electronics'
-    },
-    {
-      id: 'furniture',
-      name: 'Furniture'
-    },
-    {
-      id: 'home_appliances',
-      name: 'Home Appliances'
-    }
-  ];
-  
+  }, [currentCategory, searchQuery, conditionFilter, priceRange, ratingFilter, sortOption]);
+  const categories = [{
+    id: 'all',
+    name: 'All Categories'
+  }, {
+    id: 'cars',
+    name: 'Cars'
+  }, {
+    id: 'bikes',
+    name: 'Bikes'
+  }, {
+    id: 'mobiles',
+    name: 'Mobiles'
+  }, {
+    id: 'electronics',
+    name: 'Electronics'
+  }, {
+    id: 'furniture',
+    name: 'Furniture'
+  }, {
+    id: 'home_appliances',
+    name: 'Home Appliances'
+  }];
   const handleCategoryChange = (category: string) => {
     setCurrentCategory(category);
     setCurrentPage(1);
@@ -95,7 +80,6 @@ const Marketplace = () => {
       return params;
     });
   };
-  
   const sortListings = (items: MarketplaceListing[]): MarketplaceListing[] => {
     return [...items].sort((a, b) => {
       switch (sortOption) {
@@ -112,18 +96,9 @@ const Marketplace = () => {
       }
     });
   };
-  
   const handleSortChange = (option: SortOption) => {
     setSortOption(option);
   };
-
-  const isNewerThanOneWeek = (dateString: string): boolean => {
-    const listingDate = new Date(dateString);
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    return listingDate > oneWeekAgo;
-  };
-  
   const filteredListings = listings.filter(listing => {
     const price = listing.price;
     if (price < priceRange[0] || price > priceRange[1]) return false;
@@ -131,14 +106,11 @@ const Marketplace = () => {
     if (listingYear < yearRange[0] || listingYear > yearRange[1]) return false;
     if (ratingFilter > 0 && listing.seller_rating < ratingFilter) return false;
     if (conditionFilter !== 'all' && listing.condition.toLowerCase() !== conditionFilter.toLowerCase()) return false;
-    if (showNewestOnly && !isNewerThanOneWeek(listing.created_at)) return false;
     return true;
   });
-  
   const sortedListings = sortListings(filteredListings);
   const totalPages = Math.ceil(sortedListings.length / itemsPerPage);
   const paginatedListings = sortedListings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-  
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -146,9 +118,7 @@ const Marketplace = () => {
       maximumFractionDigits: 0
     }).format(price);
   };
-  
-  return (
-    <MainLayout>
+  return <MainLayout>
       <div className="animate-fade-in px-[7px]">
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-2">Marketplace</h1>
@@ -178,44 +148,6 @@ const Marketplace = () => {
                   <Button variant={sortOption === 'top-rated' ? "default" : "ghost"} size="sm" className="w-full justify-start" onClick={() => handleSortChange('top-rated')}>
                     Top Rated
                   </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            <Popover open={activeFilter === 'newest'} onOpenChange={open => setActiveFilter(open ? 'newest' : null)}>
-              <PopoverTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className={cn(
-                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-12 h-12 relative p-0", 
-                    activeFilter === 'newest' && "border-primary ring-2 ring-primary/20",
-                    showNewestOnly && "border-primary/30 bg-primary/5"
-                  )}
-                >
-                  <Sparkles className="h-5 w-5" />
-                  {showNewestOnly && (
-                    <Badge variant="default" className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-medium">
-                      •
-                    </Badge>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-4">
-                <div className="space-y-4">
-                  <h4 className="font-medium">Newest Listings</h4>
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="newest-only" className="text-sm font-medium cursor-pointer">
-                      Show only listings from the last week
-                    </Label>
-                    <Button
-                      variant={showNewestOnly ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setShowNewestOnly(!showNewestOnly)}
-                    >
-                      {showNewestOnly ? "On" : "Off"}
-                    </Button>
-                  </div>
                 </div>
               </PopoverContent>
             </Popover>
@@ -399,9 +331,6 @@ const Marketplace = () => {
             </TabsContent>)}
         </Tabs>
       </div>
-    </MainLayout>
-  );
+    </MainLayout>;
 };
-
 export default Marketplace;
-

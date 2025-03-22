@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -13,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Recommendation } from '@/lib/mockData';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
-
 const MyList = () => {
   const {
     wishlist
@@ -25,7 +23,6 @@ const MyList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const itemsPerPage = 6;
-
   useEffect(() => {
     const checkUser = async () => {
       setLoading(true);
@@ -78,17 +75,10 @@ const MyList = () => {
     // Handle different properties based on item type
     if (isMarketplaceListing(item)) {
       // Marketplace listing properties
-      return item.title?.toLowerCase().includes(lowercaseQuery) || 
-             item.category?.toLowerCase().includes(lowercaseQuery) || 
-             item.description?.toLowerCase().includes(lowercaseQuery) || 
-             item.location?.toLowerCase().includes(lowercaseQuery) || 
-             item.condition?.toLowerCase().includes(lowercaseQuery);
+      return item.title?.toLowerCase().includes(lowercaseQuery) || item.category?.toLowerCase().includes(lowercaseQuery) || item.description?.toLowerCase().includes(lowercaseQuery) || item.location?.toLowerCase().includes(lowercaseQuery) || item.condition?.toLowerCase().includes(lowercaseQuery);
     } else {
       // Recommendation properties
-      return item.name?.toLowerCase().includes(lowercaseQuery) || 
-             item.category?.toLowerCase().includes(lowercaseQuery) || 
-             item.description?.toLowerCase().includes(lowercaseQuery) || 
-             item.address?.toLowerCase().includes(lowercaseQuery);
+      return item.name?.toLowerCase().includes(lowercaseQuery) || item.category?.toLowerCase().includes(lowercaseQuery) || item.description?.toLowerCase().includes(lowercaseQuery) || item.address?.toLowerCase().includes(lowercaseQuery);
     }
   });
 
@@ -102,24 +92,18 @@ const MyList = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, activeTab]);
-
   if (loading) {
-    return (
-      <MainLayout>
+    return <MainLayout>
         <div className="py-8 flex justify-center">
           <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
         </div>
-      </MainLayout>
-    );
+      </MainLayout>;
   }
-
-  return (
-    <MainLayout>
+  return <MainLayout>
       <section className="py-8 px-[7px]">
         <h1 className="text-3xl font-medium mb-6">My Wishlist</h1>
         
-        {wishlist.length > 0 ? (
-          <>
+        {wishlist.length > 0 ? <>
             {/* Tabs and search input */}
             <div className="mb-6 space-y-4">
               <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
@@ -132,75 +116,44 @@ const MyList = () => {
               
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input 
-                  type="text" 
-                  placeholder="Search your wishlist..." 
-                  value={searchQuery} 
-                  onChange={e => setSearchQuery(e.target.value)} 
-                  className="pl-10" 
-                />
+                <Input type="text" placeholder="Search your wishlist..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
               </div>
             </div>
             
-            {filteredWishlist.length > 0 ? (
-              <>
+            {filteredWishlist.length > 0 ? <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {currentItems.map(item => (
-                    isMarketplaceListing(item) ? (
-                      <MarketplaceListingCard key={item.id} listing={item as MarketplaceListing} />
-                    ) : (
-                      <LocationCard key={item.id} item={item as Recommendation} />
-                    )
-                  ))}
+                  {currentItems.map(item => isMarketplaceListing(item) ? <MarketplaceListingCard key={item.id} listing={item as MarketplaceListing} /> : <LocationCard key={item.id} recommendation={item as Recommendation} />)}
                 </div>
                 
-                {totalPages > 1 && (
-                  <Pagination className="mt-6">
+                {totalPages > 1 && <Pagination className="mt-6">
                     <PaginationContent>
-                      {currentPage > 1 && (
-                        <PaginationItem>
-                          <PaginationPrevious 
-                            href="#" 
-                            onClick={e => {
-                              e.preventDefault();
-                              setCurrentPage(prev => Math.max(prev - 1, 1));
-                            }} 
-                          />
-                        </PaginationItem>
-                      )}
+                      {currentPage > 1 && <PaginationItem>
+                          <PaginationPrevious href="#" onClick={e => {
+                  e.preventDefault();
+                  setCurrentPage(prev => Math.max(prev - 1, 1));
+                }} />
+                        </PaginationItem>}
                       
-                      {Array.from({ length: totalPages }).map((_, i) => (
-                        <PaginationItem key={i}>
-                          <PaginationLink 
-                            href="#" 
-                            isActive={currentPage === i + 1} 
-                            onClick={e => {
-                              e.preventDefault();
-                              setCurrentPage(i + 1);
-                            }}
-                          >
+                      {Array.from({
+                length: totalPages
+              }).map((_, i) => <PaginationItem key={i}>
+                          <PaginationLink href="#" isActive={currentPage === i + 1} onClick={e => {
+                  e.preventDefault();
+                  setCurrentPage(i + 1);
+                }}>
                             {i + 1}
                           </PaginationLink>
-                        </PaginationItem>
-                      ))}
+                        </PaginationItem>)}
                       
-                      {currentPage < totalPages && (
-                        <PaginationItem>
-                          <PaginationNext 
-                            href="#" 
-                            onClick={e => {
-                              e.preventDefault();
-                              setCurrentPage(prev => Math.min(prev + 1, totalPages));
-                            }} 
-                          />
-                        </PaginationItem>
-                      )}
+                      {currentPage < totalPages && <PaginationItem>
+                          <PaginationNext href="#" onClick={e => {
+                  e.preventDefault();
+                  setCurrentPage(prev => Math.min(prev + 1, totalPages));
+                }} />
+                        </PaginationItem>}
                     </PaginationContent>
-                  </Pagination>
-                )}
-              </>
-            ) : (
-              <div className="bg-white rounded-xl shadow-sm border border-border p-8 text-center">
+                  </Pagination>}
+              </> : <div className="bg-white rounded-xl shadow-sm border border-border p-8 text-center">
                 <Search className="mx-auto h-12 w-12 text-muted-foreground mb-4 stroke-[1.5]" />
                 <h2 className="text-xl font-medium mb-2">No matching items found</h2>
                 <p className="text-muted-foreground mb-6">
@@ -209,11 +162,8 @@ const MyList = () => {
                 <Button onClick={() => setSearchQuery('')}>
                   Clear search
                 </Button>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-border p-8 text-center">
+              </div>}
+          </> : <div className="bg-white rounded-xl shadow-sm border border-border p-8 text-center">
             <Heart className="mx-auto h-12 w-12 text-muted-foreground mb-4 stroke-[1.5]" />
             <h2 className="text-xl font-medium mb-2">Your wishlist is empty</h2>
             <p className="text-muted-foreground mb-6">
@@ -227,11 +177,8 @@ const MyList = () => {
                 Browse marketplace
               </Button>
             </div>
-          </div>
-        )}
+          </div>}
       </section>
-    </MainLayout>
-  );
+    </MainLayout>;
 };
-
 export default MyList;
