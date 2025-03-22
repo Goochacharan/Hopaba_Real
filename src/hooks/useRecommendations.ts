@@ -3,13 +3,6 @@ import { Recommendation, mockRecommendations, searchRecommendations } from '@/li
 import { CategoryType } from '@/components/CategoryFilter';
 import { supabase } from '@/integrations/supabase/client';
 
-// Update the Recommendation interface to include created_at
-declare module '@/lib/mockData' {
-  interface Recommendation {
-    created_at?: string;
-  }
-}
-
 interface UseRecommendationsProps {
   initialQuery?: string;
   initialCategory?: CategoryType;
@@ -21,7 +14,6 @@ interface FilterOptions {
   priceLevel: number;
   openNowOnly: boolean;
   distanceUnit?: 'km' | 'mi';
-  newOnly?: boolean;
 }
 
 export interface Event {
@@ -144,8 +136,8 @@ const yogaAndFitnessMockData: Recommendation[] = [
     hours: 'Opens tomorrow at 6:00 AM',
     priceLevel: '$$$',
     images: [
-      'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-      'https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
       'https://images.unsplash.com/photo-1603988363607-e1e4a66962c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80'
     ]
   }
@@ -468,7 +460,7 @@ const useRecommendations = ({
     recs: Recommendation[],
     filterOptions: FilterOptions
   ): Recommendation[] => {
-    const { distanceUnit = 'mi', newOnly = false } = filterOptions;
+    const { distanceUnit = 'mi' } = filterOptions;
     
     return recs.filter(rec => {
       if (rec.rating < filterOptions.minRating) {
@@ -492,14 +484,6 @@ const useRecommendations = ({
       if (rec.priceLevel) {
         const priceCount = rec.priceLevel.length;
         if (priceCount > filterOptions.priceLevel) {
-          return false;
-        }
-      }
-
-      if (newOnly && rec.created_at) {
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-        if (new Date(rec.created_at) <= oneWeekAgo) {
           return false;
         }
       }
