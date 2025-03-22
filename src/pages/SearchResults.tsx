@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import LocationCard from '@/components/LocationCard';
@@ -60,7 +61,7 @@ const SearchResults = () => {
     maxDistance: distance[0],
     minRating: minRating[0],
     priceLevel: priceRange,
-    openNowOnly,
+    openNow: openNowOnly,
     distanceUnit: 'km'
   });
 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Recommendation, mockRecommendations, searchRecommendations } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -347,7 +346,8 @@ const useRecommendations = ({
           phone: item.contact_phone,
           openNow: item.open_now || false,
           hours: "Until 8:00 PM",
-          priceLevel: "$$"
+          priceLevel: "$$",
+          created_at: item.created_at || new Date().toISOString() // Add created_at property
         }));
       }
       
@@ -484,7 +484,7 @@ const useRecommendations = ({
         return false;
       }
 
-      if (filterOptions.openNowOnly && !rec.openNow) {
+      if (filterOptions.openNow && !rec.openNow) {
         return false;
       }
 
