@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Recommendation, mockRecommendations, searchRecommendations } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -12,7 +13,7 @@ interface FilterOptions {
   maxDistance: number;
   minRating: number;
   priceLevel: number;
-  openNowOnly: boolean;
+  openNow: boolean;
   distanceUnit?: 'km' | 'mi';
 }
 
@@ -282,7 +283,7 @@ const useRecommendations = ({
       return true;
     }).map(result => ({
       ...result,
-      created_at: new Date().toISOString() // Ensure created_at exists for sorting
+      created_at: result.created_at || new Date().toISOString() // Ensure created_at exists for sorting
     }));
   };
 
@@ -386,7 +387,7 @@ const useRecommendations = ({
             item.category === 'Restaurants'
           ).map(result => ({
             ...result,
-            created_at: new Date().toISOString() // Ensure created_at exists for sorting
+            created_at: result.created_at || new Date().toISOString() // Ensure created_at exists for sorting
           }));
           
           if (restaurantResults.length > 0) {
@@ -402,7 +403,10 @@ const useRecommendations = ({
         
         if (supabaseResults && supabaseResults.length > 0) {
           console.log("Using Supabase results:", supabaseResults.length);
-          setRecommendations(supabaseResults);
+          setRecommendations(supabaseResults.map(result => ({
+            ...result,
+            created_at: result.created_at || new Date().toISOString() // Ensure created_at exists for sorting
+          })));
         } else {
           console.log("No Supabase results, using mock data");
           await new Promise(resolve => setTimeout(resolve, 800));
@@ -452,7 +456,7 @@ const useRecommendations = ({
     } else {
       const defaultResults = mockRecommendations.slice(0, 6).map(result => ({
         ...result,
-        created_at: new Date().toISOString() // Ensure created_at exists for sorting
+        created_at: result.created_at || new Date().toISOString() // Ensure created_at exists for sorting
       }));
       setRecommendations(defaultResults);
       setEvents([]);

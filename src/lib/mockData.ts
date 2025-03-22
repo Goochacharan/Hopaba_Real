@@ -1,3 +1,4 @@
+
 export interface Recommendation {
   id: string;
   name: string;
@@ -17,6 +18,8 @@ export interface Recommendation {
   tags: string[];
   city?: string;
   instagram?: string;
+  created_at?: string;
+  reviewCount?: number;
 }
 
 // Mock recommendations data
