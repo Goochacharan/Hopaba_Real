@@ -1,9 +1,7 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import StarRating from './StarRating';
-import { Instagram, Film } from 'lucide-react';
-
+import { Instagram } from 'lucide-react';
 interface SellerInfoProps {
   sellerName: string;
   sellerRating: number;
@@ -12,7 +10,6 @@ interface SellerInfoProps {
   sellerId?: string | null;
   onInstagramClick?: (e: React.MouseEvent) => void;
 }
-
 const SellerInfo: React.FC<SellerInfoProps> = ({
   sellerName,
   sellerRating,
@@ -31,17 +28,10 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
       </div>
       <div className="flex items-center gap-6 w-full rounded-sm py-0 my-0 px-[25px] mx-[2px]">
         <StarRating rating={sellerRating} showCount={true} count={reviewCount} size="small" />
-        {sellerInstagram && onInstagramClick && 
-          <button 
-            onClick={onInstagramClick} 
-            className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all p-1.5"
-            title="View Instagram video"
-          >
-            <Film className="h-4 w-4 text-white" />
-          </button>
-        }
+        {sellerInstagram && onInstagramClick && <button onClick={onInstagramClick} className="text-muted-foreground hover:text-primary flex-shrink-0">
+            <Instagram className="h-5 w-5" />
+          </button>}
       </div>
     </div>;
 };
-
 export default SellerInfo;
