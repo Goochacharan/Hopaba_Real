@@ -157,7 +157,7 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                   <span>
-                    ${business.price_range_min} - ${business.price_range_max} {business.price_unit}
+                    ₹{business.price_range_min} - ₹{business.price_range_max} {business.price_unit}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
