@@ -104,7 +104,7 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
         </Button>
 
         {/* New badge - Only show if the listing is less than 7 days old */}
-        {isNew && <div className="absolute top-2 left-2 z-10 bg-[#33C3F0] text-white text-L font-semibold py-0.5 rounded flex items-center gap-1 shadow-md px-[15px]">
+        {isNew && <div className="absolute top-2 left-2 z-10 bg-[#33C3F0] text-white text-L font-semibold py-0.5 rounded flex items-center gap-1 shadow-md px-[15px] mx-0 my-0">
             <Sparkles className="h-3 w-3" />
             New
           </div>}
