@@ -26,6 +26,9 @@ export interface Event {
   image: string;
   attendees: number;
   pricePerPerson?: number;
+  phoneNumber?: string;
+  whatsappNumber?: string;
+  images?: string[];
 }
 
 const sampleEvents: Event[] = [
