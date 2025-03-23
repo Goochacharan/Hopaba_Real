@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Event } from '@/hooks/useRecommendations';
 import { Calendar, Clock, MapPin, Users, Heart, Phone, MessageCircle, Navigation2, Share2, IndianRupee } from 'lucide-react';
@@ -175,7 +176,7 @@ const EventsList: React.FC<EventsListProps> = ({ events }) => {
                 {event.pricePerPerson !== undefined && (
                   <div className="flex items-center bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-100">
                     <IndianRupee className="w-4 h-4 mr-1" />
-                    <span className="font-medium">{formatPrice(event.pricePerPerson)}</span>
+                    <span className="font-medium">{formatPrice(event.pricePerPerson).replace('₹', '')}</span>
                     <span className="text-xs ml-1 text-emerald-600">/person</span>
                   </div>
                 )}
@@ -242,3 +243,4 @@ const EventsList: React.FC<EventsListProps> = ({ events }) => {
 };
 
 export default EventsList;
+
