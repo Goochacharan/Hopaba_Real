@@ -37,8 +37,8 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
         <h2 className="text-xl font-semibold mb-3">Description</h2>
         {isNew && (
           <div className="bg-[#33C3F0] text-white text-xs font-semibold px-2 py-0.5 rounded flex items-center gap-1 mb-3">
-            <Sparkles className="h-3 w-3" />
-            New post
+            <Sparkles className="h-2.5 w-2.5" />
+            <span className="text-[10px]">New post</span>
           </div>
         )}
       </div>
