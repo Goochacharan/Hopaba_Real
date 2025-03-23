@@ -1,9 +1,11 @@
 
 import React from 'react';
-import { Shield } from 'lucide-react';
+import { Shield, Instagram, Film } from 'lucide-react';
 import SellerInfo from './SellerInfo';
 import ListingActionButtons from './ListingActionButtons';
 import ListingMetadata from './ListingMetadata';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 
 interface ListingPriceCardProps {
   id: string;
@@ -36,6 +38,12 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   createdAt,
   condition
 }) => {
+  const openInstagramLink = () => {
+    if (sellerInstagram) {
+      window.open(sellerInstagram, '_blank');
+    }
+  };
+
   return (
     <div className="sticky top-24 space-y-6">
       <div className="bg-white rounded-xl border p-6 shadow-sm">
@@ -59,9 +67,29 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
             <SellerInfo 
               sellerName={sellerName} 
               sellerRating={sellerRating}
+              sellerInstagram={sellerInstagram}
+              onInstagramClick={openInstagramLink}
             />
           </div>
         </div>
+        
+        {sellerInstagram && (
+          <div className="mb-6 border-t border-gray-100 pt-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Instagram className="h-4 w-4" />
+              <span className="font-medium">Instagram / Video Content</span>
+              <Film className="h-4 w-4 ml-1 text-purple-500" />
+            </div>
+            <Badge 
+              variant="outline" 
+              className="w-full py-2 px-3 flex justify-between items-center cursor-pointer hover:bg-secondary/50 transition-colors"
+              onClick={openInstagramLink}
+            >
+              <span className="text-muted-foreground truncate">{sellerInstagram}</span>
+              <Film className="h-4 w-4 text-purple-500" />
+            </Badge>
+          </div>
+        )}
         
         <ListingActionButtons
           listingId={id}
