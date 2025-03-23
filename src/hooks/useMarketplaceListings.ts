@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -82,7 +83,17 @@ const mockListings: MarketplaceListing[] = [
   }
 ];
 
-export const useMarketplaceListings = () => {
+// Define the filter options interface
+interface FilterOptions {
+  category?: string;
+  searchQuery?: string;
+  condition?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+}
+
+export const useMarketplaceListings = (filterOptions?: FilterOptions) => {
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +109,47 @@ export const useMarketplaceListings = () => {
       // In a real application, you would replace this with an actual API call
       setTimeout(() => {
         setListings(mockListings);
-        setFilteredListings(mockListings);
+        
+        let filtered = [...mockListings];
+        
+        // Apply filters if provided
+        if (filterOptions) {
+          if (filterOptions.category) {
+            filtered = filtered.filter(listing => 
+              listing.category?.toLowerCase() === filterOptions.category?.toLowerCase()
+            );
+          }
+          
+          if (filterOptions.searchQuery) {
+            const query = filterOptions.searchQuery.toLowerCase();
+            filtered = filtered.filter(listing =>
+              listing.title.toLowerCase().includes(query) ||
+              listing.description.toLowerCase().includes(query) ||
+              listing.location.toLowerCase().includes(query) ||
+              listing.category?.toLowerCase().includes(query)
+            );
+          }
+          
+          if (filterOptions.condition) {
+            filtered = filtered.filter(listing =>
+              listing.condition.toLowerCase() === filterOptions.condition?.toLowerCase()
+            );
+          }
+          
+          if (filterOptions.minPrice !== undefined) {
+            filtered = filtered.filter(listing => listing.price >= filterOptions.minPrice!);
+          }
+          
+          if (filterOptions.maxPrice !== undefined) {
+            filtered = filtered.filter(listing => listing.price <= filterOptions.maxPrice!);
+          }
+          
+          if (filterOptions.minRating !== undefined) {
+            filtered = filtered.filter(listing => listing.seller_rating >= filterOptions.minRating!);
+          }
+        }
+        
+        setFilteredListings(filtered);
         setLoading(false);
       }, 500);
     } catch (err: any) {
@@ -121,12 +172,56 @@ export const useMarketplaceListings = () => {
 
   useEffect(() => {
     fetchListings();
-  }, []);
+  }, [filterOptions]);
 
   return {
     listings: filteredListings,
     loading,
     error,
     searchListings,
+  };
+};
+
+// Add a function to get a single listing by ID
+export const useMarketplaceListing = (id: string) => {
+  const [listing, setListing] = useState<MarketplaceListing | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchListing = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // In a real app, you would fetch from an API/database
+        // For now, find in the mock data
+        setTimeout(() => {
+          const foundListing = mockListings.find(item => item.id === id);
+          
+          if (foundListing) {
+            setListing(foundListing);
+          } else {
+            setError('Listing not found');
+          }
+          
+          setLoading(false);
+        }, 500);
+      } catch (err: any) {
+        console.error('Error fetching marketplace listing:', err);
+        setError('Failed to fetch listing details. Please try again later.');
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchListing();
+    }
+  }, [id]);
+
+  return {
+    listing,
+    loading,
+    error
   };
 };
