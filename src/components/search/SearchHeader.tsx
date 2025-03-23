@@ -55,12 +55,9 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
       <div className="mb-4 flex flex-wrap justify-between items-center gap-3">
         <div>
           <h1 className="text-xl font-medium">
-            Results for: <span className="text-primary">{query || searchQuery}</span>
+            <span className="text-primary">{query || searchQuery}</span>
             {category !== 'all' && <span className="ml-2 text-muted-foreground"> in {category}</span>}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Found {resultsCount.locations} locations, {resultsCount.events} events, and {resultsCount.marketplace} marketplace items
-          </p>
         </div>
       </div>
     </>
