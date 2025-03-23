@@ -13,13 +13,16 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({ listings })
       {listings.map((listing, index) => (
         <div 
           key={listing.id} 
-          className="animate-fade-in" 
+          className="animate-fade-in h-full" 
           style={{ animationDelay: `${index * 100}ms` }}
         >
-          <MarketplaceListingCard listing={{
-            ...listing,
-            location: listing.location || "Not specified"
-          }} />
+          <MarketplaceListingCard 
+            listing={{
+              ...listing,
+              location: listing.location || "Not specified"
+            }} 
+            className="h-full flex flex-col"
+          />
         </div>
       ))}
     </div>

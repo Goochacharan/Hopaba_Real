@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Heart, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -95,7 +96,7 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
     touchEndX.current = null;
   };
   return <div className={cn("relative group", className)}>
-      <AspectRatio ratio={4 / 3} className="bg-muted">
+      <AspectRatio ratio={4 / 5} className="bg-muted">
         <img src={imageArray[currentImageIndex]} alt={`Product image ${currentImageIndex + 1}`} className="object-cover w-full h-full cursor-pointer" onClick={handleImageClick} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} />
         
         {/* Wishlist button */}
