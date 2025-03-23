@@ -1,16 +1,19 @@
+
 import React from 'react';
 import { MapPin, Calendar, BadgeCheck, Film } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+
 interface ListingMetadataProps {
-  location: string;
+  location: string | null;
   createdAt: string;
   condition: string;
   sellerInstagram?: string | null;
   sellerName?: string;
   showInCard?: boolean;
 }
+
 const ListingMetadata: React.FC<ListingMetadataProps> = ({
   location,
   createdAt,
@@ -19,9 +22,8 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
   sellerName,
   showInCard = false
 }) => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  
   const handleInstagramClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerInstagram) {
@@ -40,17 +42,27 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
       });
     }
   };
-  return <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground py-0">
-      <div className="flex items-center gap-1">
-        <MapPin className="h-4 w-4" />
-        <span>{location}</span>
-      </div>
+  
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground py-0">
+      {location && (
+        <div className="flex items-center gap-1">
+          <MapPin className="h-4 w-4" />
+          <span>{location}</span>
+        </div>
+      )}
       <div className="flex items-center gap-1 my-0 py-0 px-0">
         <Calendar className="h-4 w-4" />
         <span>Listed on {format(new Date(createdAt), 'PPP')}</span>
-        {sellerInstagram && <button onClick={handleInstagramClick} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 py-2 px-[31px] mx-[26px]">
+        {sellerInstagram && (
+          <button 
+            onClick={handleInstagramClick} 
+            title="Watch video content" 
+            className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 py-2 px-[31px] mx-[26px]"
+          >
             <Film className="h-5 w-5 text-white" />
-          </button>}
+          </button>
+        )}
       </div>
       <div className="flex items-center gap-1">
         <Badge variant="outline" className="flex items-center gap-1 text-amber-600 bg-amber-50">
@@ -58,6 +70,8 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
           <span>{condition}</span>
         </Badge>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default ListingMetadata;

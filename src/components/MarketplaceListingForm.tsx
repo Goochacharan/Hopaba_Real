@@ -23,7 +23,7 @@ const marketplaceListingSchema = z.object({
   price: z.coerce.number().min(1, { message: "Price must be greater than 0" }),
   category: z.string().min(1, { message: "Category is required" }),
   condition: z.string().min(1, { message: "Condition is required" }),
-  location: z.string().min(1, { message: "Location is required" }),
+  location: z.string().optional(), // Changed to optional
   seller_name: z.string().min(2, { message: "Seller name is required" }),
   seller_phone: z.string().optional(),
   seller_whatsapp: z.string().optional(),
@@ -96,7 +96,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         price: data.price,
         category: data.category,
         condition: data.condition,
-        location: data.location,
+        location: data.location || "Not specified", // Provide default value if not provided
         seller_name: data.seller_name || "Anonymous Seller",
         seller_id: user.id,
         seller_phone: data.seller_phone || null,
@@ -205,7 +205,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                   name="location"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Location*</FormLabel>
+                      <FormLabel>Location (Optional)</FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="e.g. Mumbai, Delhi or Google Maps link" 

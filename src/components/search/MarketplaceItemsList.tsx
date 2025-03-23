@@ -16,7 +16,10 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({ listings })
           className="animate-fade-in" 
           style={{ animationDelay: `${index * 100}ms` }}
         >
-          <MarketplaceListingCard listing={listing} />
+          <MarketplaceListingCard listing={{
+            ...listing,
+            location: listing.location || "Not specified"
+          }} />
         </div>
       ))}
     </div>
