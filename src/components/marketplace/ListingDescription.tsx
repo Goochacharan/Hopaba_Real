@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { format } from 'date-fns';
+import { Instagram, Film } from 'lucide-react';
 
 interface ListingDescriptionProps {
   description: string;
@@ -8,6 +9,7 @@ interface ListingDescriptionProps {
   condition: string;
   location: string;
   createdAt: string;
+  instagram?: string | null;
   showMetadata?: boolean;
 }
 
@@ -17,8 +19,15 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
   condition,
   location,
   createdAt,
+  instagram,
   showMetadata = false
 }) => {
+  const isVideoContent = instagram && (
+    instagram.includes('youtube.com') || 
+    instagram.includes('vimeo.com') || 
+    instagram.includes('tiktok.com')
+  );
+
   return (
     <div className="bg-white rounded-xl border p-6 shadow-sm">
       <h2 className="text-xl font-semibold mb-3">Description</h2>
@@ -36,6 +45,19 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
               
               <div className="text-sm font-medium">Location</div>
               <div className="text-sm text-muted-foreground">{location}</div>
+              
+              {instagram && (
+                <>
+                  <div className="text-sm font-medium flex items-center gap-1.5">
+                    <Instagram className="h-4 w-4" />
+                    {isVideoContent ? 'Video Content' : 'Instagram'}
+                    {isVideoContent && <Film className="h-3.5 w-3.5 text-purple-500" />}
+                  </div>
+                  <div className="text-sm text-muted-foreground truncate">
+                    {instagram}
+                  </div>
+                </>
+              )}
               
               <div className="text-sm font-medium">Listed on</div>
               <div className="text-sm text-muted-foreground">
