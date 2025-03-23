@@ -292,7 +292,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
             <span className="truncate">{recommendation.address}</span>
           </div>
           
-          {recommendation.distance && showDistanceUnderAddress && <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center px-px">
+          {recommendation.distance && showDistanceUnderAddress && <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center my-[3px] px-0">
               <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
               {formatDistance(recommendation.distance)}
             </div>}
