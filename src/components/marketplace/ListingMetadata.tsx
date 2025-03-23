@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MapPin, Calendar, BadgeCheck, Film, Instagram } from 'lucide-react';
+import { MapPin, Calendar, BadgeCheck, Film } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -27,7 +27,7 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
   const handleInstagramClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerInstagram) {
-      window.open(sellerInstagram, '_blank');
+      window.open(sellerInstagram);
       toast({
         title: "Opening video content",
         description: `Visiting ${sellerName}'s video content`,
@@ -54,6 +54,15 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
       <div className="flex items-center gap-1 my-0 py-0 px-0">
         <Calendar className="h-4 w-4" />
         <span>Listed on {format(new Date(createdAt), 'PPP')}</span>
+        {sellerInstagram && (
+          <button 
+            onClick={handleInstagramClick} 
+            title="Watch video content" 
+            className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 py-2 px-[31px] mx-[26px]"
+          >
+            <Film className="h-5 w-5 text-white" />
+          </button>
+        )}
       </div>
       <div className="flex items-center gap-1">
         <Badge variant="outline" className="flex items-center gap-1 text-amber-600 bg-amber-50">
@@ -61,17 +70,6 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
           <span>{condition}</span>
         </Badge>
       </div>
-      {sellerInstagram && (
-        <Badge 
-          variant="outline" 
-          className="flex items-center gap-1 cursor-pointer hover:bg-purple-50 border-purple-200 text-purple-600"
-          onClick={handleInstagramClick}
-        >
-          <Instagram className="h-3 w-3" />
-          <Film className="h-3 w-3" />
-          <span>Video</span>
-        </Badge>
-      )}
     </div>
   );
 };

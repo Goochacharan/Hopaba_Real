@@ -348,11 +348,9 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                     <FormControl>
                       <Input 
                         placeholder="Enter phone number" 
-                        value={field.value || "+91"}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          handlePhoneInput(e as React.ChangeEvent<HTMLInputElement>, 'seller_phone');
-                        }}
+                        defaultValue="+91"
+                        onInput={(e) => handlePhoneInput(e as React.ChangeEvent<HTMLInputElement>, 'seller_phone')}
+                        {...field}
                       />
                     </FormControl>
                     <FormDescription>
@@ -373,11 +371,9 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                       <FormControl>
                         <Input 
                           placeholder="Enter WhatsApp number" 
-                          value={field.value || "+91"}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            handlePhoneInput(e as React.ChangeEvent<HTMLInputElement>, 'seller_whatsapp');
-                          }}
+                          defaultValue="+91"
+                          onInput={(e) => handlePhoneInput(e as React.ChangeEvent<HTMLInputElement>, 'seller_whatsapp')}
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -390,22 +386,10 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                   name="seller_instagram"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        <div className="flex items-center gap-2">
-                          <Instagram className="h-4 w-4" />
-                          Instagram / Video Content
-                          <Film className="h-4 w-4 ml-1 text-purple-500" />
-                        </div>
-                      </FormLabel>
+                      <FormLabel>Instagram (Optional)</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="@yourusername or full URL" 
-                          {...field}
-                        />
+                        <Input placeholder="Your Instagram handle" {...field} />
                       </FormControl>
-                      <FormDescription>
-                        Add your Instagram username or video content URL
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
