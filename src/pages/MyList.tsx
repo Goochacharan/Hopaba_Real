@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -12,6 +13,9 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Recommendation } from '@/lib/mockData';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+import { Event } from '@/hooks/useRecommendations';
+import EventsList from '@/components/search/EventsList';
+
 const MyList = () => {
   const {
     wishlist
@@ -23,6 +27,7 @@ const MyList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const itemsPerPage = 6;
+  
   useEffect(() => {
     const checkUser = async () => {
       setLoading(true);
@@ -51,20 +56,29 @@ const MyList = () => {
     };
   }, [navigate]);
 
-  // Helper function to check item type
+  // Helper functions to check item type
   const isMarketplaceListing = (item: WishlistItem): item is WishlistItem & {
     type: 'marketplace';
   } => {
     return item.type === 'marketplace';
   };
 
+  const isEvent = (item: WishlistItem): item is WishlistItem & {
+    type: 'event';
+  } => {
+    return item.type === 'event';
+  };
+
   // Filter wishlist items based on search query and active tab
   const filteredWishlist = wishlist.filter(item => {
     // First filter by active tab
-    if (activeTab === 'locations' && isMarketplaceListing(item)) {
+    if (activeTab === 'locations' && (isMarketplaceListing(item) || isEvent(item))) {
       return false;
     }
-    if (activeTab === 'marketplace' && !isMarketplaceListing(item)) {
+    if (activeTab === 'marketplace' && (!isMarketplaceListing(item) || isEvent(item))) {
+      return false;
+    }
+    if (activeTab === 'events' && !isEvent(item)) {
       return false;
     }
 
@@ -75,10 +89,23 @@ const MyList = () => {
     // Handle different properties based on item type
     if (isMarketplaceListing(item)) {
       // Marketplace listing properties
-      return item.title?.toLowerCase().includes(lowercaseQuery) || item.category?.toLowerCase().includes(lowercaseQuery) || item.description?.toLowerCase().includes(lowercaseQuery) || item.location?.toLowerCase().includes(lowercaseQuery) || item.condition?.toLowerCase().includes(lowercaseQuery);
+      return item.title?.toLowerCase().includes(lowercaseQuery) || 
+             item.category?.toLowerCase().includes(lowercaseQuery) || 
+             item.description?.toLowerCase().includes(lowercaseQuery) || 
+             item.location?.toLowerCase().includes(lowercaseQuery) || 
+             item.condition?.toLowerCase().includes(lowercaseQuery);
+    } else if (isEvent(item)) {
+      // Event properties
+      return item.title?.toLowerCase().includes(lowercaseQuery) || 
+             item.description?.toLowerCase().includes(lowercaseQuery) || 
+             item.location?.toLowerCase().includes(lowercaseQuery) || 
+             item.date?.toLowerCase().includes(lowercaseQuery);
     } else {
       // Recommendation properties
-      return item.name?.toLowerCase().includes(lowercaseQuery) || item.category?.toLowerCase().includes(lowercaseQuery) || item.description?.toLowerCase().includes(lowercaseQuery) || item.address?.toLowerCase().includes(lowercaseQuery);
+      return item.name?.toLowerCase().includes(lowercaseQuery) || 
+             item.category?.toLowerCase().includes(lowercaseQuery) || 
+             item.description?.toLowerCase().includes(lowercaseQuery) || 
+             item.address?.toLowerCase().includes(lowercaseQuery);
     }
   });
 
@@ -88,10 +115,16 @@ const MyList = () => {
   const currentItems = filteredWishlist.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredWishlist.length / itemsPerPage);
 
+  // Helper to handle RSVP
+  const handleRSVP = (eventTitle: string) => {
+    // Just a dummy handler for now
+  };
+
   // Reset to first page when search query or tab changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, activeTab]);
+
   if (loading) {
     return <MainLayout>
         <div className="py-8 flex justify-center">
@@ -99,6 +132,7 @@ const MyList = () => {
         </div>
       </MainLayout>;
   }
+
   return <MainLayout>
       <section className="py-8 px-[7px]">
         <h1 className="text-3xl font-medium mb-6">My Wishlist</h1>
@@ -107,10 +141,11 @@ const MyList = () => {
             {/* Tabs and search input */}
             <div className="mb-6 space-y-4">
               <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-3 mb-4">
+                <TabsList className="grid w-full grid-cols-4 mb-4">
                   <TabsTrigger value="all">All Items</TabsTrigger>
                   <TabsTrigger value="locations">Locations</TabsTrigger>
                   <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
+                  <TabsTrigger value="events">Events</TabsTrigger>
                 </TabsList>
               </Tabs>
               
@@ -122,7 +157,17 @@ const MyList = () => {
             
             {filteredWishlist.length > 0 ? <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {currentItems.map(item => isMarketplaceListing(item) ? <MarketplaceListingCard key={item.id} listing={item as MarketplaceListing} /> : <LocationCard key={item.id} recommendation={item as Recommendation} />)}
+                  {currentItems.map(item => {
+                    if (isMarketplaceListing(item)) {
+                      return <MarketplaceListingCard key={item.id} listing={item as MarketplaceListing} />;
+                    } else if (isEvent(item)) {
+                      // Group events for the EventsList component
+                      const events = [item as Event];
+                      return <EventsList key={item.id} events={events} onRSVP={handleRSVP} />;
+                    } else {
+                      return <LocationCard key={item.id} recommendation={item as Recommendation} />;
+                    }
+                  })}
                 </div>
                 
                 {totalPages > 1 && <Pagination className="mt-6">

@@ -2,15 +2,17 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Recommendation } from '@/lib/mockData';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+import { Event } from '@/hooks/useRecommendations';
 
 // Use a discriminated union to properly type the wishlist items
 export type WishlistItem = 
   | (Recommendation & { type: 'recommendation' })
-  | (MarketplaceListing & { type: 'marketplace' });
+  | (MarketplaceListing & { type: 'marketplace' })
+  | (Event & { type: 'event' });
 
 interface WishlistContextType {
   wishlist: WishlistItem[];
-  addToWishlist: (item: Recommendation | MarketplaceListing, type: 'recommendation' | 'marketplace') => void;
+  addToWishlist: (item: Recommendation | MarketplaceListing | Event, type: 'recommendation' | 'marketplace' | 'event') => void;
   removeFromWishlist: (id: string) => void;
   isInWishlist: (id: string) => boolean;
 }
@@ -38,17 +40,20 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [wishlist]);
 
   const addToWishlist = (
-    item: Recommendation | MarketplaceListing, 
-    type: 'recommendation' | 'marketplace'
+    item: Recommendation | MarketplaceListing | Event, 
+    type: 'recommendation' | 'marketplace' | 'event'
   ) => {
     if (!isInWishlist(item.id)) {
       // Create a properly typed item based on the type parameter
       if (type === 'recommendation') {
         const recommendationItem = item as Recommendation;
         setWishlist((prev) => [...prev, { ...recommendationItem, type }]);
-      } else {
+      } else if (type === 'marketplace') {
         const marketplaceItem = item as MarketplaceListing;
         setWishlist((prev) => [...prev, { ...marketplaceItem, type }]);
+      } else if (type === 'event') {
+        const eventItem = item as Event;
+        setWishlist((prev) => [...prev, { ...eventItem, type }]);
       }
     }
   };

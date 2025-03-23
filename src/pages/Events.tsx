@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import { useToast } from '@/hooks/use-toast';
 import EventsList from '@/components/search/EventsList';
 import { Event } from '@/hooks/useRecommendations';
+import { supabase } from '@/integrations/supabase/client';
 
 const sampleEvents: Event[] = [
   {
@@ -50,6 +51,23 @@ const sampleEvents: Event[] = [
 
 const Events = () => {
   const { toast } = useToast();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data } = await supabase.auth.getSession();
+      setUser(data.session?.user || null);
+    };
+    getCurrentUser();
+    
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setUser(session?.user || null);
+    });
+    
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, []);
 
   const handleRSVP = (eventTitle: string) => {
     toast({
