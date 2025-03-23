@@ -12,7 +12,6 @@ import ListingDescription from '@/components/marketplace/ListingDescription';
 import ListingMetadata from '@/components/marketplace/ListingMetadata';
 import ImageViewer from '@/components/ImageViewer';
 import SafeTradingTips from '@/components/marketplace/SafeTradingTips';
-
 const MarketplaceListingDetails = () => {
   const {
     id = ''
@@ -26,12 +25,10 @@ const MarketplaceListingDetails = () => {
   } = useMarketplaceListing(id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
-
   const openImageViewer = (index: number) => {
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
-
   if (loading) {
     return <MainLayout>
         <div className="container mx-auto py-8 px-4 max-w-6xl animate-pulse">
@@ -47,7 +44,6 @@ const MarketplaceListingDetails = () => {
         </div>
       </MainLayout>;
   }
-
   if (error || !listing) {
     return <MainLayout>
         <div className="container mx-auto py-8 px-4 max-w-6xl">
@@ -68,7 +64,6 @@ const MarketplaceListingDetails = () => {
         </div>
       </MainLayout>;
   }
-
   return <MainLayout>
       <div className="w-full py-8 overflow-y-auto pb-32 px-[11px]">
         <div className="max-w-[1400px] mx-auto">
@@ -109,5 +104,4 @@ const MarketplaceListingDetails = () => {
       </div>
     </MainLayout>;
 };
-
 export default MarketplaceListingDetails;

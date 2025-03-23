@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserMarketplaceListings } from '@/hooks/useUserMarketplaceListings';
@@ -19,7 +20,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingForm from './MarketplaceListingForm';
-import { isWithinLastWeek } from '@/lib/utils';
 
 interface UserMarketplaceListingsProps {
   onEdit?: (listing: MarketplaceListing) => void;
@@ -36,6 +36,7 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
   const [showAddForm, setShowAddForm] = useState(false);
   const [listingToEdit, setListingToEdit] = useState<MarketplaceListing | null>(null);
 
+  // Format price to Indian Rupees
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -131,19 +132,12 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
           {listings.map((listing) => (
             <Card key={listing.id} className="overflow-hidden">
               {listing.images && listing.images.length > 0 && (
-                <div className="w-full h-48 overflow-hidden relative">
+                <div className="w-full h-48 overflow-hidden">
                   <img 
                     src={listing.images[0]} 
                     alt={listing.title} 
                     className="w-full h-full object-cover transition-transform hover:scale-105"
                   />
-                  {isWithinLastWeek(listing.created_at) && (
-                    <div className="absolute top-2 left-2">
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-500 text-white shadow-sm">
-                        New
-                      </span>
-                    </div>
-                  )}
                 </div>
               )}
               <CardHeader className="pb-2">

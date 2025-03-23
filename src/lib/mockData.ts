@@ -1,3 +1,4 @@
+
 export interface Recommendation {
   id: string;
   name: string;
@@ -37,8 +38,7 @@ export const mockRecommendations: Recommendation[] = [
     openNow: true,
     hours: 'Until 8:00 PM',
     priceLevel: '$$',
-    instagram: '@chiccuts',
-    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() // 2 days ago
+    instagram: '@chiccuts'
   },
   {
     id: '2',
@@ -54,8 +54,7 @@ export const mockRecommendations: Recommendation[] = [
     openNow: true,
     hours: 'Until 7:00 PM',
     priceLevel: '$$$',
-    instagram: 'harmonyhair',
-    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() // 5 days ago
+    instagram: 'harmonyhair'
   },
   {
     id: '3',
