@@ -102,7 +102,7 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
 
   // Check if parent has search-result-card class to determine if we're in search results
   const isInSearchResults = className?.includes('search-result-card');
-  const imageHeightClass = isInSearchResults ? "h-[400px]" : "h-full"; // Increased height for search results from 300px to 400px
+  const imageHeightClass = isInSearchResults ? "h-[300px]" : "h-full"; // Increased height for search results
 
   return <div className={cn("relative group", className)}>
       <AspectRatio ratio={4 / 5} className="bg-muted">

@@ -20,7 +20,7 @@ const LocationsList: React.FC<LocationsListProps> = ({ recommendations }) => {
             recommendation={recommendation} 
             ranking={index < 10 ? index + 1 : undefined} 
             reviewCount={recommendation.reviewCount} 
-            className="h-full search-result-card" 
+            className="h-full" 
             showDistanceUnderAddress={true}
           />
         </div>
