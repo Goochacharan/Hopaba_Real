@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Heart, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -8,12 +7,14 @@ import { useWishlist } from '@/contexts/WishlistContext';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { useToast } from '@/hooks/use-toast';
 import { differenceInDays } from 'date-fns';
+
 interface ListingImageCarouselProps {
   images: string[] | null;
   onImageClick?: (index: number) => void;
   className?: string;
   listing: MarketplaceListing;
 }
+
 const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
   images,
   onImageClick,
@@ -34,25 +35,27 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
   const touchEndX = useRef<number | null>(null);
   const minSwipeDistance = 50;
 
-  // Use default image if no images are provided
   const imageArray = images && images.length > 0 ? images : ['/placeholder.svg'];
 
-  // Check if listing is less than 7 days old
   const isNew = differenceInDays(new Date(), new Date(listing.created_at)) < 7;
+
   const handlePreviousImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentImageIndex(prev => prev === 0 ? imageArray.length - 1 : prev - 1);
   };
+
   const handleNextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentImageIndex(prev => prev === imageArray.length - 1 ? 0 : prev + 1);
   };
+
   const handleImageClick = (e: React.MouseEvent) => {
     if (onImageClick) {
       e.stopPropagation();
       onImageClick(currentImageIndex);
     }
   };
+
   const toggleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isInWishlistAlready) {
@@ -70,14 +73,15 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
     }
   };
 
-  // Touch event handlers for swipe gestures
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.targetTouches[0].clientX;
     touchEndX.current = null;
   };
+
   const onTouchMove = (e: React.TouchEvent) => {
     touchEndX.current = e.targetTouches[0].clientX;
   };
+
   const onTouchEnd = (e: React.TouchEvent) => {
     if (!touchStartX.current || !touchEndX.current) return;
     const distance = touchStartX.current - touchEndX.current;
@@ -91,10 +95,10 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
       setCurrentImageIndex(prev => prev === 0 ? imageArray.length - 1 : prev - 1);
     }
 
-    // Reset touch coordinates
     touchStartX.current = null;
     touchEndX.current = null;
   };
+
   return <div className={cn("relative group", className)}>
       <AspectRatio ratio={4 / 5} className="bg-muted">
         <img 
@@ -107,18 +111,15 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
           onTouchEnd={onTouchEnd} 
         />
         
-        {/* Wishlist button */}
         <Button size="icon" variant="secondary" className={cn("absolute top-2 right-2 z-10 opacity-90 shadow-md", isInWishlistAlready ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-background text-foreground")} onClick={toggleWishlist}>
           <Heart className={cn("h-5 w-5", isInWishlistAlready ? "fill-current" : "")} />
         </Button>
 
-        {/* New badge - Only show if the listing is less than 7 days old */}
         {isNew && <div className="absolute top-2 left-2 z-10 text-white text-L font-semibold py-0.5 rounded flex items-center gap-1 shadow-md mx-0 my-0 bg-[#b123bc] px-[14px]">
             <Sparkles className="h-3 w-3" />
-            New
+            New post
           </div>}
 
-        {/* Navigation buttons - only show if more than one image */}
         {imageArray.length > 1 && <>
             <Button size="icon" variant="ghost" className="absolute left-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/50 hover:bg-background/70" onClick={handlePreviousImage}>
               <ChevronLeft className="h-6 w-6" />
@@ -130,7 +131,6 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
           </>}
       </AspectRatio>
       
-      {/* Image indicators - only show if more than one image */}
       {imageArray.length > 1 && <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5">
           {imageArray.map((_, index) => <button key={index} className={`w-2 h-2 rounded-full transition-all ${index === currentImageIndex ? 'bg-primary scale-125' : 'bg-background/70 hover:bg-background'}`} onClick={e => {
         e.stopPropagation();
@@ -139,4 +139,5 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
         </div>}
     </div>;
 };
+
 export default ListingImageCarousel;
