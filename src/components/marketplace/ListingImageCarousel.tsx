@@ -97,7 +97,15 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
   };
   return <div className={cn("relative group", className)}>
       <AspectRatio ratio={4 / 5} className="bg-muted">
-        <img src={imageArray[currentImageIndex]} alt={`Product image ${currentImageIndex + 1}`} className="object-cover w-full h-full cursor-pointer" onClick={handleImageClick} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} />
+        <img 
+          src={imageArray[currentImageIndex]} 
+          alt={`Product image ${currentImageIndex + 1}`} 
+          className="object-contain w-full h-full cursor-pointer" 
+          onClick={handleImageClick} 
+          onTouchStart={onTouchStart} 
+          onTouchMove={onTouchMove} 
+          onTouchEnd={onTouchEnd} 
+        />
         
         {/* Wishlist button */}
         <Button size="icon" variant="secondary" className={cn("absolute top-2 right-2 z-10 opacity-90 shadow-md", isInWishlistAlready ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-background text-foreground")} onClick={toggleWishlist}>
