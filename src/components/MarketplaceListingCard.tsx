@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -41,7 +42,13 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         <h3 className="font-medium text-lg md:text-xl mb-2">{listing.title}</h3>
         
         <div className="mb-4">
-          <ListingMetadata location={listing.location} createdAt={listing.created_at} condition={listing.condition} sellerInstagram={listing.seller_instagram} sellerName={listing.seller_name} />
+          <ListingMetadata 
+            location={listing.location} 
+            createdAt={listing.created_at} 
+            condition={listing.condition} 
+            sellerInstagram={listing.seller_instagram} 
+            sellerName={listing.seller_name} 
+          />
         </div>
 
         <div className="flex justify-between items-start mb-4 py-0 my-0">
@@ -50,7 +57,12 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           </div>
           
           <div className="flex flex-col items-end py-0">
-            <SellerInfo sellerName={listing.seller_name} sellerRating={listing.seller_rating} sellerId={listing.seller_id} />
+            <SellerInfo 
+              sellerName={listing.seller_name} 
+              sellerRating={listing.seller_rating} 
+              sellerId={listing.seller_id} 
+              createdAt={listing.created_at}
+            />
           </div>
         </div>
         
@@ -58,10 +70,23 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           {listing.description}
         </p>
 
-        <ListingActionButtons listingId={listing.id} title={listing.title} price={listing.price} sellerPhone={listing.seller_phone} sellerWhatsapp={listing.seller_whatsapp} sellerInstagram={listing.seller_instagram} location={listing.location} />
+        <ListingActionButtons 
+          listingId={listing.id} 
+          title={listing.title} 
+          price={listing.price} 
+          sellerPhone={listing.seller_phone} 
+          sellerWhatsapp={listing.seller_whatsapp} 
+          sellerInstagram={listing.seller_instagram} 
+          location={listing.location} 
+        />
       </div>
 
-      <ImageViewer images={listing.images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />
+      <ImageViewer 
+        images={listing.images} 
+        initialIndex={selectedImageIndex} 
+        open={imageViewerOpen} 
+        onOpenChange={setImageViewerOpen} 
+      />
     </div>;
 };
 export default MarketplaceListingCard;

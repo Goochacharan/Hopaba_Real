@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { format } from 'date-fns';
-import { Instagram, Film } from 'lucide-react';
+import { format, differenceInDays } from 'date-fns';
+import { Instagram, Film, Sparkles } from 'lucide-react';
 
 interface ListingDescriptionProps {
   description: string;
@@ -28,9 +28,21 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
     instagram.includes('tiktok.com')
   );
 
+  // Check if listing is less than 7 days old
+  const isNew = differenceInDays(new Date(), new Date(createdAt)) < 7;
+
   return (
     <div className="bg-white rounded-xl border p-6 shadow-sm">
-      <h2 className="text-xl font-semibold mb-3">Description</h2>
+      <div className="flex items-center gap-3">
+        <h2 className="text-xl font-semibold mb-3">Description</h2>
+        {isNew && (
+          <div className="bg-[#33C3F0] text-white text-xs font-semibold px-2 py-0.5 rounded flex items-center gap-1 mb-3">
+            <Sparkles className="h-3 w-3" />
+            New
+          </div>
+        )}
+      </div>
+      
       <div className="space-y-4">
         <p className="text-muted-foreground whitespace-pre-line">{description}</p>
         

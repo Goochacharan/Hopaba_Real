@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { MapPin, Calendar, BadgeCheck, Film } from 'lucide-react';
+import { MapPin, Calendar, BadgeCheck, Film, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
 interface ListingMetadataProps {
@@ -23,6 +23,9 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
   showInCard = false
 }) => {
   const { toast } = useToast();
+  
+  // Check if listing is less than 7 days old
+  const isNew = differenceInDays(new Date(), new Date(createdAt)) < 7;
   
   const handleInstagramClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -54,6 +57,12 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
       <div className="flex items-center gap-1 my-0 py-0 px-0">
         <Calendar className="h-4 w-4" />
         <span>Listed on {format(new Date(createdAt), 'PPP')}</span>
+        {isNew && (
+          <div className="bg-[#33C3F0] text-white text-xs font-semibold px-2 py-0.5 rounded flex items-center gap-1 ml-2">
+            <Sparkles className="h-3 w-3" />
+            New
+          </div>
+        )}
         {sellerInstagram && (
           <button 
             onClick={handleInstagramClick} 
