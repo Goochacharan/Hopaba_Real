@@ -39,6 +39,33 @@ const ContactSection = () => {
       shouldValidate: true,
     });
   };
+
+  // Function to handle WhatsApp number input validation
+  const handleWhatsAppInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    
+    // Only process if there's a value (WhatsApp is optional)
+    if (value) {
+      // Ensure the value starts with +91
+      if (!value.startsWith('+91')) {
+        value = '+91' + value.replace('+91', '');
+      }
+      
+      // Remove all non-digit characters except the +91 prefix
+      const digits = value.slice(3).replace(/\D/g, '');
+      
+      // Limit to 10 digits
+      const limitedDigits = digits.slice(0, 10);
+      
+      // Set the value with +91 prefix and limited digits
+      e.target.value = '+91' + limitedDigits;
+      
+      // Update the form value
+      form.setValue('whatsapp', e.target.value, {
+        shouldValidate: true,
+      });
+    }
+  };
   
   return (
     <>
@@ -80,7 +107,12 @@ const ContactSection = () => {
               </div>
             </FormLabel>
             <FormControl>
-              <Input placeholder="Enter WhatsApp number (if different)" {...field} />
+              <Input 
+                placeholder="Enter WhatsApp number (if different)" 
+                {...field}
+                defaultValue={field.value || "+91"}
+                onInput={handleWhatsAppInput}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

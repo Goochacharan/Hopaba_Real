@@ -25,8 +25,22 @@ const marketplaceListingSchema = z.object({
   condition: z.string().min(1, { message: "Condition is required" }),
   location: z.string().optional(), // Changed to optional
   seller_name: z.string().min(2, { message: "Seller name is required" }),
-  seller_phone: z.string().optional(),
-  seller_whatsapp: z.string().optional(),
+  seller_phone: z.string()
+    .refine(phone => phone.startsWith('+91'), {
+      message: "Phone number must start with +91."
+    })
+    .refine(phone => phone.slice(3).replace(/\D/g, '').length === 10, {
+      message: "Please enter a 10-digit phone number (excluding +91)."
+    })
+    .optional(),
+  seller_whatsapp: z.string()
+    .refine(phone => !phone || phone.startsWith('+91'), {
+      message: "WhatsApp number must start with +91."
+    })
+    .refine(phone => !phone || phone.slice(3).replace(/\D/g, '').length === 10, {
+      message: "Please enter a 10-digit WhatsApp number (excluding +91)."
+    })
+    .optional(),
   seller_instagram: z.string().optional(),
   images: z.array(z.string()).min(1, { message: "Please upload at least one image" }),
 });
@@ -57,8 +71,8 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     condition: listing?.condition || '',
     location: listing?.location || '',
     seller_name: listing?.seller_name || user?.user_metadata?.full_name || '',
-    seller_phone: listing?.seller_phone || '',
-    seller_whatsapp: listing?.seller_whatsapp || '',
+    seller_phone: listing?.seller_phone || '+91',
+    seller_whatsapp: listing?.seller_whatsapp || '+91',
     seller_instagram: listing?.seller_instagram || '',
     images: listing?.images || [],
   };
@@ -68,6 +82,30 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     defaultValues,
     mode: "onBlur",
   });
+
+  // Function to handle phone number input validation
+  const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'seller_phone' | 'seller_whatsapp') => {
+    let value = e.target.value;
+    
+    // Ensure the value starts with +91
+    if (!value.startsWith('+91')) {
+      value = '+91' + value.replace('+91', '');
+    }
+    
+    // Remove all non-digit characters except the +91 prefix
+    const digits = value.slice(3).replace(/\D/g, '');
+    
+    // Limit to 10 digits
+    const limitedDigits = digits.slice(0, 10);
+    
+    // Set the value with +91 prefix and limited digits
+    e.target.value = '+91' + limitedDigits;
+    
+    // Update the form value
+    form.setValue(fieldName, e.target.value, {
+      shouldValidate: true,
+    });
+  };
 
   const handleLocationChange = (value: string, onChange: (value: string) => void) => {
     if (value.includes('google.com/maps') || value.includes('goo.gl/maps')) {
@@ -308,7 +346,12 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                   <FormItem>
                     <FormLabel>Phone Number (Optional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. +91 98765 43210" {...field} />
+                      <Input 
+                        placeholder="Enter phone number" 
+                        defaultValue="+91"
+                        onInput={(e) => handlePhoneInput(e as React.ChangeEvent<HTMLInputElement>, 'seller_phone')}
+                        {...field}
+                      />
                     </FormControl>
                     <FormDescription>
                       Your contact number for buyers
@@ -326,7 +369,12 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                     <FormItem>
                       <FormLabel>WhatsApp (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. +91 98765 43210" {...field} />
+                        <Input 
+                          placeholder="Enter WhatsApp number" 
+                          defaultValue="+91"
+                          onInput={(e) => handlePhoneInput(e as React.ChangeEvent<HTMLInputElement>, 'seller_whatsapp')}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
