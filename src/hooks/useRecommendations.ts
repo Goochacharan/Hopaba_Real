@@ -25,6 +25,7 @@ export interface Event {
   description: string;
   image: string;
   attendees: number;
+  pricePerPerson?: number;
 }
 
 const sampleEvents: Event[] = [

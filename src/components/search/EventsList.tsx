@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Event } from '@/hooks/useRecommendations';
-import { Calendar, Clock, MapPin, Users, Heart, Phone, MessageCircle, Navigation2, Share2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Calendar, Clock, MapPin, Users, Heart, Phone, MessageCircle, Navigation2, Share2, IndianRupee } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -12,10 +10,9 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface EventsListProps {
   events: Event[];
-  onRSVP: (eventTitle: string) => void;
 }
 
-const EventsList: React.FC<EventsListProps> = ({ events, onRSVP }) => {
+const EventsList: React.FC<EventsListProps> = ({ events }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -134,7 +131,6 @@ const EventsList: React.FC<EventsListProps> = ({ events, onRSVP }) => {
         duration: 2000
       });
     } else {
-      // Add the event to wishlist with the type 'event'
       addToWishlist(event, 'event');
       toast({
         title: "Added to wishlist",
@@ -144,6 +140,14 @@ const EventsList: React.FC<EventsListProps> = ({ events, onRSVP }) => {
     }
   };
 
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(price);
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {events.map(event => {
@@ -151,7 +155,7 @@ const EventsList: React.FC<EventsListProps> = ({ events, onRSVP }) => {
         
         return (
           <div key={event.id} className="bg-white rounded-xl shadow-sm border border-border overflow-hidden animate-fade-in">
-            <div className="relative h-60">
+            <div className="relative h-64">
               <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
               
               <button 
@@ -166,26 +170,35 @@ const EventsList: React.FC<EventsListProps> = ({ events, onRSVP }) => {
             </div>
             
             <div className="p-5">
-              <h3 className="text-xl font-medium mb-3">{event.title}</h3>
+              <div className="flex justify-between items-start mb-3">
+                <h3 className="text-xl font-medium">{event.title}</h3>
+                {event.pricePerPerson !== undefined && (
+                  <div className="flex items-center bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-100">
+                    <IndianRupee className="w-4 h-4 mr-1" />
+                    <span className="font-medium">{formatPrice(event.pricePerPerson)}</span>
+                    <span className="text-xs ml-1 text-emerald-600">/person</span>
+                  </div>
+                )}
+              </div>
               
               <div className="flex flex-col gap-2 mb-4">
                 <div className="flex items-center text-sm text-muted-foreground">
-                  <Calendar className="w-4 h-4 mr-2" />
+                  <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
                   {event.date}
                 </div>
                 
                 <div className="flex items-center text-sm text-muted-foreground">
-                  <Clock className="w-4 h-4 mr-2" />
+                  <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
                   {event.time}
                 </div>
                 
                 <div className="flex items-center text-sm text-muted-foreground">
-                  <MapPin className="w-4 h-4 mr-2" />
+                  <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
                   {event.location}
                 </div>
                 
                 <div className="flex items-center text-sm text-muted-foreground">
-                  <Users className="w-4 h-4 mr-2" />
+                  <Users className="w-4 h-4 mr-2 flex-shrink-0" />
                   {event.attendees} attending
                 </div>
               </div>
@@ -194,7 +207,7 @@ const EventsList: React.FC<EventsListProps> = ({ events, onRSVP }) => {
                 {event.description}
               </p>
               
-              <div className="flex gap-2 mt-4 mb-4">
+              <div className="flex gap-2 mt-4">
                 <button 
                   onClick={(e) => handleCall(e, event.title)} 
                   className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
@@ -220,10 +233,6 @@ const EventsList: React.FC<EventsListProps> = ({ events, onRSVP }) => {
                   <Share2 className="h-5 w-5" />
                 </button>
               </div>
-              
-              <Button onClick={() => onRSVP(event.title)} className="w-full">
-                RSVP to Event
-              </Button>
             </div>
           </div>
         );

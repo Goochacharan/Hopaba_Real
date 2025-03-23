@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import AddBusinessForm from '@/components/AddBusinessForm';
 import BusinessesList from '@/components/BusinessesList';
 import UserMarketplaceListings from '@/components/UserMarketplaceListings';
+import UserEventListings from '@/components/UserEventListings';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -16,7 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { User, Bell, Shield, Globe, UserCog, Save, Settings, Moon, LogOut, Plus, Store, ListPlus, ShoppingBag } from 'lucide-react';
+import { User, Bell, Shield, Globe, UserCog, Save, Settings, Moon, LogOut, Plus, Store, ListPlus, ShoppingBag, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { BusinessFormValues } from '@/components/AddBusinessForm';
@@ -220,6 +221,13 @@ const Profile = () => {
                     <span className="truncate">Marketplace</span>
                   </TabsTrigger>
                   <TabsTrigger 
+                    value="events" 
+                    className="flex-1 flex items-center justify-center gap-2 py-3 text-sm md:text-base whitespace-nowrap px-4"
+                  >
+                    <Calendar className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+                    <span className="truncate">Events</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
                     value="preferences" 
                     className="flex-1 flex items-center justify-center gap-2 py-3 text-sm md:text-base whitespace-nowrap px-4"
                   >
@@ -370,6 +378,12 @@ const Profile = () => {
               </div>
             </TabsContent>
 
+            <TabsContent value="events" className="space-y-6 pb-8">
+              <div className="bg-white rounded-xl shadow-md border border-border p-6 md:p-8 w-full">
+                <UserEventListings />
+              </div>
+            </TabsContent>
+
             <TabsContent value="preferences" className="space-y-6 pb-8">
               <div className="bg-white rounded-xl shadow-md border border-border p-6 md:p-8 w-full">
                 <div className="flex items-center justify-between mb-6">
@@ -446,4 +460,3 @@ const Profile = () => {
 };
 
 export default Profile;
-

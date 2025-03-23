@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import { useToast } from '@/hooks/use-toast';
@@ -15,7 +14,8 @@ const sampleEvents: Event[] = [
     location: 'Central Park, San Francisco',
     description: 'A culinary celebration featuring over 30 local restaurants, live cooking demonstrations, and music performances.',
     image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-    attendees: 215
+    attendees: 215,
+    pricePerPerson: 1500
   },
   {
     id: '2',
@@ -25,7 +25,8 @@ const sampleEvents: Event[] = [
     location: 'Modern Art Gallery, Indiranagar',
     description: 'Showcasing works from emerging local artists with interactive sessions and workshops throughout the weekend.',
     image: 'https://images.unsplash.com/photo-1591115765373-5207764f72e4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-    attendees: 98
+    attendees: 98,
+    pricePerPerson: 500
   },
   {
     id: '3',
@@ -35,7 +36,8 @@ const sampleEvents: Event[] = [
     location: 'Sunset Beach, Koramangala',
     description: 'A day-long retreat with yoga sessions, meditation workshops, and healthy living seminars led by certified instructors.',
     image: 'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-    attendees: 42
+    attendees: 42,
+    pricePerPerson: 2000
   },
   {
     id: '4',
@@ -45,7 +47,8 @@ const sampleEvents: Event[] = [
     location: 'Innovation Hub, Whitefield',
     description: 'Connect with founders, investors, and tech enthusiasts in a casual setting with keynote speakers and pitch opportunities.',
     image: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1728&q=80',
-    attendees: 127
+    attendees: 127,
+    pricePerPerson: 1000
   }
 ];
 
@@ -69,21 +72,13 @@ const Events = () => {
     };
   }, []);
 
-  const handleRSVP = (eventTitle: string) => {
-    toast({
-      title: "RSVP Successful",
-      description: `You've RSVP'd to ${eventTitle}. We'll send you a reminder closer to the date.`,
-      duration: 3000,
-    });
-  };
-
   return (
     <MainLayout>
       <section className="py-8 px-4 w-full pb-32">
         <div className="max-w-[1400px] mx-auto">
           <h1 className="text-3xl font-medium mb-6">Upcoming Events</h1>
           
-          <EventsList events={sampleEvents} onRSVP={handleRSVP} />
+          <EventsList events={sampleEvents} />
         </div>
       </section>
     </MainLayout>
