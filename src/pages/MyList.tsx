@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -56,7 +55,6 @@ const MyList = () => {
     };
   }, [navigate]);
 
-  // Helper functions to check item type
   const isMarketplaceListing = (item: WishlistItem): item is WishlistItem & {
     type: 'marketplace';
   } => {
@@ -69,9 +67,7 @@ const MyList = () => {
     return item.type === 'event';
   };
 
-  // Filter wishlist items based on search query and active tab
   const filteredWishlist = wishlist.filter(item => {
-    // First filter by active tab
     if (activeTab === 'locations' && (isMarketplaceListing(item) || isEvent(item))) {
       return false;
     }
@@ -82,26 +78,21 @@ const MyList = () => {
       return false;
     }
 
-    // Then filter by search query
     if (!searchQuery.trim()) return true;
     const lowercaseQuery = searchQuery.toLowerCase();
 
-    // Handle different properties based on item type
     if (isMarketplaceListing(item)) {
-      // Marketplace listing properties
       return item.title?.toLowerCase().includes(lowercaseQuery) || 
              item.category?.toLowerCase().includes(lowercaseQuery) || 
              item.description?.toLowerCase().includes(lowercaseQuery) || 
              item.location?.toLowerCase().includes(lowercaseQuery) || 
              item.condition?.toLowerCase().includes(lowercaseQuery);
     } else if (isEvent(item)) {
-      // Event properties
       return item.title?.toLowerCase().includes(lowercaseQuery) || 
              item.description?.toLowerCase().includes(lowercaseQuery) || 
              item.location?.toLowerCase().includes(lowercaseQuery) || 
              item.date?.toLowerCase().includes(lowercaseQuery);
     } else {
-      // Recommendation properties
       return item.name?.toLowerCase().includes(lowercaseQuery) || 
              item.category?.toLowerCase().includes(lowercaseQuery) || 
              item.description?.toLowerCase().includes(lowercaseQuery) || 
@@ -109,18 +100,14 @@ const MyList = () => {
     }
   });
 
-  // Calculate pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredWishlist.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredWishlist.length / itemsPerPage);
 
-  // Helper to handle RSVP
   const handleRSVP = (eventTitle: string) => {
-    // Just a dummy handler for now
   };
 
-  // Reset to first page when search query or tab changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, activeTab]);
@@ -138,7 +125,6 @@ const MyList = () => {
         <h1 className="text-3xl font-medium mb-6">My Wishlist</h1>
         
         {wishlist.length > 0 ? <>
-            {/* Tabs and search input */}
             <div className="mb-6 space-y-4">
               <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-4 mb-4">
@@ -161,9 +147,8 @@ const MyList = () => {
                     if (isMarketplaceListing(item)) {
                       return <MarketplaceListingCard key={item.id} listing={item as MarketplaceListing} />;
                     } else if (isEvent(item)) {
-                      // Group events for the EventsList component
                       const events = [item as Event];
-                      return <EventsList key={item.id} events={events} onRSVP={handleRSVP} />;
+                      return <EventsList key={item.id} events={events} />;
                     } else {
                       return <LocationCard key={item.id} recommendation={item as Recommendation} />;
                     }

@@ -54,7 +54,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
       
       <TabsContent value="events">
         {events.length > 0 ? (
-          <EventsList events={events} onRSVP={handleRSVP} />
+          <EventsList events={events} />
         ) : (
           <NoResultsMessage type="events" />
         )}
