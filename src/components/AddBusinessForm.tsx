@@ -49,9 +49,13 @@ const businessFormSchema = z.object({
   area: z.string().min(2, {
     message: "Please enter an area or neighborhood.",
   }),
-  contact_phone: z.string().min(10, {
-    message: "Please enter a valid phone number.",
-  }),
+  contact_phone: z.string()
+    .refine(phone => phone.startsWith('+91'), {
+      message: "Phone number must start with +91.",
+    })
+    .refine(phone => phone.replace(/\D/g, '').length === 12, {
+      message: "Please enter a 10-digit phone number (excluding +91).",
+    }),
   contact_email: z.string().email({
     message: "Please enter a valid email address.",
   }).optional(),
