@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -320,7 +319,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </div>
           
           {recommendation.distance && showDistanceUnderAddress && (
-            <div className="text-muted-foreground text-sm pl-5 mt-1">
+            <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center">
+              <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
               {formatDistance(recommendation.distance)}
             </div>
           )}
@@ -340,7 +340,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
                 </button>}
             </div>
             {recommendation.distance && !showDistanceUnderAddress && (
-              <div className="text-muted-foreground pl-5 mt-1">
+              <div className="text-muted-foreground pl-5 mt-1 flex items-center">
+                <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
                 {formatDistance(recommendation.distance)}
               </div>
             )}
