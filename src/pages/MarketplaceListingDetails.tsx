@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -12,23 +13,18 @@ import ListingDescription from '@/components/marketplace/ListingDescription';
 import ListingMetadata from '@/components/marketplace/ListingMetadata';
 import ImageViewer from '@/components/ImageViewer';
 import SafeTradingTips from '@/components/marketplace/SafeTradingTips';
+
 const MarketplaceListingDetails = () => {
-  const {
-    id = ''
-  } = useParams<{
-    id: string;
-  }>();
-  const {
-    listing,
-    loading,
-    error
-  } = useMarketplaceListing(id);
+  const { id = '' } = useParams<{ id: string; }>();
+  const { listing, loading, error } = useMarketplaceListing(id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
+
   const openImageViewer = (index: number) => {
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
+
   if (loading) {
     return <MainLayout>
         <div className="container mx-auto py-8 px-4 max-w-6xl animate-pulse">
@@ -44,6 +40,7 @@ const MarketplaceListingDetails = () => {
         </div>
       </MainLayout>;
   }
+
   if (error || !listing) {
     return <MainLayout>
         <div className="container mx-auto py-8 px-4 max-w-6xl">
@@ -64,6 +61,7 @@ const MarketplaceListingDetails = () => {
         </div>
       </MainLayout>;
   }
+
   return <MainLayout>
       <div className="w-full py-8 overflow-y-auto pb-32 px-[11px]">
         <div className="max-w-[1400px] mx-auto">
@@ -77,23 +75,47 @@ const MarketplaceListingDetails = () => {
               <div className="mb-6">
                 <Badge className="mb-2">{listing?.category}</Badge>
                 <h1 className="text-2xl sm:text-3xl font-bold mb-2">{listing?.title}</h1>
-                <ListingMetadata location={listing.location} createdAt={listing.created_at} condition={listing.condition} />
+                <ListingMetadata 
+                  location={listing.location} 
+                  createdAt={listing.created_at} 
+                  condition={listing.condition}
+                  sellerInstagram={listing.seller_instagram}
+                  sellerName={listing.seller_name}
+                />
               </div>
               
               <div className="mb-6 bg-black/5 rounded-xl shadow-sm overflow-hidden">
                 <ListingImageCarousel images={listing.images} onImageClick={openImageViewer} listing={listing} />
                 
                 <div className="p-4">
-                  <ListingThumbnails images={listing.images} selectedIndex={selectedImageIndex} onSelect={index => {
-                  setSelectedImageIndex(index);
-                  openImageViewer(index);
-                }} />
+                  <ListingThumbnails 
+                    images={listing.images} 
+                    selectedIndex={selectedImageIndex} 
+                    onSelect={index => {
+                      setSelectedImageIndex(index);
+                      openImageViewer(index);
+                    }} 
+                  />
                 </div>
               </div>
               
-              {listing && <ImageViewer images={listing.images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
+              {listing && <ImageViewer 
+                images={listing.images} 
+                initialIndex={selectedImageIndex} 
+                open={imageViewerOpen} 
+                onOpenChange={setImageViewerOpen} 
+              />}
               
-              <ListingDescription description={listing.description} category={listing.category} condition={listing.condition} location={listing.location} createdAt={listing.created_at} showMetadata={false} />
+              <ListingDescription 
+                description={listing.description} 
+                category={listing.category} 
+                condition={listing.condition} 
+                location={listing.location} 
+                createdAt={listing.created_at}
+                sellerInstagram={listing.seller_instagram}
+                sellerName={listing.seller_name}
+                showMetadata={false} 
+              />
               
               <div className="mt-6 mb-16">
                 <SafeTradingTips />
@@ -104,4 +126,5 @@ const MarketplaceListingDetails = () => {
       </div>
     </MainLayout>;
 };
+
 export default MarketplaceListingDetails;
