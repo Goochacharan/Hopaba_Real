@@ -55,17 +55,17 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
               {sellerInstagram && (
                 <>
                   <div className="text-sm font-medium flex items-center gap-1.5">
-                    <Instagram className="h-3.5 w-3.5 text-purple-600" />
+                    <Instagram className="h-3.5 w-3.5" />
                     <span>Instagram / Video</span>
                   </div>
                   <div className="text-sm">
                     <Badge 
                       variant="outline" 
-                      className="cursor-pointer hover:bg-purple-50 transition-colors flex items-center gap-1 border-purple-200 bg-purple-50 text-purple-600"
+                      className="cursor-pointer hover:bg-secondary/50 transition-colors flex items-center gap-1"
                       onClick={openInstagramLink}
                     >
                       <span className="truncate">{sellerInstagram}</span>
-                      <Film className="h-3.5 w-3.5 text-purple-600" />
+                      <Film className="h-3.5 w-3.5 text-purple-500" />
                     </Badge>
                   </div>
                 </>

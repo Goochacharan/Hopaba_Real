@@ -42,11 +42,11 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
         {sellerInstagram && onInstagramClick && (
           <button 
             onClick={onInstagramClick} 
-            className="text-purple-600 hover:text-purple-700 flex items-center gap-1 flex-shrink-0"
+            className="text-muted-foreground hover:text-primary flex items-center gap-1 flex-shrink-0"
             title="View video content"
           >
             <Instagram className="h-5 w-5" />
-            <Film className="h-4 w-4" />
+            <Film className="h-4 w-4 text-purple-500" />
           </button>
         )}
       </div>

@@ -76,17 +76,17 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
         {sellerInstagram && (
           <div className="mb-6 border-t border-gray-100 pt-4">
             <div className="flex items-center gap-2 mb-2">
-              <Instagram className="h-4 w-4 text-purple-600" />
+              <Instagram className="h-4 w-4" />
               <span className="font-medium">Instagram / Video Content</span>
-              <Film className="h-4 w-4 text-purple-600" />
+              <Film className="h-4 w-4 ml-1 text-purple-500" />
             </div>
             <Badge 
               variant="outline" 
-              className="w-full py-2 px-3 flex justify-between items-center cursor-pointer hover:bg-purple-50 transition-colors border-purple-200 bg-purple-50"
+              className="w-full py-2 px-3 flex justify-between items-center cursor-pointer hover:bg-secondary/50 transition-colors"
               onClick={openInstagramLink}
             >
               <span className="text-muted-foreground truncate">{sellerInstagram}</span>
-              <Film className="h-4 w-4 text-purple-600" />
+              <Film className="h-4 w-4 text-purple-500" />
             </Badge>
           </div>
         )}
