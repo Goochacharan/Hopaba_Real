@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -17,13 +18,15 @@ interface LocationCardProps {
   className?: string;
   ranking?: number;
   reviewCount?: number;
+  showDistanceUnderAddress?: boolean;
 }
 
 const LocationCard: React.FC<LocationCardProps> = ({
   recommendation,
   className,
   ranking,
-  reviewCount = Math.floor(Math.random() * 300) + 50
+  reviewCount = Math.floor(Math.random() * 300) + 50,
+  showDistanceUnderAddress = false
 }) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
@@ -310,9 +313,17 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </span>
         </div>
 
-        <div className="flex items-center text-muted-foreground mb-3 text-sm">
-          <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-          <span className="truncate">{recommendation.address}</span>
+        <div className="flex flex-col mb-3">
+          <div className="flex items-center text-muted-foreground text-sm">
+            <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+            <span className="truncate">{recommendation.address}</span>
+          </div>
+          
+          {recommendation.distance && showDistanceUnderAddress && (
+            <div className="text-muted-foreground text-sm pl-5 mt-1">
+              {formatDistance(recommendation.distance)}
+            </div>
+          )}
         </div>
 
         {recommendation.openNow !== undefined && <div className="flex flex-col text-sm mb-3">
@@ -328,9 +339,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
                   <Film className="h-5 w-5 text-white" />
                 </button>}
             </div>
-            {recommendation.distance && <div className="text-muted-foreground pl-5 mt-1">
+            {recommendation.distance && !showDistanceUnderAddress && (
+              <div className="text-muted-foreground pl-5 mt-1">
                 {formatDistance(recommendation.distance)}
-              </div>}
+              </div>
+            )}
           </div>}
 
         <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
