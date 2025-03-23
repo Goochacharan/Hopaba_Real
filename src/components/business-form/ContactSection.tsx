@@ -85,9 +85,11 @@ const ContactSection = () => {
             <FormControl>
               <Input 
                 placeholder="Enter phone number" 
-                {...field}
-                defaultValue="+91"
-                onInput={handlePhoneInput}
+                value={field.value || "+91"}
+                onChange={(e) => {
+                  field.onChange(e);
+                  handlePhoneInput(e);
+                }}
               />
             </FormControl>
             <FormMessage />
@@ -109,9 +111,11 @@ const ContactSection = () => {
             <FormControl>
               <Input 
                 placeholder="Enter WhatsApp number (if different)" 
-                {...field}
-                defaultValue={field.value || "+91"}
-                onInput={handleWhatsAppInput}
+                value={field.value || "+91"}
+                onChange={(e) => {
+                  field.onChange(e);
+                  handleWhatsAppInput(e);
+                }}
               />
             </FormControl>
             <FormMessage />
