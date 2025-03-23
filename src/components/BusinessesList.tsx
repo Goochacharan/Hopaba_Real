@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Pencil, Trash2, DollarSign, Clock, MapPin, Phone, Instagram, Film } from 'lucide-react';
+import { Pencil, Trash2, IndianRupee, Clock, MapPin, Phone, Instagram, Film } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -155,7 +155,7 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
             <CardContent className="pt-4 space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <IndianRupee className="h-4 w-4 text-muted-foreground" />
                   <span>
                     ₹{business.price_range_min} - ₹{business.price_range_max} {business.price_unit}
                   </span>

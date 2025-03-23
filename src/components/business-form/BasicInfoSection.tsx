@@ -21,11 +21,11 @@ import {
 import { 
   ListChecks, 
   Heading, 
-  DollarSign, 
   Clock, 
   FileText, 
   Star,
-  StoreIcon 
+  StoreIcon,
+  IndianRupee 
 } from 'lucide-react';
 import { BusinessFormValues } from '../AddBusinessForm';
 
@@ -148,7 +148,7 @@ const BasicInfoSection = () => {
             <FormItem>
               <FormLabel>
                 <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
+                  <IndianRupee className="h-4 w-4" />
                   Min Price*
                 </div>
               </FormLabel>
@@ -167,7 +167,7 @@ const BasicInfoSection = () => {
             <FormItem>
               <FormLabel>
                 <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
+                  <IndianRupee className="h-4 w-4" />
                   Max Price*
                 </div>
               </FormLabel>
