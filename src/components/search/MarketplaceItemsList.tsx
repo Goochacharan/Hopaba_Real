@@ -2,6 +2,7 @@
 import React from 'react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
+import { cn } from '@/lib/utils';
 
 interface MarketplaceItemsListProps {
   listings: MarketplaceListing[];
@@ -21,7 +22,11 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({ listings })
               ...listing,
               location: listing.location || "Not specified"
             }} 
-            className="h-full flex flex-col"
+            className={cn(
+              "h-full flex flex-col",
+              // Add a class for taller images only in search results page
+              "search-result-card"
+            )}
           />
         </div>
       ))}

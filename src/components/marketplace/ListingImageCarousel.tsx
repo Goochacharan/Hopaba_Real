@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Heart, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -99,12 +100,16 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
     touchEndX.current = null;
   };
 
+  // Check if parent has search-result-card class to determine if we're in search results
+  const isInSearchResults = className?.includes('search-result-card');
+  const imageHeightClass = isInSearchResults ? "h-[300px]" : "h-full"; // Increased height for search results
+
   return <div className={cn("relative group", className)}>
       <AspectRatio ratio={4 / 5} className="bg-muted">
         <img 
           src={imageArray[currentImageIndex]} 
           alt={`Product image ${currentImageIndex + 1}`} 
-          className="object-contain w-full h-full cursor-pointer" 
+          className={cn("object-contain w-full cursor-pointer", imageHeightClass)} 
           onClick={handleImageClick} 
           onTouchStart={onTouchStart} 
           onTouchMove={onTouchMove} 
