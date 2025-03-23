@@ -2,6 +2,7 @@
 import React from 'react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
+import { isWithinLastWeek } from '@/lib/utils';
 
 interface MarketplaceItemsListProps {
   listings: MarketplaceListing[];
@@ -16,7 +17,10 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({ listings })
           className="animate-fade-in" 
           style={{ animationDelay: `${index * 100}ms` }}
         >
-          <MarketplaceListingCard listing={listing} />
+          <MarketplaceListingCard 
+            listing={listing} 
+            isNew={isWithinLastWeek(listing.created_at)}
+          />
         </div>
       ))}
     </div>

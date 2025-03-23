@@ -2,6 +2,7 @@
 import React from 'react';
 import LocationCard from '@/components/LocationCard';
 import { Recommendation } from '@/lib/mockData';
+import { isWithinLastWeek } from '@/lib/utils';
 
 interface LocationsListProps {
   recommendations: Recommendation[];
@@ -22,6 +23,7 @@ const LocationsList: React.FC<LocationsListProps> = ({ recommendations }) => {
             reviewCount={recommendation.reviewCount} 
             className="h-full" 
             showDistanceUnderAddress={true}
+            isNew={recommendation.created_at ? isWithinLastWeek(recommendation.created_at) : false}
           />
         </div>
       ))}
