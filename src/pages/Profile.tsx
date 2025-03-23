@@ -29,7 +29,13 @@ const profileFormSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address."
   }),
-  phone: z.string().optional(),
+  phone: z.string()
+    .refine(phone => phone.startsWith('+91'), {
+      message: "Phone number must start with +91."
+    })
+    .refine(phone => phone.slice(3).replace(/\D/g, '').length === 10, {
+      message: "Please enter a 10-digit phone number (excluding +91)."
+    }),
   currentPassword: z.string().optional(),
   newPassword: z.string().min(8, {
     message: "Password must be at least 8 characters."
@@ -154,6 +160,24 @@ const Profile = () => {
     });
   };
 
+  const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    
+    if (!value.startsWith('+91')) {
+      value = '+91' + value.replace('+91', '');
+    }
+    
+    const digits = value.slice(3).replace(/\D/g, '');
+    
+    const limitedDigits = digits.slice(0, 10);
+    
+    e.target.value = '+91' + limitedDigits;
+    
+    form.setValue('phone', e.target.value, {
+      shouldValidate: true,
+    });
+  };
+
   return <MainLayout>
       <section className="w-full py-8 px-4 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
@@ -244,7 +268,13 @@ const Profile = () => {
                   }) => <FormItem>
                           <FormLabel className="text-sm md:text-base">Phone Number</FormLabel>
                           <FormControl>
-                            <Input placeholder="Your phone number" className="h-10 md:h-12" {...field} />
+                            <Input 
+                              placeholder="Enter phone number" 
+                              className="h-10 md:h-12" 
+                              defaultValue="+91"
+                              onInput={handlePhoneInput}
+                              {...field} 
+                            />
                           </FormControl>
                           <FormDescription className="text-xs md:text-sm">
                             Used for verification and important notifications
@@ -416,3 +446,4 @@ const Profile = () => {
 };
 
 export default Profile;
+
