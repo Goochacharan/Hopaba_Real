@@ -64,11 +64,11 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
       {sellerInstagram && (
         <Badge 
           variant="outline" 
-          className="flex items-center gap-1 cursor-pointer hover:bg-purple-50 border-purple-200 text-purple-600"
+          className="flex items-center gap-1 cursor-pointer hover:bg-purple-50 border-purple-200 text-purple-600 bg-purple-50"
           onClick={handleInstagramClick}
         >
-          <Instagram className="h-3 w-3" />
-          <Film className="h-3 w-3" />
+          <Instagram className="h-3 w-3 text-purple-600" />
+          <Film className="h-3 w-3 text-purple-600" />
           <span>Video</span>
         </Badge>
       )}
