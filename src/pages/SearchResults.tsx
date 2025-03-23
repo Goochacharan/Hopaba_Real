@@ -9,7 +9,7 @@ import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, MapPin, Clock, Users, AlertCircle, ShoppingBag } from 'lucide-react';
+import { Calendar, MapPin, Clock, Users, AlertCircle, ShoppingBag, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -135,8 +135,10 @@ const SearchResults = () => {
       <div className="w-full animate-fade-in mx-0 px-[6px]">
         <LocationSelector selectedLocation={selectedLocation} onLocationChange={handleLocationChange} />
         
-        <div className="w-full mb-6">
+        <div className="flex items-center justify-between mb-6 mt-2">
           <FilterTabs distance={distance} setDistance={setDistance} minRating={minRating} setMinRating={setMinRating} priceRange={priceRange} setPriceRange={setPriceRange} openNowOnly={openNowOnly} setOpenNowOnly={setOpenNowOnly} />
+          
+          <SortButton currentSort={sortBy} onSortChange={handleSortChange} />
         </div>
 
         <div className="w-full">
@@ -165,10 +167,6 @@ const SearchResults = () => {
                     Found {rankedRecommendations.length} locations, {events.length} events, and {marketplaceListings.length} marketplace items
                   </p>
                 </div>
-                
-                {activeTab === 'locations' && (
-                  <SortButton currentSort={sortBy} onSortChange={handleSortChange} />
-                )}
               </div>
               
               <Tabs defaultValue="locations" className="w-full mb-6" onValueChange={setActiveTab} value={activeTab}>
