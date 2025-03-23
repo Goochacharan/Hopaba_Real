@@ -1,12 +1,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Heart, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { useToast } from '@/hooks/use-toast';
+import { differenceInDays } from 'date-fns';
 
 interface ListingImageCarouselProps {
   images: string[] | null;
@@ -33,6 +34,9 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
   const imageArray = images && images.length > 0 
     ? images 
     : ['/placeholder.svg'];
+
+  // Check if listing is less than 7 days old
+  const isNew = differenceInDays(new Date(), new Date(listing.created_at)) < 7;
 
   const handlePreviousImage = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -132,6 +136,14 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
         >
           <Heart className={cn("h-5 w-5", isInWishlistAlready ? "fill-current" : "")} />
         </Button>
+
+        {/* New badge - Only show if the listing is less than 7 days old */}
+        {isNew && (
+          <div className="absolute top-2 left-2 z-10 bg-[#33C3F0] text-white text-xs font-semibold px-2 py-0.5 rounded flex items-center gap-1 shadow-md">
+            <Sparkles className="h-3 w-3" />
+            New
+          </div>
+        )}
 
         {/* Navigation buttons - only show if more than one image */}
         {imageArray.length > 1 && (
