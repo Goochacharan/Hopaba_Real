@@ -4,6 +4,7 @@ import { MapPin, Calendar, BadgeCheck, Film } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface ListingMetadataProps {
   location: string | null;
@@ -12,6 +13,7 @@ interface ListingMetadataProps {
   sellerInstagram?: string | null;
   sellerName?: string;
   showInCard?: boolean;
+  isCompact?: boolean;
 }
 
 const ListingMetadata: React.FC<ListingMetadataProps> = ({
@@ -20,7 +22,8 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
   condition,
   sellerInstagram,
   sellerName,
-  showInCard = false
+  showInCard = false,
+  isCompact = false
 }) => {
   const { toast } = useToast();
   
@@ -44,29 +47,42 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
   };
   
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground py-0">
+    <div className={cn(
+      "flex flex-wrap items-center text-sm text-muted-foreground py-0",
+      isCompact ? "gap-x-2 gap-y-1" : "gap-x-4 gap-y-2"
+    )}>
       {location && (
         <div className="flex items-center gap-1">
-          <MapPin className="h-4 w-4" />
+          <MapPin className={cn(isCompact ? "h-3 w-3" : "h-4 w-4")} />
           <span>{location}</span>
         </div>
       )}
       <div className="flex items-center gap-1 my-0 py-0 px-0">
-        <Calendar className="h-4 w-4" />
-        <span>Listed on {format(new Date(createdAt), 'PPP')}</span>
+        <Calendar className={cn(isCompact ? "h-3 w-3" : "h-4 w-4")} />
+        <span>
+          {isCompact 
+            ? format(new Date(createdAt), 'MMM d') 
+            : `Listed on ${format(new Date(createdAt), 'PPP')}`}
+        </span>
         {sellerInstagram && (
           <button 
             onClick={handleInstagramClick} 
             title="Watch video content" 
-            className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 py-2 px-[31px] mx-[26px]"
+            className={cn(
+              "bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all",
+              isCompact ? "ml-1 py-1 px-[20px] mx-[16px]" : "ml-2 py-2 px-[31px] mx-[26px]"
+            )}
           >
-            <Film className="h-5 w-5 text-white" />
+            <Film className={cn(
+              "text-white",
+              isCompact ? "h-4 w-4" : "h-5 w-5"
+            )} />
           </button>
         )}
       </div>
       <div className="flex items-center gap-1">
         <Badge variant="outline" className="flex items-center gap-1 text-amber-600 bg-amber-50">
-          <BadgeCheck className="h-3 w-3" />
+          <BadgeCheck className={cn(isCompact ? "h-2.5 w-2.5" : "h-3 w-3")} />
           <span>{condition}</span>
         </Badge>
       </div>

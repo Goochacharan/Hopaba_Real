@@ -24,8 +24,8 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({ listings })
             }} 
             className={cn(
               "h-full flex flex-col",
-              // Add a class for taller images only in search results page
-              "search-result-card"
+              // Add a class for compact spacing in search results page
+              "search-result-card compact-card"
             )}
           />
         </div>
