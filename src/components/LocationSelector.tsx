@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin, Navigation, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
@@ -71,29 +71,43 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
     }
   };
 
+  const clearLocationInput = () => {
+    setLocationInput('');
+  };
+
   return (
     <div className="bg-white rounded-xl border border-border p-3 mb-4 animate-fade-in">
       {isEditing ? (
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <MapPin className="h-5 w-5 text-primary flex-shrink-0" />
-          <Input 
-            value={locationInput}
-            onChange={(e) => setLocationInput(e.target.value)}
-            placeholder="Enter location..."
-            className="flex-1 h-9"
-            autoFocus
-          />
+          <div className="relative flex-1">
+            <Input 
+              value={locationInput}
+              onChange={(e) => setLocationInput(e.target.value)}
+              placeholder="Enter location..."
+              className="flex-1 h-9 pr-8"
+              autoFocus
+            />
+            {locationInput && (
+              <button
+                type="button"
+                onClick={clearLocationInput}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <Button type="submit" size="sm" className="flex-shrink-0">Apply</Button>
           <Button 
             type="button" 
             variant="outline" 
             size="sm"
             onClick={handleUseCurrentLocation}
-            className="flex-shrink-0"
+            className="flex-shrink-0 p-2"
           >
-            <Navigation className="h-4 w-4 mr-1" />
-            Current
+            <Navigation className="h-4 w-4" />
           </Button>
-          <Button type="submit" size="sm" className="flex-shrink-0">Apply</Button>
         </form>
       ) : (
         <div className="flex items-center justify-between">
