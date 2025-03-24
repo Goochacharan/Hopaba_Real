@@ -76,6 +76,7 @@
     @apply bg-background text-foreground antialiased;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    padding-bottom: 90px; /* Added padding to prevent content from going under fixed bars */
   }
 
   /* Custom scrollbar */
@@ -159,3 +160,11 @@
   transition: all 0.2s ease;
 }
 
+/* Fix for content appearing behind fixed elements */
+.fixed-bottom-padding {
+  padding-bottom: 120px;
+}
+
+main {
+  padding-bottom: 100px !important;
+}

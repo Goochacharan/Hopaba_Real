@@ -10,7 +10,7 @@ interface MarketplaceItemsListProps {
 
 const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({ listings }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-24">
       {listings.map((listing, index) => (
         <div 
           key={listing.id} 
@@ -24,7 +24,6 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({ listings })
             }} 
             className={cn(
               "h-full flex flex-col",
-              // Add a class for taller images only in search results page
               "search-result-card"
             )}
           />

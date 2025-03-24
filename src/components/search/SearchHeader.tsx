@@ -35,7 +35,7 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
   }
 
   return (
-    <>
+    <div className="mb-16">
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
@@ -51,9 +51,7 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
           </p>
         </div>
       )}
-      
-      {/* Removed the descriptive message (h1 element) that was here */}
-    </>
+    </div>
   );
 };
 
