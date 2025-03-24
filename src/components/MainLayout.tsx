@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
@@ -82,27 +83,27 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         </div>
       </header>
       
-      <main className="w-full flex-1 overflow-y-auto pb-28">
+      <main className="w-full flex-1 overflow-y-auto pb-24">
         {children}
       </main>
       
-      <div className="fixed bottom-16 left-0 right-0 px-4 z-50">
+      <div className="fixed bottom-12 left-0 right-0 px-4 z-50">
         <div className="max-w-5xl mx-auto">
           <SearchBar onSearch={onSearch} className="mb-0" placeholder="What are you looking for today?" initialValue="" currentRoute={location.pathname} />
         </div>
       </div>
       
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 py-2 px-4 z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 py-1 px-4 z-50">
         <div className="max-w-5xl mx-auto flex justify-around">
-          <NavButton to="/" icon={<Home className="h-6 w-6" />} label="Home" isActive={location.pathname === '/'} />
+          <NavButton to="/" icon={<Home className="h-5 w-5" />} label="Home" isActive={location.pathname === '/'} />
           
-          <NavButton to="/marketplace" icon={<ShoppingCart className="h-6 w-6" />} label="Market" isActive={location.pathname === '/marketplace'} />
+          <NavButton to="/marketplace" icon={<ShoppingCart className="h-5 w-5" />} label="Market" isActive={location.pathname === '/marketplace'} />
           
-          <NavButton to="/events" icon={<Calendar className="h-6 w-6" />} label="Events" isActive={location.pathname === '/events'} />
+          <NavButton to="/events" icon={<Calendar className="h-5 w-5" />} label="Events" isActive={location.pathname === '/events'} />
           
-          <NavButton to="/my-list" icon={<ListChecks className="h-6 w-6" />} label="My List" isActive={location.pathname === '/my-list'} />
+          <NavButton to="/my-list" icon={<ListChecks className="h-5 w-5" />} label="My List" isActive={location.pathname === '/my-list'} />
           
-          <NavButton to={user ? "/profile" : "/login"} icon={<User className="h-6 w-6" />} label={user ? "Profile" : "Login"} isActive={location.pathname === '/profile' || location.pathname === '/login'} />
+          <NavButton to={user ? "/profile" : "/login"} icon={<User className="h-5 w-5" />} label={user ? "Profile" : "Login"} isActive={location.pathname === '/profile' || location.pathname === '/login'} />
         </div>
       </div>
     </div>
@@ -123,7 +124,7 @@ const NavButton: React.FC<NavButtonProps> = ({
   isActive
 }) => {
   return (
-    <Link to={to} className={cn("flex flex-col items-center gap-1 px-3 py-2 rounded-md transition-colors", isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50")} aria-label={label}>
+    <Link to={to} className={cn("flex flex-col items-center gap-0.5 px-3 py-1 rounded-md transition-colors", isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50")} aria-label={label}>
       {icon}
       <span className="text-xs font-medium">{label}</span>
     </Link>
