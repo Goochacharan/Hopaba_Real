@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
@@ -145,12 +146,12 @@ const Marketplace = () => {
         />
         
         <ScrollArea className="w-full">
-          <div className="flex items-center gap-4 mb-6 overflow-x-auto py-2 px-1">
+          <div className="flex items-center gap-3 mb-4 overflow-x-auto py-1 px-1">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="rounded-full border border-border/60 flex items-center gap-2">
+                <Button variant="outline" size="sm" className="rounded-full border border-border/60 flex items-center gap-1 h-8 px-3">
                   <span>Sort</span>
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-3 w-3" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent align="start" className="w-48 p-2">
@@ -173,9 +174,9 @@ const Marketplace = () => {
 
             <Popover open={activeFilter === 'rating'} onOpenChange={open => setActiveFilter(open ? 'rating' : null)}>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className={cn("rounded-full border border-border/60 flex items-center justify-center bg-background w-12 h-12 relative p-0", activeFilter === 'rating' && "border-primary ring-2 ring-primary/20", ratingFilter > 0 && "border-primary/30 bg-primary/5")}>
-                  <Star className="h-5 w-5" />
-                  {ratingFilter > 0 && <Badge variant="default" className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-medium">
+                <Button variant="outline" size="icon" className={cn("rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", activeFilter === 'rating' && "border-primary ring-2 ring-primary/20", ratingFilter > 0 && "border-primary/30 bg-primary/5")}>
+                  <Star className="h-4 w-4" />
+                  {ratingFilter > 0 && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
                       {ratingFilter}+
                     </Badge>}
                 </Button>
@@ -199,9 +200,9 @@ const Marketplace = () => {
 
             <Popover open={activeFilter === 'price'} onOpenChange={open => setActiveFilter(open ? 'price' : null)}>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className={cn("rounded-full border border-border/60 flex items-center justify-center bg-background w-12 h-12 relative p-0", activeFilter === 'price' && "border-primary ring-2 ring-primary/20", (priceRange[0] > 0 || priceRange[1] < 500000) && "border-primary/30 bg-primary/5")}>
-                  <IndianRupee className="h-5 w-5" />
-                  {(priceRange[0] > 0 || priceRange[1] < 500000) && <Badge variant="default" className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-medium">
+                <Button variant="outline" size="icon" className={cn("rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", activeFilter === 'price' && "border-primary ring-2 ring-primary/20", (priceRange[0] > 0 || priceRange[1] < 500000) && "border-primary/30 bg-primary/5")}>
+                  <IndianRupee className="h-4 w-4" />
+                  {(priceRange[0] > 0 || priceRange[1] < 500000) && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
                       ₹₹
                     </Badge>}
                 </Button>
@@ -227,9 +228,9 @@ const Marketplace = () => {
 
             <Popover open={activeFilter === 'year'} onOpenChange={open => setActiveFilter(open ? 'year' : null)}>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className={cn("rounded-full border border-border/60 flex items-center justify-center bg-background w-12 h-12 relative p-0", activeFilter === 'year' && "border-primary ring-2 ring-primary/20", (yearRange[0] > 2010 || yearRange[1] < new Date().getFullYear()) && "border-primary/30 bg-primary/5")}>
-                  <Calendar className="h-5 w-5" />
-                  {(yearRange[0] > 2010 || yearRange[1] < new Date().getFullYear()) && <Badge variant="default" className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-medium">
+                <Button variant="outline" size="icon" className={cn("rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", activeFilter === 'year' && "border-primary ring-2 ring-primary/20", (yearRange[0] > 2010 || yearRange[1] < new Date().getFullYear()) && "border-primary/30 bg-primary/5")}>
+                  <Calendar className="h-4 w-4" />
+                  {(yearRange[0] > 2010 || yearRange[1] < new Date().getFullYear()) && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
                       {yearRange[0].toString().slice(-2)}
                     </Badge>}
                 </Button>
@@ -255,9 +256,9 @@ const Marketplace = () => {
 
             <Popover open={activeFilter === 'condition'} onOpenChange={open => setActiveFilter(open ? 'condition' : null)}>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className={cn("rounded-full border border-border/60 flex items-center justify-center bg-background w-12 h-12 relative p-0", activeFilter === 'condition' && "border-primary ring-2 ring-primary/20", conditionFilter !== 'all' && "border-primary/30 bg-primary/5")}>
-                  <Layers className="h-5 w-5" />
-                  {conditionFilter !== 'all' && <Badge variant="default" className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-medium">
+                <Button variant="outline" size="icon" className={cn("rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", activeFilter === 'condition' && "border-primary ring-2 ring-primary/20", conditionFilter !== 'all' && "border-primary/30 bg-primary/5")}>
+                  <Layers className="h-4 w-4" />
+                  {conditionFilter !== 'all' && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
                       •
                     </Badge>}
                 </Button>
