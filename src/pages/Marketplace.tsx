@@ -56,7 +56,6 @@ const Marketplace = () => {
   const handleLocationChange = (location: string) => {
     console.log(`Location changed to: ${location}`);
     setSelectedLocation(location);
-    // In a real application, you would fetch listings for this location
   };
 
   const categories = [{
@@ -140,11 +139,6 @@ const Marketplace = () => {
 
   return <MainLayout>
       <div className="animate-fade-in px-[7px]">
-        <div className="mb-4">
-          <h1 className="text-2xl font-bold mb-2">Marketplace</h1>
-          <p className="text-muted-foreground">Browse and buy pre-owned items from trusted sellers</p>
-        </div>
-        
         <LocationSelector 
           selectedLocation={selectedLocation}
           onLocationChange={handleLocationChange}
