@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
+import LocationSelector from '@/components/LocationSelector';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers } from 'lucide-react';
@@ -17,7 +18,9 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+
 type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
+
 const Marketplace = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
@@ -30,7 +33,9 @@ const Marketplace = () => {
   const [conditionFilter, setConditionFilter] = useState<string>('all');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('newest');
+  const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
   const itemsPerPage = 9;
+
   const {
     listings,
     loading,
@@ -43,9 +48,17 @@ const Marketplace = () => {
     maxPrice: priceRange[1] < 500000 ? priceRange[1] : undefined,
     minRating: ratingFilter > 0 ? ratingFilter : undefined
   });
+
   useEffect(() => {
     setCurrentPage(1);
   }, [currentCategory, searchQuery, conditionFilter, priceRange, ratingFilter, sortOption]);
+
+  const handleLocationChange = (location: string) => {
+    console.log(`Location changed to: ${location}`);
+    setSelectedLocation(location);
+    // In a real application, you would fetch listings for this location
+  };
+
   const categories = [{
     id: 'all',
     name: 'All Categories'
@@ -68,6 +81,7 @@ const Marketplace = () => {
     id: 'home_appliances',
     name: 'Home Appliances'
   }];
+
   const handleCategoryChange = (category: string) => {
     setCurrentCategory(category);
     setCurrentPage(1);
@@ -80,6 +94,7 @@ const Marketplace = () => {
       return params;
     });
   };
+
   const sortListings = (items: MarketplaceListing[]): MarketplaceListing[] => {
     return [...items].sort((a, b) => {
       switch (sortOption) {
@@ -96,9 +111,11 @@ const Marketplace = () => {
       }
     });
   };
+
   const handleSortChange = (option: SortOption) => {
     setSortOption(option);
   };
+
   const filteredListings = listings.filter(listing => {
     const price = listing.price;
     if (price < priceRange[0] || price > priceRange[1]) return false;
@@ -108,9 +125,11 @@ const Marketplace = () => {
     if (conditionFilter !== 'all' && listing.condition.toLowerCase() !== conditionFilter.toLowerCase()) return false;
     return true;
   });
+
   const sortedListings = sortListings(filteredListings);
   const totalPages = Math.ceil(sortedListings.length / itemsPerPage);
   const paginatedListings = sortedListings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -118,12 +137,18 @@ const Marketplace = () => {
       maximumFractionDigits: 0
     }).format(price);
   };
+
   return <MainLayout>
       <div className="animate-fade-in px-[7px]">
-        <div className="mb-6">
+        <div className="mb-4">
           <h1 className="text-2xl font-bold mb-2">Marketplace</h1>
           <p className="text-muted-foreground">Browse and buy pre-owned items from trusted sellers</p>
         </div>
+        
+        <LocationSelector 
+          selectedLocation={selectedLocation}
+          onLocationChange={handleLocationChange}
+        />
         
         <ScrollArea className="w-full">
           <div className="flex items-center gap-4 mb-6 overflow-x-auto py-2 px-1">
@@ -333,4 +358,5 @@ const Marketplace = () => {
       </div>
     </MainLayout>;
 };
+
 export default Marketplace;

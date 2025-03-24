@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import { useToast } from '@/hooks/use-toast';
 import EventsList from '@/components/search/EventsList';
+import LocationSelector from '@/components/LocationSelector';
 import { Event } from '@/hooks/useRecommendations';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -55,6 +57,7 @@ const sampleEvents: Event[] = [
 const Events = () => {
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
+  const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -72,11 +75,21 @@ const Events = () => {
     };
   }, []);
 
+  const handleLocationChange = (location: string) => {
+    console.log(`Location changed to: ${location}`);
+    setSelectedLocation(location);
+    // In a real application, you would fetch events for this location
+  };
+
   return (
     <MainLayout>
       <section className="py-8 px-4 w-full pb-32">
         <div className="max-w-[1400px] mx-auto">
-          <h1 className="text-3xl font-medium mb-6">Upcoming Events</h1>
+          <LocationSelector 
+            selectedLocation={selectedLocation}
+            onLocationChange={handleLocationChange}
+          />
+          <h1 className="text-3xl font-medium mb-6 mt-4">Upcoming Events</h1>
           
           <EventsList events={sampleEvents} />
         </div>
