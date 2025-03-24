@@ -7,94 +7,52 @@ interface StarRatingProps {
   rating: number;
   showCount?: boolean;
   count?: number;
-  size?: 'xsmall' | 'small' | 'medium' | 'large';
+  className?: string;
+  size?: 'small' | 'medium' | 'large';
 }
 
-const StarRating: React.FC<StarRatingProps> = ({
-  rating,
-  showCount = false,
+const StarRating: React.FC<StarRatingProps> = ({ 
+  rating, 
+  showCount = false, 
   count = 0,
-  size = 'medium'
+  className,
+  size = 'small'
 }) => {
-  // Map size to star dimensions
-  const starSizeMap = {
-    xsmall: {
-      className: 'h-2.5 w-2.5',
-      gap: 'gap-0.5'
-    },
-    small: {
-      className: 'h-3 w-3',
-      gap: 'gap-1'
-    },
-    medium: {
-      className: 'h-4 w-4',
-      gap: 'gap-1'
-    },
-    large: {
-      className: 'h-5 w-5',
-      gap: 'gap-1.5'
-    }
-  };
-  
-  const { className: starSize, gap } = starSizeMap[size];
-  
-  // Calculate full and partial stars
   const fullStars = Math.floor(rating);
-  const partialStar = rating % 1;
-  const emptyStars = 5 - fullStars - (partialStar > 0 ? 1 : 0);
+  const hasHalfStar = rating % 1 >= 0.5;
+  const totalStars = 5;
   
-  // Text size based on star size
-  const textSizeMap = {
-    xsmall: 'text-xs',
-    small: 'text-xs',
-    medium: 'text-sm',
-    large: 'text-base'
+  // Define star sizes
+  const starSizes = {
+    small: 'w-3.5 h-3.5',
+    medium: 'w-5 h-5',
+    large: 'w-6 h-6'
   };
   
-  const ratingTextSize = textSizeMap[size];
-  const countTextSize = {
-    xsmall: 'text-[10px]',
-    small: 'text-xs',
-    medium: 'text-xs',
-    large: 'text-sm'
-  }[size];
+  const starSize = starSizes[size];
+  const textSize = size === 'small' ? 'text-xs' : size === 'medium' ? 'text-sm' : 'text-base';
   
   return (
-    <div className="flex items-center">
-      <div className={cn("flex items-center", gap)}>
-        {[...Array(fullStars)].map((_, i) => (
-          <Star 
-            key={`full-${i}`} 
-            className={cn(starSize, "fill-amber-400 text-amber-400")} 
-          />
-        ))}
-        
-        {partialStar > 0 && (
-          <div className="relative">
-            <Star className={cn(starSize, "text-gray-300")} />
-            <div 
-              className="absolute inset-0 overflow-hidden" 
-              style={{ width: `${partialStar * 100}%` }}
-            >
-              <Star className={cn(starSize, "fill-amber-400 text-amber-400")} />
-            </div>
+    <div className={cn("flex items-center", className)}>
+      {[...Array(fullStars)].map((_, i) => (
+        <Star key={`full-${i}`} className={cn("fill-amber-500 stroke-amber-500", starSize)} />
+      ))}
+      
+      {hasHalfStar && (
+        <div className={cn("relative", starSize)}>
+          <Star className={cn("absolute stroke-amber-500", starSize)} />
+          <div className="absolute overflow-hidden w-[50%]">
+            <Star className={cn("fill-amber-500 stroke-amber-500", starSize)} />
           </div>
-        )}
-        
-        {[...Array(emptyStars)].map((_, i) => (
-          <Star 
-            key={`empty-${i}`} 
-            className={cn(starSize, "text-gray-300")} 
-          />
-        ))}
-      </div>
+        </div>
+      )}
       
-      <span className={cn("ml-1.5 font-medium", ratingTextSize)}>
-        {rating.toFixed(1)}
-      </span>
-      
+      {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
+        <Star key={`empty-${i}`} className={cn("stroke-amber-500", starSize)} />
+      ))}
+
       {showCount && (
-        <span className={cn("ml-1 text-muted-foreground", countTextSize)}>
+        <span className={cn("text-muted-foreground ml-1.5", textSize)}>
           ({count})
         </span>
       )}
