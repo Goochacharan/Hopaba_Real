@@ -52,7 +52,14 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
         </div>
       )}
       
-      {/* Removed the descriptive message (h1 element) that was here */}
+      <div className="mb-4 flex flex-wrap justify-between items-center gap-3">
+        <div>
+          <h1 className="text-xl font-medium">
+            <span className="text-primary">{query || searchQuery}</span>
+            {category !== 'all' && <span className="ml-2 text-muted-foreground"> in {category}</span>}
+          </h1>
+        </div>
+      </div>
     </>
   );
 };
