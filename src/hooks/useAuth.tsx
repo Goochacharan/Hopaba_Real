@@ -24,39 +24,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loginError, setLoginError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Set up invisible reCAPTCHA
-  useEffect(() => {
-    const loadRecaptcha = async () => {
-      if (typeof window !== 'undefined' && !window.grecaptcha) {
-        const script = document.createElement('script');
-        script.src = 'https://www.google.com/recaptcha/api.js?render=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
-      }
-    };
-    
-    loadRecaptcha();
-  }, []);
-
-  const executeRecaptcha = (): Promise<string> => {
-    return new Promise((resolve) => {
-      if (window.grecaptcha) {
-        window.grecaptcha.ready(() => {
-          window.grecaptcha
-            .execute('6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', { action: 'login' })
-            .then((token: string) => {
-              resolve(token);
-            });
-        });
-      } else {
-        // If recaptcha isn't loaded yet, resolve with empty string
-        // Supabase will handle this case
-        resolve('');
-      }
-    });
-  };
-
   useEffect(() => {
     const getUser = async () => {
       const { data, error } = await supabase.auth.getUser();
@@ -90,15 +57,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoginError(null);
     
     try {
-      // Get reCAPTCHA token
-      const token = await executeRecaptcha();
-      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password,
-        options: {
-          captchaToken: token
-        },
+        password
       });
       
       if (error) {
@@ -132,16 +93,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoginError(null);
     
     try {
-      // Get reCAPTCHA token
-      const token = await executeRecaptcha();
-      
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/profile`,
-          queryParams: {
-            captcha_token: token
-          }
         },
       });
       
@@ -170,17 +125,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoginError(null);
     
     try {
-      // Get reCAPTCHA token
-      const token = await executeRecaptcha();
-      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             full_name: name,
-          },
-          captchaToken: token
+          }
         },
       });
       
