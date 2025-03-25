@@ -273,23 +273,18 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
   const formatPrice = () => {
     if (recommendation.price_range_min && recommendation.price_range_max && recommendation.price_unit) {
-      return `₹${recommendation.price_range_min}-${recommendation.price_range_max}/${recommendation.price_unit.replace('per ', '')}`;
+      return `${recommendation.price_range_min}-${recommendation.price_range_max}/${recommendation.price_unit.replace('per ', '')}`;
     } else if (recommendation.priceLevel) {
-      return recommendation.priceLevel.replace(/\$/g, '₹');
+      return recommendation.priceLevel;
     } else if (recommendation.price_level) {
-      return recommendation.price_level.replace(/\$/g, '₹');
+      return recommendation.price_level;
     }
     return '';
   };
 
   const formatBusinessHours = (hours: string | undefined) => {
     if (!hours) return null;
-    
-    if (hours.includes('Monday') || hours.includes('Tuesday') || hours.includes('Mon') || hours.includes('Tue')) {
-      return hours;
-    }
-    
-    return `Open daily: ${hours}`;
+    return hours;
   };
 
   const isOpenNow = () => {
@@ -389,21 +384,23 @@ const LocationCard: React.FC<LocationCardProps> = ({
               </div>
               
               {businessHours && (
-                <Accordion type="single" collapsible className="w-full max-w-[200px]">
-                  <AccordionItem value="hours" className="border-none">
-                    <AccordionTrigger 
-                      onClick={(e) => e.stopPropagation()}
-                      className="py-0 hover:no-underline text-xs text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      View hours
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="text-xs text-muted-foreground pt-1">
-                        {businessHours}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                <div className="flex justify-end ml-auto">
+                  <Accordion type="single" collapsible className="w-full max-w-[200px]">
+                    <AccordionItem value="hours" className="border-none">
+                      <AccordionTrigger 
+                        onClick={(e) => e.stopPropagation()}
+                        className="py-0 hover:no-underline text-xs text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        View hours
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="text-xs text-muted-foreground pt-1">
+                          {businessHours}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
               )}
               
               {recommendation.instagram && (
@@ -434,7 +431,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
           {formatPrice() && (
             <Badge className="flex items-center gap-1 px-3 py-1.5 bg-[#1EAEDB]">
               <IndianRupee className="h-3.5 w-3.5" />
-              {formatPrice().replace('₹₹', '₹')}
+              {formatPrice()}
             </Badge>
           )}
           {recommendation.tags && recommendation.tags.map((tag, index) => (
