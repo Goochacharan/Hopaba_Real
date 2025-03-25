@@ -276,7 +276,7 @@ const Marketplace = () => {
         </ScrollArea>
         
         <Tabs defaultValue={currentCategory} value={currentCategory} onValueChange={handleCategoryChange} className="mb-6">
-          <TabsList className="mb-4 flex flex-nowrap overflow-auto pb-1 scrollbar-none py-[23px]">
+          <TabsList className="mb-4 flex flex-nowrap overflow-auto pb-1 scrollbar-none py-0">
             {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify font-semibold text-sm mx-[8px] px-[7px]">
                 {category.name}
               </TabsTrigger>)}
