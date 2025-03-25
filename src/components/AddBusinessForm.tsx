@@ -31,9 +31,16 @@ const businessFormSchema = z.object({
     message: "Price must be a positive number.",
   }),
   price_unit: z.string().optional(),
-  availability: z.string().min(2, {
-    message: "Please specify availability (e.g., Mon-Fri 9AM-5PM)",
+  availability_days: z.array(z.string()).min(1, {
+    message: "Please select at least one day of availability."
   }),
+  availability_start_time: z.string().min(1, {
+    message: "Please select a start time."
+  }),
+  availability_end_time: z.string().min(1, {
+    message: "Please select an end time."
+  }),
+  availability: z.string().optional(),
   description: z.string().min(10, {
     message: "Description must be at least 10 characters.",
   }).max(500, {
@@ -43,6 +50,7 @@ const businessFormSchema = z.object({
   address: z.string().min(5, {
     message: "Please enter a valid address.",
   }),
+  map_link: z.string().optional(),
   city: z.string().min(2, {
     message: "Please enter a city.",
   }),
@@ -56,14 +64,20 @@ const businessFormSchema = z.object({
     .refine(phone => phone.replace(/\D/g, '').length === 12, {
       message: "Please enter a 10-digit phone number (excluding +91).",
     }),
+  whatsapp: z.string()
+    .refine(phone => phone.startsWith('+91'), {
+      message: "WhatsApp number must start with +91.",
+    })
+    .refine(phone => phone.replace(/\D/g, '').length === 12, {
+      message: "Please enter a 10-digit WhatsApp number (excluding +91).",
+    }),
   contact_email: z.string().email({
     message: "Please enter a valid email address.",
-  }).optional(),
+  }).optional().or(z.literal('')),
   website: z.string().url({
     message: "Please enter a valid URL.",
-  }).optional(),
+  }).optional().or(z.literal('')),
   instagram: z.string().optional(),
-  whatsapp: z.string().optional(),
   tags: z.array(z.string()).optional(),
   languages: z.array(z.string()).optional(),
   images: z.array(z.string()).min(1, {
@@ -78,11 +92,14 @@ const defaultValues: Partial<BusinessFormValues> = {
   experience: "",
   description: "",
   website: "",
-  whatsapp: "",
+  whatsapp: "+91",
   instagram: "",
   tags: [],
   languages: [],
   images: [],
+  availability_days: [],
+  availability_start_time: "9:00 AM",
+  availability_end_time: "5:00 PM",
 };
 
 interface AddBusinessFormProps {
@@ -97,6 +114,33 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const isEditing = !!businessData?.id;
 
+  // Format availability from separate fields
+  const formatAvailability = (data: BusinessFormValues) => {
+    const days = data.availability_days?.join(', ') || '';
+    const startTime = data.availability_start_time || '';
+    const endTime = data.availability_end_time || '';
+    
+    return `${days} ${startTime} - ${endTime}`.trim();
+  };
+
+  // Parse existing availability string into separate fields
+  const parseAvailability = (availabilityString: string | undefined) => {
+    if (!availabilityString) return { days: [], startTime: '9:00 AM', endTime: '5:00 PM' };
+
+    const allDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const days = allDays.filter(day => 
+      availabilityString.toLowerCase().includes(day.toLowerCase())
+    );
+    
+    const timeMatch = availabilityString.match(/(\d+:\d+\s*[AP]M)\s*-\s*(\d+:\d+\s*[AP]M)/i);
+    const startTime = timeMatch?.[1]?.trim() || '9:00 AM';
+    const endTime = timeMatch?.[2]?.trim() || '5:00 PM';
+    
+    return { days, startTime, endTime };
+  };
+
+  const parsedAvailability = parseAvailability(businessData?.availability);
+
   const form = useForm<BusinessFormValues>({
     resolver: zodResolver(businessFormSchema),
     defaultValues: {
@@ -110,14 +154,18 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
       contact_email: businessData?.contact_email || '',
       website: businessData?.website || '',
       address: businessData?.address || '',
+      map_link: businessData?.map_link || '',
       city: businessData?.city || '',
       area: businessData?.area || '',
       availability: businessData?.availability || '',
+      availability_days: parsedAvailability.days,
+      availability_start_time: parsedAvailability.startTime,
+      availability_end_time: parsedAvailability.endTime,
       experience: businessData?.experience || '',
       tags: businessData?.tags || [],
       languages: businessData?.languages || [],
       instagram: businessData?.instagram || '',
-      whatsapp: businessData?.whatsapp || '',
+      whatsapp: businessData?.whatsapp || '+91',
       images: businessData?.images || [],
     },
     mode: "onChange",
@@ -137,6 +185,17 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
         return;
       }
 
+      // Format availability
+      const formattedAvailability = formatAvailability(data);
+
+      // Calculate distance if map_link is provided
+      let distance = null;
+      if (data.map_link) {
+        // In a real-world scenario, you would use a geolocation API to calculate distance
+        // This is a placeholder for the actual implementation
+        distance = "Calculated based on map link";
+      }
+
       if (isEditing) {
         // Update existing business
         const { error } = await supabase
@@ -147,16 +206,21 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
             price_range_min: data.price_range_min,
             price_range_max: data.price_range_max,
             price_unit: data.price_unit,
-            availability: data.availability,
+            availability: formattedAvailability,
+            availability_days: data.availability_days,
+            availability_start_time: data.availability_start_time,
+            availability_end_time: data.availability_end_time,
             description: data.description,
             experience: data.experience,
             address: data.address,
+            map_link: data.map_link,
             city: data.city,
             area: data.area,
             contact_phone: data.contact_phone,
             contact_email: data.contact_email,
             website: data.website,
             instagram: data.instagram,
+            whatsapp: data.whatsapp,
             images: data.images,
             updated_at: new Date().toISOString(),
           })
@@ -188,16 +252,21 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
             price_range_min: data.price_range_min,
             price_range_max: data.price_range_max,
             price_unit: data.price_unit,
-            availability: data.availability,
+            availability: formattedAvailability,
+            availability_days: data.availability_days,
+            availability_start_time: data.availability_start_time,
+            availability_end_time: data.availability_end_time,
             description: data.description,
             experience: data.experience,
             address: data.address,
+            map_link: data.map_link,
             city: data.city,
             area: data.area,
             contact_phone: data.contact_phone,
             contact_email: data.contact_email,
             website: data.website,
             instagram: data.instagram,
+            whatsapp: data.whatsapp,
             images: data.images,
           });
 

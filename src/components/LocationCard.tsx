@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -29,14 +30,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
-  const {
-    toast
-  } = useToast();
-  const {
-    addToWishlist,
-    removeFromWishlist,
-    isInWishlist
-  } = useWishlist();
+  const { toast } = useToast();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(recommendation.id);
   const isMobile = useIsMobile();
   const [user, setUser] = useState<any>(null);
@@ -45,15 +40,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
   useEffect(() => {
     const getCurrentUser = async () => {
-      const {
-        data
-      } = await supabase.auth.getSession();
+      const { data } = await supabase.auth.getSession();
       setUser(data.session?.user || null);
     };
     getCurrentUser();
-    const {
-      data: authListener
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user || null);
     });
     return () => {
@@ -200,6 +191,19 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
   const handleDirections = (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    // Check if there's a Google Maps link available
+    if (recommendation.map_link) {
+      window.open(recommendation.map_link, '_blank');
+      toast({
+        title: "Opening Directions",
+        description: `Opening Google Maps directions to ${recommendation.name}...`,
+        duration: 2000
+      });
+      return;
+    }
+    
+    // Fall back to normal address-based directions
     const destination = encodeURIComponent(recommendation.address);
     let mapsUrl;
     if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
@@ -255,6 +259,15 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
   const formatDistance = (distanceText: string | undefined) => {
     if (!distanceText) return '';
+    
+    // Try to extract a numeric value from the distance text
+    const distanceMatch = distanceText.match(/(\d+(\.\d+)?)/);
+    if (distanceMatch) {
+      const distanceValue = parseFloat(distanceMatch[0]);
+      return `${distanceValue.toFixed(1)} km away`;
+    }
+    
+    // If no numeric value is found, use the original text but convert to km
     let formattedDistance = distanceText.replace('miles', 'km');
     formattedDistance = formattedDistance.replace('away away', 'away');
     return formattedDistance;
@@ -381,4 +394,3 @@ const LocationCard: React.FC<LocationCardProps> = ({
 };
 
 export default LocationCard;
-

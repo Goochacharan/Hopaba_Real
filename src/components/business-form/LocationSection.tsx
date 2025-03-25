@@ -10,7 +10,7 @@ import {
   FormDescription
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { MapPin } from 'lucide-react';
+import { MapPin, Link2 } from 'lucide-react';
 import { BusinessFormValues } from '../AddBusinessForm';
 
 const LocationSection = () => {
@@ -44,13 +44,35 @@ const LocationSection = () => {
             <FormLabel>Address*</FormLabel>
             <FormControl>
               <Input 
-                placeholder="Enter your street address or Google Maps link" 
+                placeholder="Enter your street address" 
                 value={field.value} 
                 onChange={(e) => handleLocationChange(e.target.value, field.onChange)}
               />
             </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="map_link"
+        render={({ field }) => (
+          <FormItem className="md:col-span-2">
+            <FormLabel>
+              <div className="flex items-center gap-2">
+                <Link2 className="h-4 w-4" />
+                Google Maps Link
+              </div>
+            </FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="Paste your Google Maps link here" 
+                {...field} 
+              />
+            </FormControl>
             <FormDescription>
-              You can paste a Google Maps link directly
+              This link will be used for the directions button on your listing
             </FormDescription>
             <FormMessage />
           </FormItem>

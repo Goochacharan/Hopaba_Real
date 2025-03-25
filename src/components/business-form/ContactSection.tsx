@@ -10,7 +10,7 @@ import {
   FormDescription 
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Phone, MessageCircle, Instagram, Film } from 'lucide-react';
+import { Phone, MessageCircle, Instagram, Film, Mail, Globe } from 'lucide-react';
 import { BusinessFormValues } from '../AddBusinessForm';
 
 const ContactSection = () => {
@@ -44,27 +44,24 @@ const ContactSection = () => {
   const handleWhatsAppInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
     
-    // Only process if there's a value (WhatsApp is optional)
-    if (value) {
-      // Ensure the value starts with +91
-      if (!value.startsWith('+91')) {
-        value = '+91' + value.replace('+91', '');
-      }
-      
-      // Remove all non-digit characters except the +91 prefix
-      const digits = value.slice(3).replace(/\D/g, '');
-      
-      // Limit to 10 digits
-      const limitedDigits = digits.slice(0, 10);
-      
-      // Set the value with +91 prefix and limited digits
-      e.target.value = '+91' + limitedDigits;
-      
-      // Update the form value
-      form.setValue('whatsapp', e.target.value, {
-        shouldValidate: true,
-      });
+    // Ensure the value starts with +91
+    if (!value.startsWith('+91')) {
+      value = '+91' + value.replace('+91', '');
     }
+    
+    // Remove all non-digit characters except the +91 prefix
+    const digits = value.slice(3).replace(/\D/g, '');
+    
+    // Limit to 10 digits
+    const limitedDigits = digits.slice(0, 10);
+    
+    // Set the value with +91 prefix and limited digits
+    e.target.value = '+91' + limitedDigits;
+    
+    // Update the form value
+    form.setValue('whatsapp', e.target.value, {
+      shouldValidate: true,
+    });
   };
   
   return (
@@ -105,12 +102,12 @@ const ContactSection = () => {
             <FormLabel>
               <div className="flex items-center gap-2">
                 <MessageCircle className="h-4 w-4" />
-                WhatsApp Number
+                WhatsApp Number*
               </div>
             </FormLabel>
             <FormControl>
               <Input 
-                placeholder="Enter WhatsApp number (if different)" 
+                placeholder="Enter WhatsApp number" 
                 value={field.value || "+91"}
                 onChange={(e) => {
                   field.onChange(e);
@@ -118,6 +115,9 @@ const ContactSection = () => {
                 }}
               />
             </FormControl>
+            <FormDescription>
+              10-digit mobile number required
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -128,7 +128,12 @@ const ContactSection = () => {
         name="contact_email"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Email</FormLabel>
+            <FormLabel>
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                Email <span className="text-xs text-muted-foreground">(optional)</span>
+              </div>
+            </FormLabel>
             <FormControl>
               <Input placeholder="Enter email address" {...field} />
             </FormControl>
@@ -142,7 +147,12 @@ const ContactSection = () => {
         name="website"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Website</FormLabel>
+            <FormLabel>
+              <div className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Website <span className="text-xs text-muted-foreground">(optional)</span>
+              </div>
+            </FormLabel>
             <FormControl>
               <Input placeholder="Enter website URL" {...field} />
             </FormControl>

@@ -29,6 +29,7 @@ import {
   User
 } from 'lucide-react';
 import { BusinessFormValues } from '../AddBusinessForm';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const categoryOptions = [
   "Actress",
@@ -80,6 +81,22 @@ const categoryOptions = [
   "Voice Artist",
   "Writer/Author",
   "Other"
+];
+
+const daysOfWeek = [
+  { id: "monday", label: "Monday" },
+  { id: "tuesday", label: "Tuesday" },
+  { id: "wednesday", label: "Wednesday" },
+  { id: "thursday", label: "Thursday" },
+  { id: "friday", label: "Friday" },
+  { id: "saturday", label: "Saturday" },
+  { id: "sunday", label: "Sunday" },
+];
+
+const timeSlots = [
+  "6:00 AM", "7:00 AM", "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
+  "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM",
+  "7:00 PM", "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM"
 ];
 
 const BasicInfoSection = () => {
@@ -217,22 +234,101 @@ const BasicInfoSection = () => {
 
       <FormField
         control={form.control}
-        name="availability"
+        name="availability_days"
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="md:col-span-2">
             <FormLabel>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                Availability*
+                Available Days*
               </div>
             </FormLabel>
-            <FormControl>
-              <Input placeholder="e.g., Mon-Fri 9AM-5PM" {...field} />
-            </FormControl>
+            <div className="grid grid-cols-3 md:grid-cols-7 gap-2">
+              {daysOfWeek.map((day) => (
+                <FormItem
+                  key={day.id}
+                  className="flex flex-row items-center space-x-2 space-y-0 rounded-md border p-3"
+                >
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value?.includes(day.id)}
+                      onCheckedChange={(checked) => {
+                        const currentValues = field.value || [];
+                        const newValues = checked
+                          ? [...currentValues, day.id]
+                          : currentValues.filter((value) => value !== day.id);
+                        field.onChange(newValues);
+                      }}
+                    />
+                  </FormControl>
+                  <FormLabel className="cursor-pointer font-normal">
+                    {day.label}
+                  </FormLabel>
+                </FormItem>
+              ))}
+            </div>
             <FormMessage />
           </FormItem>
         )}
       />
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
+        <FormField
+          control={form.control}
+          name="availability_start_time"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Start Time*</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select start time" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {timeSlots.map((time) => (
+                    <SelectItem key={time} value={time}>
+                      {time}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="availability_end_time"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>End Time*</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select end time" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {timeSlots.map((time) => (
+                    <SelectItem key={time} value={time}>
+                      {time}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
       <FormField
         control={form.control}
