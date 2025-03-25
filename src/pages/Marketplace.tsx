@@ -277,7 +277,7 @@ const Marketplace = () => {
         
         <Tabs defaultValue={currentCategory} value={currentCategory} onValueChange={handleCategoryChange} className="mb-6">
           <TabsList className="mb-4 flex flex-nowrap overflow-auto pb-1 scrollbar-none py-[23px]">
-            {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify px-0 font-semibold text-sm mx-[11px]">
+            {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify px-0 font-semibold text-sm mx-[8px]">
                 {category.name}
               </TabsTrigger>)}
           </TabsList>
