@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Recommendation, mockRecommendations, searchRecommendations } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -350,8 +351,13 @@ const useRecommendations = ({
           phone: item.contact_phone,
           openNow: item.open_now || false,
           hours: "Until 8:00 PM",
+          availability: item.availability || null,
           priceLevel: "$$",
-          created_at: item.created_at || new Date().toISOString() // Add created_at property
+          price_range_min: item.price_range_min || null,
+          price_range_max: item.price_range_max || null,
+          price_unit: item.price_unit || null,
+          map_link: item.map_link || null,
+          created_at: item.created_at || new Date().toISOString()
         }));
       }
       

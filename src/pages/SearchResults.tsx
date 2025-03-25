@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -90,7 +91,9 @@ const SearchResults = () => {
         hours: rec.hours || rec.availability,
         price_range_min: rec.price_range_min,
         price_range_max: rec.price_range_max,
-        price_unit: rec.price_unit
+        price_unit: rec.price_unit,
+        availability: rec.availability,
+        map_link: rec.map_link
       };
     });
   };
