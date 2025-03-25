@@ -25,7 +25,8 @@ import {
   FileText, 
   Star,
   StoreIcon,
-  IndianRupee 
+  IndianRupee,
+  User
 } from 'lucide-react';
 import { BusinessFormValues } from '../AddBusinessForm';
 
@@ -204,6 +205,7 @@ const BasicInfoSection = () => {
                   <SelectItem value="per day">Per Day</SelectItem>
                   <SelectItem value="per service">Per Service</SelectItem>
                   <SelectItem value="per month">Per Month</SelectItem>
+                  <SelectItem value="per person">Per Person</SelectItem>
                   <SelectItem value="fixed price">Fixed Price</SelectItem>
                 </SelectContent>
               </Select>
