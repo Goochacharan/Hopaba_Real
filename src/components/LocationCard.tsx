@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface LocationCardProps {
   recommendation: Recommendation;
@@ -37,7 +38,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const [user, setUser] = useState<any>(null);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [hoursExpanded, setHoursExpanded] = useState(false);
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -323,8 +324,41 @@ const LocationCard: React.FC<LocationCardProps> = ({
     return undefined;
   };
 
+  const hasAvailabilityInfo = () => {
+    return recommendation.availability_days && 
+           recommendation.availability_days.length > 0 && 
+           (recommendation.availability_start_time || recommendation.availability_end_time);
+  };
+
+  const formatAvailabilityDays = () => {
+    if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
+      return null;
+    }
+    
+    const days = recommendation.availability_days.join(', ');
+    const startTime = recommendation.availability_start_time || '';
+    const endTime = recommendation.availability_end_time || '';
+    
+    if (startTime && endTime) {
+      return (
+        <div className="text-xs text-muted-foreground">
+          <p className="font-medium mb-1">Available Days:</p>
+          <p>{days}</p>
+          <p className="mt-1">Time: {startTime} - {endTime}</p>
+        </div>
+      );
+    }
+    return (
+      <div className="text-xs text-muted-foreground">
+        <p className="font-medium mb-1">Available Days:</p>
+        <p>{days}</p>
+      </div>
+    );
+  };
+
   const openStatus = isOpenNow();
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
+  const availabilityInfo = formatAvailabilityDays();
 
   return (
     <div 
@@ -412,13 +446,35 @@ const LocationCard: React.FC<LocationCardProps> = ({
               {recommendation.instagram && (
                 <button 
                   onClick={handleInstagram} 
-                  title="Watch video content" 
+                  title="Watch Instagram content" 
                   className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-3 p-1.5"
                 >
                   <Film className="h-4 w-4 text-white" />
                 </button>
               )}
             </div>
+            
+            {hasAvailabilityInfo() && (
+              <Collapsible 
+                open={availabilityOpen} 
+                onOpenChange={setAvailabilityOpen}
+                className="mt-1"
+              >
+                <CollapsibleTrigger 
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Available days
+                  <ChevronDown className={cn(
+                    "h-3 w-3 ml-1 transition-transform", 
+                    availabilityOpen ? "transform rotate-180" : ""
+                  )} />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-1 mb-2">
+                  {availabilityInfo}
+                </CollapsibleContent>
+              </Collapsible>
+            )}
             
             {recommendation.distance && !showDistanceUnderAddress && (
               <div className="text-muted-foreground pl-5 mt-1 flex items-center">

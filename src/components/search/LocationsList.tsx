@@ -24,7 +24,9 @@ const LocationsList: React.FC<LocationsListProps> = ({ recommendations }) => {
               // Pass availability days and times if they exist
               availability_days: recommendation.availability_days || [],
               availability_start_time: recommendation.availability_start_time || '',
-              availability_end_time: recommendation.availability_end_time || ''
+              availability_end_time: recommendation.availability_end_time || '',
+              // Ensure instagram link is passed
+              instagram: recommendation.instagram || ''
             }}
             ranking={index < 10 ? index + 1 : undefined} 
             reviewCount={recommendation.reviewCount} 
