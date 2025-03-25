@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -214,7 +215,7 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
             contact_email: data.contact_email,
             website: data.website,
             instagram: data.instagram,
-            whatsapp: data.whatsapp,
+            whatsapp: null, // Remove this field as it doesn't exist in the database
             images: data.images,
             updated_at: new Date().toISOString(),
           })
@@ -259,8 +260,10 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
             contact_email: data.contact_email,
             website: data.website,
             instagram: data.instagram,
-            whatsapp: data.whatsapp,
+            // whatsapp: data.whatsapp, // Remove this field as it doesn't exist in the database
             images: data.images,
+            tags: data.tags,
+            languages: data.languages,
           });
 
         if (error) {
