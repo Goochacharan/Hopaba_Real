@@ -18,6 +18,7 @@ export interface Recommendation {
   website?: string;
   openNow?: boolean;
   hours?: string;
+  availability?: string;
   distance?: string;
   tags: string[];
   city?: string;

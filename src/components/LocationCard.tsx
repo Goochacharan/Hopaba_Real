@@ -356,6 +356,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
               {recommendation.availability && <span className="text-muted-foreground ml-1">
                   {recommendation.availability}
                 </span>}
+              {!recommendation.availability && recommendation.hours && <span className="text-muted-foreground ml-1">
+                  {recommendation.hours}
+                </span>}
               {recommendation.instagram && <button onClick={handleInstagram} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-3 py-2 px-[26px] mx-[34px]">
                   <Film className="h-5 w-5 text-white" />
                 </button>}
