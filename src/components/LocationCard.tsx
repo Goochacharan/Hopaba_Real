@@ -283,7 +283,19 @@ const LocationCard: React.FC<LocationCardProps> = ({
   };
 
   const formatBusinessHours = (hours: string | undefined) => {
-    if (!hours) return null;
+    if (!hours) {
+      if (recommendation.availability_days && recommendation.availability_days.length > 0) {
+        const days = recommendation.availability_days.join(', ');
+        const startTime = recommendation.availability_start_time || '';
+        const endTime = recommendation.availability_end_time || '';
+        
+        if (startTime && endTime) {
+          return `${days}: ${startTime} - ${endTime}`;
+        }
+        return days;
+      }
+      return null;
+    }
     
     if (recommendation.availability_days && recommendation.availability_days.length > 0) {
       const days = recommendation.availability_days.join(', ');
@@ -303,7 +315,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
     if (recommendation.openNow === true) return true;
     if (recommendation.openNow === false) return false;
     
-    if (recommendation.hours || recommendation.availability) {
+    if (recommendation.hours || recommendation.availability || 
+        (recommendation.availability_days && recommendation.availability_days.length > 0)) {
       return true;
     }
     
@@ -379,7 +392,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
             </div>}
         </div>
 
-        {(recommendation.openNow !== undefined || recommendation.hours || recommendation.availability) && (
+        {(recommendation.openNow !== undefined || recommendation.hours || recommendation.availability || 
+          (recommendation.availability_days && recommendation.availability_days.length > 0)) && (
           <div className="flex flex-col text-sm mb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
