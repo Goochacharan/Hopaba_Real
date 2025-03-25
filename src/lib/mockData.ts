@@ -19,6 +19,9 @@ export interface Recommendation {
   openNow?: boolean;
   hours?: string;
   availability?: string;
+  availability_days?: string[];
+  availability_start_time?: string;
+  availability_end_time?: string;
   distance?: string;
   tags: string[];
   city?: string;
