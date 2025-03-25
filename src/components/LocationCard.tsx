@@ -284,6 +284,18 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
   const formatBusinessHours = (hours: string | undefined) => {
     if (!hours) return null;
+    
+    if (recommendation.availability_days && recommendation.availability_days.length > 0) {
+      const days = recommendation.availability_days.join(', ');
+      const startTime = recommendation.availability_start_time || '';
+      const endTime = recommendation.availability_end_time || '';
+      
+      if (startTime && endTime) {
+        return `${days}: ${startTime} - ${endTime}`;
+      }
+      return days;
+    }
+    
     return hours;
   };
 
