@@ -11,7 +11,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface LocationCardProps {
   recommendation: Recommendation;
@@ -282,6 +282,16 @@ const LocationCard: React.FC<LocationCardProps> = ({
     return '';
   };
 
+  const formatBusinessHours = (hours: string | undefined) => {
+    if (!hours) return null;
+    
+    if (hours.includes('Monday') || hours.includes('Tuesday') || hours.includes('Mon') || hours.includes('Tue')) {
+      return hours;
+    }
+    
+    return `Open daily: ${hours}`;
+  };
+
   const isOpenNow = () => {
     if (recommendation.openNow === true) return true;
     if (recommendation.openNow === false) return false;
@@ -294,6 +304,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
   };
 
   const openStatus = isOpenNow();
+  const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
 
   return (
     <div 
@@ -363,47 +374,45 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
         {(recommendation.openNow !== undefined || recommendation.hours || recommendation.availability) && (
           <div className="flex flex-col text-sm mb-3">
-            <div className="flex items-center">
-              <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
-              <span className={
-                openStatus === true ? "text-emerald-600 font-medium" : 
-                openStatus === false ? "text-rose-600 font-medium" : 
-                "text-muted-foreground"
-              }>
-                {openStatus === true ? "Open now" : 
-                 openStatus === false ? "Closed" : 
-                 "Hours available"}
-              </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
+                <span className={
+                  openStatus === true ? "text-emerald-600 font-medium" : 
+                  openStatus === false ? "text-rose-600 font-medium" : 
+                  "text-muted-foreground"
+                }>
+                  {openStatus === true ? "Open now" : 
+                   openStatus === false ? "Closed" : 
+                   "Hours available"}
+                </span>
+              </div>
               
-              {(recommendation.hours || recommendation.availability) && (
-                <Collapsible
-                  open={hoursExpanded}
-                  onOpenChange={setHoursExpanded}
-                  className="ml-2"
-                >
-                  <CollapsibleTrigger asChild>
-                    <button 
-                      className="flex items-center text-xs text-muted-foreground hover:text-primary transition-colors"
+              {businessHours && (
+                <Accordion type="single" collapsible className="w-full max-w-[200px]">
+                  <AccordionItem value="hours" className="border-none">
+                    <AccordionTrigger 
                       onClick={(e) => e.stopPropagation()}
+                      className="py-0 hover:no-underline text-xs text-muted-foreground hover:text-primary transition-colors"
                     >
-                      View hours <ChevronDown className={cn("h-3 w-3 ml-0.5 transition-transform", hoursExpanded && "rotate-180")} />
-                    </button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
-                    <div className="pt-1 pl-5 text-xs text-muted-foreground">
-                      {recommendation.hours || recommendation.availability}
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
+                      View hours
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="text-xs text-muted-foreground pt-1">
+                        {businessHours}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               )}
               
               {recommendation.instagram && (
                 <button 
                   onClick={handleInstagram} 
                   title="Watch video content" 
-                  className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-3 py-2 px-[26px] mx-[34px]"
+                  className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-3 p-1.5"
                 >
-                  <Film className="h-5 w-5 text-white" />
+                  <Film className="h-4 w-4 text-white" />
                 </button>
               )}
             </div>
@@ -425,7 +434,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
           {formatPrice() && (
             <Badge className="flex items-center gap-1 px-3 py-1.5 bg-[#1EAEDB]">
               <IndianRupee className="h-3.5 w-3.5" />
-              {formatPrice()}
+              {formatPrice().replace('₹₹', '₹')}
             </Badge>
           )}
           {recommendation.tags && recommendation.tags.map((tag, index) => (
