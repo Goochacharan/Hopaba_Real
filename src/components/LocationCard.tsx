@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film } from 'lucide-react';
+import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +11,8 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
 interface LocationCardProps {
   recommendation: Recommendation;
   className?: string;
@@ -18,6 +20,7 @@ interface LocationCardProps {
   reviewCount?: number;
   showDistanceUnderAddress?: boolean;
 }
+
 const LocationCard: React.FC<LocationCardProps> = ({
   recommendation,
   className,
@@ -27,19 +30,15 @@ const LocationCard: React.FC<LocationCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
-  const {
-    toast
-  } = useToast();
-  const {
-    addToWishlist,
-    removeFromWishlist,
-    isInWishlist
-  } = useWishlist();
+  const { toast } = useToast();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(recommendation.id);
   const isMobile = useIsMobile();
   const [user, setUser] = useState<any>(null);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [hoursExpanded, setHoursExpanded] = useState(false);
+
   useEffect(() => {
     const getCurrentUser = async () => {
       const {
@@ -57,10 +56,13 @@ const LocationCard: React.FC<LocationCardProps> = ({
       authListener?.subscription.unsubscribe();
     };
   }, []);
+
   const images = recommendation.images && recommendation.images.length > 0 ? recommendation.images : [recommendation.image];
+
   React.useEffect(() => {
     setImageLoaded(Array(images.length).fill(false));
   }, [images.length]);
+
   const handleImageLoad = (index: number) => {
     setImageLoaded(prev => {
       const newState = [...prev];
@@ -68,11 +70,13 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return newState;
     });
   };
+
   const handleImageClick = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
+
   const getMedalStyle = (rank: number) => {
     switch (rank) {
       case 1:
@@ -97,6 +101,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         };
     }
   };
+
   const renderStarRating = (rating: number) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
@@ -114,6 +119,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />)}
       </div>;
   };
+
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast({
@@ -122,6 +128,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
+
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     const phoneNumber = recommendation.phone || '';
@@ -134,6 +141,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
+
   const handleInstagram = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!recommendation.instagram) {
@@ -158,6 +166,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 2000
     });
   };
+
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) {
@@ -185,6 +194,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
+
   const handleDirections = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (recommendation.map_link && recommendation.map_link.trim() !== '') {
@@ -210,6 +220,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 2000
     });
   };
+
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (navigator.share) {
@@ -243,9 +254,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
+
   const handleCardClick = () => {
     navigate(`/location/${recommendation.id}`);
   };
+
   const formatDistance = (distanceText: string | undefined) => {
     if (!distanceText) return '';
     const distanceMatch = distanceText.match(/(\d+(\.\d+)?)/);
@@ -257,6 +270,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
     formattedDistance = formattedDistance.replace('away away', 'away');
     return formattedDistance;
   };
+
   const formatPrice = () => {
     if (recommendation.price_range_min && recommendation.price_range_max && recommendation.price_unit) {
       return `₹${recommendation.price_range_min}-${recommendation.price_range_max}/${recommendation.price_unit.replace('per ', '')}`;
@@ -267,8 +281,33 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return '';
   };
-  return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
-      <div className={cn("relative w-full overflow-hidden", className?.includes('search-result-card') ? "h-96" : "h-72")}>
+
+  const isOpenNow = () => {
+    if (recommendation.openNow === true) return true;
+    if (recommendation.openNow === false) return false;
+    
+    if (recommendation.hours || recommendation.availability) {
+      return true;
+    }
+    
+    return undefined;
+  };
+
+  const openStatus = isOpenNow();
+
+  return (
+    <div 
+      onClick={handleCardClick} 
+      className={cn(
+        "group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", 
+        "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", 
+        className
+      )}
+    >
+      <div className={cn(
+        "relative w-full overflow-hidden", 
+        className?.includes('search-result-card') ? "h-96" : "h-72"
+      )}>
         <Carousel className="w-full h-full">
           <CarouselContent className="h-full">
             {images.map((img, index) => <CarouselItem key={index} className="h-full p-0">
@@ -322,40 +361,78 @@ const LocationCard: React.FC<LocationCardProps> = ({
             </div>}
         </div>
 
-        {recommendation.openNow !== undefined && <div className="flex flex-col text-sm mb-3">
+        {(recommendation.openNow !== undefined || recommendation.hours || recommendation.availability) && (
+          <div className="flex flex-col text-sm mb-3">
             <div className="flex items-center">
               <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
-              <span className={recommendation.openNow ? "text-emerald-600" : "text-rose-600"}>
-                {recommendation.openNow ? "Open now" : "Closed"}
+              <span className={
+                openStatus === true ? "text-emerald-600 font-medium" : 
+                openStatus === false ? "text-rose-600 font-medium" : 
+                "text-muted-foreground"
+              }>
+                {openStatus === true ? "Open now" : 
+                 openStatus === false ? "Closed" : 
+                 "Hours available"}
               </span>
-              {recommendation.availability && <span className="text-muted-foreground ml-1">
-                  {recommendation.availability}
-                </span>}
-              {!recommendation.availability && recommendation.hours && <span className="text-muted-foreground ml-1">
-                  {recommendation.hours}
-                </span>}
-              {recommendation.instagram && <button onClick={handleInstagram} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-3 py-2 px-[26px] mx-[34px]">
+              
+              {(recommendation.hours || recommendation.availability) && (
+                <Collapsible
+                  open={hoursExpanded}
+                  onOpenChange={setHoursExpanded}
+                  className="ml-2"
+                >
+                  <CollapsibleTrigger asChild>
+                    <button 
+                      className="flex items-center text-xs text-muted-foreground hover:text-primary transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      View hours <ChevronDown className={cn("h-3 w-3 ml-0.5 transition-transform", hoursExpanded && "rotate-180")} />
+                    </button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+                    <div className="pt-1 pl-5 text-xs text-muted-foreground">
+                      {recommendation.hours || recommendation.availability}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
+              
+              {recommendation.instagram && (
+                <button 
+                  onClick={handleInstagram} 
+                  title="Watch video content" 
+                  className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-3 py-2 px-[26px] mx-[34px]"
+                >
                   <Film className="h-5 w-5 text-white" />
-                </button>}
+                </button>
+              )}
             </div>
-            {recommendation.distance && !showDistanceUnderAddress && <div className="text-muted-foreground pl-5 mt-1 flex items-center">
+            
+            {recommendation.distance && !showDistanceUnderAddress && (
+              <div className="text-muted-foreground pl-5 mt-1 flex items-center">
                 <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
                 {formatDistance(recommendation.distance)}
-              </div>}
-          </div>}
+              </div>
+            )}
+          </div>
+        )}
 
         <p className="mb-4 line-clamp-2 text-slate-950 font-normal text-base">
           {recommendation.description}
         </p>
 
         <div className="flex gap-2 mt-4 flex-wrap">
-          {formatPrice() && <Badge className="flex items-center gap-1 px-3 py-1.5 bg-[#1EAEDB]">
+          {formatPrice() && (
+            <Badge className="flex items-center gap-1 px-3 py-1.5 bg-[#1EAEDB]">
               <IndianRupee className="h-3.5 w-3.5" />
               {formatPrice()}
-            </Badge>}
-          {recommendation.tags && recommendation.tags.map((tag, index) => <Badge key={index} className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
+            </Badge>
+          )}
+          {recommendation.tags && recommendation.tags.map((tag, index) => (
+            <Badge key={index} className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
               {tag}
-            </Badge>)}
+            </Badge>
+          ))}
         </div>
 
         <div className="flex gap-2 mt-4">
@@ -375,6 +452,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
       </div>
 
       {images.length > 0 && <ImageViewer images={images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
-    </div>;
+    </div>
+  );
 };
+
 export default LocationCard;
