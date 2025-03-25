@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -193,7 +192,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
     e.stopPropagation();
 
     // Check if there's a Google Maps link available
-    if (recommendation.map_link) {
+    if (recommendation.map_link && recommendation.map_link.trim() !== '') {
       window.open(recommendation.map_link, '_blank');
       toast({
         title: "Opening Directions",

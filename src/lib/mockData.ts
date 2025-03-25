@@ -20,6 +20,8 @@ export interface Recommendation {
   instagram?: string;
   created_at?: string;
   reviewCount?: number;
+  map_link?: string;
+  area?: string;
 }
 
 // Mock recommendations data
