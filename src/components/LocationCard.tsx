@@ -191,7 +191,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const handleDirections = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    // Check if there's a Google Maps link available
     if (recommendation.map_link && recommendation.map_link.trim() !== '') {
       window.open(recommendation.map_link, '_blank');
       toast({
@@ -202,7 +201,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return;
     }
     
-    // Fall back to normal address-based directions
     const destination = encodeURIComponent(recommendation.address);
     let mapsUrl;
     if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
@@ -259,14 +257,12 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const formatDistance = (distanceText: string | undefined) => {
     if (!distanceText) return '';
     
-    // Try to extract a numeric value from the distance text
     const distanceMatch = distanceText.match(/(\d+(\.\d+)?)/);
     if (distanceMatch) {
       const distanceValue = parseFloat(distanceMatch[0]);
       return `${distanceValue.toFixed(1)} km away`;
     }
     
-    // If no numeric value is found, use the original text but convert to km
     let formattedDistance = distanceText.replace('miles', 'km');
     formattedDistance = formattedDistance.replace('away away', 'away');
     return formattedDistance;
@@ -357,8 +353,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
               <span className={recommendation.openNow ? "text-emerald-600" : "text-rose-600"}>
                 {recommendation.openNow ? "Open now" : "Closed"}
               </span>
-              {recommendation.hours && <span className="text-muted-foreground ml-1">
-                  {recommendation.hours}
+              {recommendation.availability && <span className="text-muted-foreground ml-1">
+                  {recommendation.availability}
                 </span>}
               {recommendation.instagram && <button onClick={handleInstagram} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-3 py-2 px-[26px] mx-[34px]">
                   <Film className="h-5 w-5 text-white" />

@@ -17,7 +17,15 @@ const LocationsList: React.FC<LocationsListProps> = ({ recommendations }) => {
           style={{ animationDelay: `${index * 100}ms` }}
         >
           <LocationCard 
-            recommendation={recommendation} 
+            recommendation={{
+              ...recommendation,
+              // Make sure we have all the data from service_providers
+              price_range_min: recommendation.price_range_min,
+              price_range_max: recommendation.price_range_max,
+              price_unit: recommendation.price_unit,
+              availability: recommendation.availability,
+              map_link: recommendation.map_link
+            }} 
             ranking={index < 10 ? index + 1 : undefined} 
             reviewCount={recommendation.reviewCount} 
             className="h-full search-result-card" 

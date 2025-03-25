@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -84,7 +83,19 @@ const SearchResults = () => {
     });
   };
 
-  const rankedRecommendations = sortRecommendations(filteredRecommendations);
+  const enhanceRecommendations = (recommendations) => {
+    return recommendations.map(rec => {
+      return {
+        ...rec,
+        hours: rec.hours || rec.availability,
+        price_range_min: rec.price_range_min,
+        price_range_max: rec.price_range_max,
+        price_unit: rec.price_unit
+      };
+    });
+  };
+
+  const rankedRecommendations = sortRecommendations(enhanceRecommendations(filteredRecommendations));
 
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
