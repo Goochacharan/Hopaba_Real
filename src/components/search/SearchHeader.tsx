@@ -35,7 +35,7 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
   }
 
   return (
-    <div className="mb-8">
+    <div className="mb-12">
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />

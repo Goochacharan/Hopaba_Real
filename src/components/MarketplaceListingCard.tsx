@@ -11,57 +11,37 @@ import ListingImageCarousel from './marketplace/ListingImageCarousel';
 import ListingMetadata from './marketplace/ListingMetadata';
 import SellerInfo from './marketplace/SellerInfo';
 import ListingActionButtons from './marketplace/ListingActionButtons';
-
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
   className?: string;
-  showPriceAfterTitle?: boolean;
 }
-
 const formatPrice = (price: number): string => {
   return '₹' + price.toLocaleString('en-IN');
 };
-
 const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   listing,
-  className,
-  showPriceAfterTitle = false
+  className
 }) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [imageViewerOpen, setImageViewerOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
-
   const handleImageClick = (index: number) => {
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
-
   const handleCardClick = () => {
     navigate(`/marketplace/${listing.id}`);
   };
-
-  return (
-    <div 
-      onClick={handleCardClick} 
-      className={cn(
-        "group bg-white rounded-xl border border-border/50 overflow-hidden transition-all cursor-pointer", 
-        "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", 
-        className
-      )}
-    >
+  return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <ListingImageCarousel images={listing.images} onImageClick={handleImageClick} listing={listing} />
       
-      <div className="p-4">
-        <h3 className="font-medium text-lg md:text-xl mb-1">{listing.title}</h3>
+      <div className="p-4 px-[12px] py-[8px]">
+        <h3 className="font-medium text-lg md:text-xl mb-2">{listing.title}</h3>
         
-        {showPriceAfterTitle && (
-          <p className="text-2xl font-bold text-[#1EAEDB] mb-3">
-            {formatPrice(listing.price)}
-          </p>
-        )}
-        
-        <div className="mb-3">
+        <div className="mb-4">
           <ListingMetadata 
             location={listing.location} 
             createdAt={listing.created_at} 
@@ -71,14 +51,12 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           />
         </div>
 
-        <div className="flex justify-between items-start mb-3">
-          {!showPriceAfterTitle && (
-            <div className="flex items-center gap-2">
-              <p className="text-2xl font-bold text-[#1EAEDB]">{formatPrice(listing.price)}</p>
-            </div>
-          )}
+        <div className="flex justify-between items-start mb-4 py-0 my-0">
+          <div className="flex items-center gap-2">
+            <p className="text-2xl font-bold text-[#1EAEDB] py-[12px]">{formatPrice(listing.price)}</p>
+          </div>
           
-          <div className={cn("flex flex-col items-end", showPriceAfterTitle && "w-full")}>
+          <div className="flex flex-col items-end py-0">
             <SellerInfo 
               sellerName={listing.seller_name} 
               sellerRating={listing.seller_rating} 
@@ -109,8 +87,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         open={imageViewerOpen} 
         onOpenChange={setImageViewerOpen} 
       />
-    </div>
-  );
+    </div>;
 };
-
 export default MarketplaceListingCard;

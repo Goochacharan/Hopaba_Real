@@ -26,7 +26,6 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({ listings })
               "h-full flex flex-col",
               "search-result-card"
             )}
-            showPriceAfterTitle={true}
           />
         </div>
       ))}
