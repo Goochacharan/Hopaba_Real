@@ -176,6 +176,9 @@ export type Database = {
           address: string
           area: string
           availability: string | null
+          availability_days: string[] | null
+          availability_end_time: string | null
+          availability_start_time: string | null
           business_hours: Json | null
           category: string
           city: string
@@ -192,6 +195,7 @@ export type Database = {
           images: string[] | null
           instagram: string | null
           languages: string[] | null
+          map_link: string | null
           name: string
           open_now: boolean | null
           price: string | null
@@ -209,6 +213,9 @@ export type Database = {
           address: string
           area: string
           availability?: string | null
+          availability_days?: string[] | null
+          availability_end_time?: string | null
+          availability_start_time?: string | null
           business_hours?: Json | null
           category: string
           city: string
@@ -225,6 +232,7 @@ export type Database = {
           images?: string[] | null
           instagram?: string | null
           languages?: string[] | null
+          map_link?: string | null
           name: string
           open_now?: boolean | null
           price?: string | null
@@ -242,6 +250,9 @@ export type Database = {
           address?: string
           area?: string
           availability?: string | null
+          availability_days?: string[] | null
+          availability_end_time?: string | null
+          availability_start_time?: string | null
           business_hours?: Json | null
           category?: string
           city?: string
@@ -258,6 +269,7 @@ export type Database = {
           images?: string[] | null
           instagram?: string | null
           languages?: string[] | null
+          map_link?: string | null
           name?: string
           open_now?: boolean | null
           price?: string | null
