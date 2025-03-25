@@ -1,9 +1,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Heart, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Heart, Sparkles, BadgeCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { useToast } from '@/hooks/use-toast';
@@ -124,6 +125,15 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
             <Sparkles className="h-3 w-3" />
             New post
           </div>}
+          
+        {/* Position the condition badge in the bottom-right corner of the image */}
+        <Badge 
+          variant="outline" 
+          className="absolute bottom-2 right-2 z-10 flex items-center gap-1 text-amber-600 bg-amber-50/90 shadow-sm border-amber-200"
+        >
+          <BadgeCheck className="h-3 w-3" />
+          <span>{listing.condition}</span>
+        </Badge>
 
         {imageArray.length > 1 && <>
             <Button size="icon" variant="ghost" className="absolute left-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/50 hover:bg-background/70" onClick={handlePreviousImage}>

@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { MapPin, Calendar, BadgeCheck, Film } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { MapPin, Calendar, Film } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
@@ -64,12 +63,7 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
           </button>
         )}
       </div>
-      <div className="flex items-center gap-1">
-        <Badge variant="outline" className="flex items-center gap-1 text-amber-600 bg-amber-50">
-          <BadgeCheck className="h-3 w-3" />
-          <span>{condition}</span>
-        </Badge>
-      </div>
+      {/* Condition badge has been moved to the image */}
     </div>
   );
 };
