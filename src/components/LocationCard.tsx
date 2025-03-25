@@ -409,26 +409,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
                 </span>
               </div>
               
-              {businessHours && (
-                <div className="flex justify-end ml-auto">
-                  <Accordion type="single" collapsible className="w-full max-w-[200px]">
-                    <AccordionItem value="hours" className="border-none">
-                      <AccordionTrigger 
-                        onClick={(e) => e.stopPropagation()}
-                        className="py-0 hover:no-underline text-xs text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        View hours
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="text-xs text-muted-foreground pt-1">
-                          {businessHours}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </div>
-              )}
-              
               {recommendation.instagram && (
                 <button 
                   onClick={handleInstagram} 
