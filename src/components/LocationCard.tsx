@@ -275,6 +275,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const formatPrice = () => {
     if (recommendation.price_range_min && recommendation.price_range_max && recommendation.price_unit) {
       return `₹${recommendation.price_range_min}-${recommendation.price_range_max}/${recommendation.price_unit.replace('per ', '')}`;
+    } else if (recommendation.priceLevel) {
+      return recommendation.priceLevel.replace(/\$/g, '₹');
     } else if (recommendation.price_level) {
       return recommendation.price_level.replace(/\$/g, '₹');
     }

@@ -10,6 +10,10 @@ export interface Recommendation {
   rating: number;
   price?: string;
   priceLevel?: string;
+  price_level?: string; // Adding this for backward compatibility
+  price_range_min?: number;
+  price_range_max?: number;
+  price_unit?: string;
   phone?: string;
   website?: string;
   openNow?: boolean;
