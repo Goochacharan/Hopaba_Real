@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { 
@@ -26,10 +25,14 @@ import {
   Star,
   StoreIcon,
   IndianRupee,
-  User
+  User,
+  Tag
 } from 'lucide-react';
 import { BusinessFormValues } from '../AddBusinessForm';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { X } from 'lucide-react';
 
 const categoryOptions = [
   "Actress",
@@ -101,7 +104,34 @@ const timeSlots = [
 
 const BasicInfoSection = () => {
   const form = useFormContext<BusinessFormValues>();
+  const [tagInput, setTagInput] = React.useState('');
   
+  const handleAddTag = () => {
+    if (tagInput.trim() === '') return;
+    
+    const currentTags = form.getValues('tags') || [];
+    if (!currentTags.includes(tagInput.trim())) {
+      form.setValue('tags', [...currentTags, tagInput.trim()], { shouldValidate: true });
+    }
+    setTagInput('');
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    const currentTags = form.getValues('tags') || [];
+    form.setValue(
+      'tags', 
+      currentTags.filter(tag => tag !== tagToRemove),
+      { shouldValidate: true }
+    );
+  };
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddTag();
+    }
+  };
+
   return (
     <>
       <div className="space-y-6 md:col-span-2">
@@ -344,6 +374,62 @@ const BasicInfoSection = () => {
             <FormControl>
               <Input placeholder="e.g., 5 years of experience" {...field} />
             </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="tags"
+        rules={{
+          validate: (value) => 
+            (value && value.length >= 3) || 
+            "Please add at least 3 popular items/services you offer"
+        }}
+        render={({ field }) => (
+          <FormItem className="md:col-span-2">
+            <FormLabel>
+              <div className="flex items-center gap-2">
+                <Tag className="h-4 w-4" />
+                Popular Items/Services*
+              </div>
+            </FormLabel>
+            <FormDescription>
+              Add at least 3 popular items or services you offer (e.g., "Ice Cream", "Massage", "Pizza")
+            </FormDescription>
+            <div className="flex gap-2 mb-2">
+              <FormControl>
+                <Input
+                  placeholder="Add a popular item or service..."
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleTagKeyDown}
+                />
+              </FormControl>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleAddTag}
+                className="shrink-0"
+              >
+                Add
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {field.value?.map((tag, index) => (
+                <Badge key={index} className="flex items-center gap-1 px-3 py-1.5 bg-primary/90">
+                  {tag}
+                  <button 
+                    type="button" 
+                    onClick={() => handleRemoveTag(tag)}
+                    className="ml-1 rounded-full hover:bg-primary-foreground/20"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
             <FormMessage />
           </FormItem>
         )}

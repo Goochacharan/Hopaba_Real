@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -78,7 +77,9 @@ const businessFormSchema = z.object({
     message: "Please enter a valid URL.",
   }).optional().or(z.literal('')),
   instagram: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+  tags: z.array(z.string()).min(3, {
+    message: "Please add at least 3 popular items or services you offer.",
+  }),
   languages: z.array(z.string()).optional(),
   images: z.array(z.string()).min(1, {
     message: "Please upload at least one image.",
@@ -114,7 +115,6 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const isEditing = !!businessData?.id;
 
-  // Format availability from separate fields
   const formatAvailability = (data: BusinessFormValues) => {
     const days = data.availability_days?.join(', ') || '';
     const startTime = data.availability_start_time || '';
@@ -123,7 +123,6 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
     return `${days} ${startTime} - ${endTime}`.trim();
   };
 
-  // Parse existing availability string into separate fields
   const parseAvailability = (availabilityString: string | undefined) => {
     if (!availabilityString) return { days: [], startTime: '9:00 AM', endTime: '5:00 PM' };
 
@@ -185,19 +184,14 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
         return;
       }
 
-      // Format availability
       const formattedAvailability = formatAvailability(data);
 
-      // Calculate distance if map_link is provided
       let distance = null;
       if (data.map_link) {
-        // In a real-world scenario, you would use a geolocation API to calculate distance
-        // This is a placeholder for the actual implementation
         distance = "Calculated based on map link";
       }
 
       if (isEditing) {
-        // Update existing business
         const { error } = await supabase
           .from('service_providers')
           .update({
@@ -242,7 +236,6 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
           if (onSaved) onSaved();
         }
       } else {
-        // Create new business
         const { error } = await supabase
           .from('service_providers')
           .insert({

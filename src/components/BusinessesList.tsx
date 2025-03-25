@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Pencil, Trash2, IndianRupee, Clock, MapPin, Phone, Instagram, Film } from 'lucide-react';
+import { Pencil, Trash2, IndianRupee, Clock, MapPin, Phone, Instagram, Film, Tag } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,9 +21,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { BusinessFormValues } from './AddBusinessForm';
+import { Badge } from '@/components/ui/badge';
 
 interface BusinessesListProps {
   onEdit: (business: BusinessFormValues & { id: string }) => void;
@@ -186,6 +185,22 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
                   </button>
                 )}
               </div>
+              
+              {business.tags && business.tags.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Popular Items/Services:</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {business.tags.map((tag, index) => (
+                      <Badge key={index} variant="secondary" className="bg-primary/10 text-primary">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
             <CardFooter className="border-t bg-muted/10 gap-2 justify-end">
               <Button 

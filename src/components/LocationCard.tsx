@@ -272,6 +272,15 @@ const LocationCard: React.FC<LocationCardProps> = ({
     return formattedDistance;
   };
 
+  const formatPrice = () => {
+    if (recommendation.price_range_min && recommendation.price_range_max && recommendation.price_unit) {
+      return `₹${recommendation.price_range_min}-${recommendation.price_range_max}/${recommendation.price_unit.replace('per ', '')}`;
+    } else if (recommendation.price_level) {
+      return recommendation.price_level.replace(/\$/g, '₹');
+    }
+    return '';
+  };
+
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <div className={cn(
         "relative w-full overflow-hidden",
@@ -364,12 +373,17 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </p>
 
         <div className="flex gap-2 mt-4 flex-wrap">
-          {recommendation.priceLevel && <span className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
-              {recommendation.priceLevel.replace(/\$/g, '₹')}
-            </span>}
-          {recommendation.tags.map((tag, index) => <span key={index} className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
+          {formatPrice() && (
+            <Badge className="flex items-center gap-1 px-3 py-1.5 bg-[#1EAEDB]">
+              <IndianRupee className="h-3.5 w-3.5" />
+              {formatPrice()}
+            </Badge>
+          )}
+          {recommendation.tags && recommendation.tags.map((tag, index) => (
+            <Badge key={index} className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
               {tag}
-            </span>)}
+            </Badge>
+          ))}
         </div>
 
         <div className="flex gap-2 mt-4">
