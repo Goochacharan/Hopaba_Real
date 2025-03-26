@@ -4,9 +4,20 @@ import AnimatedLogo from '@/components/AnimatedLogo';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, LogIn } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Category mapping for example queries
 const queryCategoryMap = {
@@ -31,12 +42,14 @@ const queryCategoryMap = {
   "Tailors who can alter ethnic wear": "services",
   "Schools with good sports programs": "education"
 };
+
 const Index = () => {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  const { user } = useAuth();
   const [isEnhancing, setIsEnhancing] = useState<string | null>(null);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [pendingQuery, setPendingQuery] = useState<string | null>(null);
 
   // Sample example queries
   const exampleQueries = [{
@@ -100,11 +113,11 @@ const Index = () => {
     text: "Schools with good sports programs",
     icon: "🏫"
   }];
+
   const enhanceSearchQuery = async (rawQuery: string) => {
     if (!rawQuery.trim()) return rawQuery;
     setIsEnhancing(rawQuery);
     try {
-      // Get the category hint from our map
       const categoryHint = queryCategoryMap[rawQuery] || "";
       const {
         data,
@@ -136,16 +149,20 @@ const Index = () => {
       setIsEnhancing(null);
     }
   };
+
   const handleSearch = async (query: string) => {
+    if (!user) {
+      setPendingQuery(query);
+      setShowAuthDialog(true);
+      return;
+    }
+
     if (query.trim()) {
       try {
-        // Enhance the search query with DeepSeek AI
         const enhancedQuery = await enhanceSearchQuery(query);
 
-        // Get the category hint from our map for search params
         const categoryHint = queryCategoryMap[query] || "";
 
-        // Add a small delay to ensure the toast is visible
         setTimeout(() => {
           const searchParams = new URLSearchParams();
           searchParams.set('q', enhancedQuery);
@@ -156,11 +173,21 @@ const Index = () => {
         }, 100);
       } catch (error) {
         console.error('Search error:', error);
-        // If enhancement fails, still navigate with original query
         navigate(`/search?q=${encodeURIComponent(query)}`);
       }
     }
   };
+
+  const navigateToLogin = () => {
+    navigate('/login');
+    setShowAuthDialog(false);
+  };
+
+  const navigateToSignup = () => {
+    navigate('/signup');
+    setShowAuthDialog(false);
+  };
+
   return <MainLayout>
       <section className="flex flex-col items-center justify-center py-4 md:py-6 mx-[5px] px-0">
         <div className="text-center mb-8 animate-fade-in">
@@ -180,6 +207,28 @@ const Index = () => {
           </ScrollArea>
         </div>
       </section>
+
+      <AlertDialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Authentication Required</AlertDialogTitle>
+            <AlertDialogDescription>
+              You need to be logged in to search on Hopaba. Please login or sign up to continue.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex justify-between">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <div className="flex gap-2">
+              <AlertDialogAction onClick={navigateToLogin} className="flex items-center gap-2 bg-primary">
+                <LogIn className="h-4 w-4" />
+                Login
+              </AlertDialogAction>
+              <AlertDialogAction onClick={navigateToSignup}>Sign Up</AlertDialogAction>
+            </div>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MainLayout>;
 };
+
 export default Index;

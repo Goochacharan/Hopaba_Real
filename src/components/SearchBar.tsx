@@ -1,10 +1,22 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Search, X, Mic, Sparkles } from 'lucide-react';
+import { Search, X, Mic, Sparkles, LogIn } from 'lucide-react';
 import { Input } from './ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -22,11 +34,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
   currentRoute
 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const currentPath = location.pathname;
   const [query, setQuery] = useState(initialValue);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   
@@ -82,6 +97,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if user is logged in
+    if (!user) {
+      setShowAuthDialog(true);
+      return;
+    }
+    
     if (query.trim()) {
       console.log("Original search query:", query);
       
@@ -118,6 +140,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
   
   const startSpeechRecognition = () => {
+    // Check if user is logged in before allowing voice search
+    if (!user) {
+      setShowAuthDialog(true);
+      return;
+    }
+    
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       toast({
         title: "Not supported",
@@ -176,6 +204,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
   }, [initialValue]);
 
   const handleSearchButtonClick = async () => {
+    // Check if user is logged in
+    if (!user) {
+      setShowAuthDialog(true);
+      return;
+    }
+    
     if (query.trim()) {
       console.log("Search button clicked with query:", query);
       
@@ -190,6 +224,16 @@ const SearchBar: React.FC<SearchBarProps> = ({
       
       onSearch(enhancedQuery);
     }
+  };
+
+  const navigateToLogin = () => {
+    navigate('/login');
+    setShowAuthDialog(false);
+  };
+
+  const navigateToSignup = () => {
+    navigate('/signup');
+    setShowAuthDialog(false);
   };
 
   return (
@@ -249,6 +293,27 @@ const SearchBar: React.FC<SearchBarProps> = ({
           </button>
         </div>
       </form>
+
+      <AlertDialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Authentication Required</AlertDialogTitle>
+            <AlertDialogDescription>
+              You need to be logged in to search on Hopaba. Please login or sign up to continue.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex justify-between">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <div className="flex gap-2">
+              <AlertDialogAction onClick={navigateToLogin} className="flex items-center gap-2 bg-primary">
+                <LogIn className="h-4 w-4" />
+                Login
+              </AlertDialogAction>
+              <AlertDialogAction onClick={navigateToSignup}>Sign Up</AlertDialogAction>
+            </div>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
