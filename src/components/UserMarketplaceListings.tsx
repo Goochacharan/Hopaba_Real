@@ -128,7 +128,7 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : listings.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           {listings.map((listing) => (
             <Card key={listing.id} className="overflow-hidden">
               {listing.images && listing.images.length > 0 && (
