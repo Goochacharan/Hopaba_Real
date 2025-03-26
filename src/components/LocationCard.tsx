@@ -362,8 +362,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
   const availabilityInfo = formatAvailabilityDays();
 
-  console.log("Instagram:", recommendation.instagram);
-  console.log("Availability days:", recommendation.availability_days);
+  console.log("LocationCard - Instagram:", recommendation.instagram);
+  console.log("LocationCard - Availability days:", recommendation.availability_days);
+  console.log("LocationCard - hasAvailabilityInfo:", hasAvailabilityInfo());
 
   return (
     <div 
@@ -487,6 +488,21 @@ const LocationCard: React.FC<LocationCardProps> = ({
                 {formatDistance(recommendation.distance)}
               </div>
             )}
+          </div>
+        )}
+
+        {(!recommendation.openNow && !recommendation.hours && !recommendation.availability && 
+          (!recommendation.availability_days || recommendation.availability_days.length === 0)) && 
+          recommendation.instagram && (
+          <div className="flex items-center mb-3">
+            <button 
+              onClick={handleInstagram} 
+              title="Watch Instagram content" 
+              className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all p-1.5"
+            >
+              <Film className="h-4 w-4 text-white" />
+            </button>
+            <span className="ml-2 text-xs text-muted-foreground">Instagram content</span>
           </div>
         )}
 
