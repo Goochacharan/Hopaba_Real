@@ -16,7 +16,6 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import ImageViewer from '@/components/ImageViewer';
-import SearchBar from '@/components/SearchBar';
 
 interface Review {
   id: string;
@@ -84,12 +83,6 @@ const LocationDetails = () => {
       reviewText: ""
     }
   });
-
-  const handleSearch = (query: string) => {
-    if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query)}`);
-    }
-  };
 
   useEffect(() => {
     if (!id) {
@@ -466,8 +459,6 @@ const LocationDetails = () => {
             
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
               <div className="space-y-4">
-                <SearchBar onSearch={handleSearch} placeholder="Search for places, services, or events..." />
-                
                 <div className="relative">
                   <Input type="text" value={question} onChange={e => setQuestion(e.target.value)} placeholder="Ask a question about this place" className="w-full pr-12 bg-[#F6F6F7] text-sm" />
                   <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#F1F1F1] hover:bg-[#E8E8E9] rounded-full w-8 h-8 flex items-center justify-center transition-colors" onClick={() => handleAskQuestion()} disabled={!question.trim() || askingQuestion}>

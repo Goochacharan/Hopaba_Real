@@ -5,7 +5,7 @@ import { Search, X, Mic, Sparkles } from 'lucide-react';
 import { Input } from './ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -23,7 +23,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
   currentRoute
 }) => {
   const location = useLocation();
-  const navigate = useNavigate();
   const currentPath = location.pathname;
   const [query, setQuery] = useState(initialValue);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -94,13 +93,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         setQuery(enhancedQuery);
       }
       
-      // Always navigate to the search page with the query
-      if (currentPath !== '/search') {
-        navigate(`/search?q=${encodeURIComponent(enhancedQuery)}`);
-      } else {
-        // If already on search page, use the provided onSearch handler
-        onSearch(enhancedQuery);
-      }
+      onSearch(enhancedQuery);
 
       // Show suggestions after search only if query is very short
       if (query.trim().length < 8) {
@@ -146,11 +139,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
       // Auto-submit after voice input
       setTimeout(() => {
-        if (currentPath !== '/search') {
-          navigate(`/search?q=${encodeURIComponent(transcript)}`);
-        } else {
-          onSearch(transcript);
-        }
+        onSearch(transcript);
       }, 500);
     };
     recognition.onerror = () => {
@@ -200,13 +189,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         setQuery(enhancedQuery);
       }
       
-      // Always navigate to the search page with the query
-      if (currentPath !== '/search') {
-        navigate(`/search?q=${encodeURIComponent(enhancedQuery)}`);
-      } else {
-        // If already on search page, use the provided onSearch handler
-        onSearch(enhancedQuery);
-      }
+      onSearch(enhancedQuery);
     }
   };
 
