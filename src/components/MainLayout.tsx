@@ -35,24 +35,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { user } = useAuth();
 
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      setLoading(true);
-      const { data } = await supabase.auth.getSession();
-      setUser(data.session?.user || null);
-      setLoading(false);
-    };
-
-    getCurrentUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user || null);
-    });
-
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
-  }, []);
+  // We're removing the problematic useEffect that caused the error
+  // The useAuth hook already handles session management, so this duplication is not needed
 
   const onSearch = (query: string) => {
     console.log("MainLayout search triggered with:", query);
