@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -373,12 +372,12 @@ const LocationCard: React.FC<LocationCardProps> = ({
     const startTime = recommendation.availability_start_time || '';
     const endTime = recommendation.availability_end_time || '';
     if (startTime && endTime) {
-      return <div className="text-xs text-muted-foreground">
+      return <div className="text-sm text-muted-foreground px-2 py-1">
           <p>{formattedDays}</p>
           <p className="mt-1">{startTime} - {endTime}</p>
         </div>;
     }
-    return <div className="text-xs text-muted-foreground">
+    return <div className="text-sm text-muted-foreground px-2 py-1">
         <p>{formattedDays}</p>
       </div>;
   };
@@ -556,22 +555,28 @@ const LocationCard: React.FC<LocationCardProps> = ({
               </div>
               
               {hasAvailabilityInfo() && openStatus === false && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="ml-2">
-                  <CollapsibleTrigger onClick={e => e.stopPropagation()} className="flex items-center text-xs text-muted-foreground hover:text-primary transition-colors px-[3px] mx-[6px] text-justify">
+                  <CollapsibleTrigger 
+                    onClick={e => e.stopPropagation()} 
+                    className="flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-2 py-1 border border-transparent hover:border-border/30 rounded-md"
+                  >
                     Available days
-                    <ChevronDown className={cn("h-3 w-3 ml-1 transition-transform", availabilityOpen ? "transform rotate-180" : "")} />
+                    <ChevronDown className={cn("h-4 w-4 ml-1 transition-transform", availabilityOpen ? "transform rotate-180" : "")} />
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-1 mb-2">
+                  <CollapsibleContent className="mt-2 mb-2 border-l-2 border-muted pl-2">
                     {availabilityInfo}
                   </CollapsibleContent>
                 </Collapsible>}
             </div>
             
-            {hasAvailabilityInfo() && openStatus !== false && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="mt-1">
-                <CollapsibleTrigger onClick={e => e.stopPropagation()} className="flex items-center text-xs text-muted-foreground hover:text-primary transition-colors">
+            {hasAvailabilityInfo() && openStatus !== false && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="mt-2">
+                <CollapsibleTrigger 
+                  onClick={e => e.stopPropagation()} 
+                  className="flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-2 py-1 border border-transparent hover:border-border/30 rounded-md"
+                >
                   Available days
-                  <ChevronDown className={cn("h-3 w-3 ml-1 transition-transform", availabilityOpen ? "transform rotate-180" : "")} />
+                  <ChevronDown className={cn("h-4 w-4 ml-1 transition-transform", availabilityOpen ? "transform rotate-180" : "")} />
                 </CollapsibleTrigger>
-                <CollapsibleContent className="mt-1 mb-2">
+                <CollapsibleContent className="mt-2 mb-2 border-l-2 border-muted pl-2">
                   {availabilityInfo}
                 </CollapsibleContent>
               </Collapsible>}
@@ -581,8 +586,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
                 {formatDistance(recommendation.distance)}
               </div>}
           </div>}
-
-        {/* Removed the standalone Instagram button section since it's now placed next to the address */}
 
         <p className="mb-4 line-clamp-2 font-normal text-sm text-slate-700">
           {recommendation.description}
@@ -619,3 +622,4 @@ const LocationCard: React.FC<LocationCardProps> = ({
 };
 
 export default LocationCard;
+
