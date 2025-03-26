@@ -372,12 +372,12 @@ const LocationCard: React.FC<LocationCardProps> = ({
     const startTime = recommendation.availability_start_time || '';
     const endTime = recommendation.availability_end_time || '';
     if (startTime && endTime) {
-      return <div className="text-sm text-muted-foreground px-2 py-1">
-          <p>{formattedDays}</p>
-          <p className="mt-1">{startTime} - {endTime}</p>
+      return <div className="text-sm text-muted-foreground px-2">
+          <p className="mb-0">{formattedDays}</p>
+          <p className="mt-0">{startTime} - {endTime}</p>
         </div>;
     }
-    return <div className="text-sm text-muted-foreground px-2 py-1">
+    return <div className="text-sm text-muted-foreground px-2">
         <p>{formattedDays}</p>
       </div>;
   };
