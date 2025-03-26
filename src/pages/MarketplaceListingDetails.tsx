@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -91,7 +92,15 @@ const MarketplaceListingDetails = () => {
                 </div>
               </div>
               
-              {listing && <ImageViewer images={listing.images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
+              {listing && <ImageViewer 
+                images={listing.images} 
+                initialIndex={selectedImageIndex} 
+                open={imageViewerOpen} 
+                onOpenChange={(open) => {
+                  setImageViewerOpen(open);
+                  // Stay on the current page when the dialog is closed
+                }} 
+              />}
               
               <ListingDescription description={listing.description} category={listing.category} condition={listing.condition} location={listing.location} createdAt={listing.created_at} showMetadata={false} />
               
