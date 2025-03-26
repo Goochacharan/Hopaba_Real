@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown, Sparkles, Award } from 'lucide-react';
+import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown, Sparkles, Award, Circle, CircleDot } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -508,7 +508,13 @@ const LocationCard: React.FC<LocationCardProps> = ({
         {(recommendation.openNow !== undefined || recommendation.hours || recommendation.availability || hasAvailabilityInfo()) && <div className="flex flex-col text-sm mb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
+                {openStatus === true ? (
+                  <CircleDot className="w-4 h-4 mr-1 flex-shrink-0 text-emerald-600 fill-emerald-600" />
+                ) : openStatus === false ? (
+                  <Circle className="w-4 h-4 mr-1 flex-shrink-0 text-rose-600 fill-rose-600" />
+                ) : (
+                  <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
+                )}
                 <span className={openStatus === true ? "text-emerald-600 font-medium" : openStatus === false ? "text-rose-600 font-medium" : "text-muted-foreground"}>
                   {openStatus === true ? "Open now" : openStatus === false ? "Closed" : "Hours available"}
                 </span>
@@ -587,4 +593,3 @@ const LocationCard: React.FC<LocationCardProps> = ({
 };
 
 export default LocationCard;
-
