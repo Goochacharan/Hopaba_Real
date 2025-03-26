@@ -457,7 +457,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </span>
         </div>
         
-        <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+        {/* Moved badges from top-left to bottom-left */}
+        <div className="absolute bottom-3 left-3 z-10 flex flex-col gap-2">
           {showHiddenGemBadge && (
             <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/90 backdrop-blur-sm text-white flex items-center">
               <Sparkles className="h-3 w-3 mr-1" />

@@ -194,8 +194,7 @@ const LocationDetails = () => {
         toast({
           title: "Sharing failed",
           description: "Could not share this location",
-          variant: "destructive",
-          duration: 2000
+          variant: "destructive"
         });
       });
     } else {
@@ -470,7 +469,7 @@ const LocationDetails = () => {
               </div>
             
               <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
-                <h2 className="text-xl font-semibold mb-4">{location.name}</h2>
+                <h2 className="text-xl font-semibold">{location.name}</h2>
                 <p className="text-muted-foreground">{location.description}</p>
                 
                 <div className="mt-4">
@@ -498,6 +497,34 @@ const LocationDetails = () => {
                                 <Star className={`w-6 h-6 ${rating <= selectedRating ? "text-amber-500 fill-amber-500" : "text-gray-300"}`} />
                               </button>)}
                             {form.formState.errors.rating && <p className="text-destructive text-xs ml-2">Please select a rating</p>}
+                          </div>
+                        </div>
+                        
+                        {/* Added place rating options to review form */}
+                        <div className="space-y-2">
+                          <Label>Rate this place as (optional)</Label>
+                          <div className="flex items-center gap-3 mt-2">
+                            <Button 
+                              type="button"
+                              onClick={() => handleRatePlace('hidden-gem')}
+                              variant={userRatedAs === 'hidden-gem' ? "default" : "outline"}
+                              size="sm"
+                              className={`flex items-center ${userRatedAs === 'hidden-gem' ? 'bg-purple-500 hover:bg-purple-600' : 'border-purple-200 text-purple-700 hover:bg-purple-50'}`}
+                            >
+                              <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                              Hidden Gem
+                            </Button>
+                            
+                            <Button 
+                              type="button"
+                              onClick={() => handleRatePlace('must-visit')}
+                              variant={userRatedAs === 'must-visit' ? "default" : "outline"}
+                              size="sm"
+                              className={`flex items-center ${userRatedAs === 'must-visit' ? 'bg-orange-500 hover:bg-orange-600' : 'border-orange-200 text-orange-700 hover:bg-orange-50'}`}
+                            >
+                              <Award className="h-3.5 w-3.5 mr-1.5" />
+                              Must Visit
+                            </Button>
                           </div>
                         </div>
 
