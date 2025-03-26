@@ -24,7 +24,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({ listings })
             }} 
             className={cn(
               "h-full flex flex-col",
-              "search-result-card"
+              "search-result-card" // This class will be used to identify search result cards
             )}
           />
         </div>

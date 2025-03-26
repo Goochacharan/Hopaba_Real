@@ -103,14 +103,20 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
 
   // Check if parent has search-result-card class to determine if we're in search results
   const isInSearchResults = className?.includes('search-result-card');
-  const imageHeightClass = isInSearchResults ? "h-[300px]" : "h-full"; // Increased height for search results
+  const isLocationDetailsPage = window.location.pathname.includes('/location/');
+  const shouldIncreaseHeight = isInSearchResults || isLocationDetailsPage;
+  
+  // Adjust image height based on context
+  const imageHeightClass = shouldIncreaseHeight 
+    ? "h-[400px]" // Increased height for search results and location details
+    : "h-full";
 
   return <div className={cn("relative group", className)}>
       <AspectRatio ratio={4 / 5} className="bg-muted">
         <img 
           src={imageArray[currentImageIndex]} 
           alt={`Product image ${currentImageIndex + 1}`} 
-          className={cn("object-contain w-full cursor-pointer", imageHeightClass)} 
+          className={cn("object-cover w-full cursor-pointer", imageHeightClass)} 
           onClick={handleImageClick} 
           onTouchStart={onTouchStart} 
           onTouchMove={onTouchMove} 

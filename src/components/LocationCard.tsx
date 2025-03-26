@@ -435,13 +435,32 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
   const availabilityInfo = formatAvailabilityDays();
 
+  const isSearchResultCard = className?.includes('search-result-card');
+  const isLocationDetailsPage = window.location.pathname.includes('/location/');
+  const shouldIncreaseHeight = isSearchResultCard || isLocationDetailsPage;
+  
+  const imageHeightClass = shouldIncreaseHeight 
+    ? "h-[400px]" // Increased height for search results and location details
+    : "h-72";
+
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
-      <div className={cn("relative w-full overflow-hidden", className?.includes('search-result-card') ? "h-96" : "h-72")}>
+      <div className={cn("relative w-full overflow-hidden", imageHeightClass)}>
         <Carousel className="w-full h-full">
           <CarouselContent className="h-full">
             {images.map((img, index) => <CarouselItem key={index} className="h-full p-0">
                 <div className={cn("absolute inset-0 bg-muted/30", imageLoaded[index] ? "opacity-0" : "opacity-100")} />
-                <img src={img} alt={`${recommendation.name} - image ${index + 1}`} onLoad={() => handleImageLoad(index)} onClick={e => handleImageClick(index, e)} className={cn("w-full object-cover transition-all-500 cursor-pointer", className?.includes('search-result-card') ? "h-96" : "h-72", imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm")} />
+                <img 
+                  src={img} 
+                  alt={`${recommendation.name} - image ${index + 1}`} 
+                  onLoad={() => handleImageLoad(index)} 
+                  onClick={e => handleImageClick(index, e)} 
+                  className={cn(
+                    "w-full transition-all-500 cursor-pointer", 
+                    imageHeightClass,
+                    shouldIncreaseHeight ? "object-cover" : "object-contain",
+                    imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
+                  )} 
+                />
               </CarouselItem>)}
           </CarouselContent>
           {images.length > 1 && <>
