@@ -16,6 +16,8 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import ImageViewer from '@/components/ImageViewer';
+import { Sparkles, Fire } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Review {
   id: string;
@@ -75,6 +77,10 @@ const LocationDetails = () => {
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const isMobile = useIsMobile();
+  const [user, setUser] = useState<any>(null);
+  const [hiddenGemCount, setHiddenGemCount] = useState<number>(15);
+  const [mustVisitCount, setMustVisitCount] = useState<number>(22);
+  const [userRatedAs, setUserRatedAs] = useState<string | null>(null);
 
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewSchema),
@@ -83,6 +89,22 @@ const LocationDetails = () => {
       reviewText: ""
     }
   });
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data } = await supabase.auth.getSession();
+      setUser(data.session?.user || null);
+    };
+    getCurrentUser();
+    
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setUser(session?.user || null);
+    });
+    
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     if (!id) {
@@ -96,6 +118,9 @@ const LocationDetails = () => {
         setLocation(foundLocation);
         const locationImages = foundLocation.images && foundLocation.images.length > 0 ? foundLocation.images : [foundLocation.image];
         setImageLoaded(Array(locationImages.length).fill(false));
+        
+        setHiddenGemCount(Math.floor(Math.random() * 40) + 5);
+        setMustVisitCount(Math.floor(Math.random() * 40) + 5);
       } else {
         toast({
           title: "Location not found",
@@ -263,6 +288,50 @@ const LocationDetails = () => {
 
   const allReviews = [...userReviews, ...reviews];
 
+  const handleRatePlace = (ratingType: 'hidden-gem' | 'must-visit') => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to rate this place",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (userRatedAs === ratingType) {
+      if (ratingType === 'hidden-gem') {
+        setHiddenGemCount(prev => Math.max(0, prev - 1));
+      } else {
+        setMustVisitCount(prev => Math.max(0, prev - 1));
+      }
+      setUserRatedAs(null);
+      toast({
+        title: "Rating removed",
+        description: `Your "${ratingType === 'hidden-gem' ? 'Hidden Gem' : 'Must Visit'}" rating has been removed`,
+        duration: 2000
+      });
+    } else {
+      if (userRatedAs === 'hidden-gem' && ratingType === 'must-visit') {
+        setHiddenGemCount(prev => Math.max(0, prev - 1));
+        setMustVisitCount(prev => prev + 1);
+      } else if (userRatedAs === 'must-visit' && ratingType === 'hidden-gem') {
+        setMustVisitCount(prev => Math.max(0, prev - 1));
+        setHiddenGemCount(prev => prev + 1);
+      } else if (ratingType === 'hidden-gem') {
+        setHiddenGemCount(prev => prev + 1);
+      } else {
+        setMustVisitCount(prev => prev + 1);
+      }
+      
+      setUserRatedAs(ratingType);
+      toast({
+        title: "Place rated",
+        description: `You've rated this as a "${ratingType === 'hidden-gem' ? 'Hidden Gem' : 'Must Visit'}" place`,
+        duration: 2000
+      });
+    }
+  };
+
   if (loading) {
     return <MainLayout>
         <div className="container mx-auto py-4 px-4 max-w-none">
@@ -363,6 +432,26 @@ const LocationDetails = () => {
                     <Calendar className="h-5 w-5 text-muted-foreground mr-3 mt-0.5 flex-shrink-0" />
                     <span>Availability: After-school hours and weekends</span>
                   </div>
+                </div>
+                
+                <div className="flex items-center justify-center gap-4 mb-6">
+                  <Button 
+                    onClick={() => handleRatePlace('hidden-gem')}
+                    variant={userRatedAs === 'hidden-gem' ? "default" : "outline"}
+                    className={`flex items-center ${userRatedAs === 'hidden-gem' ? 'bg-purple-500 hover:bg-purple-600' : 'border-purple-200 text-purple-700 hover:bg-purple-50'}`}
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Hidden Gem ({hiddenGemCount})
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => handleRatePlace('must-visit')}
+                    variant={userRatedAs === 'must-visit' ? "default" : "outline"}
+                    className={`flex items-center ${userRatedAs === 'must-visit' ? 'bg-orange-500 hover:bg-orange-600' : 'border-orange-200 text-orange-700 hover:bg-orange-50'}`}
+                  >
+                    <Fire className="h-4 w-4 mr-2" />
+                    Must Visit ({mustVisitCount})
+                  </Button>
                 </div>
                 
                 <div className="grid grid-cols-4 gap-3">

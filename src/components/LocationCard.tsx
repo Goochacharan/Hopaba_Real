@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown } from 'lucide-react';
+import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown, Sparkles, Fire } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
 interface LocationCardProps {
   recommendation: Recommendation;
   className?: string;
@@ -20,6 +21,7 @@ interface LocationCardProps {
   reviewCount?: number;
   showDistanceUnderAddress?: boolean;
 }
+
 const LocationCard: React.FC<LocationCardProps> = ({
   recommendation,
   className,
@@ -29,20 +31,21 @@ const LocationCard: React.FC<LocationCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
-  const {
-    toast
-  } = useToast();
-  const {
-    addToWishlist,
-    removeFromWishlist,
-    isInWishlist
-  } = useWishlist();
+  const { toast } = useToast();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(recommendation.id);
   const isMobile = useIsMobile();
   const [user, setUser] = useState<any>(null);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
+  
+  const hiddenGemCount = recommendation.hiddenGemCount || Math.floor(Math.random() * 30);
+  const mustVisitCount = recommendation.mustVisitCount || Math.floor(Math.random() * 30);
+  
+  const showHiddenGemBadge = hiddenGemCount >= 20;
+  const showMustVisitBadge = mustVisitCount >= 20;
+
   useEffect(() => {
     const getCurrentUser = async () => {
       const {
@@ -60,10 +63,12 @@ const LocationCard: React.FC<LocationCardProps> = ({
       authListener?.subscription.unsubscribe();
     };
   }, []);
+
   const images = recommendation.images && recommendation.images.length > 0 ? recommendation.images : [recommendation.image];
   React.useEffect(() => {
     setImageLoaded(Array(images.length).fill(false));
   }, [images.length]);
+
   const handleImageLoad = (index: number) => {
     setImageLoaded(prev => {
       const newState = [...prev];
@@ -71,11 +76,13 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return newState;
     });
   };
+
   const handleImageClick = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
+
   const getMedalStyle = (rank: number) => {
     switch (rank) {
       case 1:
@@ -100,6 +107,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         };
     }
   };
+
   const renderStarRating = (rating: number) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
@@ -117,6 +125,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />)}
       </div>;
   };
+
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast({
@@ -125,6 +134,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
+
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     const phoneNumber = recommendation.phone || '';
@@ -137,6 +147,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
+
   const handleInstagram = (e: React.MouseEvent) => {
     e.stopPropagation();
     console.log("Instagram button clicked, instagram value:", recommendation.instagram);
@@ -159,6 +170,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 2000
     });
   };
+
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) {
@@ -186,6 +198,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
+
   const handleDirections = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (recommendation.map_link && recommendation.map_link.trim() !== '') {
@@ -211,6 +224,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 2000
     });
   };
+
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (navigator.share) {
@@ -244,9 +258,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
+
   const handleCardClick = () => {
     navigate(`/location/${recommendation.id}`);
   };
+
   const formatDistance = (distanceText: string | undefined) => {
     if (!distanceText) return '';
     const distanceMatch = distanceText.match(/(\d+(\.\d+)?)/);
@@ -258,6 +274,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
     formattedDistance = formattedDistance.replace('away away', 'away');
     return formattedDistance;
   };
+
   const formatPrice = () => {
     if (recommendation.price_range_min && recommendation.price_range_max && recommendation.price_unit) {
       return `${recommendation.price_range_min}-${recommendation.price_range_max}/${recommendation.price_unit.replace('per ', '')}`;
@@ -268,6 +285,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return '';
   };
+
   const formatBusinessHours = (hours: string | undefined) => {
     if (!hours) {
       if (recommendation.availability_days && recommendation.availability_days.length > 0) {
@@ -292,6 +310,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return hours;
   };
+
   const isOpenNow = () => {
     if (recommendation.openNow === true) return true;
     if (recommendation.openNow === false) return false;
@@ -318,6 +337,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return undefined;
   };
+
   const parseTimeString = (timeString: string): number => {
     try {
       const [time, period] = timeString.split(' ');
@@ -330,16 +350,19 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return 0;
     }
   };
+
   const hasAvailabilityInfo = () => {
     console.log("LocationCard - Checking availability for:", recommendation.name);
     console.log("LocationCard - availability_days:", recommendation.availability_days);
     return recommendation.availability_days && Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0;
   };
+
   const hasInstagram = () => {
     console.log("LocationCard - Checking Instagram for:", recommendation.name);
     console.log("LocationCard - Instagram link:", recommendation.instagram);
     return recommendation.instagram && typeof recommendation.instagram === 'string' && recommendation.instagram.trim() !== '';
   };
+
   const formatAvailabilityDays = () => {
     if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
       return null;
@@ -407,9 +430,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return ranges.join(', ');
   };
+
   const openStatus = isOpenNow();
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
   const availabilityInfo = formatAvailabilityDays();
+
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <div className={cn("relative w-full overflow-hidden", className?.includes('search-result-card') ? "h-96" : "h-72")}>
         <Carousel className="w-full h-full">
@@ -429,6 +454,21 @@ const LocationCard: React.FC<LocationCardProps> = ({
           <span className="px-2 py-1 rounded-full text-xs font-medium bg-black/40 backdrop-blur-sm text-white">
             {recommendation.category}
           </span>
+        </div>
+        
+        <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+          {showHiddenGemBadge && (
+            <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/90 backdrop-blur-sm text-white flex items-center">
+              <Sparkles className="h-3 w-3 mr-1" />
+              Hidden Gem
+            </span>
+          )}
+          {showMustVisitBadge && (
+            <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/90 backdrop-blur-sm text-white flex items-center">
+              <Fire className="h-3 w-3 mr-1" />
+              Must Visit
+            </span>
+          )}
         </div>
         
         <button onClick={handleWishlistToggle} className={cn("absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10", user ? inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500" : "text-muted-foreground")}>
@@ -545,4 +585,5 @@ const LocationCard: React.FC<LocationCardProps> = ({
       {images.length > 0 && <ImageViewer images={images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
     </div>;
 };
+
 export default LocationCard;
