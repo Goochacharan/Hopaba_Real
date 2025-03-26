@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -27,9 +27,12 @@ const SortButton: React.FC<SortButtonProps> = ({ onSortChange, currentSort }) =>
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="gap-2">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative"
+        >
           <ArrowUpDown className="h-4 w-4" />
-          <span>Sort</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40">
