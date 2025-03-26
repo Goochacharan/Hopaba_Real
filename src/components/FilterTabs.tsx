@@ -138,20 +138,22 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
         <Popover open={activeFilter === 'hours'} onOpenChange={(open) => setActiveFilter(open ? 'hours' : null)}>
           <PopoverTrigger asChild>
             <Button 
-              variant="outline" 
+              variant={openNowOnly ? "default" : "outline"}
               size="sm" 
               className={cn(
-                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
-                activeFilter === 'hours' && "ring-2 ring-primary/20",
-                openNowOnly && "border-primary/30 bg-primary/5"
+                "rounded-full border flex items-center justify-center w-10 h-10 relative",
+                activeFilter === 'hours' && "ring-2 ring-primary/20"
               )}
+              onClick={() => {
+                if (!openNowOnly) {
+                  setOpenNowOnly(true);
+                  setActiveFilter(null);
+                } else {
+                  setOpenNowOnly(false);
+                }
+              }}
             >
               <Clock className="w-4 h-4" />
-              {openNowOnly && (
-                <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-primary text-white">
-                  •
-                </Badge>
-              )}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-80 p-4" align="start">
@@ -159,7 +161,7 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               <h4 className="font-medium">Hours</h4>
               <div className="flex items-center justify-between">
                 <Label htmlFor="open-now" className="text-sm font-medium cursor-pointer">
-                  Open Now Only
+                  Open Now
                 </Label>
                 <Switch
                   id="open-now"
@@ -172,84 +174,30 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
         </Popover>
 
         {/* Hidden Gem Filter */}
-        <Popover open={activeFilter === 'hidden-gem'} onOpenChange={(open) => setActiveFilter(open ? 'hidden-gem' : null)}>
-          <PopoverTrigger asChild>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className={cn(
-                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
-                activeFilter === 'hidden-gem' && "ring-2 ring-primary/20",
-                hiddenGemOnly && "border-purple-300 bg-purple-50"
-              )}
-            >
-              <Sparkles className="w-4 h-4 text-purple-500" />
-              {hiddenGemOnly && (
-                <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-purple-500 text-white">
-                  •
-                </Badge>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80 p-4" align="start">
-            <div className="space-y-4">
-              <h4 className="font-medium">Hidden Gems</h4>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="hidden-gem" 
-                  checked={hiddenGemOnly}
-                  onCheckedChange={(checked) => setHiddenGemOnly(checked === true)}
-                />
-                <Label htmlFor="hidden-gem" className="text-sm font-medium cursor-pointer">
-                  Show only Hidden Gems
-                </Label>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Filter for places that users have rated as hidden gems - lesser-known but excellent spots.
-              </p>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <Button 
+          variant={hiddenGemOnly ? "default" : "outline"}
+          size="sm" 
+          className={cn(
+            "rounded-full border flex items-center justify-center w-10 h-10 relative",
+            hiddenGemOnly && "bg-purple-500 hover:bg-purple-600"
+          )}
+          onClick={() => setHiddenGemOnly(!hiddenGemOnly)}
+        >
+          <Sparkles className="w-4 h-4" />
+        </Button>
 
         {/* Must Visit Filter */}
-        <Popover open={activeFilter === 'must-visit'} onOpenChange={(open) => setActiveFilter(open ? 'must-visit' : null)}>
-          <PopoverTrigger asChild>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className={cn(
-                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
-                activeFilter === 'must-visit' && "ring-2 ring-primary/20",
-                mustVisitOnly && "border-orange-300 bg-orange-50"
-              )}
-            >
-              <Award className="w-4 h-4 text-orange-500" />
-              {mustVisitOnly && (
-                <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-orange-500 text-white">
-                  •
-                </Badge>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80 p-4" align="start">
-            <div className="space-y-4">
-              <h4 className="font-medium">Must Visit Places</h4>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="must-visit" 
-                  checked={mustVisitOnly}
-                  onCheckedChange={(checked) => setMustVisitOnly(checked === true)}
-                />
-                <Label htmlFor="must-visit" className="text-sm font-medium cursor-pointer">
-                  Show only Must Visit places
-                </Label>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Filter for places that users have rated as must-visit locations - highly recommended spots.
-              </p>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <Button 
+          variant={mustVisitOnly ? "default" : "outline"}
+          size="sm" 
+          className={cn(
+            "rounded-full border flex items-center justify-center w-10 h-10 relative",
+            mustVisitOnly && "bg-orange-500 hover:bg-orange-600"
+          )}
+          onClick={() => setMustVisitOnly(!mustVisitOnly)}
+        >
+          <Award className="w-4 h-4" />
+        </Button>
 
         {/* Distance Filter */}
         <Popover open={activeFilter === 'distance'} onOpenChange={(open) => setActiveFilter(open ? 'distance' : null)}>

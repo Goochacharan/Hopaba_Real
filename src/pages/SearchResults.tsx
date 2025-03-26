@@ -57,7 +57,16 @@ const SearchResults = () => {
   const loading = recommendationsLoading || marketplaceLoading;
   const error = recommendationsError || marketplaceError;
 
-  const filteredRecommendations = filterRecommendations(recommendations, {
+  // Update the recommendations with fake hidden gem and must visit data for testing
+  const enhancedRecommendations = recommendations.map((rec, index) => {
+    return {
+      ...rec,
+      isHiddenGem: index % 3 === 0, // Every 3rd item is a hidden gem
+      isMustVisit: index % 5 === 0  // Every 5th item is a must visit
+    };
+  });
+
+  const filteredRecommendations = filterRecommendations(enhancedRecommendations, {
     maxDistance: distance[0],
     minRating: minRating[0],
     priceLevel: priceRange,
