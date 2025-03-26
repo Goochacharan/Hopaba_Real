@@ -12,7 +12,6 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface LocationCardProps {
@@ -416,6 +415,103 @@ const LocationCard: React.FC<LocationCardProps> = ({
     );
   };
 
+  const isOpenNow = () => {
+    if (recommendation.openNow === true) return true;
+    if (recommendation.openNow === false) return false;
+    
+    // Check if the business is open based on availability days and time
+    if (hasAvailabilityInfo()) {
+      const now = new Date();
+      const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+      
+      // Check if current day is in the availability days
+      const availableDays = recommendation.availability_days?.map(day => day.toLowerCase()) || [];
+      const isAvailableToday = availableDays.some(day => currentDay.includes(day) || day.includes(currentDay));
+      
+      if (!isAvailableToday) return false;
+      
+      // If available today, check if current time is within operating hours
+      if (recommendation.availability_start_time && recommendation.availability_end_time) {
+        const startTime = parseTimeString(recommendation.availability_start_time);
+        const endTime = parseTimeString(recommendation.availability_end_time);
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        
+        const currentTimeInMinutes = (currentHour * 60) + currentMinute;
+        
+        return currentTimeInMinutes >= startTime && currentTimeInMinutes <= endTime;
+      }
+      
+      return true; // Available today but no specific hours
+    }
+    
+    if (recommendation.hours || recommendation.availability) {
+      return true; // Default to open if hours are listed but not specific availability days
+    }
+    
+    return undefined; // Status unknown
+  };
+  
+  // Helper function to parse time like "9:00 AM" to minutes since midnight
+  const parseTimeString = (timeString: string): number => {
+    try {
+      const [time, period] = timeString.split(' ');
+      let [hours, minutes] = time.split(':').map(Number);
+      
+      if (period === 'PM' && hours < 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+      
+      return (hours * 60) + minutes;
+    } catch (e) {
+      console.error("Error parsing time string:", timeString, e);
+      return 0;
+    }
+  };
+
+  const hasAvailabilityInfo = () => {
+    console.log("LocationCard - Checking availability for:", recommendation.name);
+    console.log("LocationCard - availability_days:", recommendation.availability_days);
+    
+    return recommendation.availability_days && 
+           Array.isArray(recommendation.availability_days) && 
+           recommendation.availability_days.length > 0;
+  };
+
+  const hasInstagram = () => {
+    console.log("LocationCard - Checking Instagram for:", recommendation.name);
+    console.log("LocationCard - Instagram link:", recommendation.instagram);
+    
+    return recommendation.instagram && 
+           typeof recommendation.instagram === 'string' && 
+           recommendation.instagram.trim() !== '';
+  };
+
+  const formatAvailabilityDays = () => {
+    if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
+      return null;
+    }
+    
+    const days = recommendation.availability_days.join(', ');
+    const startTime = recommendation.availability_start_time || '';
+    const endTime = recommendation.availability_end_time || '';
+    
+    if (startTime && endTime) {
+      return (
+        <div className="text-xs text-muted-foreground">
+          <p className="font-medium mb-1">Available Days:</p>
+          <p>{days}</p>
+          <p className="mt-1">Time: {startTime} - {endTime}</p>
+        </div>
+      );
+    }
+    return (
+      <div className="text-xs text-muted-foreground">
+        <p className="font-medium mb-1">Available Days:</p>
+        <p>{days}</p>
+      </div>
+    );
+  };
+
   const openStatus = isOpenNow();
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
   const availabilityInfo = formatAvailabilityDays();
@@ -552,6 +648,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               )}
             </div>
             
+            {/* Remove the duplicate "Available days" text - now we only show the collapsible trigger */}
             {hasAvailabilityInfo() && (
               <Collapsible 
                 open={availabilityOpen} 
