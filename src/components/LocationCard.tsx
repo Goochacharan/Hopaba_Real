@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -322,12 +323,53 @@ const LocationCard: React.FC<LocationCardProps> = ({
     if (recommendation.openNow === true) return true;
     if (recommendation.openNow === false) return false;
     
-    if (recommendation.hours || recommendation.availability || 
-        (recommendation.availability_days && recommendation.availability_days.length > 0)) {
-      return true;
+    // Check if the business is open based on availability days and time
+    if (hasAvailabilityInfo()) {
+      const now = new Date();
+      const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+      
+      // Check if current day is in the availability days
+      const availableDays = recommendation.availability_days?.map(day => day.toLowerCase()) || [];
+      const isAvailableToday = availableDays.some(day => currentDay.includes(day) || day.includes(currentDay));
+      
+      if (!isAvailableToday) return false;
+      
+      // If available today, check if current time is within operating hours
+      if (recommendation.availability_start_time && recommendation.availability_end_time) {
+        const startTime = parseTimeString(recommendation.availability_start_time);
+        const endTime = parseTimeString(recommendation.availability_end_time);
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        
+        const currentTimeInMinutes = (currentHour * 60) + currentMinute;
+        
+        return currentTimeInMinutes >= startTime && currentTimeInMinutes <= endTime;
+      }
+      
+      return true; // Available today but no specific hours
     }
     
-    return undefined;
+    if (recommendation.hours || recommendation.availability) {
+      return true; // Default to open if hours are listed but not specific availability days
+    }
+    
+    return undefined; // Status unknown
+  };
+  
+  // Helper function to parse time like "9:00 AM" to minutes since midnight
+  const parseTimeString = (timeString: string): number => {
+    try {
+      const [time, period] = timeString.split(' ');
+      let [hours, minutes] = time.split(':').map(Number);
+      
+      if (period === 'PM' && hours < 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+      
+      return (hours * 60) + minutes;
+    } catch (e) {
+      console.error("Error parsing time string:", timeString, e);
+      return 0;
+    }
   };
 
   const hasAvailabilityInfo = () => {
@@ -382,6 +424,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
   console.log("LocationCard - Availability days:", recommendation.availability_days);
   console.log("LocationCard - hasAvailabilityInfo:", hasAvailabilityInfo());
   console.log("LocationCard - hasInstagram:", hasInstagram());
+  console.log("LocationCard - Open now status:", openStatus);
 
   return (
     <div 
@@ -392,21 +435,36 @@ const LocationCard: React.FC<LocationCardProps> = ({
         className
       )}
     >
+      {/* Image carousel section */}
       <div className={cn(
         "relative w-full overflow-hidden", 
         className?.includes('search-result-card') ? "h-96" : "h-72"
       )}>
         <Carousel className="w-full h-full">
           <CarouselContent className="h-full">
-            {images.map((img, index) => <CarouselItem key={index} className="h-full p-0">
+            {images.map((img, index) => (
+              <CarouselItem key={index} className="h-full p-0">
                 <div className={cn("absolute inset-0 bg-muted/30", imageLoaded[index] ? "opacity-0" : "opacity-100")} />
-                <img src={img} alt={`${recommendation.name} - image ${index + 1}`} onLoad={() => handleImageLoad(index)} onClick={e => handleImageClick(index, e)} className={cn("w-full object-cover transition-all-500 cursor-pointer", className?.includes('search-result-card') ? "h-96" : "h-72", imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm")} />
-              </CarouselItem>)}
+                <img 
+                  src={img} 
+                  alt={`${recommendation.name} - image ${index + 1}`} 
+                  onLoad={() => handleImageLoad(index)} 
+                  onClick={e => handleImageClick(index, e)} 
+                  className={cn(
+                    "w-full object-cover transition-all-500 cursor-pointer", 
+                    className?.includes('search-result-card') ? "h-96" : "h-72", 
+                    imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
+                  )} 
+                />
+              </CarouselItem>
+            ))}
           </CarouselContent>
-          {images.length > 1 && <>
+          {images.length > 1 && (
+            <>
               <CarouselPrevious className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2" />
               <CarouselNext className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2" />
-            </>}
+            </>
+          )}
         </Carousel>
 
         <div className="absolute top-3 left-20 z-10">
@@ -415,21 +473,34 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </span>
         </div>
         
-        <button onClick={handleWishlistToggle} className={cn("absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10", user ? inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500" : "text-muted-foreground")}>
+        <button 
+          onClick={handleWishlistToggle} 
+          className={cn(
+            "absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10", 
+            user ? inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500" : "text-muted-foreground"
+          )}
+        >
           {user ? <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} /> : <LogIn className="w-5 h-5" />}
         </button>
       </div>
 
       <div className="p-4">
+        {/* Title and rank */}
         <div className="flex justify-between items-start gap-2 mb-2">
           <div className="flex items-center gap-1.5">
-            {ranking !== undefined && ranking <= 10 && <div className={cn("flex items-center justify-center rounded-full border-2 flex-shrink-0", getMedalStyle(ranking).medalClass)}>
+            {ranking !== undefined && ranking <= 10 && (
+              <div className={cn(
+                "flex items-center justify-center rounded-full border-2 flex-shrink-0", 
+                getMedalStyle(ranking).medalClass
+              )}>
                 {ranking}
-              </div>}
+              </div>
+            )}
             <h3 className="font-medium text-lg">{recommendation.name}</h3>
           </div>
         </div>
 
+        {/* Rating */}
         <div className="flex items-center gap-1 mb-2">
           {renderStarRating(recommendation.rating)}
           <span className="text-xs text-muted-foreground ml-1">
@@ -437,18 +508,22 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </span>
         </div>
 
+        {/* Address and distance */}
         <div className="flex flex-col mb-3">
           <div className="flex items-center text-muted-foreground text-sm">
             <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
             <span className="truncate">{recommendation.address}</span>
           </div>
           
-          {recommendation.distance && showDistanceUnderAddress && <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center my-[3px] px-0">
+          {recommendation.distance && showDistanceUnderAddress && (
+            <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center my-[3px] px-0">
               <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
               {formatDistance(recommendation.distance)}
-            </div>}
+            </div>
+          )}
         </div>
 
+        {/* Hours and availability */}
         {(recommendation.openNow !== undefined || recommendation.hours || recommendation.availability || 
           hasAvailabilityInfo()) && (
           <div className="flex flex-col text-sm mb-3">
@@ -508,6 +583,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </div>
         )}
 
+        {/* Instagram only section */}
         {(!recommendation.openNow && !recommendation.hours && !recommendation.availability && 
           !hasAvailabilityInfo()) && 
           hasInstagram() && (
@@ -523,10 +599,12 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </div>
         )}
 
+        {/* Description */}
         <p className="mb-4 line-clamp-2 text-slate-950 font-normal text-base">
           {recommendation.description}
         </p>
 
+        {/* Price and tags */}
         <div className="flex gap-2 mt-4 flex-wrap">
           {formatPrice() && (
             <Badge className="flex items-center gap-1 px-3 py-1.5 bg-[#1EAEDB]">
@@ -541,6 +619,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
           ))}
         </div>
 
+        {/* Action buttons */}
         <div className="flex gap-2 mt-4">
           <button onClick={handleCall} className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center">
             <Phone className="h-5 w-5" />

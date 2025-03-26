@@ -19,6 +19,8 @@ const LocationsList: React.FC<LocationsListProps> = ({ recommendations }) => {
           name: recommendation.name,
           instagram: recommendation.instagram || '',
           availability_days: recommendation.availability_days || [],
+          availability_start_time: recommendation.availability_start_time || '',
+          availability_end_time: recommendation.availability_end_time || '',
         });
         
         return (
