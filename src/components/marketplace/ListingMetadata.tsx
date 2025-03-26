@@ -44,27 +44,29 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
   };
   
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground py-0">
-      {location && (
-        <div className="flex items-center gap-1">
-          <MapPin className="h-4 w-4" />
-          <span>{location}</span>
-        </div>
-      )}
-      <div className="flex items-center gap-1 my-0 py-0 px-0">
-        <Calendar className="h-4 w-4" />
-        <span>Listed on {format(new Date(createdAt), 'PPP')}</span>
-        {sellerInstagram && (
-          <button 
-            onClick={handleInstagramClick} 
-            title="Watch video content" 
-            className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 py-2 px-[31px] mx-[26px]"
-          >
-            <Film className="h-5 w-5 text-white" />
-          </button>
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm text-muted-foreground py-0">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        {location && (
+          <div className="flex items-center gap-1">
+            <MapPin className="h-4 w-4" />
+            <span>{location}</span>
+          </div>
         )}
+        <div className="flex items-center gap-1 my-0 py-0 px-0">
+          <Calendar className="h-4 w-4" />
+          <span>Listed on {format(new Date(createdAt), 'PPP')}</span>
+        </div>
       </div>
-      {/* Condition badge has been moved to the image */}
+      
+      {sellerInstagram && (
+        <button 
+          onClick={handleInstagramClick} 
+          title="Watch video content" 
+          className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all py-2 px-[31px]"
+        >
+          <Film className="h-5 w-5 text-white" />
+        </button>
+      )}
     </div>
   );
 };
