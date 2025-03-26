@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Star, Clock, IndianRupee, FilterIcon, Sparkles, Award } from 'lucide-react';
+import { Star, Clock, IndianRupee, Sparkles, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Checkbox } from '@/components/ui/checkbox';
 
 interface FilterTabsProps {
   distance: number[];
@@ -252,14 +251,7 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
           </PopoverContent>
         </Popover>
 
-        {/* All Filters Button */}
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10"
-        >
-          <FilterIcon className="w-4 h-4" />
-        </Button>
+        {/* Remove the All Filters Button that wasn't working */}
       </div>
     </ScrollArea>
   );

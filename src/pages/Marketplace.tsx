@@ -18,7 +18,9 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+
 type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
+
 const Marketplace = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
@@ -132,8 +134,7 @@ const Marketplace = () => {
           <div className="flex items-center gap-3 mb-4 overflow-x-auto py-1 px-1">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="rounded-full border border-border/60 flex items-center gap-1 h-8 px-3">
-                  <span>Sort</span>
+                <Button variant="outline" size="sm" className="rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0">
                   <ChevronDown className="h-3 w-3" />
                 </Button>
               </PopoverTrigger>
@@ -336,4 +337,5 @@ const Marketplace = () => {
       </div>
     </MainLayout>;
 };
+
 export default Marketplace;
