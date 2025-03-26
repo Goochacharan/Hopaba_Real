@@ -432,26 +432,6 @@ const LocationDetails = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center justify-center gap-4 mb-6">
-                  <Button 
-                    onClick={() => handleRatePlace('hidden-gem')}
-                    variant={userRatedAs === 'hidden-gem' ? "default" : "outline"}
-                    className={`flex items-center ${userRatedAs === 'hidden-gem' ? 'bg-purple-500 hover:bg-purple-600' : 'border-purple-200 text-purple-700 hover:bg-purple-50'}`}
-                  >
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Hidden Gem ({hiddenGemCount})
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => handleRatePlace('must-visit')}
-                    variant={userRatedAs === 'must-visit' ? "default" : "outline"}
-                    className={`flex items-center ${userRatedAs === 'must-visit' ? 'bg-orange-500 hover:bg-orange-600' : 'border-orange-200 text-orange-700 hover:bg-orange-50'}`}
-                  >
-                    <Award className="h-4 w-4 mr-2" />
-                    Must Visit ({mustVisitCount})
-                  </Button>
-                </div>
-                
                 <div className="grid grid-cols-4 gap-3">
                   <button onClick={handleCall} className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center">
                     <Phone className="h-5 w-5" />
@@ -500,7 +480,6 @@ const LocationDetails = () => {
                           </div>
                         </div>
                         
-                        {/* Added place rating options to review form */}
                         <div className="space-y-2">
                           <Label>Rate this place as (optional)</Label>
                           <div className="flex items-center gap-3 mt-2">
