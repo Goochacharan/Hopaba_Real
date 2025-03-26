@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 shadow-[0_2px_0px_0px_rgba(0,0,0,0.1)] hover:shadow-[0_1px_0px_0px_rgba(0,0,0,0.1)] active:shadow-none active:translate-y-[2px]",
   {
     variants: {
       variant: {
@@ -16,7 +16,7 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
-        condition: "border-amber-200 bg-amber-50/90 text-amber-600", // Added a new variant for condition badges
+        condition: "border-amber-200 bg-amber-50/90 text-amber-600",
       },
     },
     defaultVariants: {

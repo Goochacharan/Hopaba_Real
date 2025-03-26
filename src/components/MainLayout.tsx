@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
@@ -127,7 +126,16 @@ const NavButton: React.FC<NavButtonProps> = ({
   isActive
 }) => {
   return (
-    <Link to={to} className={cn("flex flex-col items-center gap-0.5 px-3 py-1 rounded-md transition-colors", isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50")} aria-label={label}>
+    <Link 
+      to={to} 
+      className={cn(
+        "flex flex-col items-center gap-0.5 px-3 py-1 rounded-md transition-all shadow-[0_4px_0px_0px_rgba(0,0,0,0.1)] hover:shadow-[0_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-none active:translate-y-[3px]",
+        isActive 
+          ? "text-foreground bg-accent" 
+          : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+      )} 
+      aria-label={label}
+    >
       {icon}
       <span className="text-xs font-medium">{label}</span>
     </Link>
