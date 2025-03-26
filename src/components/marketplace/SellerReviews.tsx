@@ -9,7 +9,9 @@ import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
 import { SellerReview } from '@/hooks/useSellerDetails';
 import { format } from 'date-fns';
-import { Star } from 'lucide-react';
+import { Star, LogIn } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 interface SellerReviewsProps {
   sellerId: string;
@@ -25,6 +27,8 @@ const SellerReviews: React.FC<SellerReviewsProps> = ({
   onAddReview
 }) => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,14 +73,34 @@ const SellerReviews: React.FC<SellerReviewsProps> = ({
     setRating(newRating);
   };
 
+  const handleReviewButtonClick = () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please login to write a review",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+    setDialogOpen(true);
+  };
+
   return (
     <Card className="shadow-md">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-xl font-semibold">Reviews & Ratings</CardTitle>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm">Write a Review</Button>
-          </DialogTrigger>
+          <Button size="sm" onClick={handleReviewButtonClick}>
+            {!user ? (
+              <>
+                <LogIn className="h-4 w-4 mr-2" />
+                Login to Review
+              </>
+            ) : (
+              "Write a Review"
+            )}
+          </Button>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Review {sellerName}</DialogTitle>

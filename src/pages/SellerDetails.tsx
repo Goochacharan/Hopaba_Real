@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -10,6 +11,8 @@ import { useSellerDetails } from '@/hooks/useSellerDetails';
 import SellerProfileCard from '@/components/marketplace/SellerProfileCard';
 import SellerReviews from '@/components/marketplace/SellerReviews';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
+import { useAuth } from '@/hooks/useAuth';
+
 const SellerDetails = () => {
   const {
     id
@@ -20,15 +23,27 @@ const SellerDetails = () => {
   const {
     toast
   } = useToast();
+  const { user } = useAuth();
   const {
     sellerDetails,
     loading,
     error
   } = useSellerDetails(id || '');
+
   const handleAddReview = async (review: {
     rating: number;
     comment: string;
   }) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please login to write a review",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+    
     // Mock implementation with a delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     toast({
@@ -36,12 +51,24 @@ const SellerDetails = () => {
       description: 'Thank you for your feedback!'
     });
   };
+
   const handleReport = () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please login to report a seller",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+
     toast({
       title: 'Report submitted',
       description: 'We will review this seller and take appropriate action.'
     });
   };
+
   return <MainLayout>
       <div className="w-full max-w-full mx-auto px-4 py-8">
         <div className="max-w-[1400px] mx-0 px-[2px] py-0 my-0">
