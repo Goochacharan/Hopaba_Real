@@ -153,14 +153,17 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
       return;
     }
+    
     let instagramHandle = recommendation.instagram;
     if (instagramHandle.startsWith('@')) {
       instagramHandle = instagramHandle.substring(1);
     }
+    
     window.open(`instagram://user?username=${instagramHandle}`);
     setTimeout(() => {
       window.open(`https://instagram.com/${instagramHandle}`);
     }, 300);
+    
     toast({
       title: "Opening Instagram",
       description: `Opening Instagram for ${recommendation.name}...`,
@@ -326,8 +329,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
   const hasAvailabilityInfo = () => {
     return recommendation.availability_days && 
-           recommendation.availability_days.length > 0 && 
-           (recommendation.availability_start_time || recommendation.availability_end_time);
+           recommendation.availability_days.length > 0;
   };
 
   const formatAvailabilityDays = () => {
@@ -359,6 +361,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const openStatus = isOpenNow();
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
   const availabilityInfo = formatAvailabilityDays();
+
+  console.log("Instagram:", recommendation.instagram);
+  console.log("Availability days:", recommendation.availability_days);
 
   return (
     <div 
