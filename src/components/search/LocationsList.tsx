@@ -32,6 +32,7 @@ const LocationsList: React.FC<LocationsListProps> = ({ recommendations }) => {
             <LocationCard 
               recommendation={recommendation}
               showDistanceUnderAddress={true}
+              className="search-result-card"
             />
           </div>
         );
