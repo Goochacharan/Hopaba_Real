@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Toggle } from '@/components/ui/toggle';
 
 interface FilterTabsProps {
   distance: number[];
@@ -52,16 +53,16 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
         <Popover open={activeFilter === 'rating'} onOpenChange={(open) => setActiveFilter(open ? 'rating' : null)}>
           <PopoverTrigger asChild>
             <Button 
-              variant="outline" 
+              variant={minRating[0] > 3 ? "default" : "outline"}
               size="sm" 
               className={cn(
-                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
-                activeFilter === 'rating' && "ring-2 ring-primary/20"
+                "rounded-full flex items-center justify-center w-10 h-10 relative",
+                activeFilter === 'rating' && "ring-2 ring-primary"
               )}
             >
-              <Star className="w-4 h-4" />
+              <Star className={cn("w-4 h-4", minRating[0] > 3 && "text-primary-foreground")} />
               {minRating[0] > 3 && (
-                <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-primary text-white">
+                <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-white text-primary border-2 border-primary">
                   {minRating[0]}+
                 </Badge>
               )}
@@ -95,16 +96,16 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
         <Popover open={activeFilter === 'price'} onOpenChange={(open) => setActiveFilter(open ? 'price' : null)}>
           <PopoverTrigger asChild>
             <Button 
-              variant="outline" 
+              variant={priceRange < 3 ? "default" : "outline"}
               size="sm" 
               className={cn(
-                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
-                activeFilter === 'price' && "ring-2 ring-primary/20"
+                "rounded-full flex items-center justify-center w-10 h-10 relative",
+                activeFilter === 'price' && "ring-2 ring-primary"
               )}
             >
-              <IndianRupee className="w-4 h-4" />
+              <IndianRupee className={cn("w-4 h-4", priceRange < 3 && "text-primary-foreground")} />
               {priceRange < 3 && (
-                <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-primary text-white">
+                <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-white text-primary border-2 border-primary">
                   {Array(priceRange).fill('₹').join('')}
                 </Badge>
               )}
@@ -134,79 +135,59 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
         </Popover>
 
         {/* Hours Filter */}
-        <Popover open={activeFilter === 'hours'} onOpenChange={(open) => setActiveFilter(open ? 'hours' : null)}>
-          <PopoverTrigger asChild>
-            <Button 
-              variant={openNowOnly ? "default" : "outline"}
-              size="sm" 
-              className={cn(
-                "rounded-full border flex items-center justify-center w-10 h-10 relative",
-                activeFilter === 'hours' && "ring-2 ring-primary/20"
-              )}
-              onClick={() => {
-                if (!openNowOnly) {
-                  setOpenNowOnly(true);
-                  setActiveFilter(null);
-                } else {
-                  setOpenNowOnly(false);
-                }
-              }}
-            >
-              <Clock className="w-4 h-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80 p-4" align="start">
-            <div className="space-y-4">
-              <h4 className="font-medium">Hours</h4>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="open-now" className="text-sm font-medium cursor-pointer">
-                  Open Now
-                </Label>
-                <Switch
-                  id="open-now"
-                  checked={openNowOnly}
-                  onCheckedChange={setOpenNowOnly}
-                />
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <Toggle
+          pressed={openNowOnly}
+          onPressedChange={setOpenNowOnly}
+          className={cn(
+            "rounded-full w-10 h-10 p-0",
+            openNowOnly 
+              ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+              : "bg-secondary/80 text-muted-foreground hover:bg-secondary"
+          )}
+          aria-label="Toggle open now"
+        >
+          <Clock className="w-4 h-4" />
+        </Toggle>
 
         {/* Hidden Gem Filter */}
-        <Button 
-          variant={hiddenGemOnly ? "default" : "outline"}
-          size="sm" 
+        <Toggle
+          pressed={hiddenGemOnly}
+          onPressedChange={setHiddenGemOnly}
           className={cn(
-            "rounded-full border flex items-center justify-center w-10 h-10 relative",
-            hiddenGemOnly && "bg-purple-500 hover:bg-purple-600"
+            "rounded-full w-10 h-10 p-0",
+            hiddenGemOnly 
+              ? "bg-purple-500 text-white hover:bg-purple-600" 
+              : "bg-secondary/80 text-muted-foreground hover:bg-secondary"
           )}
-          onClick={() => setHiddenGemOnly(!hiddenGemOnly)}
+          aria-label="Toggle hidden gems"
         >
           <Sparkles className="w-4 h-4" />
-        </Button>
+        </Toggle>
 
         {/* Must Visit Filter */}
-        <Button 
-          variant={mustVisitOnly ? "default" : "outline"}
-          size="sm" 
+        <Toggle
+          pressed={mustVisitOnly}
+          onPressedChange={setMustVisitOnly}
           className={cn(
-            "rounded-full border flex items-center justify-center w-10 h-10 relative",
-            mustVisitOnly && "bg-orange-500 hover:bg-orange-600"
+            "rounded-full w-10 h-10 p-0",
+            mustVisitOnly 
+              ? "bg-orange-500 text-white hover:bg-orange-600" 
+              : "bg-secondary/80 text-muted-foreground hover:bg-secondary"
           )}
-          onClick={() => setMustVisitOnly(!mustVisitOnly)}
+          aria-label="Toggle must visit"
         >
           <Award className="w-4 h-4" />
-        </Button>
+        </Toggle>
 
         {/* Distance Filter */}
         <Popover open={activeFilter === 'distance'} onOpenChange={(open) => setActiveFilter(open ? 'distance' : null)}>
           <PopoverTrigger asChild>
             <Button 
-              variant="outline" 
+              variant={distance[0] !== 5 ? "default" : "outline"}
               size="sm" 
               className={cn(
-                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
-                activeFilter === 'distance' && "ring-2 ring-primary/20"
+                "rounded-full flex items-center justify-center w-10 h-10 relative",
+                activeFilter === 'distance' && "ring-2 ring-primary"
               )}
             >
               <svg 
@@ -219,13 +200,13 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
                 strokeWidth="2" 
                 strokeLinecap="round" 
                 strokeLinejoin="round" 
-                className="w-4 h-4"
+                className={cn("w-4 h-4", distance[0] !== 5 && "text-primary-foreground")}
               >
                 <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                 <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
               </svg>
               {distance[0] !== 5 && (
-                <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-primary text-white">
+                <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-white text-primary border-2 border-primary">
                   {distance[0]}
                 </Badge>
               )}
@@ -250,8 +231,6 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
             </div>
           </PopoverContent>
         </Popover>
-
-        {/* Remove the All Filters Button that wasn't working */}
       </div>
     </ScrollArea>
   );
