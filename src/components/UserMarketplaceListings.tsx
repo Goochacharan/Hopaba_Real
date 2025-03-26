@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUserMarketplaceListings } from '@/hooks/useUserMarketplaceListings';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Edit2, Eye, Loader2, Plus, Trash2 } from 'lucide-react';
+import { AlertCircle, Edit2, Eye, Loader2, Plus, Trash2, ArrowUpDown, Tag, MapPin, Calendar } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   AlertDialog,
@@ -20,6 +20,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingForm from './MarketplaceListingForm';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface UserMarketplaceListingsProps {
   onEdit?: (listing: MarketplaceListing) => void;
@@ -35,6 +36,11 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
   const [listingToDelete, setListingToDelete] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [listingToEdit, setListingToEdit] = useState<MarketplaceListing | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<'newest' | 'price-high' | 'price-low'>('newest');
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [conditionFilter, setConditionFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
 
   // Format price to Indian Rupees
   const formatPrice = (price: number) => {
@@ -66,6 +72,25 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
     setListingToEdit(null);
     refetch();
   };
+
+  const filteredListings = listings
+    .filter(listing => categoryFilter === 'all' || listing.category === categoryFilter)
+    .filter(listing => conditionFilter === 'all' || listing.condition === conditionFilter)
+    .filter(listing => locationFilter === 'all' || listing.location === locationFilter)
+    .sort((a, b) => {
+      if (sortBy === 'newest') {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      } else if (sortBy === 'price-high') {
+        return b.price - a.price;
+      } else {
+        return a.price - b.price;
+      }
+    });
+
+  // Extract unique values for filter options
+  const categories = ['all', ...new Set(listings.map(listing => listing.category))];
+  const conditions = ['all', ...new Set(listings.map(listing => listing.condition))];
+  const locations = ['all', ...new Set(listings.map(listing => listing.location))];
 
   const userCanAddMore = listings.length < 10;
 
@@ -107,7 +132,7 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
         {userCanAddMore && (
           <Button 
             onClick={() => setShowAddForm(true)} 
-            className="flex items-center gap-1.5"
+            className="flex items-center gap-1.5 shadow-[0_4px_0px_0px_rgba(0,0,0,0.1)] hover:shadow-[0_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-none active:translate-y-[3px] transition-all"
           >
             <Plus className="h-4 w-4" />
             Add New
@@ -123,13 +148,99 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
         </Alert>
       )}
 
+      {!loading && listings.length > 0 && (
+        <div className="space-y-4">
+          {/* Sort Tab - Stacked vertically */}
+          <div className="bg-white rounded-lg border shadow-sm">
+            <div className="p-3 border-b">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                <h4 className="text-sm font-medium">Sort By</h4>
+              </div>
+            </div>
+            <div className="p-2">
+              <Tabs value={sortBy} onValueChange={(value) => setSortBy(value as 'newest' | 'price-high' | 'price-low')}>
+                <TabsList className="w-full grid grid-cols-3">
+                  <TabsTrigger value="newest" className="text-xs">Newest</TabsTrigger>
+                  <TabsTrigger value="price-high" className="text-xs">Price: High to Low</TabsTrigger>
+                  <TabsTrigger value="price-low" className="text-xs">Price: Low to High</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+
+          {/* Category Tab - Stacked vertically */}
+          <div className="bg-white rounded-lg border shadow-sm">
+            <div className="p-3 border-b">
+              <div className="flex items-center gap-2">
+                <Tag className="h-4 w-4 text-muted-foreground" />
+                <h4 className="text-sm font-medium">Category</h4>
+              </div>
+            </div>
+            <div className="p-2">
+              <Tabs value={categoryFilter} onValueChange={setCategoryFilter}>
+                <TabsList className="w-full grid" style={{ gridTemplateColumns: `repeat(${Math.min(categories.length, 4)}, 1fr)` }}>
+                  {categories.map(category => (
+                    <TabsTrigger key={category} value={category} className="text-xs capitalize">
+                      {category === 'all' ? 'All' : category}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+
+          {/* Condition Tab - Stacked vertically */}
+          <div className="bg-white rounded-lg border shadow-sm">
+            <div className="p-3 border-b">
+              <div className="flex items-center gap-2">
+                <Tag className="h-4 w-4 text-muted-foreground" />
+                <h4 className="text-sm font-medium">Condition</h4>
+              </div>
+            </div>
+            <div className="p-2">
+              <Tabs value={conditionFilter} onValueChange={setConditionFilter}>
+                <TabsList className="w-full grid" style={{ gridTemplateColumns: `repeat(${Math.min(conditions.length, 4)}, 1fr)` }}>
+                  {conditions.map(condition => (
+                    <TabsTrigger key={condition} value={condition} className="text-xs capitalize">
+                      {condition === 'all' ? 'All' : condition}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+
+          {/* Location Tab - Stacked vertically */}
+          <div className="bg-white rounded-lg border shadow-sm">
+            <div className="p-3 border-b">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <h4 className="text-sm font-medium">Location</h4>
+              </div>
+            </div>
+            <div className="p-2">
+              <Tabs value={locationFilter} onValueChange={setLocationFilter}>
+                <TabsList className="w-full grid" style={{ gridTemplateColumns: `repeat(${Math.min(locations.length, 3)}, 1fr)` }}>
+                  {locations.map(location => (
+                    <TabsTrigger key={location} value={location} className="text-xs capitalize">
+                      {location === 'all' ? 'All' : location}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="flex justify-center items-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-      ) : listings.length > 0 ? (
+      ) : filteredListings.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
-          {listings.map((listing) => (
+          {filteredListings.map((listing) => (
             <Card key={listing.id} className="overflow-hidden">
               {listing.images && listing.images.length > 0 && (
                 <div className="w-full h-48 overflow-hidden">
@@ -160,16 +271,31 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
                 </p>
               </CardContent>
               <CardFooter className="flex justify-between pt-2">
-                <Button variant="outline" size="sm" onClick={() => navigate(`/marketplace/${listing.id}`)}>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => navigate(`/marketplace/${listing.id}`)}
+                  className="shadow-[0_4px_0px_0px_rgba(0,0,0,0.1)] hover:shadow-[0_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-none active:translate-y-[3px] transition-all"
+                >
                   <Eye className="h-4 w-4 mr-1" /> View
                 </Button>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleEdit(listing)}>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => handleEdit(listing)}
+                    className="shadow-[0_4px_0px_0px_rgba(0,0,0,0.1)] hover:shadow-[0_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-none active:translate-y-[3px] transition-all"
+                  >
                     <Edit2 className="h-4 w-4" />
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="destructive" size="sm" onClick={() => setListingToDelete(listing.id)}>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={() => setListingToDelete(listing.id)}
+                        className="shadow-[0_4px_0px_0px_rgba(239,68,68,0.4)] hover:shadow-[0_2px_0px_0px_rgba(239,68,68,0.4)] active:shadow-none active:translate-y-[3px] transition-all"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </AlertDialogTrigger>
@@ -197,7 +323,10 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
           <p className="text-muted-foreground mb-4">
             Create your first marketplace listing to start selling.
           </p>
-          <Button onClick={() => setShowAddForm(true)}>
+          <Button 
+            onClick={() => setShowAddForm(true)}
+            className="shadow-[0_4px_0px_0px_rgba(0,0,0,0.1)] hover:shadow-[0_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-none active:translate-y-[3px] transition-all"
+          >
             <Plus className="mr-2 h-4 w-4" /> Add Listing
           </Button>
         </div>
