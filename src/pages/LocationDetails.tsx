@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import ImageViewer from '@/components/ImageViewer';
+import SearchBar from '@/components/SearchBar';
 
 interface Review {
   id: string;
@@ -263,6 +264,12 @@ const LocationDetails = () => {
 
   const allReviews = [...userReviews, ...reviews];
 
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+    }
+  };
+
   if (loading) {
     return <MainLayout>
         <div className="container mx-auto py-4 px-4 max-w-none">
@@ -459,15 +466,12 @@ const LocationDetails = () => {
             
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
               <div className="space-y-4">
-                <div className="relative">
-                  <Input type="text" value={question} onChange={e => setQuestion(e.target.value)} placeholder="Ask a question about this place" className="w-full pr-12 bg-[#F6F6F7] text-sm" />
-                  <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#F1F1F1] hover:bg-[#E8E8E9] rounded-full w-8 h-8 flex items-center justify-center transition-colors" onClick={() => handleAskQuestion()} disabled={!question.trim() || askingQuestion}>
-                    {askingQuestion ? <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" /> : <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8E9196" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="m3 3 3 9-3 9 19-9Z" />
-                        <path d="M6 12h16" />
-                      </svg>}
-                  </button>
-                </div>
+                <SearchBar 
+                  onSearch={handleSearch}
+                  placeholder="Ask a question about this place"
+                  className="w-full"
+                  currentRoute="/location"
+                />
                 
                 <ScrollArea className="w-full" orientation="horizontal">
                   <div className="flex gap-2 pb-2 px-1">
@@ -515,3 +519,4 @@ const LocationDetails = () => {
 };
 
 export default LocationDetails;
+

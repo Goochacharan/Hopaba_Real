@@ -5,7 +5,7 @@ import { Search, X, Mic, Sparkles } from 'lucide-react';
 import { Input } from './ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -23,6 +23,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   currentRoute
 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
   const [query, setQuery] = useState(initialValue);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -93,7 +94,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
         setQuery(enhancedQuery);
       }
       
-      onSearch(enhancedQuery);
+      // Use navigate for consistent behavior across all pages
+      navigate(`/search?q=${encodeURIComponent(enhancedQuery)}`);
 
       // Show suggestions after search only if query is very short
       if (query.trim().length < 8) {
@@ -189,7 +191,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
         setQuery(enhancedQuery);
       }
       
-      onSearch(enhancedQuery);
+      // Use navigate for consistent behavior
+      navigate(`/search?q=${encodeURIComponent(enhancedQuery)}`);
     }
   };
 
