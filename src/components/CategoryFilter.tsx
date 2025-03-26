@@ -2,7 +2,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Coffee, Utensils, Scissors, ShoppingBag, HeartPulse, Briefcase, BookOpen, Home, Users, MoreHorizontal, Dumbbell } from 'lucide-react';
-import { Toggle } from '@/components/ui/toggle';
 
 export type CategoryType = 
   | 'all' 
@@ -15,7 +14,7 @@ export type CategoryType =
   | 'education' 
   | 'real-estate' 
   | 'community' 
-  | 'fitness'
+  | 'fitness'  // Added 'fitness' category
   | 'more';
 
 interface CategoryFilterProps {
@@ -35,7 +34,7 @@ const categories: { id: CategoryType; label: string; icon: React.ReactNode }[] =
   { id: 'education', label: 'Education', icon: <BookOpen className="w-5 h-5" /> },
   { id: 'real-estate', label: 'Real Estate', icon: <Home className="w-5 h-5" /> },
   { id: 'community', label: 'Community', icon: <Users className="w-5 h-5" /> },
-  { id: 'fitness', label: 'Fitness', icon: <Dumbbell className="w-5 h-5" /> },
+  { id: 'fitness', label: 'Fitness', icon: <Dumbbell className="w-5 h-5" /> }, // Added fitness category with Dumbbell icon
   { id: 'more', label: 'More', icon: <MoreHorizontal className="w-5 h-5" /> },
 ];
 
@@ -48,19 +47,18 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
     <div className={cn("w-full overflow-auto py-2", className)}>
       <div className="flex gap-2 min-w-max pb-1">
         {categories.map((category) => (
-          <Toggle
+          <button
             key={category.id}
-            pressed={selectedCategory === category.id}
-            onPressedChange={() => onSelectCategory(category.id)}
+            onClick={() => onSelectCategory(category.id)}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all",
+              "flex items-center gap-2 px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all-200",
               selectedCategory === category.id
-                ? "bg-primary text-primary-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                : "bg-secondary/80 text-muted-foreground hover:bg-secondary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary/80 backdrop-blur-xs text-muted-foreground hover:bg-secondary"
             )}
           >
             <span className={cn(
-              "transition-all",
+              "transition-all-200",
               selectedCategory === category.id
                 ? "text-primary-foreground"
                 : "text-muted-foreground"
@@ -68,7 +66,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
               {category.icon}
             </span>
             {category.label}
-          </Toggle>
+          </button>
         ))}
       </div>
     </div>
