@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Event } from '@/hooks/useRecommendations';
 import { Calendar, Clock, MapPin, Users, Heart, Phone, MessageCircle, Navigation2, Share2, IndianRupee } from 'lucide-react';
@@ -211,25 +210,25 @@ const EventsList: React.FC<EventsListProps> = ({ events }) => {
               <div className="flex gap-2 mt-4">
                 <button 
                   onClick={(e) => handleCall(e, event.title)} 
-                  className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+                  className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]"
                 >
                   <Phone className="h-5 w-5" />
                 </button>
                 <button 
                   onClick={(e) => handleWhatsApp(e, event.title)} 
-                  className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+                  className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]"
                 >
                   <MessageCircle className="h-5 w-5" />
                 </button>
                 <button 
                   onClick={(e) => handleDirections(e, event.location)} 
-                  className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+                  className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]"
                 >
                   <Navigation2 className="h-5 w-5" />
                 </button>
                 <button 
                   onClick={(e) => handleShare(e, event.title)} 
-                  className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center"
+                  className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]"
                 >
                   <Share2 className="h-5 w-5" />
                 </button>
@@ -243,4 +242,3 @@ const EventsList: React.FC<EventsListProps> = ({ events }) => {
 };
 
 export default EventsList;
-
