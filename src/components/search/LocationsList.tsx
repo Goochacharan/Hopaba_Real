@@ -1,6 +1,6 @@
 
 import React from 'react';
-import LocationCard from '@/components/LocationCard';
+import LocationCard from '@/components/location/LocationCard';
 import { Recommendation } from '@/lib/mockData';
 
 interface LocationsListProps {
