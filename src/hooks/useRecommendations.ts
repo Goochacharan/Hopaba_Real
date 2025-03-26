@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Recommendation, mockRecommendations, searchRecommendations } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -388,11 +389,11 @@ const useRecommendations = ({
         return false;
       }
 
-      if (filterOptions.hiddenGem && (!rec.isHiddenGem || rec.isHiddenGem === false)) {
+      if (filterOptions.hiddenGem && !rec.isHiddenGem) {
         return false;
       }
 
-      if (filterOptions.mustVisit && (!rec.isMustVisit || rec.isMustVisit === false)) {
+      if (filterOptions.mustVisit && !rec.isMustVisit) {
         return false;
       }
 

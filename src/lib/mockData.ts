@@ -1,3 +1,4 @@
+
 export interface Recommendation {
   id: string;
   name: string;
@@ -28,6 +29,8 @@ export interface Recommendation {
   map_link?: string;
   hiddenGemCount?: number;
   mustVisitCount?: number;
+  isHiddenGem?: boolean;
+  isMustVisit?: boolean;
   created_at?: string;
 }
 
