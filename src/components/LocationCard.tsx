@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -402,7 +401,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     if (startTime && endTime) {
       return (
         <div className="text-xs text-muted-foreground">
-          <p className="font-medium mb-1">Available Days:</p>
           <p>{days}</p>
           <p className="mt-1">Time: {startTime} - {endTime}</p>
         </div>
@@ -410,7 +408,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return (
       <div className="text-xs text-muted-foreground">
-        <p className="font-medium mb-1">Available Days:</p>
         <p>{days}</p>
       </div>
     );
@@ -435,7 +432,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
         className
       )}
     >
-      {/* Image carousel section */}
       <div className={cn(
         "relative w-full overflow-hidden", 
         className?.includes('search-result-card') ? "h-96" : "h-72"
@@ -485,7 +481,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       </div>
 
       <div className="p-4">
-        {/* Title and rank */}
         <div className="flex justify-between items-start gap-2 mb-2">
           <div className="flex items-center gap-1.5">
             {ranking !== undefined && ranking <= 10 && (
@@ -500,7 +495,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </div>
         </div>
 
-        {/* Rating */}
         <div className="flex items-center gap-1 mb-2">
           {renderStarRating(recommendation.rating)}
           <span className="text-xs text-muted-foreground ml-1">
@@ -508,7 +502,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </span>
         </div>
 
-        {/* Address and distance */}
         <div className="flex flex-col mb-3">
           <div className="flex items-center text-muted-foreground text-sm">
             <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
@@ -523,7 +516,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
           )}
         </div>
 
-        {/* Hours and availability */}
         {(recommendation.openNow !== undefined || recommendation.hours || recommendation.availability || 
           hasAvailabilityInfo()) && (
           <div className="flex flex-col text-sm mb-3">
@@ -583,7 +575,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </div>
         )}
 
-        {/* Instagram only section */}
         {(!recommendation.openNow && !recommendation.hours && !recommendation.availability && 
           !hasAvailabilityInfo()) && 
           hasInstagram() && (
@@ -599,12 +590,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </div>
         )}
 
-        {/* Description */}
         <p className="mb-4 line-clamp-2 text-slate-950 font-normal text-base">
           {recommendation.description}
         </p>
 
-        {/* Price and tags */}
         <div className="flex gap-2 mt-4 flex-wrap">
           {formatPrice() && (
             <Badge className="flex items-center gap-1 px-3 py-1.5 bg-[#1EAEDB]">
@@ -619,7 +608,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
           ))}
         </div>
 
-        {/* Action buttons */}
         <div className="flex gap-2 mt-4">
           <button onClick={handleCall} className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center">
             <Phone className="h-5 w-5" />
