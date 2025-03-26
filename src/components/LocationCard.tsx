@@ -526,7 +526,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
             <span className="ml-2 text-xs text-muted-foreground">Instagram content</span>
           </div>}
 
-        <p className="mb-4 line-clamp-2 text-slate-950 font-normal text-base">
+        <p className="mb-4 line-clamp-2 font-normal text-sm text-slate-700">
           {recommendation.description}
         </p>
 
