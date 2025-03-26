@@ -149,7 +149,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
       <div className="grid grid-cols-2 gap-3 mt-auto">
         <button 
           onClick={handleCall}
-          className="h-12 rounded-full bg-[#1EAEDB] text-white hover:bg-[#1EAEDB]/90 transition-colors flex items-center justify-center gap-2"
+          className="h-12 rounded-full bg-[#1EAEDB] text-white hover:bg-[#1EAEDB]/90 transition-all flex items-center justify-center gap-2 shadow-[0_5px_0px_0px_rgba(24,128,163,0.8)] hover:shadow-[0_3px_0px_0px_rgba(24,128,163,0.8)] active:shadow-none active:translate-y-[3px]"
           title="Call"
           aria-label="Call seller"
         >
@@ -158,7 +158,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
         </button>
         <button 
           onClick={handleWhatsApp}
-          className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center gap-2"
+          className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center gap-2 shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]"
           title="WhatsApp"
           aria-label="Contact on WhatsApp"
         >
@@ -170,7 +170,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
       <div className="grid grid-cols-2 gap-2 mt-3">
         <button 
           onClick={handleLocation}
-          className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
+          className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]"
           title="Location"
           aria-label="View location"
         >
@@ -178,7 +178,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
         </button>
         <button 
           onClick={handleShare}
-          className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-colors flex items-center justify-center"
+          className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]"
           title="Share"
           aria-label="Share listing"
         >

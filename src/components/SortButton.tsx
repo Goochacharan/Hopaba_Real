@@ -30,7 +30,7 @@ const SortButton: React.FC<SortButtonProps> = ({ onSortChange, currentSort }) =>
         <Button 
           variant="outline" 
           size="icon" 
-          className="rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative"
+          className="rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative shadow-[0_4px_0px_0px_rgba(0,0,0,0.1)] hover:shadow-[0_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-none active:translate-y-[3px]"
         >
           <ArrowUpDown className="h-4 w-4" />
         </Button>

@@ -58,7 +58,7 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
           <button 
             onClick={handleInstagramClick} 
             title="Watch video content" 
-            className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 py-2 px-[31px] mx-[26px]"
+            className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 py-2 px-[31px] mx-[26px] shadow-[0_4px_0px_0px_rgba(0,0,0,0.25)] hover:shadow-[0_2px_0px_0px_rgba(0,0,0,0.25)] active:shadow-none active:translate-y-[3px]"
           >
             <Film className="h-5 w-5 text-white" />
           </button>
