@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,6 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import ImageViewer from '@/components/ImageViewer';
-import SearchBar from '@/components/SearchBar';
 import useRecommendations from '@/hooks/useRecommendations';
 
 interface Review {
@@ -78,8 +78,6 @@ const LocationDetails = () => {
   const isMobile = useIsMobile();
   const [location, setLocation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
-  const { handleSearch: searchRecommendations } = useRecommendations();
 
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewSchema),
@@ -267,15 +265,6 @@ const LocationDetails = () => {
   };
 
   const allReviews = [...userReviews, ...reviews];
-
-  const handleSearch = (query: string) => {
-    console.log("LocationDetails search triggered with:", query);
-    if (query.trim()) {
-      searchRecommendations(query);
-      
-      navigate(`/search?q=${encodeURIComponent(query)}`);
-    }
-  };
 
   if (loading) {
     return <MainLayout>
@@ -470,31 +459,6 @@ const LocationDetails = () => {
                 </div>
               </div>
             </div>
-            
-            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
-              <div className="space-y-4">
-                <SearchBar 
-                  onSearch={handleSearch}
-                  placeholder="Ask a question about this place"
-                  className="w-full"
-                  currentRoute="/location"
-                />
-                
-                <ScrollArea className="w-full" orientation="horizontal">
-                  <div className="flex gap-2 pb-2 px-1">
-                    {suggestedQuestions.map((q, index) => (
-                      <button 
-                        key={index} 
-                        onClick={() => handleAskQuestion(q)} 
-                        className="flex-shrink-0 items-center gap-2 text-sm py-2 px-4 rounded-full border border-border hover:bg-secondary/70 transition-colors whitespace-nowrap"
-                      >
-                        <span>{q}</span>
-                      </button>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
-            </div>
           </div>
           
           <div className="space-y-4">
@@ -509,6 +473,36 @@ const LocationDetails = () => {
                       <p className="text-sm">{item.answer}</p>
                     </div>)}
                 </div>}
+              
+              <div className="p-4 bg-secondary/30 rounded-lg mb-4">
+                <Input 
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  placeholder="Ask a question..."
+                  className="mb-2"
+                />
+                <Button 
+                  onClick={() => handleAskQuestion()} 
+                  disabled={askingQuestion || !question.trim()}
+                  className="w-full"
+                >
+                  {askingQuestion ? "Asking..." : "Ask"}
+                </Button>
+              </div>
+              
+              <ScrollArea className="w-full" orientation="horizontal">
+                <div className="flex gap-2 pb-2 px-1">
+                  {suggestedQuestions.map((q, index) => (
+                    <button 
+                      key={index} 
+                      onClick={() => handleAskQuestion(q)} 
+                      className="flex-shrink-0 items-center gap-2 text-sm py-2 px-4 rounded-full border border-border hover:bg-secondary/70 transition-colors whitespace-nowrap"
+                    >
+                      <span>{q}</span>
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
             </div>
           </div>
         </div>
