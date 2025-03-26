@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -7,10 +8,9 @@ import FilterTabs from '@/components/FilterTabs';
 import SortButton, { SortOption } from '@/components/SortButton';
 import useRecommendations from '@/hooks/useRecommendations';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
-
-// Import new components
 import SearchHeader from '@/components/search/SearchHeader';
 import SearchTabs from '@/components/search/SearchTabs';
+import SearchBar from '@/components/SearchBar';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -144,8 +144,10 @@ const SearchResults = () => {
   };
 
   const handleNewSearch = (newQuery: string) => {
+    console.log("SearchResults - Processing new search query:", newQuery);
     if (newQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(newQuery)}`);
+      handleSearch(newQuery);
     }
   };
 
@@ -161,7 +163,15 @@ const SearchResults = () => {
           onLocationChange={handleLocationChange} 
         />
         
-        <div className="flex items-center justify-between mb-6 mt-2">
+        <div className="mb-4 mt-2">
+          <SearchBar 
+            onSearch={handleNewSearch} 
+            initialValue={searchQuery}
+            placeholder="Search for places, services, or events..."
+          />
+        </div>
+        
+        <div className="flex items-center justify-between mb-6">
           <FilterTabs 
             distance={distance} 
             setDistance={setDistance} 
