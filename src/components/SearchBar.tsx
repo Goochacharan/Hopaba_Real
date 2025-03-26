@@ -146,7 +146,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
       // Auto-submit after voice input
       setTimeout(() => {
-        onSearch(transcript);
+        if (currentPath !== '/search') {
+          navigate(`/search?q=${encodeURIComponent(transcript)}`);
+        } else {
+          onSearch(transcript);
+        }
       }, 500);
     };
     recognition.onerror = () => {
