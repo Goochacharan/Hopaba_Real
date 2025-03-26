@@ -265,6 +265,7 @@ const LocationDetails = () => {
   const allReviews = [...userReviews, ...reviews];
 
   const handleSearch = (query: string) => {
+    console.log("LocationDetails search triggered with:", query);
     if (query.trim()) {
       navigate(`/search?q=${encodeURIComponent(query)}`);
     }
@@ -519,4 +520,3 @@ const LocationDetails = () => {
 };
 
 export default LocationDetails;
-
