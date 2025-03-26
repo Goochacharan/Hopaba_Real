@@ -168,15 +168,15 @@ const Index = () => {
   };
 
   return <MainLayout>
-      <section className="flex flex-col items-center justify-center py-2 md:py-4 mx-[5px] px-0">
-        <div className="text-center mb-4 animate-fade-in">
+      <section className="flex flex-col items-center justify-center pt-1 pb-0 md:pt-2 md:pb-0 mx-[5px] px-0">
+        <div className="text-center mb-3 animate-fade-in">
           <AnimatedLogo size="lg" className="mx-auto mb-2" />
           <h1 className="text-3xl sm:text-4xl font-medium tracking-tight">Hopaba</h1>
         </div>
 
         <div className="w-full max-w-2xl mx-auto">
-          <ScrollArea className="h-[calc(100vh-280px)] min-h-[300px] max-h-[500px] w-full px-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2 pr-4">
+          <ScrollArea className="h-auto max-h-[calc(100vh-200px)] w-full px-1 pb-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-0 pr-4">
               {exampleQueries.map((example, idx) => <Button key={idx} variant="outline" onClick={() => handleSearch(example.text)} className="justify-start h-auto border-border/50 text-left px-[17px] py-2 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200 overflow-hidden" disabled={isEnhancing === example.text}>
                   <div className="mr-3 text-base">{example.icon}</div>
                   <span className="font-normal text-sm sm:text-base truncate">{example.text}</span>
