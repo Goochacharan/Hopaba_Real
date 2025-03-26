@@ -1,10 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { ArrowLeft, Star } from 'lucide-react';
+import { ArrowLeft, Star, Award, Gem } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Input } from '@/components/ui/input';
@@ -18,6 +17,8 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import ImageViewer from '@/components/ImageViewer';
 import { supabase } from '@/integrations/supabase/client';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Toggle } from '@/components/ui/toggle';
 
 interface Review {
   id: string;
@@ -287,21 +288,20 @@ const LocationDetails = () => {
                             <FormMessage />
                           </FormItem>} />
 
-                      <div className="flex items-center space-x-6 mt-2">
+                      <div className="flex flex-col sm:flex-row gap-4 mt-4">
                         <FormField
                           control={form.control}
                           name="isMustVisit"
                           render={({ field }) => (
-                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-                              <div className="space-y-1 leading-none">
-                                <FormLabel>Must Visit</FormLabel>
-                              </div>
+                            <FormItem className="flex-1">
+                              <Toggle 
+                                pressed={field.value} 
+                                onPressedChange={field.onChange}
+                                className={`w-full h-12 gap-2 ${field.value ? 'bg-green-100 text-green-800 border-green-200' : ''}`}
+                              >
+                                <Award className={`h-5 w-5 ${field.value ? 'text-green-700' : ''}`} />
+                                <span className="font-medium">Must Visit</span>
+                              </Toggle>
                             </FormItem>
                           )}
                         />
@@ -310,16 +310,15 @@ const LocationDetails = () => {
                           control={form.control}
                           name="isHiddenGem"
                           render={({ field }) => (
-                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-                              <div className="space-y-1 leading-none">
-                                <FormLabel>Hidden Gem</FormLabel>
-                              </div>
+                            <FormItem className="flex-1">
+                              <Toggle 
+                                pressed={field.value} 
+                                onPressedChange={field.onChange}
+                                className={`w-full h-12 gap-2 ${field.value ? 'bg-purple-100 text-purple-800 border-purple-200' : ''}`}
+                              >
+                                <Gem className={`h-5 w-5 ${field.value ? 'text-purple-700' : ''}`} />
+                                <span className="font-medium">Hidden Gem</span>
+                              </Toggle>
                             </FormItem>
                           )}
                         />
@@ -357,14 +356,16 @@ const LocationDetails = () => {
                     {(review.isMustVisit || review.isHiddenGem) && (
                       <div className="flex gap-2 mt-2">
                         {review.isMustVisit && (
-                          <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                          <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 gap-1.5">
+                            <Award className="h-3.5 w-3.5" />
                             Must Visit
-                          </span>
+                          </Badge>
                         )}
                         {review.isHiddenGem && (
-                          <span className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
+                          <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200 gap-1.5">
+                            <Gem className="h-3.5 w-3.5" />
                             Hidden Gem
-                          </span>
+                          </Badge>
                         )}
                       </div>
                     )}
