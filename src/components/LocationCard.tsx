@@ -145,7 +145,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
   const handleInstagram = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!recommendation.instagram) {
+    
+    console.log("Instagram button clicked, instagram value:", recommendation.instagram);
+    
+    if (!recommendation.instagram || recommendation.instagram.trim() === '') {
       toast({
         title: "No Instagram",
         description: `${recommendation.name} hasn't provided an Instagram profile`,
@@ -328,8 +331,21 @@ const LocationCard: React.FC<LocationCardProps> = ({
   };
 
   const hasAvailabilityInfo = () => {
+    console.log("LocationCard - Checking availability for:", recommendation.name);
+    console.log("LocationCard - availability_days:", recommendation.availability_days);
+    
     return recommendation.availability_days && 
+           Array.isArray(recommendation.availability_days) && 
            recommendation.availability_days.length > 0;
+  };
+
+  const hasInstagram = () => {
+    console.log("LocationCard - Checking Instagram for:", recommendation.name);
+    console.log("LocationCard - Instagram link:", recommendation.instagram);
+    
+    return recommendation.instagram && 
+           typeof recommendation.instagram === 'string' && 
+           recommendation.instagram.trim() !== '';
   };
 
   const formatAvailabilityDays = () => {
@@ -365,6 +381,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
   console.log("LocationCard - Instagram:", recommendation.instagram);
   console.log("LocationCard - Availability days:", recommendation.availability_days);
   console.log("LocationCard - hasAvailabilityInfo:", hasAvailabilityInfo());
+  console.log("LocationCard - hasInstagram:", hasInstagram());
 
   return (
     <div 
@@ -433,7 +450,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </div>
 
         {(recommendation.openNow !== undefined || recommendation.hours || recommendation.availability || 
-          (recommendation.availability_days && recommendation.availability_days.length > 0)) && (
+          hasAvailabilityInfo()) && (
           <div className="flex flex-col text-sm mb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -449,7 +466,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
                 </span>
               </div>
               
-              {recommendation.instagram && (
+              {hasInstagram() && (
                 <button 
                   onClick={handleInstagram} 
                   title="Watch Instagram content" 
@@ -492,8 +509,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
         )}
 
         {(!recommendation.openNow && !recommendation.hours && !recommendation.availability && 
-          (!recommendation.availability_days || recommendation.availability_days.length === 0)) && 
-          recommendation.instagram && (
+          !hasAvailabilityInfo()) && 
+          hasInstagram() && (
           <div className="flex items-center mb-3">
             <button 
               onClick={handleInstagram} 

@@ -357,6 +357,10 @@ const useRecommendations = ({
           price_range_max: item.price_range_max || null,
           price_unit: item.price_unit || null,
           map_link: item.map_link || null,
+          instagram: item.instagram || '',
+          availability_days: item.availability_days || [],
+          availability_start_time: item.availability_start_time || '',
+          availability_end_time: item.availability_end_time || '',
           created_at: item.created_at || new Date().toISOString()
         }));
       }

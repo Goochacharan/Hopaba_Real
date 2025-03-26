@@ -86,8 +86,10 @@ const SearchResults = () => {
   const enhanceRecommendations = (recommendations) => {
     return recommendations.map(rec => {
       console.log("SearchResults - Processing recommendation:", rec.id, {
-        instagram: rec.instagram,
-        availability_days: rec.availability_days
+        instagram: rec.instagram || '',
+        availability_days: rec.availability_days || [],
+        availability_start_time: rec.availability_start_time || '',
+        availability_end_time: rec.availability_end_time || '',
       });
       
       return {

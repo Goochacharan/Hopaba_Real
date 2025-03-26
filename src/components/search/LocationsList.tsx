@@ -17,8 +17,8 @@ const LocationsList: React.FC<LocationsListProps> = ({ recommendations }) => {
         console.log(`Recommendation ${index}:`, {
           id: recommendation.id,
           name: recommendation.name,
-          instagram: recommendation.instagram,
-          availability_days: recommendation.availability_days,
+          instagram: recommendation.instagram || '',
+          availability_days: recommendation.availability_days || [],
         });
         
         return (
