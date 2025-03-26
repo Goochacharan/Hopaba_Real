@@ -1,9 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { MessageCircle, MapPin, Clock, IndianRupee, Languages, Award, Calendar, ArrowLeft, Star, Navigation2, Share2, Phone, Sparkles } from 'lucide-react';
+import { ArrowLeft, Star } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -72,14 +73,10 @@ const LocationDetails = () => {
   const [selectedRating, setSelectedRating] = useState<number>(0);
   const [reviewFormVisible, setReviewFormVisible] = useState(false);
   const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
-  const [currentImage, setCurrentImage] = useState(0);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const isMobile = useIsMobile();
   const [user, setUser] = useState<any>(null);
-  const [hiddenGemCount, setHiddenGemCount] = useState<number>(15);
-  const [mustVisitCount, setMustVisitCount] = useState<number>(22);
-  const [userRatedAs, setUserRatedAs] = useState<string | null>(null);
 
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewSchema),
@@ -117,9 +114,6 @@ const LocationDetails = () => {
         setLocation(foundLocation);
         const locationImages = foundLocation.images && foundLocation.images.length > 0 ? foundLocation.images : [foundLocation.image];
         setImageLoaded(Array(locationImages.length).fill(false));
-        
-        setHiddenGemCount(Math.floor(Math.random() * 40) + 5);
-        setMustVisitCount(Math.floor(Math.random() * 40) + 5);
       } else {
         toast({
           title: "Location not found",
@@ -143,70 +137,6 @@ const LocationDetails = () => {
   const handleImageClick = (index: number) => {
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
-  };
-
-  const handleCall = () => {
-    toast({
-      title: "Calling",
-      description: `Calling ${location?.name}...`,
-      duration: 3000
-    });
-  };
-
-  const handleChat = () => {
-    toast({
-      title: "Opening Chat",
-      description: `Starting chat with ${location?.name}...`,
-      duration: 3000
-    });
-  };
-
-  const handleDirections = () => {
-    const destination = encodeURIComponent(location.address);
-    let mapsUrl;
-    if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      mapsUrl = `maps://maps.apple.com/?q=${destination}`;
-    } else {
-      mapsUrl = `https://www.google.com/maps/search/?api=1&query=${destination}`;
-    }
-    window.open(mapsUrl, '_blank');
-    toast({
-      title: "Opening Directions",
-      description: `Getting directions to ${location?.name}...`,
-      duration: 2000
-    });
-  };
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: location.name,
-        text: `Check out ${location.name}`,
-        url: window.location.origin + `/location/${location.id}`
-      }).then(() => {
-        toast({
-          title: "Shared successfully",
-          description: `You've shared ${location.name}`,
-          duration: 2000
-        });
-      }).catch(error => {
-        console.error('Error sharing:', error);
-        toast({
-          title: "Sharing failed",
-          description: "Could not share this location",
-          variant: "destructive"
-        });
-      });
-    } else {
-      const shareUrl = window.location.origin + `/location/${location.id}`;
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        toast({
-          title: "Link copied",
-          description: "The link has been copied to your clipboard",
-          duration: 2000
-        });
-      });
-    }
   };
 
   const handleAskQuestion = (text?: string) => {
@@ -286,50 +216,6 @@ const LocationDetails = () => {
 
   const allReviews = [...userReviews, ...reviews];
 
-  const handleRatePlace = (ratingType: 'hidden-gem' | 'must-visit') => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to rate this place",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (userRatedAs === ratingType) {
-      if (ratingType === 'hidden-gem') {
-        setHiddenGemCount(prev => Math.max(0, prev - 1));
-      } else {
-        setMustVisitCount(prev => Math.max(0, prev - 1));
-      }
-      setUserRatedAs(null);
-      toast({
-        title: "Rating removed",
-        description: `Your "${ratingType === 'hidden-gem' ? 'Hidden Gem' : 'Must Visit'}" rating has been removed`,
-        duration: 2000
-      });
-    } else {
-      if (userRatedAs === 'hidden-gem' && ratingType === 'must-visit') {
-        setHiddenGemCount(prev => Math.max(0, prev - 1));
-        setMustVisitCount(prev => prev + 1);
-      } else if (userRatedAs === 'must-visit' && ratingType === 'hidden-gem') {
-        setMustVisitCount(prev => Math.max(0, prev - 1));
-        setHiddenGemCount(prev => prev + 1);
-      } else if (ratingType === 'hidden-gem') {
-        setHiddenGemCount(prev => prev + 1);
-      } else {
-        setMustVisitCount(prev => prev + 1);
-      }
-      
-      setUserRatedAs(ratingType);
-      toast({
-        title: "Place rated",
-        description: `You've rated this as a "${ratingType === 'hidden-gem' ? 'Hidden Gem' : 'Must Visit'}" place`,
-        duration: 2000
-      });
-    }
-  };
-
   if (loading) {
     return <MainLayout>
         <div className="container mx-auto py-4 px-4 max-w-none">
@@ -357,7 +243,7 @@ const LocationDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6">
-              <div className="w-full h-72 relative overflow-hidden">
+              <div className="w-full h-[400px] relative overflow-hidden">
                 <Carousel className="w-full h-full">
                   <CarouselContent className="h-full">
                     {locationImages.map((img: string, index: number) => (
@@ -366,7 +252,7 @@ const LocationDetails = () => {
                         <img 
                           src={img} 
                           alt={`${location.name} - image ${index + 1}`} 
-                          className={`w-full h-72 object-cover transition-all duration-500 ${imageLoaded[index] ? 'opacity-100 blur-0' : 'opacity-0 blur-sm'} cursor-pointer`} 
+                          className={`w-full h-[400px] object-cover transition-all duration-500 ${imageLoaded[index] ? 'opacity-100 blur-0' : 'opacity-0 blur-sm'} cursor-pointer`} 
                           onLoad={() => handleImageLoad(index)}
                           onClick={() => handleImageClick(index)}
                         />
@@ -391,167 +277,93 @@ const LocationDetails = () => {
                     <Star className="fill-amber-500 w-4 h-4" />
                   </div>
                   <span className="text-xs text-muted-foreground ml-1">
-                    {TOTAL_REVIEW_COUNT} reviews
+                    ({TOTAL_REVIEW_COUNT} reviews)
                   </span>
-                </div>
-                
-                <div className="space-y-4 mb-6">
-                  <div className="flex items-start">
-                    <MapPin className="h-5 w-5 text-muted-foreground mr-3 mt-0.5 flex-shrink-0" />
-                    <span>{location.address}</span>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Clock className="h-5 w-5 text-muted-foreground mr-3 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <span className={location.openNow ? "text-emerald-600 font-medium" : "text-rose-600 font-medium"}>
-                        {location.openNow ? "Open now" : "Closed"}
-                      </span>
-                      <p className="text-muted-foreground">3:00 PM - 7:00 PM (Mon-Fri), 10:00 AM - 5:00 PM (Sat-Sun)</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <IndianRupee className="h-5 w-5 text-muted-foreground mr-3 mt-0.5 flex-shrink-0" />
-                    <span>₹800 - ₹1200 per month</span>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Award className="h-5 w-5 text-muted-foreground mr-3 mt-0.5 flex-shrink-0" />
-                    <span>Experience: 12+ years teaching children</span>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Languages className="h-5 w-5 text-muted-foreground mr-3 mt-0.5 flex-shrink-0" />
-                    <span>Languages: English, Hindi, Kannada</span>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Calendar className="h-5 w-5 text-muted-foreground mr-3 mt-0.5 flex-shrink-0" />
-                    <span>Availability: After-school hours and weekends</span>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-4 gap-3">
-                  <button onClick={handleCall} className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center">
-                    <Phone className="h-5 w-5" />
-                  </button>
-                  <button onClick={handleChat} className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center">
-                    <MessageCircle className="h-5 w-5" />
-                  </button>
-                  <button onClick={handleDirections} className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center">
-                    <Navigation2 className="h-5 w-5" />
-                  </button>
-                  <button onClick={handleShare} className="flex-1 h-12 px-4 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-colors flex items-center justify-center">
-                    <Share2 className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
-            
-              <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
-                <h2 className="text-xl font-semibold">{location.name}</h2>
-                <p className="text-muted-foreground">{location.description}</p>
-                
-                <div className="mt-4">
-                  {location.tags.map((tag: string, i: number) => <span key={i} className="inline-block bg-secondary text-xs px-2 py-1 rounded-full text-muted-foreground mr-2 mb-2">
-                      {tag}
-                    </span>)}
-                </div>
-              </div>
-            
-              <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">Reviews</h2>
-                  <Button variant="outline" size="sm" onClick={toggleReviewForm} className="text-sm">
-                    {reviewFormVisible ? "Cancel" : "Write a review"}
-                  </Button>
-                </div>
-
-                {reviewFormVisible && <div className="mb-6 p-4 bg-secondary/30 rounded-lg">
-                    <Form {...form}>
-                      <form onSubmit={form.handleSubmit(onSubmitReview)} className="space-y-4">
-                        <div className="space-y-2">
-                          <Label>Your rating</Label>
-                          <div className="flex items-center gap-1">
-                            {[1, 2, 3, 4, 5].map(rating => <button key={rating} type="button" onClick={() => handleRatingSelect(rating)} className="focus:outline-none">
-                                <Star className={`w-6 h-6 ${rating <= selectedRating ? "text-amber-500 fill-amber-500" : "text-gray-300"}`} />
-                              </button>)}
-                            {form.formState.errors.rating && <p className="text-destructive text-xs ml-2">Please select a rating</p>}
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label>Rate this place as (optional)</Label>
-                          <div className="flex items-center gap-3 mt-2">
-                            <Button 
-                              type="button"
-                              onClick={() => handleRatePlace('hidden-gem')}
-                              variant={userRatedAs === 'hidden-gem' ? "default" : "outline"}
-                              size="sm"
-                              className={`flex items-center ${userRatedAs === 'hidden-gem' ? 'bg-purple-500 hover:bg-purple-600' : 'border-purple-200 text-purple-700 hover:bg-purple-50'}`}
-                            >
-                              <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                              Hidden Gem
-                            </Button>
-                            
-                            <Button 
-                              type="button"
-                              onClick={() => handleRatePlace('must-visit')}
-                              variant={userRatedAs === 'must-visit' ? "default" : "outline"}
-                              size="sm"
-                              className={`flex items-center ${userRatedAs === 'must-visit' ? 'bg-orange-500 hover:bg-orange-600' : 'border-orange-200 text-orange-700 hover:bg-orange-50'}`}
-                            >
-                              <Award className="h-3.5 w-3.5 mr-1.5" />
-                              Must Visit
-                            </Button>
-                          </div>
-                        </div>
-
-                        <FormField control={form.control} name="reviewText" render={({
-                          field
-                        }) => <FormItem>
-                              <FormLabel>Your review</FormLabel>
-                              <FormControl>
-                                <Textarea placeholder="Share your experience with this place..." className="min-h-[100px]" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>} />
-
-                        <div className="flex justify-end">
-                          <Button type="submit" className="w-full sm:w-auto">
-                            Submit review
-                          </Button>
-                        </div>
-                      </form>
-                    </Form>
-                  </div>}
-
-                <div className="flex items-center mb-4">
-                  <span className="font-medium">
-                    {TOTAL_REVIEW_COUNT} reviews
-                  </span>
-                  <div className="flex items-center ml-3 text-amber-500">
-                    {[...Array(5)].map((_, i) => <Star key={i} size={16} className={i < Math.floor(location.rating) ? "fill-amber-500" : ""} />)}
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  {allReviews.map(review => <div key={review.id} className="border-b border-border/50 pb-4 last:border-0 last:pb-0">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <div className="font-medium">{review.name}</div>
-                          <div className="text-xs text-muted-foreground">{review.date}</div>
-                        </div>
-                        <div className="flex items-center text-amber-500">
-                          {[...Array(5)].map((_, i) => <Star key={i} size={14} className={i < review.rating ? "fill-amber-500" : ""} />)}
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{review.text}</p>
-                    </div>)}
                 </div>
               </div>
             </div>
             
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
+              <h2 className="text-xl font-semibold mb-4">About {location.name}</h2>
+              <p className="text-muted-foreground">{location.description}</p>
+              
+              <div className="mt-4">
+                {location.tags.map((tag: string, i: number) => (
+                  <span key={i} className="inline-block bg-secondary text-xs px-2 py-1 rounded-full text-muted-foreground mr-2 mb-2">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          
+            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Reviews</h2>
+                <Button variant="outline" size="sm" onClick={toggleReviewForm} className="text-sm">
+                  {reviewFormVisible ? "Cancel" : "Write a review"}
+                </Button>
+              </div>
+
+              {reviewFormVisible && <div className="mb-6 p-4 bg-secondary/30 rounded-lg">
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmitReview)} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Your rating</Label>
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map(rating => <button key={rating} type="button" onClick={() => handleRatingSelect(rating)} className="focus:outline-none">
+                              <Star className={`w-6 h-6 ${rating <= selectedRating ? "text-amber-500 fill-amber-500" : "text-gray-300"}`} />
+                            </button>)}
+                          {form.formState.errors.rating && <p className="text-destructive text-xs ml-2">Please select a rating</p>}
+                        </div>
+                      </div>
+
+                      <FormField control={form.control} name="reviewText" render={({
+                        field
+                      }) => <FormItem>
+                            <FormLabel>Your review</FormLabel>
+                            <FormControl>
+                              <Textarea placeholder="Share your experience with this place..." className="min-h-[100px]" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>} />
+
+                      <div className="flex justify-end">
+                        <Button type="submit" className="w-full sm:w-auto">
+                          Submit review
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </div>}
+
+              <div className="flex items-center mb-4">
+                <span className="font-medium">
+                  {TOTAL_REVIEW_COUNT} reviews
+                </span>
+                <div className="flex items-center ml-3 text-amber-500">
+                  {[...Array(5)].map((_, i) => <Star key={i} size={16} className={i < Math.floor(location.rating) ? "fill-amber-500" : ""} />)}
+                </div>
+              </div>
+              <div className="space-y-4">
+                {allReviews.map(review => <div key={review.id} className="border-b border-border/50 pb-4 last:border-0 last:pb-0">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="font-medium">{review.name}</div>
+                        <div className="text-xs text-muted-foreground">{review.date}</div>
+                      </div>
+                      <div className="flex items-center text-amber-500">
+                        {[...Array(5)].map((_, i) => <Star key={i} size={14} className={i < review.rating ? "fill-amber-500" : ""} />)}
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{review.text}</p>
+                  </div>)}
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden p-6">
+              <h3 className="font-medium mb-4">Ask a Question</h3>
               <div className="space-y-4">
                 <div className="relative">
                   <Input type="text" value={question} onChange={e => setQuestion(e.target.value)} placeholder="Ask a question about this place" className="w-full pr-12 bg-[#F6F6F7] text-sm" />
@@ -577,13 +389,9 @@ const LocationDetails = () => {
                   </div>
                 </ScrollArea>
               </div>
-            </div>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden p-6">
-              <h3 className="font-medium mb-4">Questions & Answers</h3>
-              {questionAnswers.length > 0 && <div className="mb-4 space-y-3 max-h-80 overflow-y-auto">
+              
+              {questionAnswers.length > 0 && <div className="mt-4 space-y-3 max-h-80 overflow-y-auto">
+                  <h4 className="font-medium text-sm">Questions & Answers</h4>
                   {questionAnswers.map((item, index) => <div key={index} className="p-4 bg-secondary/70 rounded-lg">
                       <div className="flex items-center justify-between mb-1">
                         <p className="text-xs font-medium text-primary">{item.question}</p>
