@@ -6,7 +6,6 @@ import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
 import { ArrowLeft, Star } from 'lucide-react';
 import { getRecommendationById } from '@/lib/mockData';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -62,13 +61,6 @@ const LocationDetails = () => {
   const { toast } = useToast();
   const [location, setLocation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [question, setQuestion] = useState('');
-  const [questionAnswers, setQuestionAnswers] = useState<{
-    question: string;
-    answer: string;
-    timestamp: string;
-  }[]>([]);
-  const [askingQuestion, setAskingQuestion] = useState(false);
   const [userReviews, setUserReviews] = useState<Review[]>([]);
   const [selectedRating, setSelectedRating] = useState<number>(0);
   const [reviewFormVisible, setReviewFormVisible] = useState(false);
@@ -138,47 +130,6 @@ const LocationDetails = () => {
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
-
-  const handleAskQuestion = (text?: string) => {
-    const questionText = text || question;
-    if (!questionText.trim()) return;
-    setAskingQuestion(true);
-    const answers = {
-      "What services do they offer?": `${location?.name} offers specialized ${location?.category.toLowerCase()} instruction for all age groups, including beginners and advanced students.`,
-      "What is their experience?": `${location?.name} has over 12 years of teaching experience and has trained numerous award-winning students.`,
-      "What are their qualifications?": `${location?.name} holds advanced degrees in music and is certified by prestigious music academies.`,
-      "Do they offer trial classes?": "Yes, they offer a free trial class for new students to assess their teaching style and methodology.",
-      "What age groups do they teach?": "They teach students of all age groups, from 5 years old to adults, with specialized curriculum for each group.",
-      "Do they have experience with beginners?": "They have extensive experience working with beginners and have developed special techniques to make learning enjoyable.",
-      "What is the class duration?": "Classes typically last 45-60 minutes depending on the student's age and experience level.",
-      "Do they provide instruments?": "Students are encouraged to bring their own instruments, but they do have a few instruments available for beginners."
-    };
-    let answer = answers[questionText as keyof typeof answers];
-    if (!answer) {
-      answer = `Thank you for your question about ${location?.name}. They would be happy to provide more information about "${questionText}" when you contact them directly.`;
-    }
-    const now = new Date();
-    const timeString = now.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-    setTimeout(() => {
-      setQuestionAnswers(prev => [...prev, {
-        question: questionText,
-        answer,
-        timestamp: timeString
-      }]);
-      setQuestion('');
-      setAskingQuestion(false);
-      toast({
-        title: "Question Answered",
-        description: "We've received an answer to your question",
-        duration: 3000
-      });
-    }, 1000);
-  };
-
-  const suggestedQuestions = ["What services do they offer?", "What are their qualifications?", "Do they offer trial classes?", "What age groups do they teach?", "Do they have experience with beginners?", "What is the class duration?", "What is their teaching style?", "How much experience do they have?", "Do they teach online?", "What is their cancellation policy?"];
 
   const toggleReviewForm = () => {
     setReviewFormVisible(!reviewFormVisible);
@@ -362,45 +313,7 @@ const LocationDetails = () => {
           </div>
           
           <div className="space-y-4">
-            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden p-6">
-              <h3 className="font-medium mb-4">Ask a Question</h3>
-              <div className="space-y-4">
-                <div className="relative">
-                  <Input type="text" value={question} onChange={e => setQuestion(e.target.value)} placeholder="Ask a question about this place" className="w-full pr-12 bg-[#F6F6F7] text-sm" />
-                  <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#F1F1F1] hover:bg-[#E8E8E9] rounded-full w-8 h-8 flex items-center justify-center transition-colors" onClick={() => handleAskQuestion()} disabled={!question.trim() || askingQuestion}>
-                    {askingQuestion ? <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" /> : <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8E9196" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="m3 3 3 9-3 9 19-9Z" />
-                        <path d="M6 12h16" />
-                      </svg>}
-                  </button>
-                </div>
-                
-                <ScrollArea className="w-full" orientation="horizontal">
-                  <div className="flex gap-2 pb-2 px-1">
-                    {suggestedQuestions.map((q, index) => (
-                      <button 
-                        key={index} 
-                        onClick={() => handleAskQuestion(q)} 
-                        className="flex-shrink-0 items-center gap-2 text-sm py-2 px-4 rounded-full border border-border hover:bg-secondary/70 transition-colors whitespace-nowrap"
-                      >
-                        <span>{q}</span>
-                      </button>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
-              
-              {questionAnswers.length > 0 && <div className="mt-4 space-y-3 max-h-80 overflow-y-auto">
-                  <h4 className="font-medium text-sm">Questions & Answers</h4>
-                  {questionAnswers.map((item, index) => <div key={index} className="p-4 bg-secondary/70 rounded-lg">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-xs font-medium text-primary">{item.question}</p>
-                        <span className="text-xs text-muted-foreground">{item.timestamp}</span>
-                      </div>
-                      <p className="text-sm">{item.answer}</p>
-                    </div>)}
-                </div>}
-            </div>
+            {/* Question and answer section removed */}
           </div>
         </div>
         
