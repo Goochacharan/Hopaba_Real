@@ -92,7 +92,7 @@ const ReviewForm = ({ onSubmit, onCancel }: ReviewFormProps) => {
                   <Toggle 
                     pressed={field.value} 
                     onPressedChange={field.onChange}
-                    className={`w-full h-12 gap-2 ${field.value ? 'bg-green-500 text-white border-green-600' : ''}`}
+                    className={`w-full h-12 gap-2 ${field.value ? 'bg-green-500 text-white border-green-600 shadow-[0_4px_0px_0px_rgba(22,163,74,0.5)]' : ''}`}
                   >
                     <Award className={`h-5 w-5 ${field.value ? 'text-white' : ''}`} />
                     <span className="font-medium">Must Visit</span>
@@ -109,7 +109,7 @@ const ReviewForm = ({ onSubmit, onCancel }: ReviewFormProps) => {
                   <Toggle 
                     pressed={field.value} 
                     onPressedChange={field.onChange}
-                    className={`w-full h-12 gap-2 ${field.value ? 'bg-purple-500 text-white border-purple-600' : ''}`}
+                    className={`w-full h-12 gap-2 ${field.value ? 'bg-purple-500 text-white border-purple-600 shadow-[0_4px_0px_0px_rgba(147,51,234,0.5)]' : ''}`}
                   >
                     <Gem className={`h-5 w-5 ${field.value ? 'text-white' : ''}`} />
                     <span className="font-medium">Hidden Gem</span>
