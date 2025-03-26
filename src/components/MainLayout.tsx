@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
@@ -46,7 +45,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const onSearch = (query: string) => {
     console.log("MainLayout search triggered with:", query);
     if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+      if (location.pathname === '/events') {
+        navigate(`/events?q=${encodeURIComponent(query)}`);
+      } else {
+        navigate(`/search?q=${encodeURIComponent(query)}`);
+      }
     }
   };
 
@@ -56,7 +59,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     console.log("Navigating to home page from: ", location.pathname);
   };
   
-  // Check if current path is location details or search results
   const shouldShowSearchBar = () => {
     return !['/location', '/search'].some(path => location.pathname.startsWith(path));
   };
@@ -95,7 +97,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       {shouldShowSearchBar() && (
         <div className="fixed bottom-12 left-0 right-0 px-4 z-[60]">
           <div className="max-w-5xl mx-auto">
-            <SearchBar onSearch={onSearch} className="mb-0" placeholder="What are you looking for today?" initialValue="" currentRoute={location.pathname} />
+            <SearchBar 
+              onSearch={onSearch} 
+              className="mb-0" 
+              placeholder={location.pathname === '/events' ? "Search for events..." : "What are you looking for today?"} 
+              initialValue="" 
+              currentRoute={location.pathname} 
+            />
           </div>
         </div>
       )}

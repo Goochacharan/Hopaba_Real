@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useToast } from '@/hooks/use-toast';
 import EventsList from '@/components/search/EventsList';
@@ -58,6 +59,9 @@ const Events = () => {
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
+  const [searchParams] = useSearchParams();
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>(sampleEvents);
+  const searchQuery = searchParams.get('q') || '';
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -75,6 +79,21 @@ const Events = () => {
     };
   }, []);
 
+  // Filter events whenever search query changes
+  useEffect(() => {
+    if (searchQuery) {
+      const lowercaseQuery = searchQuery.toLowerCase();
+      const filtered = sampleEvents.filter(event => 
+        event.title.toLowerCase().includes(lowercaseQuery) ||
+        event.description.toLowerCase().includes(lowercaseQuery) ||
+        event.location.toLowerCase().includes(lowercaseQuery)
+      );
+      setFilteredEvents(filtered);
+    } else {
+      setFilteredEvents(sampleEvents);
+    }
+  }, [searchQuery]);
+
   const handleLocationChange = (location: string) => {
     console.log(`Location changed to: ${location}`);
     setSelectedLocation(location);
@@ -89,9 +108,20 @@ const Events = () => {
             selectedLocation={selectedLocation}
             onLocationChange={handleLocationChange}
           />
-          <h1 className="text-3xl font-medium mb-6 mt-4">Upcoming Events</h1>
+          <h1 className="text-3xl font-medium mb-6 mt-4">
+            {searchQuery ? `Events matching "${searchQuery}"` : "Upcoming Events"}
+          </h1>
           
-          <EventsList events={sampleEvents} />
+          {filteredEvents.length > 0 ? (
+            <EventsList events={filteredEvents} />
+          ) : (
+            <div className="text-center py-12">
+              <h3 className="text-xl font-medium mb-2">No events found</h3>
+              <p className="text-muted-foreground">
+                No events matching "{searchQuery}" were found. Try a different search term.
+              </p>
+            </div>
+          )}
         </div>
       </section>
     </MainLayout>
