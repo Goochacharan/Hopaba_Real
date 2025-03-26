@@ -440,7 +440,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
                 </span>
               </div>
               
-              {hasInstagram() && <button onClick={handleInstagram} title="Watch Instagram content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-3 p-1.5">
+              {hasInstagram() && <button onClick={handleInstagram} title="Watch Instagram content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-3 p-1.5 mx-[64px] px-[26px] py-[6px]">
                   <Film className="h-4 w-4 text-white" />
                 </button>}
             </div>
