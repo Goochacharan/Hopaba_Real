@@ -196,21 +196,22 @@ main {
 /* Improve available days dropdown on mobile */
 @media (max-width: 640px) {
   [data-radix-collapsible-trigger] {
-    padding: 6px 10px;
-    font-size: 14px;
+    padding: 8px 12px;
+    font-size: 15px;
     display: inline-flex;
     align-items: center;
-    border-radius: 6px;
+    border-radius: 8px;
     background-color: rgba(0, 0, 0, 0.03);
+    font-weight: 500;
   }
   
   [data-radix-collapsible-content] {
-    padding: 10px !important;
+    padding: 8px !important;
   }
   
   [data-radix-collapsible-content] .text-sm {
-    font-size: 14px;
-    line-height: 1.3;
+    font-size: 15px;
+    line-height: 1.2;
   }
   
   [data-radix-collapsible-content] p {
@@ -219,6 +220,6 @@ main {
   }
   
   [data-radix-collapsible-content] p + p {
-    margin-top: 2px;
+    margin-top: 0;
   }
 }
