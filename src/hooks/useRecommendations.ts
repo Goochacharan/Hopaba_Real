@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Recommendation, mockRecommendations, searchRecommendations } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -14,6 +13,8 @@ interface FilterOptions {
   minRating: number;
   priceLevel: number;
   openNow: boolean;
+  hiddenGem?: boolean;
+  mustVisit?: boolean;
   distanceUnit?: 'km' | 'mi';
 }
 
@@ -372,6 +373,50 @@ const useRecommendations = ({
     }
   };
 
+  const filterRecommendations = (
+    recs: Recommendation[],
+    filterOptions: FilterOptions
+  ): Recommendation[] => {
+    const { distanceUnit = 'mi' } = filterOptions;
+    
+    return recs.filter(rec => {
+      if (rec.rating < filterOptions.minRating) {
+        return false;
+      }
+
+      if (filterOptions.openNow && !rec.openNow) {
+        return false;
+      }
+
+      if (filterOptions.hiddenGem && (!rec.isHiddenGem || rec.isHiddenGem === false)) {
+        return false;
+      }
+
+      if (filterOptions.mustVisit && (!rec.isMustVisit || rec.isMustVisit === false)) {
+        return false;
+      }
+
+      if (rec.distance) {
+        const distanceValue = parseFloat(rec.distance.split(' ')[0]);
+        if (!isNaN(distanceValue)) {
+          const adjustedDistance = distanceUnit === 'km' ? distanceValue : distanceValue * 1.60934;
+          if (adjustedDistance > filterOptions.maxDistance) {
+            return false;
+          }
+        }
+      }
+
+      if (rec.priceLevel) {
+        const priceCount = rec.priceLevel.length;
+        if (priceCount > filterOptions.priceLevel) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  };
+
   useEffect(() => {
     const fetchRecommendations = async () => {
       setLoading(true);
@@ -485,42 +530,6 @@ const useRecommendations = ({
   const handleCategoryChange = (newCategory: CategoryType) => {
     console.log("Category changed to:", newCategory);
     setCategory(newCategory);
-  };
-
-  const filterRecommendations = (
-    recs: Recommendation[],
-    filterOptions: FilterOptions
-  ): Recommendation[] => {
-    const { distanceUnit = 'mi' } = filterOptions;
-    
-    return recs.filter(rec => {
-      if (rec.rating < filterOptions.minRating) {
-        return false;
-      }
-
-      if (filterOptions.openNow && !rec.openNow) {
-        return false;
-      }
-
-      if (rec.distance) {
-        const distanceValue = parseFloat(rec.distance.split(' ')[0]);
-        if (!isNaN(distanceValue)) {
-          const adjustedDistance = distanceUnit === 'km' ? distanceValue : distanceValue * 1.60934;
-          if (adjustedDistance > filterOptions.maxDistance) {
-            return false;
-          }
-        }
-      }
-
-      if (rec.priceLevel) {
-        const priceCount = rec.priceLevel.length;
-        if (priceCount > filterOptions.priceLevel) {
-          return false;
-        }
-      }
-
-      return true;
-    });
   };
 
   return {

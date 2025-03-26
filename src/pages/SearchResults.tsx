@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -25,6 +26,8 @@ const SearchResults = () => {
   const [minRating, setMinRating] = useState<number[]>([4]);
   const [priceRange, setPriceRange] = useState<number>(2);
   const [openNowOnly, setOpenNowOnly] = useState<boolean>(false);
+  const [hiddenGemOnly, setHiddenGemOnly] = useState<boolean>(false);
+  const [mustVisitOnly, setMustVisitOnly] = useState<boolean>(false);
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
   const [sortBy, setSortBy] = useState<SortOption>('rating');
 
@@ -59,6 +62,8 @@ const SearchResults = () => {
     minRating: minRating[0],
     priceLevel: priceRange,
     openNow: openNowOnly,
+    hiddenGem: hiddenGemOnly,
+    mustVisit: mustVisitOnly,
     distanceUnit: 'km'
   });
 
@@ -164,7 +169,11 @@ const SearchResults = () => {
             priceRange={priceRange} 
             setPriceRange={setPriceRange} 
             openNowOnly={openNowOnly} 
-            setOpenNowOnly={setOpenNowOnly} 
+            setOpenNowOnly={setOpenNowOnly}
+            hiddenGemOnly={hiddenGemOnly}
+            setHiddenGemOnly={setHiddenGemOnly}
+            mustVisitOnly={mustVisitOnly}
+            setMustVisitOnly={setMustVisitOnly}
           />
           
           <SortButton 

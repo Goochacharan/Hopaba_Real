@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Star, Clock, IndianRupee, FilterIcon, ChevronDown } from 'lucide-react';
+import { Star, Clock, IndianRupee, FilterIcon, Sparkles, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface FilterTabsProps {
   distance: number[];
@@ -23,6 +24,10 @@ interface FilterTabsProps {
   setPriceRange: (value: number) => void;
   openNowOnly: boolean;
   setOpenNowOnly: (value: boolean) => void;
+  hiddenGemOnly: boolean;
+  setHiddenGemOnly: (value: boolean) => void;
+  mustVisitOnly: boolean;
+  setMustVisitOnly: (value: boolean) => void;
 }
 
 const FilterTabs: React.FC<FilterTabsProps> = ({
@@ -33,7 +38,11 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
   priceRange,
   setPriceRange,
   openNowOnly,
-  setOpenNowOnly
+  setOpenNowOnly,
+  hiddenGemOnly,
+  setHiddenGemOnly,
+  mustVisitOnly,
+  setMustVisitOnly
 }) => {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   
@@ -158,6 +167,86 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
                   onCheckedChange={setOpenNowOnly}
                 />
               </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        {/* Hidden Gem Filter */}
+        <Popover open={activeFilter === 'hidden-gem'} onOpenChange={(open) => setActiveFilter(open ? 'hidden-gem' : null)}>
+          <PopoverTrigger asChild>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className={cn(
+                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
+                activeFilter === 'hidden-gem' && "ring-2 ring-primary/20",
+                hiddenGemOnly && "border-purple-300 bg-purple-50"
+              )}
+            >
+              <Sparkles className="w-4 h-4 text-purple-500" />
+              {hiddenGemOnly && (
+                <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-purple-500 text-white">
+                  •
+                </Badge>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-4" align="start">
+            <div className="space-y-4">
+              <h4 className="font-medium">Hidden Gems</h4>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="hidden-gem" 
+                  checked={hiddenGemOnly}
+                  onCheckedChange={(checked) => setHiddenGemOnly(checked === true)}
+                />
+                <Label htmlFor="hidden-gem" className="text-sm font-medium cursor-pointer">
+                  Show only Hidden Gems
+                </Label>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Filter for places that users have rated as hidden gems - lesser-known but excellent spots.
+              </p>
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        {/* Must Visit Filter */}
+        <Popover open={activeFilter === 'must-visit'} onOpenChange={(open) => setActiveFilter(open ? 'must-visit' : null)}>
+          <PopoverTrigger asChild>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className={cn(
+                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
+                activeFilter === 'must-visit' && "ring-2 ring-primary/20",
+                mustVisitOnly && "border-orange-300 bg-orange-50"
+              )}
+            >
+              <Award className="w-4 h-4 text-orange-500" />
+              {mustVisitOnly && (
+                <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-orange-500 text-white">
+                  •
+                </Badge>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-4" align="start">
+            <div className="space-y-4">
+              <h4 className="font-medium">Must Visit Places</h4>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="must-visit" 
+                  checked={mustVisitOnly}
+                  onCheckedChange={(checked) => setMustVisitOnly(checked === true)}
+                />
+                <Label htmlFor="must-visit" className="text-sm font-medium cursor-pointer">
+                  Show only Must Visit places
+                </Label>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Filter for places that users have rated as must-visit locations - highly recommended spots.
+              </p>
             </div>
           </PopoverContent>
         </Popover>
