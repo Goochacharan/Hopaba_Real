@@ -168,3 +168,19 @@
 main {
   padding-bottom: 150px !important; /* Increased padding for main content area */
 }
+
+/* Card and text height consistency */
+.search-result-card h3 {
+  font-size: 1.125rem;
+  line-height: 1.5;
+  min-height: 1.5rem;
+}
+
+.search-result-card p {
+  line-height: 1.5;
+  min-height: 3rem; /* Set minimum height for description text */
+}
+
+.search-result-card .truncate {
+  min-height: 1.5rem;
+}
