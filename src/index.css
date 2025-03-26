@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -222,4 +221,42 @@ main {
   [data-radix-collapsible-content] p + p {
     margin-top: 0;
   }
+}
+
+/* Image viewer styles to prevent UI overlapping */
+.image-viewer-open {
+  /* Prevents background scrolling when viewer is open */
+  overflow: hidden !important;
+  position: relative;
+}
+
+/* Ensure dialog components have proper z-index */
+[role="dialog"] {
+  z-index: 9999 !important;
+}
+
+/* Specifically target image viewer dialogs to appear above all other elements */
+[data-state="open"] > [role="dialog"] {
+  z-index: 9999 !important;
+}
+
+/* Hide navigation elements when image viewer is open */
+.image-viewer-open .fixed-bottom,
+.image-viewer-open .search-bar-container {
+  visibility: hidden;
+}
+
+/* Ensure close button and controls are always on top */
+.DialogContent {
+  z-index: 9999 !important;
+}
+
+/* Ensure close button is visible in all circumstances */
+.DialogClose {
+  z-index: 10000 !important;
+  position: fixed !important;
+  top: 16px !important;
+  right: 16px !important;
+  background-color: rgba(0,0,0,0.6) !important;
+  color: white !important;
 }

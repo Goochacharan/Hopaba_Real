@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Dialog,
@@ -34,12 +33,22 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   
   const imageRef = useRef<HTMLImageElement>(null);
 
-  // Reset state when the dialog opens
   useEffect(() => {
     if (open) {
       setCurrentIndex(initialIndex);
       resetView();
+      
+      document.body.style.overflow = 'hidden';
+      document.body.classList.add('image-viewer-open');
+    } else {
+      document.body.style.overflow = '';
+      document.body.classList.remove('image-viewer-open');
     }
+    
+    return () => {
+      document.body.style.overflow = '';
+      document.body.classList.remove('image-viewer-open');
+    };
   }, [open, initialIndex]);
 
   const resetView = () => {
@@ -119,7 +128,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   const handleTouchEnd = (e: React.TouchEvent) => {
     setIsDragging(false);
     
-    if (scale > 1) return; // Don't process swipes if zoomed in
+    if (scale > 1) return;
     
     if (!touchStartX.current || !touchEndX.current) return;
     
@@ -133,7 +142,6 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
       goPrevious();
     }
     
-    // Reset touch coordinates
     touchStartX.current = null;
     touchEndX.current = null;
   };
@@ -169,11 +177,11 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-[100vw] max-h-[100vh] w-screen h-screen p-0 border-none bg-black/95"
+        className="max-w-[100vw] max-h-[100vh] w-screen h-screen p-0 border-none bg-black/95 z-[9999]"
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >
-        <div className="fixed top-4 right-4 z-50 flex gap-2">
+        <div className="fixed top-4 right-4 z-[10000] flex gap-2">
           <button 
             onClick={handleZoomIn} 
             className="p-2 rounded-full bg-black/50 text-white hover:bg-black/70"
@@ -231,7 +239,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
         </div>
 
         {images.length > 1 && (
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+          <div className="absolute bottom-16 left-0 right-0 flex justify-center">
             <div className="flex gap-2 p-3 bg-black/60 rounded-full overflow-x-auto max-w-[90vw]">
               {images.map((img, idx) => (
                 <div
@@ -262,14 +270,14 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
           <>
             <button
               onClick={goPrevious}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 p-3 rounded-full bg-black/50 text-white hover:bg-black/70"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 p-3 rounded-full bg-black/50 text-white hover:bg-black/70 z-[10000]"
               aria-label="Previous image"
             >
               <ArrowLeft className="h-6 w-6" />
             </button>
             <button
               onClick={goNext}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 p-3 rounded-full bg-black/50 text-white hover:bg-black/70"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 p-3 rounded-full bg-black/50 text-white hover:bg-black/70 z-[10000]"
               aria-label="Next image"
             >
               <ArrowRight className="h-6 w-6" />
