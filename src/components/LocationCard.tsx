@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-
 interface LocationCardProps {
   recommendation: Recommendation;
   className?: string;
@@ -21,7 +20,6 @@ interface LocationCardProps {
   reviewCount?: number;
   showDistanceUnderAddress?: boolean;
 }
-
 const LocationCard: React.FC<LocationCardProps> = ({
   recommendation,
   className,
@@ -31,15 +29,20 @@ const LocationCard: React.FC<LocationCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
-  const { toast } = useToast();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const {
+    toast
+  } = useToast();
+  const {
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist
+  } = useWishlist();
   const inWishlist = isInWishlist(recommendation.id);
   const isMobile = useIsMobile();
   const [user, setUser] = useState<any>(null);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
-
   useEffect(() => {
     const getCurrentUser = async () => {
       const {
@@ -57,13 +60,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
       authListener?.subscription.unsubscribe();
     };
   }, []);
-
   const images = recommendation.images && recommendation.images.length > 0 ? recommendation.images : [recommendation.image];
-
   React.useEffect(() => {
     setImageLoaded(Array(images.length).fill(false));
   }, [images.length]);
-
   const handleImageLoad = (index: number) => {
     setImageLoaded(prev => {
       const newState = [...prev];
@@ -71,13 +71,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return newState;
     });
   };
-
   const handleImageClick = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
-
   const getMedalStyle = (rank: number) => {
     switch (rank) {
       case 1:
@@ -102,7 +100,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
         };
     }
   };
-
   const renderStarRating = (rating: number) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
@@ -120,7 +117,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
         {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />)}
       </div>;
   };
-
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast({
@@ -129,7 +125,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
-
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     const phoneNumber = recommendation.phone || '';
@@ -142,12 +137,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
-
   const handleInstagram = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
     console.log("Instagram button clicked, instagram value:", recommendation.instagram);
-    
     if (!recommendation.instagram || recommendation.instagram.trim() === '') {
       toast({
         title: "No Instagram",
@@ -156,24 +148,20 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
       return;
     }
-    
     let instagramHandle = recommendation.instagram;
     if (instagramHandle.startsWith('@')) {
       instagramHandle = instagramHandle.substring(1);
     }
-    
     window.open(`instagram://user?username=${instagramHandle}`);
     setTimeout(() => {
       window.open(`https://instagram.com/${instagramHandle}`);
     }, 300);
-    
     toast({
       title: "Opening Instagram",
       description: `Opening Instagram for ${recommendation.name}...`,
       duration: 2000
     });
   };
-
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) {
@@ -201,7 +189,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
-
   const handleDirections = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (recommendation.map_link && recommendation.map_link.trim() !== '') {
@@ -227,7 +214,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 2000
     });
   };
-
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (navigator.share) {
@@ -261,11 +247,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
-
   const handleCardClick = () => {
     navigate(`/location/${recommendation.id}`);
   };
-
   const formatDistance = (distanceText: string | undefined) => {
     if (!distanceText) return '';
     const distanceMatch = distanceText.match(/(\d+(\.\d+)?)/);
@@ -277,7 +261,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     formattedDistance = formattedDistance.replace('away away', 'away');
     return formattedDistance;
   };
-
   const formatPrice = () => {
     if (recommendation.price_range_min && recommendation.price_range_max && recommendation.price_unit) {
       return `${recommendation.price_range_min}-${recommendation.price_range_max}/${recommendation.price_unit.replace('per ', '')}`;
@@ -288,14 +271,12 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return '';
   };
-
   const formatBusinessHours = (hours: string | undefined) => {
     if (!hours) {
       if (recommendation.availability_days && recommendation.availability_days.length > 0) {
         const days = recommendation.availability_days.join(', ');
         const startTime = recommendation.availability_start_time || '';
         const endTime = recommendation.availability_end_time || '';
-        
         if (startTime && endTime) {
           return `${days}: ${startTime} - ${endTime}`;
         }
@@ -303,164 +284,111 @@ const LocationCard: React.FC<LocationCardProps> = ({
       }
       return null;
     }
-    
     if (recommendation.availability_days && recommendation.availability_days.length > 0) {
       const days = recommendation.availability_days.join(', ');
       const startTime = recommendation.availability_start_time || '';
       const endTime = recommendation.availability_end_time || '';
-      
       if (startTime && endTime) {
         return `${days}: ${startTime} - ${endTime}`;
       }
       return days;
     }
-    
     return hours;
   };
-
   const isOpenNow = () => {
     if (recommendation.openNow === true) return true;
     if (recommendation.openNow === false) return false;
-    
+
     // Check if the business is open based on availability days and time
     if (hasAvailabilityInfo()) {
       const now = new Date();
-      const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-      
+      const currentDay = now.toLocaleDateString('en-US', {
+        weekday: 'long'
+      }).toLowerCase();
+
       // Check if current day is in the availability days
       const availableDays = recommendation.availability_days?.map(day => day.toLowerCase()) || [];
       const isAvailableToday = availableDays.some(day => currentDay.includes(day) || day.includes(currentDay));
-      
       if (!isAvailableToday) return false;
-      
+
       // If available today, check if current time is within operating hours
       if (recommendation.availability_start_time && recommendation.availability_end_time) {
         const startTime = parseTimeString(recommendation.availability_start_time);
         const endTime = parseTimeString(recommendation.availability_end_time);
         const currentHour = now.getHours();
         const currentMinute = now.getMinutes();
-        
-        const currentTimeInMinutes = (currentHour * 60) + currentMinute;
-        
+        const currentTimeInMinutes = currentHour * 60 + currentMinute;
         return currentTimeInMinutes >= startTime && currentTimeInMinutes <= endTime;
       }
-      
       return true; // Available today but no specific hours
     }
-    
     if (recommendation.hours || recommendation.availability) {
       return true; // Default to open if hours are listed but not specific availability days
     }
-    
     return undefined; // Status unknown
   };
-  
+
   // Helper function to parse time like "9:00 AM" to minutes since midnight
   const parseTimeString = (timeString: string): number => {
     try {
       const [time, period] = timeString.split(' ');
       let [hours, minutes] = time.split(':').map(Number);
-      
       if (period === 'PM' && hours < 12) hours += 12;
       if (period === 'AM' && hours === 12) hours = 0;
-      
-      return (hours * 60) + minutes;
+      return hours * 60 + minutes;
     } catch (e) {
       console.error("Error parsing time string:", timeString, e);
       return 0;
     }
   };
-
   const hasAvailabilityInfo = () => {
     console.log("LocationCard - Checking availability for:", recommendation.name);
     console.log("LocationCard - availability_days:", recommendation.availability_days);
-    
-    return recommendation.availability_days && 
-           Array.isArray(recommendation.availability_days) && 
-           recommendation.availability_days.length > 0;
+    return recommendation.availability_days && Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0;
   };
-
   const hasInstagram = () => {
     console.log("LocationCard - Checking Instagram for:", recommendation.name);
     console.log("LocationCard - Instagram link:", recommendation.instagram);
-    
-    return recommendation.instagram && 
-           typeof recommendation.instagram === 'string' && 
-           recommendation.instagram.trim() !== '';
+    return recommendation.instagram && typeof recommendation.instagram === 'string' && recommendation.instagram.trim() !== '';
   };
-
   const formatAvailabilityDays = () => {
     if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
       return null;
     }
-    
     const days = recommendation.availability_days.join(', ');
     const startTime = recommendation.availability_start_time || '';
     const endTime = recommendation.availability_end_time || '';
-    
     if (startTime && endTime) {
-      return (
-        <div className="text-xs text-muted-foreground">
+      return <div className="text-xs text-muted-foreground">
           <p>{days}</p>
           <p className="mt-1">Time: {startTime} - {endTime}</p>
-        </div>
-      );
+        </div>;
     }
-    return (
-      <div className="text-xs text-muted-foreground">
+    return <div className="text-xs text-muted-foreground">
         <p>{days}</p>
-      </div>
-    );
+      </div>;
   };
-
   const openStatus = isOpenNow();
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
   const availabilityInfo = formatAvailabilityDays();
-
   console.log("LocationCard - Instagram:", recommendation.instagram);
   console.log("LocationCard - Availability days:", recommendation.availability_days);
   console.log("LocationCard - hasAvailabilityInfo:", hasAvailabilityInfo());
   console.log("LocationCard - hasInstagram:", hasInstagram());
   console.log("LocationCard - Open now status:", openStatus);
-
-  return (
-    <div 
-      onClick={handleCardClick} 
-      className={cn(
-        "group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", 
-        "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", 
-        className
-      )}
-    >
-      <div className={cn(
-        "relative w-full overflow-hidden", 
-        className?.includes('search-result-card') ? "h-96" : "h-72"
-      )}>
+  return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
+      <div className={cn("relative w-full overflow-hidden", className?.includes('search-result-card') ? "h-96" : "h-72")}>
         <Carousel className="w-full h-full">
           <CarouselContent className="h-full">
-            {images.map((img, index) => (
-              <CarouselItem key={index} className="h-full p-0">
+            {images.map((img, index) => <CarouselItem key={index} className="h-full p-0">
                 <div className={cn("absolute inset-0 bg-muted/30", imageLoaded[index] ? "opacity-0" : "opacity-100")} />
-                <img 
-                  src={img} 
-                  alt={`${recommendation.name} - image ${index + 1}`} 
-                  onLoad={() => handleImageLoad(index)} 
-                  onClick={e => handleImageClick(index, e)} 
-                  className={cn(
-                    "w-full object-cover transition-all-500 cursor-pointer", 
-                    className?.includes('search-result-card') ? "h-96" : "h-72", 
-                    imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
-                  )} 
-                />
-              </CarouselItem>
-            ))}
+                <img src={img} alt={`${recommendation.name} - image ${index + 1}`} onLoad={() => handleImageLoad(index)} onClick={e => handleImageClick(index, e)} className={cn("w-full object-cover transition-all-500 cursor-pointer", className?.includes('search-result-card') ? "h-96" : "h-72", imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm")} />
+              </CarouselItem>)}
           </CarouselContent>
-          {images.length > 1 && (
-            <>
+          {images.length > 1 && <>
               <CarouselPrevious className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2" />
               <CarouselNext className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2" />
-            </>
-          )}
+            </>}
         </Carousel>
 
         <div className="absolute top-3 left-20 z-10">
@@ -469,13 +397,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </span>
         </div>
         
-        <button 
-          onClick={handleWishlistToggle} 
-          className={cn(
-            "absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10", 
-            user ? inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500" : "text-muted-foreground"
-          )}
-        >
+        <button onClick={handleWishlistToggle} className={cn("absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10", user ? inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500" : "text-muted-foreground")}>
           {user ? <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} /> : <LogIn className="w-5 h-5" />}
         </button>
       </div>
@@ -483,14 +405,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
       <div className="p-4">
         <div className="flex justify-between items-start gap-2 mb-2">
           <div className="flex items-center gap-1.5">
-            {ranking !== undefined && ranking <= 10 && (
-              <div className={cn(
-                "flex items-center justify-center rounded-full border-2 flex-shrink-0", 
-                getMedalStyle(ranking).medalClass
-              )}>
+            {ranking !== undefined && ranking <= 10 && <div className={cn("flex items-center justify-center rounded-full border-2 flex-shrink-0", getMedalStyle(ranking).medalClass)}>
                 {ranking}
-              </div>
-            )}
+              </div>}
             <h3 className="font-medium text-lg">{recommendation.name}</h3>
           </div>
         </div>
@@ -508,104 +425,61 @@ const LocationCard: React.FC<LocationCardProps> = ({
             <span className="truncate">{recommendation.address}</span>
           </div>
           
-          {recommendation.distance && showDistanceUnderAddress && (
-            <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center my-[3px] px-0">
+          {recommendation.distance && showDistanceUnderAddress && <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center my-[3px] px-0">
               <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
               {formatDistance(recommendation.distance)}
-            </div>
-          )}
+            </div>}
         </div>
 
-        {(recommendation.openNow !== undefined || recommendation.hours || recommendation.availability || 
-          hasAvailabilityInfo()) && (
-          <div className="flex flex-col text-sm mb-3">
+        {(recommendation.openNow !== undefined || recommendation.hours || recommendation.availability || hasAvailabilityInfo()) && <div className="flex flex-col text-sm mb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
-                <span className={
-                  openStatus === true ? "text-emerald-600 font-medium" : 
-                  openStatus === false ? "text-rose-600 font-medium" : 
-                  "text-muted-foreground"
-                }>
-                  {openStatus === true ? "Open now" : 
-                   openStatus === false ? "Closed" : 
-                   "Hours available"}
+                <span className={openStatus === true ? "text-emerald-600 font-medium" : openStatus === false ? "text-rose-600 font-medium" : "text-muted-foreground"}>
+                  {openStatus === true ? "Open now" : openStatus === false ? "Closed" : "Hours available"}
                 </span>
               </div>
               
-              {hasInstagram() && (
-                <button 
-                  onClick={handleInstagram} 
-                  title="Watch Instagram content" 
-                  className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-3 p-1.5"
-                >
+              {hasInstagram() && <button onClick={handleInstagram} title="Watch Instagram content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-3 p-1.5">
                   <Film className="h-4 w-4 text-white" />
-                </button>
-              )}
+                </button>}
             </div>
             
-            {hasAvailabilityInfo() && (
-              <Collapsible 
-                open={availabilityOpen} 
-                onOpenChange={setAvailabilityOpen}
-                className="mt-1"
-              >
-                <CollapsibleTrigger 
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex items-center text-xs text-muted-foreground hover:text-primary transition-colors"
-                >
+            {hasAvailabilityInfo() && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="mt-1">
+                <CollapsibleTrigger onClick={e => e.stopPropagation()} className="flex items-center text-xs text-muted-foreground hover:text-primary transition-colors">
                   Available days
-                  <ChevronDown className={cn(
-                    "h-3 w-3 ml-1 transition-transform", 
-                    availabilityOpen ? "transform rotate-180" : ""
-                  )} />
+                  <ChevronDown className={cn("h-3 w-3 ml-1 transition-transform", availabilityOpen ? "transform rotate-180" : "")} />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="mt-1 mb-2">
                   {availabilityInfo}
                 </CollapsibleContent>
-              </Collapsible>
-            )}
+              </Collapsible>}
             
-            {recommendation.distance && !showDistanceUnderAddress && (
-              <div className="text-muted-foreground pl-5 mt-1 flex items-center">
+            {recommendation.distance && !showDistanceUnderAddress && <div className="text-muted-foreground pl-5 mt-1 flex items-center">
                 <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
                 {formatDistance(recommendation.distance)}
-              </div>
-            )}
-          </div>
-        )}
+              </div>}
+          </div>}
 
-        {(!recommendation.openNow && !recommendation.hours && !recommendation.availability && 
-          !hasAvailabilityInfo()) && 
-          hasInstagram() && (
-          <div className="flex items-center mb-3">
-            <button 
-              onClick={handleInstagram} 
-              title="Watch Instagram content" 
-              className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all p-1.5"
-            >
+        {!recommendation.openNow && !recommendation.hours && !recommendation.availability && !hasAvailabilityInfo() && hasInstagram() && <div className="flex items-center mb-3">
+            <button onClick={handleInstagram} title="Watch Instagram content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all p-1.5">
               <Film className="h-4 w-4 text-white" />
             </button>
             <span className="ml-2 text-xs text-muted-foreground">Instagram content</span>
-          </div>
-        )}
+          </div>}
 
         <p className="mb-4 line-clamp-2 text-slate-950 font-normal text-base">
           {recommendation.description}
         </p>
 
         <div className="flex gap-2 mt-4 flex-wrap">
-          {formatPrice() && (
-            <Badge className="flex items-center gap-1 px-3 py-1.5 bg-[#1EAEDB]">
+          {formatPrice() && <Badge className="flex items-center gap-1 px-3 py-1.5 bg-[#c63e7b]">
               <IndianRupee className="h-3.5 w-3.5" />
               {formatPrice()}
-            </Badge>
-          )}
-          {recommendation.tags && recommendation.tags.map((tag, index) => (
-            <Badge key={index} className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
+            </Badge>}
+          {recommendation.tags && recommendation.tags.map((tag, index) => <Badge key={index} className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
               {tag}
-            </Badge>
-          ))}
+            </Badge>)}
         </div>
 
         <div className="flex gap-2 mt-4">
@@ -625,8 +499,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       </div>
 
       {images.length > 0 && <ImageViewer images={images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
-    </div>
-  );
+    </div>;
 };
-
 export default LocationCard;
