@@ -347,22 +347,93 @@ const LocationCard: React.FC<LocationCardProps> = ({
     if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
       return null;
     }
-    const days = recommendation.availability_days.join(', ');
+    
+    // Format days in a concise way
+    const formattedDays = formatDayRange(recommendation.availability_days);
     const startTime = recommendation.availability_start_time || '';
     const endTime = recommendation.availability_end_time || '';
+    
     if (startTime && endTime) {
       return <div className="text-xs text-muted-foreground">
-          <p>{days}</p>
-          <p className="mt-1">Time: {startTime} - {endTime}</p>
+          <p>{formattedDays}</p>
+          <p className="mt-1">{startTime} - {endTime}</p>
         </div>;
     }
+    
     return <div className="text-xs text-muted-foreground">
-        <p>{days}</p>
+        <p>{formattedDays}</p>
       </div>;
+  };
+  
+  // Function to format day ranges (e.g., "Monday,Tuesday,Wednesday" to "Mon~Wed")
+  const formatDayRange = (days: string[]): string => {
+    if (!days || days.length === 0) return '';
+    
+    // Map full day names to abbreviations
+    const dayAbbreviations: Record<string, string> = {
+      'monday': 'Mon',
+      'tuesday': 'Tue',
+      'wednesday': 'Wed',
+      'thursday': 'Thu',
+      'friday': 'Fri',
+      'saturday': 'Sat',
+      'sunday': 'Sun'
+    };
+    
+    // Sort days according to standard week order
+    const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const sortedDays = [...days].sort((a, b) => 
+      dayOrder.indexOf(a.toLowerCase()) - dayOrder.indexOf(b.toLowerCase())
+    );
+    
+    // Check for consecutive days to create ranges
+    const ranges: string[] = [];
+    let rangeStart: string | null = null;
+    let rangeEnd: string | null = null;
+    
+    for (let i = 0; i <= sortedDays.length; i++) {
+      const day = i < sortedDays.length ? sortedDays[i].toLowerCase() : null;
+      const prevDay = i > 0 ? sortedDays[i - 1].toLowerCase() : null;
+      
+      const isDayAfterPrev = day && prevDay && 
+        dayOrder.indexOf(day) === dayOrder.indexOf(prevDay) + 1;
+      
+      if (i === 0) {
+        // Start the first range
+        rangeStart = sortedDays[0];
+        rangeEnd = sortedDays[0];
+      } else if (isDayAfterPrev) {
+        // Extend the current range
+        rangeEnd = sortedDays[i];
+      } else if (rangeStart && rangeEnd) {
+        // End of a range, add it to the result
+        if (rangeStart === rangeEnd) {
+          // Single day
+          ranges.push(dayAbbreviations[rangeStart.toLowerCase()] || rangeStart);
+        } else {
+          // Range of days
+          const startAbbr = dayAbbreviations[rangeStart.toLowerCase()] || rangeStart;
+          const endAbbr = dayAbbreviations[rangeEnd.toLowerCase()] || rangeEnd;
+          ranges.push(`${startAbbr}~${endAbbr}`);
+        }
+        
+        // Start a new range if there are more days
+        if (day) {
+          rangeStart = sortedDays[i];
+          rangeEnd = sortedDays[i];
+        } else {
+          rangeStart = null;
+          rangeEnd = null;
+        }
+      }
+    }
+    
+    return ranges.join(', ');
   };
   const openStatus = isOpenNow();
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
   const availabilityInfo = formatAvailabilityDays();
+  
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <div className={cn("relative w-full overflow-hidden", className?.includes('search-result-card') ? "h-96" : "h-72")}>
         <Carousel className="w-full h-full">
@@ -498,4 +569,5 @@ const LocationCard: React.FC<LocationCardProps> = ({
       {images.length > 0 && <ImageViewer images={images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
     </div>;
 };
+
 export default LocationCard;
