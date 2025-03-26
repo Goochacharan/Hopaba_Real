@@ -83,7 +83,7 @@ const ReviewForm = ({ onSubmit, onCancel }: ReviewFormProps) => {
             )} 
           />
 
-          <div className="flex flex-col sm:flex-row gap-4 mt-4">
+          <div className="flex gap-4 mt-4">
             <FormField
               control={form.control}
               name="isMustVisit"
@@ -92,9 +92,9 @@ const ReviewForm = ({ onSubmit, onCancel }: ReviewFormProps) => {
                   <Toggle 
                     pressed={field.value} 
                     onPressedChange={field.onChange}
-                    className={`w-full h-12 gap-2 ${field.value ? 'bg-green-100 text-green-800 border-green-200' : ''}`}
+                    className={`w-full h-12 gap-2 ${field.value ? 'bg-green-500 text-white border-green-600' : ''}`}
                   >
-                    <Award className={`h-5 w-5 ${field.value ? 'text-green-700' : ''}`} />
+                    <Award className={`h-5 w-5 ${field.value ? 'text-white' : ''}`} />
                     <span className="font-medium">Must Visit</span>
                   </Toggle>
                 </FormItem>
@@ -109,9 +109,9 @@ const ReviewForm = ({ onSubmit, onCancel }: ReviewFormProps) => {
                   <Toggle 
                     pressed={field.value} 
                     onPressedChange={field.onChange}
-                    className={`w-full h-12 gap-2 ${field.value ? 'bg-purple-100 text-purple-800 border-purple-200' : ''}`}
+                    className={`w-full h-12 gap-2 ${field.value ? 'bg-purple-500 text-white border-purple-600' : ''}`}
                   >
-                    <Gem className={`h-5 w-5 ${field.value ? 'text-purple-700' : ''}`} />
+                    <Gem className={`h-5 w-5 ${field.value ? 'text-white' : ''}`} />
                     <span className="font-medium">Hidden Gem</span>
                   </Toggle>
                 </FormItem>
