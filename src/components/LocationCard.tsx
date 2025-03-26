@@ -140,6 +140,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const handleInstagram = (e: React.MouseEvent) => {
     e.stopPropagation();
     console.log("Instagram button clicked, instagram value:", recommendation.instagram);
+    
     if (!recommendation.instagram || recommendation.instagram.trim() === '') {
       toast({
         title: "No Instagram",
@@ -148,14 +149,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
       return;
     }
-    let instagramHandle = recommendation.instagram;
-    if (instagramHandle.startsWith('@')) {
-      instagramHandle = instagramHandle.substring(1);
-    }
-    window.open(`instagram://user?username=${instagramHandle}`);
-    setTimeout(() => {
-      window.open(`https://instagram.com/${instagramHandle}`);
-    }, 300);
+    
+    console.log("Opening Instagram/video link:", recommendation.instagram);
+    window.open(recommendation.instagram, '_blank');
+    
     toast({
       title: "Opening Instagram",
       description: `Opening Instagram for ${recommendation.name}...`,
@@ -348,7 +345,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return null;
     }
 
-    // Format days in a concise way
     const formattedDays = formatDayRange(recommendation.availability_days);
     const startTime = recommendation.availability_start_time || '';
     const endTime = recommendation.availability_end_time || '';
@@ -363,11 +359,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
       </div>;
   };
 
-  // Function to format day ranges (e.g., "Monday,Tuesday,Wednesday" to "Mon~Wed")
   const formatDayRange = (days: string[]): string => {
     if (!days || days.length === 0) return '';
 
-    // Map full day names to abbreviations
     const dayAbbreviations: Record<string, string> = {
       'monday': 'Mon',
       'tuesday': 'Tue',
@@ -378,11 +372,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
       'sunday': 'Sun'
     };
 
-    // Sort days according to standard week order
     const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
     const sortedDays = [...days].sort((a, b) => dayOrder.indexOf(a.toLowerCase()) - dayOrder.indexOf(b.toLowerCase()));
 
-    // Check for consecutive days to create ranges
     const ranges: string[] = [];
     let rangeStart: string | null = null;
     let rangeEnd: string | null = null;
@@ -391,25 +383,19 @@ const LocationCard: React.FC<LocationCardProps> = ({
       const prevDay = i > 0 ? sortedDays[i - 1].toLowerCase() : null;
       const isDayAfterPrev = day && prevDay && dayOrder.indexOf(day) === dayOrder.indexOf(prevDay) + 1;
       if (i === 0) {
-        // Start the first range
         rangeStart = sortedDays[0];
         rangeEnd = sortedDays[0];
       } else if (isDayAfterPrev) {
-        // Extend the current range
         rangeEnd = sortedDays[i];
       } else if (rangeStart && rangeEnd) {
-        // End of a range, add it to the result
         if (rangeStart === rangeEnd) {
-          // Single day
           ranges.push(dayAbbreviations[rangeStart.toLowerCase()] || rangeStart);
         } else {
-          // Range of days
           const startAbbr = dayAbbreviations[rangeStart.toLowerCase()] || rangeStart;
           const endAbbr = dayAbbreviations[rangeEnd.toLowerCase()] || rangeEnd;
           ranges.push(`${startAbbr}~${endAbbr}`);
         }
 
-        // Start a new range if there are more days
         if (day) {
           rangeStart = sortedDays[i];
           rangeEnd = sortedDays[i];

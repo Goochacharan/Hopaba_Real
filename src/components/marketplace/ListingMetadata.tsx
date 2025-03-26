@@ -26,10 +26,11 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
   const handleInstagramClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerInstagram) {
-      window.open(sellerInstagram);
+      console.log("Opening video content:", sellerInstagram);
+      window.open(sellerInstagram, '_blank');
       toast({
         title: "Opening video content",
-        description: `Visiting ${sellerName}'s video content`,
+        description: `Visiting ${sellerName || 'seller'}'s video content`,
         duration: 2000
       });
     } else {

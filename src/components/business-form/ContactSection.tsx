@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { 
@@ -16,49 +15,37 @@ import { BusinessFormValues } from '../AddBusinessForm';
 const ContactSection = () => {
   const form = useFormContext<BusinessFormValues>();
   
-  // Function to handle phone number input validation
   const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
     
-    // Ensure the value starts with +91
     if (!value.startsWith('+91')) {
       value = '+91' + value.replace('+91', '');
     }
     
-    // Remove all non-digit characters except the +91 prefix
     const digits = value.slice(3).replace(/\D/g, '');
     
-    // Limit to 10 digits
     const limitedDigits = digits.slice(0, 10);
     
-    // Set the value with +91 prefix and limited digits
     e.target.value = '+91' + limitedDigits;
     
-    // Update the form value
     form.setValue('contact_phone', e.target.value, {
       shouldValidate: true,
     });
   };
 
-  // Function to handle WhatsApp number input validation
   const handleWhatsAppInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
     
-    // Ensure the value starts with +91
     if (!value.startsWith('+91')) {
       value = '+91' + value.replace('+91', '');
     }
     
-    // Remove all non-digit characters except the +91 prefix
     const digits = value.slice(3).replace(/\D/g, '');
     
-    // Limit to 10 digits
     const limitedDigits = digits.slice(0, 10);
     
-    // Set the value with +91 prefix and limited digits
     e.target.value = '+91' + limitedDigits;
     
-    // Update the form value
     form.setValue('whatsapp', e.target.value, {
       shouldValidate: true,
     });
@@ -180,7 +167,7 @@ const ContactSection = () => {
               />
             </FormControl>
             <FormDescription>
-              Add your Instagram username or video content URL
+              Add your Instagram username or full video URL (YouTube, Instagram, TikTok, etc.)
             </FormDescription>
             <FormMessage />
           </FormItem>
