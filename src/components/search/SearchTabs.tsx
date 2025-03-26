@@ -56,7 +56,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
         {events.length > 0 ? (
           <EventsList events={events} />
         ) : (
-          <NoResultsMessage type="events" />
+          <NoResultsMessage type="events" onNewSearch={handleNewSearch} />
         )}
       </TabsContent>
       
@@ -64,7 +64,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
         {marketplaceListings.length > 0 ? (
           <MarketplaceItemsList listings={marketplaceListings} />
         ) : (
-          <NoResultsMessage type="marketplace" />
+          <NoResultsMessage type="marketplace" onNewSearch={handleNewSearch} />
         )}
       </TabsContent>
     </Tabs>

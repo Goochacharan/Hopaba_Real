@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -11,9 +12,10 @@ import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 // Import new components
 import SearchHeader from '@/components/search/SearchHeader';
 import SearchTabs from '@/components/search/SearchTabs';
+import SearchBar from '@/components/SearchBar';
 
 const SearchResults = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -145,7 +147,11 @@ const SearchResults = () => {
 
   const handleNewSearch = (newQuery: string) => {
     if (newQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(newQuery)}`);
+      // Update the URL parameters
+      setSearchParams({ q: newQuery });
+      
+      // Call the handler from useRecommendations
+      handleSearch(newQuery);
     }
   };
 
@@ -204,6 +210,15 @@ const SearchResults = () => {
               handleNewSearch={handleNewSearch}
             />
           )}
+        </div>
+        
+        {/* Bottom Search Bar */}
+        <div className="mt-8 mb-4">
+          <SearchBar 
+            onSearch={handleNewSearch}
+            initialValue={searchQuery}
+            placeholder="Search for something else..."
+          />
         </div>
       </div>
     </MainLayout>
