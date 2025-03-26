@@ -92,11 +92,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
         setQuery(enhancedQuery);
       }
       
-      // Always use navigate for consistent behavior across all pages
-      navigate(`/search?q=${encodeURIComponent(enhancedQuery)}`);
-
-      // Also call the onSearch prop for backward compatibility
+      // Always call the onSearch prop first to ensure data is processed
       onSearch(enhancedQuery);
+      
+      // Then navigate to the search page
+      navigate(`/search?q=${encodeURIComponent(enhancedQuery)}`);
 
       // Show suggestions after search only if query is very short
       if (query.trim().length < 8) {
@@ -188,11 +188,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
         setQuery(enhancedQuery);
       }
       
-      // Always use navigate for consistent behavior
-      navigate(`/search?q=${encodeURIComponent(enhancedQuery)}`);
-      
-      // Also call the onSearch prop for backward compatibility
+      // Call the onSearch prop first to ensure data is processed
       onSearch(enhancedQuery);
+      
+      // Then navigate to the search page
+      navigate(`/search?q=${encodeURIComponent(enhancedQuery)}`);
     }
   };
 

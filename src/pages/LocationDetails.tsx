@@ -17,6 +17,7 @@ import * as z from "zod";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import ImageViewer from '@/components/ImageViewer';
 import SearchBar from '@/components/SearchBar';
+import useRecommendations from '@/hooks/useRecommendations';
 
 interface Review {
   id: string;
@@ -59,8 +60,7 @@ const LocationDetails = () => {
   const { id } = useParams<{ id: string; }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [location, setLocation] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  
   const [question, setQuestion] = useState('');
   const [questionAnswers, setQuestionAnswers] = useState<{
     question: string;
@@ -76,6 +76,10 @@ const LocationDetails = () => {
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const isMobile = useIsMobile();
+  const [location, setLocation] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const { handleSearch: searchRecommendations } = useRecommendations();
 
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewSchema),
@@ -267,6 +271,8 @@ const LocationDetails = () => {
   const handleSearch = (query: string) => {
     console.log("LocationDetails search triggered with:", query);
     if (query.trim()) {
+      searchRecommendations(query);
+      
       navigate(`/search?q=${encodeURIComponent(query)}`);
     }
   };
