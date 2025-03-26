@@ -28,6 +28,7 @@ export interface Recommendation {
   map_link?: string;
   hiddenGemCount?: number;
   mustVisitCount?: number;
+  created_at?: string;
 }
 
 export const mockRecommendations: Recommendation[] = [
@@ -417,9 +418,9 @@ export const searchRecommendations = (
   const filteredScored = scoredItems.filter(({ score }) => score > 0);
   filteredScored.sort((a, b) => b.score - a.score);
   
-  const filtered = filteredScored.map(({ item }) => item);
+  const resultItems = filteredScored.map(({ item }) => item);
   
-  if (filtered.length === 0 && isNearMeQuery) {
+  if (resultItems.length === 0 && isNearMeQuery) {
     let inferredCategory = '';
     
     if (normalizedQuery.includes('cafe') || normalizedQuery.includes('coffee')) {
@@ -439,7 +440,7 @@ export const searchRecommendations = (
     return mockRecommendations.slice(0, 3);
   }
   
-  if (hasLocationTerm && filtered.length === 0) {
+  if (hasLocationTerm && resultItems.length === 0) {
     const categoryFiltered = mockRecommendations.filter(item => 
       category === 'all' || 
       item.category.toLowerCase() === category.toLowerCase()
@@ -451,7 +452,7 @@ export const searchRecommendations = (
     }));
   }
   
-  return filtered;
+  return resultItems;
 };
 
 export const getRecommendationById = (id: string): Recommendation | undefined => {
