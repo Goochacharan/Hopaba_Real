@@ -5,7 +5,7 @@ import { Search, X, Mic, Sparkles } from 'lucide-react';
 import { Input } from './ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -23,7 +23,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
   currentRoute
 }) => {
   const location = useLocation();
-  const navigate = useNavigate();
   const currentPath = location.pathname;
   const [query, setQuery] = useState(initialValue);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -94,13 +93,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         setQuery(enhancedQuery);
       }
       
-      // First call the provided onSearch callback
       onSearch(enhancedQuery);
-      
-      // Then navigate to search page if we're not already there
-      if (!currentPath.startsWith('/search')) {
-        navigate(`/search?q=${encodeURIComponent(enhancedQuery)}`);
-      }
 
       // Show suggestions after search only if query is very short
       if (query.trim().length < 8) {
@@ -147,9 +140,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
       // Auto-submit after voice input
       setTimeout(() => {
         onSearch(transcript);
-        if (!currentPath.startsWith('/search')) {
-          navigate(`/search?q=${encodeURIComponent(transcript)}`);
-        }
       }, 500);
     };
     recognition.onerror = () => {
@@ -199,13 +189,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         setQuery(enhancedQuery);
       }
       
-      // Call the provided onSearch callback
       onSearch(enhancedQuery);
-      
-      // Navigate to search page if we're not already there
-      if (!currentPath.startsWith('/search')) {
-        navigate(`/search?q=${encodeURIComponent(enhancedQuery)}`);
-      }
     }
   };
 
