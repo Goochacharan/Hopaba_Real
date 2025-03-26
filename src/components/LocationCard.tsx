@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -44,8 +43,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const hiddenGemCount = recommendation.hiddenGemCount || Math.floor(Math.random() * 30);
   const mustVisitCount = recommendation.mustVisitCount || Math.floor(Math.random() * 30);
   
-  const showHiddenGemBadge = hiddenGemCount >= 20;
-  const showMustVisitBadge = mustVisitCount >= 20;
+  const showHiddenGemBadge = recommendation.isHiddenGem || hiddenGemCount >= 20;
+  const showMustVisitBadge = recommendation.isMustVisit || mustVisitCount >= 20;
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -457,7 +456,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </span>
         </div>
         
-        {/* Moved badges from top-left to bottom-left */}
         <div className="absolute bottom-3 left-3 z-10 flex flex-col gap-2">
           {showHiddenGemBadge && (
             <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/90 backdrop-blur-sm text-white flex items-center">
@@ -589,3 +587,4 @@ const LocationCard: React.FC<LocationCardProps> = ({
 };
 
 export default LocationCard;
+

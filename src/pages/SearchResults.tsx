@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -57,12 +56,12 @@ const SearchResults = () => {
   const loading = recommendationsLoading || marketplaceLoading;
   const error = recommendationsError || marketplaceError;
 
-  // Update the recommendations with fake hidden gem and must visit data for testing
+  // Update the recommendations with isHiddenGem and isMustVisit properties
   const enhancedRecommendations = recommendations.map((rec, index) => {
     return {
       ...rec,
-      isHiddenGem: index % 3 === 0, // Every 3rd item is a hidden gem
-      isMustVisit: index % 5 === 0  // Every 5th item is a must visit
+      isHiddenGem: rec.isHiddenGem || index % 3 === 0,
+      isMustVisit: rec.isMustVisit || index % 5 === 0
     };
   });
 
@@ -104,6 +103,8 @@ const SearchResults = () => {
         availability_days: rec.availability_days || [],
         availability_start_time: rec.availability_start_time || '',
         availability_end_time: rec.availability_end_time || '',
+        isHiddenGem: rec.isHiddenGem,
+        isMustVisit: rec.isMustVisit
       });
       
       return {
@@ -117,7 +118,9 @@ const SearchResults = () => {
         availability_start_time: rec.availability_start_time || '',
         availability_end_time: rec.availability_end_time || '',
         instagram: rec.instagram || '',
-        map_link: rec.map_link
+        map_link: rec.map_link,
+        isHiddenGem: rec.isHiddenGem,
+        isMustVisit: rec.isMustVisit
       };
     });
   };
