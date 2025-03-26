@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
 interface LocationCardProps {
   recommendation: Recommendation;
   className?: string;
@@ -20,6 +21,7 @@ interface LocationCardProps {
   reviewCount?: number;
   showDistanceUnderAddress?: boolean;
 }
+
 const LocationCard: React.FC<LocationCardProps> = ({
   recommendation,
   className,
@@ -43,6 +45,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
+
   useEffect(() => {
     const getCurrentUser = async () => {
       const {
@@ -60,10 +63,12 @@ const LocationCard: React.FC<LocationCardProps> = ({
       authListener?.subscription.unsubscribe();
     };
   }, []);
+
   const images = recommendation.images && recommendation.images.length > 0 ? recommendation.images : [recommendation.image];
   React.useEffect(() => {
     setImageLoaded(Array(images.length).fill(false));
   }, [images.length]);
+
   const handleImageLoad = (index: number) => {
     setImageLoaded(prev => {
       const newState = [...prev];
@@ -71,11 +76,13 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return newState;
     });
   };
+
   const handleImageClick = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
+
   const getMedalStyle = (rank: number) => {
     switch (rank) {
       case 1:
@@ -100,6 +107,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         };
     }
   };
+
   const renderStarRating = (rating: number) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
@@ -117,6 +125,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />)}
       </div>;
   };
+
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast({
@@ -125,6 +134,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
+
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     const phoneNumber = recommendation.phone || '';
@@ -137,6 +147,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
+
   const handleInstagram = (e: React.MouseEvent) => {
     e.stopPropagation();
     console.log("Instagram button clicked, instagram value:", recommendation.instagram);
@@ -162,6 +173,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 2000
     });
   };
+
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) {
@@ -189,6 +201,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
+
   const handleDirections = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (recommendation.map_link && recommendation.map_link.trim() !== '') {
@@ -214,6 +227,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 2000
     });
   };
+
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (navigator.share) {
@@ -247,9 +261,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
+
   const handleCardClick = () => {
     navigate(`/location/${recommendation.id}`);
   };
+
   const formatDistance = (distanceText: string | undefined) => {
     if (!distanceText) return '';
     const distanceMatch = distanceText.match(/(\d+(\.\d+)?)/);
@@ -261,6 +277,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
     formattedDistance = formattedDistance.replace('away away', 'away');
     return formattedDistance;
   };
+
   const formatPrice = () => {
     if (recommendation.price_range_min && recommendation.price_range_max && recommendation.price_unit) {
       return `${recommendation.price_range_min}-${recommendation.price_range_max}/${recommendation.price_unit.replace('per ', '')}`;
@@ -271,6 +288,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return '';
   };
+
   const formatBusinessHours = (hours: string | undefined) => {
     if (!hours) {
       if (recommendation.availability_days && recommendation.availability_days.length > 0) {
@@ -295,23 +313,21 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return hours;
   };
+
   const isOpenNow = () => {
     if (recommendation.openNow === true) return true;
     if (recommendation.openNow === false) return false;
 
-    // Check if the business is open based on availability days and time
     if (hasAvailabilityInfo()) {
       const now = new Date();
       const currentDay = now.toLocaleDateString('en-US', {
         weekday: 'long'
       }).toLowerCase();
 
-      // Check if current day is in the availability days
       const availableDays = recommendation.availability_days?.map(day => day.toLowerCase()) || [];
       const isAvailableToday = availableDays.some(day => currentDay.includes(day) || day.includes(currentDay));
       if (!isAvailableToday) return false;
 
-      // If available today, check if current time is within operating hours
       if (recommendation.availability_start_time && recommendation.availability_end_time) {
         const startTime = parseTimeString(recommendation.availability_start_time);
         const endTime = parseTimeString(recommendation.availability_end_time);
@@ -320,15 +336,14 @@ const LocationCard: React.FC<LocationCardProps> = ({
         const currentTimeInMinutes = currentHour * 60 + currentMinute;
         return currentTimeInMinutes >= startTime && currentTimeInMinutes <= endTime;
       }
-      return true; // Available today but no specific hours
+      return true;
     }
     if (recommendation.hours || recommendation.availability) {
-      return true; // Default to open if hours are listed but not specific availability days
+      return true;
     }
-    return undefined; // Status unknown
+    return undefined;
   };
 
-  // Helper function to parse time like "9:00 AM" to minutes since midnight
   const parseTimeString = (timeString: string): number => {
     try {
       const [time, period] = timeString.split(' ');
@@ -341,16 +356,19 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return 0;
     }
   };
+
   const hasAvailabilityInfo = () => {
     console.log("LocationCard - Checking availability for:", recommendation.name);
     console.log("LocationCard - availability_days:", recommendation.availability_days);
     return recommendation.availability_days && Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0;
   };
+
   const hasInstagram = () => {
     console.log("LocationCard - Checking Instagram for:", recommendation.name);
     console.log("LocationCard - Instagram link:", recommendation.instagram);
     return recommendation.instagram && typeof recommendation.instagram === 'string' && recommendation.instagram.trim() !== '';
   };
+
   const formatAvailabilityDays = () => {
     if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
       return null;
@@ -368,14 +386,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
         <p>{days}</p>
       </div>;
   };
+
   const openStatus = isOpenNow();
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
   const availabilityInfo = formatAvailabilityDays();
-  console.log("LocationCard - Instagram:", recommendation.instagram);
-  console.log("LocationCard - Availability days:", recommendation.availability_days);
-  console.log("LocationCard - hasAvailabilityInfo:", hasAvailabilityInfo());
-  console.log("LocationCard - hasInstagram:", hasInstagram());
-  console.log("LocationCard - Open now status:", openStatus);
+
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <div className={cn("relative w-full overflow-hidden", className?.includes('search-result-card') ? "h-96" : "h-72")}>
         <Carousel className="w-full h-full">
@@ -440,12 +455,24 @@ const LocationCard: React.FC<LocationCardProps> = ({
                 </span>
               </div>
               
+              {hasAvailabilityInfo() && openStatus === false && (
+                <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="ml-2">
+                  <CollapsibleTrigger onClick={e => e.stopPropagation()} className="flex items-center text-xs text-muted-foreground hover:text-primary transition-colors">
+                    Available days
+                    <ChevronDown className={cn("h-3 w-3 ml-1 transition-transform", availabilityOpen ? "transform rotate-180" : "")} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-1 mb-2">
+                    {availabilityInfo}
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
+              
               {hasInstagram() && <button onClick={handleInstagram} title="Watch Instagram content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-3 p-1.5 mx-[64px] px-[26px] py-[6px]">
                   <Film className="h-4 w-4 text-white" />
                 </button>}
             </div>
             
-            {hasAvailabilityInfo() && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="mt-1">
+            {hasAvailabilityInfo() && openStatus !== false && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="mt-1">
                 <CollapsibleTrigger onClick={e => e.stopPropagation()} className="flex items-center text-xs text-muted-foreground hover:text-primary transition-colors">
                   Available days
                   <ChevronDown className={cn("h-3 w-3 ml-1 transition-transform", availabilityOpen ? "transform rotate-180" : "")} />
@@ -501,4 +528,5 @@ const LocationCard: React.FC<LocationCardProps> = ({
       {images.length > 0 && <ImageViewer images={images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
     </div>;
 };
+
 export default LocationCard;
