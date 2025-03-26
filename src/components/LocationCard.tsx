@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -11,6 +12,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface LocationCardProps {
@@ -20,21 +22,6 @@ interface LocationCardProps {
   reviewCount?: number;
   showDistanceUnderAddress?: boolean;
 }
-
-const parseTimeString = (timeString: string): number => {
-  try {
-    const [time, period] = timeString.split(' ');
-    let [hours, minutes] = time.split(':').map(Number);
-    
-    if (period === 'PM' && hours < 12) hours += 12;
-    if (period === 'AM' && hours === 12) hours = 0;
-    
-    return (hours * 60) + minutes;
-  } catch (e) {
-    console.error("Error parsing time string:", timeString, e);
-    return 0;
-  }
-};
 
 const LocationCard: React.FC<LocationCardProps> = ({
   recommendation,
@@ -303,24 +290,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     return '';
   };
 
-  const hasAvailabilityInfo = () => {
-    console.log("LocationCard - Checking availability for:", recommendation.name);
-    console.log("LocationCard - availability_days:", recommendation.availability_days);
-    
-    return recommendation.availability_days && 
-           Array.isArray(recommendation.availability_days) && 
-           recommendation.availability_days.length > 0;
-  };
-
-  const hasInstagram = () => {
-    console.log("LocationCard - Checking Instagram for:", recommendation.name);
-    console.log("LocationCard - Instagram link:", recommendation.instagram);
-    
-    return recommendation.instagram && 
-           typeof recommendation.instagram === 'string' && 
-           recommendation.instagram.trim() !== '';
-  };
-
   const formatBusinessHours = (hours: string | undefined) => {
     if (!hours) {
       if (recommendation.availability_days && recommendation.availability_days.length > 0) {
@@ -385,6 +354,40 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     
     return undefined; // Status unknown
+  };
+  
+  // Helper function to parse time like "9:00 AM" to minutes since midnight
+  const parseTimeString = (timeString: string): number => {
+    try {
+      const [time, period] = timeString.split(' ');
+      let [hours, minutes] = time.split(':').map(Number);
+      
+      if (period === 'PM' && hours < 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+      
+      return (hours * 60) + minutes;
+    } catch (e) {
+      console.error("Error parsing time string:", timeString, e);
+      return 0;
+    }
+  };
+
+  const hasAvailabilityInfo = () => {
+    console.log("LocationCard - Checking availability for:", recommendation.name);
+    console.log("LocationCard - availability_days:", recommendation.availability_days);
+    
+    return recommendation.availability_days && 
+           Array.isArray(recommendation.availability_days) && 
+           recommendation.availability_days.length > 0;
+  };
+
+  const hasInstagram = () => {
+    console.log("LocationCard - Checking Instagram for:", recommendation.name);
+    console.log("LocationCard - Instagram link:", recommendation.instagram);
+    
+    return recommendation.instagram && 
+           typeof recommendation.instagram === 'string' && 
+           recommendation.instagram.trim() !== '';
   };
 
   const formatAvailabilityDays = () => {
@@ -549,7 +552,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
               )}
             </div>
             
-            {/* Only show the collapsible trigger for availability */}
             {hasAvailabilityInfo() && (
               <Collapsible 
                 open={availabilityOpen} 
