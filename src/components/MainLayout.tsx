@@ -1,23 +1,11 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
 import { cn } from '@/lib/utils';
 import { Home, User, ListChecks, Calendar, ShoppingCart, LogIn } from 'lucide-react';
 import SearchBar from './SearchBar';
 import { Button } from './ui/button';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useAuth } from '@/hooks/useAuth';
 
 interface MainLayoutProps {
@@ -31,8 +19,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { user } = useAuth();
 
   // We're removing the problematic useEffect that caused the error
@@ -41,7 +27,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const onSearch = (query: string) => {
     console.log("MainLayout search triggered with:", query);
     if (!user) {
-      setShowAuthDialog(true);
+      // Instead of showing dialog, redirect to login page
+      navigate('/login');
       return;
     }
 
@@ -62,16 +49,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   
   const shouldShowSearchBar = () => {
     return !['/location', '/search'].some(path => location.pathname.startsWith(path));
-  };
-
-  const navigateToLogin = () => {
-    navigate('/login');
-    setShowAuthDialog(false);
-  };
-
-  const navigateToSignup = () => {
-    navigate('/signup');
-    setShowAuthDialog(false);
   };
 
   return (
@@ -132,27 +109,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           <NavButton to={user ? "/profile" : "/login"} icon={<User className="h-5 w-5" />} label={user ? "Profile" : "Login"} isActive={location.pathname === '/profile' || location.pathname === '/login'} />
         </div>
       </div>
-
-      <AlertDialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Authentication Required</AlertDialogTitle>
-            <AlertDialogDescription>
-              You need to be logged in to search on Hopaba. Please login or sign up to continue.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex justify-between">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <div className="flex gap-2">
-              <AlertDialogAction onClick={navigateToLogin} className="flex items-center gap-2 bg-primary">
-                <LogIn className="h-4 w-4" />
-                Login
-              </AlertDialogAction>
-              <AlertDialogAction onClick={navigateToSignup}>Sign Up</AlertDialogAction>
-            </div>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

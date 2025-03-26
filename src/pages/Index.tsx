@@ -1,23 +1,14 @@
+
 import React, { useState } from 'react';
 import MainLayout from '@/components/MainLayout';
 import AnimatedLogo from '@/components/AnimatedLogo';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sparkles, LogIn } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 // Category mapping for example queries
 const queryCategoryMap = {
@@ -48,8 +39,6 @@ const Index = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isEnhancing, setIsEnhancing] = useState<string | null>(null);
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [pendingQuery, setPendingQuery] = useState<string | null>(null);
 
   // Sample example queries
   const exampleQueries = [{
@@ -152,8 +141,8 @@ const Index = () => {
 
   const handleSearch = async (query: string) => {
     if (!user) {
-      setPendingQuery(query);
-      setShowAuthDialog(true);
+      // Instead of showing dialog, redirect to login page
+      navigate('/login');
       return;
     }
 
@@ -178,16 +167,6 @@ const Index = () => {
     }
   };
 
-  const navigateToLogin = () => {
-    navigate('/login');
-    setShowAuthDialog(false);
-  };
-
-  const navigateToSignup = () => {
-    navigate('/signup');
-    setShowAuthDialog(false);
-  };
-
   return <MainLayout>
       <section className="flex flex-col items-center justify-center py-4 md:py-6 mx-[5px] px-0">
         <div className="text-center mb-8 animate-fade-in">
@@ -207,27 +186,6 @@ const Index = () => {
           </ScrollArea>
         </div>
       </section>
-
-      <AlertDialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Authentication Required</AlertDialogTitle>
-            <AlertDialogDescription>
-              You need to be logged in to search on Hopaba. Please login or sign up to continue.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex justify-between">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <div className="flex gap-2">
-              <AlertDialogAction onClick={navigateToLogin} className="flex items-center gap-2 bg-primary">
-                <LogIn className="h-4 w-4" />
-                Login
-              </AlertDialogAction>
-              <AlertDialogAction onClick={navigateToSignup}>Sign Up</AlertDialogAction>
-            </div>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </MainLayout>;
 };
 
