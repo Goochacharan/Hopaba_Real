@@ -55,6 +55,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     window.scrollTo(0, 0);
     console.log("Navigating to home page from: ", location.pathname);
   };
+  
+  // Check if current path is location details or search results
+  const shouldShowSearchBar = () => {
+    return !['/location', '/search'].some(path => location.pathname.startsWith(path));
+  };
 
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center relative">
@@ -87,11 +92,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         {children}
       </main>
       
-      <div className="fixed bottom-12 left-0 right-0 px-4 z-[60]">
-        <div className="max-w-5xl mx-auto">
-          <SearchBar onSearch={onSearch} className="mb-0" placeholder="What are you looking for today?" initialValue="" currentRoute={location.pathname} />
+      {shouldShowSearchBar() && (
+        <div className="fixed bottom-12 left-0 right-0 px-4 z-[60]">
+          <div className="max-w-5xl mx-auto">
+            <SearchBar onSearch={onSearch} className="mb-0" placeholder="What are you looking for today?" initialValue="" currentRoute={location.pathname} />
+          </div>
         </div>
-      </div>
+      )}
       
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 py-1 px-4 z-[60]">
         <div className="max-w-5xl mx-auto flex justify-around">

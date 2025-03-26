@@ -8,7 +8,7 @@ import SortButton, { SortOption } from '@/components/SortButton';
 import useRecommendations from '@/hooks/useRecommendations';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 
-// Import new components
+// Import components
 import SearchHeader from '@/components/search/SearchHeader';
 import SearchTabs from '@/components/search/SearchTabs';
 
@@ -143,12 +143,6 @@ const SearchResults = () => {
     });
   };
 
-  const handleNewSearch = (newQuery: string) => {
-    if (newQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(newQuery)}`);
-    }
-  };
-
   const handleSortChange = (option: SortOption) => {
     setSortBy(option);
   };
@@ -201,7 +195,6 @@ const SearchResults = () => {
               events={events}
               marketplaceListings={marketplaceListings}
               handleRSVP={handleRSVP}
-              handleNewSearch={handleNewSearch}
             />
           )}
         </div>

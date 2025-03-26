@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ShoppingBag } from 'lucide-react';
 import { Event } from '@/hooks/useRecommendations';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { Recommendation } from '@/lib/mockData';
@@ -18,7 +17,6 @@ interface SearchTabsProps {
   events: Event[];
   marketplaceListings: MarketplaceListing[];
   handleRSVP: (eventTitle: string) => void;
-  handleNewSearch: (newQuery: string) => void;
 }
 
 const SearchTabs: React.FC<SearchTabsProps> = ({
@@ -27,8 +25,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
   recommendations,
   events,
   marketplaceListings,
-  handleRSVP,
-  handleNewSearch
+  handleRSVP
 }) => {
   return (
     <Tabs defaultValue="locations" className="w-full mb-6" onValueChange={setActiveTab} value={activeTab}>
@@ -48,7 +45,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
         {recommendations.length > 0 ? (
           <LocationsList recommendations={recommendations} />
         ) : (
-          <NoResultsMessage type="locations" onNewSearch={handleNewSearch} />
+          <NoResultsMessage type="locations" />
         )}
       </TabsContent>
       
