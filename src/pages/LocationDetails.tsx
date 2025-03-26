@@ -17,6 +17,7 @@ import * as z from "zod";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import ImageViewer from '@/components/ImageViewer';
 import { supabase } from '@/integrations/supabase/client';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Review {
   id: string;
@@ -24,6 +25,8 @@ interface Review {
   date: string;
   rating: number;
   text: string;
+  isMustVisit?: boolean;
+  isHiddenGem?: boolean;
 }
 
 const reviews: Review[] = [{
@@ -50,7 +53,9 @@ const TOTAL_REVIEW_COUNT = 153;
 
 const reviewSchema = z.object({
   rating: z.number().min(1).max(5),
-  reviewText: z.string().min(3, "Review must be at least 3 characters").max(500, "Review cannot exceed 500 characters")
+  reviewText: z.string().min(3, "Review must be at least 3 characters").max(500, "Review cannot exceed 500 characters"),
+  isMustVisit: z.boolean().default(false),
+  isHiddenGem: z.boolean().default(false)
 });
 
 type ReviewFormValues = z.infer<typeof reviewSchema>;
@@ -74,7 +79,9 @@ const LocationDetails = () => {
     resolver: zodResolver(reviewSchema),
     defaultValues: {
       rating: 0,
-      reviewText: ""
+      reviewText: "",
+      isMustVisit: false,
+      isHiddenGem: false
     }
   });
 
@@ -152,7 +159,9 @@ const LocationDetails = () => {
       name: "You",
       date: currentDate,
       rating: values.rating,
-      text: values.reviewText
+      text: values.reviewText,
+      isMustVisit: values.isMustVisit,
+      isHiddenGem: values.isHiddenGem
     };
     setUserReviews(prev => [newReview, ...prev]);
     toast({
@@ -278,6 +287,44 @@ const LocationDetails = () => {
                             <FormMessage />
                           </FormItem>} />
 
+                      <div className="flex items-center space-x-6 mt-2">
+                        <FormField
+                          control={form.control}
+                          name="isMustVisit"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel>Must Visit</FormLabel>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="isHiddenGem"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel>Hidden Gem</FormLabel>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
                       <div className="flex justify-end">
                         <Button type="submit" className="w-full sm:w-auto">
                           Submit review
@@ -307,6 +354,20 @@ const LocationDetails = () => {
                       </div>
                     </div>
                     <p className="text-sm text-muted-foreground">{review.text}</p>
+                    {(review.isMustVisit || review.isHiddenGem) && (
+                      <div className="flex gap-2 mt-2">
+                        {review.isMustVisit && (
+                          <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                            Must Visit
+                          </span>
+                        )}
+                        {review.isHiddenGem && (
+                          <span className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
+                            Hidden Gem
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>)}
               </div>
             </div>
