@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -513,15 +514,30 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </div>
 
         <div className="flex flex-col mb-3">
-          <div className="flex items-center text-muted-foreground text-sm">
-            <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-            <span className="truncate">{recommendation.address}</span>
+          <div className="flex items-center justify-between text-muted-foreground text-sm">
+            <div className="flex items-center">
+              <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+              <span className="truncate">{recommendation.address}</span>
+            </div>
+            {hasInstagram() && (
+              <button 
+                onClick={handleInstagram} 
+                title="Watch video content" 
+                className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 p-1.5"
+              >
+                <Film className="h-4 w-4 text-white" />
+              </button>
+            )}
           </div>
           
-          {recommendation.distance && showDistanceUnderAddress && <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center my-[3px] px-0">
-              <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
-              {formatDistance(recommendation.distance)}
-            </div>}
+          {recommendation.distance && showDistanceUnderAddress && (
+            <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center justify-between my-[3px] px-0">
+              <div className="flex items-center">
+                <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
+                {formatDistance(recommendation.distance)}
+              </div>
+            </div>
+          )}
         </div>
 
         {(recommendation.openNow !== undefined || recommendation.hours || recommendation.availability || hasAvailabilityInfo()) && <div className="flex flex-col text-sm mb-3">
@@ -548,10 +564,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
                     {availabilityInfo}
                   </CollapsibleContent>
                 </Collapsible>}
-              
-              {hasInstagram() && <button onClick={handleInstagram} title="Watch Instagram content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-3 p-1.5 py-[6px] px-[24px] mx-[22px]">
-                  <Film className="h-4 w-4 text-white" />
-                </button>}
             </div>
             
             {hasAvailabilityInfo() && openStatus !== false && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="mt-1">
@@ -570,12 +582,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               </div>}
           </div>}
 
-        {!recommendation.openNow && !recommendation.hours && !recommendation.availability && !hasAvailabilityInfo() && hasInstagram() && <div className="flex items-center mb-3">
-            <button onClick={handleInstagram} title="Watch Instagram content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all p-1.5">
-              <Film className="h-4 w-4 text-white" />
-            </button>
-            <span className="ml-2 text-xs text-muted-foreground">Instagram content</span>
-          </div>}
+        {/* Removed the standalone Instagram button section since it's now placed next to the address */}
 
         <p className="mb-4 line-clamp-2 font-normal text-sm text-slate-700">
           {recommendation.description}
