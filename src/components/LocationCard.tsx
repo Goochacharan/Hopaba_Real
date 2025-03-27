@@ -372,13 +372,13 @@ const LocationCard: React.FC<LocationCardProps> = ({
     const startTime = recommendation.availability_start_time || '';
     const endTime = recommendation.availability_end_time || '';
     if (startTime && endTime) {
-      return <div className="text-sm text-muted-foreground px-2">
-          <p className="mb-0 leading-tight">{formattedDays}</p>
-          <p className="mt-0 leading-tight">{startTime} - {endTime}</p>
+      return <div className="text-sm text-muted-foreground px-1">
+          <p className="mb-0 leading-none">{formattedDays}</p>
+          <p className="mt-1 leading-none">{startTime} - {endTime}</p>
         </div>;
     }
-    return <div className="text-sm text-muted-foreground px-2">
-        <p className="leading-tight">{formattedDays}</p>
+    return <div className="text-sm text-muted-foreground px-1">
+        <p className="leading-none">{formattedDays}</p>
       </div>;
   };
 
@@ -562,13 +562,13 @@ const LocationCard: React.FC<LocationCardProps> = ({
                     Available days
                     <ChevronDown className={cn("h-4 w-4 ml-1 transition-transform", availabilityOpen ? "transform rotate-180" : "")} />
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-2 mb-2 border-l-2 border-muted pl-2">
+                  <CollapsibleContent className="mt-1 mb-1 border-l-2 border-muted pl-1">
                     {availabilityInfo}
                   </CollapsibleContent>
                 </Collapsible>}
             </div>
             
-            {hasAvailabilityInfo() && openStatus !== false && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="mt-2">
+            {hasAvailabilityInfo() && openStatus !== false && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="mt-1">
                 <CollapsibleTrigger 
                   onClick={e => e.stopPropagation()} 
                   className="flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-2 py-1 border border-transparent hover:border-border/30 rounded-md"
@@ -576,7 +576,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
                   Available days
                   <ChevronDown className={cn("h-4 w-4 ml-1 transition-transform", availabilityOpen ? "transform rotate-180" : "")} />
                 </CollapsibleTrigger>
-                <CollapsibleContent className="mt-2 mb-2 border-l-2 border-muted pl-2">
+                <CollapsibleContent className="mt-1 mb-1 border-l-2 border-muted pl-1">
                   {availabilityInfo}
                 </CollapsibleContent>
               </Collapsible>}

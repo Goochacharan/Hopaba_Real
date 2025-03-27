@@ -188,9 +188,25 @@ main {
 /* Collapsible component styling improvements */
 .LocationCard [data-radix-collapsible-content] {
   padding: 8px;
-  margin-top: 8px;
+  margin-top: 4px; /* Reduced from 8px to reduce the gap */
   background-color: rgba(0, 0, 0, 0.02);
   border-radius: 8px;
+}
+
+/* Reduce spacing in availability days content */
+.LocationCard [data-radix-collapsible-content] .text-sm {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.LocationCard [data-radix-collapsible-content] p {
+  margin: 0;
+  padding: 0;
+  line-height: 1.2;
+}
+
+.LocationCard [data-radix-collapsible-content] p + p {
+  margin-top: 2px; /* Reduced from default to minimize gap between days and times */
 }
 
 /* Improve available days dropdown on mobile */
@@ -206,7 +222,7 @@ main {
   }
   
   [data-radix-collapsible-content] {
-    padding: 8px !important;
+    padding: 6px !important; /* Reduced from 8px */
   }
   
   [data-radix-collapsible-content] .text-sm {
