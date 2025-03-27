@@ -104,11 +104,13 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
   // Check if parent has search-result-card class to determine if we're in search results
   const isInSearchResults = className?.includes('search-result-card');
   const isLocationDetailsPage = window.location.pathname.includes('/location/');
-  const shouldIncreaseHeight = isInSearchResults || isLocationDetailsPage;
+  const isWishlistPage = window.location.pathname.includes('/my-list');
   
-  // Adjust image height based on context
+  // Adjust image height based on context - now including wishlist page
+  const shouldIncreaseHeight = isInSearchResults || isLocationDetailsPage || isWishlistPage;
+  
   const imageHeightClass = shouldIncreaseHeight 
-    ? "h-[400px]" // Increased height for search results and location details
+    ? "h-[400px]" // Increased height for search results, location details, and wishlist
     : "h-full";
 
   return (
