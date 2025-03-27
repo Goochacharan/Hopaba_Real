@@ -493,7 +493,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               </div>
               
               {hasAvailabilityInfo() && openStatus === false && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="ml-2">
-                  <CollapsibleTrigger onClick={e => e.stopPropagation()} className="flex items-center text-xs font-medium text-muted-foreground hover:text-primary transition-colors px-1 py-0.5 border border-transparent hover:border-border/30 rounded-md">
+                  <CollapsibleTrigger onClick={e => e.stopPropagation()} className="flex items-center text-xs font-medium text-muted-foreground hover:text-primary transition-colors py-0.5 border border-transparent hover:border-border/30 rounded-md px-0 mx-[43px]">
                     Available days
                     <ChevronDown className={cn("h-3 w-3 ml-1 transition-transform", availabilityOpen ? "transform rotate-180" : "")} />
                   </CollapsibleTrigger>
