@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
@@ -73,11 +74,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         </div>
       </header>
       
-      <main className="w-full flex-1 overflow-y-auto pb-16">
+      <main className="w-full flex-1 overflow-y-auto pb-12">
         {children}
       </main>
       
-      {shouldShowSearchBar() && <div className="fixed bottom-12 left-0 right-0 px-4 z-[60]">
+      {shouldShowSearchBar() && <div className="fixed bottom-10 left-0 right-0 px-4 z-[60]">
           <div className="max-w-5xl mx-auto">
             <SearchBar onSearch={onSearch} className="mb-0" placeholder={location.pathname === '/events' ? "Search for events..." : "What are you looking for today?"} initialValue="" currentRoute={location.pathname} />
           </div>
