@@ -44,7 +44,9 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
       </div>
       
       <div className="space-y-4">
-        <p className="text-muted-foreground whitespace-pre-line leading-normal">{description}</p>
+        <p className="text-base text-muted-foreground whitespace-pre-line leading-relaxed font-normal">
+          {description}
+        </p>
         
         {showMetadata && (
           <div className="mt-6 pt-4 border-t border-gray-100">
