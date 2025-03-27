@@ -111,7 +111,8 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
     ? "h-[400px]" // Increased height for search results and location details
     : "h-full";
 
-  return <div className={cn("relative group", className)}>
+  return (
+    <div className={cn("relative group", className)}>
       <AspectRatio ratio={4 / 5} className="bg-muted">
         <img 
           src={imageArray[currentImageIndex]} 
@@ -119,7 +120,7 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
           className={cn(
             "w-full cursor-pointer", 
             imageHeightClass, 
-            "object-cover" // Always use object-cover to ensure the image fits within its container
+            "object-cover" // Always use object-cover for proper fitting
           )} 
           onClick={handleImageClick} 
           onTouchStart={onTouchStart} 
@@ -145,7 +146,8 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
           <span>{listing.condition}</span>
         </Badge>
 
-        {imageArray.length > 1 && <>
+        {imageArray.length > 1 && (
+          <>
             <Button size="icon" variant="ghost" className="absolute left-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/50 hover:bg-background/70" onClick={handlePreviousImage}>
               <ChevronLeft className="h-6 w-6" />
             </Button>
@@ -153,16 +155,27 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
             <Button size="icon" variant="ghost" className="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/50 hover:bg-background/70" onClick={handleNextImage}>
               <ChevronRight className="h-6 w-6" />
             </Button>
-          </>}
+          </>
+        )}
       </AspectRatio>
       
-      {imageArray.length > 1 && <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5">
-          {imageArray.map((_, index) => <button key={index} className={`w-2 h-2 rounded-full transition-all ${index === currentImageIndex ? 'bg-primary scale-125' : 'bg-background/70 hover:bg-background'}`} onClick={e => {
-        e.stopPropagation();
-        setCurrentImageIndex(index);
-      }} aria-label={`View image ${index + 1}`} />)}
-        </div>}
-    </div>;
+      {imageArray.length > 1 && (
+        <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5">
+          {imageArray.map((_, index) => (
+            <button 
+              key={index} 
+              className={`w-2 h-2 rounded-full transition-all ${index === currentImageIndex ? 'bg-primary scale-125' : 'bg-background/70 hover:bg-background'}`} 
+              onClick={e => {
+                e.stopPropagation();
+                setCurrentImageIndex(index);
+              }} 
+              aria-label={`View image ${index + 1}`} 
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default ListingImageCarousel;
