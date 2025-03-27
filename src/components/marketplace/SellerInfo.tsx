@@ -64,7 +64,7 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
   return (
     <div className="flex flex-col w-full">
       <div className="flex items-center mb-1 w-full py-0">
-        <span className="text-muted-foreground text-sm mr-2">Seller</span>
+        <span className="text-muted-foreground text-sm mr-1">Seller</span>
         {sellerId ? (
           <Link 
             to={`/seller/${sellerId}`} 
