@@ -35,45 +35,47 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
 
   return (
     <Card className="shadow-md w-full overflow-hidden">
-      <CardHeader className="pb-4 px-8 md:px-8 bg-muted/30">
-        <CardTitle className="text-2xl font-bold">Seller Profile</CardTitle>
+      <CardHeader className="pb-2 px-6 md:px-6 bg-muted/30">
+        <CardTitle className="text-xl font-bold">Seller Profile</CardTitle>
       </CardHeader>
-      <CardContent className="px-6 md:px-8 py-5">
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-          <Avatar className="h-32 w-32 border-4 border-background">
-            <AvatarFallback className="bg-primary/10 text-primary text-4xl">
+      <CardContent className="px-5 md:px-6 py-4">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
+          <Avatar className="h-24 w-24 border-4 border-background">
+            <AvatarFallback className="bg-primary/10 text-primary text-3xl">
               {getInitials(sellerName)}
             </AvatarFallback>
           </Avatar>
           
-          <div className="space-y-4 text-center md:text-left w-full">
-            <h3 className="text-3xl font-bold">{sellerName}</h3>
+          <div className="space-y-2 text-center md:text-left w-full">
+            <h3 className="text-2xl font-bold">{sellerName}</h3>
             
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center">
-                <StarRating rating={sellerRating} size="medium" />
-                <span className="text-muted-foreground ml-1">({reviewCount} reviews)</span>
-              </div>
+            <div className="flex flex-wrap items-center">
+              <StarRating 
+                rating={sellerRating} 
+                size="medium" 
+                showCount={true}
+                count={reviewCount}
+              />
             </div>
             
-            <div className="grid grid-cols-1 gap-y-3 pt-1">
-              <div className="flex items-center gap-2 text-base">
-                <UserCircle className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+            <div className="grid grid-cols-1 gap-y-2 pt-1">
+              <div className="flex items-center gap-2 text-sm">
+                <UserCircle className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <span>Member since {formattedJoinedDate}</span>
               </div>
               
-              <div className="flex items-center gap-2 text-base">
-                <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              <div className="flex items-center gap-2 text-sm">
+                <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <span>San Francisco, CA</span>
               </div>
               
-              <div className="flex items-center gap-2 text-base">
-                <Mail className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              <div className="flex items-center gap-2 text-sm">
+                <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <span>Contact via Message</span>
               </div>
               
-              <div className="flex items-center gap-2 text-base">
-                <Instagram className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              <div className="flex items-center gap-2 text-sm">
+                <Instagram className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <span>@{sellerName.toLowerCase().replace(/\s/g, '')}</span>
               </div>
             </div>
