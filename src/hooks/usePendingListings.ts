@@ -115,24 +115,29 @@ export const usePendingListings = () => {
     try {
       let tableName = '';
       
-      switch (listingType) {
-        case 'marketplace':
-          tableName = 'marketplace_listings';
-          break;
-        case 'services':
-          tableName = 'service_providers';
-          break;
-        case 'events':
-          tableName = 'events';
-          break;
+      // Map listingType to the actual table name
+      if (listingType === 'marketplace') {
+        const { error } = await supabase
+          .from('marketplace_listings')
+          .update({ approval_status: status })
+          .eq('id', listingId);
+        
+        if (error) throw error;
+      } else if (listingType === 'services') {
+        const { error } = await supabase
+          .from('service_providers')
+          .update({ approval_status: status })
+          .eq('id', listingId);
+        
+        if (error) throw error;
+      } else if (listingType === 'events') {
+        const { error } = await supabase
+          .from('events')
+          .update({ approval_status: status })
+          .eq('id', listingId);
+        
+        if (error) throw error;
       }
-
-      const { error } = await supabase
-        .from(tableName)
-        .update({ approval_status: status })
-        .eq('id', listingId);
-
-      if (error) throw error;
 
       toast({
         title: "Success",
