@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-
 interface LocationCardProps {
   recommendation: Recommendation;
   className?: string;
@@ -21,7 +20,6 @@ interface LocationCardProps {
   reviewCount?: number;
   showDistanceUnderAddress?: boolean;
 }
-
 const LocationCard: React.FC<LocationCardProps> = ({
   recommendation,
   className,
@@ -31,21 +29,24 @@ const LocationCard: React.FC<LocationCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
-  const { toast } = useToast();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const {
+    toast
+  } = useToast();
+  const {
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist
+  } = useWishlist();
   const inWishlist = isInWishlist(recommendation.id);
   const isMobile = useIsMobile();
   const [user, setUser] = useState<any>(null);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
-  
   const hiddenGemCount = recommendation.hiddenGemCount || Math.floor(Math.random() * 30);
   const mustVisitCount = recommendation.mustVisitCount || Math.floor(Math.random() * 30);
-  
   const showHiddenGemBadge = recommendation.isHiddenGem || hiddenGemCount >= 20;
   const showMustVisitBadge = recommendation.isMustVisit || mustVisitCount >= 20;
-
   useEffect(() => {
     const getCurrentUser = async () => {
       const {
@@ -63,12 +64,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
       authListener?.subscription.unsubscribe();
     };
   }, []);
-
   const images = recommendation.images && recommendation.images.length > 0 ? recommendation.images : [recommendation.image];
   React.useEffect(() => {
     setImageLoaded(Array(images.length).fill(false));
   }, [images.length]);
-
   const handleImageLoad = (index: number) => {
     setImageLoaded(prev => {
       const newState = [...prev];
@@ -76,13 +75,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return newState;
     });
   };
-
   const handleImageClick = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
-
   const getMedalStyle = (rank: number) => {
     switch (rank) {
       case 1:
@@ -107,7 +104,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
         };
     }
   };
-
   const renderStarRating = (rating: number) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
@@ -125,7 +121,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
         {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />)}
       </div>;
   };
-
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast({
@@ -134,7 +129,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
-
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     const phoneNumber = recommendation.phone || '';
@@ -147,11 +141,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
-
   const handleInstagram = (e: React.MouseEvent) => {
     e.stopPropagation();
     console.log("Instagram button clicked, instagram value:", recommendation.instagram);
-    
     if (!recommendation.instagram || recommendation.instagram.trim() === '') {
       toast({
         title: "No Instagram",
@@ -160,17 +152,14 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
       return;
     }
-    
     console.log("Opening Instagram/video link:", recommendation.instagram);
     window.open(recommendation.instagram, '_blank');
-    
     toast({
       title: "Opening Instagram",
       description: `Opening Instagram for ${recommendation.name}...`,
       duration: 2000
     });
   };
-
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) {
@@ -198,7 +187,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
-
   const handleDirections = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (recommendation.map_link && recommendation.map_link.trim() !== '') {
@@ -224,7 +212,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 2000
     });
   };
-
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (navigator.share) {
@@ -258,11 +245,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
-
   const handleCardClick = () => {
     navigate(`/location/${recommendation.id}`);
   };
-
   const formatDistance = (distanceText: string | undefined) => {
     if (!distanceText) return '';
     const distanceMatch = distanceText.match(/(\d+(\.\d+)?)/);
@@ -274,7 +259,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     formattedDistance = formattedDistance.replace('away away', 'away');
     return formattedDistance;
   };
-
   const formatPrice = () => {
     if (recommendation.price_range_min && recommendation.price_range_max && recommendation.price_unit) {
       return `${recommendation.price_range_min}-${recommendation.price_range_max}/${recommendation.price_unit.replace('per ', '')}`;
@@ -285,7 +269,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return '';
   };
-
   const formatBusinessHours = (hours: string | undefined) => {
     if (!hours) {
       if (recommendation.availability_days && recommendation.availability_days.length > 0) {
@@ -310,7 +293,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return hours;
   };
-
   const isOpenNow = () => {
     if (recommendation.openNow === true) return true;
     if (recommendation.openNow === false) return false;
@@ -337,7 +319,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return undefined;
   };
-
   const parseTimeString = (timeString: string): number => {
     try {
       const [time, period] = timeString.split(' ');
@@ -350,24 +331,20 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return 0;
     }
   };
-
   const hasAvailabilityInfo = () => {
     console.log("LocationCard - Checking availability for:", recommendation.name);
     console.log("LocationCard - availability_days:", recommendation.availability_days);
     return recommendation.availability_days && Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0;
   };
-
   const hasInstagram = () => {
     console.log("LocationCard - Checking Instagram for:", recommendation.name);
     console.log("LocationCard - Instagram link:", recommendation.instagram);
     return recommendation.instagram && typeof recommendation.instagram === 'string' && recommendation.instagram.trim() !== '';
   };
-
   const formatAvailabilityDays = () => {
     if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
       return null;
     }
-
     const formattedDays = formatDayRange(recommendation.availability_days);
     const startTime = recommendation.availability_start_time || '';
     const endTime = recommendation.availability_end_time || '';
@@ -381,10 +358,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
         <p className="leading-none">{formattedDays}</p>
       </div>;
   };
-
   const formatDayRange = (days: string[]): string => {
     if (!days || days.length === 0) return '';
-
     const dayAbbreviations: Record<string, string> = {
       'monday': 'Mon',
       'tuesday': 'Tue',
@@ -394,10 +369,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
       'saturday': 'Sat',
       'sunday': 'Sun'
     };
-
     const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
     const sortedDays = [...days].sort((a, b) => dayOrder.indexOf(a.toLowerCase()) - dayOrder.indexOf(b.toLowerCase()));
-
     const ranges: string[] = [];
     let rangeStart: string | null = null;
     let rangeEnd: string | null = null;
@@ -418,7 +391,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
           const endAbbr = dayAbbreviations[rangeEnd.toLowerCase()] || rangeEnd;
           ranges.push(`${startAbbr}~${endAbbr}`);
         }
-
         if (day) {
           rangeStart = sortedDays[i];
           rangeEnd = sortedDays[i];
@@ -430,37 +402,21 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return ranges.join(', ');
   };
-
   const openStatus = isOpenNow();
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
   const availabilityInfo = formatAvailabilityDays();
-
   const isSearchResultCard = className?.includes('search-result-card');
   const isLocationDetailsPage = window.location.pathname.includes('/location/');
   const shouldIncreaseHeight = isSearchResultCard || isLocationDetailsPage;
-  
-  const imageHeightClass = shouldIncreaseHeight 
-    ? "h-[400px]" // Increased height for search results and location details
-    : "h-72";
-
+  const imageHeightClass = shouldIncreaseHeight ? "h-[400px]" // Increased height for search results and location details
+  : "h-72";
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <div className={cn("relative w-full overflow-hidden", imageHeightClass)}>
         <Carousel className="w-full h-full">
           <CarouselContent className="h-full">
             {images.map((img, index) => <CarouselItem key={index} className="h-full p-0">
                 <div className={cn("absolute inset-0 bg-muted/30", imageLoaded[index] ? "opacity-0" : "opacity-100")} />
-                <img 
-                  src={img} 
-                  alt={`${recommendation.name} - image ${index + 1}`} 
-                  onLoad={() => handleImageLoad(index)} 
-                  onClick={e => handleImageClick(index, e)} 
-                  className={cn(
-                    "w-full transition-all-500 cursor-pointer", 
-                    imageHeightClass,
-                    shouldIncreaseHeight ? "object-cover" : "object-contain",
-                    imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
-                  )} 
-                />
+                <img src={img} alt={`${recommendation.name} - image ${index + 1}`} onLoad={() => handleImageLoad(index)} onClick={e => handleImageClick(index, e)} className={cn("w-full transition-all-500 cursor-pointer", imageHeightClass, shouldIncreaseHeight ? "object-cover" : "object-contain", imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm")} />
               </CarouselItem>)}
           </CarouselContent>
           {images.length > 1 && <>
@@ -476,18 +432,14 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </div>
         
         <div className="absolute bottom-3 left-3 z-10 flex flex-col gap-2">
-          {showHiddenGemBadge && (
-            <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/90 backdrop-blur-sm text-white flex items-center">
+          {showHiddenGemBadge && <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/90 backdrop-blur-sm text-white flex items-center">
               <Sparkles className="h-3 w-3 mr-1" />
               Hidden Gem
-            </span>
-          )}
-          {showMustVisitBadge && (
-            <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/90 backdrop-blur-sm text-white flex items-center">
+            </span>}
+          {showMustVisitBadge && <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/90 backdrop-blur-sm text-white flex items-center">
               <Award className="h-3 w-3 mr-1" />
               Must Visit
-            </span>
-          )}
+            </span>}
         </div>
         
         <button onClick={handleWishlistToggle} className={cn("absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10", user ? inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500" : "text-muted-foreground")}>
@@ -518,47 +470,30 @@ const LocationCard: React.FC<LocationCardProps> = ({
               <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
               <span className="truncate">{recommendation.address}</span>
             </div>
-            {hasInstagram() && (
-              <button 
-                onClick={handleInstagram} 
-                title="Watch video content" 
-                className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 p-1.5"
-              >
+            {hasInstagram() && <button onClick={handleInstagram} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 p-1.5 px-[29px] mx-[55px] py-[7px]">
                 <Film className="h-4 w-4 text-white" />
-              </button>
-            )}
+              </button>}
           </div>
           
-          {recommendation.distance && showDistanceUnderAddress && (
-            <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center justify-between my-[3px] px-0">
+          {recommendation.distance && showDistanceUnderAddress && <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center justify-between my-[3px] px-0">
               <div className="flex items-center">
                 <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
                 {formatDistance(recommendation.distance)}
               </div>
-            </div>
-          )}
+            </div>}
         </div>
 
         {(recommendation.openNow !== undefined || recommendation.hours || recommendation.availability || hasAvailabilityInfo()) && <div className="flex flex-col text-sm mb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                {openStatus === true ? (
-                  <CircleDot className="w-4 h-4 mr-1 flex-shrink-0 text-emerald-600 fill-emerald-600" />
-                ) : openStatus === false ? (
-                  <Circle className="w-4 h-4 mr-1 flex-shrink-0 text-rose-600 fill-rose-600" />
-                ) : (
-                  <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
-                )}
+                {openStatus === true ? <CircleDot className="w-4 h-4 mr-1 flex-shrink-0 text-emerald-600 fill-emerald-600" /> : openStatus === false ? <Circle className="w-4 h-4 mr-1 flex-shrink-0 text-rose-600 fill-rose-600" /> : <Clock className="w-4 h-4 mr-1 flex-shrink-0" />}
                 <span className={openStatus === true ? "text-emerald-600 font-medium" : openStatus === false ? "text-rose-600 font-medium" : "text-muted-foreground"}>
                   {openStatus === true ? "Open now" : openStatus === false ? "Closed" : "Hours available"}
                 </span>
               </div>
               
               {hasAvailabilityInfo() && openStatus === false && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="ml-2">
-                  <CollapsibleTrigger 
-                    onClick={e => e.stopPropagation()} 
-                    className="flex items-center text-xs font-medium text-muted-foreground hover:text-primary transition-colors px-1 py-0.5 border border-transparent hover:border-border/30 rounded-md"
-                  >
+                  <CollapsibleTrigger onClick={e => e.stopPropagation()} className="flex items-center text-xs font-medium text-muted-foreground hover:text-primary transition-colors px-1 py-0.5 border border-transparent hover:border-border/30 rounded-md">
                     Available days
                     <ChevronDown className={cn("h-3 w-3 ml-1 transition-transform", availabilityOpen ? "transform rotate-180" : "")} />
                   </CollapsibleTrigger>
@@ -569,10 +504,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
             </div>
             
             {hasAvailabilityInfo() && openStatus !== false && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="mt-0.5">
-                <CollapsibleTrigger 
-                  onClick={e => e.stopPropagation()} 
-                  className="flex items-center text-xs font-medium text-muted-foreground hover:text-primary transition-colors px-1 py-0.5 border border-transparent hover:border-border/30 rounded-md"
-                >
+                <CollapsibleTrigger onClick={e => e.stopPropagation()} className="flex items-center text-xs font-medium text-muted-foreground hover:text-primary transition-colors px-1 py-0.5 border border-transparent hover:border-border/30 rounded-md">
                   Available days
                   <ChevronDown className={cn("h-3 w-3 ml-1 transition-transform", availabilityOpen ? "transform rotate-180" : "")} />
                 </CollapsibleTrigger>
@@ -620,5 +552,4 @@ const LocationCard: React.FC<LocationCardProps> = ({
       {images.length > 0 && <ImageViewer images={images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
     </div>;
 };
-
 export default LocationCard;
