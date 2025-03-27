@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -146,11 +145,7 @@ const MyList = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                   {currentItems.map(item => {
                     if (isMarketplaceListing(item)) {
-                      return <MarketplaceListingCard 
-                               key={item.id} 
-                               listing={item as MarketplaceListing} 
-                               className="search-result-card" // Add the search-result-card class here
-                             />;
+                      return <MarketplaceListingCard key={item.id} listing={item as MarketplaceListing} />;
                     } else if (isEvent(item)) {
                       const events = [item as Event];
                       return <EventsList key={item.id} events={events} />;
