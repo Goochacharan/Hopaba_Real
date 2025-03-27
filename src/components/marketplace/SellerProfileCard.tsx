@@ -49,11 +49,9 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
           <div className="space-y-4 text-center md:text-left w-full">
             <h3 className="text-3xl font-bold">{sellerName}</h3>
             
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center">
-                <StarRating rating={sellerRating} size="medium" />
-                <span className="text-muted-foreground ml-1">({reviewCount} reviews)</span>
-              </div>
+            <div className="flex items-center gap-1">
+              <StarRating rating={sellerRating} size="medium" />
+              <span className="text-muted-foreground ml-1">({reviewCount} reviews)</span>
             </div>
             
             <div className="grid grid-cols-1 gap-y-3 pt-1">

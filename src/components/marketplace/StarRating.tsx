@@ -22,18 +22,18 @@ const StarRating: React.FC<StarRatingProps> = ({
   const hasHalfStar = rating % 1 >= 0.5;
   const totalStars = 5;
   
-  // Define star sizes
+  // Define star sizes - making them smaller overall
   const starSizes = {
-    small: 'w-3.5 h-3.5',
-    medium: 'w-4.5 h-4.5',
-    large: 'w-6 h-6'
+    small: 'w-3 h-3',
+    medium: 'w-4 h-4',
+    large: 'w-5 h-5'
   };
   
   const starSize = starSizes[size];
   const textSize = size === 'small' ? 'text-xs' : size === 'medium' ? 'text-sm' : 'text-base';
   
   return (
-    <div className={cn("flex items-center", className)}>
+    <div className={cn("flex items-center flex-nowrap", className)}>
       {[...Array(fullStars)].map((_, i) => (
         <Star key={`full-${i}`} className={cn("fill-amber-500 stroke-amber-500", starSize)} />
       ))}
