@@ -453,7 +453,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
             {ranking !== undefined && ranking <= 10 && <div className={cn("flex items-center justify-center rounded-full border-2 flex-shrink-0", getMedalStyle(ranking).medalClass)}>
                 {ranking}
               </div>}
-            <h3 className="font-medium text-lg">{recommendation.name}</h3>
+            <h3 className="text-xl font-bold">{recommendation.name}</h3>
           </div>
         </div>
 
