@@ -51,7 +51,7 @@ const LocationHeader = ({ name, rating, reviewCount, images, onImageClick }: Loc
       
       <div className="p-6">
         <div className="mb-2">
-          <h1 className="text-xl font-bold">{name}</h1>
+          <h1 className="text-2xl font-bold">{name}</h1>
         </div>
         
         <div className="flex items-center mb-4">
