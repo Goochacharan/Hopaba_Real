@@ -172,11 +172,11 @@ main {
 }
 
 .search-result-card p {
-  line-height: 1.1;
-  min-height: 1.2rem;
+  line-height: 1.5;
+  min-height: 3em;
   margin-top: 1px;
   margin-bottom: 0;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .search-result-card .truncate {
