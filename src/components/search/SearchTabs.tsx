@@ -28,20 +28,20 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
   handleRSVP
 }) => {
   return (
-    <Tabs defaultValue="locations" className="w-full mb-2" onValueChange={setActiveTab} value={activeTab}>
-      <TabsList className="grid w-full max-w-md grid-cols-3 mb-2 TabsList">
-        <TabsTrigger value="locations" className="font-medium text-sm py-1">
+    <Tabs defaultValue="locations" className="w-full mb-0" onValueChange={setActiveTab} value={activeTab}>
+      <TabsList className="grid w-full max-w-md grid-cols-3 mb-1 TabsList">
+        <TabsTrigger value="locations" className="font-medium text-xs py-0.5">
           Locations ({recommendations.length})
         </TabsTrigger>
-        <TabsTrigger value="events" className="font-medium text-sm py-1">
+        <TabsTrigger value="events" className="font-medium text-xs py-0.5">
           Events ({events.length})
         </TabsTrigger>
-        <TabsTrigger value="marketplace" className="font-medium text-sm py-1">
+        <TabsTrigger value="marketplace" className="font-medium text-xs py-0.5">
           Marketplace ({marketplaceListings.length})
         </TabsTrigger>
       </TabsList>
       
-      <TabsContent value="locations" className="pt-0">
+      <TabsContent value="locations" className="pt-0 mt-0">
         {recommendations.length > 0 ? (
           <LocationsList recommendations={recommendations} />
         ) : (
@@ -49,7 +49,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
         )}
       </TabsContent>
       
-      <TabsContent value="events" className="pt-0">
+      <TabsContent value="events" className="pt-0 mt-0">
         {events.length > 0 ? (
           <EventsList events={events} />
         ) : (
@@ -57,7 +57,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
         )}
       </TabsContent>
       
-      <TabsContent value="marketplace" className="pt-0">
+      <TabsContent value="marketplace" className="pt-0 mt-0">
         {marketplaceListings.length > 0 ? (
           <MarketplaceItemsList listings={marketplaceListings} />
         ) : (
