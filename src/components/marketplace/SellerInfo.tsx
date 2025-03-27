@@ -63,8 +63,8 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
 
   return (
     <div className="flex flex-col w-full">
-      <div className="flex items-center gap-3 mb-3 w-full py-0">
-        <span className="text-muted-foreground text-sm">Seller</span>
+      <div className="flex items-center mb-1 w-full py-0">
+        <span className="text-muted-foreground text-sm mr-2">Seller</span>
         {sellerId ? (
           <Link 
             to={`/seller/${sellerId}`} 
@@ -77,7 +77,7 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
           <span className="font-medium text-lg">{sellerName}</span>
         )}
       </div>
-      <div className="flex items-center gap-6 w-full rounded-sm py-0 my-0 px-[25px] mx-[2px]">
+      <div className="flex items-center gap-6 w-full rounded-sm py-0 my-0">
         <StarRating rating={sellerRating} showCount={true} count={reviewCount} size="small" />
         {sellerInstagram && (
           <button 
