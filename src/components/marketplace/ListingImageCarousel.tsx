@@ -116,7 +116,11 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
         <img 
           src={imageArray[currentImageIndex]} 
           alt={`Product image ${currentImageIndex + 1}`} 
-          className={cn("object-cover w-full cursor-pointer", imageHeightClass)} 
+          className={cn(
+            "w-full cursor-pointer", 
+            imageHeightClass, 
+            "object-cover" // Always use object-cover to ensure the image fits within its container
+          )} 
           onClick={handleImageClick} 
           onTouchStart={onTouchStart} 
           onTouchMove={onTouchMove} 
