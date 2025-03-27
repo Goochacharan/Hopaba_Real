@@ -75,7 +75,7 @@
     @apply bg-background text-foreground antialiased;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    padding-bottom: 120px; /* Increased padding to prevent content from going under fixed bars */
+    padding-bottom: 80px; /* Reduced padding from 120px */
   }
 
   /* Custom scrollbar */
@@ -161,11 +161,11 @@
 
 /* Fix for content appearing behind fixed elements */
 .fixed-bottom-padding {
-  padding-bottom: 120px;
+  padding-bottom: 80px; /* Reduced padding from 120px */
 }
 
 main {
-  padding-bottom: 150px !important; /* Increased padding for main content area */
+  padding-bottom: 100px !important; /* Reduced padding from 150px */
 }
 
 /* Card and text height consistency */

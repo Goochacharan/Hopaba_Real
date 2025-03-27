@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import MainLayout from '@/components/MainLayout';
 import AnimatedLogo from '@/components/AnimatedLogo';
@@ -171,8 +172,8 @@ const Index = () => {
         </div>
 
         <div className="w-full max-w-2xl mx-auto">
-          <ScrollArea className="h-[calc(100vh-140px)] w-full px-1 pb-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-12 pr-4">
+          <ScrollArea className="h-[calc(100vh-200px)] w-full px-1 pb-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4 pr-4">
               {exampleQueries.map((example, idx) => <Button key={idx} variant="outline" onClick={() => handleSearch(example.text)} className="justify-start h-auto border-border/50 text-left px-[17px] py-1.5 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200 overflow-hidden" disabled={isEnhancing === example.text}>
                   <div className="mr-3 text-base">{example.icon}</div>
                   <span className="font-normal text-sm sm:text-base truncate">{example.text}</span>
