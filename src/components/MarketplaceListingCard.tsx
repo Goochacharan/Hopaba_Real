@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -35,13 +34,12 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't navigate if image viewer is open
     if (imageViewerOpen) return;
-    
     navigate(`/marketplace/${listing.id}`);
   };
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <ListingImageCarousel images={listing.images} onImageClick={handleImageClick} listing={listing} />
       
-      <div className="p-4 px-[12px] py-[8px]">
+      <div className="p-4 px-[12px] py-[16px]">
         <h3 className="font-medium text-lg md:text-xl mb-2">{listing.title}</h3>
         
         <div className="mb-4">
@@ -65,15 +63,10 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         <ListingActionButtons listingId={listing.id} title={listing.title} price={listing.price} sellerPhone={listing.seller_phone} sellerWhatsapp={listing.seller_whatsapp} sellerInstagram={listing.seller_instagram} location={listing.location} />
       </div>
 
-      <ImageViewer 
-        images={listing.images} 
-        initialIndex={selectedImageIndex} 
-        open={imageViewerOpen} 
-        onOpenChange={(open) => {
-          setImageViewerOpen(open);
-          // The dialog handles its own state, no need to navigate
-        }} 
-      />
+      <ImageViewer images={listing.images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={open => {
+      setImageViewerOpen(open);
+      // The dialog handles its own state, no need to navigate
+    }} />
     </div>;
 };
 export default MarketplaceListingCard;
