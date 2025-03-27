@@ -28,8 +28,8 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
   handleRSVP
 }) => {
   return (
-    <Tabs defaultValue="locations" className="w-full mb-2" onValueChange={setActiveTab} value={activeTab}>
-      <TabsList className="grid w-full max-w-md grid-cols-3 mb-2 TabsList">
+    <Tabs defaultValue="locations" className="w-full" onValueChange={setActiveTab} value={activeTab}>
+      <TabsList className="grid w-full max-w-md grid-cols-3 mb-1 TabsList">
         <TabsTrigger value="locations" className="font-medium text-sm py-1">
           Locations ({recommendations.length})
         </TabsTrigger>

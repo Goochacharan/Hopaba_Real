@@ -14,6 +14,7 @@ interface SearchHeaderProps {
   };
   loading: boolean;
   error: string | null;
+  className?: string;
 }
 
 const SearchHeader: React.FC<SearchHeaderProps> = ({ 
@@ -22,31 +23,32 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
   category,
   resultsCount,
   loading,
-  error
+  error,
+  className
 }) => {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
         {[1, 2, 3].map(i => (
-          <div key={i} className="bg-white/50 h-96 rounded-xl border border-border/50 animate-pulse" />
+          <div key={i} className="bg-white/50 h-72 rounded-xl border border-border/50 animate-pulse" />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="mb-12">
+    <div className={`mb-1 ${className || ''}`}>
       {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
+        <Alert variant="destructive" className="mb-1 py-1">
+          <AlertCircle className="h-3 w-3" />
+          <AlertTitle className="text-xs">Error</AlertTitle>
+          <AlertDescription className="text-xs">{error}</AlertDescription>
         </Alert>
       )}
 
       {query && query !== searchQuery && (
-        <div className="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
-          <p className="text-sm text-muted-foreground">
+        <div className="mb-1 p-1 bg-primary/10 rounded-lg border border-primary/20">
+          <p className="text-xs text-muted-foreground">
             <span className="font-medium">AI-enhanced search:</span> {query}
           </p>
         </div>

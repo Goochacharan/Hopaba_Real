@@ -11,7 +11,7 @@ const LocationsList: React.FC<LocationsListProps> = ({ recommendations }) => {
   console.log("LocationsList - Recommendations:", recommendations);
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 search-results-grid">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 search-results-grid">
       {recommendations.map((recommendation, index) => {
         // Log each recommendation to debug
         console.log(`Recommendation ${index}:`, {
@@ -26,7 +26,7 @@ const LocationsList: React.FC<LocationsListProps> = ({ recommendations }) => {
         return (
           <div 
             key={recommendation.id} 
-            className="animate-fade-in" 
+            className="animate-fade-in compact-card" 
             style={{ animationDelay: `${index * 50}ms` }}
           >
             <LocationCard 

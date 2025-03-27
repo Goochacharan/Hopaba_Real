@@ -167,7 +167,7 @@ const SearchResults = () => {
 
   return (
     <MainLayout>
-      <div className="w-full animate-fade-in mx-0 px-[4px] search-results-container">
+      <div className="w-full animate-fade-in mx-0 px-[2px] search-results-container">
         <div className="location-selector">
           <LocationSelector 
             selectedLocation={selectedLocation} 
@@ -175,7 +175,7 @@ const SearchResults = () => {
           />
         </div>
         
-        <div className="flex items-center justify-between mb-2 mt-1 filter-tabs-container">
+        <div className="flex items-center justify-between mb-1 mt-0 filter-tabs-container">
           <FilterTabs 
             distance={distance} 
             setDistance={setDistance} 
