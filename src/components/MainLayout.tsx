@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
@@ -7,19 +6,19 @@ import { Home, User, ListChecks, Calendar, ShoppingCart, LogIn } from 'lucide-re
 import SearchBar from './SearchBar';
 import { Button } from './ui/button';
 import { useAuth } from '@/hooks/useAuth';
-
 interface MainLayoutProps {
   children: React.ReactNode;
   className?: string;
 }
-
 const MainLayout: React.FC<MainLayoutProps> = ({
   children,
   className
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
 
   // We're removing the problematic useEffect that caused the error
   // The useAuth hook already handles session management, so this duplication is not needed
@@ -31,7 +30,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       navigate('/login');
       return;
     }
-
     if (query.trim()) {
       if (location.pathname === '/events') {
         navigate(`/events?q=${encodeURIComponent(query)}`);
@@ -40,19 +38,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       }
     }
   };
-
   const navigateToHome = () => {
     navigate('/');
     window.scrollTo(0, 0);
     console.log("Navigating to home page from: ", location.pathname);
   };
-  
   const shouldShowSearchBar = () => {
     return !['/location', '/search'].some(path => location.pathname.startsWith(path));
   };
-
-  return (
-    <div className="min-h-screen w-full bg-background flex flex-col items-center relative">
+  return <div className="min-h-screen w-full bg-background flex flex-col items-center relative">
       <header className="w-full sticky top-0 z-50 glass border-b border-border/50 px-6 py-4">
         <div className="max-w-5xl mx-auto w-full flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2" role="button" aria-label="Go to home page" onClick={e => {
@@ -78,23 +72,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         </div>
       </header>
       
-      <main className="w-full flex-1 overflow-y-auto pb-32">
+      <main className="w-full flex-1 overflow-y-auto pb-20">
         {children}
       </main>
       
-      {shouldShowSearchBar() && (
-        <div className="fixed bottom-12 left-0 right-0 px-4 z-[60]">
+      {shouldShowSearchBar() && <div className="fixed bottom-12 left-0 right-0 px-4 z-[60]">
           <div className="max-w-5xl mx-auto">
-            <SearchBar 
-              onSearch={onSearch} 
-              className="mb-0" 
-              placeholder={location.pathname === '/events' ? "Search for events..." : "What are you looking for today?"} 
-              initialValue="" 
-              currentRoute={location.pathname} 
-            />
+            <SearchBar onSearch={onSearch} className="mb-0" placeholder={location.pathname === '/events' ? "Search for events..." : "What are you looking for today?"} initialValue="" currentRoute={location.pathname} />
           </div>
-        </div>
-      )}
+        </div>}
       
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 py-1 px-4 z-[60]">
         <div className="max-w-5xl mx-auto flex justify-around">
@@ -109,38 +95,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           <NavButton to={user ? "/profile" : "/login"} icon={<User className="h-5 w-5" />} label={user ? "Profile" : "Login"} isActive={location.pathname === '/profile' || location.pathname === '/login'} />
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 interface NavButtonProps {
   to: string;
   icon: React.ReactNode;
   label: string;
   isActive: boolean;
 }
-
 const NavButton: React.FC<NavButtonProps> = ({
   to,
   icon,
   label,
   isActive
 }) => {
-  return (
-    <Link 
-      to={to} 
-      className={cn(
-        "flex flex-col items-center gap-0.5 px-3 py-1 rounded-md transition-all",
-        isActive 
-          ? "text-foreground bg-accent" 
-          : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-      )} 
-      aria-label={label}
-    >
+  return <Link to={to} className={cn("flex flex-col items-center gap-0.5 px-3 py-1 rounded-md transition-all", isActive ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground hover:bg-accent/50")} aria-label={label}>
       {icon}
       <span className="text-xs font-medium">{label}</span>
-    </Link>
-  );
+    </Link>;
 };
-
 export default MainLayout;
