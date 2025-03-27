@@ -410,7 +410,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const shouldIncreaseHeight = isSearchResultCard || isLocationDetailsPage;
   const imageHeightClass = shouldIncreaseHeight ? "h-[400px]" // Increased height for search results and location details
   : "h-72";
-  return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
+  return <div onClick={handleCardClick} className="">
       <div className={cn("relative w-full overflow-hidden", imageHeightClass)}>
         <Carousel className="w-full h-full">
           <CarouselContent className="h-full">
@@ -519,7 +519,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               </div>}
           </div>}
 
-        <p className="mb-4 line-clamp-2 font-normal text-slate-700 text-base">
+        <p className="mb-4 line-clamp-2 font-normal text-base text-slate-600">
           {recommendation.description}
         </p>
 
