@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Heart, Sparkles, BadgeCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -106,12 +105,8 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
   const isLocationDetailsPage = window.location.pathname.includes('/location/');
   const isWishlistPage = window.location.pathname.includes('/my-list');
   
-  // Adjust image height based on context - now including wishlist page
-  const shouldIncreaseHeight = isInSearchResults || isLocationDetailsPage || isWishlistPage;
-  
-  const imageHeightClass = shouldIncreaseHeight 
-    ? "h-[400px]" // Increased height for search results, location details, and wishlist
-    : "h-full";
+  // Force a standard height for images in the wishlist page to match other pages
+  const imageHeightClass = "h-[400px]";
 
   return (
     <div className={cn("relative group", className)}>
