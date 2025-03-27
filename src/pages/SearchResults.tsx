@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -166,13 +167,15 @@ const SearchResults = () => {
 
   return (
     <MainLayout>
-      <div className="w-full animate-fade-in mx-0 px-[6px]">
-        <LocationSelector 
-          selectedLocation={selectedLocation} 
-          onLocationChange={handleLocationChange} 
-        />
+      <div className="w-full animate-fade-in mx-0 px-[4px] search-results-container">
+        <div className="location-selector">
+          <LocationSelector 
+            selectedLocation={selectedLocation} 
+            onLocationChange={handleLocationChange} 
+          />
+        </div>
         
-        <div className="flex items-center justify-between mb-6 mt-2">
+        <div className="flex items-center justify-between mb-2 mt-1 filter-tabs-container">
           <FilterTabs 
             distance={distance} 
             setDistance={setDistance} 
@@ -206,17 +209,20 @@ const SearchResults = () => {
             }}
             loading={loading}
             error={error}
+            className="search-header"
           />
           
           {!loading && (
-            <SearchTabs 
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              recommendations={rankedRecommendations}
-              events={events}
-              marketplaceListings={marketplaceListings}
-              handleRSVP={handleRSVP}
-            />
+            <div className="search-tabs-container">
+              <SearchTabs 
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                recommendations={rankedRecommendations}
+                events={events}
+                marketplaceListings={marketplaceListings}
+                handleRSVP={handleRSVP}
+              />
+            </div>
           )}
         </div>
       </div>

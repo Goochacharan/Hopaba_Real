@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -75,7 +76,7 @@
     @apply bg-background text-foreground antialiased;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    padding-bottom: 60px; /* Reduced padding from 80px */
+    padding-bottom: 40px; /* Reduced padding from 60px */
   }
 
   ::-webkit-scrollbar {
@@ -143,6 +144,7 @@
 .search-bar-container {
   position: relative;
   z-index: 50;
+  margin-bottom: 8px; /* Reduced from default */
 }
 
 .search-bar-wrapper {
@@ -155,67 +157,101 @@
 }
 
 .fixed-bottom-padding {
-  padding-bottom: 60px; /* Reduced padding from 80px */
+  padding-bottom: 40px; /* Reduced padding from 60px */
 }
 
 main {
-  padding-bottom: 80px !important; /* Reduced padding from 100px */
+  padding-bottom: 50px !important; /* Reduced padding from 80px */
 }
 
 .search-result-card h3 {
   font-size: 1.125rem;
-  line-height: 1.5;
-  min-height: 1.5rem;
+  line-height: 1.25;
+  min-height: 1.25rem;
+  margin-bottom: 2px; /* Added to reduce gap */
 }
 
 .search-result-card p {
-  line-height: 1.5;
-  min-height: 3rem; /* Set minimum height for description text */
+  line-height: 1.25;
+  min-height: 2.5rem; /* Reduced from 3rem */
+  margin-top: 2px; /* Added to reduce gap */
+  margin-bottom: 0; /* Added to reduce gap */
 }
 
 .search-result-card .truncate {
-  min-height: 1.5rem;
+  min-height: 1.25rem; /* Reduced from 1.5rem */
 }
 
 .LocationCard [data-radix-collapsible-content] {
-  padding: 4px;
-  margin-top: 2px; /* Reduced from 4px to make it even more compact */
-  background-color: rgba(0, 0, 0, 0.02);
-  border-radius: 6px;
+  padding: 2px !important; /* Reduced from 4px */
+  margin-top: 0 !important; /* Reduced from 2px */
+  background-color: transparent;
+  border-radius: 4px;
 }
 
 .LocationCard [data-radix-collapsible-content] .text-sm {
   margin: 0;
+  padding: 0;
   line-height: 1;
+  font-size: 0.75rem;
 }
 
 .LocationCard [data-radix-collapsible-content] p {
   margin: 0;
   padding: 0;
   line-height: 1;
+  min-height: auto;
 }
 
 .LocationCard [data-radix-collapsible-content] p + p {
   margin-top: 0; /* Removed margin between days and times */
 }
 
+.LocationCard [data-radix-collapsible-trigger] {
+  font-size: 0.7rem;
+  padding: 1px 4px;
+  line-height: 1;
+  background-color: transparent;
+  font-weight: 400;
+  color: var(--muted-foreground);
+  border-color: transparent;
+}
+
+/* Additional compact styles for search page */
+.search-tabs-container {
+  margin-top: 0;
+  margin-bottom: 2px;
+}
+
+.TabsList {
+  margin-bottom: 8px !important; /* Reduced from 16px */
+}
+
+.filter-tabs-container {
+  margin-bottom: 8px !important; /* Reduced from default */
+}
+
+.location-selector {
+  margin-bottom: 4px !important; /* Reduced margin */
+}
+
 @media (max-width: 640px) {
   [data-radix-collapsible-trigger] {
-    padding: 4px 8px;
-    font-size: 14px;
+    padding: 1px 4px;
+    font-size: 0.7rem;
     display: inline-flex;
     align-items: center;
-    border-radius: 6px;
-    background-color: rgba(0, 0, 0, 0.03);
-    font-weight: 500;
+    border-radius: 4px;
+    background-color: transparent;
+    font-weight: 400;
   }
   
   [data-radix-collapsible-content] {
-    padding: 4px !important; /* Reduced from 6px */
+    padding: 2px !important; /* Reduced from 4px */
   }
   
   [data-radix-collapsible-content] .text-sm {
-    font-size: 14px;
+    font-size: 0.75rem;
     line-height: 1;
   }
   
@@ -258,4 +294,17 @@ main {
   right: 16px !important;
   background-color: rgba(0,0,0,0.6) !important;
   color: white !important;
+}
+
+/* Compact styles for search results page */
+.search-results-container {
+  padding: 0 4px !important;
+}
+
+.search-results-grid {
+  gap: 8px !important;
+}
+
+.search-header {
+  margin-bottom: 4px !important;
 }
