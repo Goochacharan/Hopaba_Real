@@ -18,6 +18,7 @@ export interface MarketplaceListing {
   seller_id: string | null;
   location: string;
   created_at: string;
+  approval_status?: string;
 }
 
 interface UseMarketplaceListingsOptions {
@@ -43,7 +44,8 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
       try {
         let query = supabase
           .from('marketplace_listings')
-          .select('*');
+          .select('*')
+          .eq('approval_status', 'approved');
         
         // Apply category filter if provided
         if (category && category !== 'all') {

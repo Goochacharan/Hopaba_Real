@@ -9,8 +9,24 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
+          approval_status: string
           attendees: number | null
           created_at: string
           date: string
@@ -22,6 +38,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          approval_status?: string
           attendees?: number | null
           created_at?: string
           date: string
@@ -33,6 +50,7 @@ export type Database = {
           title: string
         }
         Update: {
+          approval_status?: string
           attendees?: number | null
           created_at?: string
           date?: string
@@ -47,6 +65,7 @@ export type Database = {
       }
       marketplace_listings: {
         Row: {
+          approval_status: string
           category: string
           condition: string
           created_at: string
@@ -65,6 +84,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_status?: string
           category: string
           condition: string
           created_at?: string
@@ -83,6 +103,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_status?: string
           category?: string
           condition?: string
           created_at?: string
@@ -174,6 +195,7 @@ export type Database = {
       service_providers: {
         Row: {
           address: string
+          approval_status: string
           area: string
           availability: string | null
           availability_days: string[] | null
@@ -211,6 +233,7 @@ export type Database = {
         }
         Insert: {
           address: string
+          approval_status?: string
           area: string
           availability?: string | null
           availability_days?: string[] | null
@@ -248,6 +271,7 @@ export type Database = {
         }
         Update: {
           address?: string
+          approval_status?: string
           area?: string
           availability?: string | null
           availability_days?: string[] | null
@@ -319,6 +343,10 @@ export type Database = {
           "": unknown
         }
         Returns: unknown
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
       search_recommendations: {
         Args: {

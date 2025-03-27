@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +12,8 @@ interface AuthContextType {
   signupWithEmail: (email: string, password: string, name: string) => Promise<void>;
   getTestCredentials: () => { email: string; password: string };
   logout: () => Promise<void>;
+  isAdmin: boolean;
+  adminLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,6 +23,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminLoading, setAdminLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -30,6 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (data?.user) {
         setUser(data.user);
+        checkAdminStatus(data.user.id);
       }
       
       if (error) {
@@ -42,8 +46,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         setUser(session.user);
+        checkAdminStatus(session.user.id);
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
+        setIsAdmin(false);
       }
     });
 
@@ -51,6 +57,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       data.subscription.unsubscribe();
     };
   }, []);
+
+  const checkAdminStatus = async (userId: string) => {
+    setAdminLoading(true);
+    try {
+      const { data, error } = await supabase.rpc('is_admin');
+      
+      if (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      } else {
+        setIsAdmin(!!data);
+      }
+    } catch (err) {
+      console.error('Error checking admin status:', err);
+      setIsAdmin(false);
+    } finally {
+      setAdminLoading(false);
+    }
+  };
 
   const loginWithEmail = async (email: string, password: string) => {
     setIsLoading(true);
@@ -212,7 +237,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         loginWithSocial,
         signupWithEmail,
         getTestCredentials,
-        logout 
+        logout,
+        isAdmin,
+        adminLoading
       }}
     >
       {children}

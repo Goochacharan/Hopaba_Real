@@ -20,6 +20,7 @@ import Signup from "./pages/Signup";
 import Marketplace from "./pages/Marketplace";
 import MarketplaceListingDetails from "./pages/MarketplaceListingDetails";
 import SellerDetails from "./pages/SellerDetails";
+import AdminPanel from "./pages/AdminPanel";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/marketplace/:id" element={<MarketplaceListingDetails />} />
               <Route path="/seller/:id" element={<SellerDetails />} />
+              <Route path="/admin" element={<AdminPanel />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

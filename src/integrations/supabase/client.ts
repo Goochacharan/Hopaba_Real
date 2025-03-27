@@ -50,3 +50,20 @@ export const getSellerName = async (sellerId?: string, fallbackName?: string) =>
     return fallbackName || "Anonymous Seller";
   }
 };
+
+/**
+ * Helper function to set a user as admin
+ * This should only be used by super admins or in development
+ */
+export const setUserAsAdmin = async (userId: string) => {
+  try {
+    const { error } = await supabase
+      .from('admin_users')
+      .insert({ id: userId });
+      
+    return { success: !error, error };
+  } catch (err) {
+    console.error("Error setting user as admin:", err);
+    return { success: false, error: err };
+  }
+};

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUserMarketplaceListings } from '@/hooks/useUserMarketplaceListings';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Edit2, Eye, Loader2, Plus, Trash2 } from 'lucide-react';
+import { AlertCircle, Edit2, Eye, Loader2, Plus, Trash2, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   AlertDialog,
@@ -68,6 +68,30 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
   };
 
   const userCanAddMore = listings.length < 10;
+
+  const renderApprovalBadge = (status: string = 'pending') => {
+    switch(status) {
+      case 'approved':
+        return (
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex items-center gap-1">
+            <CheckCircle className="h-3 w-3" /> Approved
+          </Badge>
+        );
+      case 'rejected':
+        return (
+          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 flex items-center gap-1">
+            <XCircle className="h-3 w-3" /> Rejected
+          </Badge>
+        );
+      case 'pending':
+      default:
+        return (
+          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 flex items-center gap-1">
+            <Clock className="h-3 w-3" /> Pending Approval
+          </Badge>
+        );
+    }
+  };
 
   if (showAddForm) {
     return (
@@ -158,6 +182,9 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
                 <p className="text-sm text-muted-foreground line-clamp-2">
                   {listing.description}
                 </p>
+                <div className="mt-3">
+                  {renderApprovalBadge(listing.approval_status)}
+                </div>
               </CardContent>
               <CardFooter className="flex justify-between pt-2">
                 <Button variant="outline" size="sm" onClick={() => navigate(`/marketplace/${listing.id}`)}>
