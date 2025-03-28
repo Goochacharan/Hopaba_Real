@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Event } from '@/hooks/useRecommendations';
 import { Calendar, Clock, MapPin, Users, Heart, Phone, MessageCircle, Navigation2, Share2, IndianRupee } from 'lucide-react';
@@ -155,10 +156,16 @@ const EventsList: React.FC<EventsListProps> = ({ events, className }) => {
         const inWishlist = isInWishlist(event.id);
         
         const isInMyListPage = className?.includes('mylist-event');
+        const isInEventsPage = className?.includes('events-page');
         
         return (
           <div key={event.id} className="bg-white rounded-xl shadow-sm border border-border overflow-hidden animate-fade-in">
-            <div className={cn("relative", isInMyListPage ? "h-[400px]" : "h-64")}>
+            <div className={cn(
+              "relative", 
+              isInMyListPage ? "h-[400px]" : 
+              isInEventsPage ? "h-[350px]" : 
+              "h-64"
+            )}>
               <img 
                 src={event.image} 
                 alt={event.title} 

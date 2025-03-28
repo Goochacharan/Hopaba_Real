@@ -124,7 +124,7 @@ const Events = () => {
               <p className="mt-4 text-muted-foreground">Loading events...</p>
             </div>
           ) : filteredEvents.length > 0 ? (
-            <EventsList events={filteredEvents} />
+            <EventsList events={filteredEvents} className="events-page" />
           ) : (
             <div className="text-center py-12">
               <h3 className="text-xl font-medium mb-2">No events found</h3>
