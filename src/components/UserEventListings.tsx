@@ -20,7 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Event } from '@/hooks/useRecommendations';
-import EventListingForm from './EventListingForm';
+import { EventListingForm } from './EventListingForm';
 
 // Sample events data (would come from database in a real app)
 const sampleUserEvents: Event[] = [

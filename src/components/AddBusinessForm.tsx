@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,7 +36,19 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Business } from '@/components/BusinessesList';
+
+export interface Business {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  area: string;
+  city: string;
+  address: string;
+  contact_number: string;
+  website?: string;
+  approval_status: string;
+}
 
 const businessSchema = z.object({
   name: z.string().min(2, {
@@ -68,7 +81,7 @@ const businessSchema = z.object({
   }).optional(),
 });
 
-type BusinessFormData = z.infer<typeof businessSchema>;
+export type BusinessFormValues = z.infer<typeof businessSchema>;
 
 interface AddBusinessFormProps {
   business?: Business;
