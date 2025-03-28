@@ -49,7 +49,13 @@ const Events = () => {
           throw error;
         }
         
-        setEvents(data || []);
+        // Add default price per person if missing
+        const eventsWithPrice = (data || []).map(event => ({
+          ...event,
+          pricePerPerson: event.pricePerPerson !== undefined ? event.pricePerPerson : 0
+        }));
+        
+        setEvents(eventsWithPrice);
       } catch (err) {
         console.error('Error fetching events:', err);
         toast({
