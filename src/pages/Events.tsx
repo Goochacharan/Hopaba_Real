@@ -8,6 +8,20 @@ import LocationSelector from '@/components/LocationSelector';
 import { Event } from '@/hooks/useRecommendations';
 import { supabase } from '@/integrations/supabase/client';
 
+interface SupabaseEvent {
+  approval_status: string;
+  attendees: number | null;
+  created_at: string;
+  date: string;
+  description: string;
+  id: string;
+  image: string;
+  location: string;
+  time: string;
+  title: string;
+  pricePerPerson?: number; // Adding this as optional since it might not exist in DB yet
+}
+
 const Events = () => {
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
@@ -49,10 +63,10 @@ const Events = () => {
           throw error;
         }
         
-        // Add default price per person if missing
-        const eventsWithPrice = (data || []).map(event => ({
+        // Convert Supabase events to our Event type with price info
+        const eventsWithPrice = (data || []).map((event: SupabaseEvent) => ({
           ...event,
-          pricePerPerson: event.pricePerPerson || 0 // Use nullish coalescing to handle undefined
+          pricePerPerson: event.pricePerPerson || 0 // Default to 0 if not present
         }));
         
         setEvents(eventsWithPrice);
