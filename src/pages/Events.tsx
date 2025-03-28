@@ -52,7 +52,7 @@ const Events = () => {
         // Add default price per person if missing
         const eventsWithPrice = (data || []).map(event => ({
           ...event,
-          pricePerPerson: event.pricePerPerson !== undefined ? event.pricePerPerson : 0
+          pricePerPerson: event.pricePerPerson || 0 // Use nullish coalescing to handle undefined
         }));
         
         setEvents(eventsWithPrice);
