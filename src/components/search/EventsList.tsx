@@ -10,9 +10,10 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface EventsListProps {
   events: Event[];
+  className?: string;
 }
 
-const EventsList: React.FC<EventsListProps> = ({ events }) => {
+const EventsList: React.FC<EventsListProps> = ({ events, className }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -149,14 +150,20 @@ const EventsList: React.FC<EventsListProps> = ({ events }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-6", className)}>
       {events.map(event => {
         const inWishlist = isInWishlist(event.id);
         
+        const isInMyListPage = className?.includes('mylist-event');
+        
         return (
           <div key={event.id} className="bg-white rounded-xl shadow-sm border border-border overflow-hidden animate-fade-in">
-            <div className="relative h-64">
-              <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+            <div className={cn("relative", isInMyListPage ? "h-[400px]" : "h-64")}>
+              <img 
+                src={event.image} 
+                alt={event.title} 
+                className="w-full h-full object-cover" 
+              />
               
               <button 
                 onClick={(e) => handleWishlistToggle(e, event)} 
