@@ -109,7 +109,7 @@ const UserEventListings: React.FC = () => {
           </Button>
         </div>
         <EventListingForm 
-          eventData={eventToEdit || undefined} 
+          event={eventToEdit || undefined} 
           onSaved={handleEventSaved} 
           onCancel={() => {
             setShowAddForm(false);

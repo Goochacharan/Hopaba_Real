@@ -79,6 +79,12 @@ const businessSchema = z.object({
   website: z.string().url({
     message: "Please enter a valid URL.",
   }).optional(),
+  // Add these fields to match what the business-form sections are using
+  contact_phone: z.string().optional(),
+  whatsapp: z.string().optional(),
+  contact_email: z.string().email().optional(),
+  instagram: z.string().optional(),
+  map_link: z.string().optional(),
 });
 
 export type BusinessFormValues = z.infer<typeof businessSchema>;
@@ -95,7 +101,7 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
-  const form = useForm<BusinessFormData>({
+  const form = useForm<BusinessFormValues>({
     resolver: zodResolver(businessSchema),
     defaultValues: {
       name: business?.name || "",
@@ -132,7 +138,7 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
     });
   };
 
-  const handleSubmit = async (data: BusinessFormData) => {
+  const handleSubmit = async (data: BusinessFormValues) => {
     if (!user) {
       toast({
         title: "Authentication required",
