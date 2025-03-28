@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -149,9 +148,7 @@ const MyList = () => {
                       return <MarketplaceListingCard key={item.id} listing={item as MarketplaceListing} />;
                     } else if (isEvent(item)) {
                       const events = [item as Event];
-                      return <div key={item.id} className="wishlist-event-container">
-                        <EventsList events={events} />
-                      </div>;
+                      return <EventsList key={item.id} events={events} />;
                     } else {
                       return <LocationCard key={item.id} recommendation={item as Recommendation} />;
                     }
