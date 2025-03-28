@@ -8,59 +8,14 @@ import LocationSelector from '@/components/LocationSelector';
 import { Event } from '@/hooks/useRecommendations';
 import { supabase } from '@/integrations/supabase/client';
 
-const sampleEvents: Event[] = [
-  {
-    id: '1',
-    title: 'Summer Food Festival',
-    date: 'July 15, 2023',
-    time: '11:00 AM - 8:00 PM',
-    location: 'Central Park, San Francisco',
-    description: 'A culinary celebration featuring over 30 local restaurants, live cooking demonstrations, and music performances.',
-    image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-    attendees: 215,
-    pricePerPerson: 1500
-  },
-  {
-    id: '2',
-    title: 'Weekend Art Exhibition',
-    date: 'July 22-23, 2023',
-    time: '10:00 AM - 6:00 PM',
-    location: 'Modern Art Gallery, Indiranagar',
-    description: 'Showcasing works from emerging local artists with interactive sessions and workshops throughout the weekend.',
-    image: 'https://images.unsplash.com/photo-1591115765373-5207764f72e4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80',
-    attendees: 98,
-    pricePerPerson: 500
-  },
-  {
-    id: '3',
-    title: 'Wellness & Yoga Retreat',
-    date: 'August 5, 2023',
-    time: '7:00 AM - 4:00 PM',
-    location: 'Sunset Beach, Koramangala',
-    description: 'A day-long retreat with yoga sessions, meditation workshops, and healthy living seminars led by certified instructors.',
-    image: 'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-    attendees: 42,
-    pricePerPerson: 2000
-  },
-  {
-    id: '4',
-    title: 'Tech Startup Networking',
-    date: 'August 12, 2023',
-    time: '6:00 PM - 9:00 PM',
-    location: 'Innovation Hub, Whitefield',
-    description: 'Connect with founders, investors, and tech enthusiasts in a casual setting with keynote speakers and pitch opportunities.',
-    image: 'https://images.unsplash.com/photo-1551818255-e6e10975bc17?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1728&q=80',
-    attendees: 127,
-    pricePerPerson: 1000
-  }
-];
-
 const Events = () => {
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
   const [searchParams] = useSearchParams();
-  const [filteredEvents, setFilteredEvents] = useState<Event[]>(sampleEvents);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
   const searchQuery = searchParams.get('q') || '';
 
   useEffect(() => {
@@ -79,20 +34,51 @@ const Events = () => {
     };
   }, []);
 
+  // Fetch approved events
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('events')
+          .select('*')
+          .eq('approval_status', 'approved')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          throw error;
+        }
+        
+        setEvents(data || []);
+      } catch (err) {
+        console.error('Error fetching events:', err);
+        toast({
+          title: 'Error',
+          description: 'Failed to load events. Please try again later.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchEvents();
+  }, [toast]);
+
   // Filter events whenever search query changes
   useEffect(() => {
     if (searchQuery) {
       const lowercaseQuery = searchQuery.toLowerCase();
-      const filtered = sampleEvents.filter(event => 
+      const filtered = events.filter(event => 
         event.title.toLowerCase().includes(lowercaseQuery) ||
         event.description.toLowerCase().includes(lowercaseQuery) ||
         event.location.toLowerCase().includes(lowercaseQuery)
       );
       setFilteredEvents(filtered);
     } else {
-      setFilteredEvents(sampleEvents);
+      setFilteredEvents(events);
     }
-  }, [searchQuery]);
+  }, [searchQuery, events]);
 
   const handleLocationChange = (location: string) => {
     console.log(`Location changed to: ${location}`);
@@ -112,13 +98,20 @@ const Events = () => {
             {searchQuery ? `Events matching "${searchQuery}"` : "Upcoming Events"}
           </h1>
           
-          {filteredEvents.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+              <p className="mt-4 text-muted-foreground">Loading events...</p>
+            </div>
+          ) : filteredEvents.length > 0 ? (
             <EventsList events={filteredEvents} />
           ) : (
             <div className="text-center py-12">
               <h3 className="text-xl font-medium mb-2">No events found</h3>
               <p className="text-muted-foreground">
-                No events matching "{searchQuery}" were found. Try a different search term.
+                {searchQuery 
+                  ? `No events matching "${searchQuery}" were found. Try a different search term.`
+                  : "There are no upcoming events at this time. Check back later!"}
               </p>
             </div>
           )}

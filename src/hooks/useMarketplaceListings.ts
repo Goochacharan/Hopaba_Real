@@ -125,6 +125,7 @@ export const useMarketplaceListing = (id: string) => {
           .from('marketplace_listings')
           .select('*')
           .eq('id', id)
+          .eq('approval_status', 'approved')
           .maybeSingle();
 
         if (error) {

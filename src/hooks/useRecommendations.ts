@@ -319,7 +319,8 @@ const useRecommendations = ({
     try {
       let query = supabase
         .from('service_providers')
-        .select('*');
+        .select('*')
+        .eq('approval_status', 'approved'); // Only fetch approved service providers
       
       if (categoryFilter !== 'all') {
         const dbCategory = categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1);
