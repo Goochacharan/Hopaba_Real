@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Event } from '@/hooks/useRecommendations';
 import { Calendar, Clock, MapPin, Users, Heart, Phone, MessageCircle, Navigation2, Share2, IndianRupee } from 'lucide-react';
@@ -5,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 interface EventsListProps {
@@ -15,9 +16,11 @@ interface EventsListProps {
 const EventsList: React.FC<EventsListProps> = ({ events }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useIsMobile();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [user, setUser] = useState<any>(null);
+  const isInWishlistPage = location.pathname === '/my-list';
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -155,8 +158,12 @@ const EventsList: React.FC<EventsListProps> = ({ events }) => {
         
         return (
           <div key={event.id} className="bg-white rounded-xl shadow-sm border border-border overflow-hidden animate-fade-in">
-            <div className="relative h-64">
-              <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+            <div className={cn("relative", isInWishlistPage ? "h-96" : "h-64")}>
+              <img 
+                src={event.image} 
+                alt={event.title} 
+                className={cn("w-full h-full object-cover")}
+              />
               
               <button 
                 onClick={(e) => handleWishlistToggle(e, event)} 
