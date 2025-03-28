@@ -34,6 +34,7 @@ export type Database = {
           id: string
           image: string
           location: string
+          price_per_person: number | null
           time: string
           title: string
         }
@@ -46,6 +47,7 @@ export type Database = {
           id?: string
           image: string
           location: string
+          price_per_person?: number | null
           time: string
           title: string
         }
@@ -58,6 +60,7 @@ export type Database = {
           id?: string
           image?: string
           location?: string
+          price_per_person?: number | null
           time?: string
           title?: string
         }

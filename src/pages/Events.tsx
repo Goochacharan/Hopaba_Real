@@ -19,7 +19,7 @@ interface SupabaseEvent {
   location: string;
   time: string;
   title: string;
-  pricePerPerson?: number; // Adding this as optional since it might not exist in DB yet
+  price_per_person?: number;  // Updated to match the database column name
 }
 
 const Events = () => {
@@ -66,7 +66,7 @@ const Events = () => {
         // Convert Supabase events to our Event type with price info
         const eventsWithPrice = (data || []).map((event: SupabaseEvent) => ({
           ...event,
-          pricePerPerson: event.pricePerPerson || 0 // Default to 0 if not present
+          pricePerPerson: event.price_per_person || 0 // Map from database column to our interface property
         }));
         
         setEvents(eventsWithPrice);

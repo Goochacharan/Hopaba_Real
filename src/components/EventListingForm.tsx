@@ -66,9 +66,42 @@ const EventListingForm: React.FC<EventListingFormProps> = ({
 
     setLoading(true);
     try {
-      // Save event (this is a placeholder - you'd implement the actual saving logic)
-      // In a real app, you would save to the database via Supabase
-      console.log("Event data to save:", data);
+      // Extract primary image for the main image field
+      const mainImage = data.images[0];
+      
+      // Prepare the event data
+      const eventData = {
+        title: data.title,
+        date: data.date,
+        time: data.time,
+        location: data.location,
+        description: data.description,
+        image: mainImage,
+        attendees: data.attendees || 0,
+        price_per_person: data.pricePerPerson || 0, // Map from our interface property to database column
+        phoneNumber: data.phoneNumber,
+        whatsappNumber: data.whatsappNumber
+      };
+      
+      // Insert or update in Supabase
+      let result;
+      
+      if (eventData) {
+        // Update existing event
+        result = await supabase
+          .from('events')
+          .update(eventData)
+          .eq('id', eventData.id);
+      } else {
+        // Create new event
+        result = await supabase
+          .from('events')
+          .insert(eventData);
+      }
+      
+      if (result.error) {
+        throw result.error;
+      }
 
       toast({
         title: "Success!",
