@@ -24,6 +24,9 @@ export interface Event {
   approval_status: string;
   created_at: string;
   description: string;
+  time: string;
+  image: string;
+  attendees: number | null;
 }
 
 export interface PendingListings {
@@ -74,7 +77,7 @@ export const usePendingListings = () => {
       // Fetch pending events
       const { data: eventsData, error: eventsError } = await supabase
         .from('events')
-        .select('id, title, date, location, approval_status, created_at, description')
+        .select('id, title, date, location, approval_status, created_at, description, time, image, attendees')
         .eq('approval_status', 'pending')
         .order('created_at', { ascending: false });
 
@@ -113,8 +116,6 @@ export const usePendingListings = () => {
     }
 
     try {
-      let tableName = '';
-      
       // Map listingType to the actual table name
       if (listingType === 'marketplace') {
         const { error } = await supabase
