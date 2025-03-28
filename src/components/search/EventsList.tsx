@@ -186,7 +186,7 @@ const EventsList: React.FC<EventsListProps> = ({ events, className }) => {
             <div className="p-5">
               <div className="flex justify-between items-start mb-3">
                 <h3 className="text-xl font-medium">{event.title}</h3>
-                {event.pricePerPerson !== undefined && (
+                {!isInEventsPage && event.pricePerPerson !== undefined && (
                   <div className="flex items-center bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-100">
                     <IndianRupee className="w-4 h-4 mr-1" />
                     <span className="font-medium">{formatPrice(event.pricePerPerson).replace('₹', '')}</span>
@@ -196,9 +196,19 @@ const EventsList: React.FC<EventsListProps> = ({ events, className }) => {
               </div>
               
               <div className="flex flex-col gap-2 mb-4">
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
-                  {event.date}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
+                    {event.date}
+                  </div>
+                  
+                  {isInEventsPage && event.pricePerPerson !== undefined && (
+                    <div className="flex items-center bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-100">
+                      <IndianRupee className="w-4 h-4 mr-1" />
+                      <span className="font-medium">{formatPrice(event.pricePerPerson).replace('₹', '')}</span>
+                      <span className="text-xs ml-1 text-emerald-600">/person</span>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex items-center text-sm text-muted-foreground">
