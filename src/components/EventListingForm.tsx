@@ -70,7 +70,7 @@ const EventListingForm: React.FC<EventListingFormProps> = ({
       const mainImage = data.images[0];
       
       // Prepare the event data
-      const eventData = {
+      const eventPayload = {
         title: data.title,
         date: data.date,
         time: data.time,
@@ -87,16 +87,16 @@ const EventListingForm: React.FC<EventListingFormProps> = ({
       let result;
       
       if (eventData) {
-        // Update existing event
+        // Update existing event - we use the id from eventData prop, not from the payload
         result = await supabase
           .from('events')
-          .update(eventData)
+          .update(eventPayload)
           .eq('id', eventData.id);
       } else {
         // Create new event
         result = await supabase
           .from('events')
-          .insert(eventData);
+          .insert(eventPayload);
       }
       
       if (result.error) {
