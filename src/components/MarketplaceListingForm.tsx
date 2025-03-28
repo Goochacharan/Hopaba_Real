@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -23,7 +22,7 @@ const marketplaceListingSchema = z.object({
   price: z.coerce.number().min(1, { message: "Price must be greater than 0" }),
   category: z.string().min(1, { message: "Category is required" }),
   condition: z.string().min(1, { message: "Condition is required" }),
-  location: z.string().optional(), // Changed to optional
+  location: z.string().optional(),
   seller_name: z.string().min(2, { message: "Seller name is required" }),
   seller_phone: z.string()
     .refine(phone => phone.startsWith('+91'), {
@@ -83,25 +82,19 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     mode: "onBlur",
   });
 
-  // Function to handle phone number input validation
   const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'seller_phone' | 'seller_whatsapp') => {
     let value = e.target.value;
     
-    // Ensure the value starts with +91
     if (!value.startsWith('+91')) {
       value = '+91' + value.replace('+91', '');
     }
     
-    // Remove all non-digit characters except the +91 prefix
     const digits = value.slice(3).replace(/\D/g, '');
     
-    // Limit to 10 digits
     const limitedDigits = digits.slice(0, 10);
     
-    // Set the value with +91 prefix and limited digits
     e.target.value = '+91' + limitedDigits;
     
-    // Update the form value
     form.setValue(fieldName, e.target.value, {
       shouldValidate: true,
     });
@@ -134,13 +127,14 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         price: data.price,
         category: data.category,
         condition: data.condition,
-        location: data.location || "Not specified", // Provide default value if not provided
+        location: data.location || "Not specified",
         seller_name: data.seller_name || "Anonymous Seller",
         seller_id: user.id,
         seller_phone: data.seller_phone || null,
         seller_whatsapp: data.seller_whatsapp || null,
         seller_instagram: data.seller_instagram || null,
-        images: data.images
+        images: data.images,
+        approval_status: 'pending'
       };
 
       if (listing?.id) {
@@ -154,7 +148,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         
         toast({
           title: "Listing updated",
-          description: "Your marketplace listing has been updated successfully.",
+          description: "Your marketplace listing has been updated and will be reviewed by an admin.",
         });
       } else {
         const { error } = await supabase
@@ -165,7 +159,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         
         toast({
           title: "Listing created",
-          description: "Your marketplace listing has been created successfully.",
+          description: "Your marketplace listing has been created and will be reviewed by an admin.",
         });
       }
 

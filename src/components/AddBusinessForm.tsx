@@ -1,289 +1,183 @@
-
 import React, { useState } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { Business } from '@/components/BusinessesList';
 
-import { Form } from '@/components/ui/form';
-import { Button } from '@/components/ui/button';
-import { Save } from 'lucide-react';
-
-import BasicInfoSection from './business-form/BasicInfoSection';
-import LocationSection from './business-form/LocationSection';
-import ContactSection from './business-form/ContactSection';
-import SuccessDialog from './business-form/SuccessDialog';
-import { ImageUpload } from './ui/image-upload';
-
-const businessFormSchema = z.object({
+const businessSchema = z.object({
   name: z.string().min(2, {
     message: "Business name must be at least 2 characters.",
   }),
   category: z.string().min(1, {
     message: "Please select a category.",
   }),
-  price_range_min: z.coerce.number().min(0, {
-    message: "Price must be a positive number.",
-  }),
-  price_range_max: z.coerce.number().min(0, {
-    message: "Price must be a positive number.",
-  }),
-  price_unit: z.string().optional(),
-  availability_days: z.array(z.string()).min(1, {
-    message: "Please select at least one day of availability."
-  }),
-  availability_start_time: z.string().min(1, {
-    message: "Please select a start time."
-  }),
-  availability_end_time: z.string().min(1, {
-    message: "Please select an end time."
-  }),
-  availability: z.string().optional(),
   description: z.string().min(10, {
     message: "Description must be at least 10 characters.",
-  }).max(500, {
-    message: "Description must not exceed 500 characters."
-  }),
-  experience: z.string().optional(),
-  address: z.string().min(5, {
-    message: "Please enter a valid address.",
-  }),
-  map_link: z.string().optional(),
-  city: z.string().min(2, {
-    message: "Please enter a city.",
   }),
   area: z.string().min(2, {
-    message: "Please enter an area or neighborhood.",
+    message: "Area must be at least 2 characters.",
   }),
-  contact_phone: z.string()
+  city: z.string().min(2, {
+    message: "City must be at least 2 characters.",
+  }),
+  address: z.string().min(5, {
+    message: "Address must be at least 5 characters.",
+  }),
+  contact_number: z.string()
     .refine(phone => phone.startsWith('+91'), {
-      message: "Phone number must start with +91.",
+      message: "Phone number must start with +91."
     })
-    .refine(phone => phone.replace(/\D/g, '').length === 12, {
-      message: "Please enter a 10-digit phone number (excluding +91).",
+    .refine(phone => phone.slice(3).replace(/\D/g, '').length === 10, {
+      message: "Please enter a 10-digit phone number (excluding +91)."
     }),
-  whatsapp: z.string()
-    .refine(phone => phone.startsWith('+91'), {
-      message: "WhatsApp number must start with +91.",
-    })
-    .refine(phone => phone.replace(/\D/g, '').length === 12, {
-      message: "Please enter a 10-digit WhatsApp number (excluding +91).",
-    }),
-  contact_email: z.string().email({
-    message: "Please enter a valid email address.",
-  }).optional().or(z.literal('')),
   website: z.string().url({
     message: "Please enter a valid URL.",
-  }).optional().or(z.literal('')),
-  instagram: z.string().optional(),
-  tags: z.array(z.string()).min(3, {
-    message: "Please add at least 3 popular items or services you offer.",
-  }),
-  languages: z.array(z.string()).optional(),
-  images: z.array(z.string()).min(1, {
-    message: "Please upload at least one image.",
-  }),
+  }).optional(),
 });
 
-export type BusinessFormValues = z.infer<typeof businessFormSchema>;
-
-const defaultValues: Partial<BusinessFormValues> = {
-  price_unit: "per hour",
-  experience: "",
-  description: "",
-  website: "",
-  whatsapp: "+91",
-  instagram: "",
-  tags: [],
-  languages: [],
-  images: [],
-  availability_days: [],
-  availability_start_time: "9:00 AM",
-  availability_end_time: "5:00 PM",
-};
+type BusinessFormData = z.infer<typeof businessSchema>;
 
 interface AddBusinessFormProps {
-  businessData?: BusinessFormValues & { id?: string };
-  onSaved?: () => void;
+  business?: Business;
+  onSaved: () => void;
+  onCancel?: () => void;
 }
 
-const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
+export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusinessFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const isEditing = !!businessData?.id;
 
-  const formatAvailability = (data: BusinessFormValues) => {
-    const days = data.availability_days?.join(', ') || '';
-    const startTime = data.availability_start_time || '';
-    const endTime = data.availability_end_time || '';
-    
-    return `${days} ${startTime} - ${endTime}`.trim();
-  };
-
-  const parseAvailability = (availabilityString: string | undefined) => {
-    if (!availabilityString) return { days: [], startTime: '9:00 AM', endTime: '5:00 PM' };
-
-    const allDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    const days = allDays.filter(day => 
-      availabilityString.toLowerCase().includes(day.toLowerCase())
-    );
-    
-    const timeMatch = availabilityString.match(/(\d+:\d+\s*[AP]M)\s*-\s*(\d+:\d+\s*[AP]M)/i);
-    const startTime = timeMatch?.[1]?.trim() || '9:00 AM';
-    const endTime = timeMatch?.[2]?.trim() || '5:00 PM';
-    
-    return { days, startTime, endTime };
-  };
-
-  const parsedAvailability = parseAvailability(businessData?.availability);
-
-  const form = useForm<BusinessFormValues>({
-    resolver: zodResolver(businessFormSchema),
+  const form = useForm<BusinessFormData>({
+    resolver: zodResolver(businessSchema),
     defaultValues: {
-      name: businessData?.name || '',
-      category: businessData?.category || '',
-      description: businessData?.description || '',
-      price_range_min: businessData?.price_range_min || 0,
-      price_range_max: businessData?.price_range_max || 0,
-      price_unit: businessData?.price_unit || 'per service',
-      contact_phone: businessData?.contact_phone || '',
-      contact_email: businessData?.contact_email || '',
-      website: businessData?.website || '',
-      address: businessData?.address || '',
-      map_link: businessData?.map_link || '',
-      city: businessData?.city || '',
-      area: businessData?.area || '',
-      availability: businessData?.availability || '',
-      availability_days: parsedAvailability.days,
-      availability_start_time: parsedAvailability.startTime,
-      availability_end_time: parsedAvailability.endTime,
-      experience: businessData?.experience || '',
-      tags: businessData?.tags || [],
-      languages: businessData?.languages || [],
-      instagram: businessData?.instagram || '',
-      whatsapp: businessData?.whatsapp || '+91',
-      images: businessData?.images || [],
+      name: business?.name || "",
+      category: business?.category || "",
+      description: business?.description || "",
+      area: business?.area || "",
+      city: business?.city || "",
+      address: business?.address || "",
+      contact_number: business?.contact_number || "+91",
+      website: business?.website || "",
     },
-    mode: "onChange",
   });
 
-  const onSubmit = async (data: BusinessFormValues) => {
-    setIsSubmitting(true);
+  const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
     
+    // Ensure the value starts with +91
+    if (!value.startsWith('+91')) {
+      value = '+91' + value.replace('+91', '');
+    }
+    
+    // Remove all non-digit characters except the +91 prefix
+    const digits = value.slice(3).replace(/\D/g, '');
+    
+    // Limit to 10 digits
+    const limitedDigits = digits.slice(0, 10);
+    
+    // Set the value with +91 prefix and limited digits
+    e.target.value = '+91' + limitedDigits;
+    
+    // Update the form value
+    form.setValue('contact_number', e.target.value, {
+      shouldValidate: true,
+    });
+  };
+
+  const handleSubmit = async (data: BusinessFormData) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to list your business.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      if (!user) {
+      const businessData = {
+        name: data.name,
+        category: data.category,
+        description: data.description,
+        area: data.area,
+        city: data.city,
+        address: data.address,
+        contact_number: data.contact_number,
+        website: data.website,
+        user_id: user.id,
+        approval_status: 'pending' // Always set approval_status to pending when creating or updating
+      };
+
+      if (business?.id) {
+        // Update existing business
+        const { error } = await supabase
+          .from('service_providers')
+          .update(businessData)
+          .eq('id', business.id);
+
+        if (error) throw error;
+
         toast({
-          title: "Authentication required",
-          description: "You must be logged in to create or edit a service listing.",
-          variant: "destructive",
+          title: "Business Updated",
+          description: "Your business listing has been updated and will be reviewed by an admin.",
         });
-        setIsSubmitting(false);
-        return;
-      }
-
-      const formattedAvailability = formatAvailability(data);
-
-      let distance = null;
-      if (data.map_link) {
-        distance = "Calculated based on map link";
-      }
-
-      if (isEditing) {
-        const { error } = await supabase
-          .from('service_providers')
-          .update({
-            name: data.name,
-            category: data.category,
-            price_range_min: data.price_range_min,
-            price_range_max: data.price_range_max,
-            price_unit: data.price_unit,
-            availability: formattedAvailability,
-            availability_days: data.availability_days,
-            availability_start_time: data.availability_start_time,
-            availability_end_time: data.availability_end_time,
-            description: data.description,
-            experience: data.experience,
-            address: data.address,
-            map_link: data.map_link,
-            city: data.city,
-            area: data.area,
-            contact_phone: data.contact_phone,
-            contact_email: data.contact_email,
-            website: data.website,
-            instagram: data.instagram,
-            // The whatsapp field is not included as it doesn't exist in the database
-            images: data.images,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', businessData.id)
-          .eq('user_id', user.id);
-
-        if (error) {
-          console.error("Error updating business:", error);
-          toast({
-            title: "Error",
-            description: "There was an error updating your listing. Please try again.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Success",
-            description: "Your business listing has been updated successfully!",
-          });
-          if (onSaved) onSaved();
-        }
       } else {
+        // Create new business
         const { error } = await supabase
           .from('service_providers')
-          .insert({
-            user_id: user.id,
-            name: data.name,
-            category: data.category,
-            price_range_min: data.price_range_min,
-            price_range_max: data.price_range_max,
-            price_unit: data.price_unit,
-            availability: formattedAvailability,
-            availability_days: data.availability_days,
-            availability_start_time: data.availability_start_time,
-            availability_end_time: data.availability_end_time,
-            description: data.description,
-            experience: data.experience,
-            address: data.address,
-            map_link: data.map_link,
-            city: data.city,
-            area: data.area,
-            contact_phone: data.contact_phone,
-            contact_email: data.contact_email,
-            website: data.website,
-            instagram: data.instagram,
-            // The whatsapp field is not included as it doesn't exist in the database
-            images: data.images,
-            tags: data.tags,
-            languages: data.languages,
-          });
+          .insert(businessData);
 
-        if (error) {
-          console.error("Error submitting form:", error);
-          toast({
-            title: "Error",
-            description: "There was an error creating your listing. Please try again.",
-            variant: "destructive",
-          });
-        } else {
-          form.reset();
-          setShowSuccessDialog(true);
-          if (onSaved) onSaved();
-        }
+        if (error) throw error;
+
+        toast({
+          title: "Business Added",
+          description: "Your business has been listed and will be reviewed by an admin.",
+        });
       }
-    } catch (error) {
-      console.error("Error submitting form:", error);
+
+      setShowSuccessDialog(true);
+    } catch (error: any) {
+      console.error('Error saving business:', error);
       toast({
         title: "Error",
-        description: "There was an error with your submission. Please try again.",
+        description: error.message || "Failed to save your business. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -292,51 +186,186 @@ const AddBusinessForm = ({ businessData, onSaved }: AddBusinessFormProps) => {
   };
 
   return (
-    <>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <BasicInfoSection />
-            <LocationSection />
-            <ContactSection />
-            
-            <div className="space-y-4 col-span-1 md:col-span-2">
-              <h3 className="text-lg font-medium">Images</h3>
-              <div className="bg-white p-4 rounded-md shadow-sm border">
-                <ImageUpload 
-                  images={form.watch('images')}
-                  onImagesChange={(images) => form.setValue('images', images, { shouldValidate: true })}
-                  maxImages={5}
-                />
-                {form.formState.errors.images && (
-                  <p className="text-sm font-medium text-destructive mt-2">
-                    {form.formState.errors.images.message}
-                  </p>
-                )}
-              </div>
-            </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Business Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter business name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
+          <div>
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Restaurant">Restaurant</SelectItem>
+                      <SelectItem value="Cafe">Cafe</SelectItem>
+                      <SelectItem value="Hotel">Hotel</SelectItem>
+                      <SelectItem value="Gym">Gym</SelectItem>
+                      <SelectItem value="Salon">Salon</SelectItem>
+                      <SelectItem value="Spa">Spa</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={isSubmitting}
-          >
-            <Save className="mr-2 h-4 w-4" />
-            {isSubmitting 
-              ? isEditing ? "Updating..." : "Submitting..." 
-              : isEditing ? "Update Business/Service" : "Save Business/Service"
-            }
+        <div>
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Enter business description"
+                    className="resize-none"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <FormField
+              control={form.control}
+              name="area"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Area</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter area" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div>
+            <FormField
+              control={form.control}
+              name="city"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>City</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter city" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        <div>
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Address</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter address" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div>
+          <FormField
+            control={form.control}
+            name="contact_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contact Number</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Enter contact number" 
+                    defaultValue="+91"
+                    onInput={handlePhoneInput}
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div>
+          <FormField
+            control={form.control}
+            name="website"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Website (optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter website URL" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="flex justify-end">
+          {onCancel && (
+            <Button type="button" variant="ghost" onClick={onCancel}>
+              Cancel
+            </Button>
+          )}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Submitting..." : "Submit"}
           </Button>
-        </form>
-      </Form>
-
-      <SuccessDialog 
-        open={showSuccessDialog} 
-        onOpenChange={setShowSuccessDialog} 
-      />
-    </>
+        </div>
+      </form>
+      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Business Listed!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your business listing has been submitted and is awaiting admin approval.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={onSaved}>
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Form>
   );
-};
-
-export default AddBusinessForm;
+}
