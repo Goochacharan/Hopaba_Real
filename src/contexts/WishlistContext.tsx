@@ -14,7 +14,7 @@ interface WishlistContextType {
   wishlist: WishlistItem[];
   addToWishlist: (item: WishlistItem) => void;
   removeFromWishlist: (itemId: string, itemType: 'location' | 'marketplace' | 'event') => void;
-  isInWishlist: (itemId: string, itemType: 'location' | 'marketplace' | 'event') => boolean;
+  isInWishlist: (itemId: string, itemType?: 'location' | 'marketplace' | 'event') => boolean;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
@@ -61,7 +61,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       // Show toast notification
       toast({
         title: "Added to wishlist",
-        description: `${item.type === 'location' ? item.name : item.title} has been added to your wishlist.`,
+        description: getItemTitle(item) + " has been added to your wishlist.",
         duration: 3000,
       });
 
@@ -80,7 +80,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (removedItem) {
           toast({
             title: "Removed from wishlist",
-            description: `${itemType === 'location' ? removedItem.name : removedItem.title} has been removed from your wishlist.`,
+            description: getItemTitle(removedItem) + " has been removed from your wishlist.",
             duration: 3000,
           });
         }
@@ -90,8 +90,20 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
-  const isInWishlist = (itemId: string, itemType: 'location' | 'marketplace' | 'event') => {
-    return wishlist.some(item => item.id === itemId && item.type === itemType);
+  const isInWishlist = (itemId: string, itemType?: 'location' | 'marketplace' | 'event') => {
+    if (itemType) {
+      return wishlist.some(item => item.id === itemId && item.type === itemType);
+    }
+    return wishlist.some(item => item.id === itemId);
+  };
+
+  // Helper function to get the title/name from different item types
+  const getItemTitle = (item: WishlistItem): string => {
+    if (item.type === 'location') {
+      return (item as Recommendation & { type: 'location' }).name;
+    } else {
+      return (item as (MarketplaceListing | Event) & { type: 'marketplace' | 'event' }).title;
+    }
   };
 
   return (

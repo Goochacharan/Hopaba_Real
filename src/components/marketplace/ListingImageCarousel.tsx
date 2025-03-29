@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Heart, Sparkles, BadgeCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -32,7 +31,7 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
   const {
     toast
   } = useToast();
-  const isInWishlistAlready = isInWishlist(listing.id);
+  const isInWishlistAlready = isInWishlist(listing.id, 'marketplace');
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const minSwipeDistance = 50;
@@ -61,17 +60,9 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
   const toggleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isInWishlistAlready) {
-      removeFromWishlist(listing.id);
-      toast({
-        title: "Removed from wishlist",
-        description: `${listing.title} has been removed from your wishlist.`
-      });
+      removeFromWishlist(listing.id, 'marketplace');
     } else {
-      addToWishlist(listing, 'marketplace');
-      toast({
-        title: "Added to wishlist",
-        description: `${listing.title} has been added to your wishlist.`
-      });
+      addToWishlist({...listing, type: 'marketplace'});
     }
   };
 

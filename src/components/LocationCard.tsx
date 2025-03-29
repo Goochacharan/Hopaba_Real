@@ -39,7 +39,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
     removeFromWishlist,
     isInWishlist
   } = useWishlist();
-  const inWishlist = isInWishlist(recommendation.id);
+  const inWishlist = isInWishlist(recommendation.id, 'location');
   const isMobile = useIsMobile();
   const [user, setUser] = useState<any>(null);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
@@ -184,19 +184,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return;
     }
     if (inWishlist) {
-      removeFromWishlist(recommendation.id);
-      toast({
-        title: "Removed from wishlist",
-        description: `${recommendation.name} removed from your wishlist`,
-        duration: 2000
-      });
+      removeFromWishlist(recommendation.id, 'location');
     } else {
-      addToWishlist(recommendation, 'recommendation');
-      toast({
-        title: "Added to wishlist",
-        description: `${recommendation.name} added to your wishlist`,
-        duration: 2000
-      });
+      addToWishlist({...recommendation, type: 'location'});
     }
   };
 
