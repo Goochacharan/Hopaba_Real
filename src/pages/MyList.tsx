@@ -69,13 +69,13 @@ const MyList = () => {
   };
 
   const filteredWishlist = wishlist.filter(item => {
-    if (activeTab === 'locations' && (isMarketplaceListing(item) || isEvent(item))) {
+    if (activeTab === 'locations' && item.type !== 'location') {
       return false;
     }
-    if (activeTab === 'marketplace' && (!isMarketplaceListing(item) || isEvent(item))) {
+    if (activeTab === 'marketplace' && item.type !== 'marketplace') {
       return false;
     }
-    if (activeTab === 'events' && !isEvent(item)) {
+    if (activeTab === 'events' && item.type !== 'event') {
       return false;
     }
 
@@ -142,9 +142,9 @@ const MyList = () => {
             {filteredWishlist.length > 0 ? <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                   {currentItems.map(item => {
-                    if (isMarketplaceListing(item)) {
+                    if (item.type === 'marketplace') {
                       return <MarketplaceListingCard key={item.id} listing={item as MarketplaceListing} className="search-result-card" />;
-                    } else if (isEvent(item)) {
+                    } else if (item.type === 'event') {
                       return <EventCard key={item.id} event={item as Event} className="search-result-card" />;
                     } else {
                       return <LocationCard key={item.id} recommendation={item as Recommendation} className="search-result-card" />;
