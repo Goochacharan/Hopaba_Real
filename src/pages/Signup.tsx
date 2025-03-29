@@ -12,6 +12,13 @@ import { useForm } from 'react-hook-form';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Facebook } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { Captcha } from '@/components/ui/captcha';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
+
+// Replace this with your actual reCAPTCHA site key
+const RECAPTCHA_SITE_KEY = 'YOUR_RECAPTCHA_SITE_KEY';
 
 const signupSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -29,6 +36,8 @@ export default function Signup() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const { authAttempts, isRateLimited, signupWithEmail } = useAuth();
   
   useEffect(() => {
     const checkUser = async () => {
@@ -51,22 +60,27 @@ export default function Signup() {
   });
 
   const onSubmit = async (values: SignupFormValues) => {
+    if (isRateLimited) {
+      toast({
+        title: "Too many attempts",
+        description: "For security reasons, please try again later.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!captchaToken) {
+      toast({
+        title: "CAPTCHA verification required",
+        description: "Please complete the CAPTCHA verification.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      toast({
-        title: "Sign up successful",
-        description: "Please check your email to verify your account.",
-      });
-      
+      await signupWithEmail(values.email, values.password, "", captchaToken);
       navigate('/login');
     } catch (error: any) {
       toast({
@@ -81,6 +95,15 @@ export default function Signup() {
   };
 
   const handleSocialSignup = async (provider: 'google' | 'facebook') => {
+    if (isRateLimited) {
+      toast({
+        title: "Too many attempts",
+        description: "For security reasons, please try again later.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setSocialLoading(provider);
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -104,6 +127,10 @@ export default function Signup() {
     }
   };
 
+  const handleCaptchaVerify = (token: string) => {
+    setCaptchaToken(token);
+  };
+
   return (
     <MainLayout>
       <div className="max-w-md mx-auto space-y-6 py-8">
@@ -112,13 +139,23 @@ export default function Signup() {
           <p className="text-muted-foreground">Enter your details to create a new account</p>
         </div>
 
+        {isRateLimited && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Access temporarily blocked</AlertTitle>
+            <AlertDescription>
+              Too many login attempts detected. Please try again later.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
           <div className="space-y-2">
             <Button 
               type="button" 
               className="w-full flex items-center justify-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-50"
               onClick={() => handleSocialSignup('google')}
-              disabled={!!socialLoading}
+              disabled={!!socialLoading || isRateLimited}
             >
               {socialLoading === 'google' ? (
                 <span>Connecting...</span>
@@ -141,7 +178,7 @@ export default function Signup() {
               type="button" 
               className="w-full flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white"
               onClick={() => handleSocialSignup('facebook')}
-              disabled={!!socialLoading}
+              disabled={!!socialLoading || isRateLimited}
             >
               {socialLoading === 'facebook' ? (
                 <span>Connecting...</span>
@@ -174,7 +211,7 @@ export default function Signup() {
                         placeholder="your@email.com"
                         type="email"
                         autoComplete="email"
-                        disabled={isLoading}
+                        disabled={isLoading || isRateLimited}
                         {...field}
                       />
                     </FormControl>
@@ -194,7 +231,7 @@ export default function Signup() {
                         placeholder="••••••••"
                         type="password"
                         autoComplete="new-password"
-                        disabled={isLoading}
+                        disabled={isLoading || isRateLimited}
                         {...field}
                       />
                     </FormControl>
@@ -214,7 +251,7 @@ export default function Signup() {
                         placeholder="••••••••"
                         type="password"
                         autoComplete="new-password"
-                        disabled={isLoading}
+                        disabled={isLoading || isRateLimited}
                         {...field}
                       />
                     </FormControl>
@@ -223,7 +260,9 @@ export default function Signup() {
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Captcha siteKey={RECAPTCHA_SITE_KEY} onVerify={handleCaptchaVerify} />
+
+              <Button type="submit" className="w-full" disabled={isLoading || isRateLimited || !captchaToken}>
                 {isLoading ? "Creating account..." : "Sign up with Email"}
               </Button>
             </form>

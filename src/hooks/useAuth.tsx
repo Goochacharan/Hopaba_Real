@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -9,14 +10,21 @@ interface AuthContextType {
   loginError: string | null;
   loginWithEmail: (email: string, password: string) => Promise<void>;
   loginWithSocial: (provider: 'google' | 'facebook') => Promise<void>;
-  signupWithEmail: (email: string, password: string, name: string) => Promise<void>;
+  signupWithEmail: (email: string, password: string, name: string, captchaToken?: string) => Promise<void>;
   getTestCredentials: () => { email: string; password: string };
   logout: () => Promise<void>;
   isAdmin: boolean;
   adminLoading: boolean;
+  authAttempts: number;
+  setAuthAttempts: (attempts: number) => void;
+  isRateLimited: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Rate limiting constants
+const MAX_AUTH_ATTEMPTS = 5;
+const RATE_LIMIT_DURATION = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any | null>(null);
@@ -25,7 +33,72 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminLoading, setAdminLoading] = useState(true);
+  const [authAttempts, setAuthAttempts] = useState<number>(0);
+  const [isRateLimited, setIsRateLimited] = useState<boolean>(false);
+  const [rateLimitExpiry, setRateLimitExpiry] = useState<number | null>(null);
   const { toast } = useToast();
+
+  // Check if user is rate limited from localStorage on initial load
+  useEffect(() => {
+    const storedAttempts = localStorage.getItem('auth_attempts');
+    const storedExpiryTime = localStorage.getItem('rate_limit_expiry');
+    
+    if (storedAttempts) {
+      setAuthAttempts(parseInt(storedAttempts));
+    }
+    
+    if (storedExpiryTime) {
+      const expiryTime = parseInt(storedExpiryTime);
+      const now = Date.now();
+      
+      if (now < expiryTime) {
+        setIsRateLimited(true);
+        setRateLimitExpiry(expiryTime);
+        
+        // Set timeout to remove rate limit when it expires
+        const timeoutDuration = expiryTime - now;
+        setTimeout(() => {
+          setIsRateLimited(false);
+          setAuthAttempts(0);
+          localStorage.removeItem('auth_attempts');
+          localStorage.removeItem('rate_limit_expiry');
+        }, timeoutDuration);
+      } else {
+        // Clear expired rate limit data
+        localStorage.removeItem('auth_attempts');
+        localStorage.removeItem('rate_limit_expiry');
+      }
+    }
+  }, []);
+
+  // Update localStorage when attempts change
+  useEffect(() => {
+    if (authAttempts > 0) {
+      localStorage.setItem('auth_attempts', authAttempts.toString());
+    }
+    
+    // Apply rate limiting if max attempts reached
+    if (authAttempts >= MAX_AUTH_ATTEMPTS && !isRateLimited) {
+      const expiryTime = Date.now() + RATE_LIMIT_DURATION;
+      setIsRateLimited(true);
+      setRateLimitExpiry(expiryTime);
+      localStorage.setItem('rate_limit_expiry', expiryTime.toString());
+      
+      toast({
+        title: "Too many attempts",
+        description: "For security reasons, please try again after 15 minutes.",
+        variant: "destructive",
+      });
+      
+      // Set timeout to remove rate limit
+      setTimeout(() => {
+        setIsRateLimited(false);
+        setAuthAttempts(0);
+        localStorage.removeItem('auth_attempts');
+        localStorage.removeItem('rate_limit_expiry');
+      }, RATE_LIMIT_DURATION);
+    }
+  }, [authAttempts, toast]);
 
   useEffect(() => {
     const getUser = async () => {
@@ -77,7 +150,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const incrementAuthAttempts = () => {
+    if (!isRateLimited) {
+      setAuthAttempts(prevAttempts => prevAttempts + 1);
+    }
+  };
+
   const loginWithEmail = async (email: string, password: string) => {
+    if (isRateLimited) {
+      toast({
+        title: "Access temporarily blocked",
+        description: "Too many login attempts. Please try again later.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     setLoginError(null);
     
@@ -88,6 +176,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       if (error) {
+        incrementAuthAttempts();
         setLoginError(error.message);
         toast({
           title: "Login failed",
@@ -95,6 +184,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           variant: "destructive",
         });
       } else if (data?.user) {
+        // Reset auth attempts on successful login
+        setAuthAttempts(0);
+        localStorage.removeItem('auth_attempts');
+        
         setUser(data.user);
         toast({
           title: "Welcome back!",
@@ -102,6 +195,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
       }
     } catch (error: any) {
+      incrementAuthAttempts();
       setLoginError(error.message);
       toast({
         title: "Login error",
@@ -114,6 +208,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const loginWithSocial = async (provider: 'google' | 'facebook') => {
+    if (isRateLimited) {
+      toast({
+        title: "Access temporarily blocked",
+        description: "Too many login attempts. Please try again later.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setSocialLoading(true);
     setLoginError(null);
     
@@ -126,6 +229,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       if (error) {
+        incrementAuthAttempts();
         setLoginError(error.message);
         toast({
           title: "Social login failed",
@@ -134,6 +238,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
       }
     } catch (error: any) {
+      incrementAuthAttempts();
       setLoginError(error.message);
       toast({
         title: "Social login error",
@@ -145,22 +250,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const signupWithEmail = async (email: string, password: string, name: string) => {
+  const signupWithEmail = async (email: string, password: string, name: string, captchaToken?: string) => {
+    if (isRateLimited) {
+      toast({
+        title: "Access temporarily blocked",
+        description: "Too many signup attempts. Please try again later.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     setLoginError(null);
     
     try {
+      // Include the captcha token in the signup metadata if provided
+      const options = {
+        data: {
+          full_name: name,
+        },
+        captchaToken
+      };
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            full_name: name,
-          }
-        },
+        options
       });
       
       if (error) {
+        incrementAuthAttempts();
         setLoginError(error.message);
         toast({
           title: "Signup failed",
@@ -168,6 +287,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           variant: "destructive",
         });
       } else {
+        // Reset auth attempts on successful signup
+        setAuthAttempts(0);
+        localStorage.removeItem('auth_attempts');
+        
         if (data.user && !data.session) {
           toast({
             title: "Email verification required",
@@ -182,6 +305,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
     } catch (error: any) {
+      incrementAuthAttempts();
       setLoginError(error.message);
       toast({
         title: "Signup error",
@@ -239,7 +363,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         getTestCredentials,
         logout,
         isAdmin,
-        adminLoading
+        adminLoading,
+        authAttempts,
+        setAuthAttempts,
+        isRateLimited
       }}
     >
       {children}

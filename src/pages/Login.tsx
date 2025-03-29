@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import MainLayout from '@/components/MainLayout';
@@ -12,7 +11,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
-import { Facebook, Mail } from 'lucide-react';
+import { Facebook, Mail, AlertCircle } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { Captcha } from '@/components/ui/captcha';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+// Replace this with your actual reCAPTCHA site key
+const RECAPTCHA_SITE_KEY = 'YOUR_RECAPTCHA_SITE_KEY';
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -26,6 +31,8 @@ export default function Login() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const { loginWithEmail, isRateLimited, authAttempts } = useAuth();
   
   useEffect(() => {
     const checkUser = async () => {
@@ -47,29 +54,30 @@ export default function Login() {
   });
 
   const onSubmit = async (values: LoginFormValues) => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password
-      });
-
-      if (error) {
-        throw error;
-      }
-
+    if (isRateLimited) {
       toast({
-        title: "Login successful",
-        description: "Welcome back!",
-      });
-      
-      navigate('/');
-    } catch (error: any) {
-      toast({
-        title: "Login failed",
-        description: error.message || "Something went wrong",
+        title: "Too many attempts",
+        description: "For security reasons, please try again later.",
         variant: "destructive",
       });
+      return;
+    }
+
+    if (authAttempts >= 2 && !captchaToken) {
+      toast({
+        title: "CAPTCHA verification required",
+        description: "Please complete the CAPTCHA verification.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await loginWithEmail(values.email, values.password);
+      navigate('/');
+    } catch (error: any) {
+      // The error is already handled in loginWithEmail
       console.error("Login error:", error);
     } finally {
       setIsLoading(false);
@@ -77,6 +85,15 @@ export default function Login() {
   };
 
   const handleSocialLogin = async (provider: 'google' | 'facebook') => {
+    if (isRateLimited) {
+      toast({
+        title: "Too many attempts",
+        description: "For security reasons, please try again later.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setSocialLoading(provider);
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -100,6 +117,10 @@ export default function Login() {
     }
   };
 
+  const handleCaptchaVerify = (token: string) => {
+    setCaptchaToken(token);
+  };
+
   return (
     <MainLayout>
       <div className="max-w-md mx-auto space-y-6 py-8">
@@ -108,13 +129,23 @@ export default function Login() {
           <p className="text-muted-foreground">Enter your credentials to access your account</p>
         </div>
 
+        {isRateLimited && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Access temporarily blocked</AlertTitle>
+            <AlertDescription>
+              Too many login attempts detected. Please try again later.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
           <div className="space-y-2">
             <Button 
               type="button" 
               className="w-full flex items-center justify-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-50"
               onClick={() => handleSocialLogin('google')}
-              disabled={!!socialLoading}
+              disabled={!!socialLoading || isRateLimited}
             >
               {socialLoading === 'google' ? (
                 <span>Connecting...</span>
@@ -137,7 +168,7 @@ export default function Login() {
               type="button" 
               className="w-full flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white"
               onClick={() => handleSocialLogin('facebook')}
-              disabled={!!socialLoading}
+              disabled={!!socialLoading || isRateLimited}
             >
               {socialLoading === 'facebook' ? (
                 <span>Connecting...</span>
@@ -170,7 +201,7 @@ export default function Login() {
                         placeholder="your@email.com"
                         type="email"
                         autoComplete="email"
-                        disabled={isLoading}
+                        disabled={isLoading || isRateLimited}
                         {...field}
                       />
                     </FormControl>
@@ -190,7 +221,7 @@ export default function Login() {
                         placeholder="••••••••"
                         type="password"
                         autoComplete="current-password"
-                        disabled={isLoading}
+                        disabled={isLoading || isRateLimited}
                         {...field}
                       />
                     </FormControl>
@@ -199,7 +230,19 @@ export default function Login() {
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              {authAttempts >= 2 && (
+                <Captcha siteKey={RECAPTCHA_SITE_KEY} onVerify={handleCaptchaVerify} />
+              )}
+
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={
+                  isLoading || 
+                  isRateLimited || 
+                  (authAttempts >= 2 && !captchaToken)
+                }
+              >
                 {isLoading ? "Logging in..." : "Log in with Email"}
               </Button>
             </form>
