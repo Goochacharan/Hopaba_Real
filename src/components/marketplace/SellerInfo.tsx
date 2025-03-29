@@ -59,7 +59,7 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
     
     // Open WhatsApp with pre-filled message
     const whatsappMessage = `Hi, I'd like to get recommendations similar to ${sellerName}'s listings!`;
-    const whatsappNumber = Deno.env.get('BUSINESS_WHATSAPP_NUMBER') || '1234567890'; // Replace with actual default
+    const whatsappNumber = '1234567890'; // Default fallback number
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
     
     window.open(whatsappUrl, '_blank');
