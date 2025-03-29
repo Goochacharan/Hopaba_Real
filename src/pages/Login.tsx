@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 // hCaptcha site key
 const HCAPTCHA_SITE_KEY = 'fda043e0-8372-4d8a-b190-84a8fdee1528';
+const REQUIRE_CAPTCHA = false; // Disable CAPTCHA requirement
 
 export default function Login() {
   const navigate = useNavigate();
@@ -40,7 +41,8 @@ export default function Login() {
       return;
     }
 
-    if (!captchaToken) {
+    // Only require captcha if REQUIRE_CAPTCHA is true
+    if (REQUIRE_CAPTCHA && !captchaToken) {
       toast({
         title: "CAPTCHA verification required",
         description: "Please complete the CAPTCHA verification.",
@@ -51,7 +53,8 @@ export default function Login() {
 
     setIsLoading(true);
     try {
-      await loginWithEmail(values.email, values.password, captchaToken);
+      // Only pass captchaToken if REQUIRE_CAPTCHA is true
+      await loginWithEmail(values.email, values.password, REQUIRE_CAPTCHA ? captchaToken : undefined);
       navigate('/');
     } catch (error: any) {
       console.error("Login error:", error);
@@ -70,7 +73,8 @@ export default function Login() {
       return;
     }
     
-    if (!captchaToken) {
+    // Only require captcha if REQUIRE_CAPTCHA is true
+    if (REQUIRE_CAPTCHA && !captchaToken) {
       toast({
         title: "CAPTCHA verification required",
         description: "Please complete the CAPTCHA verification.",
@@ -85,7 +89,8 @@ export default function Login() {
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
-          queryParams: captchaToken ? {
+          // Only include captchaToken if REQUIRE_CAPTCHA is true
+          queryParams: REQUIRE_CAPTCHA && captchaToken ? {
             captchaToken
           } : undefined
         },
@@ -126,6 +131,7 @@ export default function Login() {
           handleSocialLogin={handleSocialLogin}
           handleCaptchaVerify={handleCaptchaVerify}
           onSubmit={onSubmit}
+          requireCaptcha={REQUIRE_CAPTCHA}
         />
       </div>
     </MainLayout>

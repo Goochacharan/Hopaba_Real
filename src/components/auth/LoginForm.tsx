@@ -22,6 +22,7 @@ interface LoginFormProps {
   captchaToken: string | null;
   captchaSiteKey: string;
   onCaptchaVerify: (token: string) => void;
+  requireCaptcha?: boolean; // Added this prop
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
@@ -31,6 +32,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   captchaToken,
   captchaSiteKey,
   onCaptchaVerify,
+  requireCaptcha = false, // Default to false
 }) => {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -83,15 +85,17 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           )}
         />
         
-        <CaptchaVerification 
-          siteKey={captchaSiteKey} 
-          onVerify={onCaptchaVerify} 
-        />
+        {requireCaptcha && (
+          <CaptchaVerification 
+            siteKey={captchaSiteKey} 
+            onVerify={onCaptchaVerify} 
+          />
+        )}
 
         <Button 
           type="submit" 
           className="w-full" 
-          disabled={isLoading || isDisabled || !captchaToken}
+          disabled={isLoading || isDisabled || (requireCaptcha && !captchaToken)}
         >
           {isLoading ? "Logging in..." : "Log in with Email"}
         </Button>
