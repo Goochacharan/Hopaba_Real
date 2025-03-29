@@ -15,9 +15,10 @@ export interface MarketplaceListing {
   seller_phone: string | null;
   seller_whatsapp: string | null;
   seller_instagram: string | null;
-  seller_id: string | null;
+  seller_id: string; // Changed from string | null to just string to match required type
   location: string;
   created_at: string;
+  updated_at: string; // Added this required field
   approval_status?: string;
 }
 
@@ -89,7 +90,9 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         if (condition && condition !== 'all') {
           console.log(`Filtering by condition: "${condition}"`);
         }
-        setListings(data as MarketplaceListing[]);
+        
+        // Use type assertion to handle the typing issue safely
+        setListings((data || []) as MarketplaceListing[]);
       } catch (err) {
         console.error('Error fetching marketplace listings:', err);
         setError('Failed to fetch listings. Please try again later.');
@@ -135,6 +138,7 @@ export const useMarketplaceListing = (id: string) => {
         if (!data) {
           setError('Listing not found');
         } else {
+          // Use type assertion for safer type handling
           setListing(data as MarketplaceListing);
         }
       } catch (err) {
