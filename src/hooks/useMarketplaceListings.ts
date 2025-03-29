@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -10,7 +11,7 @@ export interface MarketplaceListing {
   category: string;
   images: string[];
   seller_name: string;
-  seller_id?: string;
+  seller_id: string; // Changed from optional to required to match database expectations
   seller_rating: number;
   seller_phone?: string;
   seller_whatsapp?: string;
@@ -18,7 +19,7 @@ export interface MarketplaceListing {
   location: string;
   created_at: string;
   updated_at: string;
-  approval_status: string; // Changed from optional to required
+  approval_status: string;
   isHiddenGem?: boolean;
   isMustVisit?: boolean;
 }
@@ -31,10 +32,6 @@ interface UseMarketplaceListingsProps {
   minRating?: number;
   searchQuery?: string;
 }
-
-const mockListings: MarketplaceListing[] = [
-  // ... mock listing data
-];
 
 // Added for parsing price from queries
 const extractPriceFromQuery = (query: string): number | null => {
@@ -140,20 +137,25 @@ export const useMarketplaceListings = ({
           
           // Apply hidden gem and must visit filtering
           if (hasHiddenGem || hasMustVisit) {
-            // Assign these properties deterministically
-            filteredData = filteredData.map((item) => ({
-              ...item,
-              isHiddenGem: parseInt(item.id.charAt(0), 36) % 3 === 0,
-              isMustVisit: parseInt(item.id.charAt(0), 36) % 5 === 0
-            } as MarketplaceListing));
+            // Process the data to add the virtual properties
+            filteredData = filteredData.map((item) => {
+              // Create a new object with all properties from the original item
+              // plus the additional isHiddenGem and isMustVisit properties
+              return {
+                ...item,
+                // Use a deterministic calculation for the badges
+                isHiddenGem: parseInt(item.id.charAt(0), 36) % 3 === 0,
+                isMustVisit: parseInt(item.id.charAt(0), 36) % 5 === 0
+              } as MarketplaceListing;
+            });
             
             // Filter based on the criteria
             if (hasHiddenGem) {
-              filteredData = filteredData.filter(item => (item as unknown as MarketplaceListing).isHiddenGem);
+              filteredData = filteredData.filter(item => item.isHiddenGem);
             }
             
             if (hasMustVisit) {
-              filteredData = filteredData.filter(item => (item as unknown as MarketplaceListing).isMustVisit);
+              filteredData = filteredData.filter(item => item.isMustVisit);
             }
           }
           
@@ -168,11 +170,14 @@ export const useMarketplaceListings = ({
           setListings([]);
         } else if (data) {
           // Add virtual properties for marketplace items
-          const enhancedData = data.map((item) => ({
-            ...item,
-            isHiddenGem: parseInt(item.id.charAt(0), 36) % 3 === 0,
-            isMustVisit: parseInt(item.id.charAt(0), 36) % 5 === 0
-          } as MarketplaceListing));
+          const enhancedData = data.map((item) => {
+            // Create a new object with the original properties and the additional ones
+            return {
+              ...item,
+              isHiddenGem: parseInt(item.id.charAt(0), 36) % 3 === 0,
+              isMustVisit: parseInt(item.id.charAt(0), 36) % 5 === 0
+            } as MarketplaceListing;
+          });
           
           setListings(enhancedData);
         }
@@ -220,10 +225,11 @@ export const useMarketplaceListings = ({
           
           // Add properties and filter results
           let filteredData = data.map((item) => {
-            const enhancedItem = item as MarketplaceListing;
-            enhancedItem.isHiddenGem = item.id.charCodeAt(0) % 3 === 0; // Deterministic simulation
-            enhancedItem.isMustVisit = item.id.charCodeAt(0) % 5 === 0;  // Deterministic simulation
-            return enhancedItem;
+            return {
+              ...item,
+              isHiddenGem: parseInt(item.id.charAt(0), 36) % 3 === 0,
+              isMustVisit: parseInt(item.id.charAt(0), 36) % 5 === 0
+            } as MarketplaceListing;
           });
           
           // Apply price filtering if found in the query
