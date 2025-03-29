@@ -18,8 +18,7 @@ import EventCard from '@/components/EventCard';
 
 const MyList = () => {
   const {
-    wishlist,
-    removeFromWishlist
+    wishlist
   } = useWishlist();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
@@ -102,11 +101,6 @@ const MyList = () => {
     setCurrentPage(1);
   }, [searchQuery, activeTab]);
 
-  // Handle removal of wishlist items
-  const handleRemoveFromWishlist = (itemId: string, itemType: 'location' | 'marketplace' | 'event') => {
-    removeFromWishlist(itemId, itemType);
-  };
-
   if (loading) {
     return <MainLayout>
         <div className="py-8 flex justify-center">
@@ -140,50 +134,11 @@ const MyList = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                   {currentItems.map(item => {
                     if (item.type === 'marketplace') {
-                      const marketplaceItem = item as MarketplaceListing & { type: 'marketplace' };
-                      return (
-                        <div key={marketplaceItem.id} className="relative">
-                          <MarketplaceListingCard key={marketplaceItem.id} listing={marketplaceItem} className="search-result-card" />
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            className="absolute top-2 right-2 bg-white/90 hover:bg-white z-10"
-                            onClick={() => handleRemoveFromWishlist(marketplaceItem.id, 'marketplace')}
-                          >
-                            <Heart className="h-4 w-4 fill-primary text-primary" />
-                          </Button>
-                        </div>
-                      );
+                      return <MarketplaceListingCard key={item.id} listing={item as MarketplaceListing} className="search-result-card" />;
                     } else if (item.type === 'event') {
-                      const eventItem = item as Event & { type: 'event' };
-                      return (
-                        <div key={eventItem.id} className="relative">
-                          <EventCard key={eventItem.id} event={eventItem} className="search-result-card" />
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            className="absolute top-2 right-2 bg-white/90 hover:bg-white z-10"
-                            onClick={() => handleRemoveFromWishlist(eventItem.id, 'event')}
-                          >
-                            <Heart className="h-4 w-4 fill-primary text-primary" />
-                          </Button>
-                        </div>
-                      );
+                      return <EventCard key={item.id} event={item as Event} className="search-result-card" />;
                     } else {
-                      const locationItem = item as Recommendation & { type: 'location' };
-                      return (
-                        <div key={locationItem.id} className="relative">
-                          <LocationCard key={locationItem.id} recommendation={locationItem} className="search-result-card" />
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            className="absolute top-2 right-2 bg-white/90 hover:bg-white z-10"
-                            onClick={() => handleRemoveFromWishlist(locationItem.id, 'location')}
-                          >
-                            <Heart className="h-4 w-4 fill-primary text-primary" />
-                          </Button>
-                        </div>
-                      );
+                      return <LocationCard key={item.id} recommendation={item as Recommendation} className="search-result-card" />;
                     }
                   })}
                 </div>
