@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Recommendation } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -56,7 +55,6 @@ const useRecommendations = ({
       console.log(`Using provided category: ${inferredCategory}`);
     } 
     else {
-      // Infer category from query
       if (lowercaseQuery.includes('yoga')) {
         inferredCategory = 'fitness';
       } else if (lowercaseQuery.includes('restaurant')) {
@@ -86,7 +84,6 @@ const useRecommendations = ({
     return { processedQuery, inferredCategory };
   };
 
-  // Fetch service providers from Supabase
   const fetchServiceProviders = async (searchTerm: string, categoryFilter: string) => {
     try {
       console.log(`Fetching service providers with search term: "${searchTerm}" and category: "${categoryFilter}"`);
@@ -94,10 +91,9 @@ const useRecommendations = ({
       let query = supabase
         .from('service_providers')
         .select('*')
-        .eq('approval_status', 'approved'); // Only fetch approved service providers
+        .eq('approval_status', 'approved');
       
       if (categoryFilter !== 'all') {
-        // Convert category to database format (e.g. 'restaurants' to 'Restaurants')
         const dbCategory = categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1);
         query = query.eq('category', dbCategory);
       }
@@ -151,7 +147,6 @@ const useRecommendations = ({
     }
   };
   
-  // Fetch events from Supabase
   const fetchEvents = async (searchTerm: string) => {
     try {
       console.log(`Fetching events with search term: "${searchTerm}"`);
@@ -232,6 +227,14 @@ const useRecommendations = ({
     });
   };
 
+  const handleSearch = (searchQuery: string) => {
+    setQuery(searchQuery);
+  };
+
+  const handleCategoryChange = (newCategory: CategoryType) => {
+    setCategory(newCategory);
+  };
+
   useEffect(() => {
     const fetchRecommendations = async () => {
       setLoading(true);
@@ -243,11 +246,9 @@ const useRecommendations = ({
         const effectiveCategory = inferredCategory;
         console.log("Effective search category:", effectiveCategory);
         
-        // Fetch service providers from Supabase
         const serviceProviders = await fetchServiceProviders(processedQuery, effectiveCategory);
         setRecommendations(serviceProviders);
         
-        // Fetch events from Supabase
         const eventsData = await fetchEvents(processedQuery);
         setEvents(eventsData);
         
@@ -272,6 +273,8 @@ const useRecommendations = ({
     loading,
     error,
     filterRecommendations,
+    handleSearch,
+    handleCategoryChange
   };
 };
 
