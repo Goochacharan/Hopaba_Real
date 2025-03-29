@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -102,11 +103,14 @@ export default function Login() {
     
     setSocialLoading(provider);
     try {
+      // Fixed: Pass captchaToken in queryParams instead of directly in options
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
-          captchaToken: captchaToken
+          queryParams: captchaToken ? {
+            captchaToken
+          } : undefined
         },
       });
 
