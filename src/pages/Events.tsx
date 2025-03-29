@@ -19,7 +19,7 @@ interface SupabaseEvent {
   location: string;
   time: string;
   title: string;
-  price_per_person?: number;  // Updated to match the database column name
+  price_per_person?: number;
 }
 
 const Events = () => {
@@ -30,6 +30,7 @@ const Events = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const searchQuery = searchParams.get('q') || '';
 
   useEffect(() => {
@@ -52,6 +53,7 @@ const Events = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       setLoading(true);
+      setError(null);
       try {
         const { data, error } = await supabase
           .from('events')
@@ -72,11 +74,7 @@ const Events = () => {
         setEvents(eventsWithPrice);
       } catch (err) {
         console.error('Error fetching events:', err);
-        toast({
-          title: 'Error',
-          description: 'Failed to load events. Please try again later.',
-          variant: 'destructive',
-        });
+        setError('Failed to load events. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -118,23 +116,12 @@ const Events = () => {
             {searchQuery ? `Events matching "${searchQuery}"` : "Upcoming Events"}
           </h1>
           
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-              <p className="mt-4 text-muted-foreground">Loading events...</p>
-            </div>
-          ) : filteredEvents.length > 0 ? (
-            <EventsList events={filteredEvents} className="events-page" />
-          ) : (
-            <div className="text-center py-12">
-              <h3 className="text-xl font-medium mb-2">No events found</h3>
-              <p className="text-muted-foreground">
-                {searchQuery 
-                  ? `No events matching "${searchQuery}" were found. Try a different search term.`
-                  : "There are no upcoming events at this time. Check back later!"}
-              </p>
-            </div>
-          )}
+          <EventsList 
+            events={filteredEvents} 
+            loading={loading} 
+            error={error}
+            className="events-page" 
+          />
         </div>
       </section>
     </MainLayout>

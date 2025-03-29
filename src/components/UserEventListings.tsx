@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,42 +21,58 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Event } from '@/hooks/useRecommendations';
 import { EventListingForm } from './EventListingForm';
-
-// Sample events data (would come from database in a real app)
-const sampleUserEvents: Event[] = [
-  {
-    id: '101',
-    title: 'Tech Workshop: Building with React',
-    date: 'September 15, 2023',
-    time: '10:00 AM - 4:00 PM',
-    location: 'Digital Hub, Koramangala',
-    description: 'A hands-on workshop for intermediate React developers to build real-world applications with the latest React features.',
-    image: 'https://images.unsplash.com/photo-1558403194-611308249627?q=80&w=1470&auto=format&fit=crop',
-    attendees: 42,
-    pricePerPerson: 1200
-  },
-  {
-    id: '102',
-    title: 'Local Farmer\'s Market',
-    date: 'Every Sunday',
-    time: '7:00 AM - 12:00 PM',
-    location: 'Community Park, Indiranagar',
-    description: 'Weekly farmer\'s market featuring local produce, handmade crafts, and organic products from around Bangalore.',
-    image: 'https://images.unsplash.com/photo-1516211881327-e5120a941edc?q=80&w=1470&auto=format&fit=crop',
-    attendees: 150,
-    pricePerPerson: 0
-  }
-];
+import { supabase } from '@/integrations/supabase/client';
 
 const UserEventListings: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [events, setEvents] = useState<Event[]>(sampleUserEvents);
+  const [loading, setLoading] = useState(true);
+  const [events, setEvents] = useState<Event[]>([]);
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<Event | null>(null);
+
+  // Fetch user's events from Supabase
+  useEffect(() => {
+    const fetchUserEvents = async () => {
+      if (!user) {
+        setEvents([]);
+        setLoading(false);
+        return;
+      }
+      
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('events')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          throw error;
+        }
+        
+        const formattedEvents = data.map(event => ({
+          ...event,
+          pricePerPerson: event.price_per_person || 0
+        }));
+        
+        setEvents(formattedEvents);
+      } catch (err) {
+        console.error('Error fetching events:', err);
+        toast({
+          title: 'Error',
+          description: 'Failed to load your events. Please try again later.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchUserEvents();
+  }, [user, toast]);
 
   // Format price to Indian Rupees
   const formatPrice = (price: number) => {
@@ -69,13 +85,29 @@ const UserEventListings: React.FC = () => {
 
   const handleDeleteConfirm = async () => {
     if (eventToDelete) {
-      // In a real app, this would delete from the database
-      setEvents(events.filter(event => event.id !== eventToDelete));
-      setEventToDelete(null);
-      toast({
-        title: "Event deleted",
-        description: "The event has been successfully removed."
-      });
+      try {
+        const { error } = await supabase
+          .from('events')
+          .delete()
+          .eq('id', eventToDelete);
+        
+        if (error) throw error;
+        
+        setEvents(events.filter(event => event.id !== eventToDelete));
+        toast({
+          title: "Event deleted",
+          description: "The event has been successfully removed."
+        });
+      } catch (err) {
+        console.error('Error deleting event:', err);
+        toast({
+          title: "Error",
+          description: "Failed to delete event. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setEventToDelete(null);
+      }
     }
   };
 
@@ -87,7 +119,32 @@ const UserEventListings: React.FC = () => {
   const handleEventSaved = () => {
     setShowAddForm(false);
     setEventToEdit(null);
-    // In a real app, you would refresh the event list from the database
+    
+    // Refresh the event list from the database
+    if (user) {
+      setLoading(true);
+      supabase
+        .from('events')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .then(({ data, error }) => {
+          if (error) {
+            toast({
+              title: "Error",
+              description: "Failed to refresh events. Please reload the page.",
+              variant: "destructive"
+            });
+          } else if (data) {
+            const formattedEvents = data.map(event => ({
+              ...event,
+              pricePerPerson: event.price_per_person || 0
+            }));
+            setEvents(formattedEvents);
+          }
+          setLoading(false);
+        });
+    }
+    
     toast({
       title: "Success",
       description: eventToEdit ? "Event updated successfully" : "Event created successfully"
