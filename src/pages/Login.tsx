@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Captcha } from '@/components/ui/captcha';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-const HCAPTCHA_SITE_KEY = 'YOUR_HCAPTCHA_SITE_KEY';
+const HCAPTCHA_SITE_KEY = '10000000-ffff-ffff-ffff-000000000001'; // Default test key for hCaptcha
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -103,7 +102,6 @@ export default function Login() {
     
     setSocialLoading(provider);
     try {
-      // Fixed: Pass captchaToken in queryParams instead of directly in options
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -17,8 +16,8 @@ import { Captcha } from '@/components/ui/captcha';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
-// Use your hCaptcha site key from Supabase
-const HCAPTCHA_SITE_KEY = 'YOUR_HCAPTCHA_SITE_KEY';
+// Use the same hCaptcha site key as in Login.tsx
+const HCAPTCHA_SITE_KEY = '10000000-ffff-ffff-ffff-000000000001'; // Default test key for hCaptcha
 
 const signupSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
