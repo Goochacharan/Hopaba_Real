@@ -6,4 +6,5 @@ interface Window {
     execute: (siteKey: string, options: { action: string }) => Promise<string>;
     render: (container: string | HTMLElement, parameters: object) => string | number;
   };
+  onloadCallback?: () => void;
 }

@@ -1,12 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-declare global {
-  interface Window {
-    grecaptcha: any;
-    onloadCallback: () => void;
-  }
-}
-
+// Remove the conflicting declaration and use the one from global.d.ts
 interface CaptchaProps {
   siteKey: string;
   onVerify: (token: string) => void;
