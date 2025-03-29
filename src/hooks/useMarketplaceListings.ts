@@ -19,6 +19,9 @@ export interface MarketplaceListing {
   location: string;
   created_at: string;
   updated_at: string;
+  approval_status?: string; // Added this property
+  isHiddenGem?: boolean; // Added this property
+  isMustVisit?: boolean; // Added this property
 }
 
 interface UseMarketplaceListingsProps {
@@ -272,5 +275,59 @@ export const useMarketplaceListings = ({
     error,
     refresh: fetchListings,
     search
+  };
+};
+
+// Add the useMarketplaceListing hook for individual listing details
+export const useMarketplaceListing = (listingId: string) => {
+  const [listing, setListing] = useState<MarketplaceListing | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchListing = async () => {
+      if (!listingId) {
+        setError("Listing ID is required");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('marketplace_listings')
+          .select('*')
+          .eq('id', listingId)
+          .eq('approval_status', 'approved')
+          .single();
+
+        if (error) {
+          console.error('Error fetching marketplace listing:', error);
+          setError('Failed to fetch marketplace listing');
+          setListing(null);
+        } else if (data) {
+          // Add virtual properties
+          const enhancedListing = {
+            ...data,
+            isHiddenGem: false,
+            isMustVisit: false
+          };
+          setListing(enhancedListing);
+        }
+      } catch (err) {
+        console.error('Error in fetchListing:', err);
+        setError('An unexpected error occurred');
+        setListing(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchListing();
+  }, [listingId]);
+
+  return {
+    listing,
+    loading,
+    error
   };
 };

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Recommendation, mockRecommendations, searchRecommendations } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -86,7 +85,7 @@ const sampleEvents: Event[] = [
     time: '9:00 AM - 12:00 PM',
     location: 'Serenity Yoga Studio, Indiranagar',
     description: 'A beginner-friendly workshop introducing fundamental yoga poses, breathing techniques, and mindfulness practices for newcomers.',
-    image: 'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    image: 'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
     attendees: 32,
     pricePerPerson: 500
   }
@@ -108,7 +107,7 @@ const yogaAndFitnessMockData: Recommendation[] = [
     hours: 'Until 9:00 PM',
     priceLevel: '$$',
     images: [
-      'https://images.unsplash.com/photo-1570655652364-2e0a67455ac6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1570655652364-2e0a67455ac6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
       'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
       'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1220&q=80'
     ]
@@ -425,7 +424,6 @@ const useRecommendations = ({
     });
   };
   
-  // Check if a query contains specific criteria like "hidden gem" or "must visit"
   const checkForSpecialCriteria = (query: string) => {
     const lowercaseQuery = query.toLowerCase();
     const hasHiddenGem = lowercaseQuery.includes('hidden gem') || 
@@ -443,37 +441,29 @@ const useRecommendations = ({
     return { hasHiddenGem, hasMustVisit, priceAmount };
   };
 
-  // Apply special criteria filtering
   const applySpecialCriteriaFiltering = (items: any[], query: string) => {
     const { hasHiddenGem, hasMustVisit, priceAmount } = checkForSpecialCriteria(query);
     
     return items.filter(item => {
-      // Filter for hidden gems if requested
       if (hasHiddenGem && !item.isHiddenGem) {
         return false;
       }
       
-      // Filter for must-visit if requested
       if (hasMustVisit && !item.isMustVisit) {
         return false;
       }
       
-      // Filter for price if specified
       if (priceAmount !== null) {
-        // For marketplace listings with direct price
         if ('price' in item && typeof item.price === 'number') {
-          // Allow some flexibility in price range (±20%)
           const minPrice = priceAmount * 0.8;
           const maxPrice = priceAmount * 1.2;
           return item.price >= minPrice && item.price <= maxPrice;
         }
         
-        // For service providers with price range
         if (item.price_range_min !== null && item.price_range_max !== null) {
           return priceAmount >= item.price_range_min && priceAmount <= item.price_range_max;
         }
         
-        // For events with price per person
         if ('pricePerPerson' in item && typeof item.pricePerPerson === 'number') {
           const minPrice = priceAmount * 0.8;
           const maxPrice = priceAmount * 1.2;
@@ -500,12 +490,10 @@ const useRecommendations = ({
         if (query.toLowerCase().includes('yoga') || effectiveCategory === 'fitness') {
           console.log("Specialized handling for yoga query");
           const yogaResults = getYogaResults(query);
-          // Apply special criteria filtering for badges like hidden gem or must visit
           const filteredResults = applySpecialCriteriaFiltering(yogaResults, query);
           setRecommendations(filteredResults);
           
           const matchingEvents = searchEvents(processedQuery);
-          // Apply the same filtering to events
           const filteredEvents = applySpecialCriteriaFiltering(matchingEvents, query);
           setEvents(filteredEvents);
           setLoading(false);
@@ -519,13 +507,11 @@ const useRecommendations = ({
           ).map(result => ({
             ...result,
             created_at: result.created_at || new Date().toISOString(),
-            // Add these properties for filtering support
-            isHiddenGem: Math.random() > 0.7, // Random assignment for mock data
-            isMustVisit: Math.random() > 0.8  // Random assignment for mock data
+            isHiddenGem: Math.random() > 0.7,
+            isMustVisit: Math.random() > 0.8
           }));
           
           if (restaurantResults.length > 0) {
-            // Apply special criteria filtering
             const filteredResults = applySpecialCriteriaFiltering(restaurantResults, query);
             setRecommendations(filteredResults);
             
@@ -542,15 +528,13 @@ const useRecommendations = ({
         if (supabaseResults && supabaseResults.length > 0) {
           console.log("Using Supabase results:", supabaseResults.length);
           
-          // Enhance results with hidden gem and must visit properties
           const enhancedResults = supabaseResults.map((result, index) => ({
             ...result,
             created_at: result.created_at || new Date().toISOString(),
-            isHiddenGem: result.isHiddenGem || index % 3 === 0,  // Every 3rd result is a hidden gem
-            isMustVisit: result.isMustVisit || index % 5 === 0   // Every 5th result is a must visit
+            isHiddenGem: result.isHiddenGem || index % 3 === 0,
+            isMustVisit: result.isMustVisit || index % 5 === 0
           }));
           
-          // Apply special criteria filtering
           const filteredResults = applySpecialCriteriaFiltering(enhancedResults, query);
           setRecommendations(filteredResults);
         } else {
@@ -586,7 +570,6 @@ const useRecommendations = ({
             };
           });
           
-          // Apply special criteria filtering
           const filteredResults = applySpecialCriteriaFiltering(resultsWithImages, query);
           setRecommendations(filteredResults);
         }
