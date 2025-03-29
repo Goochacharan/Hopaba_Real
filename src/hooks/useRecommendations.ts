@@ -3,14 +3,6 @@ import { Recommendation, mockRecommendations, searchRecommendations } from '@/li
 import { CategoryType } from '@/components/CategoryFilter';
 import { supabase } from '@/integrations/supabase/client';
 
-declare module '@/lib/mockData' {
-  interface Recommendation {
-    isHiddenGem?: boolean;
-    isMustVisit?: boolean;
-    created_at?: string;
-  }
-}
-
 interface UseRecommendationsProps {
   initialQuery?: string;
   initialCategory?: CategoryType;
@@ -39,8 +31,6 @@ export interface Event {
   phoneNumber?: string;
   whatsappNumber?: string;
   images?: string[];
-  isHiddenGem?: boolean;
-  isMustVisit?: boolean;
 }
 
 const sampleEvents: Event[] = [
@@ -95,7 +85,7 @@ const sampleEvents: Event[] = [
     time: '9:00 AM - 12:00 PM',
     location: 'Serenity Yoga Studio, Indiranagar',
     description: 'A beginner-friendly workshop introducing fundamental yoga poses, breathing techniques, and mindfulness practices for newcomers.',
-    image: 'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+    image: 'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
     attendees: 32,
     pricePerPerson: 500
   }
@@ -117,7 +107,7 @@ const yogaAndFitnessMockData: Recommendation[] = [
     hours: 'Until 9:00 PM',
     priceLevel: '$$',
     images: [
-      'https://images.unsplash.com/photo-1570655652364-2e0a67455ac6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+      'https://images.unsplash.com/photo-1570655652364-2e0a67455ac6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
       'https://images.unsplash.com/photo-1599447421416-3414500d18a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
       'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fA%3D%3D&auto=format&fit=crop&w=1220&q=80'
     ]
@@ -201,7 +191,6 @@ const keywordMap = {
   'veg': ['veg', 'vegetarian', 'pure veg'],
   'non-veg': ['non-veg', 'non vegetarian', 'nonveg', 'meat', 'chicken', 'beef', 'pork'],
   'hidden gem': ['hidden gem', 'underrated', 'secret', 'unknown', 'not popular', 'undiscovered'],
-  'must visit': ['must visit', 'must see', 'must try', 'top attraction', 'best place'],
   'popular': ['popular', 'crowded', 'well known', 'famous', 'trending', 'busy']
 };
 
@@ -433,77 +422,6 @@ const useRecommendations = ({
       return true;
     });
   };
-  
-  const checkForSpecialCriteria = (query: string) => {
-    const lowercaseQuery = query.toLowerCase();
-    const hasHiddenGem = lowercaseQuery.includes('hidden gem') || 
-                          lowercaseQuery.includes('underrated') || 
-                          lowercaseQuery.includes('undiscovered');
-    
-    const hasMustVisit = lowercaseQuery.includes('must visit') || 
-                          lowercaseQuery.includes('must see') || 
-                          lowercaseQuery.includes('must try') ||
-                          lowercaseQuery.includes('top attraction');
-    
-    const hasPriceInfo = lowercaseQuery.match(/(\d+)/g);
-    const priceAmount = hasPriceInfo ? parseInt(hasPriceInfo[0]) : null;
-    
-    return { hasHiddenGem, hasMustVisit, priceAmount };
-  };
-
-  const applySpecialCriteriaFiltering = (items: any[], query: string) => {
-    const { hasHiddenGem, hasMustVisit, priceAmount } = checkForSpecialCriteria(query);
-    
-    return items.filter(item => {
-      if (hasHiddenGem && !item.isHiddenGem) {
-        return false;
-      }
-      
-      if (hasMustVisit && !item.isMustVisit) {
-        return false;
-      }
-      
-      if (priceAmount !== null) {
-        if ('price' in item && typeof item.price === 'number') {
-          const minPrice = priceAmount * 0.8;
-          const maxPrice = priceAmount * 1.2;
-          return item.price >= minPrice && item.price <= maxPrice;
-        }
-        
-        if (item.price_range_min !== null && item.price_range_max !== null) {
-          return priceAmount >= item.price_range_min && priceAmount <= item.price_range_max;
-        }
-        
-        if ('pricePerPerson' in item && typeof item.pricePerPerson === 'number') {
-          const minPrice = priceAmount * 0.8;
-          const maxPrice = priceAmount * 1.2;
-          return item.pricePerPerson >= minPrice && item.pricePerPerson <= maxPrice;
-        }
-      }
-      
-      return true;
-    });
-  };
-
-  const enhanceRecommendations = (recommendations: any[]) => {
-    return recommendations.map(rec => {
-      return {
-        ...rec,
-        hours: rec.hours || rec.availability,
-        price_range_min: rec.price_range_min,
-        price_range_max: rec.price_range_max,
-        price_unit: rec.price_unit,
-        availability: rec.availability,
-        availability_days: rec.availability_days || [],
-        availability_start_time: rec.availability_start_time || '',
-        availability_end_time: rec.availability_end_time || '',
-        instagram: rec.instagram || '',
-        map_link: rec.map_link,
-        isHiddenGem: rec.isHiddenGem !== undefined ? rec.isHiddenGem : false,
-        isMustVisit: rec.isMustVisit !== undefined ? rec.isMustVisit : false
-      };
-    });
-  };
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -520,12 +438,10 @@ const useRecommendations = ({
         if (query.toLowerCase().includes('yoga') || effectiveCategory === 'fitness') {
           console.log("Specialized handling for yoga query");
           const yogaResults = getYogaResults(query);
-          const filteredResults = applySpecialCriteriaFiltering(yogaResults, query);
-          setRecommendations(filteredResults);
+          setRecommendations(yogaResults);
           
           const matchingEvents = searchEvents(processedQuery);
-          const filteredEvents = applySpecialCriteriaFiltering(matchingEvents, query);
-          setEvents(filteredEvents);
+          setEvents(matchingEvents);
           setLoading(false);
           return;
         }
@@ -536,18 +452,13 @@ const useRecommendations = ({
             item.category === 'Restaurants'
           ).map(result => ({
             ...result,
-            created_at: result.created_at || new Date().toISOString(),
-            isHiddenGem: Math.random() > 0.7,
-            isMustVisit: Math.random() > 0.8
+            created_at: result.created_at || new Date().toISOString() // Ensure created_at exists for sorting
           }));
           
           if (restaurantResults.length > 0) {
-            const filteredResults = applySpecialCriteriaFiltering(restaurantResults, query);
-            setRecommendations(filteredResults);
-            
+            setRecommendations(restaurantResults);
             const matchingEvents = searchEvents(processedQuery);
-            const filteredEvents = applySpecialCriteriaFiltering(matchingEvents, query);
-            setEvents(filteredEvents);
+            setEvents(matchingEvents);
             setLoading(false);
             return;
           }
@@ -557,41 +468,44 @@ const useRecommendations = ({
         
         if (supabaseResults && supabaseResults.length > 0) {
           console.log("Using Supabase results:", supabaseResults.length);
-          
-          const enhancedResults = supabaseResults.map((result: any, index: number) => {
-            return {
-              ...result,
-              created_at: result.created_at || new Date().toISOString(),
-              isHiddenGem: result.isHiddenGem !== undefined ? result.isHiddenGem : index % 3 === 0,
-              isMustVisit: result.isMustVisit !== undefined ? result.isMustVisit : index % 5 === 0
-            };
-          });
-          
-          const filteredResults = applySpecialCriteriaFiltering(enhancedResults, query);
-          setRecommendations(filteredResults);
+          setRecommendations(supabaseResults.map(result => ({
+            ...result,
+            created_at: result.created_at || new Date().toISOString() // Ensure created_at exists for sorting
+          })));
         } else {
           console.log("No Supabase results, using mock data");
           await new Promise(resolve => setTimeout(resolve, 800));
           
           const locationResults = searchRecommendations(processedQuery, effectiveCategory);
           
-          const resultsWithImages = locationResults.map((result: any, index: number) => {
+          const resultsWithImages = locationResults.map(result => {
+            if (result.images && result.images.length > 0) {
+              return {
+                ...result,
+                created_at: result.created_at || new Date().toISOString() // Ensure created_at exists for sorting
+              };
+            }
+            
+            const mainImage = result.image;
+            const baseUrl = mainImage.split('?')[0];
+            const images = [
+              mainImage,
+              `${baseUrl}?v=2`,
+              `${baseUrl}?v=3`,
+            ];
+            
             return {
               ...result,
-              images: result.images || [result.image, `${result.image}?v=2`, `${result.image}?v=3`],
-              created_at: result.created_at || new Date().toISOString(),
-              isHiddenGem: result.isHiddenGem !== undefined ? result.isHiddenGem : index % 3 === 0,
-              isMustVisit: result.isMustVisit !== undefined ? result.isMustVisit : index % 5 === 0
+              images,
+              created_at: result.created_at || new Date().toISOString() // Ensure created_at exists for sorting
             };
           });
           
-          const filteredResults = applySpecialCriteriaFiltering(resultsWithImages, query);
-          setRecommendations(filteredResults);
+          setRecommendations(resultsWithImages);
         }
         
         const matchingEvents = searchEvents(processedQuery);
-        const filteredEvents = applySpecialCriteriaFiltering(matchingEvents, query);
-        setEvents(filteredEvents);
+        setEvents(matchingEvents);
       } catch (err) {
         console.error('Error fetching recommendations:', err);
         setError('Failed to fetch recommendations. Please try again.');
@@ -605,14 +519,10 @@ const useRecommendations = ({
     if (query) {
       fetchRecommendations();
     } else {
-      const defaultResults = mockRecommendations.slice(0, 6).map((result: any, index: number) => {
-        return {
-          ...result,
-          created_at: result.created_at || new Date().toISOString(),
-          isHiddenGem: result.isHiddenGem !== undefined ? result.isHiddenGem : index % 3 === 0,
-          isMustVisit: result.isMustVisit !== undefined ? result.isMustVisit : index % 5 === 0
-        };
-      });
+      const defaultResults = mockRecommendations.slice(0, 6).map(result => ({
+        ...result,
+        created_at: result.created_at || new Date().toISOString() // Ensure created_at exists for sorting
+      }));
       setRecommendations(defaultResults);
       setEvents([]);
       setLoading(false);

@@ -7,334 +7,146 @@ export interface MarketplaceListing {
   title: string;
   description: string;
   price: number;
-  condition: string; // 'new', 'like new', 'good', 'fair', 'poor'
   category: string;
+  condition: string;
   images: string[];
   seller_name: string;
-  seller_id: string; // Changed from optional to required to match database expectations
   seller_rating: number;
-  seller_phone?: string;
-  seller_whatsapp?: string;
-  seller_instagram?: string;
+  seller_phone: string | null;
+  seller_whatsapp: string | null;
+  seller_instagram: string | null;
+  seller_id: string | null;
   location: string;
   created_at: string;
-  updated_at: string;
-  approval_status: string;
-  isHiddenGem?: boolean;
-  isMustVisit?: boolean;
+  approval_status?: string;
 }
 
-interface UseMarketplaceListingsProps {
+interface UseMarketplaceListingsOptions {
   category?: string;
+  searchQuery?: string;
   condition?: string;
   minPrice?: number;
   maxPrice?: number;
   minRating?: number;
-  searchQuery?: string;
 }
 
-// Added for parsing price from queries
-const extractPriceFromQuery = (query: string): number | null => {
-  const priceMatch = query.match(/(\d+)/);
-  return priceMatch ? parseInt(priceMatch[0], 10) : null;
-};
-
-// Added for checking if query contains badge terms
-const queryContainsBadge = (query: string, badgeType: 'hidden gem' | 'must visit'): boolean => {
-  const lowerQuery = query.toLowerCase();
-  
-  if (badgeType === 'hidden gem') {
-    return lowerQuery.includes('hidden gem') || 
-           lowerQuery.includes('underrated') || 
-           lowerQuery.includes('secret') ||
-           lowerQuery.includes('undiscovered');
-  } else if (badgeType === 'must visit') {
-    return lowerQuery.includes('must visit') || 
-           lowerQuery.includes('must see') || 
-           lowerQuery.includes('must try') ||
-           lowerQuery.includes('top place');
-  }
-  
-  return false;
-};
-
-export const useMarketplaceListings = ({
-  category,
-  condition,
-  minPrice,
-  maxPrice,
-  minRating,
-  searchQuery = ''
-}: UseMarketplaceListingsProps = {}) => {
+export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = {}) => {
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  const fetchListings = async () => {
-    setLoading(true);
-    setError(null);
+  const { category, searchQuery, condition, minPrice, maxPrice, minRating } = options;
 
-    try {
-      let query = supabase
-        .from('marketplace_listings')
-        .select('*')
-        .eq('approval_status', 'approved');
+  useEffect(() => {
+    const fetchListings = async () => {
+      setLoading(true);
+      setError(null);
 
-      if (category && category !== 'all') {
-        query = query.eq('category', category);
-      }
-
-      if (condition) {
-        query = query.eq('condition', condition);
-      }
-
-      if (minPrice) {
-        query = query.gte('price', minPrice);
-      }
-
-      if (maxPrice) {
-        query = query.lte('price', maxPrice);
-      }
-
-      if (minRating) {
-        query = query.gte('seller_rating', minRating);
-      }
-
-      // Basic text search
-      if (searchQuery && searchQuery.trim() !== '') {
-        // Extract potential price from the query
-        const queryPrice = extractPriceFromQuery(searchQuery);
-        
-        // Check if query contains badge terms that can be applied to marketplace
-        const hasHiddenGem = queryContainsBadge(searchQuery, 'hidden gem');
-        const hasMustVisit = queryContainsBadge(searchQuery, 'must visit');
-        
-        // Basic text matching for title and description
-        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
-        
-        // Apply price filtering if found in the query
-        if (queryPrice) {
-          // We'll adjust this in the post-processing below
-        }
-        
-        const { data, error } = await query;
-        
-        if (error) {
-          console.error('Error fetching marketplace listings:', error);
-          setError('Failed to fetch marketplace listings');
-          setListings([]);
-        } else if (data) {
-          let filteredData = [...data];
-          
-          // Post-process the results to apply price filtering with some flexibility (±20%)
-          if (queryPrice) {
-            const minAcceptablePrice = queryPrice * 0.8;
-            const maxAcceptablePrice = queryPrice * 1.2;
-            filteredData = filteredData.filter(item => 
-              item.price >= minAcceptablePrice && item.price <= maxAcceptablePrice
-            );
-          }
-          
-          // Apply hidden gem and must visit filtering
-          if (hasHiddenGem || hasMustVisit) {
-            // Process the data to add the virtual properties
-            filteredData = filteredData.map((item) => {
-              // Create a new object with all properties from the original item
-              // plus the additional isHiddenGem and isMustVisit properties
-              return {
-                ...item,
-                // Use a deterministic calculation for the badges
-                isHiddenGem: parseInt(item.id.charAt(0), 36) % 3 === 0,
-                isMustVisit: parseInt(item.id.charAt(0), 36) % 5 === 0
-              } as MarketplaceListing;
-            });
-            
-            // Filter based on the criteria
-            if (hasHiddenGem) {
-              filteredData = filteredData.filter(item => item.isHiddenGem);
-            }
-            
-            if (hasMustVisit) {
-              filteredData = filteredData.filter(item => item.isMustVisit);
-            }
-          }
-          
-          setListings(filteredData as MarketplaceListing[]);
-        }
-      } else {
-        const { data, error } = await query;
-        
-        if (error) {
-          console.error('Error fetching marketplace listings:', error);
-          setError('Failed to fetch marketplace listings');
-          setListings([]);
-        } else if (data) {
-          // Add virtual properties for marketplace items
-          const enhancedData = data.map((item) => {
-            // Create a new object with the original properties and the additional ones
-            return {
-              ...item,
-              isHiddenGem: parseInt(item.id.charAt(0), 36) % 3 === 0,
-              isMustVisit: parseInt(item.id.charAt(0), 36) % 5 === 0
-            } as MarketplaceListing;
-          });
-          
-          setListings(enhancedData);
-        }
-      }
-    } catch (err) {
-      console.error('Error in fetchListings:', err);
-      setError('An unexpected error occurred');
-      setListings([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Function to manually search marketplace listings
-  const search = (query: string) => {
-    if (!query.trim()) {
-      fetchListings();
-      return;
-    }
-    
-    setLoading(true);
-    
-    // Call the fetchListings function with the updated searchQuery
-    const searchWithQuery = async () => {
       try {
-        let supabaseQuery = supabase
+        let query = supabase
           .from('marketplace_listings')
           .select('*')
-          .eq('approval_status', 'approved')
-          .or(`title.ilike.%${query}%,description.ilike.%${query}%,category.ilike.%${query}%`);
-          
-        const { data, error } = await supabaseQuery;
+          .eq('approval_status', 'approved');
         
-        if (error) {
-          console.error('Error searching marketplace:', error);
-          setError('Failed to search marketplace');
-          setListings([]);
-        } else if (data) {
-          // Extract potential price from the query
-          const queryPrice = extractPriceFromQuery(query);
-          
-          // Check for badge terms
-          const hasHiddenGem = queryContainsBadge(query, 'hidden gem');
-          const hasMustVisit = queryContainsBadge(query, 'must visit');
-          
-          // Add properties and filter results
-          let filteredData = data.map((item) => {
-            return {
-              ...item,
-              isHiddenGem: parseInt(item.id.charAt(0), 36) % 3 === 0,
-              isMustVisit: parseInt(item.id.charAt(0), 36) % 5 === 0
-            } as MarketplaceListing;
-          });
-          
-          // Apply price filtering if found in the query
-          if (queryPrice) {
-            const minAcceptablePrice = queryPrice * 0.8;
-            const maxAcceptablePrice = queryPrice * 1.2;
-            filteredData = filteredData.filter(item => 
-              item.price >= minAcceptablePrice && item.price <= maxAcceptablePrice
-            );
-          }
-          
-          // Apply badge filtering
-          if (hasHiddenGem) {
-            filteredData = filteredData.filter(item => item.isHiddenGem);
-          }
-          
-          if (hasMustVisit) {
-            filteredData = filteredData.filter(item => item.isMustVisit);
-          }
-          
-          setListings(filteredData);
+        // Apply category filter if provided
+        if (category && category !== 'all') {
+          query = query.eq('category', category);
         }
+        
+        // Apply condition filter if provided
+        if (condition && condition !== 'all') {
+          query = query.ilike('condition', condition);
+        }
+        
+        // Apply price range filters if provided
+        if (minPrice !== undefined) {
+          query = query.gte('price', minPrice);
+        }
+        
+        if (maxPrice !== undefined) {
+          query = query.lte('price', maxPrice);
+        }
+        
+        // Apply minimum seller rating filter if provided
+        if (minRating !== undefined && minRating > 0) {
+          query = query.gte('seller_rating', minRating);
+        }
+        
+        // Apply search query if provided - with enhanced flexibility
+        if (searchQuery && searchQuery.trim() !== '') {
+          const searchTerms = searchQuery.trim().toLowerCase();
+          
+          // Make search more flexible by using partial matches and looking in both title and description
+          query = query.or(`title.ilike.%${searchTerms}%,description.ilike.%${searchTerms}%,category.ilike.%${searchTerms}%`);
+        }
+
+        const { data, error } = await query.order('created_at', { ascending: false });
+
+        if (error) {
+          throw error;
+        }
+
+        console.log(`Found ${data?.length || 0} marketplace listings for query "${searchQuery || ''}"`);
+        if (condition && condition !== 'all') {
+          console.log(`Filtering by condition: "${condition}"`);
+        }
+        setListings(data as MarketplaceListing[]);
       } catch (err) {
-        console.error('Error in marketplace search:', err);
-        setError('An unexpected error occurred while searching');
-        setListings([]);
+        console.error('Error fetching marketplace listings:', err);
+        setError('Failed to fetch listings. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
-    
-    searchWithQuery();
-  };
 
-  useEffect(() => {
     fetchListings();
-  }, [category, condition, minPrice, maxPrice, minRating]);
+  }, [category, searchQuery, condition, minPrice, maxPrice, minRating]);
 
-  // Also trigger a search when the searchQuery prop changes
-  useEffect(() => {
-    if (searchQuery) {
-      search(searchQuery);
-    }
-  }, [searchQuery]);
-
-  return {
-    listings,
-    loading,
-    error,
-    refresh: fetchListings,
-    search
-  };
+  return { listings, loading, error };
 };
 
-// Add the useMarketplaceListing hook for individual listing details
-export const useMarketplaceListing = (listingId: string) => {
+export const useMarketplaceListing = (id: string) => {
   const [listing, setListing] = useState<MarketplaceListing | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchListing = async () => {
-      if (!listingId) {
-        setError("Listing ID is required");
+      if (!id) {
+        setError('No listing ID provided');
         setLoading(false);
         return;
       }
+
+      setLoading(true);
+      setError(null);
 
       try {
         const { data, error } = await supabase
           .from('marketplace_listings')
           .select('*')
-          .eq('id', listingId)
+          .eq('id', id)
           .eq('approval_status', 'approved')
-          .single();
+          .maybeSingle();
 
         if (error) {
-          console.error('Error fetching marketplace listing:', error);
-          setError('Failed to fetch marketplace listing');
-          setListing(null);
-        } else if (data) {
-          // Add virtual properties
-          const enhancedListing = {
-            ...data,
-            isHiddenGem: parseInt(data.id.charAt(0), 36) % 3 === 0,
-            isMustVisit: parseInt(data.id.charAt(0), 36) % 5 === 0
-          } as MarketplaceListing;
-          
-          setListing(enhancedListing);
+          throw error;
+        }
+
+        if (!data) {
+          setError('Listing not found');
+        } else {
+          setListing(data as MarketplaceListing);
         }
       } catch (err) {
-        console.error('Error in fetchListing:', err);
-        setError('An unexpected error occurred');
-        setListing(null);
+        console.error('Error fetching marketplace listing:', err);
+        setError('Failed to fetch listing details. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchListing();
-  }, [listingId]);
+  }, [id]);
 
-  return {
-    listing,
-    loading,
-    error
-  };
+  return { listing, loading, error };
 };

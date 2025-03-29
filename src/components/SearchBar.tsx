@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Search, X, Mic, Sparkles, LogIn } from 'lucide-react';
@@ -76,6 +77,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
       console.log('AI enhanced search:', data);
       
       if (data.enhanced && data.enhanced !== rawQuery) {
+        toast({
+          title: "Search enhanced with AI",
+          description: `We improved your search to: "${data.enhanced}"`,
+          duration: 5000
+        });
+        
         return data.enhanced;
       }
       
