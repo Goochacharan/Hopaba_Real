@@ -143,17 +143,17 @@ export const useMarketplaceListings = ({
             // Assign these properties deterministically
             filteredData = filteredData.map((item) => ({
               ...item,
-              isHiddenGem: item.id.charCodeAt(0) % 3 === 0,
-              isMustVisit: item.id.charCodeAt(0) % 5 === 0
-            }));
+              isHiddenGem: parseInt(item.id.charAt(0), 36) % 3 === 0,
+              isMustVisit: parseInt(item.id.charAt(0), 36) % 5 === 0
+            } as MarketplaceListing));
             
             // Filter based on the criteria
             if (hasHiddenGem) {
-              filteredData = filteredData.filter(item => item.isHiddenGem);
+              filteredData = filteredData.filter(item => (item as unknown as MarketplaceListing).isHiddenGem);
             }
             
             if (hasMustVisit) {
-              filteredData = filteredData.filter(item => item.isMustVisit);
+              filteredData = filteredData.filter(item => (item as unknown as MarketplaceListing).isMustVisit);
             }
           }
           
@@ -170,10 +170,11 @@ export const useMarketplaceListings = ({
           // Add virtual properties for marketplace items
           const enhancedData = data.map((item) => ({
             ...item,
-            isHiddenGem: item.id.charCodeAt(0) % 3 === 0,
-            isMustVisit: item.id.charCodeAt(0) % 5 === 0
-          }));
-          setListings(enhancedData as MarketplaceListing[]);
+            isHiddenGem: parseInt(item.id.charAt(0), 36) % 3 === 0,
+            isMustVisit: parseInt(item.id.charAt(0), 36) % 5 === 0
+          } as MarketplaceListing));
+          
+          setListings(enhancedData);
         }
       }
     } catch (err) {
@@ -307,10 +308,11 @@ export const useMarketplaceListing = (listingId: string) => {
           // Add virtual properties
           const enhancedListing = {
             ...data,
-            isHiddenGem: data.id.charCodeAt(0) % 3 === 0,
-            isMustVisit: data.id.charCodeAt(0) % 5 === 0
-          };
-          setListing(enhancedListing as MarketplaceListing);
+            isHiddenGem: parseInt(data.id.charAt(0), 36) % 3 === 0,
+            isMustVisit: parseInt(data.id.charAt(0), 36) % 5 === 0
+          } as MarketplaceListing;
+          
+          setListing(enhancedListing);
         }
       } catch (err) {
         console.error('Error in fetchListing:', err);

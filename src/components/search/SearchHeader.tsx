@@ -45,8 +45,6 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
           <AlertDescription className="text-xs">{error}</AlertDescription>
         </Alert>
       )}
-      
-      {/* Removed the AI-enhanced search message div */}
     </div>
   );
 };

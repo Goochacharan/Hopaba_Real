@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import MainLayout from '@/components/MainLayout';
 import AnimatedLogo from '@/components/AnimatedLogo';
@@ -7,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 
 const queryCategoryMap = {
@@ -35,7 +33,6 @@ const queryCategoryMap = {
 
 const Index = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { user } = useAuth();
   const [isEnhancing, setIsEnhancing] = useState<string | null>(null);
 
@@ -121,11 +118,6 @@ const Index = () => {
       }
       console.log('AI enhanced search:', data);
       if (data.enhanced && data.enhanced !== rawQuery) {
-        toast({
-          title: "Search enhanced with AI",
-          description: `We improved your search to: "${data.enhanced}"`,
-          duration: 5000
-        });
         return data.enhanced;
       }
       return rawQuery;
