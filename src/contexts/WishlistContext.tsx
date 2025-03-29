@@ -1,26 +1,35 @@
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Recommendation } from '@/lib/mockData';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { Event } from '@/hooks/useRecommendations';
+import { useToast } from '@/hooks/use-toast';
 
-// Use a discriminated union to properly type the wishlist items
 export type WishlistItem = 
-  | (Recommendation & { type: 'recommendation' })
+  | (Recommendation & { type: 'location' })
   | (MarketplaceListing & { type: 'marketplace' })
   | (Event & { type: 'event' });
 
 interface WishlistContextType {
   wishlist: WishlistItem[];
-  addToWishlist: (item: Recommendation | MarketplaceListing | Event, type: 'recommendation' | 'marketplace' | 'event') => void;
-  removeFromWishlist: (id: string) => void;
-  isInWishlist: (id: string) => boolean;
+  addToWishlist: (item: WishlistItem) => void;
+  removeFromWishlist: (itemId: string, itemType: 'location' | 'marketplace' | 'event') => void;
+  isInWishlist: (itemId: string, itemType: 'location' | 'marketplace' | 'event') => boolean;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
+export const useWishlist = () => {
+  const context = useContext(WishlistContext);
+  if (!context) {
+    throw new Error('useWishlist must be used within a WishlistProvider');
+  }
+  return context;
+};
+
 export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
+  const { toast } = useToast();
 
   // Load wishlist from localStorage on mount
   useEffect(() => {
@@ -28,42 +37,61 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (savedWishlist) {
       try {
         setWishlist(JSON.parse(savedWishlist));
-      } catch (e) {
-        console.error('Failed to parse wishlist from localStorage:', e);
+      } catch (error) {
+        console.error('Failed to parse wishlist from localStorage:', error);
+        // Reset wishlist if parsing fails
+        localStorage.removeItem('wishlist');
       }
     }
   }, []);
 
-  // Save wishlist to localStorage when it changes
+  // Save wishlist to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
-  const addToWishlist = (
-    item: Recommendation | MarketplaceListing | Event, 
-    type: 'recommendation' | 'marketplace' | 'event'
-  ) => {
-    if (!isInWishlist(item.id)) {
-      // Create a properly typed item based on the type parameter
-      if (type === 'recommendation') {
-        const recommendationItem = item as Recommendation;
-        setWishlist((prev) => [...prev, { ...recommendationItem, type }]);
-      } else if (type === 'marketplace') {
-        const marketplaceItem = item as MarketplaceListing;
-        setWishlist((prev) => [...prev, { ...marketplaceItem, type }]);
-      } else if (type === 'event') {
-        const eventItem = item as Event;
-        setWishlist((prev) => [...prev, { ...eventItem, type }]);
+  const addToWishlist = (item: WishlistItem) => {
+    setWishlist(prev => {
+      // Check if item already exists in wishlist
+      const exists = prev.some(i => i.id === item.id && i.type === item.type);
+      if (exists) {
+        return prev;
       }
-    }
+
+      // Show toast notification
+      toast({
+        title: "Added to wishlist",
+        description: `${item.type === 'location' ? item.name : item.title} has been added to your wishlist.`,
+        duration: 3000,
+      });
+
+      // Add item to wishlist
+      return [...prev, item];
+    });
   };
 
-  const removeFromWishlist = (id: string) => {
-    setWishlist((prev) => prev.filter((item) => item.id !== id));
+  const removeFromWishlist = (itemId: string, itemType: 'location' | 'marketplace' | 'event') => {
+    setWishlist(prev => {
+      const filteredList = prev.filter(item => !(item.id === itemId && item.type === itemType));
+      
+      // Show toast notification if an item was removed
+      if (filteredList.length < prev.length) {
+        const removedItem = prev.find(item => item.id === itemId && item.type === itemType);
+        if (removedItem) {
+          toast({
+            title: "Removed from wishlist",
+            description: `${itemType === 'location' ? removedItem.name : removedItem.title} has been removed from your wishlist.`,
+            duration: 3000,
+          });
+        }
+      }
+      
+      return filteredList;
+    });
   };
 
-  const isInWishlist = (id: string) => {
-    return wishlist.some((item) => item.id === id);
+  const isInWishlist = (itemId: string, itemType: 'location' | 'marketplace' | 'event') => {
+    return wishlist.some(item => item.id === itemId && item.type === itemType);
   };
 
   return (
@@ -71,12 +99,4 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       {children}
     </WishlistContext.Provider>
   );
-};
-
-export const useWishlist = () => {
-  const context = useContext(WishlistContext);
-  if (context === undefined) {
-    throw new Error('useWishlist must be used within a WishlistProvider');
-  }
-  return context;
 };

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -13,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Recommendation } from '@/lib/mockData';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { Event } from '@/hooks/useRecommendations';
-import EventsList from '@/components/search/EventsList';
+import EventCard from '@/components/EventCard';
 
 const MyList = () => {
   const {
@@ -105,9 +106,6 @@ const MyList = () => {
   const currentItems = filteredWishlist.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredWishlist.length / itemsPerPage);
 
-  const handleRSVP = (eventTitle: string) => {
-  };
-
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, activeTab]);
@@ -147,8 +145,7 @@ const MyList = () => {
                     if (isMarketplaceListing(item)) {
                       return <MarketplaceListingCard key={item.id} listing={item as MarketplaceListing} className="search-result-card" />;
                     } else if (isEvent(item)) {
-                      const events = [item as Event];
-                      return <EventsList key={item.id} events={events} className="mylist-event" />;
+                      return <EventCard key={item.id} event={item as Event} className="search-result-card" />;
                     } else {
                       return <LocationCard key={item.id} recommendation={item as Recommendation} className="search-result-card" />;
                     }
