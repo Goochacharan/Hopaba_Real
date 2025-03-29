@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -19,7 +18,7 @@ export interface MarketplaceListing {
   location: string;
   created_at: string;
   updated_at: string;
-  approval_status?: string;
+  approval_status: string; // Changed from optional to required
   isHiddenGem?: boolean;
   isMustVisit?: boolean;
 }
@@ -140,23 +139,21 @@ export const useMarketplaceListings = ({
           }
           
           // Apply hidden gem and must visit filtering
-          // For marketplace, we'll tag certain items as hidden gems or must visit
           if (hasHiddenGem || hasMustVisit) {
-            // Assign these properties dynamically for display
-            filteredData = filteredData.map((item) => {
-              const enhancedItem = item as MarketplaceListing;
-              enhancedItem.isHiddenGem = item.id.charCodeAt(0) % 3 === 0; // Deterministic simulation
-              enhancedItem.isMustVisit = item.id.charCodeAt(0) % 5 === 0;  // Deterministic simulation
-              return enhancedItem;
-            });
+            // Assign these properties deterministically
+            filteredData = filteredData.map((item) => ({
+              ...item,
+              isHiddenGem: item.id.charCodeAt(0) % 3 === 0,
+              isMustVisit: item.id.charCodeAt(0) % 5 === 0
+            }));
             
             // Filter based on the criteria
             if (hasHiddenGem) {
-              filteredData = filteredData.filter(item => (item as MarketplaceListing).isHiddenGem);
+              filteredData = filteredData.filter(item => item.isHiddenGem);
             }
             
             if (hasMustVisit) {
-              filteredData = filteredData.filter(item => (item as MarketplaceListing).isMustVisit);
+              filteredData = filteredData.filter(item => item.isMustVisit);
             }
           }
           
@@ -171,13 +168,12 @@ export const useMarketplaceListings = ({
           setListings([]);
         } else if (data) {
           // Add virtual properties for marketplace items
-          const enhancedData = data.map((item) => {
-            const enhancedItem = item as MarketplaceListing;
-            enhancedItem.isHiddenGem = item.id.charCodeAt(0) % 3 === 0; // Deterministic simulation
-            enhancedItem.isMustVisit = item.id.charCodeAt(0) % 5 === 0;  // Deterministic simulation
-            return enhancedItem;
-          });
-          setListings(enhancedData);
+          const enhancedData = data.map((item) => ({
+            ...item,
+            isHiddenGem: item.id.charCodeAt(0) % 3 === 0,
+            isMustVisit: item.id.charCodeAt(0) % 5 === 0
+          }));
+          setListings(enhancedData as MarketplaceListing[]);
         }
       }
     } catch (err) {
@@ -309,10 +305,12 @@ export const useMarketplaceListing = (listingId: string) => {
           setListing(null);
         } else if (data) {
           // Add virtual properties
-          const enhancedListing = data as MarketplaceListing;
-          enhancedListing.isHiddenGem = data.id.charCodeAt(0) % 3 === 0;
-          enhancedListing.isMustVisit = data.id.charCodeAt(0) % 5 === 0;
-          setListing(enhancedListing);
+          const enhancedListing = {
+            ...data,
+            isHiddenGem: data.id.charCodeAt(0) % 3 === 0,
+            isMustVisit: data.id.charCodeAt(0) % 5 === 0
+          };
+          setListing(enhancedListing as MarketplaceListing);
         }
       } catch (err) {
         console.error('Error in fetchListing:', err);

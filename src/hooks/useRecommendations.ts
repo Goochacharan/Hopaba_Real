@@ -485,6 +485,26 @@ const useRecommendations = ({
     });
   };
 
+  const enhanceRecommendations = (recommendations: any[]) => {
+    return recommendations.map(rec => {
+      return {
+        ...rec,
+        hours: rec.hours || rec.availability,
+        price_range_min: rec.price_range_min,
+        price_range_max: rec.price_range_max,
+        price_unit: rec.price_unit,
+        availability: rec.availability,
+        availability_days: rec.availability_days || [],
+        availability_start_time: rec.availability_start_time || '',
+        availability_end_time: rec.availability_end_time || '',
+        instagram: rec.instagram || '',
+        map_link: rec.map_link,
+        isHiddenGem: rec.isHiddenGem !== undefined ? rec.isHiddenGem : false,
+        isMustVisit: rec.isMustVisit !== undefined ? rec.isMustVisit : false
+      };
+    });
+  };
+
   useEffect(() => {
     const fetchRecommendations = async () => {
       setLoading(true);
@@ -538,12 +558,13 @@ const useRecommendations = ({
         if (supabaseResults && supabaseResults.length > 0) {
           console.log("Using Supabase results:", supabaseResults.length);
           
-          const enhancedResults = supabaseResults.map((result, index) => {
-            const enhancedResult = { ...result } as Recommendation;
-            enhancedResult.created_at = result.created_at || new Date().toISOString();
-            enhancedResult.isHiddenGem = result.isHiddenGem || index % 3 === 0;
-            enhancedResult.isMustVisit = result.isMustVisit || index % 5 === 0;
-            return enhancedResult;
+          const enhancedResults = supabaseResults.map((result: any, index: number) => {
+            return {
+              ...result,
+              created_at: result.created_at || new Date().toISOString(),
+              isHiddenGem: result.isHiddenGem !== undefined ? result.isHiddenGem : index % 3 === 0,
+              isMustVisit: result.isMustVisit !== undefined ? result.isMustVisit : index % 5 === 0
+            };
           });
           
           const filteredResults = applySpecialCriteriaFiltering(enhancedResults, query);
@@ -554,28 +575,14 @@ const useRecommendations = ({
           
           const locationResults = searchRecommendations(processedQuery, effectiveCategory);
           
-          const resultsWithImages = locationResults.map((result, index) => {
-            if (result.images && result.images.length > 0) {
-              const enhancedResult = { ...result } as Recommendation;
-              enhancedResult.created_at = result.created_at || new Date().toISOString();
-              enhancedResult.isHiddenGem = result.isHiddenGem || index % 3 === 0;
-              enhancedResult.isMustVisit = result.isMustVisit || index % 5 === 0;
-              return enhancedResult;
-            }
-            
-            const mainImage = result.image;
-            const baseUrl = mainImage.split('?')[0];
-            const images = [
-              mainImage,
-              `${baseUrl}?v=2`,
-              `${baseUrl}?v=3`,
-            ];
-            
-            const enhancedResult = { ...result, images } as Recommendation;
-            enhancedResult.created_at = result.created_at || new Date().toISOString();
-            enhancedResult.isHiddenGem = result.isHiddenGem || index % 3 === 0;
-            enhancedResult.isMustVisit = result.isMustVisit || index % 5 === 0;
-            return enhancedResult;
+          const resultsWithImages = locationResults.map((result: any, index: number) => {
+            return {
+              ...result,
+              images: result.images || [result.image, `${result.image}?v=2`, `${result.image}?v=3`],
+              created_at: result.created_at || new Date().toISOString(),
+              isHiddenGem: result.isHiddenGem !== undefined ? result.isHiddenGem : index % 3 === 0,
+              isMustVisit: result.isMustVisit !== undefined ? result.isMustVisit : index % 5 === 0
+            };
           });
           
           const filteredResults = applySpecialCriteriaFiltering(resultsWithImages, query);
@@ -598,12 +605,13 @@ const useRecommendations = ({
     if (query) {
       fetchRecommendations();
     } else {
-      const defaultResults = mockRecommendations.slice(0, 6).map((result, index) => {
-        const enhancedResult = { ...result } as Recommendation;
-        enhancedResult.created_at = result.created_at || new Date().toISOString();
-        enhancedResult.isHiddenGem = result.isHiddenGem || index % 3 === 0;
-        enhancedResult.isMustVisit = result.isMustVisit || index % 5 === 0;
-        return enhancedResult;
+      const defaultResults = mockRecommendations.slice(0, 6).map((result: any, index: number) => {
+        return {
+          ...result,
+          created_at: result.created_at || new Date().toISOString(),
+          isHiddenGem: result.isHiddenGem !== undefined ? result.isHiddenGem : index % 3 === 0,
+          isMustVisit: result.isMustVisit !== undefined ? result.isMustVisit : index % 5 === 0
+        };
       });
       setRecommendations(defaultResults);
       setEvents([]);
