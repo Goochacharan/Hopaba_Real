@@ -15,7 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Captcha } from '@/components/ui/captcha';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-const HCAPTCHA_SITE_KEY = '10000000-ffff-ffff-ffff-000000000001'; // Default test key for hCaptcha
+const HCAPTCHA_SITE_KEY = 'fda043e0-8372-4d8a-b190-84a8fdee1528'; // Updated hCaptcha site key
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
