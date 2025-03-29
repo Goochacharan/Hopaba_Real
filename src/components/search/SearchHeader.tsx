@@ -45,14 +45,8 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
           <AlertDescription className="text-xs">{error}</AlertDescription>
         </Alert>
       )}
-
-      {query && query !== searchQuery && (
-        <div className="mb-1 p-1 bg-primary/10 rounded-lg border border-primary/20">
-          <p className="text-xs text-muted-foreground">
-            <span className="font-medium">AI-enhanced search:</span> {query}
-          </p>
-        </div>
-      )}
+      
+      {/* Removed the AI-enhanced search message div */}
     </div>
   );
 };

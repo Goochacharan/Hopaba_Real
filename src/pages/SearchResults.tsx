@@ -49,7 +49,8 @@ const SearchResults = () => {
   const {
     listings: marketplaceListings,
     loading: marketplaceLoading,
-    error: marketplaceError
+    error: marketplaceError,
+    search: searchMarketplace
   } = useMarketplaceListings({
     searchQuery: searchQuery
   });
@@ -132,8 +133,13 @@ const SearchResults = () => {
     if (searchQuery && searchQuery !== query) {
       console.log("SearchResults - Processing search query:", searchQuery);
       handleSearch(searchQuery);
+      
+      // Also search marketplace listings when query changes
+      if (searchMarketplace) {
+        searchMarketplace(searchQuery);
+      }
     }
-  }, [searchQuery, query, handleSearch]);
+  }, [searchQuery, query, handleSearch, searchMarketplace]);
 
   useEffect(() => {
     if (categoryParam !== 'all' && categoryParam !== category) {
