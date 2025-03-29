@@ -168,12 +168,7 @@ export default function Signup() {
         )}
 
         <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
-          {/* Always display CAPTCHA at the top */}
-          <div className="mb-4">
-            <p className="text-sm text-muted-foreground mb-2">Please complete the CAPTCHA verification:</p>
-            <Captcha siteKey={HCAPTCHA_SITE_KEY} onVerify={handleCaptchaVerify} />
-          </div>
-          
+          {/* Social login buttons */}
           <div className="space-y-2">
             <Button 
               type="button" 
@@ -284,7 +279,13 @@ export default function Signup() {
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={isLoading || isRateLimited || !captchaToken}>
+              {/* Moved CAPTCHA to bottom */}
+              <div className="mt-4">
+                <p className="text-sm text-muted-foreground mb-2">Please complete the CAPTCHA verification:</p>
+                <Captcha siteKey={HCAPTCHA_SITE_KEY} onVerify={handleCaptchaVerify} />
+              </div>
+
+              <Button type="submit" className="w-full mt-4" disabled={isLoading || isRateLimited || !captchaToken}>
                 {isLoading ? "Creating account..." : "Sign up with Email"}
               </Button>
             </form>
