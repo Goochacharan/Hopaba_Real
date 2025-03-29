@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -16,8 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Captcha } from '@/components/ui/captcha';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-// Replace this with your actual reCAPTCHA site key
-const RECAPTCHA_SITE_KEY = 'YOUR_RECAPTCHA_SITE_KEY';
+const HCAPTCHA_SITE_KEY = 'YOUR_HCAPTCHA_SITE_KEY';
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -63,7 +61,7 @@ export default function Login() {
       return;
     }
 
-    if (authAttempts >= 2 && !captchaToken) {
+    if (!captchaToken) {
       toast({
         title: "CAPTCHA verification required",
         description: "Please complete the CAPTCHA verification.",
@@ -74,10 +72,9 @@ export default function Login() {
 
     setIsLoading(true);
     try {
-      await loginWithEmail(values.email, values.password);
+      await loginWithEmail(values.email, values.password, captchaToken);
       navigate('/');
     } catch (error: any) {
-      // The error is already handled in loginWithEmail
       console.error("Login error:", error);
     } finally {
       setIsLoading(false);
@@ -94,12 +91,22 @@ export default function Login() {
       return;
     }
     
+    if (!captchaToken) {
+      toast({
+        title: "CAPTCHA verification required",
+        description: "Please complete the CAPTCHA verification.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setSocialLoading(provider);
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/`
+          redirectTo: `${window.location.origin}/`,
+          captchaToken: captchaToken
         },
       });
 
@@ -140,12 +147,17 @@ export default function Login() {
         )}
 
         <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
+          <div className="mb-4">
+            <p className="text-sm text-muted-foreground mb-2">Please complete the CAPTCHA verification:</p>
+            <Captcha siteKey={HCAPTCHA_SITE_KEY} onVerify={handleCaptchaVerify} />
+          </div>
+          
           <div className="space-y-2">
             <Button 
               type="button" 
               className="w-full flex items-center justify-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-50"
               onClick={() => handleSocialLogin('google')}
-              disabled={!!socialLoading || isRateLimited}
+              disabled={!!socialLoading || isRateLimited || !captchaToken}
             >
               {socialLoading === 'google' ? (
                 <span>Connecting...</span>
@@ -168,7 +180,7 @@ export default function Login() {
               type="button" 
               className="w-full flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white"
               onClick={() => handleSocialLogin('facebook')}
-              disabled={!!socialLoading || isRateLimited}
+              disabled={!!socialLoading || isRateLimited || !captchaToken}
             >
               {socialLoading === 'facebook' ? (
                 <span>Connecting...</span>
@@ -230,18 +242,10 @@ export default function Login() {
                 )}
               />
 
-              {authAttempts >= 2 && (
-                <Captcha siteKey={RECAPTCHA_SITE_KEY} onVerify={handleCaptchaVerify} />
-              )}
-
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={
-                  isLoading || 
-                  isRateLimited || 
-                  (authAttempts >= 2 && !captchaToken)
-                }
+                disabled={isLoading || isRateLimited || !captchaToken}
               >
                 {isLoading ? "Logging in..." : "Log in with Email"}
               </Button>

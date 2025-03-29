@@ -6,5 +6,10 @@ interface Window {
     execute: (siteKey: string, options: { action: string }) => Promise<string>;
     render: (container: string | HTMLElement, parameters: object) => string | number;
   };
+  hcaptcha?: {
+    ready: (callback: () => void) => void;
+    execute: (siteKey: string, options?: object) => Promise<string>;
+    render: (container: string | HTMLElement, parameters: object) => string | number;
+  };
   onloadCallback?: () => void;
 }

@@ -1,6 +1,7 @@
+
 import React, { useEffect, useRef } from 'react';
 
-// Remove the conflicting declaration and use the one from global.d.ts
+// Use the type definition from global.d.ts
 interface CaptchaProps {
   siteKey: string;
   onVerify: (token: string) => void;
@@ -11,23 +12,23 @@ export function Captcha({ siteKey, onVerify }: CaptchaProps) {
   const isScriptLoaded = useRef(false);
 
   useEffect(() => {
-    // Skip if reCAPTCHA is already loaded
-    if (window.grecaptcha && window.grecaptcha.render && divRef.current && !isScriptLoaded.current) {
+    // Skip if hCaptcha is already loaded
+    if (window.hcaptcha && divRef.current && !isScriptLoaded.current) {
       renderCaptcha();
       isScriptLoaded.current = true;
       return;
     }
 
-    // Load the reCAPTCHA script if not already loaded
-    if (!document.querySelector('#recaptcha-script') && !window.grecaptcha) {
+    // Load the hCaptcha script if not already loaded
+    if (!document.querySelector('#hcaptcha-script') && !window.hcaptcha) {
       window.onloadCallback = () => {
         renderCaptcha();
         isScriptLoaded.current = true;
       };
 
       const script = document.createElement('script');
-      script.id = 'recaptcha-script';
-      script.src = `https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit`;
+      script.id = 'hcaptcha-script';
+      script.src = `https://js.hcaptcha.com/1/api.js?onload=onloadCallback&render=explicit`;
       script.async = true;
       script.defer = true;
       document.head.appendChild(script);
@@ -41,17 +42,17 @@ export function Captcha({ siteKey, onVerify }: CaptchaProps) {
   }, [siteKey]);
 
   const renderCaptcha = () => {
-    if (divRef.current && window.grecaptcha && window.grecaptcha.render) {
+    if (divRef.current && window.hcaptcha && window.hcaptcha.render) {
       try {
-        window.grecaptcha.render(divRef.current, {
+        window.hcaptcha.render(divRef.current, {
           sitekey: siteKey,
           callback: onVerify,
         });
       } catch (error) {
-        console.error('reCAPTCHA already rendered in this element', error);
+        console.error('hCaptcha already rendered in this element', error);
       }
     }
   };
 
-  return <div ref={divRef} className="g-recaptcha mt-4"></div>;
+  return <div ref={divRef} className="h-captcha mt-4"></div>;
 }

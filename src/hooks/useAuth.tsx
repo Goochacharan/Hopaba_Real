@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -8,7 +7,7 @@ interface AuthContextType {
   socialLoading: boolean;
   user: any | null;
   loginError: string | null;
-  loginWithEmail: (email: string, password: string) => Promise<void>;
+  loginWithEmail: (email: string, password: string, captchaToken?: string) => Promise<void>;
   loginWithSocial: (provider: 'google' | 'facebook') => Promise<void>;
   signupWithEmail: (email: string, password: string, name: string, captchaToken?: string) => Promise<void>;
   getTestCredentials: () => { email: string; password: string };
@@ -38,7 +37,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [rateLimitExpiry, setRateLimitExpiry] = useState<number | null>(null);
   const { toast } = useToast();
 
-  // Check if user is rate limited from localStorage on initial load
   useEffect(() => {
     const storedAttempts = localStorage.getItem('auth_attempts');
     const storedExpiryTime = localStorage.getItem('rate_limit_expiry');
@@ -55,7 +53,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsRateLimited(true);
         setRateLimitExpiry(expiryTime);
         
-        // Set timeout to remove rate limit when it expires
         const timeoutDuration = expiryTime - now;
         setTimeout(() => {
           setIsRateLimited(false);
@@ -64,20 +61,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           localStorage.removeItem('rate_limit_expiry');
         }, timeoutDuration);
       } else {
-        // Clear expired rate limit data
         localStorage.removeItem('auth_attempts');
         localStorage.removeItem('rate_limit_expiry');
       }
     }
   }, []);
 
-  // Update localStorage when attempts change
   useEffect(() => {
     if (authAttempts > 0) {
       localStorage.setItem('auth_attempts', authAttempts.toString());
     }
     
-    // Apply rate limiting if max attempts reached
     if (authAttempts >= MAX_AUTH_ATTEMPTS && !isRateLimited) {
       const expiryTime = Date.now() + RATE_LIMIT_DURATION;
       setIsRateLimited(true);
@@ -90,7 +84,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         variant: "destructive",
       });
       
-      // Set timeout to remove rate limit
       setTimeout(() => {
         setIsRateLimited(false);
         setAuthAttempts(0);
@@ -156,7 +149,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const loginWithEmail = async (email: string, password: string) => {
+  const loginWithEmail = async (email: string, password: string, captchaToken?: string) => {
     if (isRateLimited) {
       toast({
         title: "Access temporarily blocked",
@@ -170,9 +163,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoginError(null);
     
     try {
+      const options = captchaToken ? { captchaToken } : undefined;
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password
+        password,
+        options
       });
       
       if (error) {
@@ -184,7 +180,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           variant: "destructive",
         });
       } else if (data?.user) {
-        // Reset auth attempts on successful login
         setAuthAttempts(0);
         localStorage.removeItem('auth_attempts');
         
@@ -264,7 +259,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoginError(null);
     
     try {
-      // Include the captcha token in the signup metadata if provided
       const options = {
         data: {
           full_name: name,
@@ -287,7 +281,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           variant: "destructive",
         });
       } else {
-        // Reset auth attempts on successful signup
         setAuthAttempts(0);
         localStorage.removeItem('auth_attempts');
         
