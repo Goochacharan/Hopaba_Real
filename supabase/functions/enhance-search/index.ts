@@ -14,16 +14,16 @@ serve(async (req) => {
   }
 
   try {
-    const apiKey = Deno.env.get('DEEPSEEK_API_KEY');
+    const apiKey = Deno.env.get('OPENAI_API_KEY');
     if (!apiKey) {
-      console.error('DeepSeek API key is not configured');
+      console.error('OpenAI API key is not configured');
       // Instead of throwing an error, just return the original query
       const { query } = await req.json();
       return new Response(
         JSON.stringify({ 
           original: query,
           enhanced: query, // Return the same query
-          error: "DeepSeek API key is not configured"
+          error: "OpenAI API key is not configured"
         }),
         { 
           headers: { 
@@ -39,8 +39,8 @@ serve(async (req) => {
     console.log('Enhancing search query:', query);
     console.log('With context:', context ? 'Provided' : 'None');
 
-    // DeepSeek API endpoint
-    const url = 'https://api.deepseek.com/v1/chat/completions';
+    // OpenAI API endpoint
+    const url = 'https://api.openai.com/v1/chat/completions';
 
     // Prepare context for in-context learning
     const systemPrompt = `You are an AI assistant that enhances search queries for a local business and events discovery platform.
@@ -69,7 +69,7 @@ For specialized searches like "yoga classes", ensure the enhanced query contains
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "deepseek-chat",  // Using DeepSeek's chat model
+          model: "gpt-4o-mini",  // Using OpenAI's cost-effective model
           messages: messages,
           temperature: 0.3,  // Lower temperature for more focused results
           max_tokens: 300
@@ -78,14 +78,14 @@ For specialized searches like "yoga classes", ensure the enhanced query contains
 
       if (!response.ok) {
         const error = await response.json();
-        console.error('DeepSeek API error:', error);
+        console.error('OpenAI API error:', error);
         
         // Return the original query without enhancement if the API fails
         return new Response(
           JSON.stringify({ 
             original: query,
             enhanced: query, // Return the same query when API fails
-            error: `DeepSeek API error: ${JSON.stringify(error)}`
+            error: `OpenAI API error: ${JSON.stringify(error)}`
           }),
           { 
             headers: { 
@@ -97,7 +97,7 @@ For specialized searches like "yoga classes", ensure the enhanced query contains
       }
 
       const data = await response.json();
-      console.log('DeepSeek response:', data);
+      console.log('OpenAI response:', data);
       
       // Extract the enhanced query from the response
       const enhancedQuery = data.choices[0].message.content.trim();
