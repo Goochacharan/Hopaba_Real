@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -142,23 +143,24 @@ export const useMarketplaceListings = ({
           // For marketplace, we'll tag certain items as hidden gems or must visit
           if (hasHiddenGem || hasMustVisit) {
             // Assign these properties dynamically for display
-            filteredData = filteredData.map((item: any, index) => ({
-              ...item,
-              isHiddenGem: index % 3 === 0, // Simulate hidden gems
-              isMustVisit: index % 5 === 0  // Simulate must visit
-            }));
+            filteredData = filteredData.map((item) => {
+              const enhancedItem = item as MarketplaceListing;
+              enhancedItem.isHiddenGem = item.id.charCodeAt(0) % 3 === 0; // Deterministic simulation
+              enhancedItem.isMustVisit = item.id.charCodeAt(0) % 5 === 0;  // Deterministic simulation
+              return enhancedItem;
+            });
             
             // Filter based on the criteria
             if (hasHiddenGem) {
-              filteredData = filteredData.filter(item => item.isHiddenGem);
+              filteredData = filteredData.filter(item => (item as MarketplaceListing).isHiddenGem);
             }
             
             if (hasMustVisit) {
-              filteredData = filteredData.filter(item => item.isMustVisit);
+              filteredData = filteredData.filter(item => (item as MarketplaceListing).isMustVisit);
             }
           }
           
-          setListings(filteredData);
+          setListings(filteredData as MarketplaceListing[]);
         }
       } else {
         const { data, error } = await query;
@@ -169,11 +171,12 @@ export const useMarketplaceListings = ({
           setListings([]);
         } else if (data) {
           // Add virtual properties for marketplace items
-          const enhancedData = data.map((item: any, index) => ({
-            ...item,
-            isHiddenGem: index % 3 === 0, // Simulate hidden gems
-            isMustVisit: index % 5 === 0  // Simulate must visit
-          }));
+          const enhancedData = data.map((item) => {
+            const enhancedItem = item as MarketplaceListing;
+            enhancedItem.isHiddenGem = item.id.charCodeAt(0) % 3 === 0; // Deterministic simulation
+            enhancedItem.isMustVisit = item.id.charCodeAt(0) % 5 === 0;  // Deterministic simulation
+            return enhancedItem;
+          });
           setListings(enhancedData);
         }
       }
@@ -219,11 +222,12 @@ export const useMarketplaceListings = ({
           const hasMustVisit = queryContainsBadge(query, 'must visit');
           
           // Add properties and filter results
-          let filteredData = data.map((item: any, index) => ({
-            ...item,
-            isHiddenGem: index % 3 === 0, // Simulate hidden gems
-            isMustVisit: index % 5 === 0  // Simulate must visit
-          }));
+          let filteredData = data.map((item) => {
+            const enhancedItem = item as MarketplaceListing;
+            enhancedItem.isHiddenGem = item.id.charCodeAt(0) % 3 === 0; // Deterministic simulation
+            enhancedItem.isMustVisit = item.id.charCodeAt(0) % 5 === 0;  // Deterministic simulation
+            return enhancedItem;
+          });
           
           // Apply price filtering if found in the query
           if (queryPrice) {
@@ -305,11 +309,9 @@ export const useMarketplaceListing = (listingId: string) => {
           setListing(null);
         } else if (data) {
           // Add virtual properties
-          const enhancedListing = {
-            ...data,
-            isHiddenGem: false,
-            isMustVisit: false
-          };
+          const enhancedListing = data as MarketplaceListing;
+          enhancedListing.isHiddenGem = data.id.charCodeAt(0) % 3 === 0;
+          enhancedListing.isMustVisit = data.id.charCodeAt(0) % 5 === 0;
           setListing(enhancedListing);
         }
       } catch (err) {

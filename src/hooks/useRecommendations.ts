@@ -3,6 +3,14 @@ import { Recommendation, mockRecommendations, searchRecommendations } from '@/li
 import { CategoryType } from '@/components/CategoryFilter';
 import { supabase } from '@/integrations/supabase/client';
 
+declare module '@/lib/mockData' {
+  interface Recommendation {
+    isHiddenGem?: boolean;
+    isMustVisit?: boolean;
+    created_at?: string;
+  }
+}
+
 interface UseRecommendationsProps {
   initialQuery?: string;
   initialCategory?: CategoryType;
@@ -31,6 +39,8 @@ export interface Event {
   phoneNumber?: string;
   whatsappNumber?: string;
   images?: string[];
+  isHiddenGem?: boolean;
+  isMustVisit?: boolean;
 }
 
 const sampleEvents: Event[] = [
@@ -528,12 +538,13 @@ const useRecommendations = ({
         if (supabaseResults && supabaseResults.length > 0) {
           console.log("Using Supabase results:", supabaseResults.length);
           
-          const enhancedResults = supabaseResults.map((result, index) => ({
-            ...result,
-            created_at: result.created_at || new Date().toISOString(),
-            isHiddenGem: result.isHiddenGem || index % 3 === 0,
-            isMustVisit: result.isMustVisit || index % 5 === 0
-          }));
+          const enhancedResults = supabaseResults.map((result, index) => {
+            const enhancedResult = { ...result } as Recommendation;
+            enhancedResult.created_at = result.created_at || new Date().toISOString();
+            enhancedResult.isHiddenGem = result.isHiddenGem || index % 3 === 0;
+            enhancedResult.isMustVisit = result.isMustVisit || index % 5 === 0;
+            return enhancedResult;
+          });
           
           const filteredResults = applySpecialCriteriaFiltering(enhancedResults, query);
           setRecommendations(filteredResults);
@@ -545,12 +556,11 @@ const useRecommendations = ({
           
           const resultsWithImages = locationResults.map((result, index) => {
             if (result.images && result.images.length > 0) {
-              return {
-                ...result,
-                created_at: result.created_at || new Date().toISOString(),
-                isHiddenGem: result.isHiddenGem || index % 3 === 0,
-                isMustVisit: result.isMustVisit || index % 5 === 0
-              };
+              const enhancedResult = { ...result } as Recommendation;
+              enhancedResult.created_at = result.created_at || new Date().toISOString();
+              enhancedResult.isHiddenGem = result.isHiddenGem || index % 3 === 0;
+              enhancedResult.isMustVisit = result.isMustVisit || index % 5 === 0;
+              return enhancedResult;
             }
             
             const mainImage = result.image;
@@ -561,13 +571,11 @@ const useRecommendations = ({
               `${baseUrl}?v=3`,
             ];
             
-            return {
-              ...result,
-              images,
-              created_at: result.created_at || new Date().toISOString(),
-              isHiddenGem: result.isHiddenGem || index % 3 === 0,
-              isMustVisit: result.isMustVisit || index % 5 === 0
-            };
+            const enhancedResult = { ...result, images } as Recommendation;
+            enhancedResult.created_at = result.created_at || new Date().toISOString();
+            enhancedResult.isHiddenGem = result.isHiddenGem || index % 3 === 0;
+            enhancedResult.isMustVisit = result.isMustVisit || index % 5 === 0;
+            return enhancedResult;
           });
           
           const filteredResults = applySpecialCriteriaFiltering(resultsWithImages, query);
@@ -590,12 +598,13 @@ const useRecommendations = ({
     if (query) {
       fetchRecommendations();
     } else {
-      const defaultResults = mockRecommendations.slice(0, 6).map((result, index) => ({
-        ...result,
-        created_at: result.created_at || new Date().toISOString(),
-        isHiddenGem: result.isHiddenGem || index % 3 === 0,
-        isMustVisit: result.isMustVisit || index % 5 === 0
-      }));
+      const defaultResults = mockRecommendations.slice(0, 6).map((result, index) => {
+        const enhancedResult = { ...result } as Recommendation;
+        enhancedResult.created_at = result.created_at || new Date().toISOString();
+        enhancedResult.isHiddenGem = result.isHiddenGem || index % 3 === 0;
+        enhancedResult.isMustVisit = result.isMustVisit || index % 5 === 0;
+        return enhancedResult;
+      });
       setRecommendations(defaultResults);
       setEvents([]);
       setLoading(false);
