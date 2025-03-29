@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -19,9 +18,9 @@ export interface MarketplaceListing {
   location: string;
   created_at: string;
   updated_at: string;
-  approval_status?: string; // Added this property
-  isHiddenGem?: boolean; // Added this property
-  isMustVisit?: boolean; // Added this property
+  approval_status?: string;
+  isHiddenGem?: boolean;
+  isMustVisit?: boolean;
 }
 
 interface UseMarketplaceListingsProps {
@@ -143,7 +142,7 @@ export const useMarketplaceListings = ({
           // For marketplace, we'll tag certain items as hidden gems or must visit
           if (hasHiddenGem || hasMustVisit) {
             // Assign these properties dynamically for display
-            filteredData = filteredData.map((item, index) => ({
+            filteredData = filteredData.map((item: any, index) => ({
               ...item,
               isHiddenGem: index % 3 === 0, // Simulate hidden gems
               isMustVisit: index % 5 === 0  // Simulate must visit
@@ -170,7 +169,7 @@ export const useMarketplaceListings = ({
           setListings([]);
         } else if (data) {
           // Add virtual properties for marketplace items
-          const enhancedData = data.map((item, index) => ({
+          const enhancedData = data.map((item: any, index) => ({
             ...item,
             isHiddenGem: index % 3 === 0, // Simulate hidden gems
             isMustVisit: index % 5 === 0  // Simulate must visit
@@ -220,7 +219,7 @@ export const useMarketplaceListings = ({
           const hasMustVisit = queryContainsBadge(query, 'must visit');
           
           // Add properties and filter results
-          let filteredData = data.map((item, index) => ({
+          let filteredData = data.map((item: any, index) => ({
             ...item,
             isHiddenGem: index % 3 === 0, // Simulate hidden gems
             isMustVisit: index % 5 === 0  // Simulate must visit
