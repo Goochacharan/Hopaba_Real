@@ -15,10 +15,10 @@ export interface MarketplaceListing {
   seller_phone: string | null;
   seller_whatsapp: string | null;
   seller_instagram: string | null;
-  seller_id: string; // Changed from string | null to just string to match required type
+  seller_id: string; 
   location: string;
   created_at: string;
-  updated_at: string; // Added this required field
+  updated_at: string;
   approval_status?: string;
 }
 
@@ -128,7 +128,6 @@ export const useMarketplaceListing = (id: string) => {
           .from('marketplace_listings')
           .select('*')
           .eq('id', id)
-          .eq('approval_status', 'approved')
           .maybeSingle();
 
         if (error) {
