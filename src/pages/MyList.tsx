@@ -56,18 +56,6 @@ const MyList = () => {
     };
   }, [navigate]);
 
-  const isMarketplaceListing = (item: WishlistItem): item is WishlistItem & {
-    type: 'marketplace';
-  } => {
-    return item.type === 'marketplace';
-  };
-
-  const isEvent = (item: WishlistItem): item is WishlistItem & {
-    type: 'event';
-  } => {
-    return item.type === 'event';
-  };
-
   const filteredWishlist = wishlist.filter(item => {
     if (activeTab === 'locations' && item.type !== 'location') {
       return false;
@@ -82,22 +70,25 @@ const MyList = () => {
     if (!searchQuery.trim()) return true;
     const lowercaseQuery = searchQuery.toLowerCase();
 
-    if (isMarketplaceListing(item)) {
-      return item.title?.toLowerCase().includes(lowercaseQuery) || 
-             item.category?.toLowerCase().includes(lowercaseQuery) || 
-             item.description?.toLowerCase().includes(lowercaseQuery) || 
-             item.location?.toLowerCase().includes(lowercaseQuery) || 
-             item.condition?.toLowerCase().includes(lowercaseQuery);
-    } else if (isEvent(item)) {
-      return item.title?.toLowerCase().includes(lowercaseQuery) || 
-             item.description?.toLowerCase().includes(lowercaseQuery) || 
-             item.location?.toLowerCase().includes(lowercaseQuery) || 
-             item.date?.toLowerCase().includes(lowercaseQuery);
+    if (item.type === 'marketplace') {
+      const marketplaceItem = item as MarketplaceListing & { type: 'marketplace' };
+      return marketplaceItem.title?.toLowerCase().includes(lowercaseQuery) || 
+             marketplaceItem.category?.toLowerCase().includes(lowercaseQuery) || 
+             marketplaceItem.description?.toLowerCase().includes(lowercaseQuery) || 
+             marketplaceItem.location?.toLowerCase().includes(lowercaseQuery) || 
+             marketplaceItem.condition?.toLowerCase().includes(lowercaseQuery);
+    } else if (item.type === 'event') {
+      const eventItem = item as Event & { type: 'event' };
+      return eventItem.title?.toLowerCase().includes(lowercaseQuery) || 
+             eventItem.description?.toLowerCase().includes(lowercaseQuery) || 
+             eventItem.location?.toLowerCase().includes(lowercaseQuery) || 
+             eventItem.date?.toLowerCase().includes(lowercaseQuery);
     } else {
-      return item.name?.toLowerCase().includes(lowercaseQuery) || 
-             item.category?.toLowerCase().includes(lowercaseQuery) || 
-             item.description?.toLowerCase().includes(lowercaseQuery) || 
-             item.address?.toLowerCase().includes(lowercaseQuery);
+      const locationItem = item as Recommendation & { type: 'location' };
+      return locationItem.name?.toLowerCase().includes(lowercaseQuery) || 
+             locationItem.category?.toLowerCase().includes(lowercaseQuery) || 
+             locationItem.description?.toLowerCase().includes(lowercaseQuery) || 
+             locationItem.address?.toLowerCase().includes(lowercaseQuery);
     }
   });
 
@@ -208,4 +199,5 @@ const MyList = () => {
       </section>
     </MainLayout>;
 };
+
 export default MyList;
