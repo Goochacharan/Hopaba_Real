@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import SellerInfo from './SellerInfo';
 import ListingActionButtons from './ListingActionButtons';
 import ListingMetadata from './ListingMetadata';
+
 interface ListingPriceCardProps {
   id: string;
   title: string;
@@ -19,9 +20,11 @@ interface ListingPriceCardProps {
   condition: string;
   mapLink?: string | null;
 }
+
 const formatPrice = (price: number): string => {
   return '₹' + price.toLocaleString('en-IN');
 };
+
 const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   id,
   title,
@@ -36,10 +39,17 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   condition,
   mapLink
 }) => {
-  return <div className="sticky top-24 space-y-6">
+  return (
+    <div className="sticky top-24 space-y-6">
       <div className="bg-white rounded-xl border p-6 shadow-sm">
         <div className="mb-4">
-          <ListingMetadata location={location} createdAt={createdAt} condition={condition} sellerInstagram={sellerInstagram} sellerName={sellerName} />
+          <ListingMetadata 
+            location={location} 
+            createdAt={createdAt} 
+            condition={condition} 
+            sellerInstagram={sellerInstagram} 
+            sellerName={sellerName} 
+          />
         </div>
         
         <div className="flex justify-between items-center mb-8">
@@ -53,7 +63,16 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
           </div>
         </div>
         
-        <ListingActionButtons listingId={id} title={title} price={price} sellerPhone={sellerPhone} sellerWhatsapp={sellerWhatsapp} sellerInstagram={sellerInstagram} location={location} mapLink={mapLink} />
+        <ListingActionButtons 
+          listingId={id} 
+          title={title} 
+          price={price} 
+          sellerPhone={sellerPhone} 
+          sellerWhatsapp={sellerWhatsapp} 
+          sellerInstagram={sellerInstagram} 
+          location={location} 
+          mapLink={mapLink} 
+        />
       </div>
       
       <div className="bg-[#1EAEDB]/5 rounded-xl p-6 border border-[#1EAEDB]/10">
@@ -70,6 +89,8 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default ListingPriceCard;

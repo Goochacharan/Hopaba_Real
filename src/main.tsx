@@ -4,7 +4,12 @@ import { StrictMode } from 'react'
 import App from './App.tsx'
 import './index.css'
 
-const root = createRoot(document.getElementById('root')!)
+// Create a root first, then render
+const rootElement = document.getElementById('root')
+if (!rootElement) throw new Error('Failed to find the root element')
+const root = createRoot(rootElement)
+
+// Render your app
 root.render(
   <StrictMode>
     <App />
