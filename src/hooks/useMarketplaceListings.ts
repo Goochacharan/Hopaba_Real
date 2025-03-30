@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface MarketplaceListing {
   id: string;
@@ -29,13 +30,15 @@ interface UseMarketplaceListingsOptions {
   minPrice?: number;
   maxPrice?: number;
   minRating?: number;
+  includeAllStatuses?: boolean;
 }
 
 export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = {}) => {
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { category, searchQuery, condition, minPrice, maxPrice, minRating } = options;
+  const { user } = useAuth();
+  const { category, searchQuery, condition, minPrice, maxPrice, minRating, includeAllStatuses } = options;
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
@@ -44,15 +47,24 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
     try {
       let query = supabase
         .from('marketplace_listings')
-        .select('*')
-        .eq('approval_status', 'approved');
+        .select('*');
+      
+      // Apply approval status filter
+      if (!includeAllStatuses) {
+        if (user) {
+          // For logged-in users, show approved listings + their own pending listings
+          query = query.or(`approval_status.eq.approved,seller_id.eq.${user.id}`);
+        } else {
+          // For visitors, only show approved listings
+          query = query.eq('approval_status', 'approved');
+        }
+      }
       
       if (category && category !== 'all') {
         // First fetch all listings to check actual category values in the database
         const { data: allApprovedListings } = await supabase
           .from('marketplace_listings')
-          .select('category')
-          .eq('approval_status', 'approved');
+          .select('category');
         
         console.log('All approved listing categories:', [...new Set(allApprovedListings?.map(item => item.category) || [])]);
         
@@ -90,38 +102,12 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
       }
 
       console.log(`Found ${data?.length || 0} marketplace listings for query "${searchQuery || ''}"`);
+      console.log(`Listings: ${data?.map(l => `${l.title} (${l.category}) - ${l.approval_status}`).join(', ') || 'None'}`);
+      
       if (category && category !== 'all') {
         console.log(`Category filter results: ${data?.length || 0} listings for "${category}"`);
         const categories = data?.map(item => item.category);
         console.log('Categories in results:', [...new Set(categories)]);
-        
-        // Debug info - check category values and listing approval status
-        if (data && data.length === 0) {
-          console.log('No results found. Checking all listings regardless of category filter...');
-          
-          // Check all approved listings
-          const { data: allApproved } = await supabase
-            .from('marketplace_listings')
-            .select('*')
-            .eq('approval_status', 'approved');
-          
-          console.log(`Total approved listings: ${allApproved?.length || 0}`);
-          
-          // Check specifically for Honda-related listings
-          const { data: hondaListings } = await supabase
-            .from('marketplace_listings')
-            .select('*')
-            .ilike('title', '%honda%');
-          
-          console.log(`Honda-related listings (by title): ${hondaListings?.length || 0}`);
-          if (hondaListings && hondaListings.length > 0) {
-            console.log('Honda listings details:', hondaListings.map(l => ({
-              title: l.title, 
-              category: l.category,
-              approval_status: l.approval_status
-            })));
-          }
-        }
       }
       
       setListings((data || []) as MarketplaceListing[]);
@@ -131,7 +117,7 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
     } finally {
       setLoading(false);
     }
-  }, [category, searchQuery, condition, minPrice, maxPrice, minRating]);
+  }, [category, searchQuery, condition, minPrice, maxPrice, minRating, includeAllStatuses, user]);
 
   useEffect(() => {
     fetchListings();

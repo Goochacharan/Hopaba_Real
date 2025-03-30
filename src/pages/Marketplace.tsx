@@ -64,7 +64,8 @@ const Marketplace = () => {
     condition: conditionFilter !== 'all' ? conditionFilter : undefined,
     minPrice: priceRange[0] > 0 ? priceRange[0] : undefined,
     maxPrice: priceRange[1] < 500000 ? priceRange[1] : undefined,
-    minRating: ratingFilter > 0 ? ratingFilter : undefined
+    minRating: ratingFilter > 0 ? ratingFilter : undefined,
+    includeAllStatuses: true
   });
 
   const { 
