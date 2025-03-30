@@ -17,20 +17,21 @@ interface SellerReviewsProps {
   sellerName: string;
   reviews: SellerReview[];
   onAddReview?: (review: { rating: number; comment: string }) => Promise<void>;
+  isSubmitting?: boolean;
 }
 
 const SellerReviews: React.FC<SellerReviewsProps> = ({
   sellerId,
   sellerName,
   reviews,
-  onAddReview
+  onAddReview,
+  isSubmitting = false
 }) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleSubmit = async () => {
@@ -43,28 +44,16 @@ const SellerReviews: React.FC<SellerReviewsProps> = ({
       return;
     }
 
-    setIsSubmitting(true);
     try {
       if (onAddReview) {
         await onAddReview({ rating, comment });
       }
       
-      toast({
-        title: 'Review submitted',
-        description: `Thank you for reviewing ${sellerName}`,
-      });
-      
       setComment('');
       setRating(5);
       setDialogOpen(false);
     } catch (error) {
-      toast({
-        title: 'Error submitting review',
-        description: 'Please try again later',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
+      // Error handling is done in the parent component
     }
   };
 

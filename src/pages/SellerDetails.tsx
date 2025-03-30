@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { Card } from '@/components/ui/card';
@@ -12,6 +12,7 @@ import SellerProfileCard from '@/components/marketplace/SellerProfileCard';
 import SellerReviews from '@/components/marketplace/SellerReviews';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 const SellerDetails = () => {
   const {
@@ -27,8 +28,11 @@ const SellerDetails = () => {
   const {
     sellerDetails,
     loading,
-    error
+    error,
+    refreshData
   } = useSellerDetails(id || '');
+
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const handleAddReview = async (review: {
     rating: number;
@@ -43,13 +47,51 @@ const SellerDetails = () => {
       navigate('/login');
       return;
     }
+
+    if (!id) {
+      toast({
+        title: "Error",
+        description: "Seller ID is missing",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSubmittingReview(true);
     
-    // Mock implementation with a delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    toast({
-      title: 'Review submitted',
-      description: 'Thank you for your feedback!'
-    });
+    try {
+      // Insert the new review to the database
+      const { error: insertError } = await supabase
+        .from('seller_reviews')
+        .insert({
+          seller_id: id,
+          reviewer_id: user.id,
+          reviewer_name: user.user_metadata?.full_name || user.email || 'Anonymous',
+          rating: review.rating,
+          comment: review.comment
+        });
+
+      if (insertError) {
+        throw insertError;
+      }
+      
+      // Refresh the seller details to include the new review
+      await refreshData();
+      
+      toast({
+        title: 'Review submitted',
+        description: 'Thank you for your feedback!'
+      });
+    } catch (error: any) {
+      console.error('Error submitting review:', error);
+      toast({
+        title: 'Error submitting review',
+        description: error.message || 'Please try again later',
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmittingReview(false);
+    }
   };
 
   return <MainLayout>
@@ -103,7 +145,13 @@ const SellerDetails = () => {
                 </TabsContent>
                 
                 <TabsContent value="reviews" className="w-full">
-                  <SellerReviews sellerId={sellerDetails.id} sellerName={sellerDetails.name} reviews={sellerDetails.reviews} onAddReview={handleAddReview} />
+                  <SellerReviews 
+                    sellerId={sellerDetails.id} 
+                    sellerName={sellerDetails.name} 
+                    reviews={sellerDetails.reviews} 
+                    onAddReview={handleAddReview} 
+                    isSubmitting={submittingReview}
+                  />
                 </TabsContent>
               </Tabs>
             </> : <div className="text-center py-12">
