@@ -314,3 +314,13 @@ main {
   background-color: rgba(0,0,0,0.6) !important;
   color: white !important;
 }
+
+.fixed.left-4.bottom-24 button {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fixed.left-4.bottom-24 button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}

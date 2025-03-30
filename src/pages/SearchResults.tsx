@@ -231,24 +231,12 @@ const SearchResults = () => {
             setMustVisitOnly={setMustVisitOnly}
           />
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">            
             <SortButton 
               currentSort={sortBy} 
               onSortChange={handleSortChange} 
             />
           </div>
-        </div>
-
-        <div className="mb-4 flex justify-end">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => navigate('/map')}
-            className="flex items-center gap-1"
-          >
-            <MapIcon className="h-4 w-4" />
-            <span className="sr-only">Map View</span>
-          </Button>
         </div>
 
         <div className="w-full">
@@ -278,6 +266,18 @@ const SearchResults = () => {
               />
             </div>
           )}
+        </div>
+        
+        <div className="fixed left-4 bottom-24 z-[61]">
+          <Button 
+            variant="default" 
+            size="icon" 
+            onClick={() => navigate('/map')}
+            className="rounded-full shadow-lg hover:shadow-xl"
+            aria-label="Map View"
+          >
+            <MapIcon className="h-5 w-5" />
+          </Button>
         </div>
       </div>
     </MainLayout>
