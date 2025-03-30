@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -124,9 +123,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Remove map_link from the data if it's not supported by the database
-      const { map_link, ...cleanData } = data;
-      
       const listingData = {
         title: data.title,
         description: data.description,
@@ -134,6 +130,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         category: data.category,
         condition: data.condition,
         location: data.location || "Not specified",
+        map_link: data.map_link || null,
         seller_name: data.seller_name || "Anonymous Seller",
         seller_id: user.id,
         seller_phone: data.seller_phone || null,

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -48,17 +47,14 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         .select('*')
         .eq('approval_status', 'approved');
       
-      // Apply category filter if provided
       if (category && category !== 'all') {
         query = query.eq('category', category);
       }
       
-      // Apply condition filter if provided
       if (condition && condition !== 'all') {
         query = query.ilike('condition', condition);
       }
       
-      // Apply price range filters if provided
       if (minPrice !== undefined) {
         query = query.gte('price', minPrice);
       }
@@ -67,16 +63,13 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         query = query.lte('price', maxPrice);
       }
       
-      // Apply minimum seller rating filter if provided
       if (minRating !== undefined && minRating > 0) {
         query = query.gte('seller_rating', minRating);
       }
       
-      // Apply search query if provided - with enhanced flexibility
       if (searchQuery && searchQuery.trim() !== '') {
         const searchTerms = searchQuery.trim().toLowerCase();
         
-        // Make search more flexible by using partial matches and looking in both title and description
         query = query.or(`title.ilike.%${searchTerms}%,description.ilike.%${searchTerms}%,category.ilike.%${searchTerms}%`);
       }
 
@@ -91,7 +84,6 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         console.log(`Filtering by condition: "${condition}"`);
       }
       
-      // Use type assertion to handle the typing issue safely
       setListings((data || []) as MarketplaceListing[]);
     } catch (err) {
       console.error('Error fetching marketplace listings:', err);
@@ -143,7 +135,6 @@ export const useMarketplaceListing = (id: string) => {
         if (!data) {
           setError('Listing not found');
         } else {
-          // Use type assertion for safer type handling
           setListing(data as MarketplaceListing);
         }
       } catch (err) {

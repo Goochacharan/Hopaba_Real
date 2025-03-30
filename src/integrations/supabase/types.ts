@@ -76,6 +76,7 @@ export type Database = {
           id: string
           images: string[] | null
           location: string
+          map_link: string | null
           price: number
           seller_id: string | null
           seller_instagram: string | null
@@ -95,6 +96,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           location: string
+          map_link?: string | null
           price: number
           seller_id?: string | null
           seller_instagram?: string | null
@@ -114,6 +116,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           location?: string
+          map_link?: string | null
           price?: number
           seller_id?: string | null
           seller_instagram?: string | null
