@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Shield } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -43,7 +44,7 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
         
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="md:text-6xl font-extrabold text-gray-800 py-3 px-1 text-xl">
+            <h2 className="md:text-6xl font-extrabold text-gray-800 py-3 px-1 text-4xl">
               {formatPrice(price)}
             </h2>
           </div>
