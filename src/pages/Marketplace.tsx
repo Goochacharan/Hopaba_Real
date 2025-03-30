@@ -48,6 +48,7 @@ const Marketplace = () => {
   
   useEffect(() => {
     if (categoryParam && categoryParam !== currentCategory) {
+      console.log("Setting category from URL:", categoryParam);
       setCurrentCategory(categoryParam);
     }
   }, [categoryParam]);

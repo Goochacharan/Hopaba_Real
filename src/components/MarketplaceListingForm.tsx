@@ -123,11 +123,14 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     setIsSubmitting(true);
 
     try {
+      const categoryValue = data.category.toLowerCase();
+      console.log("Submitting listing with category:", categoryValue);
+
       const listingData = {
         title: data.title,
         description: data.description,
         price: data.price,
-        category: data.category,
+        category: categoryValue,
         condition: data.condition,
         location: data.location || "Not specified",
         map_link: data.map_link || null,
@@ -306,7 +309,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {/* Ensure these match exactly with the category IDs in Marketplace.tsx */}
                           <SelectItem value="cars">Cars</SelectItem>
                           <SelectItem value="bikes">Bikes</SelectItem>
                           <SelectItem value="mobiles">Mobiles</SelectItem>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -48,8 +49,9 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         .eq('approval_status', 'approved');
       
       if (category && category !== 'all') {
-        query = query.ilike('category', category);
-        console.log(`Filtering by category: "${category}"`);
+        // Make category filter case-insensitive
+        query = query.ilike('category', `%${category}%`);
+        console.log(`Filtering by category (case-insensitive): "${category}"`);
       }
       
       if (condition && condition !== 'all') {
@@ -85,6 +87,17 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         console.log(`Category filter results: ${data?.length || 0} listings for "${category}"`);
         const categories = data?.map(item => item.category);
         console.log('Categories in results:', [...new Set(categories)]);
+        
+        // Debug info - check case sensitivity
+        if (data && data.length === 0) {
+          const { data: allData } = await supabase
+            .from('marketplace_listings')
+            .select('category')
+            .eq('approval_status', 'approved');
+          
+          const uniqueCategories = [...new Set(allData?.map(item => item.category) || [])];
+          console.log('All available categories in database:', uniqueCategories);
+        }
       }
       
       setListings((data || []) as MarketplaceListing[]);
