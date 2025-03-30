@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -43,7 +42,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
       <div className="p-4 px-[12px] py-[16px]">
         <h3 className="font-bold text-xl md:text-2xl mb-1">{listing.title}</h3>
         
-        <p className="text-gray-800 md:text-2xl mb-1 px-[4px] text-xl py-[2px] font-extrabold">
+        <p className="text-gray-800 md:text-2xl mb-1 text-lg px-0 py-0 font-bold">
           {formatPrice(listing.price)}
         </p>
         
