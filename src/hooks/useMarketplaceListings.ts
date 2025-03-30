@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -49,6 +48,14 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         .eq('approval_status', 'approved');
       
       if (category && category !== 'all') {
+        // First fetch all listings to check actual category values in the database
+        const { data: allApprovedListings } = await supabase
+          .from('marketplace_listings')
+          .select('category')
+          .eq('approval_status', 'approved');
+        
+        console.log('All approved listing categories:', [...new Set(allApprovedListings?.map(item => item.category) || [])]);
+        
         // Make category filter case-insensitive
         query = query.ilike('category', `%${category}%`);
         console.log(`Filtering by category (case-insensitive): "${category}"`);
@@ -88,15 +95,32 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         const categories = data?.map(item => item.category);
         console.log('Categories in results:', [...new Set(categories)]);
         
-        // Debug info - check case sensitivity
+        // Debug info - check category values and listing approval status
         if (data && data.length === 0) {
-          const { data: allData } = await supabase
+          console.log('No results found. Checking all listings regardless of category filter...');
+          
+          // Check all approved listings
+          const { data: allApproved } = await supabase
             .from('marketplace_listings')
-            .select('category')
+            .select('*')
             .eq('approval_status', 'approved');
           
-          const uniqueCategories = [...new Set(allData?.map(item => item.category) || [])];
-          console.log('All available categories in database:', uniqueCategories);
+          console.log(`Total approved listings: ${allApproved?.length || 0}`);
+          
+          // Check specifically for Honda-related listings
+          const { data: hondaListings } = await supabase
+            .from('marketplace_listings')
+            .select('*')
+            .ilike('title', '%honda%');
+          
+          console.log(`Honda-related listings (by title): ${hondaListings?.length || 0}`);
+          if (hondaListings && hondaListings.length > 0) {
+            console.log('Honda listings details:', hondaListings.map(l => ({
+              title: l.title, 
+              category: l.category,
+              approval_status: l.approval_status
+            })));
+          }
         }
       }
       

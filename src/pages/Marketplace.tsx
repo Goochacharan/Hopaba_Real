@@ -394,7 +394,7 @@ const Marketplace = () => {
                   <AlertTitle>Error</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>}
-          
+  
               {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="bg-white/50 h-80 rounded-xl border border-border/50 animate-pulse" />)}

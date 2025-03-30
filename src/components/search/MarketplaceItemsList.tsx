@@ -4,17 +4,20 @@ import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
+import NoResultsMessage from './NoResultsMessage';
 
 interface MarketplaceItemsListProps {
   listings: MarketplaceListing[];
   loading?: boolean;
   error?: string | null;
+  category?: string;
 }
 
 const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({ 
   listings,
   loading = false,
-  error = null 
+  error = null,
+  category
 }) => {
   if (loading) {
     return (
@@ -33,14 +36,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
   }
 
   if (listings.length === 0) {
-    return (
-      <div className="text-center py-16">
-        <h3 className="text-lg font-medium mb-2">No listings found</h3>
-        <p className="text-muted-foreground">
-          There are currently no marketplace listings matching your criteria.
-        </p>
-      </div>
-    );
+    return <NoResultsMessage type="marketplace" />;
   }
 
   return (

@@ -123,7 +123,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      const categoryValue = data.category.toLowerCase();
+      const categoryValue = data.category.toLowerCase().trim();
       console.log("Submitting listing with category:", categoryValue);
 
       const listingData = {
@@ -170,11 +170,11 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
       }
 
       onSaved();
-    } catch (error: any) {
-      console.error('Error saving marketplace listing:', error);
+    } catch (err) {
+      console.error('Error saving marketplace listing:', err);
       toast({
         title: "Error",
-        description: error.message || "Failed to save listing. Please try again.",
+        description: err.message || "Failed to save listing. Please try again.",
         variant: "destructive",
       });
     } finally {
