@@ -60,7 +60,6 @@ const SearchResults = () => {
   const loading = recommendationsLoading || marketplaceLoading;
   const error = recommendationsError || marketplaceError;
 
-  // Update the recommendations with isHiddenGem and isMustVisit properties
   const enhancedRecommendations = recommendations.map((rec, index) => {
     return {
       ...rec,
@@ -79,13 +78,10 @@ const SearchResults = () => {
     distanceUnit: 'km'
   });
 
-  // Add actual distance calculation based on user coordinates
   const addDistanceToRecommendations = (recs) => {
     if (!userCoordinates) return recs;
     
     return recs.map(rec => {
-      // In a real app, you would have actual coordinates for each recommendation
-      // For this example, we're generating dummy coordinates based on the ID
       const latitude = parseFloat(rec.id) % 0.1 + 12.9716;
       const longitude = parseFloat(rec.id) % 0.1 + 77.5946;
       
@@ -94,7 +90,7 @@ const SearchResults = () => {
         userCoordinates.lng,
         latitude,
         longitude,
-        'K' // Return distance in kilometers
+        'K'
       );
       
       return {
@@ -158,7 +154,6 @@ const SearchResults = () => {
     });
   };
 
-  // Process recommendations: add distance, enhance, and sort
   const recommendationsWithDistance = addDistanceToRecommendations(filteredRecommendations);
   const enhancedRecommendationsWithDistance = enhanceRecommendations(recommendationsWithDistance);
   const rankedRecommendations = sortRecommendations(enhancedRecommendationsWithDistance);
@@ -190,7 +185,6 @@ const SearchResults = () => {
     if (coordinates) {
       setUserCoordinates(coordinates);
     } else {
-      // Try to geocode the address
       geocodeAddress(location).then(coords => {
         if (coords) {
           setUserCoordinates(coords);
@@ -238,21 +232,23 @@ const SearchResults = () => {
           />
           
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="whitespace-nowrap"
-              onClick={() => navigate('/map')}
-            >
-              <MapIcon className="h-4 w-4 mr-1" />
-              Map View
-            </Button>
-            
             <SortButton 
               currentSort={sortBy} 
               onSortChange={handleSortChange} 
             />
           </div>
+        </div>
+
+        <div className="mb-4 flex justify-end">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate('/map')}
+            className="flex items-center gap-1"
+          >
+            <MapIcon className="h-4 w-4" />
+            <span className="sr-only">Map View</span>
+          </Button>
         </div>
 
         <div className="w-full">
