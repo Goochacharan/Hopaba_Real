@@ -72,7 +72,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
 
         <div className="flex justify-between items-center mb-4 py-0 my-0">
           <div className="flex items-center">
-            <p className="font-extrabold text-4xl md:text-5xl text-gray-800 px-2 py-1">{formatPrice(listing.price)}</p>
+            <p className="font-extrabold text-5xl md:text-6xl text-gray-800 px-2 py-1">{formatPrice(listing.price)}</p>
           </div>
           
           <div className="flex flex-col items-end py-0">
@@ -85,7 +85,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           </div>
         </div>
         
-        <ScrollArea className="h-28 mb-4 pr-3">
+        <ScrollArea className="h-40 mb-4 pr-3">
           <p className="text-muted-foreground text-sm whitespace-pre-line">
             {listing.description}
           </p>
