@@ -49,9 +49,9 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
           />
         </div>
         
-        <div className="flex justify-between items-start mb-8">
+        <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-[#1EAEDB]">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
               {formatPrice(price)}
             </h2>
           </div>
