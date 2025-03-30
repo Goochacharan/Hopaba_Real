@@ -21,6 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+import NoResultsMessage from '@/components/search/NoResultsMessage';
 
 type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
 
@@ -44,6 +45,12 @@ const Marketplace = () => {
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
   const itemsPerPage = 9;
+  
+  useEffect(() => {
+    if (categoryParam && categoryParam !== currentCategory) {
+      setCurrentCategory(categoryParam);
+    }
+  }, [categoryParam]);
   
   const {
     listings,
@@ -107,6 +114,11 @@ const Marketplace = () => {
       } else {
         params.set('category', category);
       }
+      
+      if (highlightedListingId) {
+        params.set('highlight', highlightedListingId);
+      }
+      
       return params;
     });
   };
@@ -134,14 +146,20 @@ const Marketplace = () => {
 
   useEffect(() => {
     if (highlightedListingId && !loading) {
+      console.log(`Looking for highlighted listing: ${highlightedListingId}`);
+      
       const highlightedListing = listings.find(listing => listing.id === highlightedListingId);
       if (highlightedListing) {
+        console.log(`Found highlighted listing: ${highlightedListing.title}`);
+        
         if (currentCategory !== 'all' && currentCategory !== highlightedListing.category) {
+          console.log(`Switching to category: ${highlightedListing.category} from ${currentCategory}`);
           setCurrentCategory(highlightedListing.category);
         }
         
         setTimeout(() => {
           if (highlightedListingRef.current) {
+            console.log('Scrolling to highlighted listing');
             highlightedListingRef.current.scrollIntoView({ 
               behavior: 'smooth', 
               block: 'center' 
@@ -153,16 +171,15 @@ const Marketplace = () => {
                 highlightedListingRef.current.classList.remove('ring-4', 'ring-primary', 'ring-opacity-50');
               }
             }, 2000);
-            
-            setSearchParams(params => {
-              params.delete('highlight');
-              return params;
-            });
+          } else {
+            console.log('Highlighted listing ref not found in DOM');
           }
         }, 300);
+      } else {
+        console.log(`Highlighted listing not found in current listings`);
       }
     }
-  }, [highlightedListingId, listings, loading, currentCategory, setSearchParams]);
+  }, [highlightedListingId, listings, loading, currentCategory]);
 
   const filteredListings = listings.filter(listing => {
     const price = listing.price;
@@ -366,15 +383,21 @@ const Marketplace = () => {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>}
           
-              {loading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="bg-white/50 h-80 rounded-xl border border-border/50 animate-pulse" />)}
-                </div> : paginatedListings.length > 0 ? <>
+                </div>
+              ) : paginatedListings.length > 0 ? (
+                <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {paginatedListings.map((listing, index) => (
                       <div 
                         key={listing.id} 
                         ref={listing.id === highlightedListingId ? highlightedListingRef : null}
-                        className={`transition-all duration-300 ${listing.id === highlightedListingId ? 'ring-4 ring-primary ring-opacity-50' : ''}`}
+                        className={cn(
+                          "transition-all duration-300",
+                          listing.id === highlightedListingId ? "ring-4 ring-primary ring-opacity-50" : ""
+                        )}
                       >
                         <MarketplaceListingCard listing={listing} />
                       </div>
@@ -400,22 +423,15 @@ const Marketplace = () => {
                         </PaginationItem>
                       </PaginationContent>
                     </Pagination>}
-                </> : <div className="text-center py-16">
-                  <Clock className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No listings found</h3>
-                  <p className="text-muted-foreground max-w-md mx-auto mb-6">
-                    We couldn't find any items matching your criteria. Try changing your search or filter settings.
-                  </p>
-                  <Button onClick={() => {
-              setCurrentCategory('all');
-              setPriceRange([0, 500000]);
-              setYearRange([2010, new Date().getFullYear()]);
-              setRatingFilter(0);
-              setConditionFilter('all');
-            }}>
-                    Reset all filters
-                  </Button>
-                </div>}
+                </>
+              ) : (
+                <NoResultsMessage 
+                  type="marketplace" 
+                  onNewSearch={(query) => {
+                    console.log(`New search requested: ${query}`);
+                  }} 
+                />
+              )}
             </TabsContent>)}
         </Tabs>
       </div>

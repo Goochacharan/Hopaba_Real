@@ -36,7 +36,12 @@ const MarketplaceListingDetails = () => {
   
   const handleBackToMarketplace = () => {
     // Navigate back to marketplace with a query parameter to indicate the listing
-    navigate(`/marketplace?highlight=${id}`);
+    // Add category parameter if listing exists to ensure correct category tab is selected
+    if (listing) {
+      navigate(`/marketplace?highlight=${id}&category=${listing.category}`);
+    } else {
+      navigate('/marketplace');
+    }
   };
   
   if (loading) {
