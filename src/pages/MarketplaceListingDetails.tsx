@@ -99,9 +99,9 @@ const MarketplaceListingDetails = () => {
           
           <div className="grid grid-cols-1 gap-8">
             <div>
-              <div className="mb-6">
+              <div className="mb-3">
                 <Badge className="mb-2">{listing?.category}</Badge>
-                <h1 className="text-2xl sm:text-3xl font-bold mb-1">{listing?.title}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold mb-0">{listing?.title}</h1>
                 <ListingMetadata location={listing.location} createdAt={listing.created_at} condition={listing.condition} />
               </div>
               

@@ -42,7 +42,7 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   return (
     <div className="sticky top-24 space-y-6">
       <div className="bg-white rounded-xl border p-6 shadow-sm">
-        <div className="mb-2">
+        <div className="mb-0">
           <ListingMetadata 
             location={location} 
             createdAt={createdAt} 
@@ -54,7 +54,7 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
         
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="md:text-6xl font-extrabold text-gray-800 py-2 px-1 text-4xl">
+            <h2 className="md:text-6xl font-extrabold text-gray-800 py-0 px-1 text-4xl -mb-1">
               {formatPrice(price)}
             </h2>
           </div>
