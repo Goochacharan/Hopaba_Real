@@ -49,7 +49,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
 
         <div className="flex justify-between items-center mb-4 py-0 my-0">
           <div className="flex items-center">
-            <p className="text-gray-800 py-1 font-extrabold md:text-3xl text-xl px-[9px]">
+            <p className="text-gray-800 py-1 font-extrabold md:text-3xl text-xl px-[7px]">
               {formatPrice(listing.price)}
             </p>
           </div>
