@@ -8,6 +8,8 @@ import { MapPin, List } from 'lucide-react';
 import useRecommendations from '@/hooks/useRecommendations';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import mapboxgl from 'mapbox-gl';
 
 const Map = () => {
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
@@ -15,8 +17,8 @@ const Map = () => {
   const [loading, setLoading] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<any>(null);
-  const markers = useRef<any[]>([]);
+  const map = useRef<mapboxgl.Map | null>(null);
+  const markers = useRef<mapboxgl.Marker[]>([]);
   const navigate = useNavigate();
 
   const { recommendations } = useRecommendations({});
@@ -37,22 +39,8 @@ const Map = () => {
     };
     checkUser();
 
-    // Load Mapbox script if it's not already loaded
-    if (!window.mapboxgl) {
-      const script = document.createElement('script');
-      script.src = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js';
-      script.async = true;
-      script.onload = () => {
-        const styleLink = document.createElement('link');
-        styleLink.href = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css';
-        styleLink.rel = 'stylesheet';
-        document.head.appendChild(styleLink);
-        setMapLoaded(true);
-      };
-      document.head.appendChild(script);
-    } else {
-      setMapLoaded(true);
-    }
+    // Set mapLoaded to true since we're now importing mapboxgl directly
+    setMapLoaded(true);
   }, [navigate]);
 
   useEffect(() => {
@@ -60,7 +48,6 @@ const Map = () => {
 
     const initializeMap = () => {
       try {
-        const mapboxgl = window.mapboxgl;
         // You should replace this with your actual Mapbox token
         mapboxgl.accessToken = 'pk.YOUR_MAPBOX_TOKEN';
         
@@ -94,10 +81,10 @@ const Map = () => {
       
       // Add user location marker if available
       if (userCoordinates) {
-        const userMarker = new window.mapboxgl.Marker({ color: '#FF0000' })
+        const userMarker = new mapboxgl.Marker({ color: '#FF0000' })
           .setLngLat([userCoordinates.lng, userCoordinates.lat])
-          .setPopup(new window.mapboxgl.Popup().setHTML('<p>Your location</p>'))
-          .addTo(map.current);
+          .setPopup(new mapboxgl.Popup().setHTML('<p>Your location</p>'))
+          .addTo(map.current!);
         markers.current.push(userMarker);
       }
       
@@ -108,10 +95,10 @@ const Map = () => {
         const latitude = parseFloat(rec.id) % 0.1 + 12.9716; // Dummy coordinates for example
         const longitude = parseFloat(rec.id) % 0.1 + 77.5946; // Dummy coordinates for example
         
-        const marker = new window.mapboxgl.Marker({ color: '#3FB1CE' })
+        const marker = new mapboxgl.Marker({ color: '#3FB1CE' })
           .setLngLat([longitude, latitude])
           .setPopup(
-            new window.mapboxgl.Popup().setHTML(
+            new mapboxgl.Popup().setHTML(
               `<div>
                 <h3>${rec.name}</h3>
                 <p>${rec.address}</p>
@@ -119,7 +106,7 @@ const Map = () => {
               </div>`
             )
           )
-          .addTo(map.current);
+          .addTo(map.current!);
         markers.current.push(marker);
       });
     };

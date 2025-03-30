@@ -64,4 +64,5 @@ interface SpeechGrammar {
 interface Window {
   SpeechRecognition?: typeof SpeechRecognition;
   webkitSpeechRecognition?: typeof SpeechRecognition;
+  mapboxgl?: any;
 }
