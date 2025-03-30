@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface MarketplaceListing {
@@ -37,74 +36,79 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
   const [error, setError] = useState<string | null>(null);
   const { category, searchQuery, condition, minPrice, maxPrice, minRating } = options;
 
-  useEffect(() => {
-    const fetchListings = async () => {
-      setLoading(true);
-      setError(null);
+  const fetchListings = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-      try {
-        let query = supabase
-          .from('marketplace_listings')
-          .select('*')
-          .eq('approval_status', 'approved');
-        
-        // Apply category filter if provided
-        if (category && category !== 'all') {
-          query = query.eq('category', category);
-        }
-        
-        // Apply condition filter if provided
-        if (condition && condition !== 'all') {
-          query = query.ilike('condition', condition);
-        }
-        
-        // Apply price range filters if provided
-        if (minPrice !== undefined) {
-          query = query.gte('price', minPrice);
-        }
-        
-        if (maxPrice !== undefined) {
-          query = query.lte('price', maxPrice);
-        }
-        
-        // Apply minimum seller rating filter if provided
-        if (minRating !== undefined && minRating > 0) {
-          query = query.gte('seller_rating', minRating);
-        }
-        
-        // Apply search query if provided - with enhanced flexibility
-        if (searchQuery && searchQuery.trim() !== '') {
-          const searchTerms = searchQuery.trim().toLowerCase();
-          
-          // Make search more flexible by using partial matches and looking in both title and description
-          query = query.or(`title.ilike.%${searchTerms}%,description.ilike.%${searchTerms}%,category.ilike.%${searchTerms}%`);
-        }
-
-        const { data, error } = await query.order('created_at', { ascending: false });
-
-        if (error) {
-          throw error;
-        }
-
-        console.log(`Found ${data?.length || 0} marketplace listings for query "${searchQuery || ''}"`);
-        if (condition && condition !== 'all') {
-          console.log(`Filtering by condition: "${condition}"`);
-        }
-        
-        // Use type assertion to handle the typing issue safely
-        setListings((data || []) as MarketplaceListing[]);
-      } catch (err) {
-        console.error('Error fetching marketplace listings:', err);
-        setError('Failed to fetch listings. Please try again later.');
-      } finally {
-        setLoading(false);
+    try {
+      let query = supabase
+        .from('marketplace_listings')
+        .select('*')
+        .eq('approval_status', 'approved');
+      
+      // Apply category filter if provided
+      if (category && category !== 'all') {
+        query = query.eq('category', category);
       }
-    };
+      
+      // Apply condition filter if provided
+      if (condition && condition !== 'all') {
+        query = query.ilike('condition', condition);
+      }
+      
+      // Apply price range filters if provided
+      if (minPrice !== undefined) {
+        query = query.gte('price', minPrice);
+      }
+      
+      if (maxPrice !== undefined) {
+        query = query.lte('price', maxPrice);
+      }
+      
+      // Apply minimum seller rating filter if provided
+      if (minRating !== undefined && minRating > 0) {
+        query = query.gte('seller_rating', minRating);
+      }
+      
+      // Apply search query if provided - with enhanced flexibility
+      if (searchQuery && searchQuery.trim() !== '') {
+        const searchTerms = searchQuery.trim().toLowerCase();
+        
+        // Make search more flexible by using partial matches and looking in both title and description
+        query = query.or(`title.ilike.%${searchTerms}%,description.ilike.%${searchTerms}%,category.ilike.%${searchTerms}%`);
+      }
 
-    fetchListings();
+      const { data, error } = await query.order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log(`Found ${data?.length || 0} marketplace listings for query "${searchQuery || ''}"`);
+      if (condition && condition !== 'all') {
+        console.log(`Filtering by condition: "${condition}"`);
+      }
+      
+      // Use type assertion to handle the typing issue safely
+      setListings((data || []) as MarketplaceListing[]);
+    } catch (err) {
+      console.error('Error fetching marketplace listings:', err);
+      setError('Failed to fetch listings. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   }, [category, searchQuery, condition, minPrice, maxPrice, minRating]);
 
-  return { listings, loading, error };
+  useEffect(() => {
+    fetchListings();
+  }, [fetchListings]);
+
+  return { 
+    listings, 
+    loading, 
+    error, 
+    refetch: fetchListings 
+  };
 };
 
 export const useMarketplaceListing = (id: string) => {

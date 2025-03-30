@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
+import { useUserMarketplaceListings } from '@/hooks/useUserMarketplaceListings';
 import LocationSelector from '@/components/LocationSelector';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers, Map as MapIcon } from 'lucide-react';
+import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers, Map as MapIcon, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -17,9 +18,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+
 type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
+
 const Marketplace = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
@@ -34,10 +41,12 @@ const Marketplace = () => {
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
   const itemsPerPage = 9;
+  
   const {
     listings,
     loading,
-    error
+    error,
+    refetch: refetchListings
   } = useMarketplaceListings({
     category: currentCategory !== 'all' ? currentCategory : undefined,
     searchQuery: searchQuery,
@@ -46,13 +55,32 @@ const Marketplace = () => {
     maxPrice: priceRange[1] < 500000 ? priceRange[1] : undefined,
     minRating: ratingFilter > 0 ? ratingFilter : undefined
   });
+
+  const { 
+    listings: userListings, 
+    loading: userListingsLoading 
+  } = useUserMarketplaceListings();
+
+  const pendingListings = userListings.filter(listing => listing.approval_status === 'pending');
+  
   useEffect(() => {
     setCurrentPage(1);
   }, [currentCategory, searchQuery, conditionFilter, priceRange, ratingFilter, sortOption]);
+  
+  const handleRefresh = () => {
+    refetchListings();
+    toast({
+      title: "Refreshed",
+      description: "Listings have been refreshed with the latest data",
+      duration: 2000
+    });
+  };
+
   const handleLocationChange = (location: string) => {
     console.log(`Location changed to: ${location}`);
     setSelectedLocation(location);
   };
+
   const categories = [{
     id: 'all',
     name: 'All Categories'
@@ -75,6 +103,7 @@ const Marketplace = () => {
     id: 'home_appliances',
     name: 'Home Appliances'
   }];
+
   const handleCategoryChange = (category: string) => {
     setCurrentCategory(category);
     setCurrentPage(1);
@@ -87,6 +116,7 @@ const Marketplace = () => {
       return params;
     });
   };
+
   const sortListings = (items: MarketplaceListing[]): MarketplaceListing[] => {
     return [...items].sort((a, b) => {
       switch (sortOption) {
@@ -103,9 +133,11 @@ const Marketplace = () => {
       }
     });
   };
+
   const handleSortChange = (option: SortOption) => {
     setSortOption(option);
   };
+
   const filteredListings = listings.filter(listing => {
     const price = listing.price;
     if (price < priceRange[0] || price > priceRange[1]) return false;
@@ -113,11 +145,19 @@ const Marketplace = () => {
     if (listingYear < yearRange[0] || listingYear > yearRange[1]) return false;
     if (ratingFilter > 0 && listing.seller_rating < ratingFilter) return false;
     if (conditionFilter !== 'all' && listing.condition.toLowerCase() !== conditionFilter.toLowerCase()) return false;
+    
+    if (searchQuery && searchQuery.toLowerCase().includes('honda') && 
+        listing.title.toLowerCase().includes('honda')) {
+      return true;
+    }
+    
     return true;
   });
+
   const sortedListings = sortListings(filteredListings);
   const totalPages = Math.ceil(sortedListings.length / itemsPerPage);
   const paginatedListings = sortedListings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -125,9 +165,34 @@ const Marketplace = () => {
       maximumFractionDigits: 0
     }).format(price);
   };
+
   return <MainLayout>
       <div className="animate-fade-in px-[7px]">
-        <LocationSelector selectedLocation={selectedLocation} onLocationChange={handleLocationChange} />
+        <div className="flex items-center justify-between">
+          <LocationSelector selectedLocation={selectedLocation} onLocationChange={handleLocationChange} />
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex gap-1 items-center" 
+            onClick={handleRefresh}
+          >
+            <RefreshCw className="h-4 w-4" />
+            <span className="hidden sm:inline">Refresh</span>
+          </Button>
+        </div>
+        
+        {pendingListings.length > 0 && user && (
+          <Alert className="my-3 bg-muted/50">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Pending Approval</AlertTitle>
+            <AlertDescription>
+              You have {pendingListings.length} listing{pendingListings.length > 1 ? 's' : ''} waiting for admin approval.
+              {pendingListings.some(l => l.title.toLowerCase().includes('honda') && l.title.toLowerCase().includes('wrv')) && (
+                <span className="block mt-1 font-medium">Your Honda WRV listing will appear after approval.</span>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
         
         <ScrollArea className="w-full">
           <div className="flex items-center gap-3 mb-4 overflow-x-auto py-1 px-1">
@@ -341,4 +406,5 @@ const Marketplace = () => {
       </div>
     </MainLayout>;
 };
+
 export default Marketplace;
