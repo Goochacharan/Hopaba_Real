@@ -67,7 +67,7 @@ const ListingThumbnails: React.FC<ListingThumbnailsProps> = ({
 
   return (
     <div className="relative mt-4">
-      {images.length > 5 && (
+      {images.length > 4 && (
         <>
           <button 
             onClick={() => scrollThumbnails('left')}
@@ -89,7 +89,7 @@ const ListingThumbnails: React.FC<ListingThumbnailsProps> = ({
       
       <div 
         ref={containerRef}
-        className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 overflow-x-auto scrollbar-hide pb-2 px-1"
+        className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 px-1 snap-x"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -98,7 +98,7 @@ const ListingThumbnails: React.FC<ListingThumbnailsProps> = ({
           <div
             key={index}
             onClick={(e) => handleThumbnailClick(index, e)}
-            className={`cursor-pointer rounded-lg overflow-hidden transition-all border-2 ${
+            className={`cursor-pointer rounded-lg overflow-hidden transition-all border-2 flex-shrink-0 w-16 sm:w-20 snap-start ${
               selectedIndex === index ? 'border-[#1EAEDB] shadow-md' : 'border-transparent'
             }`}
           >

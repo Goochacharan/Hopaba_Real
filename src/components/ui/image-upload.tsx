@@ -14,7 +14,7 @@ interface ImageUploadProps {
 const ImageUpload: React.FC<ImageUploadProps> = ({ 
   images, 
   onImagesChange, 
-  maxImages = 5 
+  maxImages = 10 
 }) => {
   const [uploading, setUploading] = useState(false);
 

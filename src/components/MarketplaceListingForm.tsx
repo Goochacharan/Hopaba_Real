@@ -449,11 +449,11 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                   <ImageUpload 
                     images={field.value}
                     onImagesChange={(images) => form.setValue('images', images, { shouldValidate: true })}
-                    maxImages={5}
+                    maxImages={10}
                   />
                 </FormControl>
                 <FormDescription>
-                  Upload up to 5 images of your item. At least one image is required.
+                  Upload up to 10 images of your item. At least one image is required.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
