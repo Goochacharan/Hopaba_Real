@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -5,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { ChevronLeft, MessageCircle, AlertCircle } from 'lucide-react';
+import { ChevronLeft, AlertCircle } from 'lucide-react';
 import { useSellerDetails } from '@/hooks/useSellerDetails';
 import SellerProfileCard from '@/components/marketplace/SellerProfileCard';
 import SellerReviews from '@/components/marketplace/SellerReviews';
@@ -51,23 +52,6 @@ const SellerDetails = () => {
     });
   };
 
-  const handleReport = () => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please login to report a seller",
-        variant: "destructive",
-      });
-      navigate('/login');
-      return;
-    }
-
-    toast({
-      title: 'Report submitted',
-      description: 'We will review this seller and take appropriate action.'
-    });
-  };
-
   return <MainLayout>
       <div className="w-full max-w-full mx-auto px-4 py-6">
         <div className="max-w-[1400px] mx-0 px-[2px] py-0 my-0">
@@ -87,21 +71,17 @@ const SellerDetails = () => {
               </Button>
             </Card> : sellerDetails ? <>
               <div className="w-full gap-6 mb-8">
-                <SellerProfileCard sellerName={sellerDetails.name} sellerRating={sellerDetails.rating} reviewCount={sellerDetails.review_count} joinedDate={sellerDetails.listings[0]?.created_at} />
-
-                <Card className="p-6 shadow-md w-full mt-6">
-                  <h3 className="font-medium text-lg mb-4">Contact Options</h3>
-                  <div className="flex flex-col md:flex-row gap-4">
-                    <Button className="w-full py-4 text-base" size="lg">
-                      <MessageCircle className="h-5 w-5 mr-2" />
-                      Message Seller
-                    </Button>
-                    <Button variant="outline" className="w-full py-4 text-base" size="lg" onClick={handleReport}>
-                      <AlertCircle className="h-5 w-5 mr-2" />
-                      Report Seller
-                    </Button>
-                  </div>
-                </Card>
+                <SellerProfileCard 
+                  sellerName={sellerDetails.name} 
+                  sellerRating={sellerDetails.rating} 
+                  reviewCount={sellerDetails.review_count} 
+                  joinedDate={sellerDetails.listings[0]?.created_at}
+                  sellerPhone={sellerDetails.listings[0]?.seller_phone}
+                  sellerWhatsapp={sellerDetails.listings[0]?.seller_whatsapp}
+                  location={sellerDetails.listings[0]?.location}
+                  mapLink={sellerDetails.listings[0]?.map_link}
+                  listingId={id}
+                />
               </div>
 
               <Tabs defaultValue="listings" className="w-full">
