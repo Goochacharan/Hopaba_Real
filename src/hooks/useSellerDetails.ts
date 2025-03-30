@@ -46,13 +46,14 @@ export const useSellerDetails = (sellerId: string) => {
 
         if (listingsError) throw listingsError;
 
-        // Fetch actual reviews instead of using mock data
+        // Fetch reviews from the seller_reviews table
         const { data: reviewsData, error: reviewsError } = await supabase
           .from('seller_reviews')
           .select('*')
           .eq('seller_id', sellerId)
           .order('created_at', { ascending: false });
 
+        // If there's an error fetching reviews, log it but continue
         if (reviewsError) {
           console.error('Error fetching reviews:', reviewsError);
           // Continue even if reviews fail to load
@@ -63,7 +64,7 @@ export const useSellerDetails = (sellerId: string) => {
         // Take seller name from the first listing if we have any
         const sellerName = listings.length > 0 ? listings[0].seller_name : 'Unknown Seller';
         
-        // Calculate seller rating from actual reviews if available
+        // Calculate seller rating from reviews if available
         let sellerRating = 0;
         const reviews = reviewsData || [];
 
@@ -81,7 +82,7 @@ export const useSellerDetails = (sellerId: string) => {
           rating: sellerRating,
           review_count: reviews.length,
           listings: listings,
-          reviews: reviews || []
+          reviews: reviews as SellerReview[]
         });
 
       } catch (err: any) {

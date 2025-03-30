@@ -3,7 +3,7 @@ import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import StarRating from './StarRating';
-import { UserCircle, Instagram, Mail, MapPin } from 'lucide-react';
+import { UserCircle, Mail } from 'lucide-react';
 
 interface SellerProfileCardProps {
   sellerName: string;
@@ -51,7 +51,9 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
             
             <div className="flex items-center gap-1">
               <StarRating rating={sellerRating} size="medium" />
-              <span className="text-muted-foreground ml-1">({reviewCount} reviews)</span>
+              <span className="text-muted-foreground ml-1">
+                {reviewCount > 0 ? `(${reviewCount} reviews)` : '(No reviews yet)'}
+              </span>
             </div>
             
             <div className="grid grid-cols-1 gap-y-3 pt-1">
@@ -60,14 +62,10 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
                 <span>Member since {formattedJoinedDate}</span>
               </div>
               
-              {/* Removed dummy location information */}
-              
               <div className="flex items-center gap-2 text-base">
                 <Mail className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                 <span>Contact via Message</span>
               </div>
-              
-              {/* Removed dummy Instagram information */}
             </div>
           </div>
         </div>
