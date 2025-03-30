@@ -105,7 +105,18 @@ const Marketplace = () => {
     name: 'Home Appliances'
   }];
 
+  useEffect(() => {
+    if (!loading && currentCategory !== 'all') {
+      console.log(`Filtering for category: ${currentCategory}`);
+      console.log(`Found ${listings.length} listings`);
+      
+      const categoryValues = [...new Set(listings.map(l => l.category))];
+      console.log('Available categories in listings:', categoryValues);
+    }
+  }, [listings, loading, currentCategory]);
+
   const handleCategoryChange = (category: string) => {
+    console.log(`Category changed to: ${category}`);
     setCurrentCategory(category);
     setCurrentPage(1);
     setSearchParams(params => {

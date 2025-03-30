@@ -306,7 +306,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="all">All Categories</SelectItem>
+                          {/* Ensure these match exactly with the category IDs in Marketplace.tsx */}
                           <SelectItem value="cars">Cars</SelectItem>
                           <SelectItem value="bikes">Bikes</SelectItem>
                           <SelectItem value="mobiles">Mobiles</SelectItem>

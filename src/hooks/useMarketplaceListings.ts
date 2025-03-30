@@ -48,7 +48,8 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         .eq('approval_status', 'approved');
       
       if (category && category !== 'all') {
-        query = query.eq('category', category);
+        query = query.ilike('category', category);
+        console.log(`Filtering by category: "${category}"`);
       }
       
       if (condition && condition !== 'all') {
@@ -80,8 +81,10 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
       }
 
       console.log(`Found ${data?.length || 0} marketplace listings for query "${searchQuery || ''}"`);
-      if (condition && condition !== 'all') {
-        console.log(`Filtering by condition: "${condition}"`);
+      if (category && category !== 'all') {
+        console.log(`Category filter results: ${data?.length || 0} listings for "${category}"`);
+        const categories = data?.map(item => item.category);
+        console.log('Categories in results:', [...new Set(categories)]);
       }
       
       setListings((data || []) as MarketplaceListing[]);
