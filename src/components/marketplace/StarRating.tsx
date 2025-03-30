@@ -18,8 +18,8 @@ const StarRating: React.FC<StarRatingProps> = ({
   className,
   size = 'small'
 }) => {
-  // If rating is valid and count > 0, show stars
-  if (rating > 0 && count > 0) {
+  // If rating is valid, show stars - removed the count > 0 condition
+  if (rating > 0) {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
     const totalStars = 5;
@@ -62,7 +62,7 @@ const StarRating: React.FC<StarRatingProps> = ({
     );
   }
   
-  // If no reviews yet or invalid rating, show "New Seller"
+  // If no valid rating, show "New Seller"
   return (
     <div className={cn("flex items-center", className)}>
       <span className={cn("text-muted-foreground", 

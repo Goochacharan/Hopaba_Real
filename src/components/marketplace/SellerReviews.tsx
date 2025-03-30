@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
@@ -74,6 +74,24 @@ const SellerReviews: React.FC<SellerReviewsProps> = ({
     }
     setDialogOpen(true);
   };
+
+  // Render a review item
+  const renderReviewItem = (review: SellerReview) => (
+    <div key={review.id} className="border-b pb-4 last:border-b-0">
+      <div className="flex justify-between items-start mb-2">
+        <div>
+          <div className="flex items-center gap-2">
+            <StarRating rating={review.rating} showCount={false} />
+            <span className="font-medium">{review.reviewer_name}</span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {format(new Date(review.created_at), 'PPP')}
+          </p>
+        </div>
+      </div>
+      <p className="text-sm">{review.comment}</p>
+    </div>
+  );
 
   return (
     <Card className="shadow-md">
@@ -150,22 +168,7 @@ const SellerReviews: React.FC<SellerReviewsProps> = ({
           
           <TabsContent value="all" className="space-y-4">
             {reviews.length > 0 ? (
-              reviews.map((review) => (
-                <div key={review.id} className="border-b pb-4 last:border-b-0">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <StarRating rating={review.rating} showCount={false} />
-                        <span className="font-medium">{review.reviewer_name}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(review.created_at), 'PPP')}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-sm">{review.comment}</p>
-                </div>
-              ))
+              reviews.map(renderReviewItem)
             ) : (
               <p className="text-center text-muted-foreground py-6">No reviews yet. Be the first to review this seller!</p>
             )}
@@ -175,22 +178,7 @@ const SellerReviews: React.FC<SellerReviewsProps> = ({
             {reviews.filter(review => review.rating >= 4).length > 0 ? (
               reviews
                 .filter(review => review.rating >= 4)
-                .map((review) => (
-                  <div key={review.id} className="border-b pb-4 last:border-b-0">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <StarRating rating={review.rating} showCount={false} />
-                          <span className="font-medium">{review.reviewer_name}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {format(new Date(review.created_at), 'PPP')}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-sm">{review.comment}</p>
-                  </div>
-                ))
+                .map(renderReviewItem)
             ) : (
               <p className="text-center text-muted-foreground py-6">No positive reviews yet</p>
             )}
@@ -200,22 +188,7 @@ const SellerReviews: React.FC<SellerReviewsProps> = ({
             {reviews.filter(review => review.rating < 4).length > 0 ? (
               reviews
                 .filter(review => review.rating < 4)
-                .map((review) => (
-                  <div key={review.id} className="border-b pb-4 last:border-b-0">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <StarRating rating={review.rating} showCount={false} />
-                          <span className="font-medium">{review.reviewer_name}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {format(new Date(review.created_at), 'PPP')}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-sm">{review.comment}</p>
-                  </div>
-                ))
+                .map(renderReviewItem)
             ) : (
               <p className="text-center text-muted-foreground py-6">No critical reviews yet</p>
             )}
