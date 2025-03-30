@@ -1,11 +1,9 @@
-
 import React from 'react';
 import { Shield } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import SellerInfo from './SellerInfo';
 import ListingActionButtons from './ListingActionButtons';
 import ListingMetadata from './ListingMetadata';
-
 interface ListingPriceCardProps {
   id: string;
   title: string;
@@ -20,11 +18,9 @@ interface ListingPriceCardProps {
   condition: string;
   mapLink?: string | null;
 }
-
 const formatPrice = (price: number): string => {
   return '₹' + price.toLocaleString('en-IN');
 };
-
 const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   id,
   title,
@@ -39,43 +35,24 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   condition,
   mapLink
 }) => {
-  return (
-    <div className="sticky top-24 space-y-6">
+  return <div className="sticky top-24 space-y-6">
       <div className="bg-white rounded-xl border p-6 shadow-sm">
         <div className="mb-4">
-          <ListingMetadata
-            location={location}
-            createdAt={createdAt}
-            condition={condition}
-            sellerInstagram={sellerInstagram}
-            sellerName={sellerName}
-          />
+          <ListingMetadata location={location} createdAt={createdAt} condition={condition} sellerInstagram={sellerInstagram} sellerName={sellerName} />
         </div>
         
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="text-5xl md:text-6xl font-extrabold text-gray-800 py-3 px-1">
+            <h2 className="md:text-6xl font-extrabold text-gray-800 py-3 px-1 text-xl">
               {formatPrice(price)}
             </h2>
           </div>
           <div className="flex flex-col items-end">
-            <SellerInfo 
-              sellerName={sellerName} 
-              sellerRating={sellerRating}
-            />
+            <SellerInfo sellerName={sellerName} sellerRating={sellerRating} />
           </div>
         </div>
         
-        <ListingActionButtons
-          listingId={id}
-          title={title}
-          price={price}
-          sellerPhone={sellerPhone}
-          sellerWhatsapp={sellerWhatsapp}
-          sellerInstagram={sellerInstagram}
-          location={location}
-          mapLink={mapLink}
-        />
+        <ListingActionButtons listingId={id} title={title} price={price} sellerPhone={sellerPhone} sellerWhatsapp={sellerWhatsapp} sellerInstagram={sellerInstagram} location={location} mapLink={mapLink} />
       </div>
       
       <div className="bg-[#1EAEDB]/5 rounded-xl p-6 border border-[#1EAEDB]/10">
@@ -92,8 +69,6 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ListingPriceCard;
