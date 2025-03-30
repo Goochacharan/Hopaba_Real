@@ -57,7 +57,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         </div>
         
         <ScrollArea className="h-72 mb-4 pr-3">
-          <p className="text-muted-foreground text-sm whitespace-pre-line">
+          <p className="whitespace-pre-line text-gray-950 text-base">
             {listing.description}
           </p>
         </ScrollArea>
