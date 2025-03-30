@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useMarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
@@ -20,6 +20,7 @@ const MarketplaceListingDetails = () => {
   } = useParams<{
     id: string;
   }>();
+  const navigate = useNavigate();
   const {
     listing,
     loading,
@@ -27,10 +28,17 @@ const MarketplaceListingDetails = () => {
   } = useMarketplaceListing(id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
+  
   const openImageViewer = (index: number) => {
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
+  
+  const handleBackToMarketplace = () => {
+    // Navigate back to marketplace with a query parameter to indicate the listing
+    navigate(`/marketplace?highlight=${id}`);
+  };
+  
   if (loading) {
     return <MainLayout>
         <div className="container mx-auto py-8 px-4 max-w-6xl animate-pulse">
@@ -46,13 +54,18 @@ const MarketplaceListingDetails = () => {
         </div>
       </MainLayout>;
   }
+  
   if (error || !listing) {
     return <MainLayout>
         <div className="container mx-auto py-8 px-4 max-w-6xl">
-          <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
+          <Button 
+            onClick={handleBackToMarketplace}
+            variant="ghost" 
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
+          >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Marketplace</span>
-          </Link>
+          </Button>
           
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
@@ -66,13 +79,18 @@ const MarketplaceListingDetails = () => {
         </div>
       </MainLayout>;
   }
+  
   return <MainLayout>
       <div className="w-full py-8 overflow-y-auto pb-32 px-[11px]">
         <div className="max-w-[1400px] mx-auto">
-          <Link to="/marketplace" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
+          <Button 
+            onClick={handleBackToMarketplace}
+            variant="ghost" 
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 px-0"
+          >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Marketplace</span>
-          </Link>
+          </Button>
           
           <div className="grid grid-cols-1 gap-8">
             <div>
@@ -122,4 +140,5 @@ const MarketplaceListingDetails = () => {
       </div>
     </MainLayout>;
 };
+
 export default MarketplaceListingDetails;
