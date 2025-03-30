@@ -34,32 +34,33 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
             {format(new Date(review.created_at), 'PPP')}
           </p>
         </div>
-        
-        {isUsersReview && (
-          <div className="flex gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8" 
-              onClick={() => onEdit(review)}
-            >
-              <Edit className="h-4 w-4" />
-              <span className="sr-only">Edit review</span>
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" 
-              onClick={onDelete}
-            >
-              <Trash2 className="h-4 w-4" />
-              <span className="sr-only">Delete review</span>
-            </Button>
-          </div>
-        )}
       </div>
-      <p className="text-sm">{review.comment}</p>
+      
+      <p className="text-sm mb-2">{review.comment}</p>
+      
+      {isUsersReview && (
+        <div className="flex gap-2 mt-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-8" 
+            onClick={() => onEdit(review)}
+          >
+            <Edit className="h-4 w-4 mr-1" />
+            Edit
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive" 
+            onClick={onDelete}
+          >
+            <Trash2 className="h-4 w-4 mr-1" />
+            Delete
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
