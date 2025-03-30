@@ -130,7 +130,9 @@ const SellerReviews: React.FC<SellerReviewsProps> = ({
               </div>
             </div>
             <div className="flex justify-end gap-2">
-              <DialogClose as={Button} variant="outline">Cancel</DialogClose>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                Cancel
+              </Button>
               <Button onClick={handleSubmit} disabled={isSubmitting}>
                 {isSubmitting ? 'Submitting...' : 'Submit Review'}
               </Button>
