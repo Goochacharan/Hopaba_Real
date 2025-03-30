@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -175,7 +174,7 @@ const SellerReviews: React.FC<SellerReviewsProps> = ({
                 </div>
               ))
             ) : (
-              <p className="text-center text-muted-foreground py-6">No reviews yet</p>
+              <p className="text-center text-muted-foreground py-6">No reviews yet. Be the first to review this seller!</p>
             )}
           </TabsContent>
           

@@ -60,20 +60,14 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
                 <span>Member since {formattedJoinedDate}</span>
               </div>
               
-              <div className="flex items-center gap-2 text-base">
-                <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                <span>San Francisco, CA</span>
-              </div>
+              {/* Removed dummy location information */}
               
               <div className="flex items-center gap-2 text-base">
                 <Mail className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                 <span>Contact via Message</span>
               </div>
               
-              <div className="flex items-center gap-2 text-base">
-                <Instagram className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                <span>@{sellerName.toLowerCase().replace(/\s/g, '')}</span>
-              </div>
+              {/* Removed dummy Instagram information */}
             </div>
           </div>
         </div>

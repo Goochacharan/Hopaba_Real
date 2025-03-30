@@ -46,39 +46,42 @@ export const useSellerDetails = (sellerId: string) => {
 
         if (listingsError) throw listingsError;
 
-        // For now, we'll create a mock seller details object since we haven't created a reviews table yet
-        // In a real implementation, you'd fetch this from a sellers or profiles table
+        // Fetch actual reviews instead of using mock data
+        const { data: reviewsData, error: reviewsError } = await supabase
+          .from('seller_reviews')
+          .select('*')
+          .eq('seller_id', sellerId)
+          .order('created_at', { ascending: false });
+
+        if (reviewsError) {
+          console.error('Error fetching reviews:', reviewsError);
+          // Continue even if reviews fail to load
+        }
+
         const listings = listingsData as MarketplaceListing[];
         
         // Take seller name from the first listing if we have any
         const sellerName = listings.length > 0 ? listings[0].seller_name : 'Unknown Seller';
-        const sellerRating = listings.length > 0 ? listings[0].seller_rating || 4.5 : 4.5;
         
-        // Mock reviews for now - in a real implementation, we'd fetch these from a reviews table
-        const mockReviews: SellerReview[] = [
-          {
-            id: '1',
-            rating: 5,
-            comment: 'Great seller! Fast response and item as described.',
-            reviewer_name: 'John Doe',
-            created_at: new Date().toISOString()
-          },
-          {
-            id: '2',
-            rating: 4,
-            comment: 'Good transaction overall. Would buy from them again.',
-            reviewer_name: 'Jane Smith',
-            created_at: new Date(Date.now() - 86400000).toISOString() // 1 day ago
-          }
-        ];
+        // Calculate seller rating from actual reviews if available
+        let sellerRating = 0;
+        const reviews = reviewsData || [];
+
+        if (reviews.length > 0) {
+          const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+          sellerRating = totalRating / reviews.length;
+        } else {
+          // If no reviews, use the rating from the first listing or default to 0
+          sellerRating = listings.length > 0 ? listings[0].seller_rating || 0 : 0;
+        }
 
         setSellerDetails({
           id: sellerId,
           name: sellerName,
           rating: sellerRating,
-          review_count: mockReviews.length,
+          review_count: reviews.length,
           listings: listings,
-          reviews: mockReviews
+          reviews: reviews || []
         });
 
       } catch (err: any) {
