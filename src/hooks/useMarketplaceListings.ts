@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,6 +21,7 @@ export interface MarketplaceListing {
   created_at: string;
   updated_at: string;
   approval_status?: string;
+  review_count?: number;
 }
 
 interface UseMarketplaceListingsOptions {

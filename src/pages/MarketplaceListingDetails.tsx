@@ -100,7 +100,7 @@ const MarketplaceListingDetails = () => {
               <div className="mb-3">
                 <Badge className="mb-2">{listing?.category}</Badge>
                 <h1 className="text-2xl sm:text-3xl font-bold mb-0">{listing?.title}</h1>
-                <ListingMetadata location={listing.location} createdAt={listing.created_at} condition={listing.condition} />
+                <ListingMetadata location={listing?.location || ''} createdAt={listing?.created_at || ''} condition={listing?.condition || ''} />
               </div>
               
               <div className="mb-6 bg-black/5 rounded-xl shadow-sm overflow-hidden">
@@ -125,31 +125,33 @@ const MarketplaceListingDetails = () => {
               />}
               
               <ListingDescription 
-                description={listing.description} 
-                category={listing.category} 
-                condition={listing.condition} 
-                location={listing.location} 
-                createdAt={listing.created_at} 
-                instagram={listing.seller_instagram}
+                description={listing?.description || ''} 
+                category={listing?.category || ''} 
+                condition={listing?.condition || ''} 
+                location={listing?.location || ''} 
+                createdAt={listing?.created_at || ''} 
+                instagram={listing?.seller_instagram || ''}
                 showMetadata={false} 
               />
               
               <div className="mt-6">
-                <SellerDetailsCard
-                  id={listing.id}
-                  title={listing.title}
-                  price={listing.price}
-                  sellerId={listing.seller_id || ''}
-                  sellerName={listing.seller_name}
-                  sellerRating={listing.seller_rating}
-                  sellerPhone={listing.seller_phone}
-                  sellerWhatsapp={listing.seller_whatsapp}
-                  sellerInstagram={listing.seller_instagram}
-                  location={listing.location}
-                  createdAt={listing.created_at}
-                  mapLink={listing.map_link}
-                  reviewCount={listing.review_count || 0}
-                />
+                {listing && (
+                  <SellerDetailsCard
+                    id={listing.id}
+                    title={listing.title}
+                    price={listing.price}
+                    sellerId={listing.seller_id || ''}
+                    sellerName={listing.seller_name}
+                    sellerRating={listing.seller_rating}
+                    sellerPhone={listing.seller_phone}
+                    sellerWhatsapp={listing.seller_whatsapp}
+                    sellerInstagram={listing.seller_instagram}
+                    location={listing.location}
+                    createdAt={listing.created_at}
+                    mapLink={listing.map_link}
+                    reviewCount={listing.review_count || 0}
+                  />
+                )}
               </div>
             </div>
           </div>
