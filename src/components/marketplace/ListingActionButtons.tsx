@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Phone, MessageSquare, MapPin, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -117,8 +118,13 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
     e.stopPropagation();
     let mapsUrl;
     
-    if (mapLink && (mapLink.includes('google.com/maps') || mapLink.includes('goo.gl/maps'))) {
-      // If a Google Maps link is provided, use it directly
+    // Priority order:
+    // 1. Use the mapLink if provided (direct link to Google Maps)
+    // 2. Use location if it's already a Google Maps link
+    // 3. Construct a search URL using the location name
+    
+    if (mapLink && mapLink.trim() !== '') {
+      // If a map link is explicitly provided, use it
       mapsUrl = mapLink;
     } else if (location && (location.includes('google.com/maps') || location.includes('goo.gl/maps'))) {
       // If the location itself is a maps link
@@ -145,7 +151,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
     
     toast({
       title: "Opening Directions",
-      description: `Getting directions to ${location}...`,
+      description: `Getting directions to location...`,
       duration: 2000,
     });
   };
@@ -177,8 +183,8 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
         <button 
           onClick={handleLocation}
           className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]"
-          title="Location"
-          aria-label="View location"
+          title={mapLink ? "Open Map Link" : "View Location"}
+          aria-label={mapLink ? "Open Map Link" : "View location"}
         >
           <MapPin className="h-5 w-5" />
         </button>
