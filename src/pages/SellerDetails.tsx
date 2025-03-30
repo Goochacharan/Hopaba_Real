@@ -58,10 +58,11 @@ const SellerDetails = () => {
     }
 
     setSubmittingReview(true);
+    console.log("Submitting review:", review);
     
     try {
       // Insert the new review to the database
-      const { error: insertError } = await supabase
+      const { error: insertError, data: insertData } = await supabase
         .from('seller_reviews')
         .insert({
           seller_id: id,
@@ -69,11 +70,15 @@ const SellerDetails = () => {
           reviewer_name: user.user_metadata?.full_name || user.email || 'Anonymous',
           rating: review.rating,
           comment: review.comment
-        });
+        })
+        .select();
 
       if (insertError) {
+        console.error("Insert error:", insertError);
         throw insertError;
       }
+      
+      console.log("Review inserted successfully:", insertData);
       
       // Refresh the seller details to include the new review
       await refreshData();

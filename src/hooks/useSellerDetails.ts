@@ -26,6 +26,7 @@ export const useSellerDetails = (sellerId: string) => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchSellerDetails = useCallback(async () => {
+    console.log("Fetching seller details for ID:", sellerId);
     setLoading(true);
     setError(null);
 
@@ -66,6 +67,7 @@ export const useSellerDetails = (sellerId: string) => {
       // Calculate seller rating from reviews if available
       let sellerRating = 0;
       const reviews = reviewsData || [];
+      console.log("Reviews data:", reviews);
 
       if (reviews.length > 0) {
         const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
@@ -94,6 +96,7 @@ export const useSellerDetails = (sellerId: string) => {
 
   // Function to refresh data that can be called by the component
   const refreshData = useCallback(() => {
+    console.log("Refreshing seller data...");
     return fetchSellerDetails();
   }, [fetchSellerDetails]);
 
