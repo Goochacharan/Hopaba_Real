@@ -77,6 +77,30 @@ export const useSellerDetails = (sellerId: string) => {
         sellerRating = listings.length > 0 ? listings[0].seller_rating || 0 : 0;
       }
 
+      // Update the seller_rating in marketplace_listings table if we have reviews
+      if (reviews.length > 0) {
+        // Round to 1 decimal place
+        const roundedRating = Math.round(sellerRating * 10) / 10;
+        
+        for (const listing of listings) {
+          const { error: updateError } = await supabase
+            .from('marketplace_listings')
+            .update({ 
+              seller_rating: roundedRating,
+              review_count: reviews.length
+            })
+            .eq('seller_id', sellerId);
+          
+          if (updateError) {
+            console.error('Error updating seller rating in listing:', updateError);
+          } else {
+            // Update the local listing data with the new rating
+            listing.seller_rating = roundedRating;
+            listing.review_count = reviews.length;
+          }
+        }
+      }
+
       setSellerDetails({
         id: sellerId,
         name: sellerName,

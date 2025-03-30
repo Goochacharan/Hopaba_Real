@@ -67,7 +67,7 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
           </Link> : <span className="text-sm font-medium">{sellerName}</span>}
       </div>
       <div className="flex items-center justify-end w-full rounded-sm py-0 my-0">
-        {reviewCount > 0 ? <StarRating rating={sellerRating} showCount={true} count={reviewCount} size="small" /> : <span className="text-xs text-muted-foreground">New Seller</span>}
+        <StarRating rating={sellerRating} showCount={true} count={reviewCount} size="small" />
         
         <div className="flex items-center ml-2 gap-2">
           {sellerInstagram && <button onClick={handleInstagramClick} className="text-muted-foreground hover:text-primary flex items-center gap-1 flex-shrink-0" title="View Instagram or Video Content">
