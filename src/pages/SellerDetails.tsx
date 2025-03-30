@@ -15,29 +15,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
 const SellerDetails = () => {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
+  const { id } = useParams<{ id: string; }>();
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const { user } = useAuth();
-  const {
-    sellerDetails,
-    loading,
-    error,
-    refreshData
-  } = useSellerDetails(id || '');
-
+  const { sellerDetails, loading, error, refreshData } = useSellerDetails(id || '');
   const [submittingReview, setSubmittingReview] = useState(false);
 
-  const handleAddReview = async (review: {
-    rating: number;
-    comment: string;
-  }) => {
+  const handleAddReview = async (review: { rating: number; comment: string; }) => {
     if (!user) {
       toast({
         title: "Authentication required",
@@ -99,7 +84,103 @@ const SellerDetails = () => {
     }
   };
 
-  return <MainLayout>
+  const handleEditReview = async (reviewId: string, review: { rating: number; comment: string; }) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please login to edit your review",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+
+    setSubmittingReview(true);
+    console.log("Editing review:", reviewId, review);
+    
+    try {
+      // Update the review in the database
+      const { error: updateError } = await supabase
+        .from('seller_reviews')
+        .update({
+          rating: review.rating,
+          comment: review.comment
+        })
+        .eq('id', reviewId)
+        .eq('reviewer_id', user.id); // Ensure user can only edit their own review
+
+      if (updateError) {
+        console.error("Update error:", updateError);
+        throw updateError;
+      }
+      
+      // Refresh the seller details to include the updated review
+      await refreshData();
+      
+      toast({
+        title: 'Review updated',
+        description: 'Your review has been successfully updated'
+      });
+    } catch (error: any) {
+      console.error('Error updating review:', error);
+      toast({
+        title: 'Error updating review',
+        description: error.message || 'Please try again later',
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please login to delete your review",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+
+    setSubmittingReview(true);
+    console.log("Deleting review:", reviewId);
+    
+    try {
+      // Delete the review from the database
+      const { error: deleteError } = await supabase
+        .from('seller_reviews')
+        .delete()
+        .eq('id', reviewId)
+        .eq('reviewer_id', user.id); // Ensure user can only delete their own review
+
+      if (deleteError) {
+        console.error("Delete error:", deleteError);
+        throw deleteError;
+      }
+      
+      // Refresh the seller details to update the reviews list
+      await refreshData();
+      
+      toast({
+        title: 'Review deleted',
+        description: 'Your review has been successfully deleted'
+      });
+    } catch (error: any) {
+      console.error('Error deleting review:', error);
+      toast({
+        title: 'Error deleting review',
+        description: error.message || 'Please try again later',
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  return (
+    <MainLayout>
       <div className="w-full max-w-full mx-auto px-4 py-6">
         <div className="max-w-[1400px] mx-0 px-[2px] py-0 my-0">
           <Button variant="ghost" size="sm" className="mb-4" onClick={() => navigate(-1)}>
@@ -107,16 +188,21 @@ const SellerDetails = () => {
             Back to Marketplace
           </Button>
 
-          {loading ? <div className="text-center py-12">
+          {loading ? (
+            <div className="text-center py-12">
               <p className="text-lg">Loading seller details...</p>
-            </div> : error ? <Card className="p-10 text-center my-6">
+            </div>
+          ) : error ? (
+            <Card className="p-10 text-center my-6">
               <AlertCircle className="h-14 w-14 mx-auto text-destructive" />
               <h3 className="mt-4 text-xl font-semibold">Error Loading Seller</h3>
               <p className="mt-3 text-lg text-muted-foreground">{error}</p>
               <Button className="mt-6 px-6 py-5 text-lg" onClick={() => navigate('/marketplace')}>
                 Return to Marketplace
               </Button>
-            </Card> : sellerDetails ? <>
+            </Card>
+          ) : sellerDetails ? (
+            <>
               <div className="w-full gap-6 mb-8">
                 <SellerProfileCard 
                   sellerName={sellerDetails.name} 
@@ -142,11 +228,17 @@ const SellerDetails = () => {
                 </TabsList>
                 
                 <TabsContent value="listings" className="w-full">
-                  {sellerDetails.listings.length > 0 ? <div className="w-full space-y-6">
-                      {sellerDetails.listings.map(listing => <MarketplaceListingCard key={listing.id} listing={listing} className="w-full" />)}
-                    </div> : <div className="text-center py-12">
+                  {sellerDetails.listings.length > 0 ? (
+                    <div className="w-full space-y-6">
+                      {sellerDetails.listings.map(listing => (
+                        <MarketplaceListingCard key={listing.id} listing={listing} className="w-full" />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
                       <p className="text-lg text-muted-foreground">This seller has no active listings.</p>
-                    </div>}
+                    </div>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="reviews" className="w-full">
@@ -154,16 +246,23 @@ const SellerDetails = () => {
                     sellerId={sellerDetails.id} 
                     sellerName={sellerDetails.name} 
                     reviews={sellerDetails.reviews} 
-                    onAddReview={handleAddReview} 
+                    onAddReview={handleAddReview}
+                    onEditReview={handleEditReview}
+                    onDeleteReview={handleDeleteReview}
                     isSubmitting={submittingReview}
                   />
                 </TabsContent>
               </Tabs>
-            </> : <div className="text-center py-12">
+            </>
+          ) : (
+            <div className="text-center py-12">
               <p className="text-lg text-muted-foreground">Seller not found.</p>
-            </div>}
+            </div>
+          )}
         </div>
       </div>
-    </MainLayout>;
+    </MainLayout>
+  );
 };
+
 export default SellerDetails;
