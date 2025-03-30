@@ -13,6 +13,7 @@ import ListingDescription from '@/components/marketplace/ListingDescription';
 import ListingMetadata from '@/components/marketplace/ListingMetadata';
 import ImageViewer from '@/components/ImageViewer';
 import SafeTradingTips from '@/components/marketplace/SafeTradingTips';
+import SellerDetailsCard from '@/components/marketplace/SellerDetailsCard';
 
 const MarketplaceListingDetails = () => {
   const {
@@ -135,6 +136,23 @@ const MarketplaceListingDetails = () => {
                 instagram={listing.seller_instagram}
                 showMetadata={false} 
               />
+              
+              <div className="mt-6">
+                <SellerDetailsCard
+                  id={listing.id}
+                  title={listing.title}
+                  price={listing.price}
+                  sellerId={listing.seller_id || ''}
+                  sellerName={listing.seller_name}
+                  sellerRating={listing.seller_rating}
+                  sellerPhone={listing.seller_phone}
+                  sellerWhatsapp={listing.seller_whatsapp}
+                  sellerInstagram={listing.seller_instagram}
+                  location={listing.location}
+                  createdAt={listing.created_at}
+                  mapLink={listing.map_link}
+                />
+              </div>
             </div>
           </div>
           
