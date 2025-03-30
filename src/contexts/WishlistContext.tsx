@@ -31,18 +31,10 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const { toast } = useToast();
 
-  // Load wishlist from localStorage on mount
+  // Clear localStorage and start with an empty wishlist
   useEffect(() => {
-    const savedWishlist = localStorage.getItem('wishlist');
-    if (savedWishlist) {
-      try {
-        setWishlist(JSON.parse(savedWishlist));
-      } catch (error) {
-        console.error('Failed to parse wishlist from localStorage:', error);
-        // Reset wishlist if parsing fails
-        localStorage.removeItem('wishlist');
-      }
-    }
+    localStorage.removeItem('wishlist');
+    setWishlist([]);
   }, []);
 
   // Save wishlist to localStorage whenever it changes

@@ -5,7 +5,7 @@ import MainLayout from '@/components/MainLayout';
 import LocationCard from '@/components/LocationCard';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useWishlist, WishlistItem } from '@/contexts/WishlistContext';
-import { Heart, Search } from 'lucide-react';
+import { Heart, Search, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
@@ -18,7 +18,8 @@ import EventCard from '@/components/EventCard';
 
 const MyList = () => {
   const {
-    wishlist
+    wishlist,
+    removeFromWishlist
   } = useWishlist();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
@@ -101,6 +102,11 @@ const MyList = () => {
     setCurrentPage(1);
   }, [searchQuery, activeTab]);
 
+  const handleRemoveFromWishlist = (e: React.MouseEvent, itemId: string, itemType: 'location' | 'marketplace' | 'event') => {
+    e.stopPropagation();
+    removeFromWishlist(itemId, itemType);
+  };
+
   if (loading) {
     return <MainLayout>
         <div className="py-8 flex justify-center">
@@ -134,11 +140,50 @@ const MyList = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                   {currentItems.map(item => {
                     if (item.type === 'marketplace') {
-                      return <MarketplaceListingCard key={item.id} listing={item as MarketplaceListing} className="search-result-card" />;
+                      const marketplaceItem = item as MarketplaceListing & { type: 'marketplace' };
+                      return (
+                        <div key={item.id} className="relative group">
+                          <MarketplaceListingCard listing={marketplaceItem} className="search-result-card" />
+                          <Button 
+                            variant="destructive" 
+                            size="icon" 
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => handleRemoveFromWishlist(e, item.id, 'marketplace')}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      );
                     } else if (item.type === 'event') {
-                      return <EventCard key={item.id} event={item as Event} className="search-result-card" />;
+                      const eventItem = item as Event & { type: 'event' };
+                      return (
+                        <div key={item.id} className="relative group">
+                          <EventCard event={eventItem} className="search-result-card" />
+                          <Button 
+                            variant="destructive" 
+                            size="icon" 
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => handleRemoveFromWishlist(e, item.id, 'event')}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      );
                     } else {
-                      return <LocationCard key={item.id} recommendation={item as Recommendation} className="search-result-card" />;
+                      const locationItem = item as Recommendation & { type: 'location' };
+                      return (
+                        <div key={item.id} className="relative group">
+                          <LocationCard recommendation={locationItem} className="search-result-card" />
+                          <Button 
+                            variant="destructive" 
+                            size="icon" 
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => handleRemoveFromWishlist(e, item.id, 'location')}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      );
                     }
                   })}
                 </div>
