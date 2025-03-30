@@ -18,21 +18,21 @@ const StarRating: React.FC<StarRatingProps> = ({
   className,
   size = 'small'
 }) => {
-  // If rating is valid, show stars - removed the count > 0 condition
+  // Define star sizes - making them smaller overall
+  const starSizes = {
+    small: 'w-3 h-3',
+    medium: 'w-4 h-4',
+    large: 'w-5 h-5'
+  };
+  
+  const starSize = starSizes[size];
+  const textSize = size === 'small' ? 'text-xs' : size === 'medium' ? 'text-sm' : 'text-base';
+  
+  // If rating exists (either from reviews or default set by admin), show stars
   if (rating > 0) {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
     const totalStars = 5;
-    
-    // Define star sizes - making them smaller overall
-    const starSizes = {
-      small: 'w-3 h-3',
-      medium: 'w-4 h-4',
-      large: 'w-5 h-5'
-    };
-    
-    const starSize = starSizes[size];
-    const textSize = size === 'small' ? 'text-xs' : size === 'medium' ? 'text-sm' : 'text-base';
     
     return (
       <div className={cn("flex items-center flex-nowrap", className)}>
@@ -53,16 +53,16 @@ const StarRating: React.FC<StarRatingProps> = ({
           <Star key={`empty-${i}`} className={cn("stroke-amber-500", starSize)} />
         ))}
 
-        {showCount && count > 0 && (
+        {showCount && (
           <span className={cn("text-muted-foreground ml-1.5", textSize)}>
-            ({count})
+            {count > 0 ? `(${count})` : ''}
           </span>
         )}
       </div>
     );
   }
   
-  // If no valid rating, show "New Seller"
+  // If no valid rating and no reviews, show "New Seller"
   return (
     <div className={cn("flex items-center", className)}>
       <span className={cn("text-muted-foreground", 

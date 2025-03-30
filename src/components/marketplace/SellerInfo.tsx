@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import StarRating from './StarRating';
-import { Instagram, Film } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface SellerInfoProps {
@@ -68,13 +66,6 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
       </div>
       <div className="flex items-center justify-end w-full rounded-sm py-0 my-0">
         <StarRating rating={sellerRating} showCount={true} count={reviewCount} size="small" />
-        
-        <div className="flex items-center ml-2 gap-2">
-          {sellerInstagram && <button onClick={handleInstagramClick} className="text-muted-foreground hover:text-primary flex items-center gap-1 flex-shrink-0" title="View Instagram or Video Content">
-              <Instagram className="h-4 w-4" />
-              {isVideoLink && <Film className="h-3 w-3 text-purple-500" />}
-            </button>}
-        </div>
       </div>
     </div>
   );
