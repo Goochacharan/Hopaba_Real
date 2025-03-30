@@ -37,7 +37,7 @@ const Marketplace = () => {
   
   const [currentCategory, setCurrentCategory] = useState<string>(categoryParam);
   const [currentPage, setCurrentPage] = useState(1);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
   const [yearRange, setYearRange] = useState<[number, number]>([2010, new Date().getFullYear()]);
   const [ratingFilter, setRatingFilter] = useState<number>(0);
   const [conditionFilter, setConditionFilter] = useState<string>('all');
@@ -63,7 +63,7 @@ const Marketplace = () => {
     searchQuery: searchQuery,
     condition: conditionFilter !== 'all' ? conditionFilter : undefined,
     minPrice: priceRange[0] > 0 ? priceRange[0] : undefined,
-    maxPrice: priceRange[1] < 500000 ? priceRange[1] : undefined,
+    maxPrice: priceRange[1] < 10000000 ? priceRange[1] : undefined,
     minRating: ratingFilter > 0 ? ratingFilter : undefined,
     includeAllStatuses: true
   });
@@ -84,28 +84,36 @@ const Marketplace = () => {
     setSelectedLocation(location);
   };
 
-  const categories = [{
-    id: 'all',
-    name: 'All Categories'
-  }, {
-    id: 'cars',
-    name: 'Cars'
-  }, {
-    id: 'bikes',
-    name: 'Bikes'
-  }, {
-    id: 'mobiles',
-    name: 'Mobiles'
-  }, {
-    id: 'electronics',
-    name: 'Electronics'
-  }, {
-    id: 'furniture',
-    name: 'Furniture'
-  }, {
-    id: 'home_appliances',
-    name: 'Home Appliances'
-  }];
+  const categories = [
+    {
+      id: 'all',
+      name: 'All Categories'
+    },
+    {
+      id: 'cars',
+      name: 'Cars'
+    },
+    {
+      id: 'bikes',
+      name: 'Bikes'
+    },
+    {
+      id: 'mobiles',
+      name: 'Mobiles'
+    },
+    {
+      id: 'electronics',
+      name: 'Electronics'
+    },
+    {
+      id: 'furniture',
+      name: 'Furniture'
+    },
+    {
+      id: 'home_appliances',
+      name: 'Home Appliances'
+    }
+  ];
 
   useEffect(() => {
     if (!loading && currentCategory !== 'all') {
@@ -197,9 +205,12 @@ const Marketplace = () => {
   const filteredListings = listings.filter(listing => {
     const price = listing.price;
     if (price < priceRange[0] || price > priceRange[1]) return false;
+    
     const listingYear = new Date(listing.created_at).getFullYear();
     if (listingYear < yearRange[0] || listingYear > yearRange[1]) return false;
+    
     if (ratingFilter > 0 && listing.seller_rating < ratingFilter) return false;
+    
     if (conditionFilter !== 'all' && listing.condition.toLowerCase() !== conditionFilter.toLowerCase()) return false;
     
     return true;
@@ -290,9 +301,9 @@ const Marketplace = () => {
 
             <Popover open={activeFilter === 'price'} onOpenChange={open => setActiveFilter(open ? 'price' : null)}>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className={cn("rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", activeFilter === 'price' && "border-primary ring-2 ring-primary/20", (priceRange[0] > 0 || priceRange[1] < 500000) && "border-primary/30 bg-primary/5")}>
+                <Button variant="outline" size="icon" className={cn("rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", activeFilter === 'price' && "border-primary ring-2 ring-primary/20", (priceRange[0] > 0 || priceRange[1] < 10000000) && "border-primary/30 bg-primary/5")}>
                   <IndianRupee className="h-4 w-4" />
-                  {(priceRange[0] > 0 || priceRange[1] < 500000) && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
+                  {(priceRange[0] > 0 || priceRange[1] < 10000000) && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
                       ₹₹
                     </Badge>}
                 </Button>
@@ -305,12 +316,24 @@ const Marketplace = () => {
                       <span className="text-sm text-muted-foreground">From</span>
                       <span className="text-sm font-medium">{formatPrice(priceRange[0])}</span>
                     </div>
-                    <Slider value={[priceRange[0]]} min={0} max={500000} step={5000} onValueChange={value => setPriceRange([value[0], priceRange[1]])} />
+                    <Slider 
+                      value={[priceRange[0]]} 
+                      min={0} 
+                      max={10000000} 
+                      step={100000} 
+                      onValueChange={value => setPriceRange([value[0], priceRange[1]])} 
+                    />
                     <div className="flex justify-between mt-4">
                       <span className="text-sm text-muted-foreground">To</span>
                       <span className="text-sm font-medium">{formatPrice(priceRange[1])}</span>
                     </div>
-                    <Slider value={[priceRange[1]]} min={0} max={500000} step={5000} onValueChange={value => setPriceRange([priceRange[0], value[0]])} />
+                    <Slider 
+                      value={[priceRange[1]]} 
+                      min={0} 
+                      max={10000000} 
+                      step={100000} 
+                      onValueChange={value => setPriceRange([priceRange[0], value[0]])} 
+                    />
                   </div>
                 </div>
               </PopoverContent>

@@ -56,7 +56,8 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               size="sm" 
               className={cn(
                 "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
-                activeFilter === 'rating' && "ring-2 ring-primary/20"
+                activeFilter === 'rating' && "ring-2 ring-primary/20",
+                minRating[0] > 3 && "border-primary/30 bg-primary/5"
               )}
             >
               <Star className="w-4 h-4" />
@@ -99,7 +100,8 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               size="sm" 
               className={cn(
                 "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
-                activeFilter === 'price' && "ring-2 ring-primary/20"
+                activeFilter === 'price' && "ring-2 ring-primary/20",
+                priceRange < 3 && "border-primary/30 bg-primary/5"
               )}
             >
               <IndianRupee className="w-4 h-4" />
@@ -206,7 +208,8 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               size="sm" 
               className={cn(
                 "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
-                activeFilter === 'distance' && "ring-2 ring-primary/20"
+                activeFilter === 'distance' && "ring-2 ring-primary/20",
+                distance[0] !== 5 && "border-primary/30 bg-primary/5"
               )}
             >
               <svg 
@@ -250,8 +253,6 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
             </div>
           </PopoverContent>
         </Popover>
-
-        {/* Remove the All Filters Button that wasn't working */}
       </div>
     </ScrollArea>
   );

@@ -49,7 +49,8 @@ const SearchResults = () => {
     loading: marketplaceLoading,
     error: marketplaceError
   } = useMarketplaceListings({
-    searchQuery: searchQuery
+    searchQuery: searchQuery,
+    minRating: filters.minRating[0] > 3 ? filters.minRating[0] : undefined
   });
 
   const loading = recommendationsLoading || marketplaceLoading;

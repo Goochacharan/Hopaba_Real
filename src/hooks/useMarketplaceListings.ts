@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -86,6 +87,7 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
       
       if (minRating !== undefined && minRating > 0) {
         query = query.gte('seller_rating', minRating);
+        console.log(`Filtering by minimum rating: ${minRating}`);
       }
       
       if (searchQuery && searchQuery.trim() !== '') {
@@ -101,19 +103,14 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
       }
 
       console.log(`Found ${data?.length || 0} marketplace listings`);
-      const categoryData = data?.filter(item => {
-        if (category && category !== 'all') {
-          return item.category.toLowerCase().includes(category.toLowerCase());
-        }
-        return true;
-      });
       
-      console.log("Marketplace listings fetched:", categoryData?.map(l => ({
+      console.log("Marketplace listings fetched:", data?.map(l => ({
         id: l.id,
         title: l.title,
         category: l.category,
         approval_status: l.approval_status,
         seller_id: l.seller_id,
+        seller_rating: l.seller_rating,
         current_user_id: user?.id
       })));
       
