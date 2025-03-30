@@ -1,10 +1,8 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import StarRating from './StarRating';
 import { Instagram, Film } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
 interface SellerInfoProps {
   sellerName: string;
   sellerRating: number;
@@ -14,7 +12,6 @@ interface SellerInfoProps {
   onInstagramClick?: (e: React.MouseEvent) => void;
   createdAt?: string;
 }
-
 const SellerInfo: React.FC<SellerInfoProps> = ({
   sellerName,
   sellerRating,
@@ -24,8 +21,9 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
   onInstagramClick,
   createdAt
 }) => {
-  const { toast } = useToast();
-  
+  const {
+    toast
+  } = useToast();
   const handleInstagramClick = (e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -53,14 +51,12 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
       });
     }
   };
-  
   const isVideoLink = sellerInstagram && (sellerInstagram.includes('youtube.com') || sellerInstagram.includes('vimeo.com') || sellerInstagram.includes('tiktok.com') || sellerInstagram.includes('instagram.com/reel'));
-  
   return <div className="flex flex-col w-full">
       <div className="flex items-center mb-1 w-full py-0">
         <span className="text-muted-foreground text-sm mr-1">Seller</span>
-        {sellerId ? <Link to={`/seller/${sellerId}`} className="font-medium text-lg hover:text-primary hover:underline" onClick={e => e.stopPropagation()} // Prevent triggering parent card click
-      >
+        {sellerId ? <Link to={`/seller/${sellerId}`} onClick={e => e.stopPropagation()} // Prevent triggering parent card click
+      className="font-small text-lg hover:text-primary hover:underline">
             {sellerName}
           </Link> : <span className="font-medium text-base">{sellerName}</span>}
       </div>
@@ -76,5 +72,4 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
       </div>
     </div>;
 };
-
 export default SellerInfo;
