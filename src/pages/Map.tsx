@@ -52,8 +52,8 @@ const Map = () => {
         mapboxgl.accessToken = 'pk.YOUR_MAPBOX_TOKEN';
         
         // Initialize map centered at Bengaluru
-        const defaultCenter = [77.5946, 12.9716]; // Bengaluru coordinates
-        const center = userCoordinates ? [userCoordinates.lng, userCoordinates.lat] : defaultCenter;
+        const defaultCenter: [number, number] = [77.5946, 12.9716]; // Bengaluru coordinates
+        const center: [number, number] = userCoordinates ? [userCoordinates.lng, userCoordinates.lat] : defaultCenter;
         
         map.current = new mapboxgl.Map({
           container: mapContainer.current,
