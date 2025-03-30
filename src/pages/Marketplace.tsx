@@ -18,9 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
-
 type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
-
 const Marketplace = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -336,18 +334,11 @@ const Marketplace = () => {
             </TabsContent>)}
         </Tabs>
       </div>
-      <div className="fixed left-4 bottom-24 z-[61]">
-        <Button 
-          variant="default" 
-          size="icon" 
-          onClick={() => navigate('/map')}
-          className="rounded-full shadow-lg hover:shadow-xl"
-          aria-label="Map View"
-        >
+      <div className="fixed left-4 bottom-24 z-[61] py-[8px]">
+        <Button variant="default" size="icon" onClick={() => navigate('/map')} className="rounded-full shadow-lg hover:shadow-xl" aria-label="Map View">
           <MapIcon className="h-5 w-5" />
         </Button>
       </div>
     </MainLayout>;
 };
-
 export default Marketplace;
