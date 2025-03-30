@@ -15,6 +15,7 @@ interface WishlistContextType {
   addToWishlist: (item: WishlistItem) => void;
   removeFromWishlist: (itemId: string, itemType: 'location' | 'marketplace' | 'event') => void;
   isInWishlist: (itemId: string, itemType?: 'location' | 'marketplace' | 'event') => boolean;
+  toggleWishlist: (item: WishlistItem) => void;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
@@ -31,10 +32,19 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const { toast } = useToast();
 
-  // Clear localStorage and start with an empty wishlist
+  // Load wishlist from localStorage on component mount
   useEffect(() => {
-    localStorage.removeItem('wishlist');
-    setWishlist([]);
+    const savedWishlist = localStorage.getItem('wishlist');
+    if (savedWishlist) {
+      try {
+        const parsedWishlist = JSON.parse(savedWishlist);
+        setWishlist(parsedWishlist);
+      } catch (error) {
+        console.error('Error parsing wishlist from localStorage:', error);
+        // Reset wishlist on parse error
+        localStorage.removeItem('wishlist');
+      }
+    }
   }, []);
 
   // Save wishlist to localStorage whenever it changes
@@ -82,6 +92,15 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
+  const toggleWishlist = (item: WishlistItem) => {
+    const itemExists = isInWishlist(item.id, item.type);
+    if (itemExists) {
+      removeFromWishlist(item.id, item.type);
+    } else {
+      addToWishlist(item);
+    }
+  };
+
   const isInWishlist = (itemId: string, itemType?: 'location' | 'marketplace' | 'event') => {
     if (itemType) {
       return wishlist.some(item => item.id === itemId && item.type === itemType);
@@ -99,7 +118,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   return (
-    <WishlistContext.Provider value={{ wishlist, addToWishlist, removeFromWishlist, isInWishlist }}>
+    <WishlistContext.Provider value={{ wishlist, addToWishlist, removeFromWishlist, isInWishlist, toggleWishlist }}>
       {children}
     </WishlistContext.Provider>
   );

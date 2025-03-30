@@ -1,11 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import LocationCard from '@/components/LocationCard';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useWishlist, WishlistItem } from '@/contexts/WishlistContext';
-import { Heart, Search, Trash2 } from 'lucide-react';
+import { Heart, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
@@ -19,7 +18,7 @@ import EventCard from '@/components/EventCard';
 const MyList = () => {
   const {
     wishlist,
-    removeFromWishlist
+    toggleWishlist
   } = useWishlist();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
@@ -102,9 +101,9 @@ const MyList = () => {
     setCurrentPage(1);
   }, [searchQuery, activeTab]);
 
-  const handleRemoveFromWishlist = (e: React.MouseEvent, itemId: string, itemType: 'location' | 'marketplace' | 'event') => {
+  const handleHeartClick = (e: React.MouseEvent, item: WishlistItem) => {
     e.stopPropagation();
-    removeFromWishlist(itemId, itemType);
+    toggleWishlist(item);
   };
 
   if (loading) {
@@ -144,14 +143,12 @@ const MyList = () => {
                       return (
                         <div key={item.id} className="relative group">
                           <MarketplaceListingCard listing={marketplaceItem} className="search-result-card" />
-                          <Button 
-                            variant="destructive" 
-                            size="icon" 
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={(e) => handleRemoveFromWishlist(e, item.id, 'marketplace')}
+                          <button 
+                            className="absolute top-2 right-2 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10 text-rose-500"
+                            onClick={(e) => handleHeartClick(e, item)}
                           >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                            <Heart className="h-4 w-4 fill-rose-500" />
+                          </button>
                         </div>
                       );
                     } else if (item.type === 'event') {
@@ -159,14 +156,12 @@ const MyList = () => {
                       return (
                         <div key={item.id} className="relative group">
                           <EventCard event={eventItem} className="search-result-card" />
-                          <Button 
-                            variant="destructive" 
-                            size="icon" 
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={(e) => handleRemoveFromWishlist(e, item.id, 'event')}
+                          <button 
+                            className="absolute top-2 right-2 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10 text-rose-500"
+                            onClick={(e) => handleHeartClick(e, item)}
                           >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                            <Heart className="h-4 w-4 fill-rose-500" />
+                          </button>
                         </div>
                       );
                     } else {
@@ -174,14 +169,12 @@ const MyList = () => {
                       return (
                         <div key={item.id} className="relative group">
                           <LocationCard recommendation={locationItem} className="search-result-card" />
-                          <Button 
-                            variant="destructive" 
-                            size="icon" 
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={(e) => handleRemoveFromWishlist(e, item.id, 'location')}
+                          <button 
+                            className="absolute top-2 right-2 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10 text-rose-500"
+                            onClick={(e) => handleHeartClick(e, item)}
                           >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                            <Heart className="h-4 w-4 fill-rose-500" />
+                          </button>
                         </div>
                       );
                     }
