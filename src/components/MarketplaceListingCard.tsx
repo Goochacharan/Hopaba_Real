@@ -47,7 +47,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           <ListingMetadata location={listing.location} createdAt={listing.created_at} condition={listing.condition} sellerInstagram={listing.seller_instagram} sellerName={listing.seller_name} />
         </div>
 
-        <div className="flex justify-between items-center mb-4 py-0 my-0">
+        <div className="flex justify-between items-center mb-4 py-0 my-0 px-0 mx-0">
           <div className="flex items-center">
             <p className="text-gray-800 py-1 font-extrabold md:text-3xl text-xl px-[5px]">
               {formatPrice(listing.price)}
