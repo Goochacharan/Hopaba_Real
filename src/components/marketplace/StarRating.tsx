@@ -18,15 +18,15 @@ const StarRating: React.FC<StarRatingProps> = ({
   className,
   size = 'small'
 }) => {
-  // If no reviews yet (count is 0), don't show stars
-  if (count === 0) {
+  // If no reviews yet (rating is 0), don't show stars
+  if (rating === 0 || count === 0) {
     return (
       <div className={cn("flex items-center", className)}>
         <span className={cn("text-muted-foreground", 
           size === 'small' ? 'text-xs' : 
           size === 'medium' ? 'text-sm' : 'text-base'
         )}>
-          No ratings yet
+          New Seller
         </span>
       </div>
     );
