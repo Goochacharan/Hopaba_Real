@@ -1,9 +1,7 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import StarRating from './StarRating';
 import { useToast } from '@/hooks/use-toast';
-
 interface SellerInfoProps {
   sellerName: string;
   sellerRating: number;
@@ -13,7 +11,6 @@ interface SellerInfoProps {
   onInstagramClick?: (e: React.MouseEvent) => void;
   createdAt?: string;
 }
-
 const SellerInfo: React.FC<SellerInfoProps> = ({
   sellerName,
   sellerRating,
@@ -26,7 +23,6 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
   const {
     toast
   } = useToast();
-  
   const handleInstagramClick = (e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -54,22 +50,17 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
       });
     }
   };
-  
   const isVideoLink = sellerInstagram && (sellerInstagram.includes('youtube.com') || sellerInstagram.includes('vimeo.com') || sellerInstagram.includes('tiktok.com') || sellerInstagram.includes('instagram.com/reel'));
-  
-  return (
-    <div className="flex flex-col w-full">
+  return <div className="flex flex-col w-full">
       <div className="flex items-center justify-end w-full py-0">
         <span className="text-muted-foreground text-xs mr-1">Seller</span>
         {sellerId ? <Link to={`/seller/${sellerId}`} onClick={e => e.stopPropagation()} className="text-s hover:text-primary hover:underline">
             {sellerName}
           </Link> : <span className="text-sm font-medium">{sellerName}</span>}
       </div>
-      <div className="flex items-center justify-end w-full rounded-sm py-0 my-0">
+      <div className="flex items-center justify-end w-full rounded-sm py-0 my-0 px-[63px]">
         <StarRating rating={sellerRating} showCount={true} count={reviewCount} size="small" />
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default SellerInfo;
