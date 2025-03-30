@@ -6,7 +6,7 @@ import { useUserMarketplaceListings } from '@/hooks/useUserMarketplaceListings';
 import LocationSelector from '@/components/LocationSelector';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers, Map as MapIcon, RefreshCw } from 'lucide-react';
+import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers, Map as MapIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -66,15 +66,6 @@ const Marketplace = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [currentCategory, searchQuery, conditionFilter, priceRange, ratingFilter, sortOption]);
-  
-  const handleRefresh = () => {
-    refetchListings();
-    toast({
-      title: "Refreshed",
-      description: "Listings have been refreshed with the latest data",
-      duration: 2000
-    });
-  };
 
   const handleLocationChange = (location: string) => {
     console.log(`Location changed to: ${location}`);
@@ -146,11 +137,6 @@ const Marketplace = () => {
     if (ratingFilter > 0 && listing.seller_rating < ratingFilter) return false;
     if (conditionFilter !== 'all' && listing.condition.toLowerCase() !== conditionFilter.toLowerCase()) return false;
     
-    if (searchQuery && searchQuery.toLowerCase().includes('honda') && 
-        listing.title.toLowerCase().includes('honda')) {
-      return true;
-    }
-    
     return true;
   });
 
@@ -170,15 +156,6 @@ const Marketplace = () => {
       <div className="animate-fade-in px-[7px]">
         <div className="flex items-center justify-between">
           <LocationSelector selectedLocation={selectedLocation} onLocationChange={handleLocationChange} />
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="flex gap-1 items-center" 
-            onClick={handleRefresh}
-          >
-            <RefreshCw className="h-4 w-4" />
-            <span className="hidden sm:inline">Refresh</span>
-          </Button>
         </div>
         
         {pendingListings.length > 0 && user && (
