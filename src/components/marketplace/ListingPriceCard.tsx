@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Shield } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import SellerInfo from './SellerInfo';
 import ListingActionButtons from './ListingActionButtons';
 import ListingMetadata from './ListingMetadata';

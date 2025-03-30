@@ -2,6 +2,7 @@
 import React from 'react';
 import { format, differenceInDays } from 'date-fns';
 import { Instagram, Film, Sparkles } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ListingDescriptionProps {
   description: string;
@@ -44,9 +45,11 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
       </div>
       
       <div className="space-y-4">
-        <p className="text-muted-foreground whitespace-pre-line leading-relaxed text-base font-normal">
-          {description}
-        </p>
+        <ScrollArea className="h-56 pr-3">
+          <p className="text-muted-foreground whitespace-pre-line leading-relaxed text-base font-normal">
+            {description}
+          </p>
+        </ScrollArea>
         
         {showMetadata && (
           <div className="mt-6 pt-4 border-t border-gray-100">
