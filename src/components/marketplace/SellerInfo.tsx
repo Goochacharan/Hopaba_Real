@@ -60,7 +60,7 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
             {sellerName}
           </Link> : <span className="font-medium text-base">{sellerName}</span>}
       </div>
-      <div className="flex items-center w-full rounded-sm py-0 my-0 ml-2">
+      <div className="flex items-center w-full rounded-sm py-0 my-0 ml-2 mx-[80px]">
         <StarRating rating={sellerRating} showCount={true} count={reviewCount} size="small" />
         
         <div className="flex items-center ml-auto gap-3">
