@@ -120,12 +120,12 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
     if (mapLink && (mapLink.includes('google.com/maps') || mapLink.includes('goo.gl/maps'))) {
       // If a Google Maps link is provided, use it directly
       mapsUrl = mapLink;
-    } else if (location.includes('google.com/maps') || location.includes('goo.gl/maps')) {
+    } else if (location && (location.includes('google.com/maps') || location.includes('goo.gl/maps'))) {
       // If the location itself is a maps link
       mapsUrl = location;
     } else {
       // Otherwise, construct a Google Maps search URL with the location
-      const destination = encodeURIComponent(location);
+      const destination = encodeURIComponent(location || '');
       
       if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
         mapsUrl = `maps://maps.apple.com/?q=${destination}`;
