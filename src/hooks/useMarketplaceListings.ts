@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -43,6 +44,7 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
   const fetchListings = useCallback(async () => {
     setLoading(true);
     setError(null);
+    console.log("Fetching marketplace listings with options:", options);
 
     try {
       let query = supabase
@@ -52,22 +54,19 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
       // Apply approval status filter
       if (!includeAllStatuses) {
         if (user) {
-          // For logged-in users, show approved listings + their own pending listings
+          // For logged-in users, show approved listings + their own listings (any status)
           query = query.or(`approval_status.eq.approved,seller_id.eq.${user.id}`);
+          console.log(`Filtering for approved listings OR seller_id=${user.id}`);
         } else {
           // For visitors, only show approved listings
           query = query.eq('approval_status', 'approved');
+          console.log(`Filtering for only approved listings (user not logged in)`);
         }
+      } else {
+        console.log("Including all approval statuses");
       }
       
       if (category && category !== 'all') {
-        // First fetch all listings to check actual category values in the database
-        const { data: allApprovedListings } = await supabase
-          .from('marketplace_listings')
-          .select('category');
-        
-        console.log('All approved listing categories:', [...new Set(allApprovedListings?.map(item => item.category) || [])]);
-        
         // Make category filter case-insensitive
         query = query.ilike('category', `%${category}%`);
         console.log(`Filtering by category (case-insensitive): "${category}"`);
@@ -101,14 +100,22 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         throw error;
       }
 
-      console.log(`Found ${data?.length || 0} marketplace listings for query "${searchQuery || ''}"`);
-      console.log(`Listings: ${data?.map(l => `${l.title} (${l.category}) - ${l.approval_status}`).join(', ') || 'None'}`);
+      console.log(`Found ${data?.length || 0} marketplace listings`);
+      const categoryData = data?.filter(item => {
+        if (category && category !== 'all') {
+          return item.category.toLowerCase().includes(category.toLowerCase());
+        }
+        return true;
+      });
       
-      if (category && category !== 'all') {
-        console.log(`Category filter results: ${data?.length || 0} listings for "${category}"`);
-        const categories = data?.map(item => item.category);
-        console.log('Categories in results:', [...new Set(categories)]);
-      }
+      console.log("Marketplace listings fetched:", categoryData?.map(l => ({
+        id: l.id,
+        title: l.title,
+        category: l.category,
+        approval_status: l.approval_status,
+        seller_id: l.seller_id,
+        current_user_id: user?.id
+      })));
       
       setListings((data || []) as MarketplaceListing[]);
     } catch (err) {

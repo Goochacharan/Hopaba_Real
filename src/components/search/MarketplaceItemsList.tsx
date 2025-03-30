@@ -41,11 +41,17 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     );
   }
 
-  // Filter listings to show approved ones or user's own listings
+  console.log(`MarketplaceItemsList received ${listings.length} listings`);
+  console.log('Raw listings:', listings.map(l => `${l.title} (${l.category}) - ${l.approval_status}`));
+
+  // Filter listings to show approved ones or user's own listings regardless of approval status
   const visibleListings = listings.filter(listing => 
     listing.approval_status === 'approved' || 
     (user && listing.seller_id === user.id)
   );
+
+  console.log(`After filtering, ${visibleListings.length} listings are visible`);
+  console.log('Visible listings:', visibleListings.map(l => `${l.title} (${l.category}) - ${l.approval_status}`));
 
   if (visibleListings.length === 0) {
     return <NoResultsMessage type="marketplace" />;
