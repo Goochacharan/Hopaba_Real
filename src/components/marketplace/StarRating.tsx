@@ -18,6 +18,20 @@ const StarRating: React.FC<StarRatingProps> = ({
   className,
   size = 'small'
 }) => {
+  // If no reviews yet (count is 0), don't show stars
+  if (count === 0) {
+    return (
+      <div className={cn("flex items-center", className)}>
+        <span className={cn("text-muted-foreground", 
+          size === 'small' ? 'text-xs' : 
+          size === 'medium' ? 'text-sm' : 'text-base'
+        )}>
+          No ratings yet
+        </span>
+      </div>
+    );
+  }
+
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating % 1 >= 0.5;
   const totalStars = 5;
@@ -51,7 +65,7 @@ const StarRating: React.FC<StarRatingProps> = ({
         <Star key={`empty-${i}`} className={cn("stroke-amber-500", starSize)} />
       ))}
 
-      {showCount && (
+      {showCount && count > 0 && (
         <span className={cn("text-muted-foreground ml-1.5", textSize)}>
           ({count})
         </span>
