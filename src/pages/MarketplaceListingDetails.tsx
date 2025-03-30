@@ -133,7 +133,7 @@ const MarketplaceListingDetails = () => {
                 location={listing.location} 
                 createdAt={listing.created_at} 
                 instagram={listing.seller_instagram}
-                showMetadata={true} 
+                showMetadata={false} 
               />
             </div>
           </div>
