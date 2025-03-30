@@ -1,15 +1,14 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { ChevronLeft, AlertCircle } from 'lucide-react';
 import { useSellerDetails } from '@/hooks/useSellerDetails';
 import SellerProfileCard from '@/components/marketplace/SellerProfileCard';
-import SellerReviews from '@/components/marketplace/SellerReviews';
-import MarketplaceListingCard from '@/components/MarketplaceListingCard';
+import SellerDetailsTabs from '@/components/marketplace/SellerDetailsTabs';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -210,42 +209,16 @@ const SellerDetails = () => {
                 />
               </div>
 
-              <Tabs defaultValue="listings" className="w-full">
-                <TabsList className="w-full bg-background border-b mb-6">
-                  <TabsTrigger value="listings" className="text-base px-6 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
-                    Listings ({sellerDetails.listings.length})
-                  </TabsTrigger>
-                  <TabsTrigger value="reviews" className="text-base px-6 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
-                    Reviews ({sellerDetails.reviews.length})
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="listings" className="w-full">
-                  {sellerDetails.listings.length > 0 ? (
-                    <div className="w-full space-y-6">
-                      {sellerDetails.listings.map(listing => (
-                        <MarketplaceListingCard key={listing.id} listing={listing} className="w-full" />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <p className="text-lg text-muted-foreground">This seller has no active listings.</p>
-                    </div>
-                  )}
-                </TabsContent>
-                
-                <TabsContent value="reviews" className="w-full">
-                  <SellerReviews 
-                    sellerId={sellerDetails.id} 
-                    sellerName={sellerDetails.name} 
-                    reviews={sellerDetails.reviews} 
-                    onAddReview={handleAddReview}
-                    onEditReview={handleEditReview}
-                    onDeleteReview={handleDeleteReview}
-                    isSubmitting={submittingReview}
-                  />
-                </TabsContent>
-              </Tabs>
+              <SellerDetailsTabs
+                sellerId={sellerDetails.id}
+                sellerName={sellerDetails.name}
+                listings={sellerDetails.listings}
+                reviews={sellerDetails.reviews}
+                onAddReview={handleAddReview}
+                onEditReview={handleEditReview}
+                onDeleteReview={handleDeleteReview}
+                isSubmittingReview={submittingReview}
+              />
             </>
           ) : (
             <div className="text-center py-12">
