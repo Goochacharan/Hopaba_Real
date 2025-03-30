@@ -112,11 +112,15 @@ const Marketplace = () => {
       
       const categoryValues = [...new Set(listings.map(l => l.category))];
       console.log('Available categories in listings:', categoryValues);
+      
+      listings.forEach((listing, index) => {
+        console.log(`Listing ${index + 1}: ${listing.title} - Category: "${listing.category}"`);
+      });
     }
   }, [listings, loading, currentCategory]);
 
   const handleCategoryChange = (category: string) => {
-    console.log(`Category changed to: ${category}`);
+    console.log(`Category changed to: "${category}"`);
     setCurrentCategory(category);
     setCurrentPage(1);
     setSearchParams(params => {

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -42,13 +43,16 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
     setError(null);
 
     try {
+      console.log(`Fetching marketplace listings with options:`, options);
+      
       let query = supabase
         .from('marketplace_listings')
         .select('*')
         .eq('approval_status', 'approved');
       
       if (category && category !== 'all') {
-        query = query.ilike('category', category);
+        // Case-insensitive search for the category
+        query = query.ilike('category', `%${category}%`);
         console.log(`Filtering by category: "${category}"`);
       }
       
@@ -81,10 +85,19 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
       }
 
       console.log(`Found ${data?.length || 0} marketplace listings for query "${searchQuery || ''}"`);
+      
       if (category && category !== 'all') {
         console.log(`Category filter results: ${data?.length || 0} listings for "${category}"`);
         const categories = data?.map(item => item.category);
         console.log('Categories in results:', [...new Set(categories)]);
+      }
+      
+      // Log the actual raw data returned for debugging
+      if (data && data.length > 0) {
+        console.log('First listing category:', data[0].category);
+        console.log('First listing data:', data[0]);
+      } else {
+        console.log('No listings data returned from query');
       }
       
       setListings((data || []) as MarketplaceListing[]);
@@ -94,7 +107,7 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
     } finally {
       setLoading(false);
     }
-  }, [category, searchQuery, condition, minPrice, maxPrice, minRating]);
+  }, [category, searchQuery, condition, minPrice, maxPrice, minRating, options]);
 
   useEffect(() => {
     fetchListings();
