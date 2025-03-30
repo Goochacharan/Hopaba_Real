@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -12,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card } from '@/components/ui/card';
-import { Loader2, Save, X, Instagram, Film } from 'lucide-react';
+import { Loader2, Save, X, Instagram, Film, MapPin, Link2 } from 'lucide-react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { ImageUpload } from '@/components/ui/image-upload';
 
@@ -23,6 +24,7 @@ const marketplaceListingSchema = z.object({
   category: z.string().min(1, { message: "Category is required" }),
   condition: z.string().min(1, { message: "Condition is required" }),
   location: z.string().optional(),
+  map_link: z.string().optional(),
   seller_name: z.string().min(2, { message: "Seller name is required" }),
   seller_phone: z.string()
     .refine(phone => phone.startsWith('+91'), {
@@ -69,6 +71,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     category: listing?.category || '',
     condition: listing?.condition || '',
     location: listing?.location || '',
+    map_link: listing?.map_link || '',
     seller_name: listing?.seller_name || user?.user_metadata?.full_name || '',
     seller_phone: listing?.seller_phone || '+91',
     seller_whatsapp: listing?.seller_whatsapp || '+91',
@@ -128,6 +131,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         category: data.category,
         condition: data.condition,
         location: data.location || "Not specified",
+        map_link: data.map_link || null,
         seller_name: data.seller_name || "Anonymous Seller",
         seller_id: user.id,
         seller_phone: data.seller_phone || null,
@@ -237,22 +241,52 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                   name="location"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Location (Optional)</FormLabel>
+                      <FormLabel>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          Location (Optional)
+                        </div>
+                      </FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="e.g. Mumbai, Delhi or Google Maps link" 
+                          placeholder="e.g. Mumbai, Delhi" 
                           value={field.value}
-                          onChange={(e) => handleLocationChange(e.target.value, field.onChange)}
+                          onChange={(e) => form.setValue('location', e.target.value)}
                         />
                       </FormControl>
                       <FormDescription>
-                        You can paste a Google Maps link directly
+                        Enter the location or area where the item is available
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="map_link"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      <div className="flex items-center gap-2">
+                        <Link2 className="h-4 w-4" />
+                        Google Maps Link (Optional)
+                      </div>
+                    </FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Paste your Google Maps link here" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Add a Google Maps link for more precise directions
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <div className="space-y-6">

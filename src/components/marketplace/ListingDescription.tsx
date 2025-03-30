@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { format, differenceInDays } from 'date-fns';
-import { Instagram, Film, Sparkles } from 'lucide-react';
+import { Instagram, Film, Sparkles, MapPin, Link2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ListingDescriptionProps {
@@ -11,6 +11,7 @@ interface ListingDescriptionProps {
   location: string;
   createdAt: string;
   instagram?: string | null;
+  mapLink?: string | null;
   showMetadata?: boolean;
 }
 
@@ -21,6 +22,7 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
   location,
   createdAt,
   instagram,
+  mapLink,
   showMetadata = false
 }) => {
   const isVideoContent = instagram && (
@@ -60,8 +62,31 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
               <div className="text-sm font-medium">Condition</div>
               <div className="text-sm text-muted-foreground">{condition}</div>
               
-              <div className="text-sm font-medium">Location</div>
+              <div className="text-sm font-medium flex items-center gap-1.5">
+                <MapPin className="h-4 w-4" />
+                Location
+              </div>
               <div className="text-sm text-muted-foreground">{location}</div>
+              
+              {mapLink && (
+                <>
+                  <div className="text-sm font-medium flex items-center gap-1.5">
+                    <Link2 className="h-4 w-4" />
+                    Map Link
+                  </div>
+                  <div className="text-sm text-muted-foreground truncate">
+                    <a 
+                      href={mapLink} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      View on Google Maps
+                    </a>
+                  </div>
+                </>
+              )}
               
               {instagram && (
                 <>

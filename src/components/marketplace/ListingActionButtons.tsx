@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Phone, MessageSquare, MapPin, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -12,6 +11,7 @@ interface ListingActionButtonsProps {
   sellerWhatsapp: string | null;
   sellerInstagram: string | null;
   location: string;
+  mapLink?: string | null;
 }
 
 const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
@@ -22,6 +22,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
   sellerWhatsapp,
   sellerInstagram,
   location,
+  mapLink,
 }) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -116,9 +117,14 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
     e.stopPropagation();
     let mapsUrl;
     
-    if (location.includes('google.com/maps') || location.includes('goo.gl/maps')) {
+    if (mapLink && (mapLink.includes('google.com/maps') || mapLink.includes('goo.gl/maps'))) {
+      // If a Google Maps link is provided, use it directly
+      mapsUrl = mapLink;
+    } else if (location.includes('google.com/maps') || location.includes('goo.gl/maps')) {
+      // If the location itself is a maps link
       mapsUrl = location;
     } else {
+      // Otherwise, construct a Google Maps search URL with the location
       const destination = encodeURIComponent(location);
       
       if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {

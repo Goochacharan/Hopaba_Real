@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -128,6 +127,7 @@ const MarketplaceListingDetails = () => {
                 location={listing.location || ''}
                 createdAt={listing.created_at}
                 condition={listing.condition}
+                mapLink={listing.map_link}
               />
             </div>
           </div>

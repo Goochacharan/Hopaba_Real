@@ -99,6 +99,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           sellerWhatsapp={listing.seller_whatsapp} 
           sellerInstagram={listing.seller_instagram} 
           location={listing.location} 
+          mapLink={listing.map_link}
         />
       </div>
 

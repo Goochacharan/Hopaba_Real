@@ -18,6 +18,7 @@ interface ListingPriceCardProps {
   location: string;
   createdAt: string;
   condition: string;
+  mapLink?: string | null;
 }
 
 const formatPrice = (price: number): string => {
@@ -35,7 +36,8 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   sellerInstagram,
   location,
   createdAt,
-  condition
+  condition,
+  mapLink
 }) => {
   return (
     <div className="sticky top-24 space-y-6">
@@ -72,6 +74,7 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
           sellerWhatsapp={sellerWhatsapp}
           sellerInstagram={sellerInstagram}
           location={location}
+          mapLink={mapLink}
         />
       </div>
       
