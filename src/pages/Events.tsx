@@ -1,12 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useToast } from '@/hooks/use-toast';
 import EventsList from '@/components/search/EventsList';
 import LocationSelector from '@/components/LocationSelector';
 import { Event } from '@/hooks/useRecommendations';
 import { supabase } from '@/integrations/supabase/client';
+import { Map as MapIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface SupabaseEvent {
   approval_status: string;
@@ -23,6 +24,7 @@ interface SupabaseEvent {
 }
 
 const Events = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
@@ -49,7 +51,6 @@ const Events = () => {
     };
   }, []);
 
-  // Fetch approved events
   useEffect(() => {
     const fetchEvents = async () => {
       setLoading(true);
@@ -65,10 +66,9 @@ const Events = () => {
           throw error;
         }
         
-        // Convert Supabase events to our Event type with price info
         const eventsWithPrice = (data || []).map((event: SupabaseEvent) => ({
           ...event,
-          pricePerPerson: event.price_per_person || 0 // Map from database column to our interface property
+          pricePerPerson: event.price_per_person || 0
         }));
         
         setEvents(eventsWithPrice);
@@ -83,7 +83,6 @@ const Events = () => {
     fetchEvents();
   }, [toast]);
 
-  // Filter events whenever search query changes
   useEffect(() => {
     if (searchQuery) {
       const lowercaseQuery = searchQuery.toLowerCase();
@@ -101,7 +100,6 @@ const Events = () => {
   const handleLocationChange = (location: string) => {
     console.log(`Location changed to: ${location}`);
     setSelectedLocation(location);
-    // In a real application, you would fetch events for this location
   };
 
   return (
@@ -122,6 +120,18 @@ const Events = () => {
             error={error}
             className="events-page" 
           />
+          
+          <div className="fixed left-4 bottom-24 z-[61]">
+            <Button 
+              variant="default" 
+              size="icon" 
+              onClick={() => navigate('/map')}
+              className="rounded-full shadow-lg hover:shadow-xl"
+              aria-label="Map View"
+            >
+              <MapIcon className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </section>
     </MainLayout>
