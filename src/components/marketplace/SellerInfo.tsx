@@ -77,7 +77,7 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
         )}
       </div>
 
-      <div className="flex items-center justify-end w-full rounded-sm py-0 my-0 px-[63px]">
+      <div className="flex items-center justify-end w-full">
         <StarRating 
           rating={sellerRating} 
           showCount={true} 
