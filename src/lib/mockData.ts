@@ -23,6 +23,7 @@ export interface Recommendation {
   availability_start_time?: string;
   availability_end_time?: string;
   distance?: string;
+  calculatedDistance?: number;  // Added the calculatedDistance property
   instagram?: string;
   reviewCount?: number;
   tags: string[];
