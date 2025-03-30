@@ -53,7 +53,7 @@ const StarRating: React.FC<StarRatingProps> = ({
           <Star key={`empty-${i}`} className={cn("stroke-amber-500", starSize)} />
         ))}
 
-        {showCount && count > 0 && (
+        {showCount && (
           <span className={cn("text-muted-foreground ml-1.5", textSize)}>
             ({count})
           </span>
