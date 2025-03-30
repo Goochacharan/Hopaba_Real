@@ -7,10 +7,13 @@ import FilterTabs from '@/components/FilterTabs';
 import SortButton, { SortOption } from '@/components/SortButton';
 import useRecommendations from '@/hooks/useRecommendations';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
+import { calculateDistance, geocodeAddress } from '@/lib/locationUtils';
 
 // Import components
 import SearchHeader from '@/components/search/SearchHeader';
 import SearchTabs from '@/components/search/SearchTabs';
+import { MapPin, Map as MapIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -28,6 +31,7 @@ const SearchResults = () => {
   const [hiddenGemOnly, setHiddenGemOnly] = useState<boolean>(false);
   const [mustVisitOnly, setMustVisitOnly] = useState<boolean>(false);
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
+  const [userCoordinates, setUserCoordinates] = useState<{lat: number, lng: number} | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('rating');
 
   const {
@@ -75,12 +79,41 @@ const SearchResults = () => {
     distanceUnit: 'km'
   });
 
+  // Add actual distance calculation based on user coordinates
+  const addDistanceToRecommendations = (recs) => {
+    if (!userCoordinates) return recs;
+    
+    return recs.map(rec => {
+      // In a real app, you would have actual coordinates for each recommendation
+      // For this example, we're generating dummy coordinates based on the ID
+      const latitude = parseFloat(rec.id) % 0.1 + 12.9716;
+      const longitude = parseFloat(rec.id) % 0.1 + 77.5946;
+      
+      const distanceValue = calculateDistance(
+        userCoordinates.lat,
+        userCoordinates.lng,
+        latitude,
+        longitude,
+        'K' // Return distance in kilometers
+      );
+      
+      return {
+        ...rec,
+        calculatedDistance: distanceValue,
+        distance: `${distanceValue.toFixed(1)} km away`
+      };
+    });
+  };
+
   const sortRecommendations = (recommendations) => {
     return [...recommendations].sort((a, b) => {
       switch (sortBy) {
         case 'rating':
           return b.rating - a.rating;
         case 'distance':
+          if (a.calculatedDistance !== undefined && b.calculatedDistance !== undefined) {
+            return a.calculatedDistance - b.calculatedDistance;
+          }
           const distanceA = parseFloat(a.distance?.split(' ')[0] || '0');
           const distanceB = parseFloat(b.distance?.split(' ')[0] || '0');
           return distanceA - distanceB;
@@ -125,7 +158,10 @@ const SearchResults = () => {
     });
   };
 
-  const rankedRecommendations = sortRecommendations(enhanceRecommendations(filteredRecommendations));
+  // Process recommendations: add distance, enhance, and sort
+  const recommendationsWithDistance = addDistanceToRecommendations(filteredRecommendations);
+  const enhancedRecommendationsWithDistance = enhanceRecommendations(recommendationsWithDistance);
+  const rankedRecommendations = sortRecommendations(enhancedRecommendationsWithDistance);
 
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
@@ -147,9 +183,20 @@ const SearchResults = () => {
     }
   }, [searchQuery, navigate]);
 
-  const handleLocationChange = (location: string) => {
-    console.log(`Location changed to: ${location}`);
+  const handleLocationChange = (location: string, coordinates?: { lat: number; lng: number }) => {
+    console.log(`Location changed to: ${location}`, coordinates);
     setSelectedLocation(location);
+    
+    if (coordinates) {
+      setUserCoordinates(coordinates);
+    } else {
+      // Try to geocode the address
+      geocodeAddress(location).then(coords => {
+        if (coords) {
+          setUserCoordinates(coords);
+        }
+      });
+    }
   };
 
   const handleRSVP = (eventTitle: string) => {
@@ -190,10 +237,22 @@ const SearchResults = () => {
             setMustVisitOnly={setMustVisitOnly}
           />
           
-          <SortButton 
-            currentSort={sortBy} 
-            onSortChange={handleSortChange} 
-          />
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="whitespace-nowrap"
+              onClick={() => navigate('/map')}
+            >
+              <MapIcon className="h-4 w-4 mr-1" />
+              Map View
+            </Button>
+            
+            <SortButton 
+              currentSort={sortBy} 
+              onSortChange={handleSortChange} 
+            />
+          </div>
         </div>
 
         <div className="w-full">

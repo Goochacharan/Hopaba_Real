@@ -7,7 +7,7 @@ import { toast } from '@/components/ui/use-toast';
 
 interface LocationSelectorProps {
   selectedLocation: string;
-  onLocationChange: (location: string) => void;
+  onLocationChange: (location: string, coordinates?: { lat: number; lng: number }) => void;
 }
 
 const LocationSelector: React.FC<LocationSelectorProps> = ({
@@ -31,10 +31,15 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
       
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          // For this demo, we'll just use a placeholder string
-          // In a real app, you might reverse geocode these coordinates
+          // Get coordinates
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          
+          // For display purposes we'll use "Current Location" label
           const location = "Current Location";
-          onLocationChange(location);
+          
+          // Pass both the location name and coordinates
+          onLocationChange(location, { lat, lng });
           setIsEditing(false);
           
           toast({
