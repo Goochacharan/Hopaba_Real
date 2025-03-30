@@ -13,6 +13,8 @@ import ListingDescription from '@/components/marketplace/ListingDescription';
 import ListingMetadata from '@/components/marketplace/ListingMetadata';
 import ImageViewer from '@/components/ImageViewer';
 import SafeTradingTips from '@/components/marketplace/SafeTradingTips';
+import ListingPriceCard from '@/components/marketplace/ListingPriceCard';
+
 const MarketplaceListingDetails = () => {
   const {
     id = ''
@@ -73,8 +75,8 @@ const MarketplaceListingDetails = () => {
             <span>Back to Marketplace</span>
           </Link>
           
-          <div className="grid grid-cols-1 gap-8">
-            <div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
               <div className="mb-6">
                 <Badge className="mb-2">{listing?.category}</Badge>
                 <h1 className="text-2xl sm:text-3xl font-bold mb-2">{listing?.title}</h1>
@@ -102,12 +104,36 @@ const MarketplaceListingDetails = () => {
                 }} 
               />}
               
-              <ListingDescription description={listing.description} category={listing.category} condition={listing.condition} location={listing.location} createdAt={listing.created_at} showMetadata={false} />
-              
-              <div className="mt-6 mb-16">
-                <SafeTradingTips />
-              </div>
+              <ListingDescription 
+                description={listing.description} 
+                category={listing.category} 
+                condition={listing.condition} 
+                location={listing.location} 
+                createdAt={listing.created_at} 
+                instagram={listing.seller_instagram}
+                showMetadata={true} 
+              />
             </div>
+            
+            <div className="lg:col-span-1">
+              <ListingPriceCard
+                id={listing.id}
+                title={listing.title}
+                price={listing.price}
+                sellerName={listing.seller_name}
+                sellerRating={listing.seller_rating}
+                sellerPhone={listing.seller_phone}
+                sellerWhatsapp={listing.seller_whatsapp}
+                sellerInstagram={listing.seller_instagram}
+                location={listing.location || ''}
+                createdAt={listing.created_at}
+                condition={listing.condition}
+              />
+            </div>
+          </div>
+          
+          <div className="mt-6 mb-16">
+            <SafeTradingTips />
           </div>
         </div>
       </div>

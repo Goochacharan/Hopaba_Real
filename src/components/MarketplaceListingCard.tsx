@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -56,7 +57,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           </div>
         </div>
         
-        <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
+        <p className="text-muted-foreground text-sm mb-4 line-clamp-4">
           {listing.description}
         </p>
 
