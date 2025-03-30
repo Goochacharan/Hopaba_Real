@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -46,7 +45,6 @@ const SellerDetails = () => {
     console.log("Submitting review:", review);
     
     try {
-      // Insert the new review to the database
       const { error: insertError, data: insertData } = await supabase
         .from('seller_reviews')
         .insert({
@@ -65,7 +63,6 @@ const SellerDetails = () => {
       
       console.log("Review inserted successfully:", insertData);
       
-      // Refresh the seller details to include the new review
       await refreshData();
       
       toast({
@@ -99,7 +96,6 @@ const SellerDetails = () => {
     console.log("Editing review:", reviewId, review);
     
     try {
-      // Update the review in the database
       const { error: updateError } = await supabase
         .from('seller_reviews')
         .update({
@@ -107,14 +103,13 @@ const SellerDetails = () => {
           comment: review.comment
         })
         .eq('id', reviewId)
-        .eq('reviewer_id', user.id); // Ensure user can only edit their own review
+        .eq('reviewer_id', user.id);
 
       if (updateError) {
         console.error("Update error:", updateError);
         throw updateError;
       }
       
-      // Refresh the seller details to include the updated review
       await refreshData();
       
       toast({
@@ -148,19 +143,17 @@ const SellerDetails = () => {
     console.log("Deleting review:", reviewId);
     
     try {
-      // Delete the review from the database
       const { error: deleteError } = await supabase
         .from('seller_reviews')
         .delete()
         .eq('id', reviewId)
-        .eq('reviewer_id', user.id); // Ensure user can only delete their own review
+        .eq('reviewer_id', user.id);
 
       if (deleteError) {
         console.error("Delete error:", deleteError);
         throw deleteError;
       }
       
-      // Refresh the seller details to update the reviews list
       await refreshData();
       
       toast({

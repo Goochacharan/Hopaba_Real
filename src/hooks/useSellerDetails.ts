@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
@@ -8,6 +7,7 @@ export interface SellerReview {
   rating: number;
   comment: string;
   reviewer_name: string;
+  reviewer_id?: string;
   created_at: string;
 }
 
@@ -37,7 +37,6 @@ export const useSellerDetails = (sellerId: string) => {
     }
 
     try {
-      // Fetch seller listings
       const { data: listingsData, error: listingsError } = await supabase
         .from('marketplace_listings')
         .select('*')
@@ -46,14 +45,12 @@ export const useSellerDetails = (sellerId: string) => {
 
       if (listingsError) throw listingsError;
 
-      // Fetch reviews from the seller_reviews table
       const { data: reviewsData, error: reviewsError } = await supabase
         .from('seller_reviews')
-        .select('id, rating, comment, reviewer_name, created_at')
+        .select('id, rating, comment, reviewer_name, reviewer_id, created_at')
         .eq('seller_id', sellerId)
         .order('created_at', { ascending: false });
 
-      // If there's an error fetching reviews, log it but continue
       if (reviewsError) {
         console.error('Error fetching reviews:', reviewsError);
         // Continue even if reviews fail to load
@@ -61,10 +58,8 @@ export const useSellerDetails = (sellerId: string) => {
 
       const listings = listingsData as MarketplaceListing[];
       
-      // Take seller name from the first listing if we have any
       const sellerName = listings.length > 0 ? listings[0].seller_name : 'Unknown Seller';
       
-      // Calculate seller rating from reviews if available
       let sellerRating = 0;
       const reviews = reviewsData || [];
       console.log("Reviews data:", reviews);
@@ -73,13 +68,10 @@ export const useSellerDetails = (sellerId: string) => {
         const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
         sellerRating = totalRating / reviews.length;
       } else {
-        // If no reviews, use the rating from the first listing or default to 0
         sellerRating = listings.length > 0 ? listings[0].seller_rating || 0 : 0;
       }
 
-      // Update the seller_rating in marketplace_listings table if we have reviews
       if (reviews.length > 0) {
-        // Round to 1 decimal place
         const roundedRating = Math.round(sellerRating * 10) / 10;
         
         for (const listing of listings) {
@@ -94,7 +86,6 @@ export const useSellerDetails = (sellerId: string) => {
           if (updateError) {
             console.error('Error updating seller rating in listing:', updateError);
           } else {
-            // Update the local listing data with the new rating
             listing.seller_rating = roundedRating;
             listing.review_count = reviews.length;
           }
@@ -118,7 +109,6 @@ export const useSellerDetails = (sellerId: string) => {
     }
   }, [sellerId]);
 
-  // Function to refresh data that can be called by the component
   const refreshData = useCallback(() => {
     console.log("Refreshing seller data...");
     return fetchSellerDetails();
