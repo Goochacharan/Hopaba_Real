@@ -101,7 +101,7 @@ const MarketplaceListingDetails = () => {
             <div>
               <div className="mb-6">
                 <Badge className="mb-2">{listing?.category}</Badge>
-                <h1 className="text-2xl sm:text-3xl font-bold mb-2">{listing?.title}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold mb-1">{listing?.title}</h1>
                 <ListingMetadata location={listing.location} createdAt={listing.created_at} condition={listing.condition} />
               </div>
               
