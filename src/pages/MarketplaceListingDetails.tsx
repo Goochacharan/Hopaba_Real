@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -36,8 +35,6 @@ const MarketplaceListingDetails = () => {
   };
   
   const handleBackToMarketplace = () => {
-    // Navigate back to marketplace with a query parameter to indicate the listing
-    // Add category parameter if listing exists to ensure correct category tab is selected
     if (listing) {
       navigate(`/marketplace?highlight=${id}&category=${listing.category}`);
     } else {
@@ -151,6 +148,7 @@ const MarketplaceListingDetails = () => {
                   location={listing.location}
                   createdAt={listing.created_at}
                   mapLink={listing.map_link}
+                  reviewCount={listing.review_count || 0}
                 />
               </div>
             </div>

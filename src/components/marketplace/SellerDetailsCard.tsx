@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Phone, MessageSquare, MapPin, Share2, AlertCircle } from 'lucide-react';
+import { Phone, MessageSquare, MapPin, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
@@ -181,7 +181,7 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
             </AvatarFallback>
           </Avatar>
           
-          <div>
+          <div className="flex flex-col">
             <div className="flex items-center gap-1">
               <span className="font-semibold">{sellerName}</span>
               <Link 
@@ -192,58 +192,47 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
               </Link>
             </div>
             
-            <div className="flex items-center gap-1 mt-1">
+            <div className="flex items-center mt-1">
               <StarRating rating={sellerRating} size="small" showCount={true} count={reviewCount} />
-              <span className="text-xs text-muted-foreground ml-1">
+              <span className="text-xs text-muted-foreground ml-2">
                 Member since {format(new Date(createdAt), 'MMM yyyy')}
               </span>
             </div>
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-3 pt-1">
+        <div className="grid grid-cols-4 gap-3 pt-1">
           <Button 
             onClick={handleCall}
-            className="h-12 rounded-full bg-[#1EAEDB] text-white hover:bg-[#1EAEDB]/90 transition-all flex items-center justify-center gap-2 shadow-[0_5px_0px_0px_rgba(24,128,163,0.8)] hover:shadow-[0_3px_0px_0px_rgba(24,128,163,0.8)] active:shadow-none active:translate-y-[3px]"
+            className="h-12 w-12 rounded-full bg-[#1EAEDB] text-white hover:bg-[#1EAEDB]/90 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(24,128,163,0.8)] hover:shadow-[0_3px_0px_0px_rgba(24,128,163,0.8)] active:shadow-none active:translate-y-[3px] mx-auto"
+            title="Call Seller"
           >
-            <Phone className="h-5 w-5 shrink-0" />
-            <span className="text-sm whitespace-nowrap">Call Seller</span>
+            <Phone className="h-5 w-5" />
           </Button>
           
           <Button 
             onClick={handleWhatsApp}
-            className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center gap-2 shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]"
+            className="h-12 w-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px] mx-auto"
+            title="WhatsApp"
           >
-            <MessageSquare className="h-5 w-5 shrink-0" />
-            <span className="text-sm whitespace-nowrap">WhatsApp</span>
+            <MessageSquare className="h-5 w-5" />
           </Button>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-3">
+          
           <Button 
             onClick={handleLocation}
-            className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center gap-2 shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]"
+            className="h-12 w-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px] mx-auto"
+            title="Get Directions"
           >
-            <MapPin className="h-5 w-5 shrink-0" />
-            <span className="text-sm whitespace-nowrap">Get Directions</span>
+            <MapPin className="h-5 w-5" />
           </Button>
           
           <Button 
             onClick={handleShare}
-            className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center gap-2 shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]"
+            className="h-12 w-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px] mx-auto"
+            title="Share Listing"
           >
-            <Share2 className="h-5 w-5 shrink-0" />
-            <span className="text-sm whitespace-nowrap">Share Listing</span>
+            <Share2 className="h-5 w-5" />
           </Button>
-        </div>
-        
-        <div className="pt-2">
-          <Link to={`/seller/${sellerId}`} className="w-full">
-            <Button variant="outline" className="w-full h-11 text-sm">
-              <AlertCircle className="h-4 w-4 mr-2" />
-              View Seller's Reviews
-            </Button>
-          </Link>
         </div>
       </CardContent>
     </Card>
