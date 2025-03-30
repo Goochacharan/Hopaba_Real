@@ -5,7 +5,7 @@ import MainLayout from '@/components/MainLayout';
 import LocationCard from '@/components/LocationCard';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useWishlist, WishlistItem } from '@/contexts/WishlistContext';
-import { Heart, Search } from 'lucide-react';
+import { Heart, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
@@ -18,7 +18,8 @@ import EventCard from '@/components/EventCard';
 
 const MyList = () => {
   const {
-    wishlist
+    wishlist,
+    removeFromWishlist
   } = useWishlist();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
@@ -101,6 +102,11 @@ const MyList = () => {
     setCurrentPage(1);
   }, [searchQuery, activeTab]);
 
+  // Handle removing an item from the wishlist
+  const handleRemoveItem = (itemId: string, itemType: 'location' | 'marketplace' | 'event') => {
+    removeFromWishlist(itemId, itemType);
+  };
+
   if (loading) {
     return <MainLayout>
         <div className="py-8 flex justify-center">
@@ -132,15 +138,25 @@ const MyList = () => {
             
             {filteredWishlist.length > 0 ? <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {currentItems.map(item => {
-                    if (item.type === 'marketplace') {
-                      return <MarketplaceListingCard key={item.id} listing={item as MarketplaceListing} className="search-result-card" />;
-                    } else if (item.type === 'event') {
-                      return <EventCard key={item.id} event={item as Event} className="search-result-card" />;
-                    } else {
-                      return <LocationCard key={item.id} recommendation={item as Recommendation} className="search-result-card" />;
-                    }
-                  })}
+                  {currentItems.map(item => (
+                    <div key={item.id} className="relative group">
+                      <button 
+                        onClick={() => handleRemoveItem(item.id, item.type)}
+                        className="absolute right-3 top-3 z-10 bg-black/70 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        aria-label="Remove from wishlist"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                      
+                      {item.type === 'marketplace' ? (
+                        <MarketplaceListingCard key={item.id} listing={item as MarketplaceListing} className="search-result-card" />
+                      ) : item.type === 'event' ? (
+                        <EventCard key={item.id} event={item as Event} className="search-result-card" />
+                      ) : (
+                        <LocationCard key={item.id} recommendation={item as Recommendation} className="search-result-card" />
+                      )}
+                    </div>
+                  ))}
                 </div>
                 
                 {totalPages > 1 && <Pagination className="mt-6">
