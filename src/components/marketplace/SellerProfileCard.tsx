@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,12 +33,10 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  // Format joined date to show only month and year
   const formattedJoinedDate = joinedDate 
     ? new Date(joinedDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     : 'Unknown';
 
-  // Get initials for avatar fallback
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -52,7 +49,6 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Copy to clipboard approach
     navigator.clipboard.writeText(window.location.href)
       .then(() => {
         toast({
@@ -187,10 +183,7 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
             <h3 className="text-3xl font-bold">{sellerName}</h3>
             
             <div className="flex items-center gap-1">
-              <StarRating rating={sellerRating} size="medium" />
-              <span className="text-muted-foreground ml-1">
-                {reviewCount > 0 ? `(${reviewCount} reviews)` : '(No reviews yet)'}
-              </span>
+              <StarRating rating={sellerRating} size="medium" showCount={true} count={reviewCount} />
             </div>
             
             <div className="grid grid-cols-1 gap-y-3 pt-1">
