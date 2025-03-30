@@ -198,6 +198,36 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_reviews: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          rating: number
+          reviewer_id: string | null
+          reviewer_name: string
+          seller_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: string
+          rating: number
+          reviewer_id?: string | null
+          reviewer_name: string
+          seller_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          rating?: number
+          reviewer_id?: string | null
+          reviewer_name?: string
+          seller_id?: string
+        }
+        Relationships: []
+      }
       service_providers: {
         Row: {
           address: string

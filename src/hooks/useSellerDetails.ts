@@ -49,7 +49,7 @@ export const useSellerDetails = (sellerId: string) => {
         // Fetch reviews from the seller_reviews table
         const { data: reviewsData, error: reviewsError } = await supabase
           .from('seller_reviews')
-          .select('*')
+          .select('id, rating, comment, reviewer_name, created_at')
           .eq('seller_id', sellerId)
           .order('created_at', { ascending: false });
 
