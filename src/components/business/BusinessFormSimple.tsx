@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -16,8 +17,14 @@ import { Separator } from '@/components/ui/separator';
 import { TagsInput } from '@/components/ui/tags-input';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { Building, Clock, MapPin, Phone, MessageSquare, Globe, Instagram, Tag, Star } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { 
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from '@/components/ui/badge';
 
 export interface BusinessFormValues {
@@ -39,7 +46,7 @@ export interface BusinessFormValues {
   tags?: string[];
   experience?: string;
   availability?: string;
-  hours?: string;
+  hours?: string; // Changed from working_hours to hours
   images?: string[];
 }
 
@@ -63,7 +70,7 @@ export interface Business {
   tags?: string[];
   experience?: string;
   availability?: string;
-  hours?: string;
+  hours?: string; // Changed from working_hours to hours
   images?: string[];
   approval_status?: string;
 }
@@ -99,7 +106,7 @@ const businessSchema = z.object({
   tags: z.array(z.string()).min(3, { message: "Please add at least 3 tags describing your services or items." }).optional(),
   experience: z.string().optional().or(z.literal('')),
   availability: z.string().optional().or(z.literal('')),
-  hours: z.string().optional().or(z.literal('')),
+  hours: z.string().optional().or(z.literal('')), // Changed from working_hours to hours
   images: z.array(z.string()).optional(),
 });
 
@@ -168,11 +175,18 @@ const DAYS_OF_WEEK = [
   "Sunday"
 ];
 
-const HOURS = [
-  "12:00 AM", "1:00 AM", "2:00 AM", "3:00 AM", "4:00 AM", "5:00 AM",
-  "6:00 AM", "7:00 AM", "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM",
-  "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM",
-  "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM"
+const WORKING_HOURS = [
+  "7:00 AM - 3:00 PM",
+  "8:00 AM - 4:00 PM",
+  "9:00 AM - 5:00 PM",
+  "10:00 AM - 6:00 PM",
+  "11:00 AM - 7:00 PM",
+  "12:00 PM - 8:00 PM",
+  "1:00 PM - 9:00 PM",
+  "2:00 PM - 10:00 PM",
+  "24 Hours",
+  "By Appointment Only",
+  "Flexible Hours"
 ];
 
 const EXPERIENCE_OPTIONS = [
@@ -198,9 +212,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [selectedDays, setSelectedDays] = useState<string[]>(business?.availability ? business.availability.split(', ') : []);
-  const [fromHour, setFromHour] = useState<string>(business?.hours?.split(" - ")[0] || "9:00 AM");
-  const [toHour, setToHour] = useState<string>(business?.hours?.split(" - ")[1] || "5:00 PM");
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
   const form = useForm<BusinessFormValues>({
     resolver: zodResolver(businessSchema),
@@ -223,7 +235,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
       tags: business?.tags || [],
       experience: business?.experience || "",
       availability: business?.availability || "",
-      hours: business?.hours || "",
+      hours: business?.hours || "", // Changed from working_hours to hours
       images: business?.images || [],
     },
   });
@@ -247,17 +259,14 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
         ? current.filter(d => d !== day)
         : [...current, day]
     );
+    
+    // Update availability field
+    const newAvailability = selectedDays.includes(day)
+      ? selectedDays.filter(d => d !== day).join(', ')
+      : [...selectedDays, day].join(', ');
+      
+    form.setValue('availability', newAvailability, { shouldValidate: true });
   };
-
-  useEffect(() => {
-    const hoursValue = fromHour && toHour ? `${fromHour} - ${toHour}` : "";
-    form.setValue('hours', hoursValue, { shouldValidate: true });
-  }, [fromHour, toHour, form]);
-
-  useEffect(() => {
-    const availabilityValue = selectedDays.join(', ');
-    form.setValue('availability', availabilityValue, { shouldValidate: true });
-  }, [selectedDays, form]);
 
   const handleSubmit = async (data: BusinessFormValues) => {
     if (!user) {
@@ -269,6 +278,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
       return;
     }
 
+    // Validate tags
     if (!data.tags || data.tags.length < 3) {
       toast({
         title: "Tags required",
@@ -305,7 +315,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
         tags: data.tags || [],
         experience: data.experience || null,
         availability: data.availability || null,
-        hours: data.hours || null,
+        hours: data.hours || null, // Changed from working_hours to hours
         images: data.images || [],
       };
 
@@ -366,6 +376,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
           <Card>
             <CardContent className="pt-6">
               <div className="space-y-8">
+                {/* Basic Information */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Building className="h-5 w-5 text-primary" />
@@ -449,6 +460,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
 
                 <Separator />
 
+                {/* Location Information */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-primary" />
@@ -519,6 +531,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
 
                 <Separator />
 
+                {/* Contact Information */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Phone className="h-5 w-5 text-primary" />
@@ -621,6 +634,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
 
                 <Separator />
 
+                {/* Services & Pricing */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Tag className="h-5 w-5 text-primary" />
@@ -716,6 +730,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
 
                 <Separator />
 
+                {/* Experience & Availability */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Star className="h-5 w-5 text-primary" />
@@ -759,41 +774,23 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
                           <Clock className="h-4 w-4" />
                           Available Days
                         </FormLabel>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
-                          {DAYS_OF_WEEK.map(day => (
-                            <div key={day} className="flex items-center space-x-2">
-                              <Checkbox 
-                                id={`day-${day}`} 
-                                checked={selectedDays.includes(day)}
-                                onCheckedChange={() => handleDayToggle(day)}
-                              />
-                              <label
-                                htmlFor={`day-${day}`}
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                {day}
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="mt-2">
-                          {selectedDays.length > 0 ? (
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {selectedDays.map(day => (
-                                <Badge key={day} variant="outline" className="text-xs">
-                                  {day}
-                                </Badge>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">No days selected</p>
-                          )}
-                        </div>
-                        <input 
-                          type="hidden" 
-                          {...field} 
-                          value={selectedDays.join(', ')} 
-                        />
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value || undefined}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select availability" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {AVAILABILITY_OPTIONS.map(option => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -808,73 +805,23 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
                           <Clock className="h-4 w-4" />
                           Working Hours
                         </FormLabel>
-                        <div className="space-y-2">
-                          <Tabs defaultValue="hours" className="w-full">
-                            <TabsList className="grid grid-cols-2 mb-2">
-                              <TabsTrigger value="hours">Hours</TabsTrigger>
-                              <TabsTrigger value="custom">Custom</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="hours" className="space-y-4">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                  <FormLabel>From</FormLabel>
-                                  <Select
-                                    value={fromHour}
-                                    onValueChange={setFromHour}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Start time" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {HOURS.map(hour => (
-                                        <SelectItem key={`from-${hour}`} value={hour}>
-                                          {hour}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div className="space-y-2">
-                                  <FormLabel>To</FormLabel>
-                                  <Select
-                                    value={toHour}
-                                    onValueChange={setToHour}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="End time" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {HOURS.map(hour => (
-                                        <SelectItem key={`to-${hour}`} value={hour}>
-                                          {hour}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
-                              <p className="text-sm text-muted-foreground">
-                                Working hours: {fromHour} - {toHour}
-                              </p>
-                            </TabsContent>
-                            <TabsContent value="custom" className="space-y-4">
-                              <Select 
-                                value={field.value || undefined}
-                                onValueChange={field.onChange}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select working hours" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="24 Hours">24 Hours</SelectItem>
-                                  <SelectItem value="By Appointment Only">By Appointment Only</SelectItem>
-                                  <SelectItem value="Flexible Hours">Flexible Hours</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </TabsContent>
-                          </Tabs>
-                          <input type="hidden" {...field} />
-                        </div>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value || undefined}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select working hours" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {WORKING_HOURS.map(hours => (
+                              <SelectItem key={hours} value={hours}>
+                                {hours}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}

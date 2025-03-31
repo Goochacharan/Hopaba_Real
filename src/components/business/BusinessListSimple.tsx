@@ -191,14 +191,14 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
                 {business.availability && (
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-sm">Available: {business.availability}</span>
+                    <span className="text-sm">{business.availability}</span>
                   </div>
                 )}
 
                 {business.hours && (
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-sm">Hours: {business.hours}</span>
+                    <span className="text-sm">{business.hours}</span>
                   </div>
                 )}
               </div>
