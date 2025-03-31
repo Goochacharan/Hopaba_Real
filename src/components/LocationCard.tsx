@@ -299,8 +299,22 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
   const formatBusinessHours = (hours: string | undefined) => {
     if (!hours) {
-      if (recommendation.availability_days && recommendation.availability_days.length > 0) {
-        const days = recommendation.availability_days.join(', ');
+      if (recommendation.availability_days) {
+        // Check if availability_days is a string or an array
+        let days;
+        if (typeof recommendation.availability_days === 'string') {
+          // If it's a string, split it by commas or use as is
+          days = recommendation.availability_days.includes(',') ? 
+            recommendation.availability_days : 
+            recommendation.availability_days;
+        } else if (Array.isArray(recommendation.availability_days)) {
+          // If it's an array, join it
+          days = recommendation.availability_days.join(', ');
+        } else {
+          // If it's neither, use a fallback
+          days = null;
+        }
+        
         const startTime = recommendation.availability_start_time || '';
         const endTime = recommendation.availability_end_time || '';
         if (startTime && endTime) {
@@ -310,8 +324,19 @@ const LocationCard: React.FC<LocationCardProps> = ({
       }
       return null;
     }
-    if (recommendation.availability_days && recommendation.availability_days.length > 0) {
-      const days = recommendation.availability_days.join(', ');
+    
+    if (recommendation.availability_days) {
+      let days;
+      if (typeof recommendation.availability_days === 'string') {
+        days = recommendation.availability_days.includes(',') ? 
+          recommendation.availability_days : 
+          recommendation.availability_days;
+      } else if (Array.isArray(recommendation.availability_days)) {
+        days = recommendation.availability_days.join(', ');
+      } else {
+        days = null;
+      }
+      
       const startTime = recommendation.availability_start_time || '';
       const endTime = recommendation.availability_end_time || '';
       if (startTime && endTime) {
@@ -319,6 +344,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       }
       return days;
     }
+    
     return hours;
   };
 
@@ -373,10 +399,19 @@ const LocationCard: React.FC<LocationCardProps> = ({
   };
 
   const formatAvailabilityDays = () => {
-    if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
+    if (!recommendation.availability_days) {
       return null;
     }
-    const formattedDays = formatDayRange(recommendation.availability_days);
+    
+    let formattedDays;
+    if (typeof recommendation.availability_days === 'string') {
+      formattedDays = recommendation.availability_days;
+    } else if (Array.isArray(recommendation.availability_days)) {
+      formattedDays = formatDayRange(recommendation.availability_days);
+    } else {
+      return null;
+    }
+    
     const startTime = recommendation.availability_start_time || '';
     const endTime = recommendation.availability_end_time || '';
     if (startTime && endTime) {

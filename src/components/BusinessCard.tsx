@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Card,
@@ -28,7 +27,7 @@ interface Business {
   contact_phone?: string;
   instagram?: string;
   tags?: string[];
-  availability_days?: string[];
+  availability_days?: string[] | string;
   availability_start_time?: string;
   availability_end_time?: string;
 }
@@ -61,8 +60,14 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
     }
   };
 
-  const formatDayRange = (days: string[]): string => {
-    if (!days || days.length === 0) return '';
+  const formatDayRange = (days: string[] | string): string => {
+    if (!days) return '';
+    
+    if (typeof days === 'string') {
+      return days;
+    }
+    
+    if (days.length === 0) return '';
     
     const dayAbbreviations: Record<string, string> = {
       'monday': 'Mon',
@@ -116,7 +121,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
     return ranges.join(', ');
   };
 
-  const availabilityDays = business.availability_days && business.availability_days.length > 0 
+  const availabilityDays = business.availability_days 
     ? formatDayRange(business.availability_days) 
     : business.availability || '';
 
