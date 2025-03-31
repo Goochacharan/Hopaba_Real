@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -41,7 +40,6 @@ export interface Business {
   tags?: string[];
 }
 
-// Extend the business schema to include all the fields from the detailed form sections
 const businessSchema = z.object({
   name: z.string().min(2, {
     message: "Business name must be at least 2 characters.",
@@ -110,10 +108,9 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
-  // Convert any existing tags to an array if they're not already
-  const normalizedTags = business?.tags && !Array.isArray(business.tags) 
-    ? [business.tags.toString()] 
-    : business?.tags || [];
+  const normalizedTags = business?.tags && Array.isArray(business.tags) 
+    ? business.tags 
+    : business?.tags ? [String(business.tags)] : [];
 
   const form = useForm<BusinessFormValues>({
     resolver: zodResolver(businessSchema),
@@ -151,11 +148,9 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
     setIsSubmitting(true);
 
     try {
-      // Ensure tags is an array
       const tagsArray = Array.isArray(data.tags) ? data.tags : 
-                       (data.tags ? [data.tags.toString()] : []);
+                       (data.tags ? [String(data.tags)] : []);
       
-      // Prepare business data for submission
       const businessData = {
         name: data.name,
         category: data.category,
@@ -170,7 +165,7 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         instagram: data.instagram || null,
         map_link: data.map_link || null,
         user_id: user.id,
-        approval_status: 'pending', // Always set approval_status to pending when creating or updating
+        approval_status: 'pending',
         price_unit: data.price_unit || "per hour",
         price_range_min: data.price_range_min || 0,
         price_range_max: data.price_range_max || 0,
@@ -183,7 +178,6 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
       console.log("Submitting data to Supabase:", businessData);
 
       if (business?.id) {
-        // Update existing business
         console.log("Updating existing business with ID:", business.id);
         const { data: updatedData, error } = await supabase
           .from('service_providers')
@@ -202,7 +196,6 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
           description: "Your business listing has been updated and will be reviewed by an admin.",
         });
       } else {
-        // Create new business
         console.log("Creating new business");
         const { data: insertedData, error } = await supabase
           .from('service_providers')
@@ -239,13 +232,8 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {/* Basic Information Section */}
             <BasicInfoSection />
-            
-            {/* Location Section */}
             <LocationSection />
-            
-            {/* Contact Section */}
             <ContactSection />
           </div>
 

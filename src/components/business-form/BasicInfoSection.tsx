@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { 
@@ -13,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Briefcase, BarChart4, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { BusinessFormValues } from '../AddBusinessForm';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -44,7 +44,6 @@ const BasicInfoSection = () => {
   };
   
   useEffect(() => {
-    // Initialize tags when form values change
     const formTags = form.getValues('tags');
     if (formTags && Array.isArray(formTags) && formTags.length > 0) {
       setTags(formTags);
