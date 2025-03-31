@@ -1,8 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import LocationCard from '@/components/LocationCard';
 import { Recommendation } from '@/lib/mockData';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import ReviewsSection from '@/components/location/ReviewsSection';
+import { Review } from '@/components/location/ReviewsList';
+import { ReviewFormValues } from '@/components/location/ReviewForm';
 
 interface LocationsListProps {
   recommendations: Recommendation[];
@@ -15,6 +19,9 @@ const LocationsList: React.FC<LocationsListProps> = ({
   loading = false,
   error = null
 }) => {
+  const { toast } = useToast();
+  const [cornerHouseReviews, setCornerHouseReviews] = useState<Review[]>([]);
+  
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -41,9 +48,32 @@ const LocationsList: React.FC<LocationsListProps> = ({
       </div>
     );
   }
+
+  const handleSubmitReview = (values: ReviewFormValues) => {
+    const newReview: Review = {
+      id: Date.now().toString(),
+      name: "You",
+      date: "Just now",
+      rating: values.rating,
+      text: values.reviewText,
+      isMustVisit: values.isMustVisit,
+      isHiddenGem: values.isHiddenGem
+    };
+    
+    setCornerHouseReviews(prev => [newReview, ...prev]);
+    
+    toast({
+      title: "Review submitted",
+      description: "Thank you for sharing your experience!",
+    });
+  };
+  
+  const cornerHouseRating = cornerHouseReviews.length > 0 
+    ? cornerHouseReviews.reduce((sum, review) => sum + review.rating, 0) / cornerHouseReviews.length 
+    : 4.5; // default rating
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 search-results-grid">
+    <div className="grid grid-cols-1 gap-6">
       {recommendations.map((recommendation, index) => (
         <div 
           key={recommendation.id} 
@@ -58,6 +88,20 @@ const LocationsList: React.FC<LocationsListProps> = ({
             showDistanceUnderAddress={true}
             className="search-result-card h-full"
           />
+          
+          {/* Show review section only for Corner House */}
+          {recommendation.name.toLowerCase().includes('corner house') && (
+            <div className="mt-4">
+              <ReviewsSection
+                reviews={cornerHouseReviews}
+                totalReviewCount={cornerHouseReviews.length}
+                locationRating={cornerHouseRating}
+                locationId={recommendation.id}
+                locationName={recommendation.name}
+                onSubmitReview={handleSubmitReview}
+              />
+            </div>
+          )}
         </div>
       ))}
     </div>

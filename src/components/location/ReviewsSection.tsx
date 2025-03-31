@@ -8,10 +8,19 @@ interface ReviewsSectionProps {
   reviews: Review[];
   totalReviewCount: number;
   locationRating: number;
+  locationId?: string;
+  locationName?: string;
   onSubmitReview: (values: ReviewFormValues) => void;
 }
 
-const ReviewsSection = ({ reviews, totalReviewCount, locationRating, onSubmitReview }: ReviewsSectionProps) => {
+const ReviewsSection = ({ 
+  reviews, 
+  totalReviewCount, 
+  locationRating, 
+  locationId,
+  locationName,
+  onSubmitReview 
+}: ReviewsSectionProps) => {
   const [reviewFormVisible, setReviewFormVisible] = useState(false);
 
   const toggleReviewForm = () => {
@@ -36,6 +45,7 @@ const ReviewsSection = ({ reviews, totalReviewCount, locationRating, onSubmitRev
         <ReviewForm 
           onSubmit={handleSubmitReview} 
           onCancel={toggleReviewForm} 
+          locationName={locationName}
         />
       )}
 

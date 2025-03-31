@@ -22,9 +22,10 @@ export type ReviewFormValues = z.infer<typeof reviewSchema>;
 interface ReviewFormProps {
   onSubmit: (values: ReviewFormValues) => void;
   onCancel: () => void;
+  locationName?: string;
 }
 
-const ReviewForm = ({ onSubmit, onCancel }: ReviewFormProps) => {
+const ReviewForm = ({ onSubmit, onCancel, locationName }: ReviewFormProps) => {
   const [selectedRating, setSelectedRating] = useState<number>(0);
 
   const form = useForm<ReviewFormValues>({
@@ -46,6 +47,12 @@ const ReviewForm = ({ onSubmit, onCancel }: ReviewFormProps) => {
     <div className="mb-6 p-4 bg-secondary/30 rounded-lg">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {locationName && (
+            <div className="text-sm font-medium text-muted-foreground mb-2">
+              Reviewing: {locationName}
+            </div>
+          )}
+          
           <div className="space-y-2">
             <Label>Your rating</Label>
             <div className="flex items-center gap-1">
