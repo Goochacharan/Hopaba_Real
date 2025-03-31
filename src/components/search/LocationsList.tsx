@@ -62,9 +62,33 @@ const LocationsList: React.FC<LocationsListProps> = ({
     );
   }
   
+  // Process recommendations to ensure availability data is properly formatted
+  const processedRecommendations = recommendations.map(recommendation => {
+    // Ensure availability_days is always an array
+    let availabilityDays = recommendation.availability_days || [];
+    
+    // If it's a string (comma-separated), convert to array
+    if (typeof availabilityDays === 'string') {
+      availabilityDays = availabilityDays.split(',').map(day => day.trim()).filter(Boolean);
+    }
+    
+    // Make sure it's an array
+    if (!Array.isArray(availabilityDays)) {
+      availabilityDays = [availabilityDays].filter(Boolean);
+    }
+    
+    return {
+      ...recommendation,
+      availability_days: availabilityDays,
+      // Make sure these properties are defined
+      availability_start_time: recommendation.availability_start_time || '',
+      availability_end_time: recommendation.availability_end_time || ''
+    };
+  });
+  
   return (
     <div className="grid grid-cols-1 gap-6">
-      {recommendations.map((recommendation, index) => {
+      {processedRecommendations.map((recommendation, index) => {
         // Get user reviews from localStorage
         const { count: userReviewsCount, avgRating: userAvgRating } = getStoredReviews(recommendation.id);
         

@@ -28,12 +28,23 @@ const LocationCardWrapper: React.FC<LocationCardWrapperProps> = ({
   showDistanceUnderAddress,
   hideWishlistIcon
 }) => {
+  // Make sure availability_days is always an array
+  const enhancedRecommendation = {
+    ...recommendation,
+    // If availability_days is undefined or not an array, initialize it as an empty array
+    availability_days: Array.isArray(recommendation.availability_days) 
+      ? recommendation.availability_days 
+      : recommendation.availability_days 
+        ? [recommendation.availability_days].flat().filter(Boolean) 
+        : []
+  };
+  
   // Cast LocationCard to accept our extended props
   const LocationCardWithHideWishlist = LocationCard as React.ComponentType<ExtendedLocationCardProps>;
   
   return (
     <LocationCardWithHideWishlist
-      recommendation={recommendation}
+      recommendation={enhancedRecommendation}
       className={className}
       reviewCount={reviewCount}
       showDistanceUnderAddress={showDistanceUnderAddress}

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -60,7 +59,12 @@ const SearchResults = () => {
     return {
       ...rec,
       isHiddenGem: rec.isHiddenGem || index % 3 === 0,
-      isMustVisit: rec.isMustVisit || index % 5 === 0
+      isMustVisit: rec.isMustVisit || index % 5 === 0,
+      availability_days: Array.isArray(rec.availability_days) 
+        ? rec.availability_days 
+        : rec.availability_days
+          ? [rec.availability_days].flat().filter(Boolean)
+          : []
     };
   });
 
