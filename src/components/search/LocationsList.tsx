@@ -57,6 +57,7 @@ const LocationsList: React.FC<LocationsListProps> = ({
             }}
             showDistanceUnderAddress={true}
             className="search-result-card h-full"
+            reviewCount={recommendation.review_count || 0} // Pass the actual review count from the database or 0
           />
         </div>
       ))}

@@ -11,7 +11,6 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface LocationCardProps {
@@ -26,27 +25,22 @@ const LocationCard: React.FC<LocationCardProps> = ({
   recommendation,
   className,
   ranking,
-  reviewCount = Math.floor(Math.random() * 300) + 50,
+  reviewCount = 0,
   showDistanceUnderAddress = false
 }) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
-  const {
-    toast
-  } = useToast();
-  const {
-    addToWishlist,
-    removeFromWishlist,
-    isInWishlist
-  } = useWishlist();
+  const { toast } = useToast();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(recommendation.id, 'location');
   const isMobile = useIsMobile();
   const [user, setUser] = useState<any>(null);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
-  const hiddenGemCount = recommendation.hiddenGemCount || Math.floor(Math.random() * 30);
-  const mustVisitCount = recommendation.mustVisitCount || Math.floor(Math.random() * 30);
+
+  const hiddenGemCount = recommendation.hiddenGemCount || 0;
+  const mustVisitCount = recommendation.mustVisitCount || 0;
   const showHiddenGemBadge = recommendation.isHiddenGem || hiddenGemCount >= 20;
   const showMustVisitBadge = recommendation.isMustVisit || mustVisitCount >= 20;
 
@@ -116,18 +110,26 @@ const LocationCard: React.FC<LocationCardProps> = ({
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
     const totalStars = 5;
-    return <div className="flex items-center">
-        {[...Array(fullStars)].map((_, i) => <Star key={`full-${i}`} className="fill-amber-500 stroke-amber-500 w-3.5 h-3.5" />)}
+    return (
+      <div className="flex items-center">
+        {[...Array(fullStars)].map((_, i) => (
+          <Star key={`full-${i}`} className="fill-amber-500 stroke-amber-500 w-3.5 h-3.5" />
+        ))}
         
-        {hasHalfStar && <div className="relative w-3.5 h-3.5">
+        {hasHalfStar && (
+          <div className="relative w-3.5 h-3.5">
             <Star className="absolute stroke-amber-500 w-3.5 h-3.5" />
             <div className="absolute overflow-hidden w-[50%]">
               <Star className="fill-amber-500 stroke-amber-500 w-3.5 h-3.5" />
             </div>
-          </div>}
+          </div>
+        )}
         
-        {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />)}
-      </div>;
+        {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
+          <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />
+        ))}
+      </div>
+    );
   };
 
   const handleCall = (e: React.MouseEvent) => {
@@ -466,9 +468,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
       <div className="p-4">
         <div className="flex justify-between items-start gap-2 mb-2">
           <div className="flex items-center gap-1.5">
-            {ranking !== undefined && ranking <= 10 && <div className={cn("flex items-center justify-center rounded-full border-2 flex-shrink-0", getMedalStyle(ranking).medalClass)}>
+            {ranking !== undefined && ranking <= 10 && (
+              <div className={cn("flex items-center justify-center rounded-full border-2 flex-shrink-0", getMedalStyle(ranking).medalClass)}>
                 {ranking}
-              </div>}
+              </div>
+            )}
             <h3 className="font-bold text-2xl">{recommendation.name}</h3>
           </div>
         </div>
@@ -565,7 +569,14 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </div>
       </div>
 
-      {images.length > 0 && <ImageViewer images={images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
+      {images.length > 0 && (
+        <ImageViewer 
+          images={images} 
+          initialIndex={selectedImageIndex} 
+          open={imageViewerOpen} 
+          onOpenChange={setImageViewerOpen} 
+        />
+      )}
     </div>;
 };
 

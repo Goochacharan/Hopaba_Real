@@ -155,6 +155,7 @@ const LocationDetails = () => {
     });
   };
 
+  // Only include user reviews, no mock data
   const allReviews = [...userReviews];
   const locationImages = location?.images && location.images.length > 0 ? location.images : [location?.image];
   const reviewCount = userReviews.length;
