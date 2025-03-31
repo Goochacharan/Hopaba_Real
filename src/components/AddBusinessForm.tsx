@@ -127,9 +127,11 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
       map_link: business?.map_link || "",
       tags: business?.tags || [],
     },
+    mode: "onSubmit",
   });
 
-  const handleSubmit = async (data: BusinessFormValues) => {
+  const onSubmit = async (data: BusinessFormValues) => {
+    console.log("Form submitted with data:", data);
     if (!user) {
       toast({
         title: "Authentication required",
@@ -167,6 +169,8 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         tags: data.tags,
       };
 
+      console.log("Submitting data to Supabase:", businessData);
+
       if (business?.id) {
         // Update existing business
         const { error } = await supabase
@@ -174,7 +178,10 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
           .update(businessData)
           .eq('id', business.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase update error:", error);
+          throw error;
+        }
 
         toast({
           title: "Business Updated",
@@ -182,12 +189,17 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         });
       } else {
         // Create new business
-        const { error } = await supabase
+        const { data: insertedData, error } = await supabase
           .from('service_providers')
-          .insert(businessData);
+          .insert(businessData)
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase insert error:", error);
+          throw error;
+        }
 
+        console.log("Business successfully added:", insertedData);
         toast({
           title: "Business Added",
           description: "Your business has been listed and will be reviewed by an admin.",
@@ -210,7 +222,7 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
   return (
     <FormProvider {...form}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* Basic Information Section */}
             <BasicInfoSection />
