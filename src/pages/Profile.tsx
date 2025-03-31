@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -138,8 +139,7 @@ const Profile = () => {
               </div>
 
               <BusinessListSimple
-                onAddBusiness={handleAddBusiness}
-                onEditBusiness={handleEditBusiness}
+                onEdit={handleEditBusiness}
                 refresh={refreshBusinesses}
               />
             </TabsContent>

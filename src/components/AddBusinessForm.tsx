@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -30,7 +31,6 @@ export interface Business {
   whatsapp?: string;
   contact_email?: string;
   tags?: string[];
-  availability?: string[];
 }
 
 // Extend the business schema to include all the fields from the detailed form sections
@@ -78,9 +78,7 @@ const businessSchema = z.object({
   price_unit: z.string().optional(),
   price_range_min: z.number().optional(),
   price_range_max: z.number().optional(),
-  availability: z.union([z.array(z.string()), z.string()]).optional().transform(val => 
-    typeof val === 'string' ? [val] : val
-  ),
+  availability: z.string().optional(),
   languages: z.array(z.string()).optional(),
   experience: z.string().optional(),
   tags: z.array(z.string())
@@ -120,7 +118,6 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
       instagram: business?.instagram || "",
       map_link: business?.map_link || "",
       tags: business?.tags || [],
-      availability: business?.availability || [],
     },
   });
 
@@ -145,9 +142,6 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
       const priceRangeMin = data.price_range_min ? Number(data.price_range_min) : undefined;
       const priceRangeMax = data.price_range_max ? Number(data.price_range_max) : undefined;
       
-      // Ensure availability is always an array
-      const availabilityArray = Array.isArray(data.availability) ? data.availability : data.availability ? [data.availability] : [];
-      
       // Prepare business data for submission
       const businessData = {
         name: data.name,
@@ -167,7 +161,7 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         price_unit: data.price_unit || "per hour",
         price_range_min: priceRangeMin,
         price_range_max: priceRangeMax,
-        availability: availabilityArray,
+        availability: data.availability || null,
         languages: data.languages || [],
         experience: data.experience || null,
         tags: data.tags || [],
@@ -200,7 +194,7 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         console.log("Creating new business");
         result = await supabase
           .from('service_providers')
-          .insert([businessData]);
+          .insert(businessData);
 
         if (result.error) {
           console.error("Supabase insert error:", result.error);

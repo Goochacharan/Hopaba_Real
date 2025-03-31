@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -29,7 +28,6 @@ const MarketplaceListingDetails = () => {
   } = useMarketplaceListing(id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
-  const reviews = []; // Empty array as a placeholder for reviews
   
   const openImageViewer = (index: number) => {
     setSelectedImageIndex(index);
@@ -42,12 +40,6 @@ const MarketplaceListingDetails = () => {
     } else {
       navigate('/marketplace');
     }
-  };
-  
-  const handleAddReview = async (review: { rating: number; comment: string }): Promise<void> => {
-    // This is a placeholder function for adding reviews
-    console.log("Adding review:", review);
-    // Implement the actual review submission logic here
   };
   
   if (loading) {
@@ -132,10 +124,14 @@ const MarketplaceListingDetails = () => {
                 }} 
               />}
               
-              <ListingDescription
-                listing={listing}
-                reviews={reviews}
-                onAddReview={handleAddReview}
+              <ListingDescription 
+                description={listing?.description || ''} 
+                category={listing?.category || ''} 
+                condition={listing?.condition || ''} 
+                location={listing?.location || ''} 
+                createdAt={listing?.created_at || ''} 
+                instagram={listing?.seller_instagram || ''}
+                showMetadata={false} 
               />
               
               <div className="mt-6">

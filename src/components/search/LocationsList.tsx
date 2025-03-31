@@ -1,118 +1,96 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Clock, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { formatAvailabilityDays, isOpenNow } from '@/lib/formatters';
-import { Recommendation } from '@/types/recommendation';
+import LocationCard from '@/components/LocationCard';
+import { Recommendation } from '@/lib/mockData';
+import { Loader2 } from 'lucide-react';
 
-// Update the interface to use our consolidated Recommendation type
-export interface LocationsListProps {
+// Helper function to get stored reviews count and calculate average rating
+const getStoredReviews = (locationId: string) => {
+  try {
+    const storedReviews = localStorage.getItem(`reviews_${locationId}`);
+    const reviews = storedReviews ? JSON.parse(storedReviews) : [];
+    const count = reviews.length;
+    let avgRating = 0;
+    
+    if (count > 0) {
+      const sum = reviews.reduce((total: number, review: any) => total + review.rating, 0);
+      avgRating = sum / count;
+    }
+    
+    return { count, avgRating };
+  } catch (error) {
+    console.error('Error getting stored reviews:', error);
+    return { count: 0, avgRating: 0 };
+  }
+};
+
+interface LocationsListProps {
   recommendations: Recommendation[];
-  showHeader?: boolean;
-  isLoading?: boolean;
-  emptyMessage?: string;
+  loading?: boolean;
+  error?: string | null;
 }
 
-const LocationsList: React.FC<LocationsListProps> = ({ recommendations, showHeader = true, isLoading = false, emptyMessage = "No locations found." }) => {
-  const navigate = useNavigate();
-  
-  if (isLoading) {
+const LocationsList: React.FC<LocationsListProps> = ({ 
+  recommendations,
+  loading = false,
+  error = null
+}) => {
+  if (loading) {
     return (
-      <div className="space-y-4">
-        {Array.from({ length: 3 }).map((_, index) => (
-          <Card key={index} className="overflow-hidden animate-pulse">
-            <div className="h-20 bg-gray-200"></div>
-            <CardContent className="p-4 space-y-3">
-              <div className="h-4 w-3/4 bg-gray-200 rounded"></div>
-              <div className="h-3 w-1/2 bg-gray-200 rounded"></div>
-              <div className="h-3 w-2/3 bg-gray-200 rounded"></div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="flex justify-center items-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
-  
+
+  if (error) {
+    return (
+      <div className="text-center py-8 text-destructive">
+        <p>{error}</p>
+      </div>
+    );
+  }
+
   if (recommendations.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">{emptyMessage}</p>
+      <div className="text-center py-16">
+        <h3 className="text-lg font-medium mb-2">No service providers found</h3>
+        <p className="text-muted-foreground">
+          There are currently no service providers matching your criteria.
+        </p>
       </div>
     );
   }
   
   return (
-    <div className="space-y-3">
-      {recommendations.map((location) => {
-        const hours = location.hours || (location.availability_start_time && location.availability_end_time 
-          ? `${location.availability_start_time} - ${location.availability_end_time}` 
-          : null);
-          
-        const open = location.openNow !== undefined 
-          ? location.openNow 
-          : isOpenNow(
-              location.availability_days,
-              location.availability_start_time,
-              location.availability_end_time
-            );
+    <div className="grid grid-cols-1 gap-6">
+      {recommendations.map((recommendation, index) => {
+        // Get user reviews from localStorage
+        const { count: userReviewsCount, avgRating: userAvgRating } = getStoredReviews(recommendation.id);
+        
+        // Calculate the total review count
+        const totalReviewCount = userReviewsCount + (recommendation.reviewCount || 0);
+        
+        // Use user rating if available, otherwise use default rating
+        const displayRating = userReviewsCount > 0 ? userAvgRating : recommendation.rating;
         
         return (
-          <Card 
-            key={location.id} 
-            className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => navigate(`/business/${location.id}`)}
+          <div 
+            key={recommendation.id} 
+            className="animate-fade-in" 
+            style={{ animationDelay: `${index * 50}ms` }}
           >
-            <div className="flex">
-              <div className="w-24 h-24 shrink-0 bg-gray-100 relative overflow-hidden">
-                <img 
-                  src={location.image_url || "https://images.unsplash.com/photo-1473093295043-cdd812d0e601"} 
-                  alt={location.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1473093295043-cdd812d0e601";
-                  }}
-                />
-                {location.category && (
-                  <Badge className="absolute bottom-1 left-1 text-xs px-1 py-0">
-                    {location.category}
-                  </Badge>
-                )}
-              </div>
-              
-              <CardContent className="py-2 px-3 flex-1">
-                <div className="flex justify-between">
-                  <div className="space-y-1">
-                    <h3 className="font-medium text-sm line-clamp-1">{location.name}</h3>
-                    
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      <span className="line-clamp-1">{location.area}, {location.city}</span>
-                    </div>
-                    
-                    {hours && (
-                      <div className="flex items-center gap-1 text-xs">
-                        <Clock className="h-3 w-3" />
-                        <span className={cn(
-                          "line-clamp-1",
-                          open ? "text-green-600" : "text-red-500"
-                        )}>
-                          {open ? "Open Now" : "Closed"}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <Button variant="ghost" size="icon" className="h-6 w-6">
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </div>
-          </Card>
+            <LocationCard 
+              recommendation={{
+                ...recommendation,
+                rating: displayRating, // Override with user rating if available
+                address: recommendation.address || (recommendation.area && recommendation.city ? `${recommendation.area}, ${recommendation.city}` : recommendation.address || '')
+              }}
+              showDistanceUnderAddress={true}
+              className="search-result-card h-full"
+              reviewCount={totalReviewCount}
+            />
+          </div>
         );
       })}
     </div>

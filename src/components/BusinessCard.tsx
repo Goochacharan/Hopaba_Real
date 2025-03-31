@@ -1,226 +1,217 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import React from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Star, MapPin, Clock, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Pencil, Trash2, IndianRupee, Calendar, MapPin, Phone, Instagram, Film, Tag } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
-// Helper functions to safely process availability_days
-const isValidAvailabilityDays = (days: any): days is string[] => {
-  return Array.isArray(days) && days.length > 0;
-};
-
-const isValidAvailabilityDaysString = (days: any): days is string => {
-  return typeof days === 'string' && days.trim().length > 0;
-};
-
-// Function to check if a business is open now based on availability_days
-const isOpenNow = (business: any): boolean => {
-  if (!business) {
-    return false;
-  }
-  
-  if (
-    (Array.isArray(business.availability_days) && business.availability_days.length === 0) || 
-    (typeof business.availability_days === 'string' && business.availability_days.trim() === '')
-  ) {
-    return false;
-  }
-  
-  const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  const today = new Date().getDay(); // 0 is Sunday, 1 is Monday, etc.
-  const currentDayName = daysOfWeek[today];
-  
-  // Check if today is in the availability_days
-  if (isValidAvailabilityDays(business.availability_days)) {
-    const isOpen = business.availability_days.some((day: string) => 
-      day.toLowerCase() === currentDayName
-    );
-    return isOpen;
-  } else if (isValidAvailabilityDaysString(business.availability_days)) {
-    const availabilityDaysArray = business.availability_days
-      .split(',')
-      .map((day: string) => day.trim().toLowerCase());
-    
-    const isOpen = availabilityDaysArray.includes(currentDayName);
-    return isOpen;
-  }
-  
-  return false;
-};
-
-// Format business hours
-const formatBusinessHours = (business: any): string | null => {
-  if (!business) {
-    return null;
-  }
-  
-  // Check for specific hours format first
-  if (business.hours && typeof business.hours === 'string') {
-    return business.hours;
-  }
-  
-  // Check for start and end times
-  if (business.availability_start_time && business.availability_end_time) {
-    return `${business.availability_start_time} - ${business.availability_end_time}`;
-  }
-  
-  // If no specific hours, check for availability_days
-  const formatAvailabilityDays = (business: any): string | null => {
-    if (!business) {
-      return null;
-    }
-    
-    if (isValidAvailabilityDays(business.availability_days)) {
-      return business.availability_days.join(', ');
-    } else if (isValidAvailabilityDaysString(business.availability_days)) {
-      return business.availability_days;
-    }
-    
-    return null;
-  };
-  
-  // If we have availability_days, use that
-  if (business.availability_days) {
-    if (isValidAvailabilityDays(business.availability_days) && business.availability_days.length > 0) {
-      const days = business.availability_days.join(', ');
-      return days;
-    } else if (isValidAvailabilityDaysString(business.availability_days)) {
-      return business.availability_days;
-    }
-  }
-  
-  return "Hours not specified";
-};
-
-// Format price range
-const formatPriceRange = (min?: number | null, max?: number | null, unit?: string | null): string => {
-  if (!min && !max) return "Price not specified";
-  
-  if (min && max) {
-    return `₹${min} - ₹${max} ${unit || ''}`;
-  } else if (min) {
-    return `From ₹${min} ${unit || ''}`;
-  } else if (max) {
-    return `Up to ₹${max} ${unit || ''}`;
-  }
-  
-  return "Price not specified";
-};
-
-interface BusinessCardProps {
-  business: any;
-  onClick?: () => void;
-  className?: string;
+interface Business {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  price_range_min?: number;
+  price_range_max?: number;
+  price_unit?: string;
+  availability?: string;
+  area?: string;
+  city?: string;
+  contact_phone?: string;
+  instagram?: string;
+  tags?: string[];
+  availability_days?: string[];
+  availability_start_time?: string;
+  availability_end_time?: string;
 }
 
-const BusinessCard: React.FC<BusinessCardProps> = ({ 
-  business, 
-  onClick,
-  className = ''
-}) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [displayImage, setDisplayImage] = useState(business.image_url || "https://images.unsplash.com/photo-1473093295043-cdd812d0e601");
-  const navigate = useNavigate();
-  
-  const handleImageError = () => {
-    setDisplayImage("https://images.unsplash.com/photo-1473093295043-cdd812d0e601");
-    setImageLoaded(true);
-  };
-  
-  const handleCardClick = () => {
-    if (onClick) {
-      onClick();
+interface BusinessCardProps {
+  business: Business;
+  onEdit: (business: Business) => void;
+  onDelete: (id: string) => void;
+}
+
+const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete }) => {
+  const { toast } = useToast();
+
+  const handleInstagramClick = (e: React.MouseEvent, instagram: string | undefined, businessName: string) => {
+    e.stopPropagation();
+    if (instagram) {
+      window.open(instagram);
+      toast({
+        title: "Opening video content",
+        description: `Visiting ${businessName}'s video content`,
+        duration: 2000
+      });
     } else {
-      navigate(`/business/${business.id}`);
+      toast({
+        title: "Video content not available",
+        description: "This business has not provided any video links",
+        variant: "destructive",
+        duration: 2000
+      });
     }
   };
-  
-  const priceRange = formatPriceRange(
-    business.price_range_min, 
-    business.price_range_max, 
-    business.price_unit
-  );
-  
-  const hours = formatBusinessHours(business);
-  const isOpen = isOpenNow(business);
-  
-  return (
-    <Card 
-      className={cn(
-        "hover:shadow-md transition-shadow overflow-hidden cursor-pointer",
-        className
-      )}
-      onClick={handleCardClick}
-    >
-      <div className="relative">
-        <div className="w-full h-40 bg-gray-200 relative overflow-hidden">
-          <img
-            src={displayImage}
-            alt={business.name}
-            className={cn(
-              "w-full h-full object-cover transition-all duration-200",
-              !imageLoaded && "opacity-0 blur-md",
-              imageLoaded && "opacity-100"
-            )}
-            onLoad={() => setImageLoaded(true)}
-            onError={handleImageError}
-          />
-          
-          {business.category && (
-            <Badge className="absolute bottom-2 left-2 bg-primary/80 hover:bg-primary">
-              {business.category}
-            </Badge>
-          )}
-        </div>
-      </div>
+
+  const formatDayRange = (days: string[]): string => {
+    if (!days || days.length === 0) return '';
+    
+    const dayAbbreviations: Record<string, string> = {
+      'monday': 'Mon',
+      'tuesday': 'Tue',
+      'wednesday': 'Wed',
+      'thursday': 'Thu',
+      'friday': 'Fri',
+      'saturday': 'Sat',
+      'sunday': 'Sun'
+    };
+    
+    const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const sortedDays = [...days].sort((a, b) => 
+      dayOrder.indexOf(a.toLowerCase()) - dayOrder.indexOf(b.toLowerCase())
+    );
+    
+    const ranges: string[] = [];
+    let rangeStart: string | null = null;
+    let rangeEnd: string | null = null;
+    
+    for (let i = 0; i <= sortedDays.length; i++) {
+      const day = i < sortedDays.length ? sortedDays[i].toLowerCase() : null;
+      const prevDay = i > 0 ? sortedDays[i - 1].toLowerCase() : null;
+      const isDayAfterPrev = day && prevDay && 
+        dayOrder.indexOf(day) === dayOrder.indexOf(prevDay) + 1;
       
-      <CardContent className="pt-3 pb-4">
-        <div className="space-y-2">
-          <div className="flex justify-between items-start">
-            <h3 className="font-semibold text-base line-clamp-1">
-              {business.name}
-            </h3>
-            
-            {business.rating && (
-              <div className="flex items-center gap-1">
-                <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                <span className="text-xs font-medium">{business.rating}</span>
-              </div>
-            )}
+      if (i === 0) {
+        rangeStart = sortedDays[0];
+        rangeEnd = sortedDays[0];
+      } else if (isDayAfterPrev) {
+        rangeEnd = sortedDays[i];
+      } else if (rangeStart && rangeEnd) {
+        if (rangeStart === rangeEnd) {
+          ranges.push(dayAbbreviations[rangeStart.toLowerCase()] || rangeStart);
+        } else {
+          const startAbbr = dayAbbreviations[rangeStart.toLowerCase()] || rangeStart;
+          const endAbbr = dayAbbreviations[rangeEnd.toLowerCase()] || rangeEnd;
+          ranges.push(`${startAbbr}-${endAbbr}`);
+        }
+        
+        if (day) {
+          rangeStart = sortedDays[i];
+          rangeEnd = sortedDays[i];
+        } else {
+          rangeStart = null;
+          rangeEnd = null;
+        }
+      }
+    }
+    
+    return ranges.join(', ');
+  };
+
+  const availabilityDays = business.availability_days && business.availability_days.length > 0 
+    ? formatDayRange(business.availability_days) 
+    : business.availability || '';
+
+  return (
+    <Card key={business.id} className="overflow-hidden">
+      <CardHeader className="bg-muted/30">
+        <CardTitle className="flex justify-between items-start">
+          <span>{business.name}</span>
+          <span className="text-sm font-normal text-muted-foreground px-2 py-1 bg-muted rounded-md">
+            {business.category}
+          </span>
+        </CardTitle>
+        <CardDescription className="line-clamp-none">
+          <ScrollArea className="h-[160px] pr-3">
+            <p className="whitespace-pre-line leading-relaxed text-base font-normal text-slate-700">
+              {business.description}
+            </p>
+          </ScrollArea>
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="pt-4 space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="flex items-center gap-2">
+            <IndianRupee className="h-4 w-4 text-muted-foreground" />
+            <span>
+              ₹{business.price_range_min} - ₹{business.price_range_max} {business.price_unit}
+            </span>
           </div>
-          
-          {business.area && business.city && (
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <MapPin className="h-3 w-3 flex-shrink-0" />
-              <span className="line-clamp-1">{business.area}, {business.city}</span>
-            </div>
-          )}
-          
-          {hours && (
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Clock className="h-3 w-3 flex-shrink-0" />
-              <span className={cn(
-                "line-clamp-1",
-                isOpen ? "text-green-600" : "text-red-500"
-              )}>
-                {isOpen ? `Open Now (${hours})` : `Closed (${hours})`}
-              </span>
-            </div>
-          )}
-          
-          {priceRange && priceRange !== "Price not specified" && (
-            <div className="text-xs">
-              <span className="font-medium">Price:</span> {priceRange}
-            </div>
-          )}
-          
-          <div className="flex justify-end items-center pt-1">
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">
+              {availabilityDays}
+              {business.availability_start_time && business.availability_end_time && 
+                ` (${business.availability_start_time} - ${business.availability_end_time})`}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span>{business.area}, {business.city}</span>
           </div>
         </div>
+        <div className="flex items-center gap-2">
+          <Phone className="h-4 w-4 text-muted-foreground" />
+          <span>{business.contact_phone}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Instagram className="h-4 w-4 text-muted-foreground" />
+          <span>{business.instagram}</span>
+          {business.instagram && (
+            <button 
+              onClick={(e) => handleInstagramClick(e, business.instagram, business.name)}
+              title="Watch video content" 
+              className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 px-4 py-2"
+            >
+              <Film className="h-5 w-5 text-white" />
+            </button>
+          )}
+        </div>
+        
+        {business.tags && business.tags.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <Tag className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Popular Items/Services:</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {business.tags.map((tag, index) => (
+                <Badge key={index} variant="secondary" className="bg-primary/10 text-primary">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
       </CardContent>
+      <CardFooter className="border-t bg-muted/10 gap-2 justify-end">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => onEdit(business)}
+          className="flex items-center gap-1"
+        >
+          <Pencil className="h-4 w-4" />
+          Edit
+        </Button>
+        <Button 
+          variant="destructive" 
+          size="sm" 
+          onClick={() => onDelete(business.id)}
+          className="flex items-center gap-1"
+        >
+          <Trash2 className="h-4 w-4" />
+          Delete
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

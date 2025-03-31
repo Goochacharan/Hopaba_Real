@@ -1,353 +1,653 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { MapPin, Star, Calendar, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown, Sparkles, Award } from 'lucide-react';
+import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
-import { Star, Map, Phone, Instagram, Clock, ChevronRight, Bookmark, Check } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { formatPhoneNumber } from '@/lib/formatters';
-
-// Helper functions to safely process availability_days
-const isValidAvailabilityDays = (days: any): days is string[] => {
-  return Array.isArray(days) && days.length > 0;
-};
-
-const isValidAvailabilityDaysString = (days: any): days is string => {
-  return typeof days === 'string' && days.trim().length > 0;
-};
-
-// Function to check if a business is open now based on availability_days
-const isOpenNow = (recommendation: any): boolean => {
-  if (!recommendation) {
-    return false;
-  }
-  
-  // Handle if availability_days is an empty array or empty string
-  if (
-    (Array.isArray(recommendation.availability_days) && recommendation.availability_days.length === 0) || 
-    (typeof recommendation.availability_days === 'string' && recommendation.availability_days.trim() === '')
-  ) {
-    return false;
-  }
-  
-  const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  const today = new Date().getDay(); // 0 is Sunday, 1 is Monday, etc.
-  const currentDayName = daysOfWeek[today];
-  
-  // Check if today is in the availability_days
-  if (isValidAvailabilityDays(recommendation.availability_days)) {
-    const isOpen = recommendation.availability_days.some((day: string) => 
-      day.toLowerCase() === currentDayName
-    );
-    return isOpen;
-  } else if (isValidAvailabilityDaysString(recommendation.availability_days)) {
-    const availabilityDaysArray = recommendation.availability_days
-      .split(',')
-      .map((day: string) => day.trim().toLowerCase());
-    
-    const isOpen = availabilityDaysArray.includes(currentDayName);
-    return isOpen;
-  }
-  
-  // Special case for "Corner House Rajajinagar" - always open
-  if (recommendation.name === "Corner House Rajajinagar") {
-    return true;
-  }
-  
-  return false;
-};
-
-// Function to format business hours
-const formatBusinessHours = (recommendation: any): string | null => {
-  if (!recommendation) {
-    return null;
-  }
-  
-  // Check for specific hours format first
-  if (recommendation.hours && typeof recommendation.hours === 'string') {
-    return recommendation.hours;
-  }
-  
-  // Check for start and end times
-  if (recommendation.availability_start_time && recommendation.availability_end_time) {
-    return `${recommendation.availability_start_time} - ${recommendation.availability_end_time}`;
-  }
-  
-  // If no specific hours, check for availability_days
-  const formatAvailabilityDays = (recommendation: any): string | null => {
-    if (!recommendation) {
-      return null;
-    }
-    
-    if (isValidAvailabilityDays(recommendation.availability_days)) {
-      return recommendation.availability_days.join(', ');
-    } else if (isValidAvailabilityDaysString(recommendation.availability_days)) {
-      return recommendation.availability_days;
-    }
-    
-    // Special case for Corner House Rajajinagar
-    if (recommendation.name === "Corner House Rajajinagar") {
-      return "monday, tuesday, wednesday, thursday, friday, saturday, sunday";
-    }
-    
-    return null;
-  };
-  
-  // If we have hours, but also have availability_days, prefer availability_days
-  if (recommendation.availability_days) {
-    if (isValidAvailabilityDays(recommendation.availability_days) && recommendation.availability_days.length > 0) {
-      const days = recommendation.availability_days.join(', ');
-      return days;
-    } else if (isValidAvailabilityDaysString(recommendation.availability_days)) {
-      return recommendation.availability_days;
-    }
-  }
-  
-  // Special case for Corner House Rajajinagar
-  if (recommendation.name === "Corner House Rajajinagar") {
-    return "monday, tuesday, wednesday, thursday, friday, saturday, sunday";
-  }
-  
-  return "Hours not specified";
-};
+import { useWishlist } from '@/contexts/WishlistContext';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
+import ImageViewer from '@/components/ImageViewer';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 
 interface LocationCardProps {
-  recommendation: any;
-  onSave?: (id: string) => void;
-  onRemove?: (id: string) => void;
-  isSaved?: boolean;
+  recommendation: Recommendation;
   className?: string;
-  isCompact?: boolean;
+  ranking?: number;
+  reviewCount?: number;
+  showDistanceUnderAddress?: boolean;
 }
 
-const LocationCard: React.FC<LocationCardProps> = ({ 
+const LocationCard: React.FC<LocationCardProps> = ({
   recommendation,
-  onSave,
-  onRemove,
-  isSaved = false,
-  className = '',
-  isCompact = false
+  className,
+  ranking,
+  reviewCount = 0,
+  showDistanceUnderAddress = false
 }) => {
-  const [saved, setSaved] = useState(isSaved);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [displayImage, setDisplayImage] = useState(recommendation.image);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
   const { toast } = useToast();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const inWishlist = isInWishlist(recommendation.id, 'location');
+  const isMobile = useIsMobile();
+  const [user, setUser] = useState<any>(null);
+  const [imageViewerOpen, setImageViewerOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
+  const [currentOpenStatus, setCurrentOpenStatus] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
-    setSaved(isSaved);
-  }, [isSaved]);
+    const getCurrentUser = async () => {
+      const {
+        data
+      } = await supabase.auth.getSession();
+      setUser(data.session?.user || null);
+    };
+    getCurrentUser();
+    const {
+      data: authListener
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setUser(session?.user || null);
+    });
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, []);
 
-  const handleImageError = () => {
-    setDisplayImage("https://images.unsplash.com/photo-1555041469-a586c61ea9bc");
-    setImageLoaded(true);
+  useEffect(() => {
+    const status = isOpenNow();
+    setCurrentOpenStatus(status);
+
+    const intervalId = setInterval(() => {
+      const status = isOpenNow();
+      setCurrentOpenStatus(status);
+    }, 60000);
+
+    return () => clearInterval(intervalId);
+  }, [recommendation.availability_days, recommendation.availability_start_time, recommendation.availability_end_time]);
+
+  const hiddenGemCount = recommendation.hiddenGemCount || 0;
+  const mustVisitCount = recommendation.mustVisitCount || 0;
+  const showHiddenGemBadge = recommendation.isHiddenGem || hiddenGemCount >= 20;
+  const showMustVisitBadge = recommendation.isMustVisit || mustVisitCount >= 20;
+
+  const images = recommendation.images && recommendation.images.length > 0 ? recommendation.images : [recommendation.image];
+  React.useEffect(() => {
+    setImageLoaded(Array(images.length).fill(false));
+  }, [images.length]);
+
+  const handleImageLoad = (index: number) => {
+    setImageLoaded(prev => {
+      const newState = [...prev];
+      newState[index] = true;
+      return newState;
+    });
   };
 
-  const handleSaveToggle = async (e: React.MouseEvent) => {
+  const handleImageClick = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    if (!user) {
+    setSelectedImageIndex(index);
+    setImageViewerOpen(true);
+  };
+
+  const getMedalStyle = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return {
+          medalClass: "bg-gradient-to-b from-yellow-300 to-yellow-500 border-yellow-300 text-yellow-900 shadow h-6 w-6 text-xs",
+          ribbonColor: "bg-red-500"
+        };
+      case 2:
+        return {
+          medalClass: "bg-gradient-to-b from-gray-200 to-gray-400 border-gray-200 text-gray-800 shadow h-6 w-6 text-xs",
+          ribbonColor: "bg-blue-500"
+        };
+      case 3:
+        return {
+          medalClass: "bg-gradient-to-b from-amber-300 to-amber-600 border-amber-300 text-amber-900 shadow h-6 w-6 text-xs",
+          ribbonColor: "bg-green-500"
+        };
+      default:
+        return {
+          medalClass: "bg-gradient-to-b from-blue-400 to-blue-600 border-blue-300 text-white shadow h-6 w-6 text-xs",
+          ribbonColor: "bg-blue-300"
+        };
+    }
+  };
+
+  const renderStarRating = (rating: number) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const totalStars = 5;
+    return (
+      <div className="flex items-center">
+        {[...Array(fullStars)].map((_, i) => (
+          <Star key={`full-${i}`} className="fill-amber-500 stroke-amber-500 w-3.5 h-3.5" />
+        ))}
+        
+        {hasHalfStar && (
+          <div className="relative w-3.5 h-3.5">
+            <Star className="absolute stroke-amber-500 w-3.5 h-3.5" />
+            <div className="absolute overflow-hidden w-[50%]">
+              <Star className="fill-amber-500 stroke-amber-500 w-3.5 h-3.5" />
+            </div>
+          </div>
+        )}
+        
+        {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
+          <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />
+        ))}
+      </div>
+    );
+  };
+
+  const handleCall = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toast({
+      title: "Calling",
+      description: `Calling ${recommendation.name}...`,
+      duration: 3000
+    });
+  };
+
+  const handleWhatsApp = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const phoneNumber = recommendation.phone || '';
+    const message = encodeURIComponent(`Hi, I'm interested in ${recommendation.name}`);
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
+    toast({
+      title: "Opening WhatsApp",
+      description: `Messaging ${recommendation.name} via WhatsApp...`,
+      duration: 3000
+    });
+  };
+
+  const handleInstagram = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log("Instagram button clicked, instagram value:", recommendation.instagram);
+    if (!recommendation.instagram || recommendation.instagram.trim() === '') {
       toast({
-        title: "Sign in required",
-        description: "Please sign in to save recommendations",
-        variant: "destructive"
+        title: "No Instagram",
+        description: `${recommendation.name} hasn't provided an Instagram profile`,
+        duration: 2000
       });
       return;
     }
-    
-    try {
-      if (saved) {
-        if (onRemove) {
-          onRemove(recommendation.id);
-        }
-      } else {
-        if (onSave) {
-          onSave(recommendation.id);
-        }
-      }
-      
-      setSaved(!saved);
-    } catch (error) {
-      console.error("Error toggling save:", error);
+    console.log("Opening Instagram/video link:", recommendation.instagram);
+    window.open(recommendation.instagram, '_blank');
+    toast({
+      title: "Opening Instagram",
+      description: `Opening Instagram for ${recommendation.name}...`,
+      duration: 2000
+    });
+  };
+
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) {
       toast({
-        title: "Error",
-        description: "Could not update your saved items",
+        title: "Authentication required",
+        description: "Please log in to add items to your wishlist",
         variant: "destructive"
+      });
+      navigate('/login');
+      return;
+    }
+    if (inWishlist) {
+      removeFromWishlist(recommendation.id, 'location');
+    } else {
+      addToWishlist({...recommendation, type: 'location'});
+    }
+  };
+
+  const handleDirections = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (recommendation.map_link && recommendation.map_link.trim() !== '') {
+      window.open(recommendation.map_link, '_blank');
+      toast({
+        title: "Opening Directions",
+        description: `Opening Google Maps directions to ${recommendation.name}...`,
+        duration: 2000
+      });
+      return;
+    }
+    const destination = encodeURIComponent(recommendation.address);
+    let mapsUrl;
+    if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      mapsUrl = `maps://maps.apple.com/?q=${destination}`;
+    } else {
+      mapsUrl = `https://www.google.com/maps/search/?api=1&query=${destination}`;
+    }
+    window.open(mapsUrl, '_blank');
+    toast({
+      title: "Opening Directions",
+      description: `Getting directions to ${recommendation.name}...`,
+      duration: 2000
+    });
+  };
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (navigator.share) {
+      navigator.share({
+        title: recommendation.name,
+        text: `Check out ${recommendation.name}`,
+        url: window.location.origin + `/location/${recommendation.id}`
+      }).then(() => {
+        toast({
+          title: "Shared successfully",
+          description: `You've shared ${recommendation.name}`,
+          duration: 2000
+        });
+      }).catch(error => {
+        console.error('Error sharing:', error);
+        toast({
+          title: "Sharing failed",
+          description: "Could not share this location",
+          variant: "destructive",
+          duration: 2000
+        });
+      });
+    } else {
+      const shareUrl = window.location.origin + `/location/${recommendation.id}`;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        toast({
+          title: "Link copied",
+          description: "The link has been copied to your clipboard",
+          duration: 2000
+        });
       });
     }
   };
 
   const handleCardClick = () => {
-    navigate(`/business/${recommendation.id}`);
+    navigate(`/location/${recommendation.id}`);
   };
 
-  const formatPriceRange = (min?: number | null, max?: number | null, unit?: string | null): string => {
-    if (!min && !max) return "Price not specified";
-    
-    if (min && max) {
-      return `₹${min} - ₹${max} ${unit || ''}`;
-    } else if (min) {
-      return `From ₹${min} ${unit || ''}`;
-    } else if (max) {
-      return `Up to ₹${max} ${unit || ''}`;
+  const formatDistance = (distanceText: string | undefined) => {
+    if (!distanceText) return '';
+    const distanceMatch = distanceText.match(/(\d+(\.\d+)?)/);
+    if (distanceMatch) {
+      const distanceValue = parseFloat(distanceMatch[0]);
+      return `${distanceValue.toFixed(1)} km away`;
     }
-    
-    return "Price not specified";
+    let formattedDistance = distanceText.replace('miles', 'km');
+    formattedDistance = formattedDistance.replace('away away', 'away');
+    return formattedDistance;
   };
 
-  const formatAvailabilityString = (recommendation: any): string => {
-    const days = formatBusinessHours(recommendation);
-    const isOpen = isOpenNow(recommendation);
-    
-    if (!days || (typeof days === 'string' && days.trim() === '')) {
-      return isOpen ? "Open now" : "Closed now";
+  const formatPrice = () => {
+    if (recommendation.price_range_min && recommendation.price_range_max && recommendation.price_unit) {
+      return `${recommendation.price_range_min}-${recommendation.price_range_max}/${recommendation.price_unit.replace('per ', '')}`;
+    } else if (recommendation.priceLevel) {
+      return recommendation.priceLevel;
+    } else if (recommendation.price_level) {
+      return recommendation.price_level;
     }
-    
-    return isOpen ? `Open now (${days})` : `Closed now (${days})`;
+    return '';
   };
 
-  const formattedAvailability = formatAvailabilityString(recommendation);
-  const priceRange = formatPriceRange(
-    recommendation.price_range_min, 
-    recommendation.price_range_max, 
-    recommendation.price_unit
-  );
-  const isCurrentlyOpen = isOpenNow(recommendation);
+  const formatBusinessHours = (hours: string | undefined) => {
+    if (!hours) {
+      if (recommendation.availability_days && recommendation.availability_days.length > 0) {
+        const days = recommendation.availability_days.join(', ');
+        const startTime = recommendation.availability_start_time || '';
+        const endTime = recommendation.availability_end_time || '';
+        if (startTime && endTime) {
+          return `${days}: ${startTime} - ${endTime}`;
+        }
+        return days;
+      }
+      return null;
+    }
+    if (recommendation.availability_days && recommendation.availability_days.length > 0) {
+      const days = recommendation.availability_days.join(', ');
+      const startTime = recommendation.availability_start_time || '';
+      const endTime = recommendation.availability_end_time || '';
+      if (startTime && endTime) {
+        return `${days}: ${startTime} - ${endTime}`;
+      }
+      return days;
+    }
+    return hours;
+  };
 
-  return (
-    <Card 
-      className={cn(
-        "hover:shadow-md transition-shadow overflow-hidden cursor-pointer",
-        className
-      )}
-      onClick={handleCardClick}
-    >
-      <div className="relative">
-        <div 
-          className={cn(
-            "w-full h-48 bg-gray-200 relative overflow-hidden",
-            isCompact && "h-36"
-          )}
-        >
-          <img
-            src={displayImage}
-            alt={recommendation.name}
-            className={cn(
-              "w-full h-full object-cover transition-all duration-200",
-              !imageLoaded && "opacity-0 blur-md",
-              imageLoaded && "opacity-100"
-            )}
-            onLoad={() => setImageLoaded(true)}
-            onError={handleImageError}
-          />
-          
-          {!isCompact && (
-            <button 
-              className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
-              onClick={handleSaveToggle}
-              aria-label={saved ? "Remove from saved" : "Save for later"}
-            >
-              {saved ? <Check className="h-5 w-5 text-primary" /> : <Bookmark className="h-5 w-5" />}
-            </button>
-          )}
-          
-          {recommendation.category && (
-            <Badge className="absolute bottom-2 left-2 bg-primary/80 hover:bg-primary">
-              {recommendation.category}
-            </Badge>
-          )}
-        </div>
-      </div>
+  const isOpenNow = () => {
+    if (recommendation.openNow === true) return true;
+    if (recommendation.openNow === false) return false;
+    if (hasAvailabilityInfo()) {
+      const now = new Date();
+      const currentDay = now.toLocaleDateString('en-US', {
+        weekday: 'long'
+      }).toLowerCase();
+      const availableDays = recommendation.availability_days?.map(day => day.toLowerCase()) || [];
+      const isAvailableToday = availableDays.some(day => currentDay.includes(day) || day.includes(currentDay));
+      if (!isAvailableToday) return false;
+      if (recommendation.availability_start_time && recommendation.availability_end_time) {
+        const startTime = parseTimeString(recommendation.availability_start_time);
+        const endTime = parseTimeString(recommendation.availability_end_time);
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const currentTimeInMinutes = currentHour * 60 + currentMinute;
+        return currentTimeInMinutes >= startTime && currentTimeInMinutes <= endTime;
+      }
+      return true;
+    }
+    if (recommendation.hours || recommendation.availability) {
+      return true;
+    }
+    return undefined;
+  };
+
+  const parseTimeString = (timeString: string): number => {
+    try {
+      const [time, period] = timeString.split(' ');
+      let [hours, minutes] = time.split(':').map(Number);
+      if (period === 'PM' && hours < 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+      return hours * 60 + minutes;
+    } catch (e) {
+      console.error("Error parsing time string:", timeString, e);
+      return 0;
+    }
+  };
+
+  const hasAvailabilityInfo = () => {
+    return recommendation.availability_days && Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0;
+  };
+
+  const hasInstagram = () => {
+    console.log("LocationCard - Checking Instagram for:", recommendation.name);
+    console.log("LocationCard - Instagram link:", recommendation.instagram);
+    return recommendation.instagram && typeof recommendation.instagram === 'string' && recommendation.instagram.trim() !== '';
+  };
+
+  const formatAvailabilityDays = () => {
+    if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
+      return null;
+    }
+    const formattedDays = formatDayRange(recommendation.availability_days);
+    const startTime = recommendation.availability_start_time || '';
+    const endTime = recommendation.availability_end_time || '';
+    if (startTime && endTime) {
+      return <div className="text-sm text-muted-foreground px-0">
+          <p className="leading-none">{formattedDays}</p>
+          <p className="leading-none mt-0">{startTime} - {endTime}</p>
+        </div>;
+    }
+    return <div className="text-sm text-muted-foreground px-0">
+        <p className="leading-none">{formattedDays}</p>
+      </div>;
+  };
+
+  const formatDayRange = (days: string[]): string => {
+    if (!days || days.length === 0) return '';
+    
+    const dayAbbreviations: Record<string, string> = {
+      'monday': 'Mon',
+      'tuesday': 'Tue',
+      'wednesday': 'Wed',
+      'thursday': 'Thu',
+      'friday': 'Fri',
+      'saturday': 'Sat',
+      'sunday': 'Sun'
+    };
+    
+    const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const sortedDays = [...days].sort((a, b) => 
+      dayOrder.indexOf(a.toLowerCase()) - dayOrder.indexOf(b.toLowerCase())
+    );
+    
+    const ranges: string[] = [];
+    let rangeStart: string | null = null;
+    let rangeEnd: string | null = null;
+    
+    for (let i = 0; i <= sortedDays.length; i++) {
+      const day = i < sortedDays.length ? sortedDays[i].toLowerCase() : null;
+      const prevDay = i > 0 ? sortedDays[i - 1].toLowerCase() : null;
+      const isDayAfterPrev = day && prevDay && 
+        dayOrder.indexOf(day) === dayOrder.indexOf(prevDay) + 1;
       
-      <CardContent className={cn("pt-4", isCompact && "p-3")}>
-        <div className="space-y-2">
-          <div className="flex justify-between items-start">
-            <h3 className={cn(
-              "font-semibold line-clamp-1", 
-              isCompact ? "text-base" : "text-lg"
-            )}>
-              {recommendation.name}
-            </h3>
+      if (i === 0) {
+        rangeStart = sortedDays[0];
+        rangeEnd = sortedDays[0];
+      } else if (isDayAfterPrev) {
+        rangeEnd = sortedDays[i];
+      } else if (rangeStart && rangeEnd) {
+        if (rangeStart === rangeEnd) {
+          ranges.push(dayAbbreviations[rangeStart.toLowerCase()] || rangeStart);
+        } else {
+          const startAbbr = dayAbbreviations[rangeStart.toLowerCase()] || rangeStart;
+          const endAbbr = dayAbbreviations[rangeEnd.toLowerCase()] || rangeEnd;
+          ranges.push(`${startAbbr}-${endAbbr}`);
+        }
+        
+        if (day) {
+          rangeStart = sortedDays[i];
+          rangeEnd = sortedDays[i];
+        } else {
+          rangeStart = null;
+          rangeEnd = null;
+        }
+      }
+    }
+    
+    return ranges.join(', ');
+  };
+
+  const formatDayShort = (day: string): string => {
+    const dayMap: Record<string, string> = {
+      'monday': 'Mon',
+      'tuesday': 'Tue',
+      'wednesday': 'Wed',
+      'thursday': 'Thu',
+      'friday': 'Fri',
+      'saturday': 'Sat',
+      'sunday': 'Sun'
+    };
+    
+    return dayMap[day.toLowerCase()] || day;
+  };
+
+  const formatTime = (time: string | undefined): string => {
+    if (!time) return '';
+    return time;
+  };
+
+  const getAvailabilityHoursDisplay = (): string => {
+    if (recommendation.availability_start_time && recommendation.availability_end_time) {
+      return `${formatTime(recommendation.availability_start_time)}-${formatTime(recommendation.availability_end_time)}`;
+    }
+    return businessHours || '';
+  };
+
+  const getAvailabilityDaysDisplay = (): React.ReactNode => {
+    if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
+      return null;
+    }
+    
+    return recommendation.availability_days.map(day => formatDayShort(day)).join(', ');
+  };
+
+  const openStatus = currentOpenStatus !== undefined ? currentOpenStatus : isOpenNow();
+  const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
+  const availabilityInfo = formatAvailabilityDays();
+  const isSearchResultCard = className?.includes('search-result-card');
+  const isLocationDetailsPage = window.location.pathname.includes('/location/');
+  const shouldIncreaseHeight = isSearchResultCard || isLocationDetailsPage;
+  const imageHeightClass = shouldIncreaseHeight ? "h-[400px]" : "h-72";
+
+  const formattedAvailabilityDays = recommendation.availability_days && recommendation.availability_days.length > 0 
+    ? formatDayRange(recommendation.availability_days) 
+    : null;
+
+  return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
+      <div className={cn("relative w-full overflow-hidden", imageHeightClass)}>
+        <Carousel className="w-full h-full">
+          <CarouselContent className="h-full">
+            {images.map((img, index) => <CarouselItem key={index} className="h-full p-0">
+                <div className={cn("absolute inset-0 bg-muted/30", imageLoaded[index] ? "opacity-0" : "opacity-100")} />
+                <img src={img} alt={`${recommendation.name} - image ${index + 1}`} onLoad={() => handleImageLoad(index)} onClick={e => handleImageClick(index, e)} className={cn("w-full transition-all-500 cursor-pointer", imageHeightClass, shouldIncreaseHeight ? "object-cover" : "object-contain", imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm")} />
+              </CarouselItem>)}
+          </CarouselContent>
+          {images.length > 1 && <>
+              <CarouselPrevious className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2" />
+              <CarouselNext className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2" />
+            </>}
+        </Carousel>
+
+        <div className="absolute top-3 left-20 z-10">
+          <span className="px-2 py-1 rounded-full text-xs font-medium bg-black/40 backdrop-blur-sm text-white">
+            {recommendation.category}
+          </span>
+        </div>
+        
+        <div className="absolute bottom-3 left-3 z-10 flex flex-col gap-2">
+          {showHiddenGemBadge && <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/90 backdrop-blur-sm text-white flex items-center">
+              <Sparkles className="h-3 w-3 mr-1" />
+              Hidden Gem
+            </span>}
+          {showMustVisitBadge && <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/90 backdrop-blur-sm text-white flex items-center">
+              <Award className="h-3 w-3 mr-1" />
+              Must Visit
+            </span>}
+        </div>
+        
+        <button onClick={handleWishlistToggle} className={cn("absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10", user ? inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500" : "text-muted-foreground")}>
+          {user ? <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} /> : <LogIn className="w-5 h-5" />}
+        </button>
+      </div>
+
+      <div className="p-4">
+        <div className="flex justify-between items-start gap-2 mb-2">
+          <div className="flex items-center gap-1.5">
+            {ranking !== undefined && ranking <= 10 && (
+              <div className={cn("flex items-center justify-center rounded-full border-2 flex-shrink-0", getMedalStyle(ranking).medalClass)}>
+                {ranking}
+              </div>
+            )}
+            <h3 className="font-bold text-2xl">{recommendation.name}</h3>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1 mb-2">
+          {renderStarRating(recommendation.rating)}
+          <span className="text-xs text-muted-foreground ml-1">
+            ({reviewCount})
+          </span>
+        </div>
+
+        <div className="flex flex-col mb-3">
+          <div className="flex items-center justify-between text-muted-foreground text-sm">
+            <div className="flex items-center">
+              <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+              <span className="truncate">{recommendation.address}</span>
+            </div>
+            {hasInstagram() && <button onClick={handleInstagram} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 p-1.5 px-[29px] mx-[55px] py-[7px]">
+                <Film className="h-4 w-4 text-white" />
+              </button>}
+          </div>
+          
+          {recommendation.distance && showDistanceUnderAddress && <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center justify-between my-[3px] px-0">
+              <div className="flex items-center">
+                <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
+                {formatDistance(recommendation.distance)}
+              </div>
+            </div>}
+        </div>
+
+        {(recommendation.availability_days?.length > 0 || recommendation.hours || recommendation.availability) && (
+          <div className="flex flex-col text-sm mb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Calendar className="w-4 h-4 mr-1 flex-shrink-0 text-muted-foreground" />
+                <span className="text-muted-foreground">
+                  Working days: {formattedAvailabilityDays || 'Not specified'}
+                </span>
+              </div>
+              
+              {(recommendation.availability_days || recommendation.hours) && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="ml-2 inline-flex items-center text-xs font-medium text-primary hover:text-primary/80 transition-colors rounded-md" onClick={(e) => e.stopPropagation()}>
+                    <Calendar className="h-3.5 w-3.5 mr-1" />
+                    <span className="underline">Hours</span>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
+                    {recommendation.availability_days && recommendation.availability_days.length > 0 && (
+                      <div className="mb-1">
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
+                        <div className="text-sm">{formatDayRange(recommendation.availability_days)}</div>
+                      </div>
+                    )}
+                    {(recommendation.availability_start_time && recommendation.availability_end_time) && (
+                      <div>
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Hours:</div>
+                        <div className="text-sm">{recommendation.availability_start_time} - {recommendation.availability_end_time}</div>
+                      </div>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
             
-            {!isCompact && recommendation.rating && (
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm font-medium">{recommendation.rating}</span>
+            {recommendation.distance && !showDistanceUnderAddress && (
+              <div className="text-muted-foreground pl-5 mt-1 flex items-center">
+                <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
+                {formatDistance(recommendation.distance)}
               </div>
             )}
           </div>
-          
-          {!isCompact && (
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {recommendation.description}
-            </p>
-          )}
-          
-          {recommendation.address && (
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Map className="h-3.5 w-3.5 flex-shrink-0" />
-              <span className="line-clamp-1">{recommendation.address}</span>
-            </div>
-          )}
-          
-          {!isCompact && (
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Clock className="h-3.5 w-3.5 flex-shrink-0" />
-              <span className={cn(
-                "line-clamp-1",
-                isCurrentlyOpen ? "text-green-600" : "text-red-500"
-              )}>
-                {formattedAvailability}
-              </span>
-            </div>
-          )}
-          
-          {!isCompact && priceRange && (
-            <div className="text-sm">
-              <span className="font-medium">Price Range:</span> {priceRange}
-            </div>
-          )}
+        )}
+
+        <p className="mb-4 line-clamp-8 font-normal text-slate-700 text-base leading-normal min-h-[12em] max-h-[12em] overflow-y-auto">
+          {recommendation.description}
+        </p>
+
+        <div className="flex gap-2 mt-4 flex-wrap">
+          {formatPrice() && <Badge className="flex items-center gap-1 px-3 py-1.5 bg-[#c63e7b]">
+              <IndianRupee className="h-3.5 w-3.5" />
+              {formatPrice()}
+            </Badge>}
+          {recommendation.tags && recommendation.tags.map((tag, index) => <Badge key={index} className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
+              {tag}
+            </Badge>)}
         </div>
-      </CardContent>
-      
-      {!isCompact && (
-        <CardFooter className="pt-0 flex justify-between items-center">
-          <div className="flex gap-3">
-            {recommendation.phone && (
-              <a 
-                href={`tel:${recommendation.phone}`}
-                className="text-primary hover:text-primary/80 transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Phone className="h-5 w-5" />
-              </a>
-            )}
-            
-            {recommendation.instagram && (
-              <a 
-                href={`https://instagram.com/${recommendation.instagram.replace('@', '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-pink-600 hover:text-pink-500 transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
-            )}
-          </div>
-          
-          <Button variant="ghost" size="sm" className="gap-1 p-0">
-            View Details
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </CardFooter>
+
+        <div className="flex gap-2 mt-4">
+          <button onClick={handleCall} className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]">
+            <Phone className="h-5 w-5" />
+          </button>
+          <button onClick={handleWhatsApp} className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]">
+            <MessageCircle className="h-5 w-5" />
+          </button>
+          <button onClick={handleDirections} className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]">
+            <Navigation2 className="h-5 w-5" />
+          </button>
+          <button onClick={handleShare} className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]">
+            <Share2 className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+
+      {images.length > 0 && (
+        <ImageViewer 
+          images={images} 
+          initialIndex={selectedImageIndex} 
+          open={imageViewerOpen} 
+          onOpenChange={setImageViewerOpen} 
+        />
       )}
-    </Card>
-  );
+    </div>;
 };
 
 export default LocationCard;
