@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,9 +25,14 @@ export interface Business {
   whatsapp?: string;
   contact_email?: string;
   tags?: string[];
+  languages?: string[];
+  experience?: string;
+  availability?: string;
+  price_unit?: string;
+  price_range_min?: number;
+  price_range_max?: number;
 }
 
-// Business schema
 const businessSchema = z.object({
   name: z.string().min(2, {
     message: "Business name must be at least 2 characters.",
@@ -137,11 +141,9 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
     setIsSubmitting(true);
 
     try {
-      // Convert price range values to numbers if they're provided as strings
       const priceRangeMin = data.price_range_min ? Number(data.price_range_min) : undefined;
       const priceRangeMax = data.price_range_max ? Number(data.price_range_max) : undefined;
       
-      // Prepare business data for submission
       const businessData = {
         name: data.name,
         category: data.category,
@@ -171,7 +173,6 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
       let result;
       
       if (business?.id) {
-        // Update existing business
         console.log("Updating business with ID:", business.id);
         result = await supabase
           .from('service_providers')
@@ -189,11 +190,10 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
           description: "Your business listing has been updated and will be reviewed by an admin.",
         });
       } else {
-        // Create new business
         console.log("Creating new business");
         result = await supabase
           .from('service_providers')
-          .insert([businessData]);  // Wrap businessData in an array for insert
+          .insert([businessData]);
 
         if (result.error) {
           console.error("Supabase insert error:", result.error);
