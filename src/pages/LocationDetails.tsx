@@ -162,6 +162,8 @@ const LocationDetails = () => {
               reviews={allReviews}
               totalReviewCount={TOTAL_REVIEW_COUNT}
               locationRating={location.rating}
+              locationId={location.id}
+              locationName={location.name}
               onSubmitReview={handleSubmitReview}
             />
           </div>
