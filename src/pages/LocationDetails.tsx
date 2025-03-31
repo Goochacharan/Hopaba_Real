@@ -32,6 +32,12 @@ const storeReviews = (locationId: string, reviews: Review[]) => {
   }
 };
 
+const calculateAverageRating = (reviews: Review[]): number => {
+  if (reviews.length === 0) return 0;
+  const sum = reviews.reduce((total, review) => total + review.rating, 0);
+  return sum / reviews.length;
+};
+
 const LocationDetails = () => {
   const { id } = useParams<{ id: string; }>();
   const navigate = useNavigate();
@@ -42,6 +48,7 @@ const LocationDetails = () => {
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [user, setUser] = useState<any>(null);
+  const [averageRating, setAverageRating] = useState<number>(0);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -69,6 +76,12 @@ const LocationDetails = () => {
     // Load reviews from localStorage
     const savedReviews = getStoredReviews(id);
     setUserReviews(savedReviews);
+    
+    // Calculate average rating from user reviews
+    if (savedReviews.length > 0) {
+      const avgRating = calculateAverageRating(savedReviews);
+      setAverageRating(avgRating);
+    }
     
     const mockLocation = getRecommendationById(id);
     
@@ -174,6 +187,10 @@ const LocationDetails = () => {
     const updatedReviews = [newReview, ...userReviews];
     setUserReviews(updatedReviews);
     
+    // Calculate new average rating
+    const newAverageRating = calculateAverageRating(updatedReviews);
+    setAverageRating(newAverageRating);
+    
     // Save to localStorage
     if (id) {
       storeReviews(id, updatedReviews);
@@ -190,6 +207,9 @@ const LocationDetails = () => {
   const allReviews = [...userReviews];
   const locationImages = location?.images && location.images.length > 0 ? location.images : [location?.image];
   const reviewCount = userReviews.length;
+  
+  // Use user ratings if available, otherwise fall back to location rating
+  const displayRating = userReviews.length > 0 ? averageRating : (location?.rating || 4.5);
 
   if (loading) {
     return (
@@ -225,7 +245,7 @@ const LocationDetails = () => {
           <div className="lg:col-span-2">
             <LocationHeader
               name={location.name}
-              rating={location.rating}
+              rating={displayRating}
               reviewCount={reviewCount}
               images={locationImages}
               onImageClick={handleImageClick}
@@ -240,7 +260,7 @@ const LocationDetails = () => {
             <ReviewsSection
               reviews={allReviews}
               totalReviewCount={reviewCount}
-              locationRating={location.rating || 4.5}
+              locationRating={displayRating}
               locationId={location.id}
               locationName={location.name}
               onSubmitReview={handleSubmitReview}

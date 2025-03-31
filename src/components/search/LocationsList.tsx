@@ -4,6 +4,17 @@ import LocationCard from '@/components/LocationCard';
 import { Recommendation } from '@/lib/mockData';
 import { Loader2 } from 'lucide-react';
 
+// Helper function to get stored reviews count
+const getStoredReviewsCount = (locationId: string): number => {
+  try {
+    const storedReviews = localStorage.getItem(`reviews_${locationId}`);
+    return storedReviews ? JSON.parse(storedReviews).length : 0;
+  } catch (error) {
+    console.error('Error getting stored reviews count:', error);
+    return 0;
+  }
+};
+
 interface LocationsListProps {
   recommendations: Recommendation[];
   loading?: boolean;
@@ -44,23 +55,29 @@ const LocationsList: React.FC<LocationsListProps> = ({
   
   return (
     <div className="grid grid-cols-1 gap-6">
-      {recommendations.map((recommendation, index) => (
-        <div 
-          key={recommendation.id} 
-          className="animate-fade-in" 
-          style={{ animationDelay: `${index * 50}ms` }}
-        >
-          <LocationCard 
-            recommendation={{
-              ...recommendation,
-              address: recommendation.address || (recommendation.area && recommendation.city ? `${recommendation.area}, ${recommendation.city}` : recommendation.address || '')
-            }}
-            showDistanceUnderAddress={true}
-            className="search-result-card h-full"
-            reviewCount={recommendation.reviewCount || 0} // Changed from review_count to reviewCount to match the type definition
-          />
-        </div>
-      ))}
+      {recommendations.map((recommendation, index) => {
+        // Check for user reviews in localStorage
+        const userReviewsCount = getStoredReviewsCount(recommendation.id);
+        const totalReviewCount = userReviewsCount + (recommendation.reviewCount || 0);
+        
+        return (
+          <div 
+            key={recommendation.id} 
+            className="animate-fade-in" 
+            style={{ animationDelay: `${index * 50}ms` }}
+          >
+            <LocationCard 
+              recommendation={{
+                ...recommendation,
+                address: recommendation.address || (recommendation.area && recommendation.city ? `${recommendation.area}, ${recommendation.city}` : recommendation.address || '')
+              }}
+              showDistanceUnderAddress={true}
+              className="search-result-card h-full"
+              reviewCount={totalReviewCount}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 };

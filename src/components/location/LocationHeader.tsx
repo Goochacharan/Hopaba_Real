@@ -11,7 +11,7 @@ interface LocationHeaderProps {
   onImageClick: (index: number) => void;
 }
 
-const LocationHeader = ({ name, rating, reviewCount, images, onImageClick }: LocationHeaderProps) => {
+const LocationHeader = ({ name, rating, reviewCount, onImageClick, images }: LocationHeaderProps) => {
   const [imageLoaded, setImageLoaded] = useState<boolean[]>(Array(images.length).fill(false));
 
   const handleImageLoad = (index: number) => {
@@ -56,11 +56,11 @@ const LocationHeader = ({ name, rating, reviewCount, images, onImageClick }: Loc
         
         <div className="flex items-center mb-4">
           <div className="flex items-center text-amber-500">
-            <span className="text-lg font-semibold mr-1 text-amber-700">{rating}</span>
+            <span className="text-lg font-semibold mr-1 text-amber-700">{rating.toFixed(1)}</span>
             <Star className="fill-amber-500 w-4 h-4" />
           </div>
           <span className="text-xs text-muted-foreground ml-1">
-            ({reviewCount} reviews)
+            ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
           </span>
         </div>
       </div>
