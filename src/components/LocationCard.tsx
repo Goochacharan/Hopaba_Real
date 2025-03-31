@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +7,7 @@ import { MapPin, Phone, Clock, Star, Share2, MessageCircle, Navigation2, Heart, 
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { useWishlistContext } from '@/contexts/WishlistContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 import { Button } from './ui/button';
 
 interface Recommendation {
@@ -65,7 +66,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistContext();
+  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const inWishlist = isInWishlist(recommendation.id);
   
   const hasInstaStories = recommendation.instagram && recommendation.instagram.trim() !== '';

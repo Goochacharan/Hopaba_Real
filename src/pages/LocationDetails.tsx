@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -13,7 +12,7 @@ import { Review } from '@/components/location/ReviewsList';
 import { format } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
-interface LocationDetails {
+interface ServiceProviderDetails {
   id: string;
   name: string;
   description: string;
@@ -31,7 +30,54 @@ interface LocationDetails {
   review_count?: number;
   images?: string[];
   tags?: string[];
+  approval_status?: string;
+  availability_days?: string[];
+  availability_start_time?: string;
+  availability_end_time?: string;
+  business_hours?: any;
+  contact_email?: string;
+  coordinates?: any;
+  created_at?: string;
+  distance?: string;
+  experience?: string;
+  hours?: string;
+  image_url?: string;
+  languages?: string[];
+  map_link?: string;
+  open_now?: boolean;
+  price?: string;
+  updated_at?: string;
+  user_id?: string;
+  website?: string;
+  whatsapp?: string;
 }
+
+interface RecommendationDetails {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  address: string;
+  city?: string;
+  area?: string;
+  contact_phone?: string;
+  availability?: string;
+  price_range_min?: number;
+  price_range_max?: number;
+  price_unit?: string;
+  rating?: number;
+  instagram?: string;
+  review_count?: number;
+  images?: string[];
+  tags?: string[];
+  image?: string;
+  hours?: string;
+  distance?: string;
+  open_now?: boolean;
+  created_at?: string;
+}
+
+type LocationDetails = ServiceProviderDetails | RecommendationDetails;
 
 const LocationDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -50,15 +96,16 @@ const LocationDetails = () => {
       try {
         setLoading(true);
         
-        // First try to fetch from service_providers
         let { data, error } = await supabase
           .from('service_providers')
           .select('*')
           .eq('id', id)
           .single();
         
-        // If not found, try the recommendations table
-        if (error || !data) {
+        if (error) {
+          console.error('Error fetching from service_providers:', error);
+          console.log('Trying recommendations table instead...');
+          
           const { data: recData, error: recError } = await supabase
             .from('recommendations')
             .select('*')
@@ -71,20 +118,22 @@ const LocationDetails = () => {
           }
           
           data = recData;
+          console.log('Found location in recommendations table:', data);
+        } else {
+          console.log('Found location in service_providers table:', data);
         }
         
         if (data) {
-          console.log("Fetched location data:", data);
+          if (!data.address && data.area && data.city) {
+            data.address = `${data.area}, ${data.city}`;
+          }
           
           setLocation({
             ...data,
-            address: data.address || `${data.area}, ${data.city}`,
             rating: data.rating || 4.5,
             review_count: data.review_count || 0
           });
           
-          // Fetch reviews for this location
-          // For now we'll use mock data, in a real app you'd fetch from a reviews table
           setReviews([
             {
               id: '1',
@@ -104,9 +153,7 @@ const LocationDetails = () => {
             }
           ]);
           
-          // Check if current user has already reviewed
           if (user) {
-            // Here you would check against real reviews in the database
             setUserHasReviewed(false);
           }
         }
@@ -194,7 +241,6 @@ const LocationDetails = () => {
       return;
     }
     
-    // In a real app, you would save this to the database
     const newReview: Review = {
       id: uuidv4(),
       name: user.user_metadata?.full_name || user.email || 'Anonymous',
@@ -262,28 +308,36 @@ const LocationDetails = () => {
           <div className="md:col-span-2 space-y-6">
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
               <div className="h-64 bg-muted w-full flex items-center justify-center">
-                {location.images && location.images[0] ? (
+                {location?.images && location.images[0] ? (
                   <img 
                     src={location.images[0]} 
                     alt={location.name} 
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <MapPin size={48} className="text-muted-foreground" />
+                  location?.image ? (
+                    <img 
+                      src={location.image} 
+                      alt={location.name} 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <MapPin size={48} className="text-muted-foreground" />
+                  )
                 )}
               </div>
               
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h1 className="text-2xl font-bold">{location.name}</h1>
-                    <div className="text-sm text-muted-foreground">{location.category}</div>
+                    <h1 className="text-2xl font-bold">{location?.name}</h1>
+                    <div className="text-sm text-muted-foreground">{location?.category}</div>
                   </div>
                   <div className="flex items-center">
                     <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
-                    <span className="ml-1 font-medium">{location.rating?.toFixed(1)}</span>
+                    <span className="ml-1 font-medium">{location?.rating?.toFixed(1)}</span>
                     <span className="text-sm text-muted-foreground ml-1">
-                      ({location.review_count || 0})
+                      ({location?.review_count || 0})
                     </span>
                   </div>
                 </div>
@@ -291,15 +345,15 @@ const LocationDetails = () => {
                 <div className="space-y-3 mb-6">
                   <div className="flex items-center text-muted-foreground">
                     <MapPin className="h-4 w-4 mr-2" />
-                    {location.area}, {location.city}
+                    {location?.address || `${location?.area}, ${location?.city}`}
                   </div>
-                  {location.availability && (
+                  {location?.availability && (
                     <div className="flex items-center text-muted-foreground">
                       <Clock className="h-4 w-4 mr-2" />
                       {location.availability}
                     </div>
                   )}
-                  {location.price_range_min && location.price_range_max && (
+                  {location?.price_range_min && location?.price_range_max && (
                     <div className="flex items-center text-muted-foreground">
                       <IndianRupee className="h-4 w-4 mr-2" />
                       ₹{location.price_range_min} - ₹{location.price_range_max} {location.price_unit}
@@ -307,7 +361,7 @@ const LocationDetails = () => {
                   )}
                 </div>
                 
-                <p className="text-muted-foreground mb-6">{location.description}</p>
+                <p className="text-muted-foreground mb-6">{location?.description}</p>
                 
                 <div className="grid grid-cols-4 gap-2">
                   <Button 
@@ -349,7 +403,7 @@ const LocationDetails = () => {
             <ReviewsSection 
               reviews={reviews}
               totalReviewCount={reviews.length}
-              locationRating={location.rating || 4.5}
+              locationRating={location?.rating || 4.5}
               onSubmitReview={handleSubmitReview}
             />
           </div>
@@ -360,21 +414,21 @@ const LocationDetails = () => {
               <div className="space-y-3">
                 <div>
                   <h3 className="text-sm font-medium">Address</h3>
-                  <p className="text-muted-foreground">{location.area}, {location.city}</p>
+                  <p className="text-muted-foreground">{location?.address || `${location?.area}, ${location?.city}`}</p>
                 </div>
-                {location.contact_phone && (
+                {(location?.contact_phone) && (
                   <div>
                     <h3 className="text-sm font-medium">Phone</h3>
                     <p className="text-muted-foreground">{location.contact_phone}</p>
                   </div>
                 )}
-                {location.availability && (
+                {location?.availability && (
                   <div>
                     <h3 className="text-sm font-medium">Hours</h3>
                     <p className="text-muted-foreground">{location.availability}</p>
                   </div>
                 )}
-                {location.tags && location.tags.length > 0 && (
+                {location?.tags && location.tags.length > 0 && (
                   <div>
                     <h3 className="text-sm font-medium">Tags</h3>
                     <div className="flex flex-wrap gap-2 mt-2">
