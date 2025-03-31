@@ -22,6 +22,9 @@ interface Business {
   price_range_max?: number;
   price_unit?: string;
   availability?: string;
+  availability_days?: string[] | string;
+  availability_start_time?: string;
+  availability_end_time?: string;
   area?: string;
   city?: string;
   contact_phone?: string;
@@ -37,6 +40,31 @@ interface BusinessCardProps {
 
 const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete }) => {
   const { toast } = useToast();
+
+  const formatAvailabilityDays = (days: string[] | string | undefined): string => {
+    if (!days) return '';
+    
+    // If days is a string (comma-separated), convert it to an array
+    const daysArray = Array.isArray(days) 
+      ? days 
+      : typeof days === 'string' ? days.split(',').map(day => day.trim()) : [];
+    
+    if (daysArray.length === 0) return '';
+    
+    return daysArray.join(', ');
+  };
+
+  const formatAvailabilityDisplay = (): string => {
+    const days = formatAvailabilityDays(business.availability_days);
+    
+    if (business.availability_start_time && business.availability_end_time) {
+      return days 
+        ? `${days}: ${business.availability_start_time} - ${business.availability_end_time}`
+        : `${business.availability_start_time} - ${business.availability_end_time}`;
+    }
+    
+    return days || business.availability || '';
+  };
 
   const handleInstagramClick = (e: React.MouseEvent, instagram: string | undefined, businessName: string) => {
     e.stopPropagation();
@@ -78,7 +106,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
           </div>
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-muted-foreground" />
-            <span>{business.availability}</span>
+            <span>{formatAvailabilityDisplay()}</span>
           </div>
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4 text-muted-foreground" />
