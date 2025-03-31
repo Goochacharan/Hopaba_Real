@@ -20,11 +20,20 @@ interface ReviewsListProps {
 }
 
 const ReviewsList = ({ reviews, totalReviews, locationRating }: ReviewsListProps) => {
+  // If there are no reviews, show a message
+  if (reviews.length === 0) {
+    return (
+      <div className="py-6 text-center text-muted-foreground">
+        <p>No reviews yet. Be the first to write a review!</p>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex items-center mb-4">
         <span className="font-medium">
-          {totalReviews} reviews
+          {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
         </span>
         <div className="flex items-center ml-3 text-amber-500">
           {[...Array(5)].map((_, i) => (

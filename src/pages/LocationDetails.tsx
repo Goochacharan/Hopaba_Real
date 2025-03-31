@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -12,8 +13,6 @@ import { ReviewFormValues } from '@/components/location/ReviewForm';
 import LocationHeader from '@/components/location/LocationHeader';
 import LocationAbout from '@/components/location/LocationAbout';
 import ReviewsSection from '@/components/location/ReviewsSection';
-
-const TOTAL_REVIEW_COUNT = 0;
 
 const LocationDetails = () => {
   const { id } = useParams<{ id: string; }>();
@@ -141,7 +140,7 @@ const LocationDetails = () => {
     const currentDate = "Just now";
     const newReview: Review = {
       id: reviewId,
-      name: "You",
+      name: user ? user.user_metadata?.full_name || "Anonymous" : "Guest",
       date: currentDate,
       rating: values.rating,
       text: values.reviewText,
@@ -158,6 +157,7 @@ const LocationDetails = () => {
 
   const allReviews = [...userReviews];
   const locationImages = location?.images && location.images.length > 0 ? location.images : [location?.image];
+  const reviewCount = userReviews.length;
 
   if (loading) {
     return (
@@ -175,8 +175,6 @@ const LocationDetails = () => {
   }
 
   if (!location) return null;
-
-  const actualReviewCount = userReviews.length;
 
   return (
     <MainLayout>
@@ -196,7 +194,7 @@ const LocationDetails = () => {
             <LocationHeader
               name={location.name}
               rating={location.rating}
-              reviewCount={actualReviewCount}
+              reviewCount={reviewCount}
               images={locationImages}
               onImageClick={handleImageClick}
             />
@@ -204,13 +202,13 @@ const LocationDetails = () => {
             <LocationAbout
               name={location.name}
               description={location.description}
-              tags={location.tags}
+              tags={location.tags || []}
             />
             
             <ReviewsSection
               reviews={allReviews}
-              totalReviewCount={actualReviewCount}
-              locationRating={location.rating}
+              totalReviewCount={reviewCount}
+              locationRating={location.rating || 4.5}
               locationId={location.id}
               locationName={location.name}
               onSubmitReview={handleSubmitReview}
