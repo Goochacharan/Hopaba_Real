@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Recommendation } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
 import { supabase } from '@/integrations/supabase/client';
+import { isOpenNow } from '@/lib/formatters';
 
 interface UseRecommendationsProps {
   initialQuery?: string;
@@ -35,6 +35,39 @@ export interface Event {
   user_id?: string;
   isHiddenGem?: boolean;
   isMustVisit?: boolean;
+}
+
+export interface Recommendation {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  address: string;
+  area?: string;
+  city?: string;
+  distance: string;
+  image: string;
+  images: string[];
+  rating: number;
+  tags: string[];
+  phone: string;
+  website: string;
+  hours: string;
+  openNow: boolean;
+  price: string;
+  instagram: string;
+  review_count: number;
+  price_range_min?: number;
+  price_range_max?: number;
+  price_unit?: string;
+  availability: string[];
+  availability_days: string[] | string;
+  availability_start_time?: string;
+  availability_end_time?: string;
+  created_at: string;
+  isHiddenGem?: boolean;
+  isMustVisit?: boolean;
+  priceLevel?: string;
 }
 
 const useRecommendations = ({ 
@@ -88,14 +121,16 @@ const useRecommendations = ({
     return { processedQuery, inferredCategory };
   };
 
-  const processRawData = (data: any[]) => {
+  const processRawData = (data: any[]): Recommendation[] => {
     return data.map(item => {
       // Convert availability_days from string to array if needed
-      let availability_days = [];
-      if (item.availability_days) {
-        availability_days = typeof item.availability_days === 'string'
-          ? item.availability_days.split(',')
-          : item.availability_days;
+      let availability_days = item.availability_days;
+      if (availability_days) {
+        if (typeof availability_days === 'string') {
+          availability_days = availability_days.split(',').map((day: string) => day.trim());
+        }
+      } else {
+        availability_days = [];
       }
       
       // Handle availability
@@ -138,7 +173,10 @@ const useRecommendations = ({
         availability_start_time: item.availability_start_time || '',
         availability_end_time: item.availability_end_time || '',
         created_at: item.created_at || '',
-      } as Recommendation;
+        isHiddenGem: item.isHiddenGem || false,
+        isMustVisit: item.isMustVisit || false,
+        priceLevel: item.priceLevel || '$$',
+      };
     });
   };
 
@@ -280,7 +318,7 @@ const useRecommendations = ({
         console.log("Effective search category:", effectiveCategory);
         
         const serviceProviders = await fetchServiceProviders(processedQuery, effectiveCategory);
-        setRecommendations(serviceProviders as Recommendation[]); // Type assertion to satisfy TypeScript
+        setRecommendations(serviceProviders); 
         
         const eventsData = await fetchEvents(processedQuery);
         setEvents(eventsData);
@@ -312,33 +350,3 @@ const useRecommendations = ({
 };
 
 export default useRecommendations;
-
-export interface Recommendation {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  address: string;
-  area?: string;
-  city?: string;
-  distance: string;
-  image: string;
-  images: string[];
-  rating: number;
-  tags: string[];
-  phone: string;
-  website: string;
-  hours: string;
-  openNow: boolean;
-  price: string;
-  instagram: string;
-  review_count: number;
-  price_range_min?: number;
-  price_range_max?: number;
-  price_unit?: string;
-  availability: string[];
-  availability_days: string[];
-  availability_start_time?: string;
-  availability_end_time?: string;
-  created_at: string;
-}

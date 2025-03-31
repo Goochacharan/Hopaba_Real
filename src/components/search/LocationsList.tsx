@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
@@ -5,82 +6,27 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Clock, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatAvailabilityDays, isOpenNow } from '@/lib/formatters';
 
-// Helper functions to safely process availability_days
-const isValidAvailabilityDays = (days: any): days is string[] => {
-  return Array.isArray(days) && days.length > 0;
-};
-
-const isValidAvailabilityDaysString = (days: any): days is string => {
-  return typeof days === 'string' && days.trim().length > 0;
-};
-
-// Function to check if a business is open now based on availability_days
-const isOpenNow = (business: any): boolean => {
-  if (!business) {
-    return false;
-  }
-  
-  if (
-    (Array.isArray(business.availability_days) && business.availability_days.length === 0) || 
-    (typeof business.availability_days === 'string' && business.availability_days.trim() === '')
-  ) {
-    return false;
-  }
-  
-  const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  const today = new Date().getDay(); // 0 is Sunday, 1 is Monday, etc.
-  const currentDayName = daysOfWeek[today];
-  
-  // Check if today is in the availability_days
-  if (isValidAvailabilityDays(business.availability_days)) {
-    const isOpen = business.availability_days.some((day: string) => 
-      day.toLowerCase() === currentDayName
-    );
-    return isOpen;
-  } else if (isValidAvailabilityDaysString(business.availability_days)) {
-    const availabilityDaysArray = business.availability_days
-      .split(',')
-      .map((day: string) => day.trim().toLowerCase());
-    
-    const isOpen = availabilityDaysArray.includes(currentDayName);
-    return isOpen;
-  }
-  
-  return false;
-};
-
-// Format business hours
-const formatBusinessHours = (business: any): string | null => {
-  if (!business) {
-    return null;
-  }
-  
-  // Check for specific hours format first
-  if (business.hours && typeof business.hours === 'string') {
-    return business.hours;
-  }
-  
-  // Check for start and end times
-  if (business.availability_start_time && business.availability_end_time) {
-    return `${business.availability_start_time} - ${business.availability_end_time}`;
-  }
-  
-  // If no specific hours, check for availability_days
-  if (business.availability_days) {
-    if (isValidAvailabilityDays(business.availability_days)) {
-      return business.availability_days.join(', ');
-    } else if (isValidAvailabilityDaysString(business.availability_days)) {
-      return business.availability_days;
-    }
-  }
-  
-  return "Hours not specified";
-};
+interface BusinessLocation {
+  id: string;
+  name: string;
+  category?: string;
+  address: string;
+  area?: string;
+  city?: string;
+  image_url?: string;
+  rating?: number;
+  distance?: string;
+  availability_days?: string[] | string;
+  availability_start_time?: string;
+  availability_end_time?: string;
+  hours?: string;
+}
 
 // Update the interface to include recommendations
 export interface LocationsListProps {
-  recommendations: Recommendation[];
+  recommendations: BusinessLocation[];
   showHeader?: boolean;
   isLoading?: boolean;
   emptyMessage?: string;
@@ -117,8 +63,15 @@ const LocationsList: React.FC<LocationsListProps> = ({ recommendations, showHead
   return (
     <div className="space-y-3">
       {recommendations.map((location) => {
-        const hours = formatBusinessHours(location);
-        const isOpen = isOpenNow(location);
+        const hours = location.hours || (location.availability_start_time && location.availability_end_time 
+          ? `${location.availability_start_time} - ${location.availability_end_time}` 
+          : null);
+          
+        const isOpen = isOpenNow(
+          location.availability_days,
+          location.availability_start_time,
+          location.availability_end_time
+        );
         
         return (
           <Card 

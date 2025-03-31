@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,9 +13,10 @@ import BusinessCard from '../BusinessCard';
 interface BusinessListProps {
   onAddBusiness: () => void;
   onEditBusiness: (business: Business) => void;
+  refresh?: boolean;
 }
 
-const BusinessListSimple: React.FC<BusinessListProps> = ({ onAddBusiness, onEditBusiness }) => {
+const BusinessListSimple: React.FC<BusinessListProps> = ({ onAddBusiness, onEditBusiness, refresh }) => {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('active');
@@ -37,15 +39,20 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onAddBusiness, onEdit
         if (error) throw error;
         
         const formattedData = data.map(item => {
+          // Convert availability to array
           const availability = Array.isArray(item.availability) 
             ? item.availability 
             : item.availability ? [item.availability] : [];
           
-          const availability_days = item.availability_days
-            ? typeof item.availability_days === 'string'
-              ? item.availability_days.split(',')
-              : item.availability_days
-            : [];
+          // Convert availability_days to array if it's a string
+          let availability_days;
+          if (item.availability_days) {
+            availability_days = typeof item.availability_days === 'string'
+              ? item.availability_days.split(',').map((day: string) => day.trim())
+              : item.availability_days;
+          } else {
+            availability_days = [];
+          }
           
           return {
             ...item,
@@ -63,7 +70,7 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onAddBusiness, onEdit
     };
     
     fetchBusinesses();
-  }, [user]);
+  }, [user, refresh]);
 
   const approvedBusinesses = businesses.filter(business => business.approval_status === 'approved');
   const pendingBusinesses = businesses.filter(business => business.approval_status === 'pending');
