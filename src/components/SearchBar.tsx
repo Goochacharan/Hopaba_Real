@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Search, X, Mic, Sparkles, LogIn } from 'lucide-react';
@@ -98,7 +97,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Check if user is logged in
     if (!user) {
       setShowAuthDialog(true);
       return;
@@ -140,7 +138,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
   
   const startSpeechRecognition = () => {
-    // Check if user is logged in before allowing voice search
     if (!user) {
       setShowAuthDialog(true);
       return;
@@ -204,7 +201,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
   }, [initialValue]);
 
   const handleSearchButtonClick = async () => {
-    // Check if user is logged in
     if (!user) {
       setShowAuthDialog(true);
       return;
