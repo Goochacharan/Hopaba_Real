@@ -1,10 +1,51 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { Event } from '@/hooks/useRecommendations';
+
+// Define the types that can be added to wishlist
+export interface Event {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  description: string;
+  image: string;
+  [key: string]: any;
+}
+
+export interface Recommendation {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  address: string;
+  image: string;
+  tags?: string[];
+  rating?: number;
+  [key: string]: any;
+}
+
+export interface MarketplaceListing {
+  id: string;
+  title: string;
+  price: number;
+  description: string;
+  category: string;
+  condition: string;
+  [key: string]: any;
+}
+
+// Union type for all wishlist items
+export type WishlistItem = 
+  | (Event & { type: 'event' })
+  | (Recommendation & { type: 'location' })
+  | (MarketplaceListing & { type: 'marketplace' });
 
 interface WishlistContextProps {
-  wishlist: Event[];
-  addToWishlist: (event: Event) => void;
-  removeFromWishlist: (eventId: string) => void;
+  wishlist: WishlistItem[];
+  addToWishlist: (item: Event | Recommendation | MarketplaceListing, type: 'event' | 'location' | 'marketplace') => void;
+  removeFromWishlist: (itemId: string, type: 'event' | 'location' | 'marketplace') => void;
+  isInWishlist: (itemId: string, type: 'event' | 'location' | 'marketplace') => boolean;
 }
 
 const WishlistContext = createContext<WishlistContextProps | undefined>(undefined);
@@ -14,7 +55,7 @@ interface WishlistProviderProps {
 }
 
 export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) => {
-  const [wishlist, setWishlist] = useState<Event[]>(() => {
+  const [wishlist, setWishlist] = useState<WishlistItem[]>(() => {
     if (typeof window === 'undefined') {
       return [];
     }
@@ -26,23 +67,34 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
-  const addToWishlist = (event: Event) => {
+  const addToWishlist = (item: Event | Recommendation | MarketplaceListing, type: 'event' | 'location' | 'marketplace') => {
     setWishlist(prevWishlist => {
-      if (prevWishlist.find(item => item.id === event.id)) {
+      if (prevWishlist.find(wishlistItem => wishlistItem.id === item.id && wishlistItem.type === type)) {
         return prevWishlist;
       }
-      return [...prevWishlist, event];
+      
+      // Create a new item with the type property
+      const newItem = { ...item, type };
+      
+      return [...prevWishlist, newItem as WishlistItem];
     });
   };
 
-  const removeFromWishlist = (eventId: string) => {
-    setWishlist(prevWishlist => prevWishlist.filter(event => event.id !== eventId));
+  const removeFromWishlist = (itemId: string, type: 'event' | 'location' | 'marketplace') => {
+    setWishlist(prevWishlist => 
+      prevWishlist.filter(item => !(item.id === itemId && item.type === type))
+    );
+  };
+
+  const isInWishlist = (itemId: string, type: 'event' | 'location' | 'marketplace'): boolean => {
+    return wishlist.some(item => item.id === itemId && item.type === type);
   };
 
   const value: WishlistContextProps = {
     wishlist,
     addToWishlist,
     removeFromWishlist,
+    isInWishlist
   };
 
   return (
