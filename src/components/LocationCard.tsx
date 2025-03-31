@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown, Sparkles, Award, Circle, CircleDot } from 'lucide-react';
+import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown, Sparkles, Award, Circle, CircleDot, Calendar } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -12,6 +12,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 
 interface LocationCardProps {
   recommendation: Recommendation;
@@ -419,14 +424,47 @@ const LocationCard: React.FC<LocationCardProps> = ({
     return ranges.join(', ');
   };
 
+  const formatDayShort = (day: string): string => {
+    const dayMap: Record<string, string> = {
+      'monday': 'Mon',
+      'tuesday': 'Tue',
+      'wednesday': 'Wed',
+      'thursday': 'Thu',
+      'friday': 'Fri',
+      'saturday': 'Sat',
+      'sunday': 'Sun'
+    };
+    
+    return dayMap[day.toLowerCase()] || day;
+  };
+
+  const formatTime = (time: string | undefined): string => {
+    if (!time) return '';
+    return time;
+  };
+
+  const getAvailabilityHoursDisplay = (): string => {
+    if (recommendation.availability_start_time && recommendation.availability_end_time) {
+      return `${formatTime(recommendation.availability_start_time)}-${formatTime(recommendation.availability_end_time)}`;
+    }
+    return businessHours || '';
+  };
+
+  const getAvailabilityDaysDisplay = (): React.ReactNode => {
+    if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
+      return null;
+    }
+    
+    return recommendation.availability_days.map(day => formatDayShort(day)).join(', ');
+  };
+
   const openStatus = isOpenNow();
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
   const availabilityInfo = formatAvailabilityDays();
   const isSearchResultCard = className?.includes('search-result-card');
   const isLocationDetailsPage = window.location.pathname.includes('/location/');
   const shouldIncreaseHeight = isSearchResultCard || isLocationDetailsPage;
-  const imageHeightClass = shouldIncreaseHeight ? "h-[400px]" // Increased height for search results and location details
-  : "h-72";
+  const imageHeightClass = shouldIncreaseHeight ? "h-[400px]" : "h-72";
 
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <div className={cn("relative w-full overflow-hidden", imageHeightClass)}>
@@ -506,21 +544,44 @@ const LocationCard: React.FC<LocationCardProps> = ({
         {(recommendation.openNow !== undefined || recommendation.hours || recommendation.availability || hasAvailabilityInfo()) && <div className="flex flex-col text-sm mb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                {openStatus === true ? <CircleDot className="w-4 h-4 mr-1 flex-shrink-0 text-emerald-600 fill-emerald-600" /> : openStatus === false ? <Circle className="w-4 h-4 mr-1 flex-shrink-0 text-rose-600 fill-rose-600" /> : <Clock className="w-4 h-4 mr-1 flex-shrink-0" />}
-                <span className={openStatus === true ? "text-emerald-600 font-medium" : openStatus === false ? "text-rose-600 font-medium" : "text-muted-foreground"}>
+                {openStatus === true ? 
+                  <CircleDot className="w-4 h-4 mr-1 flex-shrink-0 text-emerald-600 fill-emerald-600" /> : 
+                  openStatus === false ? 
+                  <Circle className="w-4 h-4 mr-1 flex-shrink-0 text-rose-600 fill-rose-600" /> : 
+                  <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
+                }
+                <span className={openStatus === true ? 
+                  "text-emerald-600 font-medium" : 
+                  openStatus === false ? 
+                  "text-rose-600 font-medium" : 
+                  "text-muted-foreground"
+                }>
                   {openStatus === true ? "Open now" : openStatus === false ? "Closed" : "Hours available"}
                 </span>
               </div>
               
-              {hasAvailabilityInfo() && openStatus === false && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="ml-2">
-                  <CollapsibleTrigger onClick={e => e.stopPropagation()} className="flex items-center text-xs font-medium text-muted-foreground hover:text-primary transition-colors py-0.5 border border-transparent hover:border-border/30 rounded-md px-0 mx-[43px]">
-                    Available days
-                    <ChevronDown className={cn("h-3 w-3 ml-1 transition-transform", availabilityOpen ? "transform rotate-180" : "")} />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-0.5 mb-0.5 border-l border-muted pl-0.5">
-                    {availabilityInfo}
-                  </CollapsibleContent>
-                </Collapsible>}
+              {(hasAvailabilityInfo() || businessHours) && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="ml-2 inline-flex items-center text-xs font-medium text-primary hover:text-primary/80 transition-colors rounded-md" onClick={(e) => e.stopPropagation()}>
+                    <Calendar className="h-3.5 w-3.5 mr-1" />
+                    <span className="underline">Hours</span>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
+                    {getAvailabilityDaysDisplay() && (
+                      <div className="mb-1">
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
+                        <div className="text-sm">{getAvailabilityDaysDisplay()}</div>
+                      </div>
+                    )}
+                    {getAvailabilityHoursDisplay() && (
+                      <div>
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Hours:</div>
+                        <div className="text-sm">{getAvailabilityHoursDisplay()}</div>
+                      </div>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
             
             {hasAvailabilityInfo() && openStatus !== false && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="mt-0.5">
