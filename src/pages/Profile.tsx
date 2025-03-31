@@ -28,6 +28,7 @@ const Profile = () => {
   }, [user, navigate]);
 
   const handleAddBusiness = () => {
+    console.log('Add business button clicked');
     setEditingBusiness(null);
     setShowAddBusinessForm(true);
     setActiveTab("businesses"); // Ensure we're on the businesses tab
@@ -124,7 +125,11 @@ const Profile = () => {
             <TabsContent value="businesses">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold">Your Business Listings</h2>
-                <Button onClick={handleAddBusiness} className="flex items-center gap-2">
+                <Button 
+                  onClick={handleAddBusiness} 
+                  className="flex items-center gap-2"
+                  type="button"
+                >
                   <Plus className="h-4 w-4" />
                   Add Business
                 </Button>
