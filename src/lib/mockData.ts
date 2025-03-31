@@ -1,4 +1,3 @@
-
 export interface Recommendation {
   id: string;
   name: string;
@@ -14,8 +13,8 @@ export interface Recommendation {
   price_range_max?: number;
   price_unit?: string;
   address: string;
-  area?: string;  // Added area property
-  city?: string;  // Added city property
+  area?: string;
+  city?: string;
   phone?: string;
   website?: string;
   openNow?: boolean;
@@ -231,6 +230,31 @@ export const mockRecommendations: Recommendation[] = [
       'https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
       'https://images.unsplash.com/photo-1559339352-11d035aa65de?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80'
     ]
+  },
+  {
+    id: 'corner-house-01',
+    name: 'Corner House',
+    category: 'Restaurants',
+    tags: ['Ice Cream', 'Desserts', 'Family-Friendly'],
+    rating: 4.8,
+    address: '56, 14th Cross, 5th Block, Jayanagar, Bangalore',
+    distance: '1.3 miles away',
+    phone: '+919876543299',
+    image: 'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?q=80&w=1470&auto=format&fit=crop',
+    description: 'Beloved ice cream parlor known for its signature desserts including Death by Chocolate and Hot Chocolate Fudge.',
+    openNow: true,
+    hours: 'Until 11:00 PM',
+    priceLevel: '$$',
+    instagram: 'https://www.instagram.com/reel/C17I8mBvEOX/?igsh=djY1eDZrbmI3bXA0',
+    images: [
+      'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?q=80&w=1470&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=2127&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1551024709-8f23befc6f87?q=80&w=1557&auto=format&fit=crop'
+    ],
+    area: 'Jayanagar',
+    city: 'Bangalore',
+    isHiddenGem: true,
+    isMustVisit: true
   }
 ];
 
