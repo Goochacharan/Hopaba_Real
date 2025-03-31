@@ -129,14 +129,14 @@ const useRecommendations = ({
               availabilityDays = item.availability_days;
             } else if (typeof item.availability_days === 'string') {
               try {
-                if (item.availability_days.startsWith('[') && item.availability_days.endsWith(']')) {
+                if (typeof item.availability_days === 'string' && item.availability_days.startsWith('[') && item.availability_days.endsWith(']')) {
                   availabilityDays = JSON.parse(item.availability_days);
-                } else {
+                } else if (typeof item.availability_days === 'string') {
                   availabilityDays = item.availability_days.split(',').map(day => day.trim());
                 }
               } catch (e) {
                 console.error(`Failed to parse availability_days for ${item.name}:`, e);
-                availabilityDays = [item.availability_days];
+                availabilityDays = typeof item.availability_days === 'string' ? [item.availability_days] : [];
               }
             }
           }
