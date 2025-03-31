@@ -14,6 +14,24 @@ import LocationHeader from '@/components/location/LocationHeader';
 import LocationAbout from '@/components/location/LocationAbout';
 import ReviewsSection from '@/components/location/ReviewsSection';
 
+const getStoredReviews = (locationId: string): Review[] => {
+  try {
+    const storedReviews = localStorage.getItem(`reviews_${locationId}`);
+    return storedReviews ? JSON.parse(storedReviews) : [];
+  } catch (error) {
+    console.error('Error getting stored reviews:', error);
+    return [];
+  }
+};
+
+const storeReviews = (locationId: string, reviews: Review[]) => {
+  try {
+    localStorage.setItem(`reviews_${locationId}`, JSON.stringify(reviews));
+  } catch (error) {
+    console.error('Error storing reviews:', error);
+  }
+};
+
 const LocationDetails = () => {
   const { id } = useParams<{ id: string; }>();
   const navigate = useNavigate();
@@ -47,6 +65,10 @@ const LocationDetails = () => {
       return;
     }
     setLoading(true);
+    
+    // Load reviews from localStorage
+    const savedReviews = getStoredReviews(id);
+    setUserReviews(savedReviews);
     
     const mockLocation = getRecommendationById(id);
     
@@ -147,7 +169,16 @@ const LocationDetails = () => {
       isMustVisit: values.isMustVisit,
       isHiddenGem: values.isHiddenGem
     };
-    setUserReviews(prev => [newReview, ...prev]);
+    
+    // Add the new review to the state
+    const updatedReviews = [newReview, ...userReviews];
+    setUserReviews(updatedReviews);
+    
+    // Save to localStorage
+    if (id) {
+      storeReviews(id, updatedReviews);
+    }
+    
     toast({
       title: "Review submitted",
       description: "Thank you for sharing your experience!",
