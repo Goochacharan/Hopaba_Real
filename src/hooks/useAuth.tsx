@@ -94,22 +94,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [authAttempts, toast]);
 
   useEffect(() => {
+    console.log('Auth provider: Initializing');
     const getUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      
-      if (data?.user) {
-        setUser(data.user);
-        checkAdminStatus(data.user.id);
-      }
-      
-      if (error) {
-        console.error('Error fetching user:', error);
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        
+        if (data?.user) {
+          console.log('Auth provider: User found');
+          setUser(data.user);
+          checkAdminStatus(data.user.id);
+        } else {
+          console.log('Auth provider: No user found');
+        }
+        
+        if (error) {
+          console.error('Auth provider: Error fetching user:', error);
+        }
+      } catch (err) {
+        console.error('Auth provider: Exception fetching user:', err);
       }
     };
 
     getUser();
 
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth provider: Auth state changed:', event);
       if (event === 'SIGNED_IN' && session?.user) {
         setUser(session.user);
         checkAdminStatus(session.user.id);

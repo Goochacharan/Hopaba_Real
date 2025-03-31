@@ -61,7 +61,7 @@ const BasicInfoSection = () => {
   React.useEffect(() => {
     // Initialize tags when form values change
     const formTags = form.getValues('tags');
-    if (formTags && formTags.length > 0) {
+    if (formTags && formTags.length > 0 && Array.isArray(formTags)) {
       setTags(formTags);
     }
   }, [form]);
