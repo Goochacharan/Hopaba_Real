@@ -11,16 +11,16 @@ import UserEventListings from '@/components/UserEventListings';
 import { AdminSection } from '@/components/admin/AdminSection';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import BusinessListingForm from '@/components/business-profile/BusinessListingForm';
-import BusinessList from '@/components/business-profile/BusinessList';
-import { BusinessData } from '@/components/business-profile/BusinessListingForm';
+import BusinessFormSimple from '@/components/business/BusinessFormSimple';
+import BusinessListSimple from '@/components/business/BusinessListSimple';
+import { Business } from '@/components/business/BusinessFormSimple';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useAuth();
   const { toast } = useToast();
   const [refreshBusinesses, setRefreshBusinesses] = useState(false);
-  const [editingBusiness, setEditingBusiness] = useState<BusinessData | null>(null);
+  const [editingBusiness, setEditingBusiness] = useState<Business | null>(null);
   const [showAddBusinessForm, setShowAddBusinessForm] = useState(false);
   const [activeTab, setActiveTab] = useState("listings");
 
@@ -36,7 +36,7 @@ const Profile = () => {
     setActiveTab("businesses"); // Ensure we're on the businesses tab
   };
 
-  const handleEditBusiness = (business: BusinessData) => {
+  const handleEditBusiness = (business: Business) => {
     setEditingBusiness(business);
     setShowAddBusinessForm(true);
     setActiveTab("businesses"); // Ensure we're on the businesses tab
@@ -106,7 +106,7 @@ const Profile = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <BusinessListingForm 
+              <BusinessFormSimple 
                 business={editingBusiness} 
                 onSaved={handleBusinessSaved}
                 onCancel={handleCancelBusinessForm}
@@ -134,10 +134,11 @@ const Profile = () => {
                 <h2 className="text-2xl font-bold">Your Business Listings</h2>
                 <Button onClick={handleAddBusiness} className="flex items-center gap-2">
                   <Plus className="h-4 w-4" />
-                  Submit Business
+                  Add Business
                 </Button>
               </div>
-              <BusinessList
+
+              <BusinessListSimple
                 onEdit={handleEditBusiness}
                 refresh={refreshBusinesses}
               />
