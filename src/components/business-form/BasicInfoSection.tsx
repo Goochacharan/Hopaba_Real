@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Store, FileText, PencilRuler, Medal, Tag } from 'lucide-react';
+import { Store, FileText, PencilRuler, Medal, Tag, IndianRupee } from 'lucide-react';
 import { BusinessFormValues } from '../AddBusinessForm';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -104,12 +104,31 @@ const categories = [
   "Other"
 ];
 
+// Common price ranges in Rupees
+const priceRanges = [
+  { min: 100, max: 200 },
+  { min: 200, max: 300 },
+  { min: 300, max: 500 },
+  { min: 500, max: 800 },
+  { min: 800, max: 1000 },
+  { min: 1000, max: 1500 },
+  { min: 1500, max: 2000 },
+  { min: 2000, max: 3000 },
+  { min: 3000, max: 5000 },
+  { min: 5000, max: 10000 },
+  { min: 10000, max: 20000 },
+  { min: 20000, max: 50000 },
+];
+
 const BasicInfoSection = () => {
   const form = useFormContext<BusinessFormValues>();
   const [newTag, setNewTag] = useState('');
+  const [customPriceRange, setCustomPriceRange] = useState(false);
   
   // Get the tags field array from the form
   const tags = form.watch('tags') || [];
+  const priceRangeMin = form.watch('price_range_min');
+  const priceRangeMax = form.watch('price_range_max');
   
   const handleAddTag = () => {
     if (newTag && !tags.includes(newTag)) {
@@ -122,6 +141,44 @@ const BasicInfoSection = () => {
   const handleRemoveTag = (tagToRemove: string) => {
     const updatedTags = tags.filter(tag => tag !== tagToRemove);
     form.setValue('tags', updatedTags);
+  };
+
+  const handlePriceRangeSelect = (value: string) => {
+    if (value === 'custom') {
+      setCustomPriceRange(true);
+      return;
+    }
+    
+    setCustomPriceRange(false);
+    const [min, max] = value.split('-').map(Number);
+    form.setValue('price_range_min', min);
+    form.setValue('price_range_max', max);
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(price);
+  };
+
+  const getCurrentPriceRangeValue = () => {
+    if (customPriceRange) return 'custom';
+    if (priceRangeMin === undefined || priceRangeMax === undefined) return '';
+    
+    // Check if it matches one of our predefined ranges
+    const matchingRange = priceRanges.find(
+      range => range.min === priceRangeMin && range.max === priceRangeMax
+    );
+    
+    if (matchingRange) {
+      return `${matchingRange.min}-${matchingRange.max}`;
+    }
+    
+    // If no match, it's a custom range
+    setCustomPriceRange(true);
+    return 'custom';
   };
 
   return (
@@ -196,34 +253,110 @@ const BasicInfoSection = () => {
         )}
       />
 
-      <FormField
-        control={form.control}
-        name="price_unit"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Pricing Unit</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value || "per hour"}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select pricing unit" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="per hour">Per Hour</SelectItem>
-                <SelectItem value="per session">Per Session</SelectItem>
-                <SelectItem value="per person">Per Person</SelectItem>
-                <SelectItem value="per day">Per Day</SelectItem>
-                <SelectItem value="per month">Per Month</SelectItem>
-                <SelectItem value="fixed">Fixed Price</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormDescription>
-              How you charge for your services
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
+      <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          control={form.control}
+          name="price_unit"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Pricing Unit</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value || "per hour"}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select pricing unit" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="per hour">Per Hour</SelectItem>
+                  <SelectItem value="per session">Per Session</SelectItem>
+                  <SelectItem value="per person">Per Person</SelectItem>
+                  <SelectItem value="per day">Per Day</SelectItem>
+                  <SelectItem value="per month">Per Month</SelectItem>
+                  <SelectItem value="fixed">Fixed Price</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                How you charge for your services
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormItem>
+          <FormLabel className="flex items-center gap-2">
+            <IndianRupee className="h-4 w-4" />
+            Price Range
+          </FormLabel>
+          <Select
+            onValueChange={handlePriceRangeSelect}
+            value={getCurrentPriceRangeValue()}
+          >
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select price range" />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {priceRanges.map((range) => (
+                <SelectItem key={`${range.min}-${range.max}`} value={`${range.min}-${range.max}`}>
+                  {formatPrice(range.min)} ~ {formatPrice(range.max)}
+                </SelectItem>
+              ))}
+              <SelectItem value="custom">Custom Range</SelectItem>
+            </SelectContent>
+          </Select>
+          <FormDescription>
+            Your typical price range
+          </FormDescription>
+        </FormItem>
+
+        {customPriceRange && (
+          <>
+            <FormField
+              control={form.control}
+              name="price_range_min"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Minimum Price (₹)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="Minimum price" 
+                      min={0}
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value) || 0)}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="price_range_max"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Maximum Price (₹)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="Maximum price" 
+                      min={0}
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value) || 0)}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
         )}
-      />
+      </div>
 
       <FormField
         control={form.control}
