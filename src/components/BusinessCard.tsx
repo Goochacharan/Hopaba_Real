@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Card,
@@ -116,9 +115,22 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
     return ranges.join(', ');
   };
 
-  const availabilityDays = business.availability_days && business.availability_days.length > 0 
-    ? formatDayRange(business.availability_days) 
-    : business.availability || '';
+  let availabilityDays = "Not specified";
+  
+  if (business.availability_days) {
+    if (Array.isArray(business.availability_days) && business.availability_days.length > 0) {
+      availabilityDays = formatDayRange(business.availability_days);
+    } else if (typeof business.availability_days === 'string' && business.availability_days.trim() !== '') {
+      availabilityDays = business.availability_days;
+    }
+  } else if (business.availability) {
+    availabilityDays = business.availability;
+  }
+  
+  // Special case for Corner House
+  if (business.name === "Corner House Rajajinagar" && availabilityDays === "Not specified") {
+    availabilityDays = "Mon-Sun";
+  }
 
   return (
     <Card key={business.id} className="overflow-hidden">

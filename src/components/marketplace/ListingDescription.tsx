@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { format, differenceInDays } from 'date-fns';
 import { Instagram, Film, Sparkles, MapPin, Link2, Tag, Clock, Calendar } from 'lucide-react';
@@ -94,10 +95,25 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
     return ranges.join(', ');
   };
   
-  const hasAvailabilityDays = availability_days && availability_days.length > 0;
-  const displayAvailabilityDays = hasAvailabilityDays 
-    ? formatDayRange(availability_days) 
-    : null;
+  // Handle availability_days as either array or string
+  let hasAvailabilityDays = false;
+  let displayAvailabilityDays = null;
+  
+  if (availability_days) {
+    if (Array.isArray(availability_days) && availability_days.length > 0) {
+      hasAvailabilityDays = true;
+      displayAvailabilityDays = formatDayRange(availability_days);
+    } else if (typeof availability_days === 'string' && availability_days.trim() !== '') {
+      hasAvailabilityDays = true;
+      displayAvailabilityDays = availability_days;
+    }
+  }
+  
+  // Special case for Corner House category
+  if (category === "Corner House" && !hasAvailabilityDays) {
+    hasAvailabilityDays = true;
+    displayAvailabilityDays = "Mon-Sun";
+  }
 
   return (
     <div className="bg-white rounded-xl border p-6 shadow-sm">
@@ -119,7 +135,7 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
           
           {showMetadata && (
             <div className="mt-6 space-y-4 text-sm text-gray-700">
-              {(displayAvailabilityDays || (category === "Corner House" && !displayAvailabilityDays)) && (
+              {(displayAvailabilityDays || category === "Corner House") && (
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-primary" />
                   <span className="font-medium">

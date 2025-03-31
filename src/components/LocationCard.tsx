@@ -299,7 +299,33 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
   const formatBusinessHours = (hours: string | undefined) => {
     if (!hours) {
-      if (recommendation.availability_days && recommendation.availability_days.length > 0) {
+      if (recommendation.availability_days) {
+        const isArray = Array.isArray(recommendation.availability_days);
+        
+        console.log(`Availability days for ${recommendation.name}:`, recommendation.availability_days, `Is array: ${isArray}`);
+        
+        if (isArray && recommendation.availability_days.length > 0) {
+          const days = recommendation.availability_days.join(', ');
+          const startTime = recommendation.availability_start_time || '';
+          const endTime = recommendation.availability_end_time || '';
+          if (startTime && endTime) {
+            return `${days}: ${startTime} - ${endTime}`;
+          }
+          return days;
+        } else if (recommendation.availability_days && typeof recommendation.availability_days === 'string') {
+          const days = recommendation.availability_days;
+          const startTime = recommendation.availability_start_time || '';
+          const endTime = recommendation.availability_end_time || '';
+          if (startTime && endTime) {
+            return `${days}: ${startTime} - ${endTime}`;
+          }
+          return days;
+        }
+      }
+      return null;
+    }
+    if (recommendation.availability_days) {
+      if (Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0) {
         const days = recommendation.availability_days.join(', ');
         const startTime = recommendation.availability_start_time || '';
         const endTime = recommendation.availability_end_time || '';
@@ -307,63 +333,24 @@ const LocationCard: React.FC<LocationCardProps> = ({
           return `${days}: ${startTime} - ${endTime}`;
         }
         return days;
+      } else if (typeof recommendation.availability_days === 'string') {
+        const days = recommendation.availability_days;
+        const startTime = recommendation.availability_start_time || '';
+        const endTime = recommendation.availability_end_time || '';
+        if (startTime && endTime) {
+          return `${days}: ${startTime} - ${endTime}`;
+        }
+        return days;
       }
-      return null;
-    }
-    if (recommendation.availability_days && recommendation.availability_days.length > 0) {
-      const days = recommendation.availability_days.join(', ');
-      const startTime = recommendation.availability_start_time || '';
-      const endTime = recommendation.availability_end_time || '';
-      if (startTime && endTime) {
-        return `${days}: ${startTime} - ${endTime}`;
-      }
-      return days;
     }
     return hours;
   };
 
-  const isOpenNow = () => {
-    if (recommendation.openNow === true) return true;
-    if (recommendation.openNow === false) return false;
-    if (hasAvailabilityInfo()) {
-      const now = new Date();
-      const currentDay = now.toLocaleDateString('en-US', {
-        weekday: 'long'
-      }).toLowerCase();
-      const availableDays = recommendation.availability_days?.map(day => day.toLowerCase()) || [];
-      const isAvailableToday = availableDays.some(day => currentDay.includes(day) || day.includes(currentDay));
-      if (!isAvailableToday) return false;
-      if (recommendation.availability_start_time && recommendation.availability_end_time) {
-        const startTime = parseTimeString(recommendation.availability_start_time);
-        const endTime = parseTimeString(recommendation.availability_end_time);
-        const currentHour = now.getHours();
-        const currentMinute = now.getMinutes();
-        const currentTimeInMinutes = currentHour * 60 + currentMinute;
-        return currentTimeInMinutes >= startTime && currentTimeInMinutes <= endTime;
-      }
-      return true;
-    }
-    if (recommendation.hours || recommendation.availability) {
-      return true;
-    }
-    return undefined;
-  };
-
-  const parseTimeString = (timeString: string): number => {
-    try {
-      const [time, period] = timeString.split(' ');
-      let [hours, minutes] = time.split(':').map(Number);
-      if (period === 'PM' && hours < 12) hours += 12;
-      if (period === 'AM' && hours === 12) hours = 0;
-      return hours * 60 + minutes;
-    } catch (e) {
-      console.error("Error parsing time string:", timeString, e);
-      return 0;
-    }
-  };
-
   const hasAvailabilityInfo = () => {
-    return recommendation.availability_days && Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0;
+    return recommendation.availability_days && 
+           (Array.isArray(recommendation.availability_days) ? 
+             recommendation.availability_days.length > 0 : 
+             recommendation.availability_days.trim() !== '');
   };
 
   const hasInstagram = () => {
@@ -373,21 +360,42 @@ const LocationCard: React.FC<LocationCardProps> = ({
   };
 
   const formatAvailabilityDays = () => {
-    if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
+    if (!recommendation.availability_days) {
       return null;
     }
-    const formattedDays = formatDayRange(recommendation.availability_days);
-    const startTime = recommendation.availability_start_time || '';
-    const endTime = recommendation.availability_end_time || '';
-    if (startTime && endTime) {
+    
+    if (Array.isArray(recommendation.availability_days)) {
+      if (recommendation.availability_days.length === 0) {
+        return null;
+      }
+      const formattedDays = formatDayRange(recommendation.availability_days);
+      const startTime = recommendation.availability_start_time || '';
+      const endTime = recommendation.availability_end_time || '';
+      if (startTime && endTime) {
+        return <div className="text-sm text-muted-foreground px-0">
+            <p className="leading-none">{formattedDays}</p>
+            <p className="leading-none mt-0">{startTime} - {endTime}</p>
+          </div>;
+      }
       return <div className="text-sm text-muted-foreground px-0">
           <p className="leading-none">{formattedDays}</p>
-          <p className="leading-none mt-0">{startTime} - {endTime}</p>
+        </div>;
+    } else if (typeof recommendation.availability_days === 'string') {
+      const formattedDays = recommendation.availability_days;
+      const startTime = recommendation.availability_start_time || '';
+      const endTime = recommendation.availability_end_time || '';
+      if (startTime && endTime) {
+        return <div className="text-sm text-muted-foreground px-0">
+            <p className="leading-none">{formattedDays}</p>
+            <p className="leading-none mt-0">{startTime} - {endTime}</p>
+          </div>;
+      }
+      return <div className="text-sm text-muted-foreground px-0">
+          <p className="leading-none">{formattedDays}</p>
         </div>;
     }
-    return <div className="text-sm text-muted-foreground px-0">
-        <p className="leading-none">{formattedDays}</p>
-      </div>;
+    
+    return null;
   };
 
   const formatDayRange = (days: string[]): string => {
@@ -487,9 +495,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const shouldIncreaseHeight = isSearchResultCard || isLocationDetailsPage;
   const imageHeightClass = shouldIncreaseHeight ? "h-[400px]" : "h-72";
 
-  const formattedAvailabilityDays = recommendation.availability_days && recommendation.availability_days.length > 0 
-    ? formatDayRange(recommendation.availability_days) 
-    : null;
+  const formattedAvailabilityDays = recommendation.availability_days ? 
+    (Array.isArray(recommendation.availability_days) ? 
+      (recommendation.availability_days.length > 0 ? formatDayRange(recommendation.availability_days) : "Not specified") : 
+      (recommendation.availability_days || "Not specified")) 
+    : "Not specified";
 
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <div className={cn("relative w-full overflow-hidden", imageHeightClass)}>
@@ -566,13 +576,13 @@ const LocationCard: React.FC<LocationCardProps> = ({
             </div>}
         </div>
 
-        {(recommendation.availability_days?.length > 0 || recommendation.hours || recommendation.availability) && (
+        {(recommendation.availability_days || recommendation.hours || recommendation.availability) && (
           <div className="flex flex-col text-sm mb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <Calendar className="w-4 h-4 mr-1 flex-shrink-0 text-muted-foreground" />
                 <span className="text-muted-foreground">
-                  Working days: {formattedAvailabilityDays || 'Not specified'}
+                  Working days: {formattedAvailabilityDays}
                 </span>
               </div>
               
@@ -583,10 +593,16 @@ const LocationCard: React.FC<LocationCardProps> = ({
                     <span className="underline">Hours</span>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
-                    {recommendation.availability_days && recommendation.availability_days.length > 0 && (
+                    {recommendation.availability_days && (
                       <div className="mb-1">
                         <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
-                        <div className="text-sm">{formatDayRange(recommendation.availability_days)}</div>
+                        <div className="text-sm">
+                          {Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0 ? 
+                            formatDayRange(recommendation.availability_days) : 
+                            (typeof recommendation.availability_days === 'string' ? 
+                              recommendation.availability_days : 
+                              "Not specified")}
+                        </div>
                       </div>
                     )}
                     {(recommendation.availability_start_time && recommendation.availability_end_time) && (

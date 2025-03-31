@@ -122,13 +122,31 @@ const useRecommendations = ({
         });
         
         return data.map(item => {
-          let availabilityDays = item.availability_days || [];
-          let formattedAvailability = item.availability || null;
+          let availabilityDays = [];
+          
+          if (item.availability_days) {
+            if (Array.isArray(item.availability_days)) {
+              availabilityDays = item.availability_days;
+            } else if (typeof item.availability_days === 'string') {
+              try {
+                if (item.availability_days.startsWith('[') && item.availability_days.endsWith(']')) {
+                  availabilityDays = JSON.parse(item.availability_days);
+                } else {
+                  availabilityDays = item.availability_days.split(',').map(day => day.trim());
+                }
+              } catch (e) {
+                console.error(`Failed to parse availability_days for ${item.name}:`, e);
+                availabilityDays = [item.availability_days];
+              }
+            }
+          }
           
           if (item.name === "Corner House Rajajinagar" && (!availabilityDays || availabilityDays.length === 0)) {
             availabilityDays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
-            formattedAvailability = "Mon-Sun";
+            console.log("Set default days for Corner House Rajajinagar:", availabilityDays);
           }
+          
+          let formattedAvailability = item.availability || null;
           
           return {
             id: item.id,
