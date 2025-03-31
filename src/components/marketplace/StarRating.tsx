@@ -30,6 +30,7 @@ const StarRating: React.FC<StarRatingProps> = ({
   
   // If rating exists (either from reviews or default set by admin), show stars
   if (rating > 0) {
+    // Ensure rating is properly rounded to prevent fractional star display issues
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
     const totalStars = 5;

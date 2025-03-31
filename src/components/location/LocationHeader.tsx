@@ -22,6 +22,9 @@ const LocationHeader = ({ name, rating, reviewCount, onImageClick, images }: Loc
     });
   };
 
+  // Format the rating to one decimal place
+  const formattedRating = rating.toFixed(1);
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6">
       <div className="w-full h-[400px] relative overflow-hidden">
@@ -56,7 +59,7 @@ const LocationHeader = ({ name, rating, reviewCount, onImageClick, images }: Loc
         
         <div className="flex items-center mb-4">
           <div className="flex items-center text-amber-500">
-            <span className="text-lg font-semibold mr-1 text-amber-700">{rating.toFixed(1)}</span>
+            <span className="text-lg font-semibold mr-1 text-amber-700">{formattedRating}</span>
             <Star className="fill-amber-500 w-4 h-4" />
           </div>
           <span className="text-xs text-muted-foreground ml-1">

@@ -4,14 +4,23 @@ import LocationCard from '@/components/LocationCard';
 import { Recommendation } from '@/lib/mockData';
 import { Loader2 } from 'lucide-react';
 
-// Helper function to get stored reviews count
-const getStoredReviewsCount = (locationId: string): number => {
+// Helper function to get stored reviews count and calculate average rating
+const getStoredReviews = (locationId: string) => {
   try {
     const storedReviews = localStorage.getItem(`reviews_${locationId}`);
-    return storedReviews ? JSON.parse(storedReviews).length : 0;
+    const reviews = storedReviews ? JSON.parse(storedReviews) : [];
+    const count = reviews.length;
+    let avgRating = 0;
+    
+    if (count > 0) {
+      const sum = reviews.reduce((total: number, review: any) => total + review.rating, 0);
+      avgRating = sum / count;
+    }
+    
+    return { count, avgRating };
   } catch (error) {
-    console.error('Error getting stored reviews count:', error);
-    return 0;
+    console.error('Error getting stored reviews:', error);
+    return { count: 0, avgRating: 0 };
   }
 };
 
@@ -56,9 +65,14 @@ const LocationsList: React.FC<LocationsListProps> = ({
   return (
     <div className="grid grid-cols-1 gap-6">
       {recommendations.map((recommendation, index) => {
-        // Check for user reviews in localStorage
-        const userReviewsCount = getStoredReviewsCount(recommendation.id);
+        // Get user reviews from localStorage
+        const { count: userReviewsCount, avgRating: userAvgRating } = getStoredReviews(recommendation.id);
+        
+        // Calculate the total review count
         const totalReviewCount = userReviewsCount + (recommendation.reviewCount || 0);
+        
+        // Use user rating if available, otherwise use default rating
+        const displayRating = userReviewsCount > 0 ? userAvgRating : recommendation.rating;
         
         return (
           <div 
@@ -69,6 +83,7 @@ const LocationsList: React.FC<LocationsListProps> = ({
             <LocationCard 
               recommendation={{
                 ...recommendation,
+                rating: displayRating, // Override with user rating if available
                 address: recommendation.address || (recommendation.area && recommendation.city ? `${recommendation.area}, ${recommendation.city}` : recommendation.address || '')
               }}
               showDistanceUnderAddress={true}
