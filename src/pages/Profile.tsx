@@ -126,7 +126,7 @@ const Profile = () => {
                 <h2 className="text-2xl font-bold">Your Business Listings</h2>
                 <Button onClick={handleAddBusiness} className="flex items-center gap-2">
                   <Plus className="h-4 w-4" />
-                  Add Business
+                  Submit Business
                 </Button>
               </div>
               <BusinessesList
