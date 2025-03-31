@@ -39,6 +39,7 @@ export interface Business {
   contact_phone?: string;
   whatsapp?: string;
   contact_email?: string;
+  tags?: string[];
 }
 
 // Extend the business schema to include all the fields from the detailed form sections
@@ -92,6 +93,11 @@ const businessSchema = z.object({
   availability: z.string().optional(),
   languages: z.array(z.string()).optional(),
   experience: z.string().optional(),
+  tags: z.array(z.string())
+    .min(3, {
+      message: "Please add at least 3 tags describing your services or items."
+    })
+    .optional(),
 });
 
 export type BusinessFormValues = z.infer<typeof businessSchema>;
@@ -124,6 +130,7 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
       website: business?.website || "",
       instagram: business?.instagram || "",
       map_link: business?.map_link || "",
+      tags: business?.tags || [],
     },
   });
 
@@ -163,6 +170,7 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         availability: data.availability,
         languages: data.languages,
         experience: data.experience,
+        tags: data.tags,
       };
 
       if (business?.id) {

@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { format, differenceInDays } from 'date-fns';
-import { Instagram, Film, Sparkles, MapPin, Link2 } from 'lucide-react';
+import { Instagram, Film, Sparkles, MapPin, Link2, Tag } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 
 interface ListingDescriptionProps {
   description: string;
@@ -15,6 +16,7 @@ interface ListingDescriptionProps {
   showMetadata?: boolean;
   priceUnit?: string;
   experience?: string;
+  tags?: string[];
 }
 
 const ListingDescription: React.FC<ListingDescriptionProps> = ({
@@ -27,7 +29,8 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
   mapLink,
   showMetadata = false,
   priceUnit,
-  experience
+  experience,
+  tags
 }) => {
   const isVideoContent = instagram && (instagram.includes('youtube.com') || instagram.includes('vimeo.com') || instagram.includes('tiktok.com'));
 
@@ -53,7 +56,7 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
           </p>
           
           {showMetadata && (
-            <div className="mt-6 space-y-2 text-sm text-gray-700">
+            <div className="mt-6 space-y-4 text-sm text-gray-700">
               {priceUnit && (
                 <p>
                   <span className="font-semibold">Pricing:</span> {priceUnit}
@@ -64,6 +67,22 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
                 <p>
                   <span className="font-semibold">Experience:</span> {experience} years
                 </p>
+              )}
+              
+              {tags && tags.length > 0 && (
+                <div className="space-y-2">
+                  <p className="font-semibold flex items-center gap-1">
+                    <Tag className="h-3.5 w-3.5" />
+                    Services/Items:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((tag) => (
+                      <Badge key={tag} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
               )}
               
               {mapLink && (

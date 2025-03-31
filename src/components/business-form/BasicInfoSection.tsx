@@ -18,11 +18,82 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Store, FileText, PencilRuler, Medal } from 'lucide-react';
+import { Store, FileText, PencilRuler, Medal, Tag } from 'lucide-react';
 import { BusinessFormValues } from '../AddBusinessForm';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+
+const categories = [
+  "Accountant",
+  "Actor/Actress",
+  "Architect",
+  "Artist",
+  "Bartender",
+  "Blacksmith",
+  "Carpenter",
+  "Chef/Cook",
+  "Choreographer",
+  "Dentist",
+  "Doctor",
+  "Electrician",
+  "Fashion Designer",
+  "Financial Analyst",
+  "Graphic Designer",
+  "Hair Stylist/Barber",
+  "Hotel Manager",
+  "Human Resources Manager",
+  "Journalist",
+  "Lawyer",
+  "Marketing Manager",
+  "Mechanic",
+  "Model",
+  "Musician",
+  "Nurse",
+  "Painter",
+  "Pharmacist",
+  "Photographer",
+  "Physiotherapist",
+  "Plumber",
+  "Professor",
+  "Researcher",
+  "Salesperson",
+  "Surgeon",
+  "Tailor",
+  "Teacher",
+  "Tutor",
+  "Veterinarian",
+  "Waiter/Waitress",
+  "Writer",
+  "Yoga Instructor",
+  "Fitness Trainer",
+  "Restaurant",
+  "Cafe",
+  "Hotel",
+  "Gym",
+  "Salon",
+  "Spa",
+  "Other"
+];
 
 const BasicInfoSection = () => {
   const form = useFormContext<BusinessFormValues>();
+  const [newTag, setNewTag] = useState('');
+  
+  // Get the tags field array from the form
+  const tags = form.watch('tags') || [];
+  
+  const handleAddTag = () => {
+    if (newTag && !tags.includes(newTag)) {
+      const updatedTags = [...tags, newTag];
+      form.setValue('tags', updatedTags);
+      setNewTag('');
+    }
+  };
+  
+  const handleRemoveTag = (tagToRemove: string) => {
+    const updatedTags = tags.filter(tag => tag !== tagToRemove);
+    form.setValue('tags', updatedTags);
+  };
 
   return (
     <>
@@ -62,22 +133,12 @@ const BasicInfoSection = () => {
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent>
-                <SelectItem value="Actor">Actor</SelectItem>
-                <SelectItem value="Painter">Painter</SelectItem>
-                <SelectItem value="Musician">Musician</SelectItem>
-                <SelectItem value="Photographer">Photographer</SelectItem>
-                <SelectItem value="Therapist">Therapist</SelectItem>
-                <SelectItem value="Tutor">Tutor</SelectItem>
-                <SelectItem value="Yoga Instructor">Yoga Instructor</SelectItem>
-                <SelectItem value="Fitness Trainer">Fitness Trainer</SelectItem>
-                <SelectItem value="Restaurant">Restaurant</SelectItem>
-                <SelectItem value="Cafe">Cafe</SelectItem>
-                <SelectItem value="Hotel">Hotel</SelectItem>
-                <SelectItem value="Gym">Gym</SelectItem>
-                <SelectItem value="Salon">Salon</SelectItem>
-                <SelectItem value="Spa">Spa</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
+              <SelectContent className="max-h-[300px]">
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <FormMessage />
@@ -146,6 +207,58 @@ const BasicInfoSection = () => {
             </FormControl>
             <FormDescription>
               How many years of experience you have
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="tags"
+        render={() => (
+          <FormItem className="md:col-span-2">
+            <FormLabel className="flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              Services/Items Offered (Tags)
+            </FormLabel>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {tags.map((tag) => (
+                <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                  {tag}
+                  <button 
+                    type="button" 
+                    onClick={() => handleRemoveTag(tag)}
+                    className="rounded-full h-4 w-4 inline-flex items-center justify-center text-xs hover:bg-destructive/20"
+                  >
+                    ×
+                  </button>
+                </Badge>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                placeholder="Add service or item (e.g. Hair Cut, Ice Cream)"
+                className="flex-1"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddTag();
+                  }
+                }}
+              />
+              <Button 
+                type="button" 
+                onClick={handleAddTag}
+                variant="outline"
+              >
+                Add
+              </Button>
+            </div>
+            <FormDescription>
+              Add at least 3 tags describing services or items you offer (e.g., Hair Cut, Ice Cream, Sandwich)
             </FormDescription>
             <FormMessage />
           </FormItem>
