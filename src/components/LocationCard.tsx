@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { correctIsInWishlist } from './LocationCardFix';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -36,8 +37,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
   const { toast } = useToast();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-  const inWishlist = isInWishlist(recommendation.id, 'location');
+  const { addToWishlist, removeFromWishlist } = useWishlist();
+  const inWishlist = correctIsInWishlist(recommendation.id, 'location');
   const isMobile = useIsMobile();
   const [user, setUser] = useState<any>(null);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);

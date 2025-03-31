@@ -3,6 +3,7 @@ import React from 'react';
 import LocationCard from '@/components/LocationCard';
 import { Recommendation } from '@/lib/mockData';
 import { Loader2 } from 'lucide-react';
+import { correctIsInWishlist } from '@/components/LocationCardFix';
 
 // Helper function to get stored reviews count and calculate average rating
 const getStoredReviews = (locationId: string) => {
@@ -66,7 +67,7 @@ const LocationsList: React.FC<LocationsListProps> = ({
   const preparedRecommendations = recommendations.map(recommendation => {
     // Handle possible conversions needed for availability_days
     let availabilityDays = recommendation.availability_days || [];
-    if (typeof availabilityDays === 'string' && availabilityDays) {
+    if (typeof availabilityDays === 'string') {
       try {
         // Try to parse it if it might be a JSON string
         if (availabilityDays.includes('[') && availabilityDays.includes(']')) {

@@ -168,25 +168,32 @@ export const useRecommendations = ({
       }
 
       // Transform business data to match Recommendation interface
-      let transformedData: Recommendation[] = businesses.map((business: ServiceProvider) => {
+      const transformedData: Recommendation[] = businesses.map((business: ServiceProvider) => {
         // Calculate distance if location is provided
         let distanceText = '';
         if (selectedLocation && business.coordinates) {
-          const coordinates = typeof business.coordinates === 'string' && business.coordinates ? 
-            business.coordinates.split('(')[1]?.split(')')[0]?.split(' ').map(Number) : 
-            null;
-            
-          if (coordinates && coordinates.length === 2) {
-            const [lng, lat] = coordinates;
-            const distance = calculateDistance(
-              selectedLocation.lat,
-              selectedLocation.lng,
-              lat,
-              lng
-            );
-            distanceText = distance < 1 
-              ? `${(distance * 1000).toFixed(0)} m` 
-              : `${distance.toFixed(1)} km`;
+          try {
+            const coordinatesStr = business.coordinates as string;
+            const coordinateMatch = coordinatesStr.match(/\(([^)]+)\)/);
+            if (coordinateMatch && coordinateMatch[1]) {
+              const coordParts = coordinateMatch[1].split(' ');
+              if (coordParts.length === 2) {
+                const [lng, lat] = coordParts.map(Number);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                  const distance = calculateDistance(
+                    selectedLocation.lat,
+                    selectedLocation.lng,
+                    lat,
+                    lng
+                  );
+                  distanceText = distance < 1 
+                    ? `${(distance * 1000).toFixed(0)} m` 
+                    : `${distance.toFixed(1)} km`;
+                }
+              }
+            }
+          } catch (e) {
+            console.error('Error parsing coordinates:', e);
           }
         }
 
@@ -195,8 +202,10 @@ export const useRecommendations = ({
         if (typeof availabilityDays === 'string' && availabilityDays) {
           try {
             // Try to parse it if it might be a JSON string
-            if (availabilityDays.includes('[') && availabilityDays.includes(']')) {
-              availabilityDays = JSON.parse(availabilityDays as string);
+            if (typeof availabilityDays === 'string' && 
+                availabilityDays.includes('[') && 
+                availabilityDays.includes(']')) {
+              availabilityDays = JSON.parse(availabilityDays);
             }
           } catch (e) {
             console.error('Error parsing availability_days:', e);
@@ -234,23 +243,25 @@ export const useRecommendations = ({
       });
 
       // Apply sorting
+      let sortedData = [...transformedData];
+      
       if (sortBy === 'distance' && selectedLocation) {
-        transformedData = transformedData.sort((a, b) => {
+        sortedData = sortedData.sort((a, b) => {
           const distA = a.distance ? parseFloat(a.distance.replace(' km', '').replace(' m', '')) : Infinity;
           const distB = b.distance ? parseFloat(b.distance.replace(' km', '').replace(' m', '')) : Infinity;
           return distA - distB;
         });
       } else if (sortBy === 'rating') {
-        transformedData = transformedData.sort((a, b) => ((b.rating || 0) - (a.rating || 0)));
+        sortedData = sortedData.sort((a, b) => ((b.rating || 0) - (a.rating || 0)));
       } else if (sortBy === 'newest') {
-        transformedData = transformedData.sort((a, b) => {
+        sortedData = sortedData.sort((a, b) => {
           const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
           const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
           return dateB - dateA;
         });
       }
 
-      setRecommendations(transformedData);
+      setRecommendations(sortedData);
       
       // Also fetch events
       try {

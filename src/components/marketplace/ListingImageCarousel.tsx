@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Heart, Sparkles, BadgeCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -9,6 +8,7 @@ import { useWishlist } from '@/contexts/WishlistContext';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { useToast } from '@/hooks/use-toast';
 import { differenceInDays } from 'date-fns';
+import { correctIsInWishlist } from '@/components/LocationCardFix';
 
 interface ListingImageCarouselProps {
   images: string[] | null;
@@ -26,13 +26,12 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const {
     addToWishlist,
-    removeFromWishlist,
-    isInWishlist
+    removeFromWishlist
   } = useWishlist();
   const {
     toast
   } = useToast();
-  const isInWishlistAlready = isInWishlist(listing.id, 'marketplace');
+  const isInWishlistAlready = correctIsInWishlist(listing.id, 'marketplace');
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const minSwipeDistance = 50;
@@ -93,14 +92,12 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
     touchEndX.current = null;
   };
 
-  // Check if parent has search-result-card class to determine if we're in search results
   const isInSearchResults = className?.includes('search-result-card');
   const isLocationDetailsPage = window.location.pathname.includes('/location/');
   const shouldIncreaseHeight = isInSearchResults || isLocationDetailsPage;
   
-  // Adjust image height based on context
   const imageHeightClass = shouldIncreaseHeight 
-    ? "h-[400px]" // Increased height for search results and location details
+    ? "h-[400px]"
     : "h-full";
 
   return (
@@ -112,7 +109,7 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
           className={cn(
             "w-full cursor-pointer", 
             imageHeightClass, 
-            "object-cover" // Always use object-cover for proper fitting
+            "object-cover"
           )} 
           onClick={handleImageClick} 
           onTouchStart={onTouchStart} 
@@ -129,7 +126,6 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
             New post
           </div>}
           
-        {/* Position the condition badge in the bottom-right corner of the image */}
         <Badge 
           variant="outline" 
           className="absolute bottom-2 right-2 z-10 flex items-center gap-1 text-amber-600 bg-amber-50/90 shadow-sm border-amber-200"
