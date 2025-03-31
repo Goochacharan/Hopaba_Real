@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { 
   FormField, 
@@ -7,189 +7,93 @@ import {
   FormLabel, 
   FormControl, 
   FormMessage,
-  FormDescription
+  FormDescription 
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import {
+import { 
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Store, FileText, PencilRuler, Medal, Tag, IndianRupee } from 'lucide-react';
+} from '@/components/ui/select';
+import { BusinessCard, PenSquare, Tag, IndianRupee } from 'lucide-react';
 import { BusinessFormValues } from '../AddBusinessForm';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
-const categories = [
-  "Accountant",
-  "Actor/Actress",
-  "Architect",
-  "Artist",
-  "Auto Repair",
-  "Bartender",
-  "Blacksmith",
-  "Car Dealers",
-  "Carpenter",
-  "Chef/Cook",
-  "Choreographer",
-  "Computer Repair",
-  "Consultant",
-  "Contractor",
-  "Dentist",
-  "Doctor",
-  "Dog Shop",
-  "Electrician",
-  "Event Planning",
-  "Fashion Designer",
-  "Financial Analyst",
-  "Fitness Trainer",
-  "Graphic Designer",
-  "Hair Salon",
-  "Hair Stylist/Barber",
-  "Home Cleaning",
-  "Hotel Manager",
-  "Human Resources Manager",
-  "HVAC Services",
-  "Ice Cream Shop",
-  "Interior Design",
-  "IT Services",
-  "Journalist",
-  "Landscaping",
-  "Laser Hair Removal",
-  "Lawyer",
-  "Legal Services",
-  "Marketing Agency",
-  "Marketing Manager",
-  "Massage Therapy",
-  "Mechanic",
-  "Medical Spa",
-  "Model",
-  "Musician",
-  "Nail Technician",
-  "Nurse",
-  "Painter",
-  "Pharmacist",
-  "Photographer",
-  "Physiotherapist",
-  "Pizza Shop",
-  "Plumber",
-  "Pool & Hot Tub Services",
-  "Professor",
-  "Researcher",
-  "Restaurant",
-  "Roofing",
-  "Salesperson",
-  "Salon",
-  "Skin Care",
-  "Spa",
-  "Surgeon",
-  "Tailor",
-  "Teacher",
-  "Towing",
-  "Transmission Repair",
-  "Travel Agent",
-  "Tutor",
-  "Vacation Rental",
-  "Veterinarian",
-  "Videographer",
-  "Waiter/Waitress",
-  "Wedding Chapel",
-  "Weight Loss Center",
-  "Windshield Installation & Repair",
-  "Writer",
-  "Yoga Instructor",
-  "Other"
-];
-
-// Common price ranges in Rupees
-const priceRanges = [
-  { min: 100, max: 200 },
-  { min: 200, max: 300 },
-  { min: 300, max: 500 },
-  { min: 500, max: 800 },
-  { min: 800, max: 1000 },
-  { min: 1000, max: 1500 },
-  { min: 1500, max: 2000 },
-  { min: 2000, max: 3000 },
-  { min: 3000, max: 5000 },
-  { min: 5000, max: 10000 },
-  { min: 10000, max: 20000 },
-  { min: 20000, max: 50000 },
+// Define the categories
+const BUSINESS_CATEGORIES = [
+  'Home Services',
+  'Food & Beverages',
+  'Beauty & Wellness',
+  'Arts & Crafts',
+  'Education',
+  'Professional Services',
+  'Tech Services',
+  'Health & Fitness',
+  'Event Planning',
+  'Transportation',
+  'Retail Shop',
+  'Travel & Tourism',
+  'Entertainment',
+  'Children Services',
+  'Tutoring',
+  'Fashion',
+  'Photography',
+  'Pet Services',
+  'Legal Services',
+  'Financial Services',
+  'Other'
 ];
 
 const BasicInfoSection = () => {
   const form = useFormContext<BusinessFormValues>();
-  const [newTag, setNewTag] = useState('');
-  const [customPriceRange, setCustomPriceRange] = useState(false);
-  
-  // Get the tags field array from the form
-  const tags = form.watch('tags') || [];
-  const priceRangeMin = form.watch('price_range_min');
-  const priceRangeMax = form.watch('price_range_max');
-  
-  const handleAddTag = () => {
-    if (newTag && !tags.includes(newTag)) {
-      const updatedTags = [...tags, newTag];
-      form.setValue('tags', updatedTags);
-      setNewTag('');
+  const [tags, setTags] = React.useState<string[]>(form.getValues('tags') || []);
+  const [tagInput, setTagInput] = React.useState('');
+
+  React.useEffect(() => {
+    // Set form tags whenever tags state changes
+    form.setValue('tags', tags, { shouldValidate: true });
+  }, [tags, form]);
+
+  React.useEffect(() => {
+    // Initialize tags when form values change
+    const formTags = form.getValues('tags');
+    if (formTags && formTags.length > 0) {
+      setTags(formTags);
+    }
+  }, [form]);
+
+  const addTag = () => {
+    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+      const newTags = [...tags, tagInput.trim()];
+      setTags(newTags);
+      setTagInput('');
     }
   };
-  
-  const handleRemoveTag = (tagToRemove: string) => {
-    const updatedTags = tags.filter(tag => tag !== tagToRemove);
-    form.setValue('tags', updatedTags);
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
-  const handlePriceRangeSelect = (value: string) => {
-    if (value === 'custom') {
-      setCustomPriceRange(true);
-      return;
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTag();
     }
-    
-    setCustomPriceRange(false);
-    const [min, max] = value.split('-').map(Number);
-    form.setValue('price_range_min', min);
-    form.setValue('price_range_max', max);
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(price);
-  };
-
-  const getCurrentPriceRangeValue = () => {
-    if (customPriceRange) return 'custom';
-    if (priceRangeMin === undefined || priceRangeMax === undefined) return '';
-    
-    // Check if it matches one of our predefined ranges
-    const matchingRange = priceRanges.find(
-      range => range.min === priceRangeMin && range.max === priceRangeMax
-    );
-    
-    if (matchingRange) {
-      return `${matchingRange.min}-${matchingRange.max}`;
-    }
-    
-    // If no match, it's a custom range
-    setCustomPriceRange(true);
-    return 'custom';
   };
 
   return (
     <>
       <div className="space-y-6 md:col-span-2">
         <h3 className="text-lg font-medium flex items-center gap-2">
-          <Store className="h-5 w-5 text-primary" />
+          <BusinessCard className="h-5 w-5 text-primary" />
           Basic Information
         </h3>
         <p className="text-sm text-muted-foreground">
-          Provide essential details about your business or service.
+          Provide details about your business to help others find and understand your services.
         </p>
       </div>
 
@@ -197,10 +101,13 @@ const BasicInfoSection = () => {
         control={form.control}
         name="name"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Business/Service Name*</FormLabel>
+          <FormItem className="md:col-span-2">
+            <FormLabel>Business Name*</FormLabel>
             <FormControl>
-              <Input placeholder="Enter business or service name" {...field} />
+              <Input 
+                placeholder="Enter your business name" 
+                {...field} 
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -213,14 +120,17 @@ const BasicInfoSection = () => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Category*</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select
+              value={field.value}
+              onValueChange={field.onChange}
+            >
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent className="max-h-[300px]">
-                {categories.map((category) => (
+              <SelectContent>
+                {BUSINESS_CATEGORIES.map((category) => (
                   <SelectItem key={category} value={category}>
                     {category}
                   </SelectItem>
@@ -239,137 +149,119 @@ const BasicInfoSection = () => {
           <FormItem className="md:col-span-2">
             <FormLabel>Description*</FormLabel>
             <FormControl>
-              <Textarea
-                placeholder="Enter business description"
-                className="resize-none min-h-32"
-                {...field}
+              <Textarea 
+                placeholder="Describe your business, services, and what makes you unique" 
+                className="min-h-32" 
+                {...field} 
               />
             </FormControl>
-            <FormDescription>
-              Briefly describe your business, service, or professional background.
-            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
       />
 
-      <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormField
-          control={form.control}
-          name="price_unit"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Pricing Unit</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value || "per hour"}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select pricing unit" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="per hour">Per Hour</SelectItem>
-                  <SelectItem value="per session">Per Session</SelectItem>
-                  <SelectItem value="per person">Per Person</SelectItem>
-                  <SelectItem value="per day">Per Day</SelectItem>
-                  <SelectItem value="per month">Per Month</SelectItem>
-                  <SelectItem value="fixed">Fixed Price</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                How you charge for your services
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormItem>
-          <FormLabel className="flex items-center gap-2">
-            <IndianRupee className="h-4 w-4" />
-            Price Range
-          </FormLabel>
-          <Select
-            onValueChange={handlePriceRangeSelect}
-            value={getCurrentPriceRangeValue()}
-          >
+      <FormField
+        control={form.control}
+        name="price_range_min"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>
+              <div className="flex items-center gap-2">
+                <IndianRupee className="h-4 w-4" />
+                Min Price
+              </div>
+            </FormLabel>
             <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Select price range" />
-              </SelectTrigger>
+              <Input 
+                type="number"
+                min="0"
+                placeholder="Min price (₹)" 
+                {...field}
+                onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+              />
             </FormControl>
-            <SelectContent>
-              {priceRanges.map((range) => (
-                <SelectItem key={`${range.min}-${range.max}`} value={`${range.min}-${range.max}`}>
-                  {formatPrice(range.min)} ~ {formatPrice(range.max)}
-                </SelectItem>
-              ))}
-              <SelectItem value="custom">Custom Range</SelectItem>
-            </SelectContent>
-          </Select>
-          <FormDescription>
-            Your typical price range
-          </FormDescription>
-        </FormItem>
-
-        {customPriceRange && (
-          <>
-            <FormField
-              control={form.control}
-              name="price_range_min"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Minimum Price (₹)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      placeholder="Minimum price" 
-                      min={0}
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value) || 0)}
-                      value={field.value || ''}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="price_range_max"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Maximum Price (₹)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      placeholder="Maximum price" 
-                      min={0}
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value) || 0)}
-                      value={field.value || ''}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </>
+            <FormMessage />
+          </FormItem>
         )}
-      </div>
+      />
 
       <FormField
         control={form.control}
-        name="experience"
+        name="price_range_max"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Experience</FormLabel>
+            <FormLabel>
+              <div className="flex items-center gap-2">
+                <IndianRupee className="h-4 w-4" />
+                Max Price
+              </div>
+            </FormLabel>
             <FormControl>
-              <Input placeholder="Years of experience" {...field} />
+              <Input 
+                type="number"
+                min="0"
+                placeholder="Max price (₹)" 
+                {...field}
+                onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+              />
             </FormControl>
-            <FormDescription>
-              How many years of experience you have
-            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="price_unit"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Price Unit</FormLabel>
+            <Select
+              value={field.value || "per hour"}
+              onValueChange={field.onChange}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select price unit" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="per hour">per hour</SelectItem>
+                <SelectItem value="per day">per day</SelectItem>
+                <SelectItem value="per session">per session</SelectItem>
+                <SelectItem value="per month">per month</SelectItem>
+                <SelectItem value="fixed price">fixed price</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="availability"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Availability</FormLabel>
+            <Select
+              value={field.value || ""}
+              onValueChange={field.onChange}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select availability" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="Weekdays only">Weekdays only</SelectItem>
+                <SelectItem value="Weekends only">Weekends only</SelectItem>
+                <SelectItem value="All days">All days</SelectItem>
+                <SelectItem value="By appointment">By appointment</SelectItem>
+                <SelectItem value="Evenings only">Evenings only</SelectItem>
+                <SelectItem value="Mornings only">Mornings only</SelectItem>
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         )}
@@ -380,49 +272,58 @@ const BasicInfoSection = () => {
         name="tags"
         render={() => (
           <FormItem className="md:col-span-2">
-            <FormLabel className="flex items-center gap-2">
-              <Tag className="h-4 w-4" />
-              Services/Items Offered (Tags)
+            <FormLabel>
+              <div className="flex items-center gap-2">
+                <Tag className="h-4 w-4" />
+                Services/Products Tags
+              </div>
             </FormLabel>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+            <div className="flex items-center space-x-2">
+              <FormControl>
+                <Input 
+                  placeholder="Add services or products (e.g., 'Home Cleaning', 'Pizza')" 
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="flex-1"
+                />
+              </FormControl>
+              <Button 
+                type="button" 
+                onClick={addTag}
+                variant="secondary"
+                size="sm"
+              >
+                Add
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {tags.map((tag, index) => (
+                <Badge 
+                  key={index} 
+                  variant="outline"
+                  className="flex items-center gap-1 px-2 py-1"
+                >
                   {tag}
-                  <button 
-                    type="button" 
-                    onClick={() => handleRemoveTag(tag)}
-                    className="rounded-full h-4 w-4 inline-flex items-center justify-center text-xs hover:bg-destructive/20"
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="ml-1 text-xs rounded-full hover:text-destructive"
                   >
                     ×
                   </button>
                 </Badge>
               ))}
             </div>
-            <div className="flex gap-2">
-              <Input
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                placeholder="Add service or item (e.g. Hair Cut, Ice Cream)"
-                className="flex-1"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddTag();
-                  }
-                }}
-              />
-              <Button 
-                type="button" 
-                onClick={handleAddTag}
-                variant="outline"
-              >
-                Add
-              </Button>
-            </div>
-            <FormDescription>
-              Add at least 3 tags describing services or items you offer (e.g., Hair Cut, Ice Cream, Sandwich)
-            </FormDescription>
+            {tags.length < 3 && (
+              <p className="text-sm mt-1 text-amber-500">
+                Please add at least 3 tags describing your services or items.
+              </p>
+            )}
             <FormMessage />
+            <FormDescription>
+              Add specific services, items, or keywords that describe what you offer. Add at least 3 tags.
+            </FormDescription>
           </FormItem>
         )}
       />

@@ -48,6 +48,7 @@ const Profile = () => {
   };
 
   const handleCancelBusinessForm = () => {
+    console.log("Business form cancelled");
     setEditingBusiness(null);
     setShowAddBusinessForm(false);
   };

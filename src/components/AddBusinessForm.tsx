@@ -166,29 +166,33 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         availability: data.availability,
         languages: data.languages,
         experience: data.experience,
-        tags: data.tags,
+        tags: data.tags || [],
       };
 
       console.log("Submitting data to Supabase:", businessData);
 
       if (business?.id) {
         // Update existing business
-        const { error } = await supabase
+        console.log("Updating existing business with ID:", business.id);
+        const { data: updatedData, error } = await supabase
           .from('service_providers')
           .update(businessData)
-          .eq('id', business.id);
+          .eq('id', business.id)
+          .select();
 
         if (error) {
           console.error("Supabase update error:", error);
           throw error;
         }
 
+        console.log("Business successfully updated:", updatedData);
         toast({
           title: "Business Updated",
           description: "Your business listing has been updated and will be reviewed by an admin.",
         });
       } else {
         // Create new business
+        console.log("Creating new business");
         const { data: insertedData, error } = await supabase
           .from('service_providers')
           .insert(businessData)
