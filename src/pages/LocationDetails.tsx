@@ -13,27 +13,7 @@ import LocationHeader from '@/components/location/LocationHeader';
 import LocationAbout from '@/components/location/LocationAbout';
 import ReviewsSection from '@/components/location/ReviewsSection';
 
-const TOTAL_REVIEW_COUNT = 153;
-
-const initialReviews: Review[] = [{
-  id: '1',
-  name: 'Priya Singh',
-  date: '2 weeks ago',
-  rating: 5,
-  text: 'Amazing desserts! Their Death by Chocolate is to die for. Must visit for ice cream lovers.'
-}, {
-  id: '2',
-  name: 'Raj Patel',
-  date: '1 month ago',
-  rating: 4,
-  text: 'Great ambiance and delicious ice cream. A bit crowded on weekends but worth the wait.'
-}, {
-  id: '3',
-  name: 'Ananya Sharma',
-  date: '2 months ago',
-  rating: 5,
-  text: 'Best ice cream place in Bangalore! The Hot Chocolate Fudge is my favorite. Always my go-to dessert spot.'
-}];
+const TOTAL_REVIEW_COUNT = 0;
 
 const LocationDetails = () => {
   const { id } = useParams<{ id: string; }>();
@@ -69,10 +49,8 @@ const LocationDetails = () => {
     }
     setLoading(true);
     
-    // First try to find in mock data
     const mockLocation = getRecommendationById(id);
     
-    // Then try to find by name "Corner House" if id is not found
     const isCornerHouseId = id === 'corner-house-01' || id.toLowerCase().includes('corner');
     
     if (mockLocation) {
@@ -80,25 +58,21 @@ const LocationDetails = () => {
       setLocation(mockLocation);
       setLoading(false);
     } else if (isCornerHouseId) {
-      // If the ID suggests Corner House but not found in mock data, use the Corner House data
       const cornerHouse = mockRecommendations.find(rec => rec.name === 'Corner House');
       if (cornerHouse) {
         console.log("Using Corner House data:", cornerHouse);
         setLocation(cornerHouse);
         setLoading(false);
       } else {
-        // If not found in mockRecommendations, try to fetch from Supabase
         fetchLocationFromSupabase();
       }
     } else {
-      // Try to fetch from Supabase
       fetchLocationFromSupabase();
     }
   }, [id, navigate, toast]);
 
   const fetchLocationFromSupabase = async () => {
     try {
-      // First check service_providers table
       const { data: serviceProvider, error: serviceError } = await supabase
         .from('service_providers')
         .select('*')
@@ -112,7 +86,6 @@ const LocationDetails = () => {
         return;
       }
 
-      // Then check recommendations table
       const { data: recommendation, error: recommendationError } = await supabase
         .from('recommendations')
         .select('*')
@@ -126,7 +99,6 @@ const LocationDetails = () => {
         return;
       }
 
-      // If both failed, check for Corner House by name
       const { data: cornerHouse, error: cornerHouseError } = await supabase
         .from('service_providers')
         .select('*')
@@ -140,7 +112,6 @@ const LocationDetails = () => {
         return;
       }
 
-      // If not found in any table, show error
       toast({
         title: "Location not found",
         description: "We couldn't find the location you're looking for",
@@ -185,7 +156,7 @@ const LocationDetails = () => {
     });
   };
 
-  const allReviews = [...userReviews, ...initialReviews];
+  const allReviews = [...userReviews];
   const locationImages = location?.images && location.images.length > 0 ? location.images : [location?.image];
 
   if (loading) {
@@ -205,6 +176,8 @@ const LocationDetails = () => {
 
   if (!location) return null;
 
+  const actualReviewCount = userReviews.length;
+
   return (
     <MainLayout>
       <div className="container mx-auto py-4 max-w-none px-[7px]">
@@ -223,7 +196,7 @@ const LocationDetails = () => {
             <LocationHeader
               name={location.name}
               rating={location.rating}
-              reviewCount={TOTAL_REVIEW_COUNT}
+              reviewCount={actualReviewCount}
               images={locationImages}
               onImageClick={handleImageClick}
             />
@@ -236,7 +209,7 @@ const LocationDetails = () => {
             
             <ReviewsSection
               reviews={allReviews}
-              totalReviewCount={TOTAL_REVIEW_COUNT}
+              totalReviewCount={actualReviewCount}
               locationRating={location.rating}
               locationId={location.id}
               locationName={location.name}
