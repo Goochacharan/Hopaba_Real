@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,6 +44,7 @@ const UserEventListings: React.FC = () => {
       
       setLoading(true);
       try {
+        // Fix: Using type assertion to avoid excessive type instantiation
         const { data, error } = await supabase
           .from('events')
           .select('*')
@@ -126,6 +128,7 @@ const UserEventListings: React.FC = () => {
       supabase
         .from('events')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .then(({ data, error }) => {
           if (error) {
