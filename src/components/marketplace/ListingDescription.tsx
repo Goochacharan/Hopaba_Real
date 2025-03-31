@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { format, differenceInDays } from 'date-fns';
-import { Instagram, Film, Sparkles, MapPin, Link2, Tag, Clock, Circle, CircleDot } from 'lucide-react';
+import { Instagram, Film, Sparkles, MapPin, Link2, Tag, Clock, Calendar } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 
@@ -38,67 +38,67 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
   availability_start_time,
   availability_end_time
 }) => {
-  const [currentOpenStatus, setCurrentOpenStatus] = useState<boolean | undefined>(undefined);
-  const isVideoContent = instagram && (instagram.includes('youtube.com') || instagram.includes('vimeo.com') || instagram.includes('tiktok.com'));
-
   // Check if listing is less than 7 days old
   const isNew = differenceInDays(new Date(), new Date(createdAt)) < 7;
   
-  // Add useEffect to update open status in real-time
-  useEffect(() => {
-    // Initial check when component mounts
-    const status = isOpenNow();
-    setCurrentOpenStatus(status);
-
-    // Set up interval to check every minute
-    const intervalId = setInterval(() => {
-      const status = isOpenNow();
-      setCurrentOpenStatus(status);
-    }, 60000); // Check every minute
+  const formatDayRange = (days: string[]): string => {
+    if (!days || days.length === 0) return '';
     
-    return () => clearInterval(intervalId);
-  }, [availability_days, availability_start_time, availability_end_time]);
-
-  const isOpenNow = () => {
-    if (hasAvailabilityInfo()) {
-      const now = new Date();
-      const currentDay = now.toLocaleDateString('en-US', {
-        weekday: 'long'
-      }).toLowerCase();
-      const availableDays = availability_days?.map(day => day.toLowerCase()) || [];
-      const isAvailableToday = availableDays.some(day => currentDay.includes(day) || day.includes(currentDay));
-      if (!isAvailableToday) return false;
-      if (availability_start_time && availability_end_time) {
-        const startTime = parseTimeString(availability_start_time);
-        const endTime = parseTimeString(availability_end_time);
-        const currentHour = now.getHours();
-        const currentMinute = now.getMinutes();
-        const currentTimeInMinutes = currentHour * 60 + currentMinute;
-        return currentTimeInMinutes >= startTime && currentTimeInMinutes <= endTime;
+    const dayAbbreviations: Record<string, string> = {
+      'monday': 'Mon',
+      'tuesday': 'Tue',
+      'wednesday': 'Wed',
+      'thursday': 'Thu',
+      'friday': 'Fri',
+      'saturday': 'Sat',
+      'sunday': 'Sun'
+    };
+    
+    const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const sortedDays = [...days].sort((a, b) => 
+      dayOrder.indexOf(a.toLowerCase()) - dayOrder.indexOf(b.toLowerCase())
+    );
+    
+    const ranges: string[] = [];
+    let rangeStart: string | null = null;
+    let rangeEnd: string | null = null;
+    
+    for (let i = 0; i <= sortedDays.length; i++) {
+      const day = i < sortedDays.length ? sortedDays[i].toLowerCase() : null;
+      const prevDay = i > 0 ? sortedDays[i - 1].toLowerCase() : null;
+      const isDayAfterPrev = day && prevDay && 
+        dayOrder.indexOf(day) === dayOrder.indexOf(prevDay) + 1;
+      
+      if (i === 0) {
+        rangeStart = sortedDays[0];
+        rangeEnd = sortedDays[0];
+      } else if (isDayAfterPrev) {
+        rangeEnd = sortedDays[i];
+      } else if (rangeStart && rangeEnd) {
+        if (rangeStart === rangeEnd) {
+          ranges.push(dayAbbreviations[rangeStart.toLowerCase()] || rangeStart);
+        } else {
+          const startAbbr = dayAbbreviations[rangeStart.toLowerCase()] || rangeStart;
+          const endAbbr = dayAbbreviations[rangeEnd.toLowerCase()] || rangeEnd;
+          ranges.push(`${startAbbr}-${endAbbr}`);
+        }
+        
+        if (day) {
+          rangeStart = sortedDays[i];
+          rangeEnd = sortedDays[i];
+        } else {
+          rangeStart = null;
+          rangeEnd = null;
+        }
       }
-      return true;
     }
-    return undefined;
+    
+    return ranges.join(', ');
   };
-
-  const parseTimeString = (timeString: string): number => {
-    try {
-      const [time, period] = timeString.split(' ');
-      let [hours, minutes] = time.split(':').map(Number);
-      if (period === 'PM' && hours < 12) hours += 12;
-      if (period === 'AM' && hours === 12) hours = 0;
-      return hours * 60 + minutes;
-    } catch (e) {
-      console.error("Error parsing time string:", timeString, e);
-      return 0;
-    }
-  };
-
-  const hasAvailabilityInfo = () => {
-    return availability_days && Array.isArray(availability_days) && availability_days.length > 0;
-  };
-
-  const openStatus = currentOpenStatus !== undefined ? currentOpenStatus : isOpenNow();
+  
+  const availabilityDays = availability_days && availability_days.length > 0 
+    ? formatDayRange(availability_days) 
+    : null;
 
   return (
     <div className="bg-white rounded-xl border p-6 shadow-sm">
@@ -120,18 +120,17 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
           
           {showMetadata && (
             <div className="mt-6 space-y-4 text-sm text-gray-700">
-              {openStatus !== undefined && (
+              {availabilityDays && (
                 <div className="flex items-center gap-2">
-                  {openStatus === true ? 
-                    <CircleDot className="h-4 w-4 text-emerald-600 fill-emerald-600" /> : 
-                    <Circle className="h-4 w-4 text-rose-600 fill-rose-600" />
-                  }
-                  <span className={openStatus === true ? 
-                    "text-emerald-600 font-medium" : 
-                    "text-rose-600 font-medium"
-                  }>
-                    {openStatus === true ? "Open now" : "Closed"}
+                  <Calendar className="h-4 w-4 text-primary" />
+                  <span className="font-medium">
+                    Working days: {availabilityDays}
                   </span>
+                  {availability_start_time && availability_end_time && (
+                    <span className="text-muted-foreground">
+                      ({availability_start_time} - {availability_end_time})
+                    </span>
+                  )}
                 </div>
               )}
               
@@ -179,7 +178,7 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
               
               {instagram && (
                 <div className="flex items-center gap-2 mt-2">
-                  {isVideoContent ? (
+                  {instagram.includes('youtube.com') || instagram.includes('vimeo.com') || instagram.includes('tiktok.com') ? (
                     <Film className="h-4 w-4 text-purple-500" />
                   ) : (
                     <Instagram className="h-4 w-4 text-pink-500" />
@@ -190,7 +189,7 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
                   >
-                    {isVideoContent ? 'View Video Content' : 'Visit Instagram'}
+                    {instagram.includes('youtube.com') || instagram.includes('vimeo.com') || instagram.includes('tiktok.com') ? 'View Video Content' : 'Visit Instagram'}
                   </a>
                 </div>
               )}
