@@ -110,6 +110,11 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
+  // Convert any existing tags to an array if they're not already
+  const normalizedTags = business?.tags && !Array.isArray(business.tags) 
+    ? [business.tags.toString()] 
+    : business?.tags || [];
+
   const form = useForm<BusinessFormValues>({
     resolver: zodResolver(businessSchema),
     defaultValues: {
@@ -125,10 +130,12 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
       website: business?.website || "",
       instagram: business?.instagram || "",
       map_link: business?.map_link || "",
-      tags: business?.tags || [],
+      tags: normalizedTags,
     },
     mode: "onSubmit",
   });
+
+  console.log("Form initialized with:", form.getValues());
 
   const onSubmit = async (data: BusinessFormValues) => {
     console.log("Form submitted with data:", data);
@@ -144,6 +151,10 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
     setIsSubmitting(true);
 
     try {
+      // Ensure tags is an array
+      const tagsArray = Array.isArray(data.tags) ? data.tags : 
+                       (data.tags ? [data.tags.toString()] : []);
+      
       // Prepare business data for submission
       const businessData = {
         name: data.name,
@@ -155,18 +166,18 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         contact_phone: data.contact_phone,
         whatsapp: data.whatsapp,
         contact_email: data.contact_email,
-        website: data.website,
-        instagram: data.instagram,
-        map_link: data.map_link,
+        website: data.website || null,
+        instagram: data.instagram || null,
+        map_link: data.map_link || null,
         user_id: user.id,
         approval_status: 'pending', // Always set approval_status to pending when creating or updating
         price_unit: data.price_unit || "per hour",
-        price_range_min: data.price_range_min,
-        price_range_max: data.price_range_max,
-        availability: data.availability,
-        languages: data.languages,
-        experience: data.experience,
-        tags: data.tags || [],
+        price_range_min: data.price_range_min || 0,
+        price_range_max: data.price_range_max || 0,
+        availability: data.availability || null,
+        languages: data.languages || null,
+        experience: data.experience || null,
+        tags: tagsArray,
       };
 
       console.log("Submitting data to Supabase:", businessData);
