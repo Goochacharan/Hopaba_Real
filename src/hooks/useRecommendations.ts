@@ -116,10 +116,6 @@ const useRecommendations = ({
       console.log(`Fetched ${data?.length || 0} service providers from Supabase`);
       
       if (data && data.length > 0) {
-        data.forEach(item => {
-          console.log(`Service Provider ${item.name} - availability_days:`, item.availability_days);
-        });
-        
         return data.map(item => ({
           id: item.id,
           name: item.name,
@@ -141,7 +137,7 @@ const useRecommendations = ({
           price_unit: item.price_unit || null,
           map_link: item.map_link || null,
           instagram: item.instagram || '',
-          availability_days: item.availability_days || null,
+          availability_days: item.availability_days || [],
           availability_start_time: item.availability_start_time || '',
           availability_end_time: item.availability_end_time || '',
           created_at: item.created_at || new Date().toISOString()

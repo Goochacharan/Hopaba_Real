@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { MapPin, Star, Calendar, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown, Sparkles, Award } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -299,18 +299,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
   const formatBusinessHours = (hours: string | undefined) => {
     if (!hours) {
-      if (recommendation.availability_days) {
-        let days;
-        if (typeof recommendation.availability_days === 'string') {
-          days = recommendation.availability_days.includes(',') ? 
-            recommendation.availability_days : 
-            recommendation.availability_days;
-        } else if (Array.isArray(recommendation.availability_days)) {
-          days = recommendation.availability_days.join(', ');
-        } else {
-          days = null;
-        }
-        
+      if (recommendation.availability_days && recommendation.availability_days.length > 0) {
+        const days = recommendation.availability_days.join(', ');
         const startTime = recommendation.availability_start_time || '';
         const endTime = recommendation.availability_end_time || '';
         if (startTime && endTime) {
@@ -320,17 +310,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
       }
       return null;
     }
-    
-    if (recommendation.availability_days) {
-      let days;
-      if (typeof recommendation.availability_days === 'string') {
-        days = recommendation.availability_days;
-      } else if (Array.isArray(recommendation.availability_days)) {
-        days = recommendation.availability_days.join(', ');
-      } else {
-        days = null;
-      }
-      
+    if (recommendation.availability_days && recommendation.availability_days.length > 0) {
+      const days = recommendation.availability_days.join(', ');
       const startTime = recommendation.availability_start_time || '';
       const endTime = recommendation.availability_end_time || '';
       if (startTime && endTime) {
@@ -338,7 +319,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       }
       return days;
     }
-    
     return hours;
   };
 
@@ -350,18 +330,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
       const currentDay = now.toLocaleDateString('en-US', {
         weekday: 'long'
       }).toLowerCase();
-      
-      let availableDays: string[] = [];
-      if (typeof recommendation.availability_days === 'string') {
-        availableDays = [recommendation.availability_days.toLowerCase()];
-      } else if (Array.isArray(recommendation.availability_days)) {
-        availableDays = recommendation.availability_days.map(day => day.toLowerCase());
-      }
-      
-      const isAvailableToday = availableDays.some(day => 
-        currentDay.includes(day) || day.includes(currentDay)
-      );
-      
+      const availableDays = recommendation.availability_days?.map(day => day.toLowerCase()) || [];
+      const isAvailableToday = availableDays.some(day => currentDay.includes(day) || day.includes(currentDay));
       if (!isAvailableToday) return false;
       if (recommendation.availability_start_time && recommendation.availability_end_time) {
         const startTime = parseTimeString(recommendation.availability_start_time);
@@ -393,9 +363,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
   };
 
   const hasAvailabilityInfo = () => {
-    return recommendation.availability_days && 
-           (typeof recommendation.availability_days === 'string' || 
-            (Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0));
+    return recommendation.availability_days && Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0;
   };
 
   const hasInstagram = () => {
@@ -405,19 +373,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
   };
 
   const formatAvailabilityDays = () => {
-    if (!recommendation.availability_days) {
+    if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
       return null;
     }
-    
-    let formattedDays;
-    if (typeof recommendation.availability_days === 'string') {
-      formattedDays = recommendation.availability_days;
-    } else if (Array.isArray(recommendation.availability_days)) {
-      formattedDays = formatDayRange(recommendation.availability_days);
-    } else {
-      return null;
-    }
-    
+    const formattedDays = formatDayRange(recommendation.availability_days);
     const startTime = recommendation.availability_start_time || '';
     const endTime = recommendation.availability_end_time || '';
     if (startTime && endTime) {
@@ -513,17 +472,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
   };
 
   const getAvailabilityDaysDisplay = (): React.ReactNode => {
-    if (!recommendation.availability_days) {
+    if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
       return null;
     }
     
-    if (typeof recommendation.availability_days === 'string') {
-      return formatDayShort(recommendation.availability_days);
-    } else if (Array.isArray(recommendation.availability_days)) {
-      return recommendation.availability_days.map(day => formatDayShort(day)).join(', ');
-    }
-    
-    return null;
+    return recommendation.availability_days.map(day => formatDayShort(day)).join(', ');
   };
 
   const openStatus = currentOpenStatus !== undefined ? currentOpenStatus : isOpenNow();
@@ -534,170 +487,167 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const shouldIncreaseHeight = isSearchResultCard || isLocationDetailsPage;
   const imageHeightClass = shouldIncreaseHeight ? "h-[400px]" : "h-72";
 
-  const formattedAvailabilityDays = recommendation.availability_days && 
-    (typeof recommendation.availability_days === 'string' 
-      ? recommendation.availability_days 
-      : Array.isArray(recommendation.availability_days) 
-        ? formatDayRange(recommendation.availability_days) 
-        : null);
+  const formattedAvailabilityDays = recommendation.availability_days && recommendation.availability_days.length > 0 
+    ? formatDayRange(recommendation.availability_days) 
+    : null;
 
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
-    <div className={cn("relative w-full overflow-hidden", imageHeightClass)}>
-      <Carousel className="w-full h-full">
-        <CarouselContent className="h-full">
-          {images.map((img, index) => <CarouselItem key={index} className="h-full p-0">
-              <div className={cn("absolute inset-0 bg-muted/30", imageLoaded[index] ? "opacity-0" : "opacity-100")} />
-              <img src={img} alt={`${recommendation.name} - image ${index + 1}`} onLoad={() => handleImageLoad(index)} onClick={e => handleImageClick(index, e)} className={cn("w-full transition-all-500 cursor-pointer", imageHeightClass, shouldIncreaseHeight ? "object-cover" : "object-contain", imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm")} />
-            </CarouselItem>)}
-        </CarouselContent>
-        {images.length > 1 && <>
-            <CarouselPrevious className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2" />
-            <CarouselNext className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2" />
-          </>}
-      </Carousel>
+      <div className={cn("relative w-full overflow-hidden", imageHeightClass)}>
+        <Carousel className="w-full h-full">
+          <CarouselContent className="h-full">
+            {images.map((img, index) => <CarouselItem key={index} className="h-full p-0">
+                <div className={cn("absolute inset-0 bg-muted/30", imageLoaded[index] ? "opacity-0" : "opacity-100")} />
+                <img src={img} alt={`${recommendation.name} - image ${index + 1}`} onLoad={() => handleImageLoad(index)} onClick={e => handleImageClick(index, e)} className={cn("w-full transition-all-500 cursor-pointer", imageHeightClass, shouldIncreaseHeight ? "object-cover" : "object-contain", imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm")} />
+              </CarouselItem>)}
+          </CarouselContent>
+          {images.length > 1 && <>
+              <CarouselPrevious className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2" />
+              <CarouselNext className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2" />
+            </>}
+        </Carousel>
 
-      <div className="absolute top-3 left-20 z-10">
-        <span className="px-2 py-1 rounded-full text-xs font-medium bg-black/40 backdrop-blur-sm text-white">
-          {recommendation.category}
-        </span>
-      </div>
-      
-      <div className="absolute bottom-3 left-3 z-10 flex flex-col gap-2">
-        {showHiddenGemBadge && <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/90 backdrop-blur-sm text-white flex items-center">
-            <Sparkles className="h-3 w-3 mr-1" />
-            Hidden Gem
-          </span>}
-        {showMustVisitBadge && <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/90 backdrop-blur-sm text-white flex items-center">
-            <Award className="h-3 w-3 mr-1" />
-            Must Visit
-          </span>}
-      </div>
-      
-      <button onClick={handleWishlistToggle} className={cn("absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10", user ? inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500" : "text-muted-foreground")}>
-        {user ? <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} /> : <LogIn className="w-5 h-5" />}
-      </button>
-    </div>
-
-    <div className="p-4">
-      <div className="flex justify-between items-start gap-2 mb-2">
-        <div className="flex items-center gap-1.5">
-          {ranking !== undefined && ranking <= 10 && (
-            <div className={cn("flex items-center justify-center rounded-full border-2 flex-shrink-0", getMedalStyle(ranking).medalClass)}>
-              {ranking}
-            </div>
-          )}
-          <h3 className="font-bold text-2xl">{recommendation.name}</h3>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-1 mb-2">
-        {renderStarRating(recommendation.rating)}
-        <span className="text-xs text-muted-foreground ml-1">
-          ({reviewCount})
-        </span>
-      </div>
-
-      <div className="flex flex-col mb-3">
-        <div className="flex items-center justify-between text-muted-foreground text-sm">
-          <div className="flex items-center">
-            <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-            <span className="truncate">{recommendation.address}</span>
-          </div>
-          {hasInstagram() && <button onClick={handleInstagram} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 p-1.5 px-[29px] mx-[55px] py-[7px]">
-              <Film className="h-4 w-4 text-white" />
-            </button>}
+        <div className="absolute top-3 left-20 z-10">
+          <span className="px-2 py-1 rounded-full text-xs font-medium bg-black/40 backdrop-blur-sm text-white">
+            {recommendation.category}
+          </span>
         </div>
         
-        {recommendation.distance && showDistanceUnderAddress && <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center justify-between my-[3px] px-0">
-            <div className="flex items-center">
-              <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
-              {formatDistance(recommendation.distance)}
-            </div>
-          </div>}
+        <div className="absolute bottom-3 left-3 z-10 flex flex-col gap-2">
+          {showHiddenGemBadge && <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/90 backdrop-blur-sm text-white flex items-center">
+              <Sparkles className="h-3 w-3 mr-1" />
+              Hidden Gem
+            </span>}
+          {showMustVisitBadge && <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/90 backdrop-blur-sm text-white flex items-center">
+              <Award className="h-3 w-3 mr-1" />
+              Must Visit
+            </span>}
+        </div>
+        
+        <button onClick={handleWishlistToggle} className={cn("absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10", user ? inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500" : "text-muted-foreground")}>
+          {user ? <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} /> : <LogIn className="w-5 h-5" />}
+        </button>
       </div>
 
-      {(recommendation.availability_days?.length > 0 || recommendation.hours || recommendation.availability) && (
-        <div className="flex flex-col text-sm mb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Calendar className="w-4 h-4 mr-1 flex-shrink-0 text-muted-foreground" />
-              <span className="text-muted-foreground">
-                Working days: {formattedAvailabilityDays || 'Not specified'}
-              </span>
-            </div>
-            
-            {(recommendation.availability_days || recommendation.hours) && (
-              <DropdownMenu>
-                <DropdownMenuTrigger className="ml-2 inline-flex items-center text-xs font-medium text-primary hover:text-primary/80 transition-colors rounded-md" onClick={(e) => e.stopPropagation()}>
-                  <Calendar className="h-3.5 w-3.5 mr-1" />
-                  <span className="underline">Hours</span>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
-                  {recommendation.availability_days && recommendation.availability_days.length > 0 && (
-                    <div className="mb-1">
-                      <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
-                      <div className="text-sm">{formatDayRange(recommendation.availability_days)}</div>
-                    </div>
-                  )}
-                  {(recommendation.availability_start_time && recommendation.availability_end_time) && (
-                    <div>
-                      <div className="text-xs font-medium text-muted-foreground mb-1">Hours:</div>
-                      <div className="text-sm">{recommendation.availability_start_time} - {recommendation.availability_end_time}</div>
-                    </div>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+      <div className="p-4">
+        <div className="flex justify-between items-start gap-2 mb-2">
+          <div className="flex items-center gap-1.5">
+            {ranking !== undefined && ranking <= 10 && (
+              <div className={cn("flex items-center justify-center rounded-full border-2 flex-shrink-0", getMedalStyle(ranking).medalClass)}>
+                {ranking}
+              </div>
             )}
+            <h3 className="font-bold text-2xl">{recommendation.name}</h3>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1 mb-2">
+          {renderStarRating(recommendation.rating)}
+          <span className="text-xs text-muted-foreground ml-1">
+            ({reviewCount})
+          </span>
+        </div>
+
+        <div className="flex flex-col mb-3">
+          <div className="flex items-center justify-between text-muted-foreground text-sm">
+            <div className="flex items-center">
+              <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+              <span className="truncate">{recommendation.address}</span>
+            </div>
+            {hasInstagram() && <button onClick={handleInstagram} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 p-1.5 px-[29px] mx-[55px] py-[7px]">
+                <Film className="h-4 w-4 text-white" />
+              </button>}
           </div>
           
-          {recommendation.distance && !showDistanceUnderAddress && (
-            <div className="text-muted-foreground pl-5 mt-1 flex items-center">
-              <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
-              {formatDistance(recommendation.distance)}
-            </div>
-          )}
+          {recommendation.distance && showDistanceUnderAddress && <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center justify-between my-[3px] px-0">
+              <div className="flex items-center">
+                <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
+                {formatDistance(recommendation.distance)}
+              </div>
+            </div>}
         </div>
+
+        {(recommendation.availability_days?.length > 0 || recommendation.hours || recommendation.availability) && (
+          <div className="flex flex-col text-sm mb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Calendar className="w-4 h-4 mr-1 flex-shrink-0 text-muted-foreground" />
+                <span className="text-muted-foreground">
+                  Working days: {formattedAvailabilityDays}
+                </span>
+              </div>
+              
+              {(recommendation.availability_days || recommendation.hours) && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="ml-2 inline-flex items-center text-xs font-medium text-primary hover:text-primary/80 transition-colors rounded-md" onClick={(e) => e.stopPropagation()}>
+                    <Calendar className="h-3.5 w-3.5 mr-1" />
+                    <span className="underline">Hours</span>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
+                    {recommendation.availability_days && recommendation.availability_days.length > 0 && (
+                      <div className="mb-1">
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
+                        <div className="text-sm">{formatDayRange(recommendation.availability_days)}</div>
+                      </div>
+                    )}
+                    {(recommendation.availability_start_time && recommendation.availability_end_time) && (
+                      <div>
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Hours:</div>
+                        <div className="text-sm">{recommendation.availability_start_time} - {recommendation.availability_end_time}</div>
+                      </div>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
+            
+            {recommendation.distance && !showDistanceUnderAddress && (
+              <div className="text-muted-foreground pl-5 mt-1 flex items-center">
+                <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
+                {formatDistance(recommendation.distance)}
+              </div>
+            )}
+          </div>
+        )}
+
+        <p className="mb-4 line-clamp-8 font-normal text-slate-700 text-base leading-normal min-h-[12em] max-h-[12em] overflow-y-auto">
+          {recommendation.description}
+        </p>
+
+        <div className="flex gap-2 mt-4 flex-wrap">
+          {formatPrice() && <Badge className="flex items-center gap-1 px-3 py-1.5 bg-[#c63e7b]">
+              <IndianRupee className="h-3.5 w-3.5" />
+              {formatPrice()}
+            </Badge>}
+          {recommendation.tags && recommendation.tags.map((tag, index) => <Badge key={index} className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
+              {tag}
+            </Badge>)}
+        </div>
+
+        <div className="flex gap-2 mt-4">
+          <button onClick={handleCall} className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]">
+            <Phone className="h-5 w-5" />
+          </button>
+          <button onClick={handleWhatsApp} className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]">
+            <MessageCircle className="h-5 w-5" />
+          </button>
+          <button onClick={handleDirections} className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]">
+            <Navigation2 className="h-5 w-5" />
+          </button>
+          <button onClick={handleShare} className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]">
+            <Share2 className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+
+      {images.length > 0 && (
+        <ImageViewer 
+          images={images} 
+          initialIndex={selectedImageIndex} 
+          open={imageViewerOpen} 
+          onOpenChange={setImageViewerOpen} 
+        />
       )}
-
-      <p className="mb-4 line-clamp-8 font-normal text-slate-700 text-base leading-normal min-h-[12em] max-h-[12em] overflow-y-auto">
-        {recommendation.description}
-      </p>
-
-      <div className="flex gap-2 mt-4 flex-wrap">
-        {formatPrice() && <Badge className="flex items-center gap-1 px-3 py-1.5 bg-[#c63e7b]">
-            <IndianRupee className="h-3.5 w-3.5" />
-            {formatPrice()}
-          </Badge>}
-        {recommendation.tags && recommendation.tags.map((tag, index) => <Badge key={index} className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
-            {tag}
-          </Badge>)}
-      </div>
-
-      <div className="flex gap-2 mt-4">
-        <button onClick={handleCall} className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]">
-          <Phone className="h-5 w-5" />
-        </button>
-        <button onClick={handleWhatsApp} className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]">
-          <MessageCircle className="h-5 w-5" />
-        </button>
-        <button onClick={handleDirections} className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]">
-          <Navigation2 className="h-5 w-5" />
-        </button>
-        <button onClick={handleShare} className="flex-1 h-10 rounded-full border border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px]">
-          <Share2 className="h-5 w-5" />
-        </button>
-      </div>
-    </div>
-
-    {images.length > 0 && (
-      <ImageViewer 
-        images={images} 
-        initialIndex={selectedImageIndex} 
-        open={imageViewerOpen} 
-        onOpenChange={setImageViewerOpen} 
-      />
-    )}
-  </div>;
+    </div>;
 };
 
 export default LocationCard;
