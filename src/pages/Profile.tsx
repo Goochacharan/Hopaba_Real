@@ -8,18 +8,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import UserMarketplaceListings from '@/components/UserMarketplaceListings';
 import UserEventListings from '@/components/UserEventListings';
-import BusinessesList from '@/components/business/BusinessesList';
 import { AdminSection } from '@/components/admin/AdminSection';
-import BusinessForm from '@/components/business/BusinessForm';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import BusinessListingForm from '@/components/business-profile/BusinessListingForm';
+import BusinessList from '@/components/business-profile/BusinessList';
+import { BusinessData } from '@/components/business-profile/BusinessListingForm';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useAuth();
   const { toast } = useToast();
   const [refreshBusinesses, setRefreshBusinesses] = useState(false);
-  const [editingBusiness, setEditingBusiness] = useState<any | null>(null);
+  const [editingBusiness, setEditingBusiness] = useState<BusinessData | null>(null);
   const [showAddBusinessForm, setShowAddBusinessForm] = useState(false);
   const [activeTab, setActiveTab] = useState("listings");
 
@@ -35,7 +36,7 @@ const Profile = () => {
     setActiveTab("businesses"); // Ensure we're on the businesses tab
   };
 
-  const handleEditBusiness = (business: any) => {
+  const handleEditBusiness = (business: BusinessData) => {
     setEditingBusiness(business);
     setShowAddBusinessForm(true);
     setActiveTab("businesses"); // Ensure we're on the businesses tab
@@ -105,7 +106,7 @@ const Profile = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <BusinessForm 
+              <BusinessListingForm 
                 business={editingBusiness} 
                 onSaved={handleBusinessSaved}
                 onCancel={handleCancelBusinessForm}
@@ -136,7 +137,7 @@ const Profile = () => {
                   Submit Business
                 </Button>
               </div>
-              <BusinessesList
+              <BusinessList
                 onEdit={handleEditBusiness}
                 refresh={refreshBusinesses}
               />
