@@ -1,41 +1,27 @@
 
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Button } from '@/components/ui/button';
 import {
   Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import BasicInfoSection from './business-form/BasicInfoSection';
+import LocationSection from './business-form/LocationSection';
+import ContactSection from './business-form/ContactSection';
 
 export interface Business {
   id: string;
@@ -48,8 +34,14 @@ export interface Business {
   contact_number: string;
   website?: string;
   approval_status: string;
+  instagram?: string;
+  map_link?: string;
+  contact_phone?: string;
+  whatsapp?: string;
+  contact_email?: string;
 }
 
+// Extend the business schema to include all the fields from the detailed form sections
 const businessSchema = z.object({
   name: z.string().min(2, {
     message: "Business name must be at least 2 characters.",
@@ -69,22 +61,37 @@ const businessSchema = z.object({
   address: z.string().min(5, {
     message: "Address must be at least 5 characters.",
   }),
-  contact_number: z.string()
+  // Old field kept for backward compatibility
+  contact_number: z.string().optional(),
+  // New detailed fields from form sections
+  contact_phone: z.string()
     .refine(phone => phone.startsWith('+91'), {
       message: "Phone number must start with +91."
     })
     .refine(phone => phone.slice(3).replace(/\D/g, '').length === 10, {
       message: "Please enter a 10-digit phone number (excluding +91)."
     }),
-  website: z.string().url({
-    message: "Please enter a valid URL.",
+  whatsapp: z.string()
+    .refine(phone => phone.startsWith('+91'), {
+      message: "WhatsApp number must start with +91."
+    })
+    .refine(phone => phone.slice(3).replace(/\D/g, '').length === 10, {
+      message: "Please enter a 10-digit WhatsApp number (excluding +91)."
+    }),
+  contact_email: z.string().email({
+    message: "Please enter a valid email address."
   }).optional(),
-  // Add these fields to match what the business-form sections are using
-  contact_phone: z.string().optional(),
-  whatsapp: z.string().optional(),
-  contact_email: z.string().email().optional(),
+  website: z.string().url({
+    message: "Please enter a valid URL."
+  }).optional().or(z.literal('')),
   instagram: z.string().optional(),
   map_link: z.string().optional(),
+  price_unit: z.string().optional(),
+  price_range_min: z.number().optional(),
+  price_range_max: z.number().optional(),
+  availability: z.string().optional(),
+  languages: z.array(z.string()).optional(),
+  experience: z.string().optional(),
 });
 
 export type BusinessFormValues = z.infer<typeof businessSchema>;
@@ -110,33 +117,15 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
       area: business?.area || "",
       city: business?.city || "",
       address: business?.address || "",
-      contact_number: business?.contact_number || "+91",
+      contact_number: business?.contact_number || "",
+      contact_phone: business?.contact_phone || "+91",
+      whatsapp: business?.whatsapp || "+91",
+      contact_email: business?.contact_email || "",
       website: business?.website || "",
+      instagram: business?.instagram || "",
+      map_link: business?.map_link || "",
     },
   });
-
-  const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value;
-    
-    // Ensure the value starts with +91
-    if (!value.startsWith('+91')) {
-      value = '+91' + value.replace('+91', '');
-    }
-    
-    // Remove all non-digit characters except the +91 prefix
-    const digits = value.slice(3).replace(/\D/g, '');
-    
-    // Limit to 10 digits
-    const limitedDigits = digits.slice(0, 10);
-    
-    // Set the value with +91 prefix and limited digits
-    e.target.value = '+91' + limitedDigits;
-    
-    // Update the form value
-    form.setValue('contact_number', e.target.value, {
-      shouldValidate: true,
-    });
-  };
 
   const handleSubmit = async (data: BusinessFormValues) => {
     if (!user) {
@@ -151,6 +140,7 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
     setIsSubmitting(true);
 
     try {
+      // For backward compatibility, use contact_phone for contact_number
       const businessData = {
         name: data.name,
         category: data.category,
@@ -158,10 +148,21 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         area: data.area,
         city: data.city,
         address: data.address,
-        contact_number: data.contact_number,
+        contact_number: data.contact_phone, // For backward compatibility
+        contact_phone: data.contact_phone,
+        whatsapp: data.whatsapp,
+        contact_email: data.contact_email,
         website: data.website,
+        instagram: data.instagram,
+        map_link: data.map_link,
         user_id: user.id,
-        approval_status: 'pending' // Always set approval_status to pending when creating or updating
+        approval_status: 'pending', // Always set approval_status to pending when creating or updating
+        price_unit: data.price_unit || "per hour",
+        price_range_min: data.price_range_min,
+        price_range_max: data.price_range_max,
+        availability: data.availability,
+        languages: data.languages,
+        experience: data.experience,
       };
 
       if (business?.id) {
@@ -205,186 +206,47 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div>
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Business Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter business name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    <FormProvider {...form}>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* Basic Information Section */}
+            <BasicInfoSection />
+            
+            {/* Location Section */}
+            <LocationSection />
+            
+            {/* Contact Section */}
+            <ContactSection />
           </div>
-          <div>
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Restaurant">Restaurant</SelectItem>
-                      <SelectItem value="Cafe">Cafe</SelectItem>
-                      <SelectItem value="Hotel">Hotel</SelectItem>
-                      <SelectItem value="Gym">Gym</SelectItem>
-                      <SelectItem value="Salon">Salon</SelectItem>
-                      <SelectItem value="Spa">Spa</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
 
-        <div>
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Enter business description"
-                    className="resize-none"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          <div className="flex justify-end gap-4 mt-8">
+            {onCancel && (
+              <Button type="button" variant="outline" onClick={onCancel}>
+                Cancel
+              </Button>
             )}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div>
-            <FormField
-              control={form.control}
-              name="area"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Area</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter area" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div>
-            <FormField
-              control={form.control}
-              name="city"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>City</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter city" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        <div>
-          <FormField
-            control={form.control}
-            name="address"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Address</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter address" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div>
-          <FormField
-            control={form.control}
-            name="contact_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Contact Number</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Enter contact number" 
-                    defaultValue="+91"
-                    onInput={handlePhoneInput}
-                    {...field} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div>
-          <FormField
-            control={form.control}
-            name="website"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Website (optional)</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter website URL" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="flex justify-end">
-          {onCancel && (
-            <Button type="button" variant="ghost" onClick={onCancel}>
-              Cancel
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Submit"}
             </Button>
-          )}
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Submitting..." : "Submit"}
-          </Button>
-        </div>
-      </form>
-      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Business Listed!</AlertDialogTitle>
-            <AlertDialogDescription>
-              Your business listing has been submitted and is awaiting admin approval.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={onSaved}>
-              OK
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </Form>
+          </div>
+        </form>
+        <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Business Listed!</AlertDialogTitle>
+              <AlertDialogDescription>
+                Your business listing has been submitted and is awaiting admin approval.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={onSaved}>
+                OK
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </Form>
+    </FormProvider>
   );
 }

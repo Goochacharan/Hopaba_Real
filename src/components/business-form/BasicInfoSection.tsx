@@ -41,9 +41,9 @@ const BasicInfoSection = () => {
         name="name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Business Name*</FormLabel>
+            <FormLabel>Business/Service Name*</FormLabel>
             <FormControl>
-              <Input placeholder="Enter business name" {...field} />
+              <Input placeholder="Enter business or service name" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -63,6 +63,14 @@ const BasicInfoSection = () => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
+                <SelectItem value="Actor">Actor</SelectItem>
+                <SelectItem value="Painter">Painter</SelectItem>
+                <SelectItem value="Musician">Musician</SelectItem>
+                <SelectItem value="Photographer">Photographer</SelectItem>
+                <SelectItem value="Therapist">Therapist</SelectItem>
+                <SelectItem value="Tutor">Tutor</SelectItem>
+                <SelectItem value="Yoga Instructor">Yoga Instructor</SelectItem>
+                <SelectItem value="Fitness Trainer">Fitness Trainer</SelectItem>
                 <SelectItem value="Restaurant">Restaurant</SelectItem>
                 <SelectItem value="Cafe">Cafe</SelectItem>
                 <SelectItem value="Hotel">Hotel</SelectItem>
@@ -86,12 +94,58 @@ const BasicInfoSection = () => {
             <FormControl>
               <Textarea
                 placeholder="Enter business description"
-                className="resize-none"
+                className="resize-none min-h-32"
                 {...field}
               />
             </FormControl>
             <FormDescription>
-              Briefly describe your business and what it offers.
+              Briefly describe your business, service, or professional background.
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="price_unit"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Pricing Unit</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value || "per hour"}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select pricing unit" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="per hour">Per Hour</SelectItem>
+                <SelectItem value="per session">Per Session</SelectItem>
+                <SelectItem value="per person">Per Person</SelectItem>
+                <SelectItem value="per day">Per Day</SelectItem>
+                <SelectItem value="per month">Per Month</SelectItem>
+                <SelectItem value="fixed">Fixed Price</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormDescription>
+              How you charge for your services
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="experience"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Experience</FormLabel>
+            <FormControl>
+              <Input placeholder="Years of experience" {...field} />
+            </FormControl>
+            <FormDescription>
+              How many years of experience you have
             </FormDescription>
             <FormMessage />
           </FormItem>
