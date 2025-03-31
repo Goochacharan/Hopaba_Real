@@ -22,7 +22,6 @@ import { useAuth } from '@/hooks/useAuth';
 import BasicInfoSection from './business-form/BasicInfoSection';
 import LocationSection from './business-form/LocationSection';
 import ContactSection from './business-form/ContactSection';
-import { FormActions } from './event-form/FormActions';
 
 export interface Business {
   id: string;
@@ -224,11 +223,14 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
           </div>
 
           <div className="flex justify-end gap-4 mt-8">
-            <FormActions 
-              loading={isSubmitting} 
-              isEditing={!!business?.id} 
-              onCancel={onCancel} 
-            />
+            {onCancel && (
+              <Button type="button" variant="outline" onClick={onCancel}>
+                Cancel
+              </Button>
+            )}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : business?.id ? "Update Business" : "Add Business"}
+            </Button>
           </div>
         </form>
         <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
