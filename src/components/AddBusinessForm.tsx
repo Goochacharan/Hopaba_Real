@@ -31,7 +31,6 @@ export interface Business {
   area: string;
   city: string;
   address: string;
-  contact_number: string;
   website?: string;
   approval_status: string;
   instagram?: string;
@@ -62,9 +61,6 @@ const businessSchema = z.object({
   address: z.string().min(5, {
     message: "Address must be at least 5 characters.",
   }),
-  // Old field kept for backward compatibility
-  contact_number: z.string().optional(),
-  // New detailed fields from form sections
   contact_phone: z.string()
     .refine(phone => phone.startsWith('+91'), {
       message: "Phone number must start with +91."
@@ -123,7 +119,6 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
       area: business?.area || "",
       city: business?.city || "",
       address: business?.address || "",
-      contact_number: business?.contact_number || "",
       contact_phone: business?.contact_phone || "+91",
       whatsapp: business?.whatsapp || "+91",
       contact_email: business?.contact_email || "",
@@ -147,7 +142,7 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
     setIsSubmitting(true);
 
     try {
-      // For backward compatibility, use contact_phone for contact_number
+      // Remove the contact_number field from the data since it's not in the database schema
       const businessData = {
         name: data.name,
         category: data.category,
@@ -155,7 +150,6 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         area: data.area,
         city: data.city,
         address: data.address,
-        contact_number: data.contact_phone, // For backward compatibility
         contact_phone: data.contact_phone,
         whatsapp: data.whatsapp,
         contact_email: data.contact_email,

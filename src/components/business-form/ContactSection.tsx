@@ -10,7 +10,7 @@ import {
   FormDescription 
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Phone, MessageCircle, Instagram, Film, Mail, Globe } from 'lucide-react';
+import { Phone, MessageCircle, Instagram, Film, Globe } from 'lucide-react';
 import { BusinessFormValues } from '../AddBusinessForm';
 
 const ContactSection = () => {
@@ -106,25 +106,6 @@ const ContactSection = () => {
             <FormDescription>
               10-digit mobile number required
             </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="contact_email"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Email <span className="text-xs text-muted-foreground">(optional)</span>
-              </div>
-            </FormLabel>
-            <FormControl>
-              <Input placeholder="Enter email address" {...field} />
-            </FormControl>
             <FormMessage />
           </FormItem>
         )}
