@@ -1,11 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
 import { ArrowLeft } from 'lucide-react';
-import { getRecommendationById } from '@/lib/mockData';
+import { getRecommendationById, mockRecommendations } from '@/lib/mockData';
 import { supabase } from '@/integrations/supabase/client';
 import ImageViewer from '@/components/ImageViewer';
 import { Review } from '@/components/location/ReviewsList';
