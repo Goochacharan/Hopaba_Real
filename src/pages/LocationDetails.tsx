@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Phone, MessageCircle, Navigation2, Share2, MapPin, Clock, Star } from 'lucide-react';
+import { ArrowLeft, Phone, MessageCircle, Navigation2, Share2, MapPin, Clock, Star, IndianRupee } from 'lucide-react';
 import { ReviewFormValues } from '@/components/location/ReviewForm';
 import ReviewsSection from '@/components/location/ReviewsSection';
 import { Review } from '@/components/location/ReviewsList';
