@@ -42,6 +42,11 @@ const UserEventCard: React.FC<UserEventCardProps> = ({ event, onEdit, onDelete }
             {event.pricePerPerson > 0 ? formatPrice(event.pricePerPerson) : "Free"}
           </Badge>
         </div>
+        <CardDescription>
+          Status: {event.approval_status === 'approved' ? 
+            <span className="text-green-600 font-medium">Approved</span> : 
+            <span className="text-amber-600 font-medium">Pending</span>}
+        </CardDescription>
       </CardHeader>
       <CardContent className="pb-2 space-y-2">
         <div className="flex items-center text-sm text-muted-foreground">

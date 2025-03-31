@@ -35,6 +35,7 @@ export const useUserEvents = () => {
           throw error;
         }
         
+        // Ensure we properly convert price_per_person to pricePerPerson for frontend
         const formattedEvents = data?.map((event) => ({
           ...event,
           pricePerPerson: event.price_per_person || 0
@@ -57,8 +58,28 @@ export const useUserEvents = () => {
   }, [user, toast]);
 
   const handleDeleteConfirm = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to delete events.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (eventToDelete) {
       try {
+        // First check if this event belongs to current user
+        const { data: eventData } = await supabase
+          .from('events')
+          .select('user_id')
+          .eq('id', eventToDelete)
+          .single();
+          
+        if (eventData?.user_id !== user.id) {
+          throw new Error("You don't have permission to delete this event");
+        }
+        
         const { error } = await supabase
           .from('events')
           .delete()

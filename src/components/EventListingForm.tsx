@@ -98,7 +98,8 @@ export const EventListingForm = ({ event, onSaved, onCancel }: EventFormProps) =
         const { error } = await supabase
           .from('events')
           .update(eventPayload)
-          .eq('id', event.id);
+          .eq('id', event.id)
+          .eq('user_id', user.id); // Ensure we're only updating an event that belongs to the user
         
         if (error) throw error;
         
