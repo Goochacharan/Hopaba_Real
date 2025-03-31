@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -223,7 +222,6 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [selectedDays, setSelectedDays] = useState<string[]>(business?.availability_days || []);
 
-  // Parse hours if they exist
   const parseHours = () => {
     if (business?.hours) {
       const hoursMatch = business.hours.match(/(\d+:\d+ [AP]M)\s*-\s*(\d+:\d+ [AP]M)/);
@@ -268,7 +266,6 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
     },
   });
 
-  // Update hours when from/to changes
   useEffect(() => {
     const hoursFrom = form.getValues("hours_from");
     const hoursTo = form.getValues("hours_to");
@@ -303,7 +300,6 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
     form.setValue("availability_days", updatedDays, { shouldValidate: true });
     setSelectedDays(updatedDays);
     
-    // Update availability field with comma-separated days
     form.setValue("availability", updatedDays.join(', '), { shouldValidate: true });
   };
 
@@ -317,7 +313,6 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
       return;
     }
 
-    // Validate tags
     if (!data.tags || data.tags.length < 3) {
       toast({
         title: "Tags required",
@@ -333,15 +328,10 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
       const priceRangeMin = data.price_range_min ? Number(data.price_range_min) : undefined;
       const priceRangeMax = data.price_range_max ? Number(data.price_range_max) : undefined;
       
-      // Format hours from the from/to fields
       const hours = `${data.hours_from} - ${data.hours_to}`;
       
-      // Store the selected days in the availability field as a comma-separated string
-      // since the available_days column might not exist in the database
       const availabilityString = (data.availability_days || []).join(', ');
       
-      // Fix: Omit the availability_days field from the business data
-      // since it doesn't exist in the database
       const businessData = {
         name: data.name,
         category: data.category,
@@ -426,7 +416,6 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
           <Card>
             <CardContent className="pt-6">
               <div className="space-y-8">
-                {/* Basic Information */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Building className="h-5 w-5 text-primary" />
@@ -510,7 +499,6 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
 
                 <Separator />
 
-                {/* Location Information */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-primary" />
@@ -581,7 +569,6 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
 
                 <Separator />
 
-                {/* Contact Information */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Phone className="h-5 w-5 text-primary" />
@@ -684,7 +671,6 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
 
                 <Separator />
 
-                {/* Services & Pricing */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Tag className="h-5 w-5 text-primary" />
@@ -780,7 +766,6 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
 
                 <Separator />
 
-                {/* Experience & Availability */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Star className="h-5 w-5 text-primary" />
@@ -817,7 +802,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
                   
                   <FormField
                     control={form.control}
-                    name="available_days"
+                    name="availability_days"
                     render={() => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
