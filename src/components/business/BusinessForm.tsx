@@ -28,11 +28,11 @@ export interface Business {
   tags?: string[];
   languages?: string[];
   experience?: string;
-  availability?: string;
+  availability?: string | string[];
   price_unit?: string;
   price_range_min?: number;
   price_range_max?: number;
-  availability_days?: string[];
+  availability_days?: string[] | string;
   availability_start_time?: string;
   availability_end_time?: string;
 }
@@ -108,6 +108,27 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
+  // Prepare availability_days for the form
+  let initialAvailabilityDays: string[] = [];
+  if (business?.availability_days) {
+    if (Array.isArray(business.availability_days)) {
+      initialAvailabilityDays = business.availability_days;
+    } else if (typeof business.availability_days === 'string') {
+      try {
+        // Try to parse if it's a JSON string
+        if (business.availability_days.startsWith('[') && business.availability_days.endsWith(']')) {
+          initialAvailabilityDays = JSON.parse(business.availability_days);
+        } else {
+          // If it's a comma-separated string, split it
+          initialAvailabilityDays = business.availability_days.split(',').map(day => day.trim());
+        }
+      } catch (e) {
+        console.error('Error parsing availability_days:', e);
+        initialAvailabilityDays = [];
+      }
+    }
+  }
+
   const form = useForm<BusinessFormValues>({
     resolver: zodResolver(businessSchema),
     defaultValues: {
@@ -126,11 +147,11 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
       tags: business?.tags || [],
       languages: business?.languages || [],
       experience: business?.experience || "",
-      availability: business?.availability || "",
+      availability: typeof business?.availability === 'string' ? business.availability : "",
       price_unit: business?.price_unit || "per hour",
       price_range_min: business?.price_range_min,
       price_range_max: business?.price_range_max,
-      availability_days: business?.availability_days || [],
+      availability_days: initialAvailabilityDays,
       availability_start_time: business?.availability_start_time || "",
       availability_end_time: business?.availability_end_time || "",
     },
@@ -154,6 +175,9 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
       const priceRangeMin = data.price_range_min ? Number(data.price_range_min) : undefined;
       const priceRangeMax = data.price_range_max ? Number(data.price_range_max) : undefined;
       
+      // Ensure availability_days is an array for database
+      const availabilityDays = data.availability_days || [];
+      
       const businessData = {
         name: data.name,
         category: data.category,
@@ -172,11 +196,12 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
         price_unit: data.price_unit || "per hour",
         price_range_min: priceRangeMin,
         price_range_max: priceRangeMax,
+        // Use availability field as a string for backward compatibility
         availability: data.availability || null,
         languages: data.languages || [],
         experience: data.experience || null,
         tags: data.tags || [],
-        availability_days: data.availability_days || [],
+        availability_days: availabilityDays,
         availability_start_time: data.availability_start_time || null,
         availability_end_time: data.availability_end_time || null,
       };

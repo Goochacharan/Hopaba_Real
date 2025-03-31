@@ -1,285 +1,199 @@
-import { useState, useEffect } from 'react';
-import { Recommendation } from '@/lib/mockData';
-import { CategoryType } from '@/components/CategoryFilter';
+
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { calculateDistance } from '@/lib/locationUtils';
+
+export interface Recommendation {
+  id: string;
+  name: string;
+  category: string;
+  tags?: string[];
+  rating?: number;
+  address?: string;
+  distance?: string;
+  image?: string;
+  images?: string[];
+  description?: string;
+  phone?: string;
+  openNow?: boolean;
+  hours?: string;
+  website?: string;
+  instagram?: string;
+  price?: string;
+  area?: string;
+  city?: string;
+  availability?: string | string[];
+  availability_days?: string[] | string;
+  availability_start_time?: string;
+  availability_end_time?: string;
+  reviewCount?: number;
+  location?: [number, number];
+  mapLink?: string;
+  created_at?: string;
+}
 
 interface UseRecommendationsProps {
-  initialQuery?: string;
-  initialCategory?: CategoryType;
+  selectedLocation?: { lat: number; lng: number } | null;
+  category?: string;
+  searchTerm?: string;
+  sortBy?: string;
+  isOpen?: boolean;
+  priceLevel?: string;
+  limit?: number;
 }
 
-interface FilterOptions {
-  maxDistance: number;
-  minRating: number;
-  priceLevel: number;
-  openNow: boolean;
-  hiddenGem?: boolean;
-  mustVisit?: boolean;
-  distanceUnit?: 'km' | 'mi';
-}
-
-export interface Event {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  description: string;
-  image: string;
-  attendees: number;
-  pricePerPerson?: number;
-  phoneNumber?: string;
-  whatsappNumber?: string;
-  images?: string[];
-  approval_status?: string;
-  user_id?: string;
-  isHiddenGem?: boolean;
-  isMustVisit?: boolean;
-}
-
-const useRecommendations = ({ 
-  initialQuery = '', 
-  initialCategory = 'all' 
+export const useRecommendations = ({
+  selectedLocation,
+  category,
+  searchTerm,
+  sortBy = 'distance',
+  isOpen = false,
+  priceLevel,
+  limit = 50
 }: UseRecommendationsProps = {}) => {
-  const [query, setQuery] = useState(initialQuery);
-  const [category, setCategory] = useState<CategoryType>(initialCategory);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  const processNaturalLanguageQuery = (rawQuery: string) => {
-    const lowercaseQuery = rawQuery.toLowerCase();
-    let processedQuery = lowercaseQuery;
-    let inferredCategory: CategoryType = category === 'all' ? 'all' : category;
-    
-    console.log('Original query:', `"${lowercaseQuery}"`);
-    
-    if (inferredCategory !== 'all') {
-      console.log(`Using provided category: ${inferredCategory}`);
-    } 
-    else {
-      if (lowercaseQuery.includes('yoga')) {
-        inferredCategory = 'fitness';
-      } else if (lowercaseQuery.includes('restaurant')) {
-        inferredCategory = 'restaurants';
-      } else if (lowercaseQuery.includes('café') || lowercaseQuery.includes('cafe') || lowercaseQuery.includes('coffee')) {
-        inferredCategory = 'cafes';
-      } else if (lowercaseQuery.includes('salon') || lowercaseQuery.includes('haircut')) {
-        inferredCategory = 'salons';
-      } else if (lowercaseQuery.includes('plumber')) {
-        inferredCategory = 'services';
-      } else if (lowercaseQuery.includes('fitness') || lowercaseQuery.includes('gym')) {
-        inferredCategory = 'fitness';
-      } else if (lowercaseQuery.includes('biryani') || 
-                 lowercaseQuery.includes('food') || 
-                 lowercaseQuery.includes('dinner') || 
-                 lowercaseQuery.includes('lunch') ||
-                 lowercaseQuery.includes('breakfast')) {
-        inferredCategory = 'restaurants';
-      }
-    }
-    
-    if (inferredCategory !== 'all' && inferredCategory !== category) {
-      console.log(`Setting category state to: ${inferredCategory}`);
-      setCategory(inferredCategory);
-    }
-    
-    return { processedQuery, inferredCategory };
-  };
+  const [businessCount, setBusinessCount] = useState(0);
 
-  const fetchServiceProviders = async (searchTerm: string, categoryFilter: string) => {
+  // Fetch recommendations based on the provided filters
+  const fetchRecommendations = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
     try {
-      console.log(`Fetching service providers with search term: "${searchTerm}" and category: "${categoryFilter}"`);
-      
       let query = supabase
         .from('service_providers')
         .select('*')
         .eq('approval_status', 'approved');
-      
-      if (categoryFilter !== 'all') {
-        const dbCategory = categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1);
-        query = query.eq('category', dbCategory);
+
+      // Apply category filter if provided
+      if (category && category !== 'All') {
+        query = query.eq('category', category);
       }
-      
+
+      // Apply search term filter if provided
       if (searchTerm && searchTerm.trim() !== '') {
-        query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error("Error fetching from Supabase:", error);
-        return [];
-      }
-      
-      console.log(`Fetched ${data?.length || 0} service providers from Supabase`);
-      
-      if (data && data.length > 0) {
-        return data.map(item => ({
-          id: item.id,
-          name: item.name,
-          category: item.category,
-          tags: item.tags || [],
-          rating: item.rating || 4.5,
-          address: `${item.area}, ${item.city}`,
-          distance: "0.5 miles away",
-          image: item.image_url || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
-          images: item.images || [],
-          description: item.description || "",
-          phone: item.contact_phone,
-          openNow: item.open_now || false,
-          hours: "Until 8:00 PM",
-          availability: item.availability || null,
-          priceLevel: "$$",
-          price_range_min: item.price_range_min || null,
-          price_range_max: item.price_range_max || null,
-          price_unit: item.price_unit || null,
-          map_link: item.map_link || null,
-          instagram: item.instagram || '',
-          availability_days: item.availability_days || [],
-          availability_start_time: item.availability_start_time || '',
-          availability_end_time: item.availability_end_time || '',
-          created_at: item.created_at || new Date().toISOString()
-        }));
-      }
-      
-      return [];
-    } catch (err) {
-      console.error("Failed to fetch from Supabase:", err);
-      return [];
-    }
-  };
-  
-  const fetchEvents = async (searchTerm: string) => {
-    try {
-      console.log(`Fetching events with search term: "${searchTerm}"`);
-      
-      let query = supabase
-        .from('events')
-        .select('*')
-        .eq('approval_status', 'approved');
-      
-      if (searchTerm && searchTerm.trim() !== '') {
-        query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error("Error fetching events from Supabase:", error);
-        return [];
-      }
-      
-      console.log(`Fetched ${data?.length || 0} events from Supabase`);
-      
-      if (data && data.length > 0) {
-        return data.map(event => ({
-          ...event,
-          pricePerPerson: event.price_per_person || 0
-        }));
-      }
-      
-      return [];
-    } catch (err) {
-      console.error("Failed to fetch events from Supabase:", err);
-      return [];
-    }
-  };
-
-  const filterRecommendations = (
-    recs: Recommendation[],
-    filterOptions: FilterOptions
-  ): Recommendation[] => {
-    const { distanceUnit = 'mi' } = filterOptions;
-    
-    return recs.filter(rec => {
-      if (rec.rating < filterOptions.minRating) {
-        return false;
+        const searchLower = searchTerm.toLowerCase();
+        query = query.or(`name.ilike.%${searchLower}%,description.ilike.%${searchLower}%,tags.cs.{${searchLower}}`);
       }
 
-      if (filterOptions.openNow && !rec.openNow) {
-        return false;
+      // Apply open now filter if required
+      if (isOpen) {
+        query = query.eq('open_now', true);
       }
 
-      if (filterOptions.hiddenGem && !rec.isHiddenGem) {
-        return false;
+      // Fetch businesses with applied filters
+      const { data: businesses, error: fetchError, count } = await query.order('created_at', { ascending: false }).limit(limit);
+
+      if (fetchError) {
+        throw fetchError;
       }
 
-      if (filterOptions.mustVisit && !rec.isMustVisit) {
-        return false;
+      if (count !== null) {
+        setBusinessCount(count);
       }
 
-      if (rec.distance) {
-        const distanceValue = parseFloat(rec.distance.split(' ')[0]);
-        if (!isNaN(distanceValue)) {
-          const adjustedDistance = distanceUnit === 'km' ? distanceValue : distanceValue * 1.60934;
-          if (adjustedDistance > filterOptions.maxDistance) {
-            return false;
+      if (!businesses || businesses.length === 0) {
+        setRecommendations([]);
+        setLoading(false);
+        return;
+      }
+
+      // Transform business data to match Recommendation interface
+      let transformedData: Recommendation[] = businesses.map(business => {
+        // Calculate distance if location is provided
+        let distanceText = '';
+        if (selectedLocation && business.coordinates) {
+          const [lng, lat] = business.coordinates.split('(')[1].split(')')[0].split(' ').map(Number);
+          const distance = calculateDistance(
+            selectedLocation.lat,
+            selectedLocation.lng,
+            lat,
+            lng
+          );
+          distanceText = distance < 1 
+            ? `${(distance * 1000).toFixed(0)} m` 
+            : `${distance.toFixed(1)} km`;
+        }
+
+        // Prepare availability_days based on the data type
+        let availabilityDays = business.availability_days;
+        if (typeof availabilityDays === 'string' && availabilityDays) {
+          try {
+            // Try to parse it if it might be a JSON string
+            if (availabilityDays.startsWith('[') && availabilityDays.endsWith(']')) {
+              availabilityDays = JSON.parse(availabilityDays);
+            }
+          } catch (e) {
+            console.error('Error parsing availability_days:', e);
           }
         }
+
+        return {
+          id: business.id,
+          name: business.name,
+          category: business.category,
+          description: business.description,
+          address: business.address,
+          area: business.area,
+          city: business.city,
+          tags: business.tags || [],
+          rating: business.rating || 4.5,
+          reviewCount: business.review_count || 0,
+          distance: distanceText || business.distance,
+          openNow: business.open_now,
+          hours: business.hours,
+          price: business.price,
+          website: business.website,
+          instagram: business.instagram,
+          phone: business.contact_phone,
+          image: business.image_url || '/placeholder.svg',
+          images: business.images || [],
+          availability: business.availability,
+          availability_days: availabilityDays,
+          availability_start_time: business.availability_start_time,
+          availability_end_time: business.availability_end_time,
+          mapLink: business.map_link,
+          created_at: business.created_at
+        };
+      });
+
+      // Apply sorting
+      if (sortBy === 'distance' && selectedLocation) {
+        transformedData = transformedData.sort((a, b) => {
+          const distA = a.distance ? parseFloat(a.distance.replace(' km', '').replace(' m', '')) : Infinity;
+          const distB = b.distance ? parseFloat(b.distance.replace(' km', '').replace(' m', '')) : Infinity;
+          return distA - distB;
+        });
+      } else if (sortBy === 'rating') {
+        transformedData = transformedData.sort((a, b) => ((b.rating || 0) - (a.rating || 0)));
+      } else if (sortBy === 'newest') {
+        transformedData = transformedData.sort((a, b) => {
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return dateB - dateA;
+        });
       }
 
-      if (rec.priceLevel) {
-        const priceCount = rec.priceLevel.length;
-        if (priceCount > filterOptions.priceLevel) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  };
-
-  const handleSearch = (searchQuery: string) => {
-    setQuery(searchQuery);
-  };
-
-  const handleCategoryChange = (newCategory: CategoryType) => {
-    setCategory(newCategory);
-  };
+      setRecommendations(transformedData);
+    } catch (err: any) {
+      console.error('Error fetching recommendations:', err);
+      setError('Failed to load recommendations. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedLocation, category, searchTerm, sortBy, isOpen, priceLevel, limit]);
 
   useEffect(() => {
-    const fetchRecommendations = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const { processedQuery, inferredCategory } = processNaturalLanguageQuery(query);
-        
-        const effectiveCategory = inferredCategory;
-        console.log("Effective search category:", effectiveCategory);
-        
-        const serviceProviders = await fetchServiceProviders(processedQuery, effectiveCategory);
-        setRecommendations(serviceProviders);
-        
-        const eventsData = await fetchEvents(processedQuery);
-        setEvents(eventsData);
-        
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to fetch recommendations. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchRecommendations();
-  }, [query, category]);
+  }, [fetchRecommendations]);
 
-  return {
-    query,
-    setQuery,
-    category,
-    setCategory,
-    recommendations,
-    events,
-    loading,
-    error,
-    filterRecommendations,
-    handleSearch,
-    handleCategoryChange
+  return { 
+    recommendations, 
+    loading, 
+    error, 
+    refetch: fetchRecommendations,
+    totalCount: businessCount
   };
 };
-
-export default useRecommendations;

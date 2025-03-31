@@ -22,13 +22,13 @@ interface Business {
   price_range_min?: number;
   price_range_max?: number;
   price_unit?: string;
-  availability?: string;
+  availability?: string | string[];
   area?: string;
   city?: string;
   contact_phone?: string;
   instagram?: string;
   tags?: string[];
-  availability_days?: string[];
+  availability_days?: string[] | string;
   availability_start_time?: string;
   availability_end_time?: string;
 }
@@ -61,8 +61,10 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
     }
   };
 
-  const formatDayRange = (days: string[]): string => {
-    if (!days || days.length === 0) return '';
+  const formatDayRange = (days: string[] | string): string => {
+    if (!days) return '';
+    if (typeof days === 'string') return days;
+    if (!Array.isArray(days) || days.length === 0) return '';
     
     const dayAbbreviations: Record<string, string> = {
       'monday': 'Mon',
@@ -116,9 +118,17 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
     return ranges.join(', ');
   };
 
-  const availabilityDays = business.availability_days && business.availability_days.length > 0 
-    ? formatDayRange(business.availability_days) 
-    : business.availability || '';
+  // Handle availability display
+  let availabilityText = '';
+  if (business.availability_days) {
+    availabilityText = formatDayRange(business.availability_days);
+  } else if (business.availability) {
+    if (typeof business.availability === 'string') {
+      availabilityText = business.availability;
+    } else if (Array.isArray(business.availability)) {
+      availabilityText = formatDayRange(business.availability);
+    }
+  }
 
   return (
     <Card key={business.id} className="overflow-hidden">
@@ -148,7 +158,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">
-              {availabilityDays}
+              {availabilityText}
               {business.availability_start_time && business.availability_end_time && 
                 ` (${business.availability_start_time} - ${business.availability_end_time})`}
             </span>

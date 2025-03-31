@@ -237,7 +237,6 @@ export type Database = {
           approval_status: string
           area: string
           availability: string | null
-          availability_days: string[] | null
           availability_end_time: string | null
           availability_start_time: string | null
           business_hours: Json | null
@@ -276,7 +275,6 @@ export type Database = {
           approval_status?: string
           area: string
           availability?: string | null
-          availability_days?: string[] | null
           availability_end_time?: string | null
           availability_start_time?: string | null
           business_hours?: Json | null
@@ -315,7 +313,6 @@ export type Database = {
           approval_status?: string
           area?: string
           availability?: string | null
-          availability_days?: string[] | null
           availability_end_time?: string | null
           availability_start_time?: string | null
           business_hours?: Json | null
