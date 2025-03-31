@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { AuthProvider } from "./hooks/useAuth";
 import React from "react";
@@ -24,37 +24,36 @@ import AdminPanel from "./pages/AdminPanel";
 
 const queryClient = new QueryClient();
 
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <AuthProvider>
-          <WishlistProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/search" element={<SearchResults />} />
-                <Route path="/location/:id" element={<LocationDetails />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/my-list" element={<MyList />} />
-                <Route path="/events" element={<Events />} />
-                <Route path="/map" element={<Map />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/marketplace/:id" element={<MarketplaceListingDetails />} />
-                <Route path="/seller/:id" element={<SellerDetails />} />
-                <Route path="/admin" element={<AdminPanel />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </TooltipProvider>
-          </WishlistProvider>
-        </AuthProvider>
-      </Router>
-    </QueryClientProvider>
-  );
-}
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <BrowserRouter>
+      <AuthProvider>
+        <WishlistProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/search" element={<SearchResults />} />
+              <Route path="/location/:id" element={<LocationDetails />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/my-list" element={<MyList />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/map" element={<Map />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/marketplace/:id" element={<MarketplaceListingDetails />} />
+              <Route path="/seller/:id" element={<SellerDetails />} />
+              <Route path="/admin" element={<AdminPanel />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </TooltipProvider>
+        </WishlistProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  </QueryClientProvider>
+);
 
 export default App;

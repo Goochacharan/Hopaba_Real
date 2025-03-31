@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Recommendation } from '@/lib/mockData';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
@@ -11,10 +12,10 @@ export type WishlistItem =
 
 interface WishlistContextType {
   wishlist: WishlistItem[];
-  addToWishlist: (item: WishlistItem | Recommendation | MarketplaceListing | Event) => void;
-  removeFromWishlist: (itemId: string, itemType?: 'location' | 'marketplace' | 'event') => void;
+  addToWishlist: (item: WishlistItem) => void;
+  removeFromWishlist: (itemId: string, itemType: 'location' | 'marketplace' | 'event') => void;
   isInWishlist: (itemId: string, itemType?: 'location' | 'marketplace' | 'event') => boolean;
-  toggleWishlist: (item: WishlistItem | Recommendation | MarketplaceListing | Event) => void;
+  toggleWishlist: (item: WishlistItem) => void;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
@@ -51,20 +52,10 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
-  const addToWishlist = (item: WishlistItem | Recommendation | MarketplaceListing | Event) => {
+  const addToWishlist = (item: WishlistItem) => {
     setWishlist(prev => {
-      // Ensure item has a type property
-      const itemWithType = 'type' in item 
-        ? item as WishlistItem
-        : {
-            ...item,
-            type: 'title' in item 
-              ? ('attendees' in item ? 'event' : 'marketplace') 
-              : 'location'
-          } as WishlistItem;
-      
       // Check if item already exists in wishlist
-      const exists = prev.some(i => i.id === itemWithType.id && i.type === itemWithType.type);
+      const exists = prev.some(i => i.id === item.id && i.type === item.type);
       if (exists) {
         return prev;
       }
@@ -72,26 +63,22 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       // Show toast notification
       toast({
         title: "Added to wishlist",
-        description: getItemTitle(itemWithType) + " has been added to your wishlist.",
+        description: getItemTitle(item) + " has been added to your wishlist.",
         duration: 3000,
       });
 
       // Add item to wishlist
-      return [...prev, itemWithType];
+      return [...prev, item];
     });
   };
 
-  const removeFromWishlist = (itemId: string, itemType?: 'location' | 'marketplace' | 'event') => {
+  const removeFromWishlist = (itemId: string, itemType: 'location' | 'marketplace' | 'event') => {
     setWishlist(prev => {
-      const filteredList = itemType
-        ? prev.filter(item => !(item.id === itemId && item.type === itemType))
-        : prev.filter(item => item.id !== itemId);
+      const filteredList = prev.filter(item => !(item.id === itemId && item.type === itemType));
       
       // Show toast notification if an item was removed
       if (filteredList.length < prev.length) {
-        const removedItem = prev.find(item => 
-          itemType ? (item.id === itemId && item.type === itemType) : item.id === itemId
-        );
+        const removedItem = prev.find(item => item.id === itemId && item.type === itemType);
         if (removedItem) {
           toast({
             title: "Removed from wishlist",
@@ -105,26 +92,20 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
-  const toggleWishlist = (item: WishlistItem | Recommendation | MarketplaceListing | Event) => {
-    const itemType = 'type' in item 
-      ? item.type 
-      : ('title' in item 
-          ? ('attendees' in item ? 'event' : 'marketplace') 
-          : 'location');
-          
-    const itemExists = isInWishlist(item.id, itemType as 'location' | 'marketplace' | 'event');
-    
+  const toggleWishlist = (item: WishlistItem) => {
+    const itemExists = isInWishlist(item.id, item.type);
     if (itemExists) {
-      removeFromWishlist(item.id, itemType as 'location' | 'marketplace' | 'event');
+      removeFromWishlist(item.id, item.type);
     } else {
       addToWishlist(item);
     }
   };
 
   const isInWishlist = (itemId: string, itemType?: 'location' | 'marketplace' | 'event') => {
-    return itemType
-      ? wishlist.some(item => item.id === itemId && item.type === itemType)
-      : wishlist.some(item => item.id === itemId);
+    if (itemType) {
+      return wishlist.some(item => item.id === itemId && item.type === itemType);
+    }
+    return wishlist.some(item => item.id === itemId);
   };
 
   // Helper function to get the title/name from different item types

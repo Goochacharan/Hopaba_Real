@@ -111,7 +111,7 @@ const useRecommendations = ({
         return [];
       }
       
-      console.log(`Fetched ${data?.length || 0} service providers from Supabase:`, data);
+      console.log(`Fetched ${data?.length || 0} service providers from Supabase`);
       
       if (data && data.length > 0) {
         return data.map(item => ({
@@ -148,62 +148,7 @@ const useRecommendations = ({
       return [];
     }
   };
-
-  const fetchRecommendationsData = async (searchTerm: string, categoryFilter: string) => {
-    try {
-      console.log(`Fetching recommendations with search term: "${searchTerm}" and category: "${categoryFilter}"`);
-      
-      let query = supabase
-        .from('recommendations')
-        .select('*');
-      
-      if (categoryFilter !== 'all') {
-        const dbCategory = categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1);
-        query = query.eq('category', dbCategory);
-      }
-      
-      if (searchTerm && searchTerm.trim() !== '') {
-        query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%`);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error("Error fetching recommendations from Supabase:", error);
-        return [];
-      }
-      
-      console.log(`Fetched ${data?.length || 0} recommendations from Supabase:`, data);
-      
-      if (data && data.length > 0) {
-        return data.map(item => ({
-          id: item.id,
-          name: item.name,
-          category: item.category,
-          tags: item.tags || [],
-          rating: item.rating || 4.5,
-          address: item.address || "",
-          distance: item.distance || "0.5 miles away",
-          image: item.image || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
-          images: item.images || [],
-          description: item.description || "",
-          phone: item.phone,
-          openNow: item.open_now || false,
-          hours: item.hours || "Until 8:00 PM",
-          availability: null,
-          priceLevel: item.price_level || "$$",
-          instagram: item.instagram || '',
-          created_at: item.created_at || new Date().toISOString()
-        }));
-      }
-      
-      return [];
-    } catch (err) {
-      console.error("Failed to fetch recommendations from Supabase:", err);
-      return [];
-    }
-  };
-
+  
   const fetchEvents = async (searchTerm: string) => {
     try {
       console.log(`Fetching events with search term: "${searchTerm}"`);
@@ -304,10 +249,7 @@ const useRecommendations = ({
         console.log("Effective search category:", effectiveCategory);
         
         const serviceProviders = await fetchServiceProviders(processedQuery, effectiveCategory);
-        const recommendationsData = await fetchRecommendationsData(processedQuery, effectiveCategory);
-        
-        const combinedResults = [...serviceProviders, ...recommendationsData];
-        setRecommendations(combinedResults);
+        setRecommendations(serviceProviders);
         
         const eventsData = await fetchEvents(processedQuery);
         setEvents(eventsData);

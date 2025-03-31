@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Pencil, Trash2, IndianRupee, Clock, MapPin, Phone, Instagram, Film, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 
 interface Business {
   id: string;
@@ -38,7 +37,6 @@ interface BusinessCardProps {
 
 const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete }) => {
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const handleInstagramClick = (e: React.MouseEvent, instagram: string | undefined, businessName: string) => {
     e.stopPropagation();
@@ -59,13 +57,8 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
     }
   };
 
-  const handleCardClick = () => {
-    // Navigate to location details page
-    navigate(`/location/${business.id}`);
-  };
-
   return (
-    <Card key={business.id} className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow" onClick={handleCardClick}>
+    <Card key={business.id} className="overflow-hidden">
       <CardHeader className="bg-muted/30">
         <CardTitle className="flex justify-between items-start">
           <span>{business.name}</span>
@@ -126,14 +119,11 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
           </div>
         )}
       </CardContent>
-      <CardFooter className="border-t bg-muted/10 gap-2 justify-end" onClick={e => e.stopPropagation()}>
+      <CardFooter className="border-t bg-muted/10 gap-2 justify-end">
         <Button 
           variant="outline" 
           size="sm" 
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit(business);
-          }}
+          onClick={() => onEdit(business)}
           className="flex items-center gap-1"
         >
           <Pencil className="h-4 w-4" />
@@ -142,10 +132,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
         <Button 
           variant="destructive" 
           size="sm" 
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(business.id);
-          }}
+          onClick={() => onDelete(business.id)}
           className="flex items-center gap-1"
         >
           <Trash2 className="h-4 w-4" />
