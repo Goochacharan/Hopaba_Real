@@ -53,8 +53,7 @@ const LocationsList: React.FC<LocationsListProps> = ({
           <LocationCard 
             recommendation={{
               ...recommendation,
-              city: recommendation.city || '',
-              address: recommendation.address || `${recommendation.area}, ${recommendation.city}`,
+              address: recommendation.address || (recommendation.area && recommendation.city ? `${recommendation.area}, ${recommendation.city}` : recommendation.address || '')
             }}
             showDistanceUnderAddress={true}
             className="search-result-card h-full"
