@@ -14,6 +14,7 @@ export interface Recommendation {
   price_range_max?: number;
   price_unit?: string;
   address: string;
+  city?: string;
   phone?: string;
   website?: string;
   openNow?: boolean;
@@ -23,7 +24,7 @@ export interface Recommendation {
   availability_start_time?: string;
   availability_end_time?: string;
   distance?: string;
-  calculatedDistance?: number;  // Added the calculatedDistance property
+  calculatedDistance?: number;
   instagram?: string;
   reviewCount?: number;
   tags: string[];

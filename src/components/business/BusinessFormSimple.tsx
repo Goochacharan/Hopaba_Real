@@ -64,6 +64,8 @@ export interface Business {
   experience?: string;
   availability?: string;
   hours?: string;
+  images?: string[];
+  approval_status?: string;
 }
 
 const businessSchema = z.object({
