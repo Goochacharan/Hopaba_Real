@@ -10,12 +10,15 @@ import UserMarketplaceListings from '@/components/UserMarketplaceListings';
 import UserEventListings from '@/components/UserEventListings';
 import BusinessesList from '@/components/BusinessesList';
 import { AdminSection } from '@/components/admin/AdminSection';
+import AddBusinessForm from '@/components/AddBusinessForm';
+import { Plus } from 'lucide-react';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useAuth();
   const [refreshBusinesses, setRefreshBusinesses] = useState(false);
   const [editingBusiness, setEditingBusiness] = useState<any | null>(null);
+  const [showAddBusinessForm, setShowAddBusinessForm] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -25,15 +28,23 @@ const Profile = () => {
 
   const handleAddBusiness = () => {
     setEditingBusiness(null);
+    setShowAddBusinessForm(true);
   };
 
   const handleEditBusiness = (business: any) => {
     setEditingBusiness(business);
+    setShowAddBusinessForm(true);
   };
 
   const handleBusinessSaved = () => {
     setEditingBusiness(null);
+    setShowAddBusinessForm(false);
     setRefreshBusinesses(prev => !prev);
+  };
+
+  const handleCancelBusinessForm = () => {
+    setEditingBusiness(null);
+    setShowAddBusinessForm(false);
   };
 
   if (!user) {
@@ -75,28 +86,53 @@ const Profile = () => {
 
         {isAdmin && <AdminSection />}
 
-        <Tabs defaultValue="listings" className="w-full">
-          <TabsList className="grid grid-cols-3 mb-8">
-            <TabsTrigger value="listings">Your Listings</TabsTrigger>
-            <TabsTrigger value="events">Your Events</TabsTrigger>
-            <TabsTrigger value="businesses">Your Businesses</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="listings">
-            <UserMarketplaceListings />
-          </TabsContent>
-          
-          <TabsContent value="events">
-            <UserEventListings />
-          </TabsContent>
-          
-          <TabsContent value="businesses">
-            <BusinessesList
-              onEdit={handleEditBusiness}
-              refresh={refreshBusinesses}
-            />
-          </TabsContent>
-        </Tabs>
+        {showAddBusinessForm ? (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>{editingBusiness ? 'Edit Business' : 'Add Business'}</CardTitle>
+              <CardDescription>
+                {editingBusiness ? 'Update your business information' : 'List your business or service'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AddBusinessForm 
+                business={editingBusiness} 
+                onSaved={handleBusinessSaved}
+                onCancel={handleCancelBusinessForm}
+              />
+            </CardContent>
+          </Card>
+        ) : (
+          <Tabs defaultValue="listings" className="w-full">
+            <TabsList className="grid grid-cols-3 mb-8">
+              <TabsTrigger value="listings">Your Listings</TabsTrigger>
+              <TabsTrigger value="events">Your Events</TabsTrigger>
+              <TabsTrigger value="businesses">Your Businesses</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="listings">
+              <UserMarketplaceListings />
+            </TabsContent>
+            
+            <TabsContent value="events">
+              <UserEventListings />
+            </TabsContent>
+            
+            <TabsContent value="businesses">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">Your Business Listings</h2>
+                <Button onClick={handleAddBusiness} className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  Add Business
+                </Button>
+              </div>
+              <BusinessesList
+                onEdit={handleEditBusiness}
+                refresh={refreshBusinesses}
+              />
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
     </MainLayout>
   );
