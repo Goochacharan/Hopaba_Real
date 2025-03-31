@@ -50,7 +50,7 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
       </div>
       
       <div className="space-y-4">
-        <ScrollArea className="h-[200px] pr-3">
+        <ScrollArea className="h-[300px] pr-3">
           <p className="whitespace-pre-line leading-relaxed text-base font-normal text-slate-900">
             {description}
           </p>
