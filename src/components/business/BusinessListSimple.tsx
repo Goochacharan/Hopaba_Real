@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Building, MapPin, Phone, MessageSquare, Globe, Instagram, IndianRupee, Pencil, Trash } from 'lucide-react';
+import { Building, MapPin, Phone, MessageSquare, Globe, Instagram, IndianRupee, Pencil, Trash, Tag, Clock, Star } from 'lucide-react';
 import { Business } from './BusinessFormSimple';
 
 interface BusinessListProps {
@@ -164,7 +164,56 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
                     ₹{business.price_range_min || '—'} - ₹{business.price_range_max || '—'} {business.price_unit}
                   </span>
                 </div>
+                
+                {business.map_link && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <a href={business.map_link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:underline truncate">
+                      Google Maps
+                    </a>
+                  </div>
+                )}
+
+                {business.availability && (
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-sm">{business.availability}</span>
+                  </div>
+                )}
+
+                {business.working_hours && (
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-sm">{business.working_hours}</span>
+                  </div>
+                )}
               </div>
+              
+              {business.tags && business.tags.length > 0 && (
+                <div className="mt-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Tag className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Services/Items:</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {business.tags.map((tag, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {business.experience && (
+                <div className="mt-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Star className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Experience:</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground pl-6">{business.experience}</p>
+                </div>
+              )}
             </CardContent>
             
             <CardFooter className="border-t bg-muted/10 gap-2 justify-end py-3">
