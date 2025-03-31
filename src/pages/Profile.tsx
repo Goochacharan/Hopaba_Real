@@ -19,6 +19,7 @@ const Profile = () => {
   const [refreshBusinesses, setRefreshBusinesses] = useState(false);
   const [editingBusiness, setEditingBusiness] = useState<any | null>(null);
   const [showAddBusinessForm, setShowAddBusinessForm] = useState(false);
+  const [activeTab, setActiveTab] = useState("listings");
 
   useEffect(() => {
     if (!user) {
@@ -29,11 +30,13 @@ const Profile = () => {
   const handleAddBusiness = () => {
     setEditingBusiness(null);
     setShowAddBusinessForm(true);
+    setActiveTab("businesses"); // Ensure we're on the businesses tab
   };
 
   const handleEditBusiness = (business: any) => {
     setEditingBusiness(business);
     setShowAddBusinessForm(true);
+    setActiveTab("businesses"); // Ensure we're on the businesses tab
   };
 
   const handleBusinessSaved = () => {
@@ -103,7 +106,7 @@ const Profile = () => {
             </CardContent>
           </Card>
         ) : (
-          <Tabs defaultValue="listings" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-3 mb-8">
               <TabsTrigger value="listings">Your Listings</TabsTrigger>
               <TabsTrigger value="events">Your Events</TabsTrigger>
