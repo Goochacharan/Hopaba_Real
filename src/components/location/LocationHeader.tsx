@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Star } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { cn } from '@/lib/utils';
 
 interface LocationHeaderProps {
   name: string;
@@ -22,8 +23,32 @@ const LocationHeader = ({ name, rating, reviewCount, onImageClick, images }: Loc
     });
   };
 
-  // Format the rating to one decimal place
-  const formattedRating = rating.toFixed(1);
+  const renderStarRating = (rating: number) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const totalStars = 5;
+    
+    return (
+      <div className="flex items-center">
+        {[...Array(fullStars)].map((_, i) => (
+          <Star key={`full-${i}`} className="fill-amber-500 stroke-amber-500 w-4 h-4" />
+        ))}
+        
+        {hasHalfStar && (
+          <div className="relative w-4 h-4">
+            <Star className="absolute stroke-amber-500 w-4 h-4" />
+            <div className="absolute overflow-hidden w-[50%]">
+              <Star className="fill-amber-500 stroke-amber-500 w-4 h-4" />
+            </div>
+          </div>
+        )}
+        
+        {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
+          <Star key={`empty-${i}`} className="stroke-amber-500 w-4 h-4" />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6">
@@ -58,13 +83,12 @@ const LocationHeader = ({ name, rating, reviewCount, onImageClick, images }: Loc
         </div>
         
         <div className="flex items-center mb-4">
-          <div className="flex items-center text-amber-500">
-            <span className="text-lg font-semibold mr-1 text-amber-700">{formattedRating}</span>
-            <Star className="fill-amber-500 w-4 h-4" />
+          <div className="flex items-center">
+            {renderStarRating(rating)}
+            <span className="text-xs text-muted-foreground ml-1.5">
+              ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
+            </span>
           </div>
-          <span className="text-xs text-muted-foreground ml-1">
-            ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
-          </span>
         </div>
       </div>
     </div>
