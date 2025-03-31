@@ -43,15 +43,19 @@ const LocationsList: React.FC<LocationsListProps> = ({
   }
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 search-results-grid">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 search-results-grid">
       {recommendations.map((recommendation, index) => (
         <div 
           key={recommendation.id} 
-          className="animate-fade-in compact-card" 
+          className="animate-fade-in" 
           style={{ animationDelay: `${index * 50}ms` }}
         >
           <LocationCard 
-            recommendation={recommendation}
+            recommendation={{
+              ...recommendation,
+              city: recommendation.city || '',
+              address: recommendation.address || `${recommendation.area}, ${recommendation.city}`,
+            }}
             showDistanceUnderAddress={true}
             className="search-result-card h-full"
           />
