@@ -10,13 +10,15 @@ interface EventsListProps {
   loading?: boolean;
   error?: string | null;
   className?: string;
+  hideWishlistIcon?: boolean;
 }
 
 const EventsList: React.FC<EventsListProps> = ({ 
   events, 
   loading = false,
   error = null,
-  className 
+  className,
+  hideWishlistIcon
 }) => {
   if (loading) {
     return (
@@ -59,6 +61,7 @@ const EventsList: React.FC<EventsListProps> = ({
               "h-full flex flex-col",
               "event-card" // This class will be used to identify event cards
             )}
+            hideWishlistIcon={hideWishlistIcon}
           />
         </div>
       ))}

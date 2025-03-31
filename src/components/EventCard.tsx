@@ -11,9 +11,10 @@ interface EventCardProps {
   event: Event;
   className?: string;
   onRSVP?: (eventId: string) => void;
+  hideWishlistIcon?: boolean;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ event, className, onRSVP }) => {
+const EventCard: React.FC<EventCardProps> = ({ event, className, onRSVP, hideWishlistIcon }) => {
   const formatDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), 'MMMM d, yyyy');
