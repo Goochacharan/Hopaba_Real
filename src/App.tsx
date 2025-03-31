@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -34,6 +35,7 @@ function App() {
               <Sonner />
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/search" element={<SearchResults />} />
                 <Route path="/location/:id" element={<LocationDetails />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/my-list" element={<MyList />} />

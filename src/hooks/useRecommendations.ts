@@ -92,8 +92,7 @@ const useRecommendations = ({
       
       let query = supabase
         .from('service_providers')
-        .select('*')
-        .eq('approval_status', 'approved');
+        .select('*');
       
       if (categoryFilter !== 'all') {
         const dbCategory = categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1);
@@ -111,7 +110,7 @@ const useRecommendations = ({
         return [];
       }
       
-      console.log(`Fetched ${data?.length || 0} service providers from Supabase`);
+      console.log(`Fetched ${data?.length || 0} service providers from Supabase:`, data);
       
       if (data && data.length > 0) {
         return data.map(item => ({

@@ -50,19 +50,35 @@ const LocationDetails = () => {
       try {
         setLoading(true);
         
-        // Fetch the business details
-        const { data, error } = await supabase
+        // First try to fetch from service_providers
+        let { data, error } = await supabase
           .from('service_providers')
           .select('*')
           .eq('id', id)
           .single();
         
-        if (error) throw error;
+        // If not found, try the recommendations table
+        if (error || !data) {
+          const { data: recData, error: recError } = await supabase
+            .from('recommendations')
+            .select('*')
+            .eq('id', id)
+            .single();
+            
+          if (recError) {
+            console.error('Error fetching from recommendations:', recError);
+            throw new Error('Location not found');
+          }
+          
+          data = recData;
+        }
         
         if (data) {
+          console.log("Fetched location data:", data);
+          
           setLocation({
             ...data,
-            address: `${data.area}, ${data.city}`,
+            address: data.address || `${data.area}, ${data.city}`,
             rating: data.rating || 4.5,
             review_count: data.review_count || 0
           });
