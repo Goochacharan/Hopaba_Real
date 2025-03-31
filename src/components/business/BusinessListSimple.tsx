@@ -195,10 +195,10 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
                   </div>
                 )}
 
-                {business.working_hours && (
+                {business.hours && (
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-sm">{business.working_hours}</span>
+                    <span className="text-sm">{business.hours}</span>
                   </div>
                 )}
               </div>
