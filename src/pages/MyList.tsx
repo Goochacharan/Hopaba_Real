@@ -1,8 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
-import LocationCardWrapper from '@/components/LocationCardWrapper';
+import LocationCard from '@/components/LocationCard';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useWishlist, WishlistItem } from '@/contexts/WishlistContext';
 import { Heart, Search } from 'lucide-react';
@@ -143,11 +142,7 @@ const MyList = () => {
                       const marketplaceItem = item as MarketplaceListing & { type: 'marketplace' };
                       return (
                         <div key={item.id} className="relative group">
-                          <MarketplaceListingCard 
-                            listing={marketplaceItem} 
-                            className="search-result-card" 
-                            hideWishlistIcon={true} 
-                          />
+                          <MarketplaceListingCard listing={marketplaceItem} className="search-result-card" />
                           <button 
                             className="absolute top-2 right-2 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10 text-rose-500"
                             onClick={(e) => handleHeartClick(e, item)}
@@ -160,11 +155,7 @@ const MyList = () => {
                       const eventItem = item as Event & { type: 'event' };
                       return (
                         <div key={item.id} className="relative group">
-                          <EventCard 
-                            event={eventItem} 
-                            className="search-result-card" 
-                            hideWishlistIcon={true} 
-                          />
+                          <EventCard event={eventItem} className="search-result-card" />
                           <button 
                             className="absolute top-2 right-2 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10 text-rose-500"
                             onClick={(e) => handleHeartClick(e, item)}
@@ -175,14 +166,9 @@ const MyList = () => {
                       );
                     } else {
                       const locationItem = item as Recommendation & { type: 'location' };
-                      // Use LocationCardWrapper instead of LocationCard directly
                       return (
                         <div key={item.id} className="relative group">
-                          <LocationCardWrapper 
-                            recommendation={locationItem} 
-                            className="search-result-card" 
-                            hideWishlistIcon={true} 
-                          />
+                          <LocationCard recommendation={locationItem} className="search-result-card" />
                           <button 
                             className="absolute top-2 right-2 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10 text-rose-500"
                             onClick={(e) => handleHeartClick(e, item)}

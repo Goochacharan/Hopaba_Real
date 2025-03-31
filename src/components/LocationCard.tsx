@@ -458,36 +458,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     return recommendation.availability_days.map(day => formatDayShort(day)).join(', ');
   };
 
-  const renderAvailabilityInfo = () => {
-    const daysDisplay = getAvailabilityDaysDisplay();
-    const hoursDisplay = getAvailabilityHoursDisplay();
-
-    if (!daysDisplay && !hoursDisplay) return null;
-
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger className="ml-2 inline-flex items-center text-xs font-medium text-primary hover:text-primary/80 transition-colors rounded-md" onClick={(e) => e.stopPropagation()}>
-          <Calendar className="h-3.5 w-3.5 mr-1" />
-          <span className="underline">Hours</span>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-3 shadow-md rounded-md border z-50">
-          {daysDisplay && (
-            <div className="mb-2 border-b pb-2">
-              <div className="text-xs font-medium text-muted-foreground mb-1">Available days:</div>
-              <div className="text-sm font-medium">{daysDisplay}</div>
-            </div>
-          )}
-          {hoursDisplay && (
-            <div>
-              <div className="text-xs font-medium text-muted-foreground mb-1">Open hours:</div>
-              <div className="text-sm font-medium">{hoursDisplay}</div>
-            </div>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  };
-
   const openStatus = isOpenNow();
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
   const availabilityInfo = formatAvailabilityDays();
@@ -590,7 +560,28 @@ const LocationCard: React.FC<LocationCardProps> = ({
                 </span>
               </div>
               
-              {(hasAvailabilityInfo() || businessHours) && renderAvailabilityInfo()}
+              {(hasAvailabilityInfo() || businessHours) && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="ml-2 inline-flex items-center text-xs font-medium text-primary hover:text-primary/80 transition-colors rounded-md" onClick={(e) => e.stopPropagation()}>
+                    <Calendar className="h-3.5 w-3.5 mr-1" />
+                    <span className="underline">Hours</span>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
+                    {getAvailabilityDaysDisplay() && (
+                      <div className="mb-1">
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
+                        <div className="text-sm">{getAvailabilityDaysDisplay()}</div>
+                      </div>
+                    )}
+                    {getAvailabilityHoursDisplay() && (
+                      <div>
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Hours:</div>
+                        <div className="text-sm">{getAvailabilityHoursDisplay()}</div>
+                      </div>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
             
             {hasAvailabilityInfo() && openStatus !== false && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="mt-0.5">
