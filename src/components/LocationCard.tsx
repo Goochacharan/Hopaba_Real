@@ -332,7 +332,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
         weekday: 'long'
       }).toLowerCase();
       const availableDays = recommendation.availability_days?.map(day => day.toLowerCase()) || [];
-      const isAvailableToday = availableDays.some(day => currentDay.includes(day) || day.includes(currentDay));
+      const isAvailableToday = availableDays.some(day => 
+        currentDay.includes(day.toString()) || day.toString().includes(currentDay)
+      );
       if (!isAvailableToday) return false;
       if (recommendation.availability_start_time && recommendation.availability_end_time) {
         const startTime = parseTimeString(recommendation.availability_start_time);

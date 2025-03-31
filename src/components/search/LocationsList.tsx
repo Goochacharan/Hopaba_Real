@@ -70,8 +70,10 @@ const LocationsList: React.FC<LocationsListProps> = ({
     if (typeof availabilityDays === 'string') {
       try {
         // Try to parse it if it might be a JSON string
-        if (availabilityDays.includes('[') && availabilityDays.includes(']')) {
-          availabilityDays = JSON.parse(availabilityDays);
+        if (typeof availabilityDays === 'string' && 
+            availabilityDays.toString().includes('[') && 
+            availabilityDays.toString().includes(']')) {
+          availabilityDays = JSON.parse(availabilityDays as string);
         }
       } catch (e) {
         console.error('Error parsing availability_days:', e);

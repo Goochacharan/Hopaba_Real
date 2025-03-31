@@ -33,6 +33,9 @@ export interface Recommendation {
   location?: [number, number];
   mapLink?: string;
   created_at?: string;
+  hiddenGemCount?: number;
+  mustVisitCount?: number;
+  map_link?: string;
 }
 
 export interface Event {
@@ -74,6 +77,7 @@ interface FilterOptions {
   distanceUnit?: string;
 }
 
+// Define the service provider interface to match database columns
 interface ServiceProvider {
   id: string;
   name: string;
@@ -168,7 +172,7 @@ export const useRecommendations = ({
       }
 
       // Transform business data to match Recommendation interface
-      const transformedData: Recommendation[] = businesses.map((business: ServiceProvider) => {
+      const transformedData: Recommendation[] = businesses.map((business: any) => {
         // Calculate distance if location is provided
         let distanceText = '';
         if (selectedLocation && business.coordinates) {
@@ -203,9 +207,9 @@ export const useRecommendations = ({
           try {
             // Try to parse it if it might be a JSON string
             if (typeof availabilityDays === 'string' && 
-                availabilityDays.includes('[') && 
-                availabilityDays.includes(']')) {
-              availabilityDays = JSON.parse(availabilityDays);
+                availabilityDays.toString().includes('[') && 
+                availabilityDays.toString().includes(']')) {
+              availabilityDays = JSON.parse(availabilityDays as string);
             }
           } catch (e) {
             console.error('Error parsing availability_days:', e);
@@ -237,7 +241,7 @@ export const useRecommendations = ({
           availability_days: availabilityDays,
           availability_start_time: business.availability_start_time,
           availability_end_time: business.availability_end_time,
-          mapLink: business.map_link,
+          map_link: business.map_link,
           created_at: business.created_at
         };
       });
