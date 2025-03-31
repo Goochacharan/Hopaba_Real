@@ -1,216 +1,258 @@
 
-import React, { useState, useEffect } from 'react';
-import { format, differenceInDays } from 'date-fns';
-import { Instagram, Film, Sparkles, MapPin, Link2, Tag, Clock, Calendar } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { formatDistanceToNow } from 'date-fns';
+import { Phone, MessageSquare, Instagram, MapPin, CircleDollarSign, ShoppingBag, Tag, Info, Calendar, Star } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+import ReactMarkdown from 'react-markdown';
+import ImageGallery from '../ImageGallery';
+import SellerReviews from './SellerReviews';
+import ReviewForm from './ReviewForm';
+
+// Helper functions to safely process availability_days
+const isValidAvailabilityDays = (days: any): days is string[] => {
+  return Array.isArray(days) && days.length > 0;
+};
+
+const isValidAvailabilityDaysString = (days: any): days is string => {
+  return typeof days === 'string' && days.trim().length > 0;
+};
 
 interface ListingDescriptionProps {
-  description: string;
-  category: string;
-  condition: string;
-  location: string;
-  createdAt: string;
-  instagram?: string | null;
-  mapLink?: string | null;
-  showMetadata?: boolean;
-  priceUnit?: string;
-  experience?: string;
-  tags?: string[];
-  availability_days?: string[];
-  availability_start_time?: string;
-  availability_end_time?: string;
+  listing: MarketplaceListing;
+  sellerReviews?: any[];
+  onReviewSubmit?: (rating: number, comment: string) => Promise<void>;
+  isReviewSubmitting?: boolean;
+  currentUserReviewed?: boolean;
+  refetchReviews?: () => void;
 }
 
 const ListingDescription: React.FC<ListingDescriptionProps> = ({
-  description,
-  category,
-  condition,
-  location,
-  createdAt,
-  instagram,
-  mapLink,
-  showMetadata = false,
-  priceUnit,
-  experience,
-  tags,
-  availability_days,
-  availability_start_time,
-  availability_end_time
+  listing,
+  sellerReviews = [],
+  onReviewSubmit,
+  isReviewSubmitting = false,
+  currentUserReviewed = false,
+  refetchReviews
 }) => {
-  const isNew = differenceInDays(new Date(), new Date(createdAt)) < 7;
+  const [activeTab, setActiveTab] = useState('details');
   
-  const formatDayRange = (days: string[]): string => {
-    if (!days || days.length === 0) return '';
-    
-    const dayAbbreviations: Record<string, string> = {
-      'monday': 'Mon',
-      'tuesday': 'Tue',
-      'wednesday': 'Wed',
-      'thursday': 'Thu',
-      'friday': 'Fri',
-      'saturday': 'Sat',
-      'sunday': 'Sun'
-    };
-    
-    const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    const sortedDays = [...days].sort((a, b) => 
-      dayOrder.indexOf(a.toLowerCase()) - dayOrder.indexOf(b.toLowerCase())
-    );
-    
-    const ranges: string[] = [];
-    let rangeStart: string | null = null;
-    let rangeEnd: string | null = null;
-    
-    for (let i = 0; i <= sortedDays.length; i++) {
-      const day = i < sortedDays.length ? sortedDays[i].toLowerCase() : null;
-      const prevDay = i > 0 ? sortedDays[i - 1].toLowerCase() : null;
-      const isDayAfterPrev = day && prevDay && 
-        dayOrder.indexOf(day) === dayOrder.indexOf(prevDay) + 1;
-      
-      if (i === 0) {
-        rangeStart = sortedDays[0];
-        rangeEnd = sortedDays[0];
-      } else if (isDayAfterPrev) {
-        rangeEnd = sortedDays[i];
-      } else if (rangeStart && rangeEnd) {
-        if (rangeStart === rangeEnd) {
-          ranges.push(dayAbbreviations[rangeStart.toLowerCase()] || rangeStart);
-        } else {
-          const startAbbr = dayAbbreviations[rangeStart.toLowerCase()] || rangeStart;
-          const endAbbr = dayAbbreviations[rangeEnd.toLowerCase()] || rangeEnd;
-          ranges.push(`${startAbbr}-${endAbbr}`);
-        }
-        
-        if (day) {
-          rangeStart = sortedDays[i];
-          rangeEnd = sortedDays[i];
-        } else {
-          rangeStart = null;
-          rangeEnd = null;
-        }
-      }
-    }
-    
-    return ranges.join(', ');
+  const formatCondition = (condition: string) => {
+    return condition.charAt(0).toUpperCase() + condition.slice(1);
   };
   
-  // Handle availability_days as either array or string
-  let hasAvailabilityDays = false;
-  let displayAvailabilityDays = null;
-  
-  if (availability_days) {
-    if (Array.isArray(availability_days) && availability_days.length > 0) {
-      hasAvailabilityDays = true;
-      displayAvailabilityDays = formatDayRange(availability_days);
-    } else if (typeof availability_days === 'string' && availability_days.trim() !== '') {
-      hasAvailabilityDays = true;
-      displayAvailabilityDays = availability_days;
+  const formatTimeAgo = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      return 'Recently';
     }
-  }
+  };
   
-  // Special case for Corner House category
-  if (category === "Corner House" && !hasAvailabilityDays) {
-    hasAvailabilityDays = true;
-    displayAvailabilityDays = "Mon-Sun";
-  }
-
+  const timeAgo = formatTimeAgo(listing.created_at);
+  
   return (
-    <div className="bg-white rounded-xl border p-6 shadow-sm">
-      <div className="flex items-center gap-3">
-        <h2 className="text-xl font-semibold mb-3">Description</h2>
-        {isNew && (
-          <div className="bg-[#33C3F0] text-white text-xs font-semibold px-2 py-0.5 rounded flex items-center gap-1 mb-3">
-            <Sparkles className="h-2.5 w-2.5" />
-            <span className="text-[10px]">New post</span>
-          </div>
-        )}
-      </div>
-      
-      <div className="space-y-4">
-        <ScrollArea className="h-[350px] pr-3">
-          <p className="whitespace-pre-line leading-relaxed text-base font-normal text-slate-900">
-            {description}
-          </p>
-          
-          {showMetadata && (
-            <div className="mt-6 space-y-4 text-sm text-gray-700">
-              {(displayAvailabilityDays || category === "Corner House") && (
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-primary" />
-                  <span className="font-medium">
-                    Working days: {displayAvailabilityDays || (category === "Corner House" ? "Mon-Sun" : "Not specified")}
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="p-4 md:p-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Badge className="px-2 py-1">
+                {listing.category.charAt(0).toUpperCase() + listing.category.slice(1)}
+              </Badge>
+              <span className="text-sm text-muted-foreground">{timeAgo}</span>
+            </div>
+            
+            <h1 className="text-2xl font-bold">{listing.title}</h1>
+            
+            <div className="flex flex-wrap gap-4 py-2">
+              <div className="flex items-center gap-1.5">
+                <CircleDollarSign className="h-5 w-5 text-green-600" />
+                <span className="text-xl font-semibold">₹{listing.price.toLocaleString()}</span>
+              </div>
+              
+              <div className="flex items-center gap-1.5">
+                <ShoppingBag className="h-5 w-5 text-amber-500" />
+                <span className="text-sm">
+                  Condition: <span className="font-medium">{formatCondition(listing.condition)}</span>
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-1.5">
+                <MapPin className="h-5 w-5 text-blue-500" />
+                <span className="text-sm">{listing.location}</span>
+              </div>
+              
+              {listing.seller_rating && (
+                <div className="flex items-center gap-1.5">
+                  <Star className="h-5 w-5 text-yellow-500" />
+                  <span className="text-sm">
+                    <span className="font-medium">{listing.seller_rating}</span>/5
+                    {listing.review_count && (
+                      <span className="text-muted-foreground ml-1">
+                        ({listing.review_count} {listing.review_count === 1 ? 'review' : 'reviews'})
+                      </span>
+                    )}
                   </span>
-                  {availability_start_time && availability_end_time && (
-                    <span className="text-muted-foreground">
-                      ({availability_start_time} - {availability_end_time})
-                    </span>
-                  )}
-                </div>
-              )}
-              
-              {priceUnit && (
-                <p>
-                  <span className="font-semibold">Pricing:</span> {priceUnit}
-                </p>
-              )}
-              
-              {experience && (
-                <p>
-                  <span className="font-semibold">Experience:</span> {experience} years
-                </p>
-              )}
-              
-              {tags && tags.length > 0 && (
-                <div className="space-y-2">
-                  <p className="font-semibold flex items-center gap-1">
-                    <Tag className="h-3.5 w-3.5" />
-                    Services/Items:
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {mapLink && (
-                <div className="flex items-center gap-2 mt-4">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <a 
-                    href={mapLink} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    View on Google Maps
-                  </a>
-                </div>
-              )}
-              
-              {instagram && (
-                <div className="flex items-center gap-2 mt-2">
-                  {instagram.includes('youtube.com') || instagram.includes('vimeo.com') || instagram.includes('tiktok.com') ? (
-                    <Film className="h-4 w-4 text-purple-500" />
-                  ) : (
-                    <Instagram className="h-4 w-4 text-pink-500" />
-                  )}
-                  <a 
-                    href={instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram.replace('@', '')}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    {instagram.includes('youtube.com') || instagram.includes('vimeo.com') || instagram.includes('tiktok.com') ? 'View Video Content' : 'Visit Instagram'}
-                  </a>
                 </div>
               )}
             </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 space-y-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="w-full grid grid-cols-2">
+              <TabsTrigger value="details" className="text-sm">
+                <Info className="mr-2 h-4 w-4" />
+                Details
+              </TabsTrigger>
+              <TabsTrigger value="seller" className="text-sm">
+                <Star className="mr-2 h-4 w-4" />
+                Seller ({sellerReviews.length})
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="details" className="mt-4 space-y-6">
+              <Card>
+                <CardContent className="p-4 md:p-6">
+                  <div className="space-y-4">
+                    <h2 className="text-lg font-semibold">Description</h2>
+                    <div className="prose prose-sm max-w-none">
+                      <ReactMarkdown>
+                        {listing.description}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {listing.images && listing.images.length > 0 && (
+                <Card>
+                  <CardContent className="p-4 md:p-6">
+                    <h2 className="text-lg font-semibold mb-4">Images</h2>
+                    <ImageGallery images={listing.images} />
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="seller" className="mt-4 space-y-6">
+              <Card>
+                <CardContent className="p-4 md:p-6">
+                  <div className="space-y-4">
+                    <h2 className="text-lg font-semibold">About the Seller</h2>
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-primary font-medium">
+                          {listing.seller_name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-medium">{listing.seller_name}</p>
+                        {listing.seller_rating && (
+                          <div className="flex items-center gap-1">
+                            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                            <span className="text-sm">{listing.seller_rating}/5</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <SellerReviews 
+                reviews={sellerReviews} 
+                sellerName={listing.seller_name} 
+              />
+              
+              {!currentUserReviewed && onReviewSubmit && (
+                <ReviewForm 
+                  onSubmit={onReviewSubmit} 
+                  isSubmitting={isReviewSubmitting} 
+                  sellerName={listing.seller_name}
+                />
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
+        
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="p-4 md:p-6">
+              <h2 className="text-lg font-semibold mb-4">Contact Seller</h2>
+              <div className="space-y-3">
+                {listing.seller_phone && (
+                  <a href={`tel:${listing.seller_phone}`}>
+                    <Button variant="outline" className="w-full justify-start">
+                      <Phone className="mr-2 h-4 w-4" />
+                      Call Seller
+                    </Button>
+                  </a>
+                )}
+                
+                {listing.seller_whatsapp && (
+                  <a 
+                    href={`https://wa.me/${listing.seller_whatsapp.replace(/\+/g, '')}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    <Button variant="outline" className="w-full justify-start">
+                      <MessageSquare className="mr-2 h-4 w-4 text-green-600" />
+                      WhatsApp
+                    </Button>
+                  </a>
+                )}
+                
+                {listing.seller_instagram && (
+                  <a 
+                    href={
+                      listing.seller_instagram.startsWith('@') 
+                        ? `https://instagram.com/${listing.seller_instagram.slice(1)}` 
+                        : listing.seller_instagram.includes('instagram.com') 
+                          ? listing.seller_instagram 
+                          : `https://instagram.com/${listing.seller_instagram}`
+                    } 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    <Button variant="outline" className="w-full justify-start">
+                      <Instagram className="mr-2 h-4 w-4 text-pink-600" />
+                      Instagram / Video
+                    </Button>
+                  </a>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+          
+          {listing.map_link && (
+            <Card>
+              <CardContent className="p-4 md:p-6">
+                <h2 className="text-lg font-semibold mb-4">Location</h2>
+                <a 
+                  href={listing.map_link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <Button variant="outline" className="w-full justify-start">
+                    <MapPin className="mr-2 h-4 w-4 text-red-500" />
+                    View on Map
+                  </Button>
+                </a>
+              </CardContent>
+            </Card>
           )}
-        </ScrollArea>
+        </div>
       </div>
     </div>
   );

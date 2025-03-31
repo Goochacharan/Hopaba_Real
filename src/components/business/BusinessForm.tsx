@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,7 +27,7 @@ export interface Business {
   tags?: string[];
   languages?: string[];
   experience?: string;
-  availability?: string;
+  availability?: string[];
   price_unit?: string;
   price_range_min?: number;
   price_range_max?: number;
@@ -81,7 +80,9 @@ const businessSchema = z.object({
   price_unit: z.string().optional(),
   price_range_min: z.number().optional(),
   price_range_max: z.number().optional(),
-  availability: z.string().optional(),
+  availability: z.union([z.array(z.string()), z.string()]).optional().transform(val => 
+    typeof val === 'string' ? [val] : val
+  ),
   languages: z.array(z.string()).optional(),
   experience: z.string().optional(),
   tags: z.array(z.string())
@@ -126,7 +127,7 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
       tags: business?.tags || [],
       languages: business?.languages || [],
       experience: business?.experience || "",
-      availability: business?.availability || "",
+      availability: business?.availability || [],
       price_unit: business?.price_unit || "per hour",
       price_range_min: business?.price_range_min,
       price_range_max: business?.price_range_max,
@@ -154,6 +155,8 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
       const priceRangeMin = data.price_range_min ? Number(data.price_range_min) : undefined;
       const priceRangeMax = data.price_range_max ? Number(data.price_range_max) : undefined;
       
+      const availabilityArray = Array.isArray(data.availability) ? data.availability : data.availability ? [data.availability] : [];
+      
       const businessData = {
         name: data.name,
         category: data.category,
@@ -172,7 +175,7 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
         price_unit: data.price_unit || "per hour",
         price_range_min: priceRangeMin,
         price_range_max: priceRangeMax,
-        availability: data.availability || null,
+        availability: availabilityArray,
         languages: data.languages || [],
         experience: data.experience || null,
         tags: data.tags || [],

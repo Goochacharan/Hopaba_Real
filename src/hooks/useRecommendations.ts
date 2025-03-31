@@ -117,22 +117,18 @@ const useRecommendations = ({
       console.log(`Fetched ${data?.length || 0} service providers from Supabase`);
       
       if (data && data.length > 0) {
-        data.forEach(item => {
-          console.log(`Service Provider ${item.name} - availability_days:`, item.availability_days);
-          console.log(`Service Provider ${item.name} - availability:`, item.availability);
-        });
-        
         return data.map(item => {
-          let availabilityDays = [];
+          // Process availability_days - ensure it's always an array
+          let availabilityDays: string[] = [];
           
           if (item.availability_days) {
             if (Array.isArray(item.availability_days)) {
               availabilityDays = item.availability_days;
             } else if (typeof item.availability_days === 'string') {
               try {
-                if (typeof item.availability_days === 'string' && item.availability_days.startsWith('[') && item.availability_days.endsWith(']')) {
+                if (item.availability_days.startsWith('[') && item.availability_days.endsWith(']')) {
                   availabilityDays = JSON.parse(item.availability_days);
-                } else if (typeof item.availability_days === 'string') {
+                } else {
                   availabilityDays = item.availability_days.split(',').map(day => day.trim());
                 }
               } catch (e) {
@@ -147,9 +143,14 @@ const useRecommendations = ({
             console.log("Set default days for Corner House Rajajinagar:", availabilityDays);
           }
           
-          let formattedAvailability = null;
+          // Process availability - ensure it's always an array
+          let availability: string[] = [];
           if (item.availability) {
-            formattedAvailability = Array.isArray(item.availability) ? item.availability : [item.availability];
+            if (Array.isArray(item.availability)) {
+              availability = item.availability;
+            } else if (typeof item.availability === 'string') {
+              availability = [item.availability];
+            }
           }
           
           return {
@@ -166,7 +167,7 @@ const useRecommendations = ({
             phone: item.contact_phone,
             openNow: item.open_now || false,
             hours: "Until 8:00 PM",
-            availability: formattedAvailability,
+            availability: availability,
             priceLevel: "$$",
             price_range_min: item.price_range_min || null,
             price_range_max: item.price_range_max || null,
@@ -250,7 +251,7 @@ const useRecommendations = ({
       if (rec.distance) {
         const distanceValue = parseFloat(rec.distance.split(' ')[0]);
         if (!isNaN(distanceValue)) {
-          const adjustedDistance = distanceUnit === 'km' ? distanceValue : distanceValue * 1.60934;
+          const adjustedDistance = filterOptions.distanceUnit === 'km' ? distanceValue : distanceValue * 1.60934;
           if (adjustedDistance > filterOptions.maxDistance) {
             return false;
           }

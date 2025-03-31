@@ -45,7 +45,7 @@ export interface BusinessFormValues {
   map_link?: string;
   tags?: string[];
   experience?: string;
-  availability?: string;
+  availability?: string[];
   hours?: string;
   hours_from?: string;
   hours_to?: string;
@@ -72,7 +72,7 @@ export interface Business {
   map_link?: string;
   tags?: string[];
   experience?: string;
-  availability?: string;
+  availability?: string[];
   hours?: string;
   hours_from?: string;
   hours_to?: string;
@@ -111,7 +111,9 @@ const businessSchema = z.object({
   map_link: z.string().optional().or(z.literal('')),
   tags: z.array(z.string()).min(3, { message: "Please add at least 3 tags describing your services or items." }).optional(),
   experience: z.string().optional().or(z.literal('')),
-  availability: z.string().optional().or(z.literal('')),
+  availability: z.union([z.array(z.string()), z.string()]).optional().transform(val => 
+    typeof val === 'string' ? [val] : val
+  ),
   hours: z.string().optional().or(z.literal('')),
   hours_from: z.string().optional(),
   hours_to: z.string().optional(),
@@ -257,7 +259,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
       map_link: business?.map_link || "",
       tags: business?.tags || [],
       experience: business?.experience || "",
-      availability: business?.availability || "",
+      availability: business?.availability || [],
       hours: business?.hours || "",
       hours_from: defaultHoursFrom,
       hours_to: defaultHoursTo,
@@ -299,8 +301,6 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
     
     form.setValue("availability_days", updatedDays, { shouldValidate: true });
     setSelectedDays(updatedDays);
-    
-    form.setValue("availability", updatedDays.join(', '), { shouldValidate: true });
   };
 
   const handleSubmit = async (data: BusinessFormValues) => {
@@ -330,7 +330,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
       
       const hours = `${data.hours_from} - ${data.hours_to}`;
       
-      const availabilityString = (data.availability_days || []).join(', ');
+      const availabilityArray = Array.isArray(data.availability) ? data.availability : data.availability ? [data.availability] : [];
       
       const businessData = {
         name: data.name,
@@ -352,10 +352,11 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
         price_range_max: priceRangeMax,
         tags: data.tags || [],
         experience: data.experience || null,
-        availability: availabilityString || null,
+        availability: availabilityArray,
         hours: hours,
         availability_start_time: data.hours_from || null,
         availability_end_time: data.hours_to || null,
+        availability_days: data.availability_days || [],
         images: data.images || [],
       };
 
@@ -905,12 +906,12 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
             </CardContent>
           </Card>
           
-          <div className="flex justify-end gap-4">
+          <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : business?.id ? "Update Business" : "Submit Business"}
+              {isSubmitting ? "Saving..." : business?.id ? "Update Business" : "Create Business"}
             </Button>
           </div>
         </form>
@@ -921,7 +922,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
           <AlertDialogHeader>
             <AlertDialogTitle>Success!</AlertDialogTitle>
             <AlertDialogDescription>
-              Your business/service has been successfully {business?.id ? "updated" : "added"}. It will now be available for others to discover after admin approval.
+              Your business has been successfully {business?.id ? "updated" : "created"} and will be reviewed by an admin.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
