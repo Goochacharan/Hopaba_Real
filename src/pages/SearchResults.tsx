@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import useRecommendations from '@/hooks/useRecommendations';
+import { useRecommendations } from "@/hooks/useRecommendations";
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { addDistanceToRecommendations, sortRecommendations, enhanceRecommendations } from '@/utils/searchUtils';

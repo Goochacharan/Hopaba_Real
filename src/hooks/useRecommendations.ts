@@ -32,6 +32,23 @@ export interface Recommendation {
   created_at?: string;
 }
 
+export interface Event {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  description: string;
+  attendees: number;
+  pricePerPerson?: number;
+  image?: string;
+  isHiddenGem?: boolean;
+  isMustVisit?: boolean;
+  approval_status?: string;
+  user_id?: string;
+  created_at?: string;
+}
+
 interface UseRecommendationsProps {
   selectedLocation?: { lat: number; lng: number } | null;
   category?: string;
@@ -105,20 +122,26 @@ export const useRecommendations = ({
         // Calculate distance if location is provided
         let distanceText = '';
         if (selectedLocation && business.coordinates) {
-          const [lng, lat] = business.coordinates.split('(')[1].split(')')[0].split(' ').map(Number);
-          const distance = calculateDistance(
-            selectedLocation.lat,
-            selectedLocation.lng,
-            lat,
-            lng
-          );
-          distanceText = distance < 1 
-            ? `${(distance * 1000).toFixed(0)} m` 
-            : `${distance.toFixed(1)} km`;
+          const coordinates = typeof business.coordinates === 'string' && business.coordinates ? 
+            business.coordinates.split('(')[1]?.split(')')[0]?.split(' ').map(Number) : 
+            null;
+            
+          if (coordinates && coordinates.length === 2) {
+            const [lng, lat] = coordinates;
+            const distance = calculateDistance(
+              selectedLocation.lat,
+              selectedLocation.lng,
+              lat,
+              lng
+            );
+            distanceText = distance < 1 
+              ? `${(distance * 1000).toFixed(0)} m` 
+              : `${distance.toFixed(1)} km`;
+          }
         }
 
         // Prepare availability_days based on the data type
-        let availabilityDays = business.availability_days;
+        let availabilityDays: string[] | string = business.availability_days || [];
         if (typeof availabilityDays === 'string' && availabilityDays) {
           try {
             // Try to parse it if it might be a JSON string

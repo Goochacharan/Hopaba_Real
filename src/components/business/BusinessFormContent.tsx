@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -48,6 +47,27 @@ const BusinessFormContent: React.FC<BusinessFormContentProps> = ({
     { id: 'saturday', label: 'Saturday' },
     { id: 'sunday', label: 'Sunday' },
   ];
+
+  // This is a helper function to handle the conversion
+  const parseAvailabilityDays = (availabilityDays: string | string[] | undefined): string[] => {
+    if (!availabilityDays) return [];
+    
+    if (Array.isArray(availabilityDays)) {
+      return availabilityDays;
+    }
+    
+    // If it's a string, try to parse it
+    try {
+      if (availabilityDays.startsWith('[') && availabilityDays.endsWith(']')) {
+        return JSON.parse(availabilityDays);
+      }
+      // Handle comma-separated string
+      return availabilityDays.split(',').map(day => day.trim());
+    } catch (e) {
+      console.error('Error parsing availability_days:', e);
+      return [];
+    }
+  };
 
   const handleDayChange = (day: string, checked: boolean) => {
     let updatedDays;

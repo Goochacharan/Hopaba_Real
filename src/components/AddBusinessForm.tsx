@@ -35,6 +35,11 @@ export interface Business {
   availability_days?: string[] | string;
   availability_start_time?: string;
   availability_end_time?: string;
+  price_unit?: string;
+  price_range_min?: number;
+  price_range_max?: number;
+  languages?: string[];
+  experience?: string;
 }
 
 // Extend the business schema to include all the fields from the detailed form sections
