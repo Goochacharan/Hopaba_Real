@@ -234,117 +234,96 @@ export type Database = {
       service_providers: {
         Row: {
           address: string
-          approval_status: string
+          approval_status: string | null
           area: string
           availability: string | null
+          availability_days: string[] | null
           availability_end_time: string | null
           availability_start_time: string | null
-          business_hours: Json | null
           category: string
           city: string
           contact_email: string | null
-          contact_phone: string | null
-          coordinates: unknown | null
-          created_at: string | null
-          description: string | null
-          distance: string | null
+          contact_phone: string
+          created_at: string
+          description: string
           experience: string | null
           hours: string | null
           id: string
-          image_url: string | null
           images: string[] | null
           instagram: string | null
           languages: string[] | null
           map_link: string | null
           name: string
-          open_now: boolean | null
-          price: string | null
           price_range_max: number | null
           price_range_min: number | null
           price_unit: string | null
-          rating: number | null
-          review_count: number | null
           tags: string[] | null
-          updated_at: string | null
-          user_id: string | null
+          updated_at: string
+          user_id: string
           website: string | null
-          whatsapp: string | null
+          whatsapp: string
         }
         Insert: {
           address: string
-          approval_status?: string
+          approval_status?: string | null
           area: string
           availability?: string | null
+          availability_days?: string[] | null
           availability_end_time?: string | null
           availability_start_time?: string | null
-          business_hours?: Json | null
           category: string
           city: string
           contact_email?: string | null
-          contact_phone?: string | null
-          coordinates?: unknown | null
-          created_at?: string | null
-          description?: string | null
-          distance?: string | null
+          contact_phone: string
+          created_at?: string
+          description: string
           experience?: string | null
           hours?: string | null
           id?: string
-          image_url?: string | null
           images?: string[] | null
           instagram?: string | null
           languages?: string[] | null
           map_link?: string | null
           name: string
-          open_now?: boolean | null
-          price?: string | null
           price_range_max?: number | null
           price_range_min?: number | null
           price_unit?: string | null
-          rating?: number | null
-          review_count?: number | null
           tags?: string[] | null
-          updated_at?: string | null
-          user_id?: string | null
+          updated_at?: string
+          user_id: string
           website?: string | null
-          whatsapp?: string | null
+          whatsapp: string
         }
         Update: {
           address?: string
-          approval_status?: string
+          approval_status?: string | null
           area?: string
           availability?: string | null
+          availability_days?: string[] | null
           availability_end_time?: string | null
           availability_start_time?: string | null
-          business_hours?: Json | null
           category?: string
           city?: string
           contact_email?: string | null
-          contact_phone?: string | null
-          coordinates?: unknown | null
-          created_at?: string | null
-          description?: string | null
-          distance?: string | null
+          contact_phone?: string
+          created_at?: string
+          description?: string
           experience?: string | null
           hours?: string | null
           id?: string
-          image_url?: string | null
           images?: string[] | null
           instagram?: string | null
           languages?: string[] | null
           map_link?: string | null
           name?: string
-          open_now?: boolean | null
-          price?: string | null
           price_range_max?: number | null
           price_range_min?: number | null
           price_unit?: string | null
-          rating?: number | null
-          review_count?: number | null
           tags?: string[] | null
-          updated_at?: string | null
-          user_id?: string | null
+          updated_at?: string
+          user_id?: string
           website?: string | null
-          whatsapp?: string | null
+          whatsapp?: string
         }
         Relationships: []
       }
