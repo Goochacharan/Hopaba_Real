@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Building, MapPin, Phone, MessageSquare, Globe, Instagram, IndianRupee, Pencil, Trash, Tag, Clock, Star } from 'lucide-react';
+import { Building, MapPin, Phone, MessageSquare, Globe, Instagram, IndianRupee, Pencil, Trash, Tag, Clock, Star, Image } from 'lucide-react';
 import { Business } from './BusinessFormSimple';
 
 interface BusinessListProps {
@@ -128,6 +128,20 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
             </CardHeader>
             
             <CardContent className="pt-4 space-y-4">
+              {business.images && business.images.length > 0 && (
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-3">
+                  {business.images.slice(0, 5).map((image, index) => (
+                    <div key={index} className="relative aspect-square rounded-md overflow-hidden">
+                      <img 
+                        src={image} 
+                        alt={`${business.name} image ${index + 1}`}
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />

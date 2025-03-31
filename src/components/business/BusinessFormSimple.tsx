@@ -11,12 +11,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TagsInput } from '@/components/ui/tags-input';
 import { Separator } from '@/components/ui/separator';
-import { Building, Clock, MapPin, Phone, MessageSquare, Globe, Instagram, Image, Tag, Star } from 'lucide-react';
+import { TagsInput } from '@/components/ui/tags-input';
+import { ImageUpload } from '@/components/ui/image-upload';
+import { Building, Clock, MapPin, Phone, MessageSquare, Globe, Instagram, Tag, Star } from 'lucide-react';
 
 export interface BusinessFormValues {
   name: string;
@@ -161,7 +161,6 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState("basic");
 
   const form = useForm<BusinessFormValues>({
     resolver: zodResolver(businessSchema),
@@ -219,7 +218,6 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
         description: "Please add at least 3 tags describing your services or items.",
         variant: "destructive",
       });
-      setActiveTab("additional");
       return;
     }
 
@@ -307,277 +305,269 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-4 mb-6">
-              <TabsTrigger value="basic">Basic Info</TabsTrigger>
-              <TabsTrigger value="location">Location</TabsTrigger>
-              <TabsTrigger value="contact">Contact</TabsTrigger>
-              <TabsTrigger value="additional">Additional Info</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="basic" className="space-y-4">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Building className="h-5 w-5 text-primary" />
-                  <h3 className="text-lg font-medium">Basic Information</h3>
-                </div>
-                
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Business Name*</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Your business name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category*</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-8">
+                {/* Basic Information */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Building className="h-5 w-5 text-primary" />
+                    <h3 className="text-lg font-medium">Basic Information</h3>
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Business Name*</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
+                          <Input placeholder="Your business name" {...field} />
                         </FormControl>
-                        <SelectContent className="max-h-[300px]">
-                          {CATEGORIES.map(category => (
-                            <SelectItem key={category} value={category}>
-                              {category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description*</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Describe your business or service" className="min-h-[120px]" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category*</FormLabel>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="max-h-[300px]">
+                            {CATEGORIES.map(category => (
+                              <SelectItem key={category} value={category}>
+                                {category}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="images"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <Image className="h-4 w-4" />
-                        Images
-                      </FormLabel>
-                      <FormDescription>
-                        Add image URLs for your business (one per line)
-                      </FormDescription>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg" 
-                          className="min-h-[100px]"
-                          value={field.value?.join('\n') || ''}
-                          onChange={(e) => {
-                            const urls = e.target.value.split('\n').filter(url => url.trim() !== '');
-                            field.onChange(urls);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="location" className="space-y-4">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-primary" />
-                  <h3 className="text-lg font-medium">Location Information</h3>
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description*</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Describe your business or service" className="min-h-[120px]" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="images"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Business Images</FormLabel>
+                        <FormDescription>
+                          Upload images of your business or services
+                        </FormDescription>
+                        <FormControl>
+                          <ImageUpload 
+                            images={field.value || []} 
+                            onImagesChange={(images) => form.setValue('images', images, { shouldValidate: true })}
+                            maxImages={5}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-                
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address*</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter your street address" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
-                <FormField
-                  control={form.control}
-                  name="city"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>City*</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter city" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <Separator />
 
-                <FormField
-                  control={form.control}
-                  name="area"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Area/Neighborhood*</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter neighborhood or area" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Location Information */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    <h3 className="text-lg font-medium">Location Information</h3>
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Address*</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter your street address" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="map_link"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Google Maps Link</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Paste your Google Maps link here" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Optional: Add a link to your business on Google Maps
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="contact" className="space-y-4">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Phone className="h-5 w-5 text-primary" />
-                  <h3 className="text-lg font-medium">Contact Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>City*</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter city" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="area"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Area/Neighborhood*</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter neighborhood or area" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="map_link"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Google Maps Link</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Paste your Google Maps link here" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Optional: Add a link to your business on Google Maps
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-                
-                <FormField
-                  control={form.control}
-                  name="contact_phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone Number*</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Enter phone number" 
-                          value={field.value} 
-                          onChange={(e) => {
-                            field.onChange(e);
-                            handlePhoneInput(e, 'contact_phone');
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
-                <FormField
-                  control={form.control}
-                  name="whatsapp"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <MessageSquare className="h-4 w-4" />
-                        WhatsApp Number*
-                      </FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Enter WhatsApp number" 
-                          value={field.value}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            handlePhoneInput(e, 'whatsapp');
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <Separator />
 
-                <FormField
-                  control={form.control}
-                  name="contact_email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email <span className="text-muted-foreground text-xs">(optional)</span></FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter email address" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Contact Information */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-5 w-5 text-primary" />
+                    <h3 className="text-lg font-medium">Contact Information</h3>
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name="contact_phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number*</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter phone number" 
+                            value={field.value} 
+                            onChange={(e) => {
+                              field.onChange(e);
+                              handlePhoneInput(e, 'contact_phone');
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="website"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <Globe className="h-4 w-4" />
-                        Website <span className="text-xs text-muted-foreground">(optional)</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter website URL" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="instagram"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <Instagram className="h-4 w-4" />
-                        Instagram <span className="text-xs text-muted-foreground">(optional)</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input placeholder="@yourusername or full URL" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="additional" className="space-y-4">
-              <div className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="whatsapp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <MessageSquare className="h-4 w-4" />
+                          WhatsApp Number*
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter WhatsApp number" 
+                            value={field.value}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              handlePhoneInput(e, 'whatsapp');
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="contact_email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email <span className="text-muted-foreground text-xs">(optional)</span></FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter email address" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="website"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <Globe className="h-4 w-4" />
+                          Website <span className="text-xs text-muted-foreground">(optional)</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter website URL" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="instagram"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <Instagram className="h-4 w-4" />
+                          Instagram <span className="text-xs text-muted-foreground">(optional)</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="@yourusername or full URL" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Separator />
+
+                {/* Services & Pricing */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Tag className="h-5 w-5 text-primary" />
@@ -670,9 +660,10 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
                     )}
                   />
                 </div>
-                
+
                 <Separator />
-                
+
+                {/* Experience & Availability */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Star className="h-5 w-5 text-primary" />
@@ -735,10 +726,10 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
                   />
                 </div>
               </div>
-            </TabsContent>
-          </Tabs>
+            </CardContent>
+          </Card>
           
-          <div className="flex justify-end gap-4 pt-6 border-t">
+          <div className="flex justify-end gap-4">
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
