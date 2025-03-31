@@ -566,17 +566,17 @@ const LocationCard: React.FC<LocationCardProps> = ({
                     <Calendar className="h-3.5 w-3.5 mr-1" />
                     <span className="underline">Hours</span>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
+                  <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-3 shadow-md rounded-md border z-50">
                     {getAvailabilityDaysDisplay() && (
-                      <div className="mb-1">
-                        <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
-                        <div className="text-sm">{getAvailabilityDaysDisplay()}</div>
+                      <div className="mb-2 border-b pb-2">
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Available days:</div>
+                        <div className="text-sm font-medium">{getAvailabilityDaysDisplay()}</div>
                       </div>
                     )}
                     {getAvailabilityHoursDisplay() && (
                       <div>
-                        <div className="text-xs font-medium text-muted-foreground mb-1">Hours:</div>
-                        <div className="text-sm">{getAvailabilityHoursDisplay()}</div>
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Open hours:</div>
+                        <div className="text-sm font-medium">{getAvailabilityHoursDisplay()}</div>
                       </div>
                     )}
                   </DropdownMenuContent>
