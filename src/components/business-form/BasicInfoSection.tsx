@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { BusinessCard, PenSquare, Tag, IndianRupee } from 'lucide-react';
+import { Briefcase, PenSquare, Tag, IndianRupee } from 'lucide-react';
 import { BusinessFormValues } from '../AddBusinessForm';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -89,7 +89,7 @@ const BasicInfoSection = () => {
     <>
       <div className="space-y-6 md:col-span-2">
         <h3 className="text-lg font-medium flex items-center gap-2">
-          <BusinessCard className="h-5 w-5 text-primary" />
+          <Briefcase className="h-5 w-5 text-primary" />
           Basic Information
         </h3>
         <p className="text-sm text-muted-foreground">
