@@ -487,6 +487,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const shouldIncreaseHeight = isSearchResultCard || isLocationDetailsPage;
   const imageHeightClass = shouldIncreaseHeight ? "h-[400px]" : "h-72";
 
+  const formattedAvailabilityDays = recommendation.availability_days && recommendation.availability_days.length > 0 
+    ? formatDayRange(recommendation.availability_days) 
+    : null;
+
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <div className={cn("relative w-full overflow-hidden", imageHeightClass)}>
         <Carousel className="w-full h-full">
@@ -568,7 +572,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               <div className="flex items-center">
                 <Calendar className="w-4 h-4 mr-1 flex-shrink-0 text-muted-foreground" />
                 <span className="text-muted-foreground">
-                  Working days: {availabilityDays}
+                  Working days: {formattedAvailabilityDays}
                 </span>
               </div>
               
