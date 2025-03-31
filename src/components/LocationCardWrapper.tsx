@@ -11,6 +11,16 @@ interface LocationCardWrapperProps {
   hideWishlistIcon?: boolean;
 }
 
+// We need to extend the original LocationCard props in a way that accommodates the hideWishlistIcon prop
+interface ExtendedLocationCardProps {
+  recommendation: Recommendation;
+  className?: string;
+  ranking?: number;
+  reviewCount?: number;
+  showDistanceUnderAddress?: boolean;
+  hideWishlistIcon?: boolean; // Adding this to match our wrapper interface
+}
+
 const LocationCardWrapper: React.FC<LocationCardWrapperProps> = ({
   recommendation,
   className,
@@ -18,10 +28,11 @@ const LocationCardWrapper: React.FC<LocationCardWrapperProps> = ({
   showDistanceUnderAddress,
   hideWishlistIcon
 }) => {
-  // Simply pass all props to the original LocationCard
-  // The hideWishlistIcon prop will be handled inside LocationCard
+  // Cast LocationCard to accept our extended props
+  const LocationCardWithHideWishlist = LocationCard as React.ComponentType<ExtendedLocationCardProps>;
+  
   return (
-    <LocationCard
+    <LocationCardWithHideWishlist
       recommendation={recommendation}
       className={className}
       reviewCount={reviewCount}

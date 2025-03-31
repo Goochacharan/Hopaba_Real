@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
-import LocationCard from '@/components/LocationCard';
+import LocationCardWrapper from '@/components/LocationCardWrapper';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useWishlist, WishlistItem } from '@/contexts/WishlistContext';
 import { Heart, Search } from 'lucide-react';
@@ -175,10 +175,10 @@ const MyList = () => {
                       );
                     } else {
                       const locationItem = item as Recommendation & { type: 'location' };
-                      // Use LocationCard directly since it's in read-only files
+                      // Use LocationCardWrapper instead of LocationCard directly
                       return (
                         <div key={item.id} className="relative group">
-                          <LocationCard 
+                          <LocationCardWrapper 
                             recommendation={locationItem} 
                             className="search-result-card" 
                             hideWishlistIcon={true} 
