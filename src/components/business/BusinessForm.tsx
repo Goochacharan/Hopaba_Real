@@ -113,6 +113,12 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
       instagram: business?.instagram || "",
       map_link: business?.map_link || "",
       tags: business?.tags || [],
+      languages: business?.languages || [],
+      experience: business?.experience || "",
+      availability: business?.availability || "",
+      price_unit: business?.price_unit || "per hour",
+      price_range_min: business?.price_range_min,
+      price_range_max: business?.price_range_max,
     },
   });
 
@@ -187,14 +193,14 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
         console.log("Creating new business");
         result = await supabase
           .from('service_providers')
-          .insert(businessData);
+          .insert([businessData]);  // Wrap businessData in an array for insert
 
         if (result.error) {
           console.error("Supabase insert error:", result.error);
           throw new Error(result.error.message);
         }
 
-        console.log("Business created successfully");
+        console.log("Business created successfully", result);
         toast({
           title: "Business Added",
           description: "Your business has been listed and will be reviewed by an admin.",
