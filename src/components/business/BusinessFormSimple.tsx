@@ -50,7 +50,7 @@ export interface BusinessFormValues {
   hours?: string;
   hours_from?: string;
   hours_to?: string;
-  available_days?: string[];
+  availability_days?: string[];
   images?: string[];
 }
 
@@ -77,7 +77,7 @@ export interface Business {
   hours?: string;
   hours_from?: string;
   hours_to?: string;
-  available_days?: string[];
+  availability_days?: string[];
   images?: string[];
   approval_status?: string;
 }
@@ -116,7 +116,7 @@ const businessSchema = z.object({
   hours: z.string().optional().or(z.literal('')),
   hours_from: z.string().optional(),
   hours_to: z.string().optional(),
-  available_days: z.array(z.string()).optional(),
+  availability_days: z.array(z.string()).optional(),
   images: z.array(z.string()).optional(),
 });
 
@@ -221,7 +221,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [selectedDays, setSelectedDays] = useState<string[]>(business?.available_days || []);
+  const [selectedDays, setSelectedDays] = useState<string[]>(business?.availability_days || []);
 
   // Parse hours if they exist
   const parseHours = () => {
@@ -263,7 +263,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
       hours: business?.hours || "",
       hours_from: defaultHoursFrom,
       hours_to: defaultHoursTo,
-      available_days: business?.available_days || [],
+      availability_days: business?.availability_days || [],
       images: business?.images || [],
     },
   });
@@ -292,7 +292,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
   };
 
   const handleDayToggle = (day: string, checked: boolean) => {
-    let updatedDays = form.getValues("available_days") || [];
+    let updatedDays = form.getValues("availability_days") || [];
     
     if (checked) {
       updatedDays = [...updatedDays, day];
@@ -300,7 +300,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
       updatedDays = updatedDays.filter(d => d !== day);
     }
     
-    form.setValue("available_days", updatedDays, { shouldValidate: true });
+    form.setValue("availability_days", updatedDays, { shouldValidate: true });
     setSelectedDays(updatedDays);
     
     // Update availability field with comma-separated days
@@ -336,6 +336,12 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
       // Format hours from the from/to fields
       const hours = `${data.hours_from} - ${data.hours_to}`;
       
+      // Store the selected days in the availability field as a comma-separated string
+      // since the available_days column might not exist in the database
+      const availabilityString = (data.availability_days || []).join(', ');
+      
+      // Fix: Omit the availability_days field from the business data
+      // since it doesn't exist in the database
       const businessData = {
         name: data.name,
         category: data.category,
@@ -356,9 +362,10 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
         price_range_max: priceRangeMax,
         tags: data.tags || [],
         experience: data.experience || null,
-        availability: data.availability || null,
+        availability: availabilityString || null,
         hours: hours,
-        available_days: data.available_days || [],
+        availability_start_time: data.hours_from || null,
+        availability_end_time: data.hours_to || null,
         images: data.images || [],
       };
 
