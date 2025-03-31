@@ -69,7 +69,7 @@ const LocationsList: React.FC<LocationsListProps> = ({
     
     // If it's a string (comma-separated), convert to array
     if (typeof availabilityDays === 'string') {
-      availabilityDays = availabilityDays.split(',').map(day => day.trim()).filter(Boolean);
+      availabilityDays = String(availabilityDays).split(',').map(day => day.trim()).filter(Boolean);
     }
     
     // Make sure it's an array
