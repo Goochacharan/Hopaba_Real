@@ -6,11 +6,37 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Plus, Settings } from 'lucide-react';
-import { BusinessData } from './BusinessListingForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import BusinessCard from '../BusinessCard';
 import NoBusinessesMessage from './NoBusinessesMessage';
 import LoadingSkeleton from './LoadingSkeleton';
+
+export interface BusinessData {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  area: string;
+  city: string;
+  address: string;
+  contact_phone: string;
+  whatsapp: string;
+  contact_email?: string;
+  website?: string;
+  instagram?: string;
+  map_link?: string;
+  tags?: string[];
+  languages?: string[];
+  experience?: string;
+  availability?: string[];
+  price_unit?: string;
+  price_range_min?: number;
+  price_range_max?: number;
+  approval_status?: string;
+  availability_days?: string[];
+  availability_start_time?: string;
+  availability_end_time?: string;
+}
 
 interface BusinessListProps {
   onAddBusiness: () => void;
@@ -39,11 +65,26 @@ const BusinessList: React.FC<BusinessListProps> = ({ onAddBusiness, onEditBusine
           
         if (error) throw error;
         
-        // Convert availability field to array if needed for interface compatibility
-        const formattedData = data.map(item => ({
-          ...item,
-          availability: Array.isArray(item.availability) ? item.availability : item.availability ? [item.availability] : []
-        })) as BusinessData[];
+        // Process the data to ensure availability is an array and availability_days is also properly handled
+        const formattedData = data.map(item => {
+          // Handle availability field
+          const availability = Array.isArray(item.availability) 
+            ? item.availability 
+            : item.availability ? [item.availability] : [];
+          
+          // Handle availability_days - convert from string to array if needed
+          const availability_days = item.availability_days
+            ? typeof item.availability_days === 'string'
+              ? item.availability_days.split(',')
+              : item.availability_days
+            : [];
+            
+          return {
+            ...item,
+            availability,
+            availability_days
+          } as BusinessData;
+        });
         
         setBusinesses(formattedData);
       } catch (error) {

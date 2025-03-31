@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,11 +36,23 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onAddBusiness, onEdit
           
         if (error) throw error;
         
-        // Convert availability field to array if needed for interface compatibility
-        const formattedData = data.map(item => ({
-          ...item,
-          availability: Array.isArray(item.availability) ? item.availability : item.availability ? [item.availability] : []
-        })) as Business[];
+        const formattedData = data.map(item => {
+          const availability = Array.isArray(item.availability) 
+            ? item.availability 
+            : item.availability ? [item.availability] : [];
+          
+          const availability_days = item.availability_days
+            ? typeof item.availability_days === 'string'
+              ? item.availability_days.split(',')
+              : item.availability_days
+            : [];
+          
+          return {
+            ...item,
+            availability,
+            availability_days
+          } as Business;
+        });
         
         setBusinesses(formattedData);
       } catch (error) {

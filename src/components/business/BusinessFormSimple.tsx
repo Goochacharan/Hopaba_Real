@@ -332,6 +332,10 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
       
       const availabilityArray = Array.isArray(data.availability) ? data.availability : data.availability ? [data.availability] : [];
       
+      const availabilityDaysString = Array.isArray(data.availability_days) 
+        ? data.availability_days.join(',') 
+        : data.availability_days || null;
+      
       const businessData = {
         name: data.name,
         category: data.category,
@@ -356,7 +360,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
         hours: hours,
         availability_start_time: data.hours_from || null,
         availability_end_time: data.hours_to || null,
-        availability_days: data.availability_days || [],
+        availability_days: availabilityDaysString,
         images: data.images || [],
       };
 

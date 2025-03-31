@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -157,6 +158,11 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
       
       const availabilityArray = Array.isArray(data.availability) ? data.availability : data.availability ? [data.availability] : [];
       
+      // Convert availability_days array to string for database compatibility
+      const availabilityDaysString = Array.isArray(data.availability_days) 
+        ? data.availability_days.join(',') 
+        : data.availability_days || null;
+      
       const businessData = {
         name: data.name,
         category: data.category,
@@ -179,7 +185,7 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
         languages: data.languages || [],
         experience: data.experience || null,
         tags: data.tags || [],
-        availability_days: data.availability_days || [],
+        availability_days: availabilityDaysString,
         availability_start_time: data.availability_start_time || null,
         availability_end_time: data.availability_end_time || null,
       };

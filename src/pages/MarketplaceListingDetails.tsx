@@ -24,7 +24,8 @@ const MarketplaceListingDetails = () => {
   const {
     listing,
     loading,
-    error
+    error,
+    reviews
   } = useMarketplaceListing(id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
@@ -124,14 +125,11 @@ const MarketplaceListingDetails = () => {
                 }} 
               />}
               
-              <ListingDescription 
-                description={listing?.description || ''} 
-                category={listing?.category || ''} 
-                condition={listing?.condition || ''} 
-                location={listing?.location || ''} 
-                createdAt={listing?.created_at || ''} 
-                instagram={listing?.seller_instagram || ''}
-                showMetadata={false} 
+              <ListingDescription
+                listing={listing}
+                reviews={reviews}
+                onAddReview={handleAddReview}
+                showMetadata={true}
               />
               
               <div className="mt-6">

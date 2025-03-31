@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
@@ -79,12 +78,15 @@ const formatBusinessHours = (business: any): string | null => {
   return "Hours not specified";
 };
 
-interface LocationsListProps {
-  locations: any[];
+// Update the interface to include recommendations
+export interface LocationsListProps {
+  recommendations: Recommendation[];
+  showHeader?: boolean;
   isLoading?: boolean;
+  emptyMessage?: string;
 }
 
-const LocationsList: React.FC<LocationsListProps> = ({ locations, isLoading = false }) => {
+const LocationsList: React.FC<LocationsListProps> = ({ recommendations, showHeader = true, isLoading = false, emptyMessage = "No locations found." }) => {
   const navigate = useNavigate();
   
   if (isLoading) {
@@ -104,17 +106,17 @@ const LocationsList: React.FC<LocationsListProps> = ({ locations, isLoading = fa
     );
   }
   
-  if (locations.length === 0) {
+  if (recommendations.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-muted-foreground">No locations found.</p>
+        <p className="text-muted-foreground">{emptyMessage}</p>
       </div>
     );
   }
   
   return (
     <div className="space-y-3">
-      {locations.map((location) => {
+      {recommendations.map((location) => {
         const hours = formatBusinessHours(location);
         const isOpen = isOpenNow(location);
         

@@ -44,6 +44,9 @@ export interface BusinessData {
   price_range_min?: number;
   price_range_max?: number;
   approval_status?: string;
+  availability_days?: string[];
+  availability_start_time?: string;
+  availability_end_time?: string;
 }
 
 const businessSchema = z.object({
@@ -172,6 +175,10 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
       
       const availabilityArray = Array.isArray(data.availability) ? data.availability : data.availability ? [data.availability] : [];
       
+      const availabilityDaysString = Array.isArray(data.availability_days) 
+        ? data.availability_days.join(',') 
+        : data.availability_days || null;
+      
       const businessData = {
         name: data.name,
         category: data.category,
@@ -194,6 +201,7 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
         languages: data.languages || [],
         experience: data.experience || null,
         tags: data.tags || [],
+        availability_days: availabilityDaysString,
       };
 
       console.log("Formatted business data for Supabase:", businessData);
