@@ -1,352 +1,145 @@
+
 import { useState, useEffect } from 'react';
-import { CategoryType } from '@/components/CategoryFilter';
+import { Recommendation } from '@/types/recommendation';
 import { supabase } from '@/integrations/supabase/client';
-import { isOpenNow } from '@/lib/formatters';
 
-interface UseRecommendationsProps {
-  initialQuery?: string;
-  initialCategory?: CategoryType;
-}
+// Helper function to check if a business is currently open
+const isOpenNow = (
+  availabilityDays?: string[] | string,
+  startTime?: string,
+  endTime?: string
+): boolean => {
+  if (!availabilityDays || !startTime || !endTime) return false;
 
-interface FilterOptions {
-  maxDistance: number;
-  minRating: number;
-  priceLevel: number;
-  openNow: boolean;
-  hiddenGem?: boolean;
-  mustVisit?: boolean;
-  distanceUnit?: 'km' | 'mi';
-}
+  const now = new Date();
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' });
+  
+  // Process availability days (it can be string or array)
+  let days: string[] = [];
+  if (Array.isArray(availabilityDays)) {
+    days = availabilityDays;
+  } else if (typeof availabilityDays === 'string') {
+    days = availabilityDays.split(',').map(day => day.trim());
+  }
+  
+  // Check if today is in the availability days
+  if (!days.includes(currentDay)) return false;
+  
+  // Parse time ranges
+  const formatTime = (timeStr: string): Date => {
+    const [time, period] = timeStr.split(' ');
+    const [hourStr, minuteStr] = time.split(':');
+    let hour = parseInt(hourStr);
+    const minute = parseInt(minuteStr);
+    
+    if (period === 'PM' && hour < 12) hour += 12;
+    if (period === 'AM' && hour === 12) hour = 0;
+    
+    const date = new Date();
+    date.setHours(hour, minute, 0, 0);
+    return date;
+  };
+  
+  const start = formatTime(startTime);
+  const end = formatTime(endTime);
+  
+  // Return true if current time is between start and end
+  return now >= start && now <= end;
+};
 
-export interface Event {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  description: string;
-  image: string;
-  attendees: number;
-  pricePerPerson?: number;
-  phoneNumber?: string;
-  whatsappNumber?: string;
-  images?: string[];
-  approval_status?: string;
-  user_id?: string;
-  isHiddenGem?: boolean;
-  isMustVisit?: boolean;
-}
-
-export interface Recommendation {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  address: string;
-  area?: string;
-  city?: string;
-  distance: string;
-  image: string;
-  images: string[];
-  rating: number;
-  tags: string[];
-  phone: string;
-  website: string;
-  hours: string;
-  openNow: boolean;
-  price: string;
-  instagram: string;
-  review_count: number;
-  price_range_min?: number;
-  price_range_max?: number;
-  price_unit?: string;
-  availability: string[];
-  availability_days: string[] | string;
-  availability_start_time?: string;
-  availability_end_time?: string;
-  created_at: string;
-  isHiddenGem?: boolean;
-  isMustVisit?: boolean;
-  priceLevel?: string;
-}
-
-const useRecommendations = ({ 
-  initialQuery = '', 
-  initialCategory = 'all' 
-}: UseRecommendationsProps = {}) => {
-  const [query, setQuery] = useState(initialQuery);
-  const [category, setCategory] = useState<CategoryType>(initialCategory);
+export const useRecommendations = (query: string, category?: string) => {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  const processNaturalLanguageQuery = (rawQuery: string) => {
-    const lowercaseQuery = rawQuery.toLowerCase();
-    let processedQuery = lowercaseQuery;
-    let inferredCategory: CategoryType = category === 'all' ? 'all' : category;
-    
-    console.log('Original query:', `"${lowercaseQuery}"`);
-    
-    if (inferredCategory !== 'all') {
-      console.log(`Using provided category: ${inferredCategory}`);
-    } 
-    else {
-      if (lowercaseQuery.includes('yoga')) {
-        inferredCategory = 'fitness';
-      } else if (lowercaseQuery.includes('restaurant')) {
-        inferredCategory = 'restaurants';
-      } else if (lowercaseQuery.includes('café') || lowercaseQuery.includes('cafe') || lowercaseQuery.includes('coffee')) {
-        inferredCategory = 'cafes';
-      } else if (lowercaseQuery.includes('salon') || lowercaseQuery.includes('haircut')) {
-        inferredCategory = 'salons';
-      } else if (lowercaseQuery.includes('plumber')) {
-        inferredCategory = 'services';
-      } else if (lowercaseQuery.includes('fitness') || lowercaseQuery.includes('gym')) {
-        inferredCategory = 'fitness';
-      } else if (lowercaseQuery.includes('biryani') || 
-                 lowercaseQuery.includes('food') || 
-                 lowercaseQuery.includes('dinner') || 
-                 lowercaseQuery.includes('lunch') ||
-                 lowercaseQuery.includes('breakfast')) {
-        inferredCategory = 'restaurants';
-      }
-    }
-    
-    if (inferredCategory !== 'all' && inferredCategory !== category) {
-      console.log(`Setting category state to: ${inferredCategory}`);
-      setCategory(inferredCategory);
-    }
-    
-    return { processedQuery, inferredCategory };
-  };
-
-  const processRawData = (data: any[]): Recommendation[] => {
-    return data.map(item => {
-      // Convert availability_days from string to array if needed
-      let availability_days = item.availability_days;
-      if (availability_days) {
-        if (typeof availability_days === 'string') {
-          availability_days = availability_days.split(',').map((day: string) => day.trim());
-        }
-      } else {
-        availability_days = [];
-      }
-      
-      // Handle availability
-      const availability = Array.isArray(item.availability)
-        ? item.availability
-        : item.availability ? [item.availability] : [];
-      
-      // Determine if business is open now
-      const isOpen = isOpenNow(
-        availability_days,
-        item.availability_start_time || null,
-        item.availability_end_time || null
-      );
-      
-      return {
-        id: item.id,
-        name: item.name,
-        category: item.category,
-        tags: item.tags || [],
-        rating: item.rating || 4.5,
-        address: item.address,
-        distance: item.distance || '2 km away',
-        image: item.image || item.image_url || (item.images && item.images.length > 0 ? item.images[0] : ''),
-        images: item.images || [],
-        description: item.description,
-        phone: item.contact_phone || item.phone || '',
-        openNow: isOpen,
-        hours: item.hours || '',
-        website: item.website || '',
-        price: item.price || '',
-        price_range_min: item.price_range_min,
-        price_range_max: item.price_range_max,
-        price_unit: item.price_unit || '',
-        instagram: item.instagram || '',
-        review_count: item.review_count || 0,
-        area: item.area || '',
-        city: item.city || '',
-        availability: availability,
-        availability_days: availability_days,
-        availability_start_time: item.availability_start_time || '',
-        availability_end_time: item.availability_end_time || '',
-        created_at: item.created_at || '',
-        isHiddenGem: item.isHiddenGem || false,
-        isMustVisit: item.isMustVisit || false,
-        priceLevel: item.priceLevel || '$$',
-      };
-    });
-  };
-
-  const fetchServiceProviders = async (searchTerm: string, categoryFilter: string) => {
-    try {
-      console.log(`Fetching service providers with search term: "${searchTerm}" and category: "${categoryFilter}"`);
-      
-      let query = supabase
-        .from('service_providers')
-        .select('*')
-        .eq('approval_status', 'approved');
-      
-      if (categoryFilter !== 'all') {
-        const dbCategory = categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1);
-        query = query.eq('category', dbCategory);
-      }
-      
-      if (searchTerm && searchTerm.trim() !== '') {
-        query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error("Error fetching from Supabase:", error);
-        return [];
-      }
-      
-      console.log(`Fetched ${data?.length || 0} service providers from Supabase`);
-      
-      if (data && data.length > 0) {
-        return processRawData(data);
-      }
-      
-      return [];
-    } catch (err) {
-      console.error("Failed to fetch from Supabase:", err);
-      return [];
-    }
-  };
-  
-  const fetchEvents = async (searchTerm: string) => {
-    try {
-      console.log(`Fetching events with search term: "${searchTerm}"`);
-      
-      let query = supabase
-        .from('events')
-        .select('*')
-        .eq('approval_status', 'approved');
-      
-      if (searchTerm && searchTerm.trim() !== '') {
-        query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error("Error fetching events from Supabase:", error);
-        return [];
-      }
-      
-      console.log(`Fetched ${data?.length || 0} events from Supabase`);
-      
-      if (data && data.length > 0) {
-        return data.map(event => ({
-          ...event,
-          pricePerPerson: event.price_per_person || 0
-        }));
-      }
-      
-      return [];
-    } catch (err) {
-      console.error("Failed to fetch events from Supabase:", err);
-      return [];
-    }
-  };
-
-  const filterRecommendations = (
-    recs: Recommendation[],
-    filterOptions: FilterOptions
-  ): Recommendation[] => {
-    const { distanceUnit = 'mi' } = filterOptions;
-    
-    return recs.filter(rec => {
-      if (rec.rating < filterOptions.minRating) {
-        return false;
-      }
-
-      if (filterOptions.openNow && !rec.openNow) {
-        return false;
-      }
-
-      if (filterOptions.hiddenGem && !rec.isHiddenGem) {
-        return false;
-      }
-
-      if (filterOptions.mustVisit && !rec.isMustVisit) {
-        return false;
-      }
-
-      if (rec.distance) {
-        const distanceValue = parseFloat(rec.distance.split(' ')[0]);
-        if (!isNaN(distanceValue)) {
-          const adjustedDistance = filterOptions.distanceUnit === 'km' ? distanceValue : distanceValue * 1.60934;
-          if (adjustedDistance > filterOptions.maxDistance) {
-            return false;
-          }
-        }
-      }
-
-      if (rec.priceLevel) {
-        const priceCount = rec.priceLevel.length;
-        if (priceCount > filterOptions.priceLevel) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  };
-
-  const handleSearch = (searchQuery: string) => {
-    setQuery(searchQuery);
-  };
-
-  const handleCategoryChange = (newCategory: CategoryType) => {
-    setCategory(newCategory);
-  };
-
   useEffect(() => {
     const fetchRecommendations = async () => {
+      if (!query.trim()) {
+        setRecommendations([]);
+        setLoading(false);
+        return;
+      }
+      
       setLoading(true);
       setError(null);
       
       try {
-        const { processedQuery, inferredCategory } = processNaturalLanguageQuery(query);
+        const { data, error } = await supabase
+          .from('service_providers')
+          .select('*')
+          .ilike('name', `%${query}%`)
+          .or(`description.ilike.%${query}%, tags.cs.{${query}}`)
+          .eq('approval_status', 'approved');
+          
+        if (error) throw error;
         
-        const effectiveCategory = inferredCategory;
-        console.log("Effective search category:", effectiveCategory);
+        const results = data.map(business => {
+          // Convert availability to array
+          const availability = Array.isArray(business.availability) 
+            ? business.availability 
+            : business.availability ? [business.availability] : [];
+          
+          // Convert availability_days to array if it's a string
+          let availability_days;
+          if (business.availability_days) {
+            availability_days = typeof business.availability_days === 'string'
+              ? business.availability_days.split(',').map((day: string) => day.trim())
+              : business.availability_days;
+          } else {
+            availability_days = [];
+          }
+          
+          // Check if business is currently open
+          const openNow = isOpenNow(
+            business.availability_days,
+            business.availability_start_time,
+            business.availability_end_time
+          );
+          
+          return {
+            id: business.id,
+            name: business.name,
+            category: business.category,
+            tags: business.tags || [],
+            rating: business.rating || 4.5,
+            address: business.address,
+            distance: '2.3 km', // This would be calculated based on user location
+            image_url: business.images && business.images.length > 0 ? business.images[0] : undefined,
+            images: business.images || [],
+            description: business.description,
+            contact_phone: business.contact_phone,
+            whatsapp: business.whatsapp,
+            openNow,
+            hours: business.availability_start_time && business.availability_end_time 
+              ? `${business.availability_start_time} - ${business.availability_end_time}` 
+              : undefined,
+            area: business.area,
+            city: business.city,
+            availability,
+            availability_days,
+            availability_start_time: business.availability_start_time,
+            availability_end_time: business.availability_end_time,
+            created_at: business.created_at
+          } as Recommendation;
+        });
         
-        const serviceProviders = await fetchServiceProviders(processedQuery, effectiveCategory);
-        setRecommendations(serviceProviders); 
-        
-        const eventsData = await fetchEvents(processedQuery);
-        setEvents(eventsData);
-        
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to fetch recommendations. Please try again later.');
+        // Filter by category if provided
+        const filteredResults = category 
+          ? results.filter(item => item.category === category)
+          : results;
+          
+        setRecommendations(filteredResults);
+      } catch (err: any) {
+        console.error('Error fetching recommendations:', err);
+        setError(err.message || 'Failed to fetch recommendations');
+        setRecommendations([]);
       } finally {
         setLoading(false);
       }
     };
-
+    
     fetchRecommendations();
   }, [query, category]);
-
-  return {
-    query,
-    setQuery,
-    category,
-    setCategory,
-    recommendations,
-    events,
-    loading,
-    error,
-    filterRecommendations,
-    handleSearch,
-    handleCategoryChange
-  };
+  
+  return { recommendations, loading, error };
 };
-
-export default useRecommendations;

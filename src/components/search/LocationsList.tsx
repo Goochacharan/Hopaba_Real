@@ -7,26 +7,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Clock, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatAvailabilityDays, isOpenNow } from '@/lib/formatters';
+import { Recommendation } from '@/types/recommendation';
 
-interface BusinessLocation {
-  id: string;
-  name: string;
-  category?: string;
-  address: string;
-  area?: string;
-  city?: string;
-  image_url?: string;
-  rating?: number;
-  distance?: string;
-  availability_days?: string[] | string;
-  availability_start_time?: string;
-  availability_end_time?: string;
-  hours?: string;
-}
-
-// Update the interface to include recommendations
+// Update the interface to use our consolidated Recommendation type
 export interface LocationsListProps {
-  recommendations: BusinessLocation[];
+  recommendations: Recommendation[];
   showHeader?: boolean;
   isLoading?: boolean;
   emptyMessage?: string;
@@ -67,11 +52,13 @@ const LocationsList: React.FC<LocationsListProps> = ({ recommendations, showHead
           ? `${location.availability_start_time} - ${location.availability_end_time}` 
           : null);
           
-        const isOpen = isOpenNow(
-          location.availability_days,
-          location.availability_start_time,
-          location.availability_end_time
-        );
+        const open = location.openNow !== undefined 
+          ? location.openNow 
+          : isOpenNow(
+              location.availability_days,
+              location.availability_start_time,
+              location.availability_end_time
+            );
         
         return (
           <Card 
@@ -111,9 +98,9 @@ const LocationsList: React.FC<LocationsListProps> = ({ recommendations, showHead
                         <Clock className="h-3 w-3" />
                         <span className={cn(
                           "line-clamp-1",
-                          isOpen ? "text-green-600" : "text-red-500"
+                          open ? "text-green-600" : "text-red-500"
                         )}>
-                          {isOpen ? "Open Now" : "Closed"}
+                          {open ? "Open Now" : "Closed"}
                         </span>
                       </div>
                     )}

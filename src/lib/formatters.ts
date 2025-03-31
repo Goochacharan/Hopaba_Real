@@ -1,135 +1,108 @@
 
 /**
- * A collection of formatting utilities for the application
- */
-
-/**
- * Format a phone number to include spaces for better readability
- */
-export function formatPhoneNumber(phone: string): string {
-  if (!phone) return '';
-  
-  // For numbers with the +91 prefix (India)
-  if (phone.startsWith('+91')) {
-    const digits = phone.substring(3);
-    if (digits.length === 10) {
-      return `+91 ${digits.substring(0, 5)} ${digits.substring(5)}`;
-    }
-  }
-  
-  return phone;
-}
-
-/**
  * Format availability days into a readable string
  */
-export function formatAvailabilityDays(days: string[] | string | null | undefined): string {
-  if (!days) return 'Not specified';
-  
-  if (typeof days === 'string') {
-    return days;
+export const formatAvailabilityDays = (days?: string[] | string): string => {
+  if (!days || (Array.isArray(days) && days.length === 0)) {
+    return 'Not specified';
   }
   
-  if (Array.isArray(days) && days.length > 0) {
-    return days.join(', ');
+  let daysArray: string[] = [];
+  
+  if (Array.isArray(days)) {
+    daysArray = days;
+  } else if (typeof days === 'string') {
+    daysArray = days.split(',').map(day => day.trim());
   }
   
-  return 'Not specified';
-}
+  if (daysArray.length === 7) {
+    return 'Every day';
+  }
+  
+  if (daysArray.length === 5 && 
+      daysArray.includes('Monday') && 
+      daysArray.includes('Tuesday') && 
+      daysArray.includes('Wednesday') && 
+      daysArray.includes('Thursday') && 
+      daysArray.includes('Friday')) {
+    return 'Weekdays';
+  }
+  
+  if (daysArray.length === 2 && 
+      daysArray.includes('Saturday') && 
+      daysArray.includes('Sunday')) {
+    return 'Weekends';
+  }
+  
+  return daysArray.join(', ');
+};
 
 /**
- * Format a price range for display
+ * Check if a business is currently open based on its availability
  */
-export function formatPriceRange(min?: number, max?: number, unit?: string): string {
+export const isOpenNow = (
+  availabilityDays?: string[] | string,
+  startTime?: string,
+  endTime?: string
+): boolean => {
+  if (!availabilityDays || !startTime || !endTime) return false;
+
+  const now = new Date();
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' });
+  
+  // Process availability days (it can be string or array)
+  let days: string[] = [];
+  if (Array.isArray(availabilityDays)) {
+    days = availabilityDays;
+  } else if (typeof availabilityDays === 'string') {
+    days = availabilityDays.split(',').map(day => day.trim());
+  }
+  
+  // Check if today is in the availability days
+  if (!days.includes(currentDay)) return false;
+  
+  // Parse time ranges
+  const formatTime = (timeStr: string): Date => {
+    const [time, period] = timeStr.split(' ');
+    const [hourStr, minuteStr] = time.split(':');
+    let hour = parseInt(hourStr);
+    const minute = parseInt(minuteStr);
+    
+    if (period === 'PM' && hour < 12) hour += 12;
+    if (period === 'AM' && hour === 12) hour = 0;
+    
+    const date = new Date();
+    date.setHours(hour, minute, 0, 0);
+    return date;
+  };
+  
+  const start = formatTime(startTime);
+  const end = formatTime(endTime);
+  
+  // Return true if current time is between start and end
+  return now >= start && now <= end;
+};
+
+/**
+ * Format a price range to a readable string
+ */
+export const formatPriceRange = (min?: number, max?: number, unit?: string): string => {
   if (!min && !max) return 'Price not specified';
   
   if (min && max) {
-    return `₹${min} - ₹${max} ${unit || ''}`;
+    if (min === max) {
+      return `₹${min}${unit ? ` ${unit}` : ''}`;
+    }
+    return `₹${min} - ₹${max}${unit ? ` ${unit}` : ''}`;
   }
   
   if (min) {
-    return `₹${min}+ ${unit || ''}`;
+    return `From ₹${min}${unit ? ` ${unit}` : ''}`;
   }
   
   if (max) {
-    return `Up to ₹${max} ${unit || ''}`;
+    return `Up to ₹${max}${unit ? ` ${unit}` : ''}`;
   }
   
   return 'Price not specified';
-}
-
-/**
- * Check if a business/service is open now based on availability days and hours
- */
-export function isOpenNow(
-  availabilityDays?: string[] | string | null, 
-  availabilityStartTime?: string | null, 
-  availabilityEndTime?: string | null
-): boolean {
-  // If no availability info, assume closed
-  if (!availabilityDays || !availabilityStartTime || !availabilityEndTime) {
-    return false;
-  }
-  
-  const now = new Date();
-  const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' });
-  
-  // Check if today is in the availability days
-  let isAvailableToday = false;
-  
-  if (typeof availabilityDays === 'string') {
-    // Handle string format
-    const lowercaseDays = availabilityDays.toLowerCase();
-    isAvailableToday = 
-      lowercaseDays.includes('all days') || 
-      lowercaseDays.includes('everyday') ||
-      lowercaseDays.includes(dayOfWeek.toLowerCase());
-  } else if (Array.isArray(availabilityDays)) {
-    // Handle array format
-    isAvailableToday = availabilityDays.some(day => 
-      day.toLowerCase() === dayOfWeek.toLowerCase() ||
-      day.toLowerCase() === 'all days' ||
-      day.toLowerCase() === 'everyday'
-    );
-  }
-  
-  if (!isAvailableToday) return false;
-  
-  // Parse time
-  const timeNow = now.getHours() * 60 + now.getMinutes();
-  
-  // Parse start time
-  let startMinutes = 0;
-  if (availabilityStartTime) {
-    const startMatch = availabilityStartTime.match(/(\d+):(\d+)\s*([AP]M)?/i);
-    if (startMatch) {
-      let hours = parseInt(startMatch[1]);
-      const minutes = parseInt(startMatch[2] || '0');
-      const period = startMatch[3] || '';
-      
-      if (period.toUpperCase() === 'PM' && hours < 12) hours += 12;
-      if (period.toUpperCase() === 'AM' && hours === 12) hours = 0;
-      
-      startMinutes = hours * 60 + minutes;
-    }
-  }
-  
-  // Parse end time
-  let endMinutes = 24 * 60; // Default to end of day
-  if (availabilityEndTime) {
-    const endMatch = availabilityEndTime.match(/(\d+):(\d+)\s*([AP]M)?/i);
-    if (endMatch) {
-      let hours = parseInt(endMatch[1]);
-      const minutes = parseInt(endMatch[2] || '0');
-      const period = endMatch[3] || '';
-      
-      if (period.toUpperCase() === 'PM' && hours < 12) hours += 12;
-      if (period.toUpperCase() === 'AM' && hours === 12) hours = 0;
-      
-      endMinutes = hours * 60 + minutes;
-    }
-  }
-  
-  // Check if current time is within operating hours
-  return timeNow >= startMinutes && timeNow <= endMinutes;
-}
+};
