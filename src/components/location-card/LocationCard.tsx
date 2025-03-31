@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -7,6 +6,7 @@ import { Recommendation } from '@/lib/mockData';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { supabase } from '@/integrations/supabase/client';
 import ImageViewer from '@/components/ImageViewer';
+import { useToast } from '@/hooks/use-toast';
 
 // Import newly created components
 import StarRating from './StarRating';
