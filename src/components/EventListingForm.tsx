@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -89,7 +88,7 @@ export const EventListingForm = ({ event, onSaved, onCancel }: EventFormProps) =
         attendees: data.attendees || 0,
         price_per_person: data.price_per_person || 0,
         approval_status: 'pending', // Always set approval_status to pending when creating or updating
-        user_id: user.id // IMPORTANT: Add the user_id to associate the event with the current user
+        user_id: user.id // Add the user_id to associate the event with the current user
       };
 
       console.log("Submitting event with user_id:", user.id);
@@ -326,4 +325,3 @@ export const EventListingForm = ({ event, onSaved, onCancel }: EventFormProps) =
     </Card>
   );
 };
-

@@ -35,7 +35,7 @@ export const useUserEvents = () => {
           throw error;
         }
         
-        const formattedEvents = data?.map((event: any) => ({
+        const formattedEvents = data?.map((event) => ({
           ...event,
           pricePerPerson: event.price_per_person || 0
         })) || [];
@@ -109,7 +109,7 @@ export const useUserEvents = () => {
               variant: "destructive"
             });
           } else if (data) {
-            const formattedEvents = data.map((event: any) => ({
+            const formattedEvents = data.map((event) => ({
               ...event,
               pricePerPerson: event.price_per_person || 0
             }));

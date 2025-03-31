@@ -37,6 +37,7 @@ export type Database = {
           price_per_person: number | null
           time: string
           title: string
+          user_id: string | null
         }
         Insert: {
           approval_status?: string
@@ -50,6 +51,7 @@ export type Database = {
           price_per_person?: number | null
           time: string
           title: string
+          user_id?: string | null
         }
         Update: {
           approval_status?: string
@@ -63,6 +65,7 @@ export type Database = {
           price_per_person?: number | null
           time?: string
           title?: string
+          user_id?: string | null
         }
         Relationships: []
       }
