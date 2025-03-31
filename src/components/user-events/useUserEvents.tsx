@@ -29,16 +29,16 @@ export const useUserEvents = () => {
           .from('events')
           .select('*')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false }) as any;
+          .order('created_at', { ascending: false });
         
         if (error) {
           throw error;
         }
         
-        const formattedEvents = data.map((event: any) => ({
+        const formattedEvents = data?.map((event: any) => ({
           ...event,
           pricePerPerson: event.price_per_person || 0
-        }));
+        })) || [];
         
         setEvents(formattedEvents);
       } catch (err) {
@@ -100,7 +100,7 @@ export const useUserEvents = () => {
         .from('events')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false }) as any
+        .order('created_at', { ascending: false })
         .then(({ data, error }) => {
           if (error) {
             toast({
