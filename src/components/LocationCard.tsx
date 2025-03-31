@@ -43,11 +43,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
-
-  const hiddenGemCount = recommendation.hiddenGemCount || 0;
-  const mustVisitCount = recommendation.mustVisitCount || 0;
-  const showHiddenGemBadge = recommendation.isHiddenGem || hiddenGemCount >= 20;
-  const showMustVisitBadge = recommendation.isMustVisit || mustVisitCount >= 20;
+  const [currentOpenStatus, setCurrentOpenStatus] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -66,6 +62,23 @@ const LocationCard: React.FC<LocationCardProps> = ({
       authListener?.subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    const status = isOpenNow();
+    setCurrentOpenStatus(status);
+
+    const intervalId = setInterval(() => {
+      const status = isOpenNow();
+      setCurrentOpenStatus(status);
+    }, 60000);
+
+    return () => clearInterval(intervalId);
+  }, [recommendation.availability_days, recommendation.availability_start_time, recommendation.availability_end_time]);
+
+  const hiddenGemCount = recommendation.hiddenGemCount || 0;
+  const mustVisitCount = recommendation.mustVisitCount || 0;
+  const showHiddenGemBadge = recommendation.isHiddenGem || hiddenGemCount >= 20;
+  const showMustVisitBadge = recommendation.isMustVisit || mustVisitCount >= 20;
 
   const images = recommendation.images && recommendation.images.length > 0 ? recommendation.images : [recommendation.image];
   React.useEffect(() => {
@@ -350,8 +363,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
   };
 
   const hasAvailabilityInfo = () => {
-    console.log("LocationCard - Checking availability for:", recommendation.name);
-    console.log("LocationCard - availability_days:", recommendation.availability_days);
     return recommendation.availability_days && Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0;
   };
 
@@ -458,7 +469,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
     return recommendation.availability_days.map(day => formatDayShort(day)).join(', ');
   };
 
-  const openStatus = isOpenNow();
+  const openStatus = currentOpenStatus !== undefined ? currentOpenStatus : isOpenNow();
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
   const availabilityInfo = formatAvailabilityDays();
   const isSearchResultCard = className?.includes('search-result-card');
@@ -541,7 +552,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
             </div>}
         </div>
 
-        {(recommendation.openNow !== undefined || recommendation.hours || recommendation.availability || hasAvailabilityInfo()) && <div className="flex flex-col text-sm mb-3">
+        {(openStatus !== undefined || recommendation.hours || recommendation.availability || hasAvailabilityInfo()) && <div className="flex flex-col text-sm mb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 {openStatus === true ? 

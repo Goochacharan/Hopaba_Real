@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -31,6 +32,9 @@ export interface Business {
   price_unit?: string;
   price_range_min?: number;
   price_range_max?: number;
+  availability_days?: string[];
+  availability_start_time?: string;
+  availability_end_time?: string;
 }
 
 const businessSchema = z.object({
@@ -85,6 +89,9 @@ const businessSchema = z.object({
       message: "Please add at least 3 tags describing your services or items."
     })
     .optional(),
+  availability_days: z.array(z.string()).optional(),
+  availability_start_time: z.string().optional(),
+  availability_end_time: z.string().optional(),
 });
 
 export type BusinessFormValues = z.infer<typeof businessSchema>;
@@ -123,6 +130,9 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
       price_unit: business?.price_unit || "per hour",
       price_range_min: business?.price_range_min,
       price_range_max: business?.price_range_max,
+      availability_days: business?.availability_days || [],
+      availability_start_time: business?.availability_start_time || "",
+      availability_end_time: business?.availability_end_time || "",
     },
   });
 
@@ -166,6 +176,9 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
         languages: data.languages || [],
         experience: data.experience || null,
         tags: data.tags || [],
+        availability_days: data.availability_days || [],
+        availability_start_time: data.availability_start_time || null,
+        availability_end_time: data.availability_end_time || null,
       };
 
       console.log("Formatted business data for Supabase:", businessData);

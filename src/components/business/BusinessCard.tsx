@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -9,7 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Pencil, Trash2, IndianRupee, Clock, MapPin, Phone, Instagram, Film, Tag } from 'lucide-react';
+import { Pencil, Trash2, IndianRupee, Clock, MapPin, Phone, Instagram, Film, Tag, CircleDot, Circle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -27,6 +28,9 @@ interface Business {
   contact_phone?: string;
   instagram?: string;
   tags?: string[];
+  availability_days?: string[];
+  availability_start_time?: string;
+  availability_end_time?: string;
 }
 
 interface BusinessCardProps {
@@ -37,6 +41,22 @@ interface BusinessCardProps {
 
 const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete }) => {
   const { toast } = useToast();
+  const [currentOpenStatus, setCurrentOpenStatus] = useState<boolean | undefined>(undefined);
+
+  // Add useEffect to update open status in real-time
+  useEffect(() => {
+    // Initial check when component mounts
+    const status = isOpenNow();
+    setCurrentOpenStatus(status);
+
+    // Set up interval to check every minute
+    const intervalId = setInterval(() => {
+      const status = isOpenNow();
+      setCurrentOpenStatus(status);
+    }, 60000); // Check every minute
+    
+    return () => clearInterval(intervalId);
+  }, [business.availability_days, business.availability_start_time, business.availability_end_time]);
 
   const handleInstagramClick = (e: React.MouseEvent, instagram: string | undefined, businessName: string) => {
     e.stopPropagation();
@@ -56,6 +76,50 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
       });
     }
   };
+
+  const isOpenNow = () => {
+    if (hasAvailabilityInfo()) {
+      const now = new Date();
+      const currentDay = now.toLocaleDateString('en-US', {
+        weekday: 'long'
+      }).toLowerCase();
+      const availableDays = business.availability_days?.map(day => day.toLowerCase()) || [];
+      const isAvailableToday = availableDays.some(day => currentDay.includes(day) || day.includes(currentDay));
+      if (!isAvailableToday) return false;
+      if (business.availability_start_time && business.availability_end_time) {
+        const startTime = parseTimeString(business.availability_start_time);
+        const endTime = parseTimeString(business.availability_end_time);
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const currentTimeInMinutes = currentHour * 60 + currentMinute;
+        return currentTimeInMinutes >= startTime && currentTimeInMinutes <= endTime;
+      }
+      return true;
+    }
+    if (business.availability) {
+      return true;
+    }
+    return undefined;
+  };
+
+  const parseTimeString = (timeString: string): number => {
+    try {
+      const [time, period] = timeString.split(' ');
+      let [hours, minutes] = time.split(':').map(Number);
+      if (period === 'PM' && hours < 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+      return hours * 60 + minutes;
+    } catch (e) {
+      console.error("Error parsing time string:", timeString, e);
+      return 0;
+    }
+  };
+
+  const hasAvailabilityInfo = () => {
+    return business.availability_days && Array.isArray(business.availability_days) && business.availability_days.length > 0;
+  };
+
+  const openStatus = currentOpenStatus !== undefined ? currentOpenStatus : isOpenNow();
 
   return (
     <Card key={business.id} className="overflow-hidden">
@@ -83,8 +147,20 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span>{business.availability}</span>
+            {openStatus === true ? 
+              <CircleDot className="h-4 w-4 text-emerald-600 fill-emerald-600" /> : 
+              openStatus === false ? 
+              <Circle className="h-4 w-4 text-rose-600 fill-rose-600" /> : 
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            }
+            <span className={openStatus === true ? 
+              "text-emerald-600 font-medium" : 
+              openStatus === false ? 
+              "text-rose-600 font-medium" : 
+              ""
+            }>
+              {openStatus === true ? "Open now" : openStatus === false ? "Closed" : business.availability}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4 text-muted-foreground" />
