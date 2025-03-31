@@ -8,9 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import UserMarketplaceListings from '@/components/UserMarketplaceListings';
 import UserEventListings from '@/components/UserEventListings';
-import BusinessesList from '@/components/BusinessesList';
+import BusinessesList from '@/components/business/BusinessesList';
 import { AdminSection } from '@/components/admin/AdminSection';
-import AddBusinessForm from '@/components/AddBusinessForm';
+import BusinessForm from '@/components/business/BusinessForm';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -105,7 +105,7 @@ const Profile = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <AddBusinessForm 
+              <BusinessForm 
                 business={editingBusiness} 
                 onSaved={handleBusinessSaved}
                 onCancel={handleCancelBusinessForm}
