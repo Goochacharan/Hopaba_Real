@@ -33,6 +33,8 @@ export interface Event {
   images?: string[];
   approval_status?: string;
   user_id?: string;
+  isHiddenGem?: boolean;
+  isMustVisit?: boolean;
 }
 
 const useRecommendations = ({ 
