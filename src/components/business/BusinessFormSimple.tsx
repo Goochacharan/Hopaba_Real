@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from "@/components/ui/checkbox";
 
 export interface BusinessFormValues {
   name: string;
@@ -46,7 +47,10 @@ export interface BusinessFormValues {
   tags?: string[];
   experience?: string;
   availability?: string;
-  hours?: string; // Changed from working_hours to hours
+  hours?: string;
+  hours_from?: string;
+  hours_to?: string;
+  available_days?: string[];
   images?: string[];
 }
 
@@ -70,7 +74,10 @@ export interface Business {
   tags?: string[];
   experience?: string;
   availability?: string;
-  hours?: string; // Changed from working_hours to hours
+  hours?: string;
+  hours_from?: string;
+  hours_to?: string;
+  available_days?: string[];
   images?: string[];
   approval_status?: string;
 }
@@ -106,7 +113,10 @@ const businessSchema = z.object({
   tags: z.array(z.string()).min(3, { message: "Please add at least 3 tags describing your services or items." }).optional(),
   experience: z.string().optional().or(z.literal('')),
   availability: z.string().optional().or(z.literal('')),
-  hours: z.string().optional().or(z.literal('')), // Changed from working_hours to hours
+  hours: z.string().optional().or(z.literal('')),
+  hours_from: z.string().optional(),
+  hours_to: z.string().optional(),
+  available_days: z.array(z.string()).optional(),
   images: z.array(z.string()).optional(),
 });
 
@@ -175,18 +185,17 @@ const DAYS_OF_WEEK = [
   "Sunday"
 ];
 
-const WORKING_HOURS = [
-  "7:00 AM - 3:00 PM",
-  "8:00 AM - 4:00 PM",
-  "9:00 AM - 5:00 PM",
-  "10:00 AM - 6:00 PM",
-  "11:00 AM - 7:00 PM",
-  "12:00 PM - 8:00 PM",
-  "1:00 PM - 9:00 PM",
-  "2:00 PM - 10:00 PM",
-  "24 Hours",
-  "By Appointment Only",
-  "Flexible Hours"
+const TIME_OPTIONS = [
+  "12:00 AM", "12:30 AM",
+  "1:00 AM", "1:30 AM", "2:00 AM", "2:30 AM", "3:00 AM", "3:30 AM", 
+  "4:00 AM", "4:30 AM", "5:00 AM", "5:30 AM", "6:00 AM", "6:30 AM",
+  "7:00 AM", "7:30 AM", "8:00 AM", "8:30 AM", "9:00 AM", "9:30 AM",
+  "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
+  "12:00 PM", "12:30 PM",
+  "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM", "3:00 PM", "3:30 PM", 
+  "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM",
+  "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM", "9:30 PM",
+  "10:00 PM", "10:30 PM", "11:00 PM", "11:30 PM",
 ];
 
 const EXPERIENCE_OPTIONS = [
@@ -212,7 +221,23 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [selectedDays, setSelectedDays] = useState<string[]>(business?.available_days || []);
+
+  // Parse hours if they exist
+  const parseHours = () => {
+    if (business?.hours) {
+      const hoursMatch = business.hours.match(/(\d+:\d+ [AP]M)\s*-\s*(\d+:\d+ [AP]M)/);
+      if (hoursMatch) {
+        return {
+          from: hoursMatch[1],
+          to: hoursMatch[2]
+        };
+      }
+    }
+    return { from: "9:00 AM", to: "5:00 PM" };
+  };
+
+  const { from: defaultHoursFrom, to: defaultHoursTo } = parseHours();
 
   const form = useForm<BusinessFormValues>({
     resolver: zodResolver(businessSchema),
@@ -235,10 +260,23 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
       tags: business?.tags || [],
       experience: business?.experience || "",
       availability: business?.availability || "",
-      hours: business?.hours || "", // Changed from working_hours to hours
+      hours: business?.hours || "",
+      hours_from: defaultHoursFrom,
+      hours_to: defaultHoursTo,
+      available_days: business?.available_days || [],
       images: business?.images || [],
     },
   });
+
+  // Update hours when from/to changes
+  useEffect(() => {
+    const hoursFrom = form.getValues("hours_from");
+    const hoursTo = form.getValues("hours_to");
+    
+    if (hoursFrom && hoursTo) {
+      form.setValue("hours", `${hoursFrom} - ${hoursTo}`);
+    }
+  }, [form.watch("hours_from"), form.watch("hours_to")]);
 
   const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'contact_phone' | 'whatsapp') => {
     let value = e.target.value;
@@ -253,19 +291,20 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
     form.setValue(fieldName, '+91' + limitedDigits, { shouldValidate: true });
   };
 
-  const handleDayToggle = (day: string) => {
-    setSelectedDays(current =>
-      current.includes(day)
-        ? current.filter(d => d !== day)
-        : [...current, day]
-    );
+  const handleDayToggle = (day: string, checked: boolean) => {
+    let updatedDays = form.getValues("available_days") || [];
     
-    // Update availability field
-    const newAvailability = selectedDays.includes(day)
-      ? selectedDays.filter(d => d !== day).join(', ')
-      : [...selectedDays, day].join(', ');
-      
-    form.setValue('availability', newAvailability, { shouldValidate: true });
+    if (checked) {
+      updatedDays = [...updatedDays, day];
+    } else {
+      updatedDays = updatedDays.filter(d => d !== day);
+    }
+    
+    form.setValue("available_days", updatedDays, { shouldValidate: true });
+    setSelectedDays(updatedDays);
+    
+    // Update availability field with comma-separated days
+    form.setValue("availability", updatedDays.join(', '), { shouldValidate: true });
   };
 
   const handleSubmit = async (data: BusinessFormValues) => {
@@ -294,6 +333,9 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
       const priceRangeMin = data.price_range_min ? Number(data.price_range_min) : undefined;
       const priceRangeMax = data.price_range_max ? Number(data.price_range_max) : undefined;
       
+      // Format hours from the from/to fields
+      const hours = `${data.hours_from} - ${data.hours_to}`;
+      
       const businessData = {
         name: data.name,
         category: data.category,
@@ -315,7 +357,8 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
         tags: data.tags || [],
         experience: data.experience || null,
         availability: data.availability || null,
-        hours: data.hours || null, // Changed from working_hours to hours
+        hours: hours,
+        available_days: data.available_days || [],
         images: data.images || [],
       };
 
@@ -767,65 +810,104 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
                   
                   <FormField
                     control={form.control}
-                    name="availability"
-                    render={({ field }) => (
+                    name="available_days"
+                    render={() => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Clock className="h-4 w-4" />
                           Available Days
                         </FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          value={field.value || undefined}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select availability" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {AVAILABILITY_OPTIONS.map(option => (
-                              <SelectItem key={option} value={option}>
-                                {option}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormDescription>
+                          Select the days you are available
+                        </FormDescription>
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                          {DAYS_OF_WEEK.map((day) => (
+                            <FormItem
+                              key={day}
+                              className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3"
+                            >
+                              <FormControl>
+                                <Checkbox
+                                  checked={selectedDays.includes(day)}
+                                  onCheckedChange={(checked) => {
+                                    handleDayToggle(day, checked as boolean);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                {day}
+                              </FormLabel>
+                            </FormItem>
+                          ))}
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   
-                  <FormField
-                    control={form.control}
-                    name="hours"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          Working Hours
-                        </FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          value={field.value || undefined}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select working hours" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {WORKING_HOURS.map(hours => (
-                              <SelectItem key={hours} value={hours}>
-                                {hours}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="hours_from"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            Working Hours From
+                          </FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            value={field.value || "9:00 AM"}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select start time" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="max-h-[300px]">
+                              {TIME_OPTIONS.map(time => (
+                                <SelectItem key={`from-${time}`} value={time}>
+                                  {time}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="hours_to"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            Working Hours To
+                          </FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            value={field.value || "5:00 PM"}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select end time" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="max-h-[300px]">
+                              {TIME_OPTIONS.map(time => (
+                                <SelectItem key={`to-${time}`} value={time}>
+                                  {time}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
               </div>
             </CardContent>
