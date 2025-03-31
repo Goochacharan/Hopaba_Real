@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,13 +7,21 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
 } from "@/components/ui/form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import BasicInfoSection from './business-form/BasicInfoSection';
 import LocationSection from './business-form/LocationSection';
 import ContactSection from './business-form/ContactSection';
-import SuccessDialog from './business-form/SuccessDialog';
 
 export interface Business {
   id: string;
@@ -32,6 +41,7 @@ export interface Business {
   tags?: string[];
 }
 
+// Extend the business schema to include all the fields from the detailed form sections
 const businessSchema = z.object({
   name: z.string().min(2, {
     message: "Business name must be at least 2 characters.",
@@ -100,10 +110,6 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
-  const normalizedTags = business?.tags && Array.isArray(business.tags) 
-    ? business.tags 
-    : business?.tags ? [String(business.tags)] : [];
-
   const form = useForm<BusinessFormValues>({
     resolver: zodResolver(businessSchema),
     defaultValues: {
@@ -119,15 +125,11 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
       website: business?.website || "",
       instagram: business?.instagram || "",
       map_link: business?.map_link || "",
-      tags: normalizedTags,
+      tags: business?.tags || [],
     },
-    mode: "onSubmit",
   });
 
-  console.log("Form initialized with:", form.getValues());
-
-  const onSubmit = async (data: BusinessFormValues) => {
-    console.log("Form submitted with data:", data);
+  const handleSubmit = async (data: BusinessFormValues) => {
     if (!user) {
       toast({
         title: "Authentication required",
@@ -140,9 +142,7 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
     setIsSubmitting(true);
 
     try {
-      const tagsArray = Array.isArray(data.tags) ? data.tags : 
-                       (data.tags ? [String(data.tags)] : []);
-      
+      // Prepare business data for submission
       const businessData = {
         name: data.name,
         category: data.category,
@@ -153,53 +153,41 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         contact_phone: data.contact_phone,
         whatsapp: data.whatsapp,
         contact_email: data.contact_email,
-        website: data.website || null,
-        instagram: data.instagram || null,
-        map_link: data.map_link || null,
+        website: data.website,
+        instagram: data.instagram,
+        map_link: data.map_link,
         user_id: user.id,
-        approval_status: 'pending',
+        approval_status: 'pending', // Always set approval_status to pending when creating or updating
         price_unit: data.price_unit || "per hour",
-        price_range_min: data.price_range_min || 0,
-        price_range_max: data.price_range_max || 0,
-        availability: data.availability || null,
-        languages: data.languages || null,
-        experience: data.experience || null,
-        tags: tagsArray,
+        price_range_min: data.price_range_min,
+        price_range_max: data.price_range_max,
+        availability: data.availability,
+        languages: data.languages,
+        experience: data.experience,
+        tags: data.tags,
       };
 
-      console.log("Submitting data to Supabase:", businessData);
-
       if (business?.id) {
-        console.log("Updating existing business with ID:", business.id);
-        const { data: updatedData, error } = await supabase
+        // Update existing business
+        const { error } = await supabase
           .from('service_providers')
           .update(businessData)
-          .eq('id', business.id)
-          .select();
+          .eq('id', business.id);
 
-        if (error) {
-          console.error("Supabase update error:", error);
-          throw error;
-        }
+        if (error) throw error;
 
-        console.log("Business successfully updated:", updatedData);
         toast({
           title: "Business Updated",
           description: "Your business listing has been updated and will be reviewed by an admin.",
         });
       } else {
-        console.log("Creating new business");
-        const { data: insertedData, error } = await supabase
+        // Create new business
+        const { error } = await supabase
           .from('service_providers')
-          .insert(businessData)
-          .select();
+          .insert(businessData);
 
-        if (error) {
-          console.error("Supabase insert error:", error);
-          throw error;
-        }
+        if (error) throw error;
 
-        console.log("Business successfully added:", insertedData);
         toast({
           title: "Business Added",
           description: "Your business has been listed and will be reviewed by an admin.",
@@ -222,10 +210,15 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
   return (
     <FormProvider {...form}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* Basic Information Section */}
             <BasicInfoSection />
+            
+            {/* Location Section */}
             <LocationSection />
+            
+            {/* Contact Section */}
             <ContactSection />
           </div>
 
@@ -240,12 +233,21 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
             </Button>
           </div>
         </form>
-        
-        <SuccessDialog 
-          open={showSuccessDialog} 
-          onOpenChange={setShowSuccessDialog}
-          onContinue={onSaved}
-        />
+        <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Business Listed!</AlertDialogTitle>
+              <AlertDialogDescription>
+                Your business listing has been submitted and is awaiting admin approval.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={onSaved}>
+                OK
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </Form>
     </FormProvider>
   );

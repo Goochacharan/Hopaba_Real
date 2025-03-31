@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { 
   FormField, 
@@ -6,102 +7,200 @@ import {
   FormLabel, 
   FormControl, 
   FormMessage,
-  FormDescription 
+  FormDescription
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Briefcase, BarChart4, Tag } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Store, FileText, PencilRuler, Medal, Tag, IndianRupee } from 'lucide-react';
+import { BusinessFormValues } from '../AddBusinessForm';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { BusinessFormValues } from '../AddBusinessForm';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const categories = [
+  "Accountant",
+  "Actor/Actress",
+  "Architect",
+  "Artist",
+  "Auto Repair",
+  "Bartender",
+  "Blacksmith",
+  "Car Dealers",
+  "Carpenter",
+  "Chef/Cook",
+  "Choreographer",
+  "Computer Repair",
+  "Consultant",
+  "Contractor",
+  "Dentist",
+  "Doctor",
+  "Dog Shop",
+  "Electrician",
+  "Event Planning",
+  "Fashion Designer",
+  "Financial Analyst",
+  "Fitness Trainer",
+  "Graphic Designer",
+  "Hair Salon",
+  "Hair Stylist/Barber",
+  "Home Cleaning",
+  "Hotel Manager",
+  "Human Resources Manager",
+  "HVAC Services",
+  "Ice Cream Shop",
+  "Interior Design",
+  "IT Services",
+  "Journalist",
+  "Landscaping",
+  "Laser Hair Removal",
+  "Lawyer",
+  "Legal Services",
+  "Marketing Agency",
+  "Marketing Manager",
+  "Massage Therapy",
+  "Mechanic",
+  "Medical Spa",
+  "Model",
+  "Musician",
+  "Nail Technician",
+  "Nurse",
+  "Painter",
+  "Pharmacist",
+  "Photographer",
+  "Physiotherapist",
+  "Pizza Shop",
+  "Plumber",
+  "Pool & Hot Tub Services",
+  "Professor",
+  "Researcher",
+  "Restaurant",
+  "Roofing",
+  "Salesperson",
+  "Salon",
+  "Skin Care",
+  "Spa",
+  "Surgeon",
+  "Tailor",
+  "Teacher",
+  "Towing",
+  "Transmission Repair",
+  "Travel Agent",
+  "Tutor",
+  "Vacation Rental",
+  "Veterinarian",
+  "Videographer",
+  "Waiter/Waitress",
+  "Wedding Chapel",
+  "Weight Loss Center",
+  "Windshield Installation & Repair",
+  "Writer",
+  "Yoga Instructor",
+  "Other"
+];
+
+// Common price ranges in Rupees
+const priceRanges = [
+  { min: 100, max: 200 },
+  { min: 200, max: 300 },
+  { min: 300, max: 500 },
+  { min: 500, max: 800 },
+  { min: 800, max: 1000 },
+  { min: 1000, max: 1500 },
+  { min: 1500, max: 2000 },
+  { min: 2000, max: 3000 },
+  { min: 3000, max: 5000 },
+  { min: 5000, max: 10000 },
+  { min: 10000, max: 20000 },
+  { min: 20000, max: 50000 },
+];
 
 const BasicInfoSection = () => {
   const form = useFormContext<BusinessFormValues>();
   const [newTag, setNewTag] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
+  const [customPriceRange, setCustomPriceRange] = useState(false);
+  
+  // Get the tags field array from the form
+  const tags = form.watch('tags') || [];
+  const priceRangeMin = form.watch('price_range_min');
+  const priceRangeMax = form.watch('price_range_max');
   
   const handleAddTag = () => {
-    if (!newTag.trim() || tags.includes(newTag.trim())) return;
-    
-    const updatedTags = [...tags, newTag.trim()];
-    setTags(updatedTags);
-    form.setValue('tags', updatedTags, { shouldValidate: true });
-    setNewTag('');
-  };
-  
-  const handleRemoveTag = (tag: string) => {
-    const updatedTags = tags.filter(t => t !== tag);
-    setTags(updatedTags);
-    form.setValue('tags', updatedTags, { shouldValidate: true });
-  };
-  
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && newTag.trim()) {
-      e.preventDefault();
-      handleAddTag();
+    if (newTag && !tags.includes(newTag)) {
+      const updatedTags = [...tags, newTag];
+      form.setValue('tags', updatedTags);
+      setNewTag('');
     }
   };
   
-  useEffect(() => {
-    const formTags = form.getValues('tags');
-    if (formTags && Array.isArray(formTags) && formTags.length > 0) {
-      setTags(formTags);
-    }
-  }, [form]);
-  
-  const categories = [
-    { value: "Food", label: "Food" },
-    { value: "Home Services", label: "Home Services" },
-    { value: "Fitness", label: "Fitness" },
-    { value: "Education", label: "Education" },
-    { value: "Beauty", label: "Beauty" },
-    { value: "Entertainment", label: "Entertainment" },
-    { value: "Fashion", label: "Fashion" },
-    { value: "Health", label: "Health" },
-    { value: "Transport", label: "Transport" },
-    { value: "Technology", label: "Technology" },
-    { value: "Finance", label: "Finance" },
-    { value: "Legal", label: "Legal" },
-    { value: "Other", label: "Other" }
-  ];
-  
-  const availabilityOptions = [
-    { value: "24/7", label: "Available 24/7" },
-    { value: "Weekdays", label: "Weekdays Only" },
-    { value: "Weekends", label: "Weekends Only" },
-    { value: "Evenings", label: "Evening Hours Only" },
-    { value: "By Appointment", label: "By Appointment Only" },
-    { value: "Custom", label: "Custom Schedule" }
-  ];
+  const handleRemoveTag = (tagToRemove: string) => {
+    const updatedTags = tags.filter(tag => tag !== tagToRemove);
+    form.setValue('tags', updatedTags);
+  };
 
-  const priceUnitOptions = [
-    { value: "per hour", label: "Per Hour" },
-    { value: "per day", label: "Per Day" },
-    { value: "per month", label: "Per Month" },
-    { value: "per project", label: "Per Project" },
-    { value: "per service", label: "Per Service" },
-    { value: "per person", label: "Per Person" },
-    { value: "one time", label: "One Time" }
-  ];
-  
+  const handlePriceRangeSelect = (value: string) => {
+    if (value === 'custom') {
+      setCustomPriceRange(true);
+      return;
+    }
+    
+    setCustomPriceRange(false);
+    const [min, max] = value.split('-').map(Number);
+    form.setValue('price_range_min', min);
+    form.setValue('price_range_max', max);
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(price);
+  };
+
+  const getCurrentPriceRangeValue = () => {
+    if (customPriceRange) return 'custom';
+    if (priceRangeMin === undefined || priceRangeMax === undefined) return '';
+    
+    // Check if it matches one of our predefined ranges
+    const matchingRange = priceRanges.find(
+      range => range.min === priceRangeMin && range.max === priceRangeMax
+    );
+    
+    if (matchingRange) {
+      return `${matchingRange.min}-${matchingRange.max}`;
+    }
+    
+    // If no match, it's a custom range
+    setCustomPriceRange(true);
+    return 'custom';
+  };
+
   return (
     <>
       <div className="space-y-6 md:col-span-2">
-        <h3 className="text-lg font-medium flex items-center gap-2 mt-4">
-          <Briefcase className="h-5 w-5 text-primary" />
+        <h3 className="text-lg font-medium flex items-center gap-2">
+          <Store className="h-5 w-5 text-primary" />
           Basic Information
         </h3>
+        <p className="text-sm text-muted-foreground">
+          Provide essential details about your business or service.
+        </p>
       </div>
-      
+
       <FormField
         control={form.control}
         name="name"
         render={({ field }) => (
-          <FormItem className="md:col-span-2">
-            <FormLabel>Business Name*</FormLabel>
+          <FormItem>
+            <FormLabel>Business/Service Name*</FormLabel>
             <FormControl>
-              <Input placeholder="Enter your business name" {...field} />
+              <Input placeholder="Enter business or service name" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -114,16 +213,16 @@ const BasicInfoSection = () => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Category*</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent>
-                {categories.map(category => (
-                  <SelectItem key={category.value} value={category.value}>
-                    {category.label}
+              <SelectContent className="max-h-[300px]">
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -132,7 +231,7 @@ const BasicInfoSection = () => {
           </FormItem>
         )}
       />
-      
+
       <FormField
         control={form.control}
         name="description"
@@ -140,174 +239,189 @@ const BasicInfoSection = () => {
           <FormItem className="md:col-span-2">
             <FormLabel>Description*</FormLabel>
             <FormControl>
-              <Textarea 
-                placeholder="Describe your business, services, and what makes you unique" 
-                className="min-h-32" 
-                {...field} 
+              <Textarea
+                placeholder="Enter business description"
+                className="resize-none min-h-32"
+                {...field}
               />
             </FormControl>
             <FormDescription>
-              Include key details about your services, expertise, and what makes your business stand out
+              Briefly describe your business, service, or professional background.
             </FormDescription>
             <FormMessage />
           </FormItem>
         )}
       />
-      
+
+      <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          control={form.control}
+          name="price_unit"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Pricing Unit</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value || "per hour"}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select pricing unit" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="per hour">Per Hour</SelectItem>
+                  <SelectItem value="per session">Per Session</SelectItem>
+                  <SelectItem value="per person">Per Person</SelectItem>
+                  <SelectItem value="per day">Per Day</SelectItem>
+                  <SelectItem value="per month">Per Month</SelectItem>
+                  <SelectItem value="fixed">Fixed Price</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                How you charge for your services
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormItem>
+          <FormLabel className="flex items-center gap-2">
+            <IndianRupee className="h-4 w-4" />
+            Price Range
+          </FormLabel>
+          <Select
+            onValueChange={handlePriceRangeSelect}
+            value={getCurrentPriceRangeValue()}
+          >
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select price range" />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {priceRanges.map((range) => (
+                <SelectItem key={`${range.min}-${range.max}`} value={`${range.min}-${range.max}`}>
+                  {formatPrice(range.min)} ~ {formatPrice(range.max)}
+                </SelectItem>
+              ))}
+              <SelectItem value="custom">Custom Range</SelectItem>
+            </SelectContent>
+          </Select>
+          <FormDescription>
+            Your typical price range
+          </FormDescription>
+        </FormItem>
+
+        {customPriceRange && (
+          <>
+            <FormField
+              control={form.control}
+              name="price_range_min"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Minimum Price (₹)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="Minimum price" 
+                      min={0}
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value) || 0)}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="price_range_max"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Maximum Price (₹)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="Maximum price" 
+                      min={0}
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value) || 0)}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
+      </div>
+
+      <FormField
+        control={form.control}
+        name="experience"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Experience</FormLabel>
+            <FormControl>
+              <Input placeholder="Years of experience" {...field} />
+            </FormControl>
+            <FormDescription>
+              How many years of experience you have
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       <FormField
         control={form.control}
         name="tags"
-        render={({ field }) => (
+        render={() => (
           <FormItem className="md:col-span-2">
-            <FormLabel>
-              <div className="flex items-center gap-2">
-                <Tag className="h-4 w-4" />
-                Popular Items/Services*
-              </div>
+            <FormLabel className="flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              Services/Items Offered (Tags)
             </FormLabel>
-            <FormControl>
-              <div className="space-y-3">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Add key items or services (e.g., Haircut, Pasta, Tax Filing)"
-                    value={newTag}
-                    onChange={e => setNewTag(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                  />
-                  <Button 
+            <div className="flex flex-wrap gap-2 mb-2">
+              {tags.map((tag) => (
+                <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                  {tag}
+                  <button 
                     type="button" 
-                    variant="outline" 
-                    onClick={handleAddTag}
+                    onClick={() => handleRemoveTag(tag)}
+                    className="rounded-full h-4 w-4 inline-flex items-center justify-center text-xs hover:bg-destructive/20"
                   >
-                    Add
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {tags && tags.map(tag => (
-                    <Badge
-                      key={tag} 
-                      variant="secondary" 
-                      className="flex items-center gap-1 py-1.5"
-                    >
-                      {tag}
-                      <button 
-                        type="button" 
-                        className="ml-1 hover:text-destructive" 
-                        onClick={() => handleRemoveTag(tag)}
-                      >
-                        ×
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </FormControl>
+                    ×
+                  </button>
+                </Badge>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                placeholder="Add service or item (e.g. Hair Cut, Ice Cream)"
+                className="flex-1"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddTag();
+                  }
+                }}
+              />
+              <Button 
+                type="button" 
+                onClick={handleAddTag}
+                variant="outline"
+              >
+                Add
+              </Button>
+            </div>
             <FormDescription>
-              Add at least 3 popular items or services that you offer
+              Add at least 3 tags describing services or items you offer (e.g., Hair Cut, Ice Cream, Sandwich)
             </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <div className="space-y-6 md:col-span-2">
-        <h3 className="text-lg font-medium flex items-center gap-2 mt-4">
-          <BarChart4 className="h-5 w-5 text-primary" />
-          Pricing & Availability
-        </h3>
-      </div>
-      
-      <FormField
-        control={form.control}
-        name="price_range_min"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Minimum Price (₹)</FormLabel>
-            <FormControl>
-              <Input 
-                type="number" 
-                placeholder="0" 
-                min="0" 
-                {...field} 
-                onChange={(e) => {
-                  const value = e.target.value === '' ? undefined : Number(e.target.value);
-                  field.onChange(value);
-                }}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <FormField
-        control={form.control}
-        name="price_range_max"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Maximum Price (₹)</FormLabel>
-            <FormControl>
-              <Input 
-                type="number" 
-                placeholder="10000" 
-                min="0" 
-                {...field} 
-                onChange={(e) => {
-                  const value = e.target.value === '' ? undefined : Number(e.target.value);
-                  field.onChange(value);
-                }}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <FormField
-        control={form.control}
-        name="price_unit"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Price Unit</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value || "per hour"}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a price unit" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {priceUnitOptions.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <FormField
-        control={form.control}
-        name="availability"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Availability</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value || "By Appointment"}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select availability" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {availabilityOptions.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             <FormMessage />
           </FormItem>
         )}

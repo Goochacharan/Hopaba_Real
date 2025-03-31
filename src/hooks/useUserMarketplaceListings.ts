@@ -22,7 +22,6 @@ export const useUserMarketplaceListings = () => {
     }
 
     try {
-      console.log('Fetching marketplace listings for user ID:', user.id);
       const { data, error } = await supabase
         .from('marketplace_listings')
         .select('*')
@@ -33,7 +32,6 @@ export const useUserMarketplaceListings = () => {
         throw error;
       }
 
-      console.log('Marketplace listings fetched:', data?.length || 0);
       setListings(data || []);
     } catch (err: any) {
       console.error('Error fetching user marketplace listings:', err);
@@ -73,9 +71,7 @@ export const useUserMarketplaceListings = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchUserListings();
-    }
+    fetchUserListings();
   }, [user]);
 
   return { 
