@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Recommendation } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -115,7 +116,12 @@ const useRecommendations = ({
       
       console.log(`Fetched ${data?.length || 0} service providers from Supabase`);
       
+      // Log each service provider's availability_days to debug
       if (data && data.length > 0) {
+        data.forEach(item => {
+          console.log(`Service Provider ${item.name} - availability_days:`, item.availability_days);
+        });
+        
         return data.map(item => ({
           id: item.id,
           name: item.name,

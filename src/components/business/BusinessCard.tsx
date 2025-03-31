@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Card,
@@ -118,7 +117,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
 
   const availabilityDays = business.availability_days && business.availability_days.length > 0 
     ? formatDayRange(business.availability_days) 
-    : business.availability || '';
+    : business.availability || 'Not specified';
 
   return (
     <Card key={business.id} className="overflow-hidden">

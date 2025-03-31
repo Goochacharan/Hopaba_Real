@@ -572,7 +572,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               <div className="flex items-center">
                 <Calendar className="w-4 h-4 mr-1 flex-shrink-0 text-muted-foreground" />
                 <span className="text-muted-foreground">
-                  Working days: {formattedAvailabilityDays}
+                  Working days: {formattedAvailabilityDays || 'Not specified'}
                 </span>
               </div>
               
