@@ -40,6 +40,7 @@ const Profile = () => {
   };
 
   const handleBusinessSaved = () => {
+    console.log("Business saved, refreshing list");
     setEditingBusiness(null);
     setShowAddBusinessForm(false);
     setRefreshBusinesses(prev => !prev);

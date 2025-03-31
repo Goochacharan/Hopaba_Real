@@ -122,6 +122,8 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
   });
 
   const handleSubmit = async (data: BusinessFormValues) => {
+    console.log("Form submitted with data:", data);
+    
     if (!user) {
       toast({
         title: "Authentication required",
@@ -136,6 +138,10 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
     try {
       console.log("Submitting business data:", data);
       
+      // Convert price range values to numbers if they're provided as strings
+      const priceRangeMin = data.price_range_min ? Number(data.price_range_min) : undefined;
+      const priceRangeMax = data.price_range_max ? Number(data.price_range_max) : undefined;
+      
       // Prepare business data for submission
       const businessData = {
         name: data.name,
@@ -146,19 +152,19 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         address: data.address,
         contact_phone: data.contact_phone,
         whatsapp: data.whatsapp,
-        contact_email: data.contact_email,
+        contact_email: data.contact_email || null,
         website: data.website || null,
         instagram: data.instagram || null,
         map_link: data.map_link || null,
         user_id: user.id,
         approval_status: 'pending',
         price_unit: data.price_unit || "per hour",
-        price_range_min: data.price_range_min,
-        price_range_max: data.price_range_max,
-        availability: data.availability,
-        languages: data.languages,
-        experience: data.experience,
-        tags: data.tags,
+        price_range_min: priceRangeMin,
+        price_range_max: priceRangeMax,
+        availability: data.availability || null,
+        languages: data.languages || [],
+        experience: data.experience || null,
+        tags: data.tags || [],
       };
 
       console.log("Formatted business data:", businessData);
