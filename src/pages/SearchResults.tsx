@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -40,7 +41,7 @@ const SearchResults = () => {
     filterRecommendations
   } = useRecommendations({
     initialQuery: searchQuery,
-    initialCategory: categoryParam as any
+    initialCategory: categoryParam
   });
 
   const {
@@ -87,7 +88,7 @@ const SearchResults = () => {
   useEffect(() => {
     if (categoryParam !== 'all' && categoryParam !== category) {
       console.log("SearchResults - Setting category from URL:", categoryParam);
-      handleCategoryChange(categoryParam as any);
+      handleCategoryChange(categoryParam);
     }
   }, [categoryParam, category, handleCategoryChange]);
 
@@ -138,7 +139,7 @@ const SearchResults = () => {
             category={category}
             resultsCount={{
               locations: rankedRecommendations.length,
-              events: events.length,
+              events: events ? events.length : 0,
               marketplace: marketplaceListings.length
             }}
             loading={loading}
@@ -152,7 +153,7 @@ const SearchResults = () => {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 recommendations={rankedRecommendations}
-                events={events}
+                events={events || []}
                 marketplaceListings={marketplaceListings}
                 handleRSVP={handleRSVP}
               />

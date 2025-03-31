@@ -20,6 +20,7 @@ export interface Recommendation {
   website?: string;
   instagram?: string;
   price?: string;
+  price_level?: string;
   area?: string;
   city?: string;
   availability?: string | string[];
@@ -27,6 +28,8 @@ export interface Recommendation {
   availability_start_time?: string;
   availability_end_time?: string;
   reviewCount?: number;
+  isHiddenGem?: boolean;
+  isMustVisit?: boolean;
   location?: [number, number];
   mapLink?: string;
   created_at?: string;
@@ -57,6 +60,48 @@ interface UseRecommendationsProps {
   isOpen?: boolean;
   priceLevel?: string;
   limit?: number;
+  initialQuery?: string;
+  initialCategory?: string;
+}
+
+interface FilterOptions {
+  maxDistance?: number;
+  minRating?: number;
+  priceLevel?: string[];
+  openNow?: boolean;
+  hiddenGem?: boolean;
+  mustVisit?: boolean;
+  distanceUnit?: string;
+}
+
+interface ServiceProvider {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  address: string;
+  area: string;
+  city: string;
+  open_now?: boolean;
+  hours?: string;
+  price?: string;
+  price_level?: string;
+  image_url?: string;
+  images?: string[];
+  tags?: string[];
+  contact_phone?: string;
+  website?: string;
+  instagram?: string;
+  rating?: number;
+  review_count?: number;
+  distance?: string;
+  availability?: string;
+  availability_days?: string[] | string;
+  availability_start_time?: string;
+  availability_end_time?: string;
+  map_link?: string;
+  created_at?: string;
+  coordinates?: string;
 }
 
 export const useRecommendations = ({
@@ -66,12 +111,17 @@ export const useRecommendations = ({
   sortBy = 'distance',
   isOpen = false,
   priceLevel,
-  limit = 50
+  limit = 50,
+  initialQuery,
+  initialCategory = 'all'
 }: UseRecommendationsProps = {}) => {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [businessCount, setBusinessCount] = useState(0);
+  const [query, setQuery] = useState(initialQuery || '');
+  const [activeCategory, setActiveCategory] = useState(initialCategory);
 
   // Fetch recommendations based on the provided filters
   const fetchRecommendations = useCallback(async () => {
@@ -118,7 +168,7 @@ export const useRecommendations = ({
       }
 
       // Transform business data to match Recommendation interface
-      let transformedData: Recommendation[] = businesses.map(business => {
+      let transformedData: Recommendation[] = businesses.map((business: ServiceProvider) => {
         // Calculate distance if location is provided
         let distanceText = '';
         if (selectedLocation && business.coordinates) {
@@ -145,8 +195,8 @@ export const useRecommendations = ({
         if (typeof availabilityDays === 'string' && availabilityDays) {
           try {
             // Try to parse it if it might be a JSON string
-            if (availabilityDays.startsWith('[') && availabilityDays.endsWith(']')) {
-              availabilityDays = JSON.parse(availabilityDays);
+            if (availabilityDays.includes('[') && availabilityDays.includes(']')) {
+              availabilityDays = JSON.parse(availabilityDays as string);
             }
           } catch (e) {
             console.error('Error parsing availability_days:', e);
@@ -168,6 +218,7 @@ export const useRecommendations = ({
           openNow: business.open_now,
           hours: business.hours,
           price: business.price,
+          price_level: business.price_level,
           website: business.website,
           instagram: business.instagram,
           phone: business.contact_phone,
@@ -200,6 +251,20 @@ export const useRecommendations = ({
       }
 
       setRecommendations(transformedData);
+      
+      // Also fetch events
+      try {
+        const { data: eventsData } = await supabase
+          .from('events')
+          .select('*')
+          .eq('approval_status', 'approved')
+          .order('created_at', { ascending: false });
+          
+        setEvents(eventsData || []);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        setEvents([]);
+      }
     } catch (err: any) {
       console.error('Error fetching recommendations:', err);
       setError('Failed to load recommendations. Please try again.');
@@ -212,11 +277,54 @@ export const useRecommendations = ({
     fetchRecommendations();
   }, [fetchRecommendations]);
 
+  const handleSearch = (newQuery: string) => {
+    setQuery(newQuery);
+    // Additional search logic can be added here
+  };
+
+  const handleCategoryChange = (newCategory: string) => {
+    setActiveCategory(newCategory);
+    // Additional category change logic can be added here
+  };
+
+  const filterRecommendations = (recommendations: Recommendation[], filters: FilterOptions) => {
+    return recommendations.filter(recommendation => {
+      // Apply distance filter
+      if (filters.maxDistance && recommendation.distance) {
+        const distanceValue = parseFloat(recommendation.distance.replace(' km', '').replace(' m', ''));
+        const unit = recommendation.distance.includes('km') ? 'km' : 'm';
+        
+        const distanceInKm = unit === 'm' ? distanceValue / 1000 : distanceValue;
+        if (distanceInKm > filters.maxDistance) return false;
+      }
+
+      // Apply rating filter
+      if (filters.minRating && (recommendation.rating || 0) < filters.minRating) return false;
+
+      // Apply open now filter
+      if (filters.openNow && !recommendation.openNow) return false;
+
+      // Apply hidden gem filter
+      if (filters.hiddenGem && !recommendation.isHiddenGem) return false;
+
+      // Apply must visit filter
+      if (filters.mustVisit && !recommendation.isMustVisit) return false;
+
+      return true;
+    });
+  };
+
   return { 
     recommendations, 
+    events,
     loading, 
     error, 
     refetch: fetchRecommendations,
-    totalCount: businessCount
+    totalCount: businessCount,
+    query,
+    category: activeCategory,
+    handleSearch,
+    handleCategoryChange,
+    filterRecommendations
   };
 };

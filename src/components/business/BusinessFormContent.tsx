@@ -35,7 +35,7 @@ const BusinessFormContent: React.FC<BusinessFormContentProps> = ({
 }) => {
   const form = useFormContext();
   const [selectedDays, setSelectedDays] = useState<string[]>(
-    business?.availability_days || []
+    Array.isArray(business?.availability_days) ? business?.availability_days : []
   );
 
   const daysOfWeek = [
@@ -48,7 +48,6 @@ const BusinessFormContent: React.FC<BusinessFormContentProps> = ({
     { id: 'sunday', label: 'Sunday' },
   ];
 
-  // This is a helper function to handle the conversion
   const parseAvailabilityDays = (availabilityDays: string | string[] | undefined): string[] => {
     if (!availabilityDays) return [];
     
@@ -56,12 +55,10 @@ const BusinessFormContent: React.FC<BusinessFormContentProps> = ({
       return availabilityDays;
     }
     
-    // If it's a string, try to parse it
     try {
-      if (availabilityDays.startsWith('[') && availabilityDays.endsWith(']')) {
+      if (availabilityDays.includes('[') && availabilityDays.includes(']')) {
         return JSON.parse(availabilityDays);
       }
-      // Handle comma-separated string
       return availabilityDays.split(',').map(day => day.trim());
     } catch (e) {
       console.error('Error parsing availability_days:', e);

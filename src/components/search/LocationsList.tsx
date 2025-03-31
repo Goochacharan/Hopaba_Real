@@ -65,11 +65,11 @@ const LocationsList: React.FC<LocationsListProps> = ({
   // Prepare recommendations with proper type handling for availability_days
   const preparedRecommendations = recommendations.map(recommendation => {
     // Handle possible conversions needed for availability_days
-    let availabilityDays = recommendation.availability_days;
+    let availabilityDays = recommendation.availability_days || [];
     if (typeof availabilityDays === 'string' && availabilityDays) {
       try {
         // Try to parse it if it might be a JSON string
-        if (availabilityDays.startsWith('[') && availabilityDays.endsWith(']')) {
+        if (availabilityDays.includes('[') && availabilityDays.includes(']')) {
           availabilityDays = JSON.parse(availabilityDays);
         }
       } catch (e) {

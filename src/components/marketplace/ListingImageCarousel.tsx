@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Heart, Sparkles, BadgeCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
