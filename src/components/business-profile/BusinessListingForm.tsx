@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -44,6 +43,7 @@ export interface BusinessData {
   price_unit?: string;
   price_range_min?: number;
   price_range_max?: number;
+  approval_status?: string;
 }
 
 const businessSchema = z.object({
