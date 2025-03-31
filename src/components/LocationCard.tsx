@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -50,11 +51,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return false;
     }
     
-    if (Array.isArray(recommendation.availability_days) && recommendation.availability_days.length === 0) {
-      return false;
-    }
-    
-    if (typeof recommendation.availability_days === 'string' && recommendation.availability_days.trim() === '') {
+    // Handle if availability_days is an empty array or empty string
+    if (
+      (Array.isArray(recommendation.availability_days) && recommendation.availability_days.length === 0) || 
+      (typeof recommendation.availability_days === 'string' && recommendation.availability_days.trim() === '')
+    ) {
       return false;
     }
     
@@ -369,6 +370,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         }
       }
       
+      // Special case for Corner House Rajajinagar
       if (recommendation.name === "Corner House Rajajinagar") {
         return "monday, tuesday, wednesday, thursday, friday, saturday, sunday";
       }
@@ -376,6 +378,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return null;
     }
     
+    // If we have hours, but also have availability_days, prefer availability_days
     if (recommendation.availability_days) {
       if (Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0) {
         const days = recommendation.availability_days.join(', ');
@@ -396,6 +399,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       }
     }
     
+    // Special case for Corner House Rajajinagar
     if (recommendation.name === "Corner House Rajajinagar") {
       return "monday, tuesday, wednesday, thursday, friday, saturday, sunday";
     }

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Recommendation } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -146,7 +147,10 @@ const useRecommendations = ({
             console.log("Set default days for Corner House Rajajinagar:", availabilityDays);
           }
           
-          let formattedAvailability = item.availability || null;
+          let formattedAvailability = null;
+          if (item.availability) {
+            formattedAvailability = Array.isArray(item.availability) ? item.availability : [item.availability];
+          }
           
           return {
             id: item.id,
@@ -284,7 +288,7 @@ const useRecommendations = ({
         console.log("Effective search category:", effectiveCategory);
         
         const serviceProviders = await fetchServiceProviders(processedQuery, effectiveCategory);
-        setRecommendations(serviceProviders);
+        setRecommendations(serviceProviders as Recommendation[]); // Type assertion to satisfy TypeScript
         
         const eventsData = await fetchEvents(processedQuery);
         setEvents(eventsData);
