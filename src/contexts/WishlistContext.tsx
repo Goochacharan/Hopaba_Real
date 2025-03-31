@@ -46,6 +46,7 @@ interface WishlistContextProps {
   addToWishlist: (item: Event | Recommendation | MarketplaceListing, type: 'event' | 'location' | 'marketplace') => void;
   removeFromWishlist: (itemId: string, type: 'event' | 'location' | 'marketplace') => void;
   isInWishlist: (itemId: string, type: 'event' | 'location' | 'marketplace') => boolean;
+  toggleWishlist: (item: WishlistItem) => void; // Add this function
 }
 
 const WishlistContext = createContext<WishlistContextProps | undefined>(undefined);
@@ -90,11 +91,25 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
     return wishlist.some(item => item.id === itemId && item.type === type);
   };
 
+  // Add toggleWishlist function
+  const toggleWishlist = (item: WishlistItem) => {
+    const { id, type } = item;
+    
+    if (isInWishlist(id, type)) {
+      removeFromWishlist(id, type);
+    } else {
+      // We need to pass the item without the type, and then the type separately
+      const { type: _, ...itemWithoutType } = item;
+      addToWishlist(itemWithoutType as any, type);
+    }
+  };
+
   const value: WishlistContextProps = {
     wishlist,
     addToWishlist,
     removeFromWishlist,
-    isInWishlist
+    isInWishlist,
+    toggleWishlist
   };
 
   return (
