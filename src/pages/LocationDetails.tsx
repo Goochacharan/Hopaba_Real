@@ -171,16 +171,44 @@ const LocationDetails = () => {
   };
 
   const handleSubmitReview = (values: ReviewFormValues) => {
+    if (!user) {
+      toast({
+        title: "Login required",
+        description: "Please login to submit a review",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check if this user has already submitted a review
+    const existingUserReview = userReviews.find(
+      review => review.userId === user.id
+    );
+
+    if (existingUserReview) {
+      toast({
+        title: "Review already submitted",
+        description: "You have already submitted a review for this location.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const reviewId = Math.random().toString(36).substring(2, 9);
     const currentDate = "Just now";
+    
+    // Get user name from metadata or use email as fallback
+    const userName = user.user_metadata?.full_name || user.email || user.id;
+    
     const newReview: Review = {
       id: reviewId,
-      name: user ? user.user_metadata?.full_name || "Anonymous" : "Guest",
+      name: userName,
       date: currentDate,
       rating: values.rating,
       text: values.reviewText,
       isMustVisit: values.isMustVisit,
-      isHiddenGem: values.isHiddenGem
+      isHiddenGem: values.isHiddenGem,
+      userId: user.id // Store the user ID to check for duplicate reviews
     };
     
     // Add the new review to the state
@@ -264,6 +292,8 @@ const LocationDetails = () => {
               locationId={location.id}
               locationName={location.name}
               onSubmitReview={handleSubmitReview}
+              currentUser={user}
+              hasUserReviewed={userReviews.some(review => review.userId === (user?.id || null))}
             />
           </div>
           

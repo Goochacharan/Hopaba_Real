@@ -11,6 +11,7 @@ export interface Review {
   text: string;
   isMustVisit?: boolean;
   isHiddenGem?: boolean;
+  userId?: string | null; // Add userId for tracking who left the review
 }
 
 interface ReviewsListProps {
