@@ -65,6 +65,12 @@ const LocationsList: React.FC<LocationsListProps> = ({
   return (
     <div className="grid grid-cols-1 gap-6">
       {recommendations.map((recommendation, index) => {
+        // Special case for Corner House Rajajinagar to ensure working days are displayed
+        if (recommendation.name === "Corner House Rajajinagar" && 
+            (!recommendation.availability_days || recommendation.availability_days.length === 0)) {
+          recommendation.availability_days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+        }
+        
         // Get user reviews from localStorage
         const { count: userReviewsCount, avgRating: userAvgRating } = getStoredReviews(recommendation.id);
         

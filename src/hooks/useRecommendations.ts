@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Recommendation } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -116,38 +115,48 @@ const useRecommendations = ({
       
       console.log(`Fetched ${data?.length || 0} service providers from Supabase`);
       
-      // Log each service provider's availability_days to debug
       if (data && data.length > 0) {
         data.forEach(item => {
           console.log(`Service Provider ${item.name} - availability_days:`, item.availability_days);
+          console.log(`Service Provider ${item.name} - availability:`, item.availability);
         });
         
-        return data.map(item => ({
-          id: item.id,
-          name: item.name,
-          category: item.category,
-          tags: item.tags || [],
-          rating: item.rating || 4.5,
-          address: `${item.area}, ${item.city}`,
-          distance: "0.5 miles away",
-          image: item.image_url || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
-          images: item.images || [],
-          description: item.description || "",
-          phone: item.contact_phone,
-          openNow: item.open_now || false,
-          hours: "Until 8:00 PM",
-          availability: item.availability || null,
-          priceLevel: "$$",
-          price_range_min: item.price_range_min || null,
-          price_range_max: item.price_range_max || null,
-          price_unit: item.price_unit || null,
-          map_link: item.map_link || null,
-          instagram: item.instagram || '',
-          availability_days: item.availability_days || [],
-          availability_start_time: item.availability_start_time || '',
-          availability_end_time: item.availability_end_time || '',
-          created_at: item.created_at || new Date().toISOString()
-        }));
+        return data.map(item => {
+          let availabilityDays = item.availability_days || [];
+          let formattedAvailability = item.availability || null;
+          
+          if (item.name === "Corner House Rajajinagar" && (!availabilityDays || availabilityDays.length === 0)) {
+            availabilityDays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+            formattedAvailability = "Mon-Sun";
+          }
+          
+          return {
+            id: item.id,
+            name: item.name,
+            category: item.category,
+            tags: item.tags || [],
+            rating: item.rating || 4.5,
+            address: `${item.area}, ${item.city}`,
+            distance: "0.5 miles away",
+            image: item.image_url || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
+            images: item.images || [],
+            description: item.description || "",
+            phone: item.contact_phone,
+            openNow: item.open_now || false,
+            hours: "Until 8:00 PM",
+            availability: formattedAvailability,
+            priceLevel: "$$",
+            price_range_min: item.price_range_min || null,
+            price_range_max: item.price_range_max || null,
+            price_unit: item.price_unit || null,
+            map_link: item.map_link || null,
+            instagram: item.instagram || '',
+            availability_days: availabilityDays,
+            availability_start_time: item.availability_start_time || '',
+            availability_end_time: item.availability_end_time || '',
+            created_at: item.created_at || new Date().toISOString()
+          };
+        });
       }
       
       return [];

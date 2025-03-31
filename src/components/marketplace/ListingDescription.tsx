@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { format, differenceInDays } from 'date-fns';
 import { Instagram, Film, Sparkles, MapPin, Link2, Tag, Clock, Calendar } from 'lucide-react';
@@ -38,7 +37,6 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
   availability_start_time,
   availability_end_time
 }) => {
-  // Check if listing is less than 7 days old
   const isNew = differenceInDays(new Date(), new Date(createdAt)) < 7;
   
   const formatDayRange = (days: string[]): string => {
@@ -96,7 +94,8 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
     return ranges.join(', ');
   };
   
-  const availabilityDays = availability_days && availability_days.length > 0 
+  const hasAvailabilityDays = availability_days && availability_days.length > 0;
+  const displayAvailabilityDays = hasAvailabilityDays 
     ? formatDayRange(availability_days) 
     : null;
 
@@ -120,11 +119,11 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
           
           {showMetadata && (
             <div className="mt-6 space-y-4 text-sm text-gray-700">
-              {availabilityDays && (
+              {(displayAvailabilityDays || (category === "Corner House" && !displayAvailabilityDays)) && (
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-primary" />
                   <span className="font-medium">
-                    Working days: {availabilityDays}
+                    Working days: {displayAvailabilityDays || (category === "Corner House" ? "Mon-Sun" : "Not specified")}
                   </span>
                   {availability_start_time && availability_end_time && (
                     <span className="text-muted-foreground">

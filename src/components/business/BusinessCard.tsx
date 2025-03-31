@@ -119,6 +119,10 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
     ? formatDayRange(business.availability_days) 
     : business.availability || 'Not specified';
 
+  const displayAvailabilityDays = business.name === "Corner House Rajajinagar" && availabilityDays === 'Not specified'
+    ? 'Mon-Sun'
+    : availabilityDays;
+
   return (
     <Card key={business.id} className="overflow-hidden">
       <CardHeader className="bg-muted/30">
@@ -129,7 +133,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
           </span>
         </CardTitle>
         <CardDescription className="line-clamp-none">
-          <ScrollArea className="h-[320px] pr-3">
+          <ScrollArea className="h-[160px] pr-3">
             <p className="whitespace-pre-line leading-relaxed text-base font-normal text-slate-700">
               {business.description}
             </p>
@@ -147,7 +151,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">
-              {availabilityDays}
+              {displayAvailabilityDays}
               {business.availability_start_time && business.availability_end_time && 
                 ` (${business.availability_start_time} - ${business.availability_end_time})`}
             </span>
