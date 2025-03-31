@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -43,6 +44,7 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
     
     setLoading(true);
     try {
+      console.log("Fetching businesses for user:", user.id);
       const { data, error } = await supabase
         .from('service_providers')
         .select('*')
@@ -50,9 +52,11 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
         .order('created_at', { ascending: false });
       
       if (error) {
+        console.error('Error fetching businesses:', error);
         throw error;
       }
       
+      console.log("Fetched businesses:", data);
       setBusinesses(data || []);
     } catch (error: any) {
       console.error('Error fetching businesses:', error);
@@ -67,11 +71,14 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
   };
 
   useEffect(() => {
-    fetchBusinesses();
+    if (user) {
+      fetchBusinesses();
+    }
   }, [user, refresh]);
 
   const handleDelete = async (id: string) => {
     try {
+      console.log("Deleting business with ID:", id);
       const { error } = await supabase
         .from('service_providers')
         .delete()
@@ -79,6 +86,7 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
         .eq('user_id', user?.id);
       
       if (error) {
+        console.error('Error deleting business:', error);
         throw error;
       }
       

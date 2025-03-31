@@ -12,10 +12,12 @@ import BusinessesList from '@/components/BusinessesList';
 import { AdminSection } from '@/components/admin/AdminSection';
 import AddBusinessForm from '@/components/AddBusinessForm';
 import { Plus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useAuth();
+  const { toast } = useToast();
   const [refreshBusinesses, setRefreshBusinesses] = useState(false);
   const [editingBusiness, setEditingBusiness] = useState<any | null>(null);
   const [showAddBusinessForm, setShowAddBusinessForm] = useState(false);
@@ -41,6 +43,10 @@ const Profile = () => {
 
   const handleBusinessSaved = () => {
     console.log("Business saved, refreshing list");
+    toast({
+      title: "Success",
+      description: editingBusiness ? "Business updated successfully" : "Business created successfully"
+    });
     setEditingBusiness(null);
     setShowAddBusinessForm(false);
     setRefreshBusinesses(prev => !prev);

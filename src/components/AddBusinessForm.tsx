@@ -167,19 +167,21 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         tags: data.tags || [],
       };
 
-      console.log("Formatted business data:", businessData);
+      console.log("Formatted business data for Supabase:", businessData);
 
+      let result;
+      
       if (business?.id) {
         // Update existing business
         console.log("Updating business with ID:", business.id);
-        const { error } = await supabase
+        result = await supabase
           .from('service_providers')
           .update(businessData)
           .eq('id', business.id);
 
-        if (error) {
-          console.error("Supabase update error:", error);
-          throw error;
+        if (result.error) {
+          console.error("Supabase update error:", result.error);
+          throw new Error(result.error.message);
         }
 
         console.log("Business updated successfully");
@@ -190,17 +192,16 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
       } else {
         // Create new business
         console.log("Creating new business");
-        const { data: insertedData, error } = await supabase
+        result = await supabase
           .from('service_providers')
-          .insert(businessData)
-          .select();
+          .insert(businessData);
 
-        if (error) {
-          console.error("Supabase insert error:", error);
-          throw error;
+        if (result.error) {
+          console.error("Supabase insert error:", result.error);
+          throw new Error(result.error.message);
         }
 
-        console.log("Business created successfully:", insertedData);
+        console.log("Business created successfully");
         toast({
           title: "Business Added",
           description: "Your business has been listed and will be reviewed by an admin.",
