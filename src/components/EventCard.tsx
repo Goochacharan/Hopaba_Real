@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Event } from '@/hooks/useRecommendations';
 import { cn } from '@/lib/utils';
-import { Calendar, Clock, MapPin, User } from 'lucide-react';
+import { Calendar, Clock, MapPin, User, Sparkles, Award } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
@@ -31,6 +31,21 @@ const EventCard: React.FC<EventCardProps> = ({ event, className, onRSVP }) => {
           alt={event.title} 
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
         />
+        
+        <div className="absolute bottom-3 left-3 z-10 flex flex-col gap-2">
+          {event.isHiddenGem && (
+            <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/90 backdrop-blur-sm text-white flex items-center">
+              <Sparkles className="h-3 w-3 mr-1" />
+              Hidden Gem
+            </span>
+          )}
+          {event.isMustVisit && (
+            <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/90 backdrop-blur-sm text-white flex items-center">
+              <Award className="h-3 w-3 mr-1" />
+              Must Visit
+            </span>
+          )}
+        </div>
       </div>
       
       <CardHeader className="px-4 py-3 border-b">
