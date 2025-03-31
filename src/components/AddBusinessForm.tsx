@@ -7,21 +7,13 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
 } from "@/components/ui/form";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import BasicInfoSection from './business-form/BasicInfoSection';
 import LocationSection from './business-form/LocationSection';
 import ContactSection from './business-form/ContactSection';
+import SuccessDialog from './business-form/SuccessDialog';
 
 export interface Business {
   id: string;
@@ -142,6 +134,8 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
     setIsSubmitting(true);
 
     try {
+      console.log("Submitting business data:", data);
+      
       // Prepare business data for submission
       const businessData = {
         name: data.name,
@@ -153,11 +147,11 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         contact_phone: data.contact_phone,
         whatsapp: data.whatsapp,
         contact_email: data.contact_email,
-        website: data.website,
-        instagram: data.instagram,
-        map_link: data.map_link,
+        website: data.website || null,
+        instagram: data.instagram || null,
+        map_link: data.map_link || null,
         user_id: user.id,
-        approval_status: 'pending', // Always set approval_status to pending when creating or updating
+        approval_status: 'pending',
         price_unit: data.price_unit || "per hour",
         price_range_min: data.price_range_min,
         price_range_max: data.price_range_max,
@@ -167,27 +161,40 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         tags: data.tags,
       };
 
+      console.log("Formatted business data:", businessData);
+
       if (business?.id) {
         // Update existing business
+        console.log("Updating business with ID:", business.id);
         const { error } = await supabase
           .from('service_providers')
           .update(businessData)
           .eq('id', business.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase update error:", error);
+          throw error;
+        }
 
+        console.log("Business updated successfully");
         toast({
           title: "Business Updated",
           description: "Your business listing has been updated and will be reviewed by an admin.",
         });
       } else {
         // Create new business
-        const { error } = await supabase
+        console.log("Creating new business");
+        const { data: insertedData, error } = await supabase
           .from('service_providers')
-          .insert(businessData);
+          .insert(businessData)
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase insert error:", error);
+          throw error;
+        }
 
+        console.log("Business created successfully:", insertedData);
         toast({
           title: "Business Added",
           description: "Your business has been listed and will be reviewed by an admin.",
@@ -229,25 +236,18 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
               </Button>
             )}
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : business?.id ? "Update Business" : "Add Business"}
+              {isSubmitting ? "Saving..." : business?.id ? "Update Business" : "Submit Business"}
             </Button>
           </div>
         </form>
-        <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Business Listed!</AlertDialogTitle>
-              <AlertDialogDescription>
-                Your business listing has been submitted and is awaiting admin approval.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction onClick={onSaved}>
-                OK
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        
+        <SuccessDialog 
+          open={showSuccessDialog} 
+          onOpenChange={(open) => {
+            setShowSuccessDialog(open);
+            if (!open) onSaved();
+          }} 
+        />
       </Form>
     </FormProvider>
   );

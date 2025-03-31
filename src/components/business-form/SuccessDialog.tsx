@@ -22,7 +22,7 @@ const SuccessDialog = ({ open, onOpenChange }: SuccessDialogProps) => {
         <AlertDialogHeader>
           <AlertDialogTitle>Success!</AlertDialogTitle>
           <AlertDialogDescription>
-            Your business/service has been successfully added. It will now be available for others to discover.
+            Your business/service has been successfully added. It will now be available for others to discover after admin approval.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
