@@ -6,21 +6,13 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
 } from "@/components/ui/form";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import BasicInfoSection from './business-form/BasicInfoSection';
 import LocationSection from './business-form/LocationSection';
 import ContactSection from './business-form/ContactSection';
+import SuccessDialog from './business-form/SuccessDialog';
 
 export interface Business {
   id: string;
@@ -248,21 +240,12 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
             </Button>
           </div>
         </form>
-        <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Business Listed!</AlertDialogTitle>
-              <AlertDialogDescription>
-                Your business listing has been submitted and is awaiting admin approval.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction onClick={onSaved}>
-                OK
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        
+        <SuccessDialog 
+          open={showSuccessDialog} 
+          onOpenChange={setShowSuccessDialog}
+          onContinue={onSaved}
+        />
       </Form>
     </FormProvider>
   );

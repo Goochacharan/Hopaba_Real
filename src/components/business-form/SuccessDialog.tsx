@@ -13,9 +13,18 @@ import {
 interface SuccessDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onContinue?: () => void;
 }
 
-const SuccessDialog = ({ open, onOpenChange }: SuccessDialogProps) => {
+const SuccessDialog = ({ open, onOpenChange, onContinue }: SuccessDialogProps) => {
+  const handleContinue = () => {
+    if (onContinue) {
+      onContinue();
+    } else {
+      onOpenChange(false);
+    }
+  };
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -26,7 +35,7 @@ const SuccessDialog = ({ open, onOpenChange }: SuccessDialogProps) => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogAction onClick={() => onOpenChange(false)}>
+          <AlertDialogAction onClick={handleContinue}>
             Continue
           </AlertDialogAction>
         </AlertDialogFooter>
