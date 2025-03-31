@@ -125,6 +125,7 @@ const UserEventListings: React.FC = () => {
     // Refresh the event list from the database
     if (user) {
       setLoading(true);
+      // Fix: Using type assertion to avoid excessive type instantiation
       supabase
         .from('events')
         .select('*')
