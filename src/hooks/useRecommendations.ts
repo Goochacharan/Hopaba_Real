@@ -31,6 +31,8 @@ export interface Event {
   phoneNumber?: string;
   whatsappNumber?: string;
   images?: string[];
+  approval_status?: string;
+  user_id?: string;
 }
 
 const useRecommendations = ({ 
