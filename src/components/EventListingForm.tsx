@@ -63,7 +63,7 @@ export const EventListingForm = ({ event, onSaved, onCancel }: EventFormProps) =
 
   const handleImageChange = useCallback((images: string[]) => {
     form.setValue('image', images[0], { shouldValidate: true });
-  }, [form.setValue]);
+  }, [form]);
 
   const handleSubmit = async (data: EventFormData) => {
     if (!user) {
@@ -88,8 +88,11 @@ export const EventListingForm = ({ event, onSaved, onCancel }: EventFormProps) =
         image: data.image,
         attendees: data.attendees || 0,
         price_per_person: data.price_per_person || 0,
-        approval_status: 'pending' // Always set approval_status to pending when creating or updating
+        approval_status: 'pending', // Always set approval_status to pending when creating or updating
+        user_id: user.id // IMPORTANT: Add the user_id to associate the event with the current user
       };
+
+      console.log("Submitting event with user_id:", user.id);
 
       if (event) {
         // Update existing event
@@ -323,3 +326,4 @@ export const EventListingForm = ({ event, onSaved, onCancel }: EventFormProps) =
     </Card>
   );
 };
+

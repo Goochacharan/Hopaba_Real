@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,6 +46,7 @@ const UserEventListings: React.FC = () => {
         const { data, error } = await supabase
           .from('events')
           .select('*')
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false });
         
         if (error) {
