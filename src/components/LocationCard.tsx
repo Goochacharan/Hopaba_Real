@@ -600,7 +600,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               </div>}
           </div>}
 
-        <p className="mb-4 line-clamp-2 font-normal text-slate-700 text-base leading-normal min-h-[3em]">
+        <p className="mb-4 line-clamp-4 font-normal text-slate-700 text-base leading-normal min-h-[6em]">
           {recommendation.description}
         </p>
 
