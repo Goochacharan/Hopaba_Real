@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Card,
@@ -10,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Pencil, Trash2, IndianRupee, Calendar, MapPin, Phone, Instagram, Film, Tag } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Business {
