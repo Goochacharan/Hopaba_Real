@@ -22,6 +22,7 @@ import { useAuth } from '@/hooks/useAuth';
 import BasicInfoSection from './business-form/BasicInfoSection';
 import LocationSection from './business-form/LocationSection';
 import ContactSection from './business-form/ContactSection';
+import { FormActions } from './event-form/FormActions';
 
 export interface Business {
   id: string;
@@ -142,7 +143,7 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
     setIsSubmitting(true);
 
     try {
-      // Remove the contact_number field from the data since it's not in the database schema
+      // Prepare business data for submission
       const businessData = {
         name: data.name,
         category: data.category,
@@ -223,14 +224,11 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
           </div>
 
           <div className="flex justify-end gap-4 mt-8">
-            {onCancel && (
-              <Button type="button" variant="outline" onClick={onCancel}>
-                Cancel
-              </Button>
-            )}
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : "Submit"}
-            </Button>
+            <FormActions 
+              loading={isSubmitting} 
+              isEditing={!!business?.id} 
+              onCancel={onCancel} 
+            />
           </div>
         </form>
         <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
