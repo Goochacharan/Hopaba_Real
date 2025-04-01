@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, Calendar, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown, Sparkles, Award } from 'lucide-react';
+import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown, Sparkles, Award, Circle, CircleDot, Calendar } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -12,7 +12,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { correctIsInWishlist } from './LocationCardFix';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -37,14 +36,18 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
   const { toast } = useToast();
-  const { addToWishlist, removeFromWishlist } = useWishlist();
-  const inWishlist = correctIsInWishlist(recommendation.id, 'location');
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const inWishlist = isInWishlist(recommendation.id, 'location');
   const isMobile = useIsMobile();
   const [user, setUser] = useState<any>(null);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
-  const [currentOpenStatus, setCurrentOpenStatus] = useState<boolean | undefined>(undefined);
+
+  const hiddenGemCount = recommendation.hiddenGemCount || 0;
+  const mustVisitCount = recommendation.mustVisitCount || 0;
+  const showHiddenGemBadge = recommendation.isHiddenGem || hiddenGemCount >= 20;
+  const showMustVisitBadge = recommendation.isMustVisit || mustVisitCount >= 20;
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -63,23 +66,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       authListener?.subscription.unsubscribe();
     };
   }, []);
-
-  useEffect(() => {
-    const status = isOpenNow();
-    setCurrentOpenStatus(status);
-
-    const intervalId = setInterval(() => {
-      const status = isOpenNow();
-      setCurrentOpenStatus(status);
-    }, 60000);
-
-    return () => clearInterval(intervalId);
-  }, [recommendation.availability_days, recommendation.availability_start_time, recommendation.availability_end_time]);
-
-  const hiddenGemCount = recommendation.hiddenGemCount || 0;
-  const mustVisitCount = recommendation.mustVisitCount || 0;
-  const showHiddenGemBadge = recommendation.isHiddenGem || hiddenGemCount >= 20;
-  const showMustVisitBadge = recommendation.isMustVisit || mustVisitCount >= 20;
 
   const images = recommendation.images && recommendation.images.length > 0 ? recommendation.images : [recommendation.image];
   React.useEffect(() => {
@@ -332,9 +318,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         weekday: 'long'
       }).toLowerCase();
       const availableDays = recommendation.availability_days?.map(day => day.toLowerCase()) || [];
-      const isAvailableToday = availableDays.some(day => 
-        currentDay.includes(day.toString()) || day.toString().includes(currentDay)
-      );
+      const isAvailableToday = availableDays.some(day => currentDay.includes(day) || day.includes(currentDay));
       if (!isAvailableToday) return false;
       if (recommendation.availability_start_time && recommendation.availability_end_time) {
         const startTime = parseTimeString(recommendation.availability_start_time);
@@ -366,6 +350,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
   };
 
   const hasAvailabilityInfo = () => {
+    console.log("LocationCard - Checking availability for:", recommendation.name);
+    console.log("LocationCard - availability_days:", recommendation.availability_days);
     return recommendation.availability_days && Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0;
   };
 
@@ -395,7 +381,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
   const formatDayRange = (days: string[]): string => {
     if (!days || days.length === 0) return '';
-    
     const dayAbbreviations: Record<string, string> = {
       'monday': 'Mon',
       'tuesday': 'Tue',
@@ -405,22 +390,15 @@ const LocationCard: React.FC<LocationCardProps> = ({
       'saturday': 'Sat',
       'sunday': 'Sun'
     };
-    
     const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    const sortedDays = [...days].sort((a, b) => 
-      dayOrder.indexOf(a.toLowerCase()) - dayOrder.indexOf(b.toLowerCase())
-    );
-    
+    const sortedDays = [...days].sort((a, b) => dayOrder.indexOf(a.toLowerCase()) - dayOrder.indexOf(b.toLowerCase()));
     const ranges: string[] = [];
     let rangeStart: string | null = null;
     let rangeEnd: string | null = null;
-    
     for (let i = 0; i <= sortedDays.length; i++) {
       const day = i < sortedDays.length ? sortedDays[i].toLowerCase() : null;
       const prevDay = i > 0 ? sortedDays[i - 1].toLowerCase() : null;
-      const isDayAfterPrev = day && prevDay && 
-        dayOrder.indexOf(day) === dayOrder.indexOf(prevDay) + 1;
-      
+      const isDayAfterPrev = day && prevDay && dayOrder.indexOf(day) === dayOrder.indexOf(prevDay) + 1;
       if (i === 0) {
         rangeStart = sortedDays[0];
         rangeEnd = sortedDays[0];
@@ -432,9 +410,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
         } else {
           const startAbbr = dayAbbreviations[rangeStart.toLowerCase()] || rangeStart;
           const endAbbr = dayAbbreviations[rangeEnd.toLowerCase()] || rangeEnd;
-          ranges.push(`${startAbbr}-${endAbbr}`);
+          ranges.push(`${startAbbr}~${endAbbr}`);
         }
-        
         if (day) {
           rangeStart = sortedDays[i];
           rangeEnd = sortedDays[i];
@@ -444,7 +421,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
         }
       }
     }
-    
     return ranges.join(', ');
   };
 
@@ -482,17 +458,13 @@ const LocationCard: React.FC<LocationCardProps> = ({
     return recommendation.availability_days.map(day => formatDayShort(day)).join(', ');
   };
 
-  const openStatus = currentOpenStatus !== undefined ? currentOpenStatus : isOpenNow();
+  const openStatus = isOpenNow();
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
   const availabilityInfo = formatAvailabilityDays();
   const isSearchResultCard = className?.includes('search-result-card');
   const isLocationDetailsPage = window.location.pathname.includes('/location/');
   const shouldIncreaseHeight = isSearchResultCard || isLocationDetailsPage;
   const imageHeightClass = shouldIncreaseHeight ? "h-[400px]" : "h-72";
-
-  const formattedAvailabilityDays = recommendation.availability_days && recommendation.availability_days.length > 0 
-    ? formatDayRange(recommendation.availability_days) 
-    : null;
 
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <div className={cn("relative w-full overflow-hidden", imageHeightClass)}>
@@ -569,33 +541,42 @@ const LocationCard: React.FC<LocationCardProps> = ({
             </div>}
         </div>
 
-        {(recommendation.availability_days?.length > 0 || recommendation.hours || recommendation.availability) && (
-          <div className="flex flex-col text-sm mb-3">
+        {(recommendation.openNow !== undefined || recommendation.hours || recommendation.availability || hasAvailabilityInfo()) && <div className="flex flex-col text-sm mb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <Calendar className="w-4 h-4 mr-1 flex-shrink-0 text-muted-foreground" />
-                <span className="text-muted-foreground">
-                  Working days: {formattedAvailabilityDays}
+                {openStatus === true ? 
+                  <CircleDot className="w-4 h-4 mr-1 flex-shrink-0 text-emerald-600 fill-emerald-600" /> : 
+                  openStatus === false ? 
+                  <Circle className="w-4 h-4 mr-1 flex-shrink-0 text-rose-600 fill-rose-600" /> : 
+                  <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
+                }
+                <span className={openStatus === true ? 
+                  "text-emerald-600 font-medium" : 
+                  openStatus === false ? 
+                  "text-rose-600 font-medium" : 
+                  "text-muted-foreground"
+                }>
+                  {openStatus === true ? "Open now" : openStatus === false ? "Closed" : "Hours available"}
                 </span>
               </div>
               
-              {(recommendation.availability_days || recommendation.hours) && (
+              {(hasAvailabilityInfo() || businessHours) && (
                 <DropdownMenu>
                   <DropdownMenuTrigger className="ml-2 inline-flex items-center text-xs font-medium text-primary hover:text-primary/80 transition-colors rounded-md" onClick={(e) => e.stopPropagation()}>
                     <Calendar className="h-3.5 w-3.5 mr-1" />
                     <span className="underline">Hours</span>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
-                    {recommendation.availability_days && recommendation.availability_days.length > 0 && (
+                    {getAvailabilityDaysDisplay() && (
                       <div className="mb-1">
                         <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
-                        <div className="text-sm">{formatDayRange(recommendation.availability_days)}</div>
+                        <div className="text-sm">{getAvailabilityDaysDisplay()}</div>
                       </div>
                     )}
-                    {(recommendation.availability_start_time && recommendation.availability_end_time) && (
+                    {getAvailabilityHoursDisplay() && (
                       <div>
                         <div className="text-xs font-medium text-muted-foreground mb-1">Hours:</div>
-                        <div className="text-sm">{recommendation.availability_start_time} - {recommendation.availability_end_time}</div>
+                        <div className="text-sm">{getAvailabilityHoursDisplay()}</div>
                       </div>
                     )}
                   </DropdownMenuContent>
@@ -603,14 +584,21 @@ const LocationCard: React.FC<LocationCardProps> = ({
               )}
             </div>
             
-            {recommendation.distance && !showDistanceUnderAddress && (
-              <div className="text-muted-foreground pl-5 mt-1 flex items-center">
+            {hasAvailabilityInfo() && openStatus !== false && <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="mt-0.5">
+                <CollapsibleTrigger onClick={e => e.stopPropagation()} className="flex items-center text-xs font-medium text-muted-foreground hover:text-primary transition-colors px-1 py-0.5 border border-transparent hover:border-border/30 rounded-md">
+                  Available days
+                  <ChevronDown className={cn("h-3 w-3 ml-1 transition-transform", availabilityOpen ? "transform rotate-180" : "")} />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-0.5 mb-0.5 border-l border-muted pl-0.5">
+                  {availabilityInfo}
+                </CollapsibleContent>
+              </Collapsible>}
+            
+            {recommendation.distance && !showDistanceUnderAddress && <div className="text-muted-foreground pl-5 mt-1 flex items-center">
                 <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
                 {formatDistance(recommendation.distance)}
-              </div>
-            )}
-          </div>
-        )}
+              </div>}
+          </div>}
 
         <p className="mb-4 line-clamp-8 font-normal text-slate-700 text-base leading-normal min-h-[12em] max-h-[12em] overflow-y-auto">
           {recommendation.description}

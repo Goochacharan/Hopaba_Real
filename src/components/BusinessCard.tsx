@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Card,
@@ -10,7 +9,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Pencil, Trash2, IndianRupee, Calendar, MapPin, Phone, Instagram, Film, Tag } from 'lucide-react';
+import { Pencil, Trash2, IndianRupee, Clock, MapPin, Phone, Instagram, Film, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -22,15 +21,12 @@ interface Business {
   price_range_min?: number;
   price_range_max?: number;
   price_unit?: string;
-  availability?: string | string[];
+  availability?: string;
   area?: string;
   city?: string;
   contact_phone?: string;
   instagram?: string;
   tags?: string[];
-  availability_days?: string[] | string;
-  availability_start_time?: string;
-  availability_end_time?: string;
 }
 
 interface BusinessCardProps {
@@ -61,75 +57,6 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
     }
   };
 
-  const formatDayRange = (days: string[] | string): string => {
-    if (!days) return '';
-    if (typeof days === 'string') return days;
-    if (!Array.isArray(days) || days.length === 0) return '';
-    
-    const dayAbbreviations: Record<string, string> = {
-      'monday': 'Mon',
-      'tuesday': 'Tue',
-      'wednesday': 'Wed',
-      'thursday': 'Thu',
-      'friday': 'Fri',
-      'saturday': 'Sat',
-      'sunday': 'Sun'
-    };
-    
-    const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    const sortedDays = [...days].sort((a, b) => 
-      dayOrder.indexOf(a.toLowerCase()) - dayOrder.indexOf(b.toLowerCase())
-    );
-    
-    const ranges: string[] = [];
-    let rangeStart: string | null = null;
-    let rangeEnd: string | null = null;
-    
-    for (let i = 0; i <= sortedDays.length; i++) {
-      const day = i < sortedDays.length ? sortedDays[i].toLowerCase() : null;
-      const prevDay = i > 0 ? sortedDays[i - 1].toLowerCase() : null;
-      const isDayAfterPrev = day && prevDay && 
-        dayOrder.indexOf(day) === dayOrder.indexOf(prevDay) + 1;
-      
-      if (i === 0) {
-        rangeStart = sortedDays[0];
-        rangeEnd = sortedDays[0];
-      } else if (isDayAfterPrev) {
-        rangeEnd = sortedDays[i];
-      } else if (rangeStart && rangeEnd) {
-        if (rangeStart === rangeEnd) {
-          ranges.push(dayAbbreviations[rangeStart.toLowerCase()] || rangeStart);
-        } else {
-          const startAbbr = dayAbbreviations[rangeStart.toLowerCase()] || rangeStart;
-          const endAbbr = dayAbbreviations[rangeEnd.toLowerCase()] || rangeEnd;
-          ranges.push(`${startAbbr}-${endAbbr}`);
-        }
-        
-        if (day) {
-          rangeStart = sortedDays[i];
-          rangeEnd = sortedDays[i];
-        } else {
-          rangeStart = null;
-          rangeEnd = null;
-        }
-      }
-    }
-    
-    return ranges.join(', ');
-  };
-
-  // Handle availability display
-  let availabilityText = '';
-  if (business.availability_days) {
-    availabilityText = formatDayRange(business.availability_days);
-  } else if (business.availability) {
-    if (typeof business.availability === 'string') {
-      availabilityText = business.availability;
-    } else if (Array.isArray(business.availability)) {
-      availabilityText = formatDayRange(business.availability);
-    }
-  }
-
   return (
     <Card key={business.id} className="overflow-hidden">
       <CardHeader className="bg-muted/30">
@@ -156,12 +83,8 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">
-              {availabilityText}
-              {business.availability_start_time && business.availability_end_time && 
-                ` (${business.availability_start_time} - ${business.availability_end_time})`}
-            </span>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span>{business.availability}</span>
           </div>
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4 text-muted-foreground" />

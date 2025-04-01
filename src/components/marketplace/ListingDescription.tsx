@@ -1,7 +1,6 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { format, differenceInDays } from 'date-fns';
-import { Instagram, Film, Sparkles, MapPin, Link2, Tag, Clock, Calendar } from 'lucide-react';
+import { Instagram, Film, Sparkles, MapPin, Link2, Tag } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 
@@ -17,9 +16,6 @@ interface ListingDescriptionProps {
   priceUnit?: string;
   experience?: string;
   tags?: string[];
-  availability_days?: string[];
-  availability_start_time?: string;
-  availability_end_time?: string;
 }
 
 const ListingDescription: React.FC<ListingDescriptionProps> = ({
@@ -33,73 +29,13 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
   showMetadata = false,
   priceUnit,
   experience,
-  tags,
-  availability_days,
-  availability_start_time,
-  availability_end_time
+  tags
 }) => {
+  const isVideoContent = instagram && (instagram.includes('youtube.com') || instagram.includes('vimeo.com') || instagram.includes('tiktok.com'));
+
   // Check if listing is less than 7 days old
   const isNew = differenceInDays(new Date(), new Date(createdAt)) < 7;
   
-  const formatDayRange = (days: string[]): string => {
-    if (!days || days.length === 0) return '';
-    
-    const dayAbbreviations: Record<string, string> = {
-      'monday': 'Mon',
-      'tuesday': 'Tue',
-      'wednesday': 'Wed',
-      'thursday': 'Thu',
-      'friday': 'Fri',
-      'saturday': 'Sat',
-      'sunday': 'Sun'
-    };
-    
-    const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    const sortedDays = [...days].sort((a, b) => 
-      dayOrder.indexOf(a.toLowerCase()) - dayOrder.indexOf(b.toLowerCase())
-    );
-    
-    const ranges: string[] = [];
-    let rangeStart: string | null = null;
-    let rangeEnd: string | null = null;
-    
-    for (let i = 0; i <= sortedDays.length; i++) {
-      const day = i < sortedDays.length ? sortedDays[i].toLowerCase() : null;
-      const prevDay = i > 0 ? sortedDays[i - 1].toLowerCase() : null;
-      const isDayAfterPrev = day && prevDay && 
-        dayOrder.indexOf(day) === dayOrder.indexOf(prevDay) + 1;
-      
-      if (i === 0) {
-        rangeStart = sortedDays[0];
-        rangeEnd = sortedDays[0];
-      } else if (isDayAfterPrev) {
-        rangeEnd = sortedDays[i];
-      } else if (rangeStart && rangeEnd) {
-        if (rangeStart === rangeEnd) {
-          ranges.push(dayAbbreviations[rangeStart.toLowerCase()] || rangeStart);
-        } else {
-          const startAbbr = dayAbbreviations[rangeStart.toLowerCase()] || rangeStart;
-          const endAbbr = dayAbbreviations[rangeEnd.toLowerCase()] || rangeEnd;
-          ranges.push(`${startAbbr}-${endAbbr}`);
-        }
-        
-        if (day) {
-          rangeStart = sortedDays[i];
-          rangeEnd = sortedDays[i];
-        } else {
-          rangeStart = null;
-          rangeEnd = null;
-        }
-      }
-    }
-    
-    return ranges.join(', ');
-  };
-  
-  const availabilityDays = availability_days && availability_days.length > 0 
-    ? formatDayRange(availability_days) 
-    : null;
-
   return (
     <div className="bg-white rounded-xl border p-6 shadow-sm">
       <div className="flex items-center gap-3">
@@ -120,20 +56,6 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
           
           {showMetadata && (
             <div className="mt-6 space-y-4 text-sm text-gray-700">
-              {availabilityDays && (
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-primary" />
-                  <span className="font-medium">
-                    Working days: {availabilityDays}
-                  </span>
-                  {availability_start_time && availability_end_time && (
-                    <span className="text-muted-foreground">
-                      ({availability_start_time} - {availability_end_time})
-                    </span>
-                  )}
-                </div>
-              )}
-              
               {priceUnit && (
                 <p>
                   <span className="font-semibold">Pricing:</span> {priceUnit}
@@ -178,7 +100,7 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
               
               {instagram && (
                 <div className="flex items-center gap-2 mt-2">
-                  {instagram.includes('youtube.com') || instagram.includes('vimeo.com') || instagram.includes('tiktok.com') ? (
+                  {isVideoContent ? (
                     <Film className="h-4 w-4 text-purple-500" />
                   ) : (
                     <Instagram className="h-4 w-4 text-pink-500" />
@@ -189,7 +111,7 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
                   >
-                    {instagram.includes('youtube.com') || instagram.includes('vimeo.com') || instagram.includes('tiktok.com') ? 'View Video Content' : 'Visit Instagram'}
+                    {isVideoContent ? 'View Video Content' : 'Visit Instagram'}
                   </a>
                 </div>
               )}

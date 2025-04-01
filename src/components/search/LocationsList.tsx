@@ -3,7 +3,6 @@ import React from 'react';
 import LocationCard from '@/components/LocationCard';
 import { Recommendation } from '@/lib/mockData';
 import { Loader2 } from 'lucide-react';
-import { correctIsInWishlist } from '@/components/LocationCardFix';
 
 // Helper function to get stored reviews count and calculate average rating
 const getStoredReviews = (locationId: string) => {
@@ -63,54 +62,37 @@ const LocationsList: React.FC<LocationsListProps> = ({
     );
   }
   
-  // Prepare recommendations with proper type handling for availability_days
-  const preparedRecommendations = recommendations.map(recommendation => {
-    // Handle possible conversions needed for availability_days
-    let availabilityDays = recommendation.availability_days || [];
-    if (typeof availabilityDays === 'string') {
-      try {
-        // Try to parse it if it might be a JSON string
-        if (availabilityDays.includes('[') && availabilityDays.includes(']')) {
-          availabilityDays = JSON.parse(availabilityDays);
-        }
-      } catch (e) {
-        console.error('Error parsing availability_days:', e);
-      }
-    }
-
-    // Get user reviews from localStorage
-    const { count: userReviewsCount, avgRating: userAvgRating } = getStoredReviews(recommendation.id);
-    
-    // Calculate the total review count
-    const totalReviewCount = userReviewsCount + (recommendation.reviewCount || 0);
-    
-    // Use user rating if available, otherwise use default rating
-    const displayRating = userReviewsCount > 0 ? userAvgRating : recommendation.rating;
-    
-    return {
-      ...recommendation,
-      rating: displayRating, // Override with user rating if available
-      address: recommendation.address || (recommendation.area && recommendation.city ? `${recommendation.area}, ${recommendation.city}` : recommendation.address || ''),
-      availability_days: availabilityDays
-    };
-  });
-  
   return (
     <div className="grid grid-cols-1 gap-6">
-      {preparedRecommendations.map((recommendation, index) => (
-        <div 
-          key={recommendation.id} 
-          className="animate-fade-in" 
-          style={{ animationDelay: `${index * 50}ms` }}
-        >
-          <LocationCard 
-            recommendation={recommendation}
-            showDistanceUnderAddress={true}
-            className="search-result-card h-full"
-            reviewCount={recommendation.reviewCount || 0}
-          />
-        </div>
-      ))}
+      {recommendations.map((recommendation, index) => {
+        // Get user reviews from localStorage
+        const { count: userReviewsCount, avgRating: userAvgRating } = getStoredReviews(recommendation.id);
+        
+        // Calculate the total review count
+        const totalReviewCount = userReviewsCount + (recommendation.reviewCount || 0);
+        
+        // Use user rating if available, otherwise use default rating
+        const displayRating = userReviewsCount > 0 ? userAvgRating : recommendation.rating;
+        
+        return (
+          <div 
+            key={recommendation.id} 
+            className="animate-fade-in" 
+            style={{ animationDelay: `${index * 50}ms` }}
+          >
+            <LocationCard 
+              recommendation={{
+                ...recommendation,
+                rating: displayRating, // Override with user rating if available
+                address: recommendation.address || (recommendation.area && recommendation.city ? `${recommendation.area}, ${recommendation.city}` : recommendation.address || '')
+              }}
+              showDistanceUnderAddress={true}
+              className="search-result-card h-full"
+              reviewCount={totalReviewCount}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 };

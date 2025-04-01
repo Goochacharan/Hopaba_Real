@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { useRecommendations } from "@/hooks/useRecommendations";
+import useRecommendations from '@/hooks/useRecommendations';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { addDistanceToRecommendations, sortRecommendations, enhanceRecommendations } from '@/utils/searchUtils';
@@ -41,7 +41,7 @@ const SearchResults = () => {
     filterRecommendations
   } = useRecommendations({
     initialQuery: searchQuery,
-    initialCategory: categoryParam
+    initialCategory: categoryParam as any
   });
 
   const {
@@ -56,25 +56,18 @@ const SearchResults = () => {
   const loading = recommendationsLoading || marketplaceLoading;
   const error = recommendationsError || marketplaceError;
 
-  // Fix: Create proper string array for price range
-  const priceRangeArray = filters.priceRange ? 
-    (Array.isArray(filters.priceRange) ? filters.priceRange : [filters.priceRange]) : 
-    [];
-
   const enhancedRecommendations = recommendations.map((rec, index) => {
     return {
       ...rec,
       isHiddenGem: rec.isHiddenGem || index % 3 === 0,
-      isMustVisit: rec.isMustVisit || index % 5 === 0,
-      // Ensure description exists to satisfy type requirements
-      description: rec.description || ''
+      isMustVisit: rec.isMustVisit || index % 5 === 0
     };
   });
 
   const filteredRecommendations = filterRecommendations(enhancedRecommendations, {
     maxDistance: filters.distance[0],
     minRating: filters.minRating[0],
-    priceLevel: priceRangeArray,
+    priceLevel: filters.priceRange,
     openNow: filters.openNowOnly,
     hiddenGem: filters.hiddenGemOnly,
     mustVisit: filters.mustVisitOnly,
@@ -95,7 +88,7 @@ const SearchResults = () => {
   useEffect(() => {
     if (categoryParam !== 'all' && categoryParam !== category) {
       console.log("SearchResults - Setting category from URL:", categoryParam);
-      handleCategoryChange(categoryParam);
+      handleCategoryChange(categoryParam as any);
     }
   }, [categoryParam, category, handleCategoryChange]);
 
@@ -146,7 +139,7 @@ const SearchResults = () => {
             category={category}
             resultsCount={{
               locations: rankedRecommendations.length,
-              events: events ? events.length : 0,
+              events: events.length,
               marketplace: marketplaceListings.length
             }}
             loading={loading}
@@ -160,7 +153,7 @@ const SearchResults = () => {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 recommendations={rankedRecommendations}
-                events={events || []}
+                events={events}
                 marketplaceListings={marketplaceListings}
                 handleRSVP={handleRSVP}
               />

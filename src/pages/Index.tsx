@@ -164,8 +164,7 @@ const Index = () => {
     }
   };
 
-  return (
-    <MainLayout>
+  return <MainLayout>
       <section className="flex flex-col items-center justify-center pt-0 pb-0 mx-[5px] px-0">
         <div className="text-center mb-1 animate-fade-in">
           <AnimatedLogo size="lg" className="mx-auto mb-1" />
@@ -175,25 +174,16 @@ const Index = () => {
         <div className="w-full max-w-2xl mx-auto">
           <ScrollArea className="h-[calc(100vh-180px)] w-full px-1 pb-0">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2 pr-4">
-              {exampleQueries.map((example, idx) => (
-                <Button 
-                  key={idx} 
-                  variant="outline" 
-                  onClick={() => handleSearch(example.text)} 
-                  className="justify-start h-auto border-border/50 text-left px-[17px] py-1.5 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200 overflow-hidden" 
-                  disabled={isEnhancing === example.text}
-                >
+              {exampleQueries.map((example, idx) => <Button key={idx} variant="outline" onClick={() => handleSearch(example.text)} className="justify-start h-auto border-border/50 text-left px-[17px] py-1.5 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200 overflow-hidden" disabled={isEnhancing === example.text}>
                   <div className="mr-3 text-base">{example.icon}</div>
                   <span className="font-normal text-sm sm:text-base truncate">{example.text}</span>
                   {isEnhancing === example.text && <Sparkles className="h-4 w-4 ml-2 animate-pulse" />}
-                </Button>
-              ))}
+                </Button>)}
             </div>
           </ScrollArea>
         </div>
       </section>
-    </MainLayout>
-  );
+    </MainLayout>;
 };
 
 export default Index;

@@ -1,10 +1,11 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import MainLayout from '@/components/MainLayout';
 import { useNavigate } from 'react-router-dom';
 import LocationSelector from '@/components/LocationSelector';
 import { Button } from '@/components/ui/button';
 import { MapPin, List } from 'lucide-react';
-import { useRecommendations } from "@/hooks/useRecommendations";
+import useRecommendations from '@/hooks/useRecommendations';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -29,6 +30,7 @@ const Map = () => {
     }
   };
 
+  // Load the Mapbox script
   useEffect(() => {
     const checkUser = async () => {
       setLoading(true);
@@ -37,6 +39,7 @@ const Map = () => {
     };
     checkUser();
 
+    // Set mapLoaded to true since we're now importing mapboxgl directly
     setMapLoaded(true);
   }, [navigate]);
 
@@ -45,9 +48,11 @@ const Map = () => {
 
     const initializeMap = () => {
       try {
+        // You should replace this with your actual Mapbox token
         mapboxgl.accessToken = 'pk.YOUR_MAPBOX_TOKEN';
         
-        const defaultCenter: [number, number] = [77.5946, 12.9716];
+        // Initialize map centered at Bengaluru
+        const defaultCenter: [number, number] = [77.5946, 12.9716]; // Bengaluru coordinates
         const center: [number, number] = userCoordinates ? [userCoordinates.lng, userCoordinates.lat] : defaultCenter;
         
         map.current = new mapboxgl.Map({
@@ -57,9 +62,11 @@ const Map = () => {
           zoom: 12
         });
 
+        // Add navigation controls
         map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
         
         map.current.on('load', () => {
+          // Add markers for all recommendations
           addMarkers();
         });
       } catch (error) {
@@ -68,9 +75,11 @@ const Map = () => {
     };
 
     const addMarkers = () => {
+      // Clear existing markers
       markers.current.forEach(marker => marker.remove());
       markers.current = [];
       
+      // Add user location marker if available
       if (userCoordinates) {
         const userMarker = new mapboxgl.Marker({ color: '#FF0000' })
           .setLngLat([userCoordinates.lng, userCoordinates.lat])
@@ -79,9 +88,12 @@ const Map = () => {
         markers.current.push(userMarker);
       }
       
+      // Add recommendation markers
       recommendations.forEach(rec => {
-        const latitude = parseFloat(rec.id) % 0.1 + 12.9716;
-        const longitude = parseFloat(rec.id) % 0.1 + 77.5946;
+        // This is a simplified example, in a real app you'd need actual coordinates
+        // Either from the recommendation object or from geocoding the address
+        const latitude = parseFloat(rec.id) % 0.1 + 12.9716; // Dummy coordinates for example
+        const longitude = parseFloat(rec.id) % 0.1 + 77.5946; // Dummy coordinates for example
         
         const marker = new mapboxgl.Marker({ color: '#3FB1CE' })
           .setLngLat([longitude, latitude])
