@@ -65,6 +65,12 @@ const LocationsList: React.FC<LocationsListProps> = ({
   return (
     <div className="grid grid-cols-1 gap-6">
       {recommendations.map((recommendation, index) => {
+        // Safely handle availability_days
+        const availabilityDays = recommendation.availability_days || [];
+        const availabilityDaysString = Array.isArray(availabilityDays) 
+          ? availabilityDays.map(day => String(day)) 
+          : [];
+          
         // Get user reviews from localStorage
         const { count: userReviewsCount, avgRating: userAvgRating } = getStoredReviews(recommendation.id);
         
@@ -84,7 +90,8 @@ const LocationsList: React.FC<LocationsListProps> = ({
               recommendation={{
                 ...recommendation,
                 rating: displayRating, // Override with user rating if available
-                address: recommendation.address || (recommendation.area && recommendation.city ? `${recommendation.area}, ${recommendation.city}` : recommendation.address || '')
+                address: recommendation.address || (recommendation.area && recommendation.city ? `${recommendation.area}, ${recommendation.city}` : recommendation.address || ''),
+                availability_days: availabilityDaysString
               }}
               showDistanceUnderAddress={true}
               className="search-result-card h-full"

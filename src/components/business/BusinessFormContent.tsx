@@ -27,7 +27,7 @@ const BusinessFormContent: React.FC<BusinessFormContentProps> = ({
   return (
     <>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {/* Basic Information Section */}
+        {/* Basic Information Section with taller textarea for descriptions */}
         <div className="space-y-6">
           <BasicInfoSection />
           <Separator />

@@ -159,24 +159,23 @@ const LocationCard: React.FC<LocationCardProps> = ({
     });
   };
 
-  const handleInstagram = (e: React.MouseEvent) => {
+  const handleInstagramClick = (e: React.MouseEvent, instagram: string | undefined, businessName: string) => {
     e.stopPropagation();
-    console.log("Instagram button clicked, instagram value:", recommendation.instagram);
-    if (!recommendation.instagram || recommendation.instagram.trim() === '') {
+    if (instagram) {
+      window.open(instagram, '_blank');
       toast({
-        title: "No Instagram",
-        description: `${recommendation.name} hasn't provided an Instagram profile`,
+        title: "Opening video content",
+        description: `Visiting ${businessName}'s video content`,
         duration: 2000
       });
-      return;
+    } else {
+      toast({
+        title: "Video content not available",
+        description: "This business has not provided any video links",
+        variant: "destructive",
+        duration: 2000
+      });
     }
-    console.log("Opening Instagram/video link:", recommendation.instagram);
-    window.open(recommendation.instagram, '_blank');
-    toast({
-      title: "Opening Instagram",
-      description: `Opening Instagram for ${recommendation.name}...`,
-      duration: 2000
-    });
   };
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
@@ -528,7 +527,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
               <span className="truncate">{recommendation.address}</span>
             </div>
-            {hasInstagram() && <button onClick={handleInstagram} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 p-1.5 px-[29px] mx-[55px] py-[7px]">
+            {hasInstagram() && <button onClick={(e) => handleInstagramClick(e, recommendation.instagram, recommendation.name)} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 p-1.5 px-[29px] mx-[55px] py-[7px]">
                 <Film className="h-4 w-4 text-white" />
               </button>}
           </div>

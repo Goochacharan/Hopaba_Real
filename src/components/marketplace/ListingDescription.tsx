@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { format, differenceInDays } from 'date-fns';
 import { Instagram, Film, Sparkles, MapPin, Link2, Tag } from 'lucide-react';
@@ -49,7 +50,7 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
       </div>
       
       <div className="space-y-4">
-        <ScrollArea className="h-[350px] pr-3">
+        <ScrollArea className="h-[400px] pr-3">
           <p className="whitespace-pre-line leading-relaxed text-base font-normal text-slate-900">
             {description}
           </p>

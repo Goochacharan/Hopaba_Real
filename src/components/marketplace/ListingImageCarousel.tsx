@@ -66,6 +66,23 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
     }
   };
 
+  const handleInstagramClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    if (listing?.seller_instagram) {
+      window.open(listing.seller_instagram, '_blank');
+      
+      if (toast) {
+        toast({
+          title: "Opening Instagram",
+          description: "Redirecting to Instagram...",
+          duration: 3000,
+        });
+      }
+    }
+  };
+
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.targetTouches[0].clientX;
     touchEndX.current = null;
