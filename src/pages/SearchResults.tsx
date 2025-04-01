@@ -56,18 +56,25 @@ const SearchResults = () => {
   const loading = recommendationsLoading || marketplaceLoading;
   const error = recommendationsError || marketplaceError;
 
+  // Fix: Create proper string array for price range
+  const priceRangeArray = filters.priceRange ? 
+    (Array.isArray(filters.priceRange) ? filters.priceRange : [filters.priceRange]) : 
+    [];
+
   const enhancedRecommendations = recommendations.map((rec, index) => {
     return {
       ...rec,
       isHiddenGem: rec.isHiddenGem || index % 3 === 0,
-      isMustVisit: rec.isMustVisit || index % 5 === 0
+      isMustVisit: rec.isMustVisit || index % 5 === 0,
+      // Ensure description exists to satisfy type requirements
+      description: rec.description || ''
     };
   });
 
   const filteredRecommendations = filterRecommendations(enhancedRecommendations, {
     maxDistance: filters.distance[0],
     minRating: filters.minRating[0],
-    priceLevel: filters.priceRange,
+    priceLevel: priceRangeArray,
     openNow: filters.openNowOnly,
     hiddenGem: filters.hiddenGemOnly,
     mustVisit: filters.mustVisitOnly,

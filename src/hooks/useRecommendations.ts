@@ -77,37 +77,6 @@ interface FilterOptions {
   distanceUnit?: string;
 }
 
-// Define the service provider interface to match database columns
-interface ServiceProvider {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  address: string;
-  area: string;
-  city: string;
-  open_now?: boolean;
-  hours?: string;
-  price?: string;
-  price_level?: string;
-  image_url?: string;
-  images?: string[];
-  tags?: string[];
-  contact_phone?: string;
-  website?: string;
-  instagram?: string;
-  rating?: number;
-  review_count?: number;
-  distance?: string;
-  availability?: string;
-  availability_days?: string[] | string;
-  availability_start_time?: string;
-  availability_end_time?: string;
-  map_link?: string;
-  created_at?: string;
-  coordinates?: string;
-}
-
 export const useRecommendations = ({
   selectedLocation,
   category,
@@ -206,9 +175,7 @@ export const useRecommendations = ({
         if (typeof availabilityDays === 'string' && availabilityDays) {
           try {
             // Try to parse it if it might be a JSON string
-            if (typeof availabilityDays === 'string' && 
-                availabilityDays.toString().includes('[') && 
-                availabilityDays.toString().includes(']')) {
+            if (availabilityDays.includes('[') && availabilityDays.includes(']')) {
               availabilityDays = JSON.parse(availabilityDays as string);
             }
           } catch (e) {
@@ -220,7 +187,7 @@ export const useRecommendations = ({
           id: business.id,
           name: business.name,
           category: business.category,
-          description: business.description,
+          description: business.description || '',
           address: business.address,
           area: business.area,
           city: business.city,
