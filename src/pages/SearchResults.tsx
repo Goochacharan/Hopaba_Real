@@ -13,7 +13,7 @@ import SearchHeader from '@/components/search/SearchHeader';
 import SearchTabs from '@/components/search/SearchTabs';
 import SearchLocation from '@/components/search/SearchLocation';
 import SearchControls from '@/components/search/SearchControls';
-import MapViewButton from '@/components/search/MapViewButton';
+// Removed MapViewButton import
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -161,7 +161,7 @@ const SearchResults = () => {
           )}
         </div>
         
-        <MapViewButton />
+        {/* Removed MapViewButton component */}
       </div>
     </MainLayout>
   );

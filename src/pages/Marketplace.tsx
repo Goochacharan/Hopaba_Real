@@ -6,7 +6,7 @@ import { useUserMarketplaceListings } from '@/hooks/useUserMarketplaceListings';
 import LocationSelector from '@/components/LocationSelector';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers, Map as MapIcon } from 'lucide-react';
+import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -470,11 +470,6 @@ const Marketplace = () => {
               )}
             </TabsContent>)}
         </Tabs>
-      </div>
-      <div className="fixed left-4 bottom-24 z-[61] py-[8px]">
-        <Button variant="default" size="icon" onClick={() => navigate('/map')} className="rounded-full shadow-lg hover:shadow-xl" aria-label="Map View">
-          <MapIcon className="h-5 w-5" />
-        </Button>
       </div>
     </MainLayout>;
 };
