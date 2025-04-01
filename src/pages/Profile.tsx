@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import UserMarketplaceListings from '@/components/UserMarketplaceListings';
 import UserEventListings from '@/components/UserEventListings';
 import { AdminSection } from '@/components/admin/AdminSection';
-import { Plus, Settings as SettingsIcon } from 'lucide-react';
+import { Plus, Settings as SettingsIcon, LogOut } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import BusinessFormSimple from '@/components/business/BusinessFormSimple';
 import BusinessListSimple from '@/components/business/BusinessListSimple';
@@ -83,23 +83,28 @@ const Profile = () => {
   return (
     <MainLayout>
       <div className="container mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Your Profile</h1>
-            <p className="text-muted-foreground">
-              {user.user_metadata?.full_name || user.email}
-            </p>
-          </div>
+        <div className="flex flex-col mb-8">
+          <h1 className="text-3xl font-bold">Your Profile</h1>
+          <p className="text-muted-foreground mb-3">
+            {user.user_metadata?.full_name || user.email}
+          </p>
           <div className="flex gap-3">
             <Button 
               variant="outline" 
               onClick={() => navigate('/settings')}
               className="flex items-center gap-2"
+              size="sm"
             >
               <SettingsIcon className="h-4 w-4" />
               Settings
             </Button>
-            <Button variant="outline" onClick={logout}>
+            <Button 
+              variant="outline" 
+              onClick={logout}
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
               Sign Out
             </Button>
           </div>
