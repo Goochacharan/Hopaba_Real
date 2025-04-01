@@ -179,7 +179,7 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
             <Phone className="h-5 w-5" />
           </Button>
           
-          <Button onClick={handleWhatsApp} className="flex-1 h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]" title="WhatsApp">
+          <Button onClick={handleWhatsApp} title="WhatsApp" className="flex-1 h-12 border border-[#1EAEDB]/20 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px] bg-lime-600 hover:bg-lime-500 text-slate-50 rounded">
             <MessageSquare className="h-5 w-5" />
           </Button>
           
