@@ -17,6 +17,7 @@ import {
   DropdownMenuContent, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface LocationCardProps {
   recommendation: Recommendation;
@@ -162,7 +163,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const handleInstagramClick = (e: React.MouseEvent, instagram: string | undefined, businessName: string) => {
     e.stopPropagation();
     if (instagram) {
-      window.open(instagram, '_blank');
+      window.open(instagram, '_blank', 'noopener,noreferrer');
       toast({
         title: "Opening video content",
         description: `Visiting ${businessName}'s video content`,
@@ -599,9 +600,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
               </div>}
           </div>}
 
-        <p className="mb-4 line-clamp-8 font-normal text-slate-700 text-base leading-normal min-h-[12em] max-h-[12em] overflow-y-auto">
-          {recommendation.description}
-        </p>
+        <ScrollArea className="min-h-[12em] max-h-[12em] mb-4">
+          <p className="font-normal text-slate-700 text-base leading-normal">
+            {recommendation.description}
+          </p>
+        </ScrollArea>
 
         <div className="flex gap-2 mt-4 flex-wrap">
           {formatPrice() && <Badge className="flex items-center gap-1 px-3 py-1.5 bg-[#c63e7b]">
