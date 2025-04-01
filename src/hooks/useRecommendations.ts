@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Recommendation } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -121,14 +122,14 @@ const useRecommendations = ({
           name: item.name,
           category: item.category,
           tags: item.tags || [],
-          rating: item.rating || 4.5,
+          rating: 4.5, // Default rating since it's not in the service_providers table
           address: `${item.area}, ${item.city}`,
           distance: "0.5 miles away",
-          image: item.image_url || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
+          image: item.images && item.images.length > 0 ? item.images[0] : "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
           images: item.images || [],
           description: item.description || "",
           phone: item.contact_phone,
-          openNow: item.open_now || false,
+          openNow: false, // Default value since it's not in the service_providers table
           hours: "Until 8:00 PM",
           availability: item.availability || null,
           priceLevel: "$$",
