@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Phone, MessageSquare, MapPin, Share2, Instagram } from 'lucide-react';
+import { Phone, MessageSquare, MapPin, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -156,33 +156,6 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
     });
   };
 
-  const handleVideo = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (sellerInstagram) {
-      // Use the safer approach with a temporary link
-      const link = document.createElement('a');
-      link.href = sellerInstagram;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      toast({
-        title: "Opening video content",
-        description: "Visiting seller's video content...",
-        duration: 2000,
-      });
-    } else {
-      toast({
-        title: "Video content not available",
-        description: "The seller has not provided any video links",
-        variant: "destructive",
-        duration: 3000,
-      });
-    }
-  };
-
   return (
     <>
       <div className="grid grid-cols-2 gap-3 mt-auto">
@@ -206,7 +179,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
         </button>
       </div>
       
-      <div className="grid grid-cols-3 gap-2 mt-3">
+      <div className="grid grid-cols-2 gap-2 mt-3">
         <button 
           onClick={handleLocation}
           className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]"
@@ -223,17 +196,6 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
         >
           <Share2 className="h-5 w-5" />
         </button>
-        {sellerInstagram && (
-          <button 
-            onClick={handleVideo}
-            className="h-12 rounded-full border border-purple-400 bg-purple-600 text-white hover:bg-purple-700 transition-all flex items-center justify-center gap-1 shadow-[0_5px_0px_0px_rgba(147,51,234,0.5)] hover:shadow-[0_3px_0px_0px_rgba(147,51,234,0.5)] active:shadow-none active:translate-y-[3px]"
-            title="Watch Video"
-            aria-label="Watch seller's video content"
-          >
-            <Instagram className="h-5 w-5" />
-            <span className="text-xs font-medium">Video</span>
-          </button>
-        )}
       </div>
     </>
   );
