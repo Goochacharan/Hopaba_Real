@@ -495,7 +495,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               </button>}
           </div>
           
-          {recommendation.distance && showDistanceUnderAddress && <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center justify-between my-[3px] px-0">
+          {recommendation.distance && showDistanceUnderAddress && <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center justify-between my-[3px] px-[2px]">
               <div className="flex items-center px-0 mx-0">
                 <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
                 {formatDistance(recommendation.distance)}
