@@ -490,7 +490,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
               <span className="truncate">{recommendation.address}</span>
             </div>
-            {hasInstagram() && <button onClick={e => handleInstagramClick(e, recommendation.instagram, recommendation.name)} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 p-1.5 px-[29px] mx-[55px] py-[7px]">
+            {hasInstagram() && <button onClick={e => handleInstagramClick(e, recommendation.instagram, recommendation.name)} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 p-1.5 py-[7px] mx-0 px-[25px]">
                 <Film className="h-4 w-4 text-white" />
               </button>}
           </div>
