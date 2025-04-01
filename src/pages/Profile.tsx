@@ -109,7 +109,7 @@ const Profile = () => {
           </Card> : <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-3 mb-8">
               <TabsTrigger value="listings">Marketplace</TabsTrigger>
-              <TabsTrigger value="events">Events</TabsTrigger>
+              <TabsTrigger value="events">Your Events</TabsTrigger>
               <TabsTrigger value="businesses">Your Businesses</TabsTrigger>
             </TabsList>
             
