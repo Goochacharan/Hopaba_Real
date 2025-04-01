@@ -152,7 +152,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
         <MessageSquare className="h-5 w-5" />
       </button>
       
-      <button onClick={handleLocation} className="flex-1 h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]" title="View Location" aria-label="View location">
+      <button onClick={handleLocation} title="View Location" aria-label="View location" className="flex-1 h-12 border border-[#1EAEDB]/20 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px] bg-amber-600 hover:bg-amber-500 rounded text-slate-50">
         <MapPin className="h-5 w-5" />
       </button>
       
