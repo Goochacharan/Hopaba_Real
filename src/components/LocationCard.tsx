@@ -486,7 +486,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
         <div className="flex flex-col mb-3">
           <div className="flex items-center justify-between text-muted-foreground text-sm">
-            <div className="flex items-center mx-[19px]">
+            <div className="flex items-center mx-0">
               <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
               <span className="truncate">{recommendation.address}</span>
             </div>
