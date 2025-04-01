@@ -563,7 +563,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </div>
 
         <div className="flex gap-2 mt-4">
-          <button onClick={handleCall} className="flex-1 h-10 rounded-full border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 text-slate-50">
+          <button onClick={handleCall} className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 text-slate-50 rounded">
             <Phone className="h-5 w-5" />
           </button>
           <button onClick={handleWhatsApp} className="flex-1 h-10 rounded-full border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 bg-green-600 hover:bg-green-500">
