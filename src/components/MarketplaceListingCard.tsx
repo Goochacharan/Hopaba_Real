@@ -42,7 +42,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
       <div className="p-4 px-[12px] py-[16px]">
         <h3 className="font-bold text-xl md:text-2xl mb-1">{listing.title}</h3>
         
-        <p className="text-gray-800 md:text-2xl px-0 py-0 font-bold mb-0 text-xl">
+        <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl">
           {formatPrice(listing.price)}
         </p>
         
