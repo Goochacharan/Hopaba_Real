@@ -267,6 +267,13 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
   });
 
   useEffect(() => {
+    if (business?.availability_days && business.availability_days.length > 0) {
+      setSelectedDays(business.availability_days);
+      form.setValue("availability_days", business.availability_days);
+    }
+  }, [business, form]);
+
+  useEffect(() => {
     const hoursFrom = form.getValues("hours_from");
     const hoursTo = form.getValues("hours_to");
     
@@ -289,18 +296,22 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
   };
 
   const handleDayToggle = (day: string, checked: boolean) => {
-    let updatedDays = form.getValues("availability_days") || [];
+    let updatedDays = [...selectedDays];
     
     if (checked) {
-      updatedDays = [...updatedDays, day];
+      if (!updatedDays.includes(day)) {
+        updatedDays.push(day);
+      }
     } else {
       updatedDays = updatedDays.filter(d => d !== day);
     }
     
-    form.setValue("availability_days", updatedDays, { shouldValidate: true });
     setSelectedDays(updatedDays);
+    form.setValue("availability_days", updatedDays, { shouldValidate: true });
     
     form.setValue("availability", updatedDays.join(', '), { shouldValidate: true });
+    
+    console.log("Updated days:", updatedDays);
   };
 
   const handleSubmit = async (data: BusinessFormValues) => {
@@ -330,7 +341,10 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
       
       const hours = `${data.hours_from} - ${data.hours_to}`;
       
-      const availabilityString = (data.availability_days || []).join(', ');
+      const availabilityDays = selectedDays;
+      const availabilityString = availabilityDays.join(', ');
+      
+      console.log("Submitting availability days:", availabilityDays);
       
       const businessData = {
         name: data.name,
@@ -356,6 +370,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
         hours: hours,
         availability_start_time: data.hours_from || null,
         availability_end_time: data.hours_to || null,
+        availability_days: availabilityDays,
         images: data.images || [],
       };
 
