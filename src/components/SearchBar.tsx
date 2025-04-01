@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Search, X, Mic, Sparkles, LogIn } from 'lucide-react';
@@ -7,17 +6,7 @@ import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 interface SearchBarProps {
   onSearch: (query: string) => void;
   className?: string;
@@ -25,7 +14,6 @@ interface SearchBarProps {
   initialValue?: string;
   currentRoute?: string;
 }
-
 const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   className,
@@ -35,7 +23,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const currentPath = location.pathname;
   const [query, setQuery] = useState(initialValue);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -44,7 +34,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  
   const getPlaceholder = () => {
     if (currentPath === '/events' || currentPath.startsWith('/events')) {
       return "Search for events...";
@@ -57,35 +46,32 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
     return placeholder || "What are you looking for today?";
   };
-  
   const suggestionExamples = ["hidden gem restaurants in Indiranagar", "good flute teacher in Malleshwaram", "places to visit in Nagarbhavi", "best unisex salon near me", "plumbers available right now"];
-  
   const enhanceSearchQuery = async (rawQuery: string) => {
     if (!rawQuery.trim()) return rawQuery;
-    
     setIsEnhancing(true);
     try {
-      const { data, error } = await supabase.functions.invoke('enhance-search', {
-        body: { query: rawQuery }
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('enhance-search', {
+        body: {
+          query: rawQuery
+        }
       });
-      
       if (error) {
         console.error('Error enhancing search:', error);
         return rawQuery;
       }
-      
       console.log('AI enhanced search:', data);
-      
       if (data.enhanced && data.enhanced !== rawQuery) {
         toast({
           title: "Search enhanced with AI",
           description: `We improved your search to: "${data.enhanced}"`,
           duration: 5000
         });
-        
         return data.enhanced;
       }
-      
       return rawQuery;
     } catch (err) {
       console.error('Failed to enhance search:', err);
@@ -94,32 +80,25 @@ const SearchBar: React.FC<SearchBarProps> = ({
       setIsEnhancing(false);
     }
   };
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Check if user is logged in
     if (!user) {
       setShowAuthDialog(true);
       return;
     }
-    
     if (query.trim()) {
       console.log("Original search query:", query);
-      
       let enhancedQuery = query;
       if (currentPath !== '/events') {
         enhancedQuery = await enhanceSearchQuery(query);
       }
-      
       console.log("Enhanced search query:", enhancedQuery);
-      
       if (enhancedQuery !== query) {
         setQuery(enhancedQuery);
       }
-      
       onSearch(enhancedQuery);
-
       if (query.trim().length < 8 && currentPath !== '/events') {
         const randomSuggestion = suggestionExamples[Math.floor(Math.random() * suggestionExamples.length)];
         toast({
@@ -130,7 +109,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
       }
     }
   };
-  
   const clearSearch = (e: React.MouseEvent) => {
     e.stopPropagation();
     setQuery('');
@@ -138,14 +116,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
       inputRef.current.focus();
     }
   };
-  
   const startSpeechRecognition = () => {
     // Check if user is logged in before allowing voice search
     if (!user) {
       setShowAuthDialog(true);
       return;
     }
-    
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       toast({
         title: "Not supported",
@@ -156,7 +132,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
       return;
     }
     setIsListening(true);
-
     const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognitionConstructor();
     recognition.lang = 'en-US';
@@ -165,7 +140,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
       const transcript = event.results[0][0].transcript;
       setQuery(transcript);
       setIsListening(false);
-
       setTimeout(() => {
         onSearch(transcript);
       }, 500);
@@ -184,7 +158,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
     };
     recognition.start();
   };
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node) && isExpanded) {
@@ -196,100 +169,52 @@ const SearchBar: React.FC<SearchBarProps> = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isExpanded]);
-
   useEffect(() => {
     if (initialValue) {
       setQuery(initialValue);
     }
   }, [initialValue]);
-
   const handleSearchButtonClick = async () => {
     // Check if user is logged in
     if (!user) {
       setShowAuthDialog(true);
       return;
     }
-    
     if (query.trim()) {
       console.log("Search button clicked with query:", query);
-      
       let enhancedQuery = query;
       if (currentPath !== '/events') {
         enhancedQuery = await enhanceSearchQuery(query);
       }
-      
       if (enhancedQuery !== query) {
         setQuery(enhancedQuery);
       }
-      
       onSearch(enhancedQuery);
     }
   };
-
   const navigateToLogin = () => {
     navigate('/login');
     setShowAuthDialog(false);
   };
-
   const navigateToSignup = () => {
     navigate('/signup');
     setShowAuthDialog(false);
   };
-
-  return (
-    <div className={cn("w-full max-w-2xl mx-auto", className)}>
+  return <div className={cn("w-full max-w-2xl mx-auto", className)}>
       <form ref={formRef} onSubmit={handleSubmit} className="w-full bg-white rounded-xl shadow-md border border-border/50">
-        <div className="flex items-center p-2">
-          <Input
-            ref={inputRef}
-            type="text"
-            placeholder={getPlaceholder()}
-            className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-2"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setIsExpanded(true)}
-          />
+        <div className="flex items-center p-2 my-0 py-[17px]">
+          <Input ref={inputRef} type="text" placeholder={getPlaceholder()} className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-2" value={query} onChange={e => setQuery(e.target.value)} onFocus={() => setIsExpanded(true)} />
           
-          {query && (
-            <button
-              type="button"
-              onClick={clearSearch}
-              className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full"
-              aria-label="Clear search"
-            >
+          {query && <button type="button" onClick={clearSearch} className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full" aria-label="Clear search">
               <X className="h-5 w-5" />
-            </button>
-          )}
+            </button>}
           
-          <button
-            type="button"
-            onClick={startSpeechRecognition}
-            className={cn(
-              "p-2 transition-colors rounded-full",
-              isListening 
-                ? "text-red-500 animate-pulse" 
-                : "text-muted-foreground hover:text-foreground"
-            )}
-            aria-label="Voice search"
-          >
+          <button type="button" onClick={startSpeechRecognition} className={cn("p-2 transition-colors rounded-full", isListening ? "text-red-500 animate-pulse" : "text-muted-foreground hover:text-foreground")} aria-label="Voice search">
             <Mic className="h-5 w-5" />
           </button>
           
-          <button 
-            type="submit"
-            className={cn(
-              "p-2 text-primary hover:text-primary-foreground hover:bg-primary rounded-full transition-colors flex items-center",
-              isEnhancing && "opacity-70"
-            )}
-            aria-label="Search"
-            onClick={handleSearchButtonClick}
-            disabled={isEnhancing}
-          >
-            {isEnhancing ? (
-              <Sparkles className="h-5 w-5 animate-pulse" />
-            ) : (
-              <Search className="h-5 w-5" />
-            )}
+          <button type="submit" className={cn("p-2 text-primary hover:text-primary-foreground hover:bg-primary rounded-full transition-colors flex items-center", isEnhancing && "opacity-70")} aria-label="Search" onClick={handleSearchButtonClick} disabled={isEnhancing}>
+            {isEnhancing ? <Sparkles className="h-5 w-5 animate-pulse" /> : <Search className="h-5 w-5" />}
           </button>
         </div>
       </form>
@@ -314,8 +239,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>;
 };
-
 export default SearchBar;
