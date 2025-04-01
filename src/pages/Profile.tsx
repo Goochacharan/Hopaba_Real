@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import UserMarketplaceListings from '@/components/UserMarketplaceListings';
 import UserEventListings from '@/components/UserEventListings';
 import { AdminSection } from '@/components/admin/AdminSection';
-import { Plus } from 'lucide-react';
+import { Plus, Settings as SettingsIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import BusinessFormSimple from '@/components/business/BusinessFormSimple';
 import BusinessListSimple from '@/components/business/BusinessListSimple';
@@ -90,9 +90,19 @@ const Profile = () => {
               {user.user_metadata?.full_name || user.email}
             </p>
           </div>
-          <Button variant="outline" onClick={logout}>
-            Sign Out
-          </Button>
+          <div className="flex gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/settings')}
+              className="flex items-center gap-2"
+            >
+              <SettingsIcon className="h-4 w-4" />
+              Settings
+            </Button>
+            <Button variant="outline" onClick={logout}>
+              Sign Out
+            </Button>
+          </div>
         </div>
 
         {isAdmin && <AdminSection />}

@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Phone, MessageSquare, MapPin, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +23,7 @@ interface SellerDetailsCardProps {
   createdAt: string;
   mapLink?: string | null;
   reviewCount?: number;
+  avatarUrl?: string | null;
 }
 const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
   id,
@@ -36,7 +38,8 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
   location,
   createdAt,
   mapLink,
-  reviewCount = 0
+  reviewCount = 0,
+  avatarUrl
 }) => {
   const {
     toast
@@ -152,9 +155,13 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
       <CardContent className="space-y-4">
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12 border border-border">
-            <AvatarFallback className="bg-primary/10 text-primary">
-              {getInitials(sellerName)}
-            </AvatarFallback>
+            {avatarUrl ? (
+              <AvatarImage src={avatarUrl} alt={sellerName} />
+            ) : (
+              <AvatarFallback className="bg-primary/10 text-primary">
+                {getInitials(sellerName)}
+              </AvatarFallback>
+            )}
           </Avatar>
           
           <div className="flex flex-col">

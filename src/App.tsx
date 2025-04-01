@@ -21,6 +21,7 @@ import Marketplace from "./pages/Marketplace";
 import MarketplaceListingDetails from "./pages/MarketplaceListingDetails";
 import SellerDetails from "./pages/SellerDetails";
 import AdminPanel from "./pages/AdminPanel";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/search" element={<SearchResults />} />
               <Route path="/location/:id" element={<LocationDetails />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="/my-list" element={<MyList />} />
               <Route path="/events" element={<Events />} />
               <Route path="/map" element={<Map />} />

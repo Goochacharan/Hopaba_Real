@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +18,7 @@ interface SellerProfileCardProps {
   location?: string;
   mapLink?: string | null;
   listingId?: string;
+  avatarUrl?: string | null;
 }
 
 const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
@@ -28,7 +30,8 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
   sellerWhatsapp,
   location,
   mapLink,
-  listingId
+  listingId,
+  avatarUrl
 }) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -174,9 +177,13 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
       <CardContent className="px-6 md:px-8 py-5">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
           <Avatar className="h-32 w-32 border-4 border-background">
-            <AvatarFallback className="bg-primary/10 text-primary text-4xl">
-              {getInitials(sellerName)}
-            </AvatarFallback>
+            {avatarUrl ? (
+              <AvatarImage src={avatarUrl} alt={sellerName} />
+            ) : (
+              <AvatarFallback className="bg-primary/10 text-primary text-4xl">
+                {getInitials(sellerName)}
+              </AvatarFallback>
+            )}
           </Avatar>
           
           <div className="space-y-4 text-center md:text-left w-full">
