@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -188,7 +187,7 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
             <MapPin className="h-5 w-5" />
           </Button>
           
-          <Button onClick={handleShare} className="flex-1 h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]" title="Share Listing">
+          <Button onClick={handleShare} title="Share Listing" className="flex-1 h-12 border border-[#1EAEDB]/20 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px] bg-violet-700 hover:bg-violet-600 text-white rounded">
             <Share2 className="h-5 w-5" />
           </Button>
         </div>
