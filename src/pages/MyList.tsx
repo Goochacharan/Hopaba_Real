@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -130,9 +131,6 @@ const MyList = () => {
                 };
                 return <div key={item.id} className="relative group">
                           <MarketplaceListingCard listing={marketplaceItem} className="search-result-card" />
-                          <button onClick={e => handleHeartClick(e, item)} className="absolute top-2 right-2 p-2 rounded-full shadow-sm backdrop-blur-sm transition-all z-10 bg-transparent text-transparent font-thin text-xs py-0 my-[13px] px-[13px] mx-[53px]">
-                            <Heart className="h-4 w-4 fill-rose-500" />
-                          </button>
                         </div>;
               } else if (item.type === 'event') {
                 const eventItem = item as Event & {
