@@ -513,7 +513,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               </div>
               
               {(hasAvailabilityInfo() || businessHours) && <DropdownMenu>
-                  <DropdownMenuTrigger className="ml-2 inline-flex items-center text-xs font-medium text-primary hover:text-primary/80 transition-colors rounded-md" onClick={e => e.stopPropagation()}>
+                  <DropdownMenuTrigger onClick={e => e.stopPropagation()} className="ml-2 inline-flex items-center text-xs font-medium transition-colors rounded bg-slate-50 text-amber-950">
                     <Calendar className="h-3.5 w-3.5 mr-1" />
                     <span className="underline text-base">Hours</span>
                   </DropdownMenuTrigger>
