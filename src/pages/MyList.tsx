@@ -14,7 +14,6 @@ import { Recommendation } from '@/lib/mockData';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { Event } from '@/hooks/useRecommendations';
 import EventCard from '@/components/EventCard';
-
 const MyList = () => {
   const {
     wishlist,
@@ -27,7 +26,6 @@ const MyList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const itemsPerPage = 6;
-  
   useEffect(() => {
     const checkUser = async () => {
       setLoading(true);
@@ -55,7 +53,6 @@ const MyList = () => {
       authListener?.subscription.unsubscribe();
     };
   }, [navigate]);
-
   const filteredWishlist = wishlist.filter(item => {
     if (activeTab === 'locations' && item.type !== 'location') {
       return false;
@@ -66,46 +63,36 @@ const MyList = () => {
     if (activeTab === 'events' && item.type !== 'event') {
       return false;
     }
-
     if (!searchQuery.trim()) return true;
     const lowercaseQuery = searchQuery.toLowerCase();
-
     if (item.type === 'marketplace') {
-      const marketplaceItem = item as MarketplaceListing & { type: 'marketplace' };
-      return marketplaceItem.title?.toLowerCase().includes(lowercaseQuery) || 
-             marketplaceItem.category?.toLowerCase().includes(lowercaseQuery) || 
-             marketplaceItem.description?.toLowerCase().includes(lowercaseQuery) || 
-             marketplaceItem.location?.toLowerCase().includes(lowercaseQuery) || 
-             marketplaceItem.condition?.toLowerCase().includes(lowercaseQuery);
+      const marketplaceItem = item as MarketplaceListing & {
+        type: 'marketplace';
+      };
+      return marketplaceItem.title?.toLowerCase().includes(lowercaseQuery) || marketplaceItem.category?.toLowerCase().includes(lowercaseQuery) || marketplaceItem.description?.toLowerCase().includes(lowercaseQuery) || marketplaceItem.location?.toLowerCase().includes(lowercaseQuery) || marketplaceItem.condition?.toLowerCase().includes(lowercaseQuery);
     } else if (item.type === 'event') {
-      const eventItem = item as Event & { type: 'event' };
-      return eventItem.title?.toLowerCase().includes(lowercaseQuery) || 
-             eventItem.description?.toLowerCase().includes(lowercaseQuery) || 
-             eventItem.location?.toLowerCase().includes(lowercaseQuery) || 
-             eventItem.date?.toLowerCase().includes(lowercaseQuery);
+      const eventItem = item as Event & {
+        type: 'event';
+      };
+      return eventItem.title?.toLowerCase().includes(lowercaseQuery) || eventItem.description?.toLowerCase().includes(lowercaseQuery) || eventItem.location?.toLowerCase().includes(lowercaseQuery) || eventItem.date?.toLowerCase().includes(lowercaseQuery);
     } else {
-      const locationItem = item as Recommendation & { type: 'location' };
-      return locationItem.name?.toLowerCase().includes(lowercaseQuery) || 
-             locationItem.category?.toLowerCase().includes(lowercaseQuery) || 
-             locationItem.description?.toLowerCase().includes(lowercaseQuery) || 
-             locationItem.address?.toLowerCase().includes(lowercaseQuery);
+      const locationItem = item as Recommendation & {
+        type: 'location';
+      };
+      return locationItem.name?.toLowerCase().includes(lowercaseQuery) || locationItem.category?.toLowerCase().includes(lowercaseQuery) || locationItem.description?.toLowerCase().includes(lowercaseQuery) || locationItem.address?.toLowerCase().includes(lowercaseQuery);
     }
   });
-
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredWishlist.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredWishlist.length / itemsPerPage);
-
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, activeTab]);
-
   const handleHeartClick = (e: React.MouseEvent, item: WishlistItem) => {
     e.stopPropagation();
     toggleWishlist(item);
   };
-
   if (loading) {
     return <MainLayout>
         <div className="py-8 flex justify-center">
@@ -113,7 +100,6 @@ const MyList = () => {
         </div>
       </MainLayout>;
   }
-
   return <MainLayout>
       <section className="py-8 px-[7px]">
         <h1 className="text-3xl font-medium mb-6">My Wishlist</h1>
@@ -138,47 +124,38 @@ const MyList = () => {
             {filteredWishlist.length > 0 ? <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                   {currentItems.map(item => {
-                    if (item.type === 'marketplace') {
-                      const marketplaceItem = item as MarketplaceListing & { type: 'marketplace' };
-                      return (
-                        <div key={item.id} className="relative group">
+              if (item.type === 'marketplace') {
+                const marketplaceItem = item as MarketplaceListing & {
+                  type: 'marketplace';
+                };
+                return <div key={item.id} className="relative group">
                           <MarketplaceListingCard listing={marketplaceItem} className="search-result-card" />
-                          <button 
-                            className="absolute top-2 right-2 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10 text-rose-500"
-                            onClick={(e) => handleHeartClick(e, item)}
-                          >
+                          <button onClick={e => handleHeartClick(e, item)} className="absolute top-2 right-2 p-2 rounded-full shadow-sm backdrop-blur-sm transition-all z-10 bg-transparent text-transparent font-thin text-xs py-0 my-[13px] px-[13px] mx-[53px]">
                             <Heart className="h-4 w-4 fill-rose-500" />
                           </button>
-                        </div>
-                      );
-                    } else if (item.type === 'event') {
-                      const eventItem = item as Event & { type: 'event' };
-                      return (
-                        <div key={item.id} className="relative group">
+                        </div>;
+              } else if (item.type === 'event') {
+                const eventItem = item as Event & {
+                  type: 'event';
+                };
+                return <div key={item.id} className="relative group">
                           <EventCard event={eventItem} className="search-result-card" />
-                          <button 
-                            className="absolute top-2 right-2 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10 text-rose-500"
-                            onClick={(e) => handleHeartClick(e, item)}
-                          >
+                          <button className="absolute top-2 right-2 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10 text-rose-500" onClick={e => handleHeartClick(e, item)}>
                             <Heart className="h-4 w-4 fill-rose-500" />
                           </button>
-                        </div>
-                      );
-                    } else {
-                      const locationItem = item as Recommendation & { type: 'location' };
-                      return (
-                        <div key={item.id} className="relative group">
+                        </div>;
+              } else {
+                const locationItem = item as Recommendation & {
+                  type: 'location';
+                };
+                return <div key={item.id} className="relative group">
                           <LocationCard recommendation={locationItem} className="search-result-card" />
-                          <button 
-                            className="absolute top-2 right-2 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10 text-rose-500"
-                            onClick={(e) => handleHeartClick(e, item)}
-                          >
+                          <button className="absolute top-2 right-2 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10 text-rose-500" onClick={e => handleHeartClick(e, item)}>
                             <Heart className="h-4 w-4 fill-rose-500" />
                           </button>
-                        </div>
-                      );
-                    }
-                  })}
+                        </div>;
+              }
+            })}
                 </div>
                 
                 {totalPages > 1 && <Pagination className="mt-6">
@@ -237,5 +214,4 @@ const MyList = () => {
       </section>
     </MainLayout>;
 };
-
 export default MyList;
