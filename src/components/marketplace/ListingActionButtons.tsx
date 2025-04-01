@@ -144,7 +144,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
     });
   };
   return <div className="flex justify-between items-center gap-2 mt-4">
-      <button onClick={handleCall} title="Call Seller" aria-label="Call seller" className="flex-1 h-12 text-white transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(24,128,163,0.8)] hover:shadow-[0_3px_0px_0px_rgba(24,128,163,0.8)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 rounded">
+      <button onClick={handleCall} title="Call Seller" aria-label="Call seller" className="flex-1 h-12 text-white transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(24,128,163,0.8)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 rounded">
         <Phone className="h-5 w-5" />
       </button>
       
