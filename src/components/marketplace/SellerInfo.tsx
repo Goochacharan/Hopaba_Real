@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import StarRating from './StarRating';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Instagram } from 'lucide-react';
 
 interface SellerInfoProps {
   sellerName: string;
@@ -112,6 +113,17 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
           </Link>
         ) : (
           <span className="text-sm font-medium">{sellerName}</span>
+        )}
+        
+        {sellerInstagram && (
+          <button
+            onClick={handleInstagramClick}
+            className="flex items-center gap-1.5 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-all ml-2 py-1 px-2.5"
+            title="Watch video content"
+          >
+            <Instagram className="h-3 w-3 text-white" />
+            <span className="text-xs font-medium">Video</span>
+          </button>
         )}
       </div>
 

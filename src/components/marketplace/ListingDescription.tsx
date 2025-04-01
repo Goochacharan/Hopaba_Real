@@ -101,18 +101,14 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
               
               {instagram && (
                 <div className="flex items-center gap-2 mt-2">
-                  {isVideoContent ? (
-                    <Film className="h-4 w-4 text-purple-500" />
-                  ) : (
-                    <Instagram className="h-4 w-4 text-pink-500" />
-                  )}
                   <a 
                     href={instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram.replace('@', '')}`} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
+                    className="flex items-center gap-1.5 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-all py-1.5 px-3"
                   >
-                    {isVideoContent ? 'View Video Content' : 'Visit Instagram'}
+                    <Instagram className="h-3.5 w-3.5 text-white" />
+                    <span className="text-xs font-medium">Video</span>
                   </a>
                 </div>
               )}

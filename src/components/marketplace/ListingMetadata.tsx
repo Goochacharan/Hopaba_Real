@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { MapPin, Calendar, Film } from 'lucide-react';
+import { MapPin, Calendar, Film, Instagram } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 interface ListingMetadataProps {
@@ -48,8 +49,9 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
       <div className="flex items-center gap-1 my-0 py-0 px-0">
         <Calendar className="h-3 w-3" />
         <span>Listed on {format(new Date(createdAt), 'PPP')}</span>
-        {sellerInstagram && <button onClick={handleInstagramClick} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 py-2 px-[31px] mx-[26px] shadow-[0_4px_0px_0px_rgba(0,0,0,0.25)] hover:shadow-[0_2px_0px_0px_rgba(0,0,0,0.25)] active:shadow-none active:translate-y-[3px]">
-            <Film className="h-5 w-5 text-white" />
+        {sellerInstagram && <button onClick={handleInstagramClick} title="Watch video content" className="flex items-center gap-1.5 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-all ml-2 py-1.5 px-3">
+            <Instagram className="h-3.5 w-3.5 text-white" />
+            <span className="text-xs font-medium">Video</span>
           </button>}
       </div>
       {/* Condition badge has been moved to the image */}
