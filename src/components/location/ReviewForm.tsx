@@ -39,7 +39,7 @@ const ReviewForm = ({
     setSelectedRating(rating);
     form.setValue("rating", rating);
   };
-  return <div className="mb-6 p-4 bg-secondary/30 rounded-lg px-0">
+  return <div className="mb-6 p-4 bg-secondary/30 rounded-lg px-[9px]">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {locationName && <div className="text-sm font-medium text-muted-foreground mb-2">
