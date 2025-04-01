@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Phone, MessageSquare, MapPin, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -157,47 +156,43 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
   };
 
   return (
-    <>
-      <div className="grid grid-cols-2 gap-3 mt-auto">
-        <button 
-          onClick={handleCall}
-          className="h-12 rounded-full bg-[#1EAEDB] text-white hover:bg-[#1EAEDB]/90 transition-all flex items-center justify-center gap-2 shadow-[0_5px_0px_0px_rgba(24,128,163,0.8)] hover:shadow-[0_3px_0px_0px_rgba(24,128,163,0.8)] active:shadow-none active:translate-y-[3px]"
-          title="Call"
-          aria-label="Call seller"
-        >
-          <Phone className="h-5 w-5 shrink-0" />
-          <span className="text-sm whitespace-nowrap">Contact Seller</span>
-        </button>
-        <button 
-          onClick={handleWhatsApp}
-          className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center gap-2 shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]"
-          title="WhatsApp"
-          aria-label="Contact on WhatsApp"
-        >
-          <MessageSquare className="h-5 w-5 shrink-0" />
-          <span className="text-sm whitespace-nowrap">WhatsApp</span>
-        </button>
-      </div>
+    <div className="flex justify-between items-center gap-2 mt-4">
+      <button 
+        onClick={handleCall}
+        className="flex-1 h-12 rounded-full bg-[#1EAEDB] text-white hover:bg-[#1EAEDB]/90 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(24,128,163,0.8)] hover:shadow-[0_3px_0px_0px_rgba(24,128,163,0.8)] active:shadow-none active:translate-y-[3px]"
+        title="Call Seller"
+        aria-label="Call seller"
+      >
+        <Phone className="h-5 w-5" />
+      </button>
       
-      <div className="grid grid-cols-2 gap-2 mt-3">
-        <button 
-          onClick={handleLocation}
-          className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]"
-          title={mapLink ? "Open Map Link" : "View Location"}
-          aria-label={mapLink ? "Open Map Link" : "View location"}
-        >
-          <MapPin className="h-5 w-5" />
-        </button>
-        <button 
-          onClick={handleShare}
-          className="h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]"
-          title="Share"
-          aria-label="Share listing"
-        >
-          <Share2 className="h-5 w-5" />
-        </button>
-      </div>
-    </>
+      <button 
+        onClick={handleWhatsApp}
+        className="flex-1 h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]"
+        title="WhatsApp"
+        aria-label="Contact on WhatsApp"
+      >
+        <MessageSquare className="h-5 w-5" />
+      </button>
+      
+      <button 
+        onClick={handleLocation}
+        className="flex-1 h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]"
+        title="View Location"
+        aria-label="View location"
+      >
+        <MapPin className="h-5 w-5" />
+      </button>
+      
+      <button 
+        onClick={handleShare}
+        className="flex-1 h-12 rounded-full border border-[#1EAEDB]/20 bg-[#1EAEDB]/5 text-[#1EAEDB] hover:bg-[#1EAEDB]/10 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px]"
+        title="Share"
+        aria-label="Share listing"
+      >
+        <Share2 className="h-5 w-5" />
+      </button>
+    </div>
   );
 };
 
