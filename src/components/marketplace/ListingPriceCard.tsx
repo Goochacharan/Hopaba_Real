@@ -55,7 +55,7 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
         <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="md:text-6xl font-extrabold text-gray-800 py-0 px-1 text-4xl -mb-1 flex items-center">
-              <IndianRupee className="h-7 w-7 mr-0.5" />
+              <IndianRupee className="h-7 w-7 mr-0.5 inline-flex items-center" />
               {price.toLocaleString('en-IN')}
             </h2>
           </div>

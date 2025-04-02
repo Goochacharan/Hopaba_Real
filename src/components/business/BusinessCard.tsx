@@ -78,8 +78,8 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
       <CardContent className="pt-4 space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="flex items-center gap-0.5">
-            <IndianRupee className="h-3.5 w-3.5 mr-0.5" />
-            <span>
+            <span className="flex items-center">
+              <IndianRupee className="h-3.5 w-3.5 mr-0.5" />
               ₹{business.price_range_min} - ₹{business.price_range_max} {business.price_unit}
             </span>
           </div>
