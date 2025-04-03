@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface FilterTabsProps {
   distance: number[];
@@ -53,7 +52,16 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
   const isRatingActive = minRating[0] > 0;
   
   // Helper to check if price filter is active (changed from default)
-  const isPriceActive = priceRange < 3;
+  const isPriceActive = priceRange < 50000;
+
+  // Format price as rupees
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(price);
+  };
 
   return (
     <ScrollArea className="w-full">
@@ -119,7 +127,7 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               <IndianRupee className="w-4 h-4" />
               {isPriceActive && (
                 <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-primary text-white">
-                  {priceRange}
+                  ₹
                 </Badge>
               )}
             </Button>
@@ -129,23 +137,25 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               <h4 className="font-medium">Price Range</h4>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Show results priced</span>
+                  <span className="text-sm text-muted-foreground">Maximum price</span>
                   <span className="text-sm font-medium">
-                    {Array(priceRange).fill('₹').join('')}
+                    {formatPrice(priceRange)}
                   </span>
                 </div>
                 
-                {/* Replace the slider with a toggle group for easier selection */}
-                <ToggleGroup type="single" value={priceRange.toString()} onValueChange={(value) => setPriceRange(parseInt(value) || 3)}>
-                  <ToggleGroupItem value="1" className="flex-1">₹</ToggleGroupItem>
-                  <ToggleGroupItem value="2" className="flex-1">₹₹</ToggleGroupItem>
-                  <ToggleGroupItem value="3" className="flex-1">₹₹₹</ToggleGroupItem>
-                </ToggleGroup>
+                <Slider
+                  id="price"
+                  value={[priceRange]}
+                  min={0}
+                  max={50000}
+                  step={100}
+                  onValueChange={(value) => setPriceRange(value[0])}
+                />
                 
                 <div className="flex justify-between text-xs text-muted-foreground pt-1">
-                  <span>Budget</span>
-                  <span>Mid-range</span>
-                  <span>Premium</span>
+                  <span>₹0</span>
+                  <span>₹25,000</span>
+                  <span>₹50,000</span>
                 </div>
               </div>
             </div>
