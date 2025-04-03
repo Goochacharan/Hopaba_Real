@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Star, Clock, IndianRupee, Sparkles, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -56,11 +55,10 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
 
   // Format price as rupees
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
+    // Custom formatting to ensure rupee symbol is the same size as text and closer to it
+    return `₹${new Intl.NumberFormat('en-IN', {
       maximumFractionDigits: 0
-    }).format(price);
+    }).format(price)}`;
   };
 
   return (
@@ -153,9 +151,9 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
                 />
                 
                 <div className="flex justify-between text-xs text-muted-foreground pt-1">
-                  <span>₹0</span>
-                  <span>₹25,000</span>
-                  <span>₹50,000</span>
+                  <span className="text-xs">₹0</span>
+                  <span className="text-xs">₹25,000</span>
+                  <span className="text-xs">₹50,000</span>
                 </div>
               </div>
             </div>
