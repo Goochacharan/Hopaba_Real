@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
@@ -229,7 +228,6 @@ const Marketplace = () => {
     }).format(price);
   };
 
-  // Helper functions to check if filters are active
   const isPriceFilterActive = priceRange[0] > 0 || priceRange[1] < 10000000;
   const isYearFilterActive = yearRange[0] > 2010 || yearRange[1] < new Date().getFullYear();
   const isRatingFilterActive = ratingFilter > 0;
@@ -264,7 +262,7 @@ const Marketplace = () => {
                   size="sm" 
                   className={cn(
                     "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0",
-                    isSortFilterActive && "border-primary/30 bg-primary/5"
+                    isSortFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
                   )}
                 >
                   <ChevronDown className="h-3 w-3" />
@@ -301,7 +299,7 @@ const Marketplace = () => {
                   className={cn(
                     "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
                     activeFilter === 'rating' && "border-primary ring-2 ring-primary/20", 
-                    isRatingFilterActive && "border-primary/30 bg-primary/5"
+                    isRatingFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
                   )}
                 >
                   <Star className="h-4 w-4" />
@@ -335,7 +333,7 @@ const Marketplace = () => {
                   className={cn(
                     "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
                     activeFilter === 'price' && "border-primary ring-2 ring-primary/20", 
-                    isPriceFilterActive && "border-primary/30 bg-primary/5"
+                    isPriceFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
                   )}
                 >
                   <IndianRupee className="h-4 w-4" />
@@ -393,7 +391,7 @@ const Marketplace = () => {
                   className={cn(
                     "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
                     activeFilter === 'year' && "border-primary ring-2 ring-primary/20", 
-                    isYearFilterActive && "border-primary/30 bg-primary/5"
+                    isYearFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
                   )}
                 >
                   <Calendar className="h-4 w-4" />
@@ -429,7 +427,7 @@ const Marketplace = () => {
                   className={cn(
                     "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
                     activeFilter === 'condition' && "border-primary ring-2 ring-primary/20", 
-                    isConditionFilterActive && "border-primary/30 bg-primary/5"
+                    isConditionFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
                   )}
                 >
                   <Layers className="h-4 w-4" />

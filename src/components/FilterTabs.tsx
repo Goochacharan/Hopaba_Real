@@ -75,7 +75,8 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               size="sm" 
               className={cn(
                 "rounded-full border flex items-center justify-center w-10 h-10 relative",
-                activeFilter === 'rating' && "ring-2 ring-primary/20"
+                activeFilter === 'rating' && "ring-2 ring-primary/20",
+                isRatingActive && "bg-blue-500 hover:bg-blue-600 text-white"
               )}
             >
               <Star className="w-4 h-4" />
@@ -122,7 +123,8 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               size="sm" 
               className={cn(
                 "rounded-full border flex items-center justify-center w-10 h-10 relative",
-                activeFilter === 'price' && "ring-2 ring-primary/20"
+                activeFilter === 'price' && "ring-2 ring-primary/20",
+                isPriceActive && "bg-blue-500 hover:bg-blue-600 text-white"
               )}
             >
               <IndianRupee className="w-4 h-4" />
@@ -170,7 +172,8 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
           variant={openNowOnly ? "default" : "outline"}
           size="sm" 
           className={cn(
-            "rounded-full border flex items-center justify-center w-10 h-10 relative"
+            "rounded-full border flex items-center justify-center w-10 h-10 relative",
+            openNowOnly && "bg-blue-500 hover:bg-blue-600 text-white"
           )}
           onClick={() => setOpenNowOnly(!openNowOnly)}
         >
@@ -183,7 +186,7 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
           size="sm" 
           className={cn(
             "rounded-full border flex items-center justify-center w-10 h-10 relative",
-            hiddenGemOnly && "bg-purple-500 hover:bg-purple-600"
+            hiddenGemOnly && "bg-purple-500 hover:bg-purple-600 text-white"
           )}
           onClick={() => setHiddenGemOnly(!hiddenGemOnly)}
         >
@@ -196,7 +199,7 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
           size="sm" 
           className={cn(
             "rounded-full border flex items-center justify-center w-10 h-10 relative",
-            mustVisitOnly && "bg-orange-500 hover:bg-orange-600"
+            mustVisitOnly && "bg-orange-500 hover:bg-orange-600 text-white"
           )}
           onClick={() => setMustVisitOnly(!mustVisitOnly)}
         >
@@ -211,7 +214,8 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               size="sm" 
               className={cn(
                 "rounded-full border flex items-center justify-center w-10 h-10 relative",
-                activeFilter === 'distance' && "ring-2 ring-primary/20"
+                activeFilter === 'distance' && "ring-2 ring-primary/20",
+                isDistanceActive && "bg-blue-500 hover:bg-blue-600 text-white"
               )}
             >
               <svg 
