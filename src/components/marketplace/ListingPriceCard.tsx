@@ -22,6 +22,7 @@ interface ListingPriceCardProps {
 }
 
 const formatPrice = (price: number): string => {
+  // Custom formatting to ensure rupee symbol is the same size as text and closer to it
   return price.toLocaleString('en-IN');
 };
 
@@ -55,7 +56,7 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
         <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="md:text-6xl font-extrabold text-gray-800 py-0 px-1 text-4xl -mb-1 flex items-center">
-              <span className="text-4xl md:text-6xl mr-1">₹</span>{formatPrice(price)}
+              <span className="text-4xl md:text-5xl font-extrabold mr-0.5">₹</span>{formatPrice(price)}
             </h2>
           </div>
           <div className="flex flex-col items-end">

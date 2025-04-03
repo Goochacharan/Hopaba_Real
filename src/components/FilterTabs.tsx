@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Star, Clock, IndianRupee, Sparkles, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -53,12 +54,14 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
   // Helper to check if price filter is active (changed from default)
   const isPriceActive = priceRange < 50000;
 
-  // Format price as rupees
+  // Format price as rupees - ensure symbol is same size and close to number
   const formatPrice = (price: number) => {
-    // Custom formatting to ensure rupee symbol is the same size as text and closer to it
-    return `₹${new Intl.NumberFormat('en-IN', {
-      maximumFractionDigits: 0
-    }).format(price)}`;
+    return <span className="inline-flex items-center">
+      <span className="text-sm">₹</span>
+      <span className="text-sm">{new Intl.NumberFormat('en-IN', {
+        maximumFractionDigits: 0
+      }).format(price)}</span>
+    </span>;
   };
 
   return (
@@ -136,8 +139,10 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Maximum price</span>
-                  <span className="text-sm font-medium">
-                    {formatPrice(priceRange)}
+                  <span className="text-sm font-medium inline-flex items-center">
+                    <span className="text-sm">₹</span>{new Intl.NumberFormat('en-IN', {
+                      maximumFractionDigits: 0
+                    }).format(priceRange)}
                   </span>
                 </div>
                 
@@ -151,9 +156,9 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
                 />
                 
                 <div className="flex justify-between text-xs text-muted-foreground pt-1">
-                  <span className="text-xs">₹0</span>
-                  <span className="text-xs">₹25,000</span>
-                  <span className="text-xs">₹50,000</span>
+                  <span className="inline-flex items-center"><span className="text-xs">₹</span><span className="text-xs">0</span></span>
+                  <span className="inline-flex items-center"><span className="text-xs">₹</span><span className="text-xs">25,000</span></span>
+                  <span className="inline-flex items-center"><span className="text-xs">₹</span><span className="text-xs">50,000</span></span>
                 </div>
               </div>
             </div>
