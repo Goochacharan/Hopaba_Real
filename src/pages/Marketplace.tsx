@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
@@ -228,6 +229,13 @@ const Marketplace = () => {
     }).format(price);
   };
 
+  // Helper functions to check if filters are active
+  const isPriceFilterActive = priceRange[0] > 0 || priceRange[1] < 10000000;
+  const isYearFilterActive = yearRange[0] > 2010 || yearRange[1] < new Date().getFullYear();
+  const isRatingFilterActive = ratingFilter > 0;
+  const isConditionFilterActive = conditionFilter !== 'all';
+  const isSortFilterActive = sortOption !== 'newest';
+
   return <MainLayout>
       <div className="animate-fade-in px-[7px]">
         <div className="flex items-center justify-between">
@@ -251,8 +259,20 @@ const Marketplace = () => {
           <div className="flex items-center gap-3 mb-4 overflow-x-auto py-1 px-1">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0">
+                <Button 
+                  variant={isSortFilterActive ? "default" : "outline"} 
+                  size="sm" 
+                  className={cn(
+                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0",
+                    isSortFilterActive && "border-primary/30 bg-primary/5"
+                  )}
+                >
                   <ChevronDown className="h-3 w-3" />
+                  {isSortFilterActive && (
+                    <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
+                      •
+                    </Badge>
+                  )}
                 </Button>
               </PopoverTrigger>
               <PopoverContent align="start" className="w-48 p-2">
@@ -275,9 +295,17 @@ const Marketplace = () => {
 
             <Popover open={activeFilter === 'rating'} onOpenChange={open => setActiveFilter(open ? 'rating' : null)}>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className={cn("rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", activeFilter === 'rating' && "border-primary ring-2 ring-primary/20", ratingFilter > 0 && "border-primary/30 bg-primary/5")}>
+                <Button 
+                  variant={isRatingFilterActive ? "default" : "outline"} 
+                  size="icon" 
+                  className={cn(
+                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
+                    activeFilter === 'rating' && "border-primary ring-2 ring-primary/20", 
+                    isRatingFilterActive && "border-primary/30 bg-primary/5"
+                  )}
+                >
                   <Star className="h-4 w-4" />
-                  {ratingFilter > 0 && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
+                  {isRatingFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
                       {ratingFilter}+
                     </Badge>}
                 </Button>
@@ -301,10 +329,18 @@ const Marketplace = () => {
 
             <Popover open={activeFilter === 'price'} onOpenChange={open => setActiveFilter(open ? 'price' : null)}>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className={cn("rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", activeFilter === 'price' && "border-primary ring-2 ring-primary/20", (priceRange[0] > 0 || priceRange[1] < 10000000) && "border-primary/30 bg-primary/5")}>
+                <Button 
+                  variant={isPriceFilterActive ? "default" : "outline"} 
+                  size="icon" 
+                  className={cn(
+                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
+                    activeFilter === 'price' && "border-primary ring-2 ring-primary/20", 
+                    isPriceFilterActive && "border-primary/30 bg-primary/5"
+                  )}
+                >
                   <IndianRupee className="h-4 w-4" />
-                  {(priceRange[0] > 0 || priceRange[1] < 10000000) && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
-                      ₹₹
+                  {isPriceFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
+                      ₹
                     </Badge>}
                 </Button>
               </PopoverTrigger>
@@ -314,7 +350,12 @@ const Marketplace = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">From</span>
-                      <span className="text-sm font-medium">{formatPrice(priceRange[0])}</span>
+                      <span className="text-sm font-medium inline-flex items-center">
+                        <span className="text-sm">₹</span>
+                        <span className="text-sm">{new Intl.NumberFormat('en-IN', {
+                          maximumFractionDigits: 0
+                        }).format(priceRange[0])}</span>
+                      </span>
                     </div>
                     <Slider 
                       value={[priceRange[0]]} 
@@ -325,7 +366,12 @@ const Marketplace = () => {
                     />
                     <div className="flex justify-between mt-4">
                       <span className="text-sm text-muted-foreground">To</span>
-                      <span className="text-sm font-medium">{formatPrice(priceRange[1])}</span>
+                      <span className="text-sm font-medium inline-flex items-center">
+                        <span className="text-sm">₹</span>
+                        <span className="text-sm">{new Intl.NumberFormat('en-IN', {
+                          maximumFractionDigits: 0
+                        }).format(priceRange[1])}</span>
+                      </span>
                     </div>
                     <Slider 
                       value={[priceRange[1]]} 
@@ -341,9 +387,17 @@ const Marketplace = () => {
 
             <Popover open={activeFilter === 'year'} onOpenChange={open => setActiveFilter(open ? 'year' : null)}>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className={cn("rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", activeFilter === 'year' && "border-primary ring-2 ring-primary/20", (yearRange[0] > 2010 || yearRange[1] < new Date().getFullYear()) && "border-primary/30 bg-primary/5")}>
+                <Button 
+                  variant={isYearFilterActive ? "default" : "outline"} 
+                  size="icon" 
+                  className={cn(
+                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
+                    activeFilter === 'year' && "border-primary ring-2 ring-primary/20", 
+                    isYearFilterActive && "border-primary/30 bg-primary/5"
+                  )}
+                >
                   <Calendar className="h-4 w-4" />
-                  {(yearRange[0] > 2010 || yearRange[1] < new Date().getFullYear()) && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
+                  {isYearFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
                       {yearRange[0].toString().slice(-2)}
                     </Badge>}
                 </Button>
@@ -369,9 +423,17 @@ const Marketplace = () => {
 
             <Popover open={activeFilter === 'condition'} onOpenChange={open => setActiveFilter(open ? 'condition' : null)}>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" className={cn("rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", activeFilter === 'condition' && "border-primary ring-2 ring-primary/20", conditionFilter !== 'all' && "border-primary/30 bg-primary/5")}>
+                <Button 
+                  variant={isConditionFilterActive ? "default" : "outline"} 
+                  size="icon" 
+                  className={cn(
+                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
+                    activeFilter === 'condition' && "border-primary ring-2 ring-primary/20", 
+                    isConditionFilterActive && "border-primary/30 bg-primary/5"
+                  )}
+                >
                   <Layers className="h-4 w-4" />
-                  {conditionFilter !== 'all' && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
+                  {isConditionFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
                       •
                     </Badge>}
                 </Button>
