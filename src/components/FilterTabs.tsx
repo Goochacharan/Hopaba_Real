@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface FilterTabsProps {
   distance: number[];
@@ -45,6 +46,15 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
 }) => {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   
+  // Helper to check if distance filter is active (user has changed from default)
+  const isDistanceActive = distance[0] < 10;
+  
+  // Helper to check if rating filter is active
+  const isRatingActive = minRating[0] > 0;
+  
+  // Helper to check if price filter is active (changed from default)
+  const isPriceActive = priceRange < 3;
+
   return (
     <ScrollArea className="w-full">
       <div className="flex items-center gap-2 pb-2 pt-1 px-1 overflow-x-auto min-w-max">
@@ -52,16 +62,15 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
         <Popover open={activeFilter === 'rating'} onOpenChange={(open) => setActiveFilter(open ? 'rating' : null)}>
           <PopoverTrigger asChild>
             <Button 
-              variant="outline" 
+              variant={isRatingActive ? "default" : "outline"}
               size="sm" 
               className={cn(
-                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
-                activeFilter === 'rating' && "ring-2 ring-primary/20",
-                minRating[0] > 3 && "border-primary/30 bg-primary/5"
+                "rounded-full border flex items-center justify-center w-10 h-10 relative",
+                activeFilter === 'rating' && "ring-2 ring-primary/20"
               )}
             >
               <Star className="w-4 h-4" />
-              {minRating[0] > 3 && (
+              {isRatingActive && (
                 <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-primary text-white">
                   {minRating[0]}+
                 </Badge>
@@ -82,11 +91,15 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
                 <Slider
                   id="rating"
                   value={minRating}
-                  min={3}
+                  min={0}
                   max={5}
-                  step={0.1}
+                  step={0.5}
                   onValueChange={setMinRating}
                 />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Any</span>
+                  <span>5.0</span>
+                </div>
               </div>
             </div>
           </PopoverContent>
@@ -96,18 +109,17 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
         <Popover open={activeFilter === 'price'} onOpenChange={(open) => setActiveFilter(open ? 'price' : null)}>
           <PopoverTrigger asChild>
             <Button 
-              variant="outline" 
+              variant={isPriceActive ? "default" : "outline"} 
               size="sm" 
               className={cn(
-                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
-                activeFilter === 'price' && "ring-2 ring-primary/20",
-                priceRange < 3 && "border-primary/30 bg-primary/5"
+                "rounded-full border flex items-center justify-center w-10 h-10 relative",
+                activeFilter === 'price' && "ring-2 ring-primary/20"
               )}
             >
               <IndianRupee className="w-4 h-4" />
-              {priceRange < 3 && (
+              {isPriceActive && (
                 <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-primary text-white">
-                  {Array(priceRange).fill('₹').join('')}
+                  {priceRange}
                 </Badge>
               )}
             </Button>
@@ -122,57 +134,35 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
                     {Array(priceRange).fill('₹').join('')}
                   </span>
                 </div>
-                <Slider
-                  id="price"
-                  value={[priceRange]}
-                  min={1}
-                  max={3}
-                  step={1}
-                  onValueChange={(value) => setPriceRange(value[0])}
-                />
+                
+                {/* Replace the slider with a toggle group for easier selection */}
+                <ToggleGroup type="single" value={priceRange.toString()} onValueChange={(value) => setPriceRange(parseInt(value) || 3)}>
+                  <ToggleGroupItem value="1" className="flex-1">₹</ToggleGroupItem>
+                  <ToggleGroupItem value="2" className="flex-1">₹₹</ToggleGroupItem>
+                  <ToggleGroupItem value="3" className="flex-1">₹₹₹</ToggleGroupItem>
+                </ToggleGroup>
+                
+                <div className="flex justify-between text-xs text-muted-foreground pt-1">
+                  <span>Budget</span>
+                  <span>Mid-range</span>
+                  <span>Premium</span>
+                </div>
               </div>
             </div>
           </PopoverContent>
         </Popover>
 
         {/* Hours Filter */}
-        <Popover open={activeFilter === 'hours'} onOpenChange={(open) => setActiveFilter(open ? 'hours' : null)}>
-          <PopoverTrigger asChild>
-            <Button 
-              variant={openNowOnly ? "default" : "outline"}
-              size="sm" 
-              className={cn(
-                "rounded-full border flex items-center justify-center w-10 h-10 relative",
-                activeFilter === 'hours' && "ring-2 ring-primary/20"
-              )}
-              onClick={() => {
-                if (!openNowOnly) {
-                  setOpenNowOnly(true);
-                  setActiveFilter(null);
-                } else {
-                  setOpenNowOnly(false);
-                }
-              }}
-            >
-              <Clock className="w-4 h-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80 p-4" align="start">
-            <div className="space-y-4">
-              <h4 className="font-medium">Hours</h4>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="open-now" className="text-sm font-medium cursor-pointer">
-                  Open Now
-                </Label>
-                <Switch
-                  id="open-now"
-                  checked={openNowOnly}
-                  onCheckedChange={setOpenNowOnly}
-                />
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <Button 
+          variant={openNowOnly ? "default" : "outline"}
+          size="sm" 
+          className={cn(
+            "rounded-full border flex items-center justify-center w-10 h-10 relative"
+          )}
+          onClick={() => setOpenNowOnly(!openNowOnly)}
+        >
+          <Clock className="w-4 h-4" />
+        </Button>
 
         {/* Hidden Gem Filter */}
         <Button 
@@ -204,12 +194,11 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
         <Popover open={activeFilter === 'distance'} onOpenChange={(open) => setActiveFilter(open ? 'distance' : null)}>
           <PopoverTrigger asChild>
             <Button 
-              variant="outline" 
+              variant={isDistanceActive ? "default" : "outline"}
               size="sm" 
               className={cn(
-                "rounded-full border border-border/60 flex items-center justify-center bg-background w-10 h-10 relative",
-                activeFilter === 'distance' && "ring-2 ring-primary/20",
-                distance[0] !== 5 && "border-primary/30 bg-primary/5"
+                "rounded-full border flex items-center justify-center w-10 h-10 relative",
+                activeFilter === 'distance' && "ring-2 ring-primary/20"
               )}
             >
               <svg 
@@ -227,7 +216,7 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
                 <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                 <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
               </svg>
-              {distance[0] !== 5 && (
+              {isDistanceActive && (
                 <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium bg-primary text-white">
                   {distance[0]}
                 </Badge>
@@ -245,10 +234,15 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
                 <Slider
                   id="distance"
                   value={distance}
+                  min={0.5}
                   max={10}
                   step={0.5}
                   onValueChange={setDistance}
                 />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>0.5 km</span>
+                  <span>10 km</span>
+                </div>
               </div>
             </div>
           </PopoverContent>

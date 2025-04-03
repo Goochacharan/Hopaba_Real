@@ -13,9 +13,10 @@ export interface SearchFilters {
 }
 
 export function useSearchFilters(initialFilters?: Partial<SearchFilters>) {
-  const [distance, setDistance] = useState<number[]>(initialFilters?.distance || [5]);
-  const [minRating, setMinRating] = useState<number[]>(initialFilters?.minRating || [3]);
-  const [priceRange, setPriceRange] = useState<number>(initialFilters?.priceRange || 2);
+  // Set more neutral default values that don't apply any filtering
+  const [distance, setDistance] = useState<number[]>(initialFilters?.distance || [10]);
+  const [minRating, setMinRating] = useState<number[]>(initialFilters?.minRating || [0]);
+  const [priceRange, setPriceRange] = useState<number>(initialFilters?.priceRange || 3);
   const [openNowOnly, setOpenNowOnly] = useState<boolean>(initialFilters?.openNowOnly || false);
   const [hiddenGemOnly, setHiddenGemOnly] = useState<boolean>(initialFilters?.hiddenGemOnly || false);
   const [mustVisitOnly, setMustVisitOnly] = useState<boolean>(initialFilters?.mustVisitOnly || false);

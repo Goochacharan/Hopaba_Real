@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -16,7 +17,7 @@ interface MarketplaceListingCardProps {
   className?: string;
 }
 const formatPrice = (price: number): string => {
-  return '₹' + price.toLocaleString('en-IN');
+  return price.toLocaleString('en-IN');
 };
 const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   listing,
@@ -42,8 +43,8 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
       <div className="p-4 px-[12px] py-[16px]">
         <h3 className="font-bold text-xl md:text-2xl mb-1">{listing.title}</h3>
         
-        <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl">
-          {formatPrice(listing.price)}
+        <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
+          <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
         </p>
         
         <div className="mt-0">
