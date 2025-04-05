@@ -181,7 +181,7 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
                 <MessageSquare className="h-5 w-5" />
               </Button>
               
-              <Button variant="outline" size="icon" onClick={handleLocation} className="h-10 w-10 rounded-full" title="Get Directions">
+              <Button variant="outline" size="icon" onClick={handleLocation} title="Get Directions" className="h-10 w-10 bg-amber-600 hover:bg-amber-500 rounded text-slate-50">
                 <MapPin className="h-5 w-5" />
               </Button>
               
