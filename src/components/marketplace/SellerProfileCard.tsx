@@ -6,7 +6,6 @@ import { UserCircle, Phone, MessageSquare, MapPin, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
-
 interface SellerProfileCardProps {
   sellerName: string;
   sellerRating: number;
@@ -19,7 +18,6 @@ interface SellerProfileCardProps {
   listingId?: string;
   avatarUrl?: string | null;
 }
-
 const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
   sellerName,
   sellerRating,
@@ -40,11 +38,9 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
     month: 'long',
     year: 'numeric'
   }) : 'Unknown';
-  
   const getInitials = (name: string) => {
     return name.split(' ').map(part => part[0]).join('').toUpperCase().substring(0, 2);
   };
-  
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(window.location.href).then(() => {
@@ -63,7 +59,6 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
       });
     });
   };
-  
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerPhone) {
@@ -88,7 +83,6 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
       });
     }
   };
-  
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerWhatsapp) {
@@ -115,7 +109,6 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
       });
     }
   };
-  
   const handleLocation = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!location) {
@@ -153,7 +146,6 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
       duration: 2000
     });
   };
-  
   return <Card className="shadow-md w-full overflow-hidden">
       <CardHeader className="pb-4 px-8 md:px-8 bg-muted/30">
         <CardTitle className="text-2xl font-bold">Seller Profile</CardTitle>
@@ -185,15 +177,15 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
                 <Phone className="h-5 w-5" />
               </Button>
               
-              <Button variant="outline" size="icon" onClick={handleWhatsApp} title="WhatsApp" className="h-10 w-10 text-slate-50 rounded bg-blue-600 hover:bg-blue-500">
+              <Button variant="outline" size="icon" onClick={handleWhatsApp} title="WhatsApp" className="h-10 w-10 text-slate-50 rounded bg-lime-600 hover:bg-lime-500">
                 <MessageSquare className="h-5 w-5" />
               </Button>
               
-              <Button variant="outline" size="icon" onClick={handleLocation} title="Get Directions" className="h-10 w-10 bg-blue-600 hover:bg-blue-500 rounded text-slate-50">
+              <Button variant="outline" size="icon" onClick={handleLocation} title="Get Directions" className="h-10 w-10 bg-amber-600 hover:bg-amber-500 rounded text-slate-50">
                 <MapPin className="h-5 w-5" />
               </Button>
               
-              <Button variant="outline" size="icon" onClick={handleShare} title="Share" className="h-10 w-10 bg-blue-600 hover:bg-blue-500 text-slate-50 rounded">
+              <Button variant="outline" size="icon" onClick={handleShare} title="Share" className="h-10 w-10 bg-violet-600 hover:bg-violet-500 text-slate-50 rounded">
                 <Share2 className="h-5 w-5" />
               </Button>
             </div>
@@ -202,5 +194,4 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
       </CardContent>
     </Card>;
 };
-
 export default SellerProfileCard;

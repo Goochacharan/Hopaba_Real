@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Building, MapPin, Phone, MessageSquare, Globe, Instagram, IndianRupee, Pencil, Trash, Tag, Clock, Star, Image } from 'lucide-react';
 import { Business } from './BusinessFormSimple';
-import CategoryFilter, { CategoryType } from '@/components/CategoryFilter';
 
 interface BusinessListProps {
   onEdit: (business: Business) => void;
@@ -17,14 +16,12 @@ interface BusinessListProps {
 }
 
 const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) => {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [filteredBusinesses, setFilteredBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
   const [businessToDelete, setBusinessToDelete] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType>('all');
 
   const fetchBusinesses = async () => {
     if (!user) return;
@@ -45,7 +42,6 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
       
       console.log("Fetched businesses:", data);
       setBusinesses(data || []);
-      setFilteredBusinesses(data || []);
     } catch (error: any) {
       console.error('Error fetching businesses:', error);
       toast({
@@ -64,17 +60,6 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
     }
   }, [user, refresh]);
 
-  useEffect(() => {
-    // Apply category filter
-    if (selectedCategory === 'all') {
-      setFilteredBusinesses(businesses);
-    } else {
-      setFilteredBusinesses(businesses.filter(business => 
-        business.category.toLowerCase() === selectedCategory.toLowerCase()
-      ));
-    }
-  }, [selectedCategory, businesses]);
-
   const handleDelete = async (id: string) => {
     try {
       console.log("Deleting business with ID:", id);
@@ -90,7 +75,6 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
       }
       
       setBusinesses(businesses.filter(business => business.id !== id));
-      setFilteredBusinesses(filteredBusinesses.filter(business => business.id !== id));
       toast({
         title: 'Success',
         description: 'Business listing deleted successfully',
@@ -127,16 +111,8 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
 
   return (
     <div className="space-y-6">
-      <div className="mb-6">
-        <CategoryFilter 
-          selectedCategory={selectedCategory} 
-          onSelectCategory={setSelectedCategory} 
-          allowAddCategories={isAdmin}
-        />
-      </div>
-      
       <div className="grid grid-cols-1 gap-6">
-        {filteredBusinesses.map((business) => (
+        {businesses.map((business) => (
           <Card key={business.id} className="overflow-hidden">
             <CardHeader className="bg-muted/30">
               <div className="flex justify-between items-start mb-1">
