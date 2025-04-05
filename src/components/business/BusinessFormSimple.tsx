@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -987,4 +988,122 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
                                   {time}
                                 </SelectItem>
                               ))}
-                            </Select
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="hours_to"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            Working Hours To
+                          </FormLabel>
+                          <Select 
+                            onValueChange={field.onChange}
+                            value={field.value || "5:00 PM"}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select end time" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="max-h-[300px]">
+                              {TIME_OPTIONS.map(time => (
+                                <SelectItem key={`to-${time}`} value={time}>
+                                  {time}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 
+                "Saving..." : 
+                business?.id ? "Update Business" : "Submit Business"
+              }
+            </Button>
+          </div>
+        </form>
+      </Form>
+      
+      <AlertDialog open={showAddCategoryDialog} onOpenChange={setShowAddCategoryDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Add New Category</AlertDialogTitle>
+            <AlertDialogDescription>
+              Enter a new business category to add to the list.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <Input
+              placeholder="Category name"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleAddCategory}>Add Category</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      <AlertDialog 
+        open={showSuccessDialog} 
+        onOpenChange={(open) => {
+          setShowSuccessDialog(open);
+          if (!open) onSaved();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {business?.id ? "Business Updated" : "Business Added"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {business?.id ? 
+                "Your business listing has been updated and will be reviewed by an admin." :
+                "Your business has been listed and will be reviewed by an admin."
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => {
+              setShowSuccessDialog(false);
+              onSaved();
+            }}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+};
+
+export default BusinessFormSimple;

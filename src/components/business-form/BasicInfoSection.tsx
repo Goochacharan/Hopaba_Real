@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { 
@@ -20,7 +21,7 @@ interface BasicInfoSectionProps {
   maxImages?: number;
 }
 
-export default function BasicInfoSection({ maxImages = 10 }: BasicInfoSectionProps) { // Changed default from 5 to 10
+export default function BasicInfoSection({ maxImages = 10 }: BasicInfoSectionProps) {
   const { control, setValue, getValues } = useFormContext<BusinessFormValues>();
   
   return (
