@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -58,7 +57,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         </div>
         
         <ScrollArea className="h-[280px] mb-4 pr-3">
-          <p className="whitespace-pre-line text-gray-950 text-base">
+          <p className="whitespace-pre-line text-gray-950 text-sm">
             {listing.description}
           </p>
         </ScrollArea>
