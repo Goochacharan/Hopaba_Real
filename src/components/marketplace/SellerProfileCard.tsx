@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +6,6 @@ import { UserCircle, Phone, MessageSquare, MapPin, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
-
 interface SellerProfileCardProps {
   sellerName: string;
   sellerRating: number;
@@ -20,7 +18,6 @@ interface SellerProfileCardProps {
   listingId?: string;
   avatarUrl?: string | null;
 }
-
 const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
   sellerName,
   sellerRating,
@@ -33,44 +30,35 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
   listingId,
   avatarUrl
 }) => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const isMobile = useIsMobile();
-  
-  const formattedJoinedDate = joinedDate 
-    ? new Date(joinedDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-    : 'Unknown';
-
+  const formattedJoinedDate = joinedDate ? new Date(joinedDate).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric'
+  }) : 'Unknown';
   const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
+    return name.split(' ').map(part => part[0]).join('').toUpperCase().substring(0, 2);
   };
-
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    navigator.clipboard.writeText(window.location.href)
-      .then(() => {
-        toast({
-          title: "Link copied to clipboard",
-          description: "You can now share this profile with others",
-          duration: 3000,
-        });
-      })
-      .catch(error => {
-        console.error('Failed to copy:', error);
-        toast({
-          title: "Unable to copy link",
-          description: "Please try again later",
-          variant: "destructive",
-          duration: 3000,
-        });
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      toast({
+        title: "Link copied to clipboard",
+        description: "You can now share this profile with others",
+        duration: 3000
       });
+    }).catch(error => {
+      console.error('Failed to copy:', error);
+      toast({
+        title: "Unable to copy link",
+        description: "Please try again later",
+        variant: "destructive",
+        duration: 3000
+      });
+    });
   };
-
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerPhone) {
@@ -81,28 +69,25 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
       toast({
         title: "Calling seller",
         description: `Dialing ${sellerPhone}...`,
-        duration: 2000,
+        duration: 2000
       });
     } else {
       toast({
         title: "Phone number not available",
         description: "The seller has not provided a phone number",
         variant: "destructive",
-        duration: 3000,
+        duration: 3000
       });
     }
   };
-
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerWhatsapp) {
       const message = `Hi, I'm interested in your listings. Are they still available?`;
       const whatsappUrl = `https://wa.me/${sellerWhatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
-      
       const link = document.createElement('a');
       link.href = whatsappUrl;
       link.target = '_blank';
@@ -110,22 +95,20 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
       toast({
         title: "Opening WhatsApp",
         description: "Starting WhatsApp conversation...",
-        duration: 2000,
+        duration: 2000
       });
     } else {
       toast({
         title: "WhatsApp not available",
         description: "The seller has not provided a WhatsApp number",
         variant: "destructive",
-        duration: 3000,
+        duration: 3000
       });
     }
   };
-
   const handleLocation = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!location) {
@@ -133,27 +116,23 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
         title: "Location not available",
         description: "Location information is not available",
         variant: "destructive",
-        duration: 3000,
+        duration: 3000
       });
       return;
     }
-    
     let mapsUrl;
-    
     if (mapLink && mapLink.trim() !== '') {
       mapsUrl = mapLink;
     } else if (location && (location.includes('google.com/maps') || location.includes('goo.gl/maps'))) {
       mapsUrl = location;
     } else {
       const destination = encodeURIComponent(location || '');
-      
       if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
         mapsUrl = `maps://maps.apple.com/?q=${destination}`;
       } else {
         mapsUrl = `https://www.google.com/maps/search/?api=1&query=${destination}`;
       }
     }
-    
     const link = document.createElement('a');
     link.href = mapsUrl;
     link.target = '_blank';
@@ -161,29 +140,22 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
     toast({
       title: "Opening Directions",
       description: `Getting directions to location...`,
-      duration: 2000,
+      duration: 2000
     });
   };
-
-  return (
-    <Card className="shadow-md w-full overflow-hidden">
+  return <Card className="shadow-md w-full overflow-hidden">
       <CardHeader className="pb-4 px-8 md:px-8 bg-muted/30">
         <CardTitle className="text-2xl font-bold">Seller Profile</CardTitle>
       </CardHeader>
       <CardContent className="px-6 md:px-8 py-5">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
           <Avatar className="h-32 w-32 border-4 border-background">
-            {avatarUrl ? (
-              <AvatarImage src={avatarUrl} alt={sellerName} />
-            ) : (
-              <AvatarFallback className="bg-primary/10 text-primary text-4xl">
+            {avatarUrl ? <AvatarImage src={avatarUrl} alt={sellerName} /> : <AvatarFallback className="bg-primary/10 text-primary text-4xl">
                 {getInitials(sellerName)}
-              </AvatarFallback>
-            )}
+              </AvatarFallback>}
           </Avatar>
           
           <div className="space-y-4 text-center md:text-left w-full">
@@ -200,52 +172,26 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
               </div>
             </div>
             
-            <div className="flex flex-wrap gap-3 mt-2">
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={handleCall}
-                className="h-10 w-10 rounded-full"
-                title="Call Seller"
-              >
+            <div className="flex flex-wrap gap-3 mt-2 my-[10px] px-[38px]">
+              <Button variant="outline" size="icon" onClick={handleCall} className="h-10 w-10 rounded-full" title="Call Seller">
                 <Phone className="h-5 w-5" />
               </Button>
               
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={handleWhatsApp}
-                className="h-10 w-10 rounded-full"
-                title="WhatsApp"
-              >
+              <Button variant="outline" size="icon" onClick={handleWhatsApp} className="h-10 w-10 rounded-full" title="WhatsApp">
                 <MessageSquare className="h-5 w-5" />
               </Button>
               
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={handleLocation}
-                className="h-10 w-10 rounded-full"
-                title="Get Directions"
-              >
+              <Button variant="outline" size="icon" onClick={handleLocation} className="h-10 w-10 rounded-full" title="Get Directions">
                 <MapPin className="h-5 w-5" />
               </Button>
               
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={handleShare}
-                className="h-10 w-10 rounded-full"
-                title="Share"
-              >
+              <Button variant="outline" size="icon" onClick={handleShare} className="h-10 w-10 rounded-full" title="Share">
                 <Share2 className="h-5 w-5" />
               </Button>
             </div>
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default SellerProfileCard;
