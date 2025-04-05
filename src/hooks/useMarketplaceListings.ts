@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,6 +23,7 @@ export interface MarketplaceListing {
   updated_at: string;
   approval_status?: string;
   review_count?: number;
+  tags?: string[]; // Add tags field to the interface
 }
 
 interface UseMarketplaceListingsOptions {
@@ -129,7 +131,10 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
           // Calculate a relevance score for each listing based on how many search words it contains across different fields
           filteredData = filteredData.map(listing => {
             // Combine all relevant text fields into one searchable text
-            const listingText = `${listing.title} ${listing.description} ${listing.category} ${listing.location} ${listing.seller_name}`.toLowerCase();
+            const tags = listing.tags || [];
+            const tagText = Array.isArray(tags) ? tags.join(' ') : '';
+            
+            const listingText = `${listing.title} ${listing.description} ${listing.category} ${listing.location} ${listing.seller_name} ${tagText}`.toLowerCase();
             
             // Count how many of the search words appear in the listing
             const matchedWords = searchWords.filter(word => listingText.includes(word));
@@ -153,10 +158,19 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
               listing.seller_name.toLowerCase().includes(word)
             ).length;
             
+            // Increase score for tag matches
+            const tagMatches = searchWords.filter(word => {
+              if (!Array.isArray(listing.tags)) return false;
+              return listing.tags.some(tag => 
+                tag.toLowerCase().includes(word)
+              );
+            }).length;
+            
             // Add bonuses for matches in different fields
             relevanceScore += (titleMatches / totalWords) * 0.5; // 50% bonus for title matches
             relevanceScore += (locationMatches / totalWords) * 0.4; // 40% bonus for location matches
             relevanceScore += (sellerNameMatches / totalWords) * 0.3; // 30% bonus for seller name matches
+            relevanceScore += (tagMatches / totalWords) * 0.5; // 50% bonus for tag matches
             
             // Special case: If all words appear somewhere in the listing, give a big boost
             if (matchedWords.length === searchWords.length) {
@@ -170,18 +184,25 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
               }
             }
 
-            // Check for cross-field matches (e.g., one word in title, another in location)
-            // This specifically helps with cases like "Rambhavan muddinpallya"
+            // Check for cross-field matches (e.g., one word in title, another in location, another in tags)
             if (searchWords.length >= 2) {
               const titleWords = listing.title.toLowerCase().split(/\s+/);
               const locationWords = listing.location.toLowerCase().split(/\s+/);
               const descriptionWords = listing.description.toLowerCase().split(/\s+/);
+              const tagWords = Array.isArray(listing.tags) 
+                ? listing.tags.flatMap(tag => tag.toLowerCase().split(/\s+/)) 
+                : [];
               
               // Check if different search words match in different fields
-              const hasFieldCrossing = searchWords.some(word => 
-                titleWords.includes(word)
-              ) && searchWords.some(word => 
-                locationWords.includes(word) || descriptionWords.includes(word)
+              const hasFieldCrossing = (
+                searchWords.some(word => titleWords.includes(word)) && 
+                (
+                  searchWords.some(word => locationWords.includes(word) || descriptionWords.includes(word)) ||
+                  searchWords.some(word => tagWords.includes(word))
+                )
+              ) || (
+                searchWords.some(word => tagWords.includes(word)) && 
+                searchWords.some(word => locationWords.includes(word))
               );
               
               if (hasFieldCrossing) {
@@ -211,6 +232,7 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         seller_id: l.seller_id,
         seller_name: l.seller_name,
         seller_rating: l.seller_rating,
+        tags: l.tags,
         current_user_id: user?.id
       })));
       
