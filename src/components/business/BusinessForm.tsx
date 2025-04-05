@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -31,6 +32,7 @@ export interface Business {
   price_unit?: string;
   price_range_min?: number;
   price_range_max?: number;
+  images?: string[];
 }
 
 const businessSchema = z.object({
@@ -85,6 +87,7 @@ const businessSchema = z.object({
       message: "Please add at least 3 tags describing your services or items."
     })
     .optional(),
+  images: z.array(z.string()).optional(),
 });
 
 export type BusinessFormValues = z.infer<typeof businessSchema>;

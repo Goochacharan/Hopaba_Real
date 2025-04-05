@@ -72,6 +72,7 @@ const businessSchema = z.object({
   languages: z.array(z.string()).optional(),
   experience: z.string().optional(),
   tags: z.array(z.string()).min(3, { message: "Please add at least 3 tags describing your services or items." }).optional(),
+  images: z.array(z.string()).optional(),
 });
 
 type BusinessFormValues = z.infer<typeof businessSchema>;
