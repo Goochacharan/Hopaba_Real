@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Card,
@@ -103,9 +102,10 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
             <button 
               onClick={(e) => handleInstagramClick(e, business.instagram, business.name)}
               title="Watch video content" 
-              className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 px-4 py-2"
+              className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 px-4 py-2 flex items-center"
             >
-              <Film className="h-5 w-5 text-white" />
+              <Film className="h-5 w-5 text-white mr-1" />
+              <span className="text-white text-xs font-medium">Video</span>
             </button>
           )}
         </div>
