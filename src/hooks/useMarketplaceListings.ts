@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,7 +23,7 @@ export interface MarketplaceListing {
   updated_at: string;
   approval_status?: string;
   review_count?: number;
-  tags?: string[]; // Add tags field to the interface
+  tags?: string[]; // Added the tags property
 }
 
 interface UseMarketplaceListingsOptions {
@@ -245,24 +246,18 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
 
   // Process natural language query by removing common connector words
   const processNaturalLanguageQuery = (query: string): string => {
-    // List of common connector words/stopwords to remove
     const stopwords = ['in', 'at', 'near', 'around', 'by', 'the', 'a', 'an', 'for', 'with', 'to', 'from', 'and', 'or'];
     
-    // Replace all commas with spaces for better tokenization
     let processedQuery = query.replace(/,/g, ' ');
     
-    // Split into words and filter out stopwords, but keep location terms
     const allWords = processedQuery.split(/\s+/).filter(word => word.length > 0);
     
-    // First pass: identify location terms
-    const possibleLocations: string[] = [];
+    let possibleLocations: string[] = [];
     let locationMode = false;
     
-    // Look for location indicators
     for (let i = 0; i < allWords.length; i++) {
       const word = allWords[i].toLowerCase();
       
-      // These words likely indicate the next word is a location
       if (['in', 'at', 'near', 'around', 'by'].includes(word) && i < allWords.length - 1) {
         possibleLocations.push(allWords[i + 1]);
         locationMode = true;
@@ -273,7 +268,6 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
       }
     }
     
-    // Second pass: build the processed query
     const processedWords = allWords.filter(word => 
       !stopwords.includes(word.toLowerCase()) || possibleLocations.includes(word)
     );
