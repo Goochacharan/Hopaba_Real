@@ -88,33 +88,59 @@ const LocationCard: React.FC<LocationCardProps> = ({
     const currentMinute = now.getMinutes();
     const currentTimeInMinutes = currentHour * 60 + currentMinute;
     
+    console.log(`Calculating open status for ${recommendation.name}`);
+    console.log(`Current day: ${currentDay}, Current time: ${currentHour}:${currentMinute} (${currentTimeInMinutes} minutes)`);
+    
     if (recommendation.availability_days && Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0) {
-      const isAvailableToday = recommendation.availability_days.some(day => 
-        currentDay.toLowerCase().includes(day.toLowerCase()) || day.toLowerCase().includes(currentDay.toLowerCase())
-      );
+      // Check if today is in the available days
+      const isAvailableToday = recommendation.availability_days.some(day => {
+        const dayMatch = currentDay.toLowerCase().includes(day.toLowerCase()) || 
+                       day.toLowerCase().includes(currentDay.toLowerCase());
+        console.log(`Checking day: ${day} against current day: ${currentDay}, match: ${dayMatch}`);
+        return dayMatch;
+      });
       
-      if (!isAvailableToday) return false;
+      if (!isAvailableToday) {
+        console.log("Not available today");
+        return false;
+      }
+      
+      console.log("Available today, checking hours");
       
       if (recommendation.availability_start_time && recommendation.availability_end_time) {
         const startTime = parseTimeString(recommendation.availability_start_time);
         const endTime = parseTimeString(recommendation.availability_end_time);
         
+        console.log(`Start time: ${recommendation.availability_start_time} (${startTime} minutes)`);
+        console.log(`End time: ${recommendation.availability_end_time} (${endTime} minutes)`);
+        console.log(`Current time: ${currentTimeInMinutes} minutes`);
+        
+        // If end time is earlier than start time, it means the business closes after midnight
         if (endTime < startTime) {
-          return currentTimeInMinutes >= startTime || currentTimeInMinutes <= endTime;
+          const isOpen = currentTimeInMinutes >= startTime || currentTimeInMinutes <= endTime;
+          console.log(`Business operates overnight, is open: ${isOpen}`);
+          return isOpen;
         }
         
-        return currentTimeInMinutes >= startTime && currentTimeInMinutes <= endTime;
+        const isOpen = currentTimeInMinutes >= startTime && currentTimeInMinutes <= endTime;
+        console.log(`Is open based on time range: ${isOpen}`);
+        return isOpen;
       }
       
+      // If we have the day but not specific hours, consider it open for the whole day
       return isAvailableToday;
     }
     
+    // Try to parse hours from the hours field
     if (recommendation.hours) {
+      console.log(`Parsing hours from: ${recommendation.hours}`);
       const hoursMatch = recommendation.hours.match(/([\d:]+\s*[AP]M)\s*-\s*([\d:]+\s*[AP]M)/i);
       if (hoursMatch) {
         const startTime = parseTimeString(hoursMatch[1]);
         const endTime = parseTimeString(hoursMatch[2]);
         
+        console.log(`Extracted hours - start: ${hoursMatch[1]} (${startTime} minutes), end: ${hoursMatch[2]} (${endTime} minutes)`);
+        
         if (endTime < startTime) {
           return currentTimeInMinutes >= startTime || currentTimeInMinutes <= endTime;
         }
@@ -123,8 +149,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
       }
     }
     
+    // Check availability string for clues
     if (recommendation.availability) {
       const availStr = recommendation.availability.toLowerCase();
+      console.log(`Checking availability string: ${availStr}`);
       
       if (availStr.includes("appointment")) return false;
       
@@ -141,25 +169,34 @@ const LocationCard: React.FC<LocationCardProps> = ({
       }
     }
     
+    console.log("Could not determine open status");
     return undefined;
   };
 
   const parseTimeString = (timeString: string): number => {
     try {
       const cleanTimeString = timeString.trim().toUpperCase();
+      console.log(`Parsing time string: ${cleanTimeString}`);
       
       const timeMatch = cleanTimeString.match(/(\d+)(?::(\d+))?\s*(AM|PM)/i);
       
-      if (!timeMatch) return 0;
+      if (!timeMatch) {
+        console.log(`Could not parse time: ${cleanTimeString}`);
+        return 0;
+      }
       
       let hours = parseInt(timeMatch[1], 10);
       const minutes = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
       const period = timeMatch[3].toUpperCase();
       
+      // Adjust hours for PM
       if (period === 'PM' && hours < 12) hours += 12;
+      // Adjust for 12 AM
       if (period === 'AM' && hours === 12) hours = 0;
       
-      return hours * 60 + minutes;
+      const totalMinutes = hours * 60 + minutes;
+      console.log(`Parsed ${cleanTimeString} as ${hours}:${minutes} (${totalMinutes} minutes)`);
+      return totalMinutes;
     } catch (e) {
       console.error("Error parsing time string:", timeString, e);
       return 0;

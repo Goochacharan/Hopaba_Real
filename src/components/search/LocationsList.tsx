@@ -62,15 +62,24 @@ const LocationsList: React.FC<LocationsListProps> = ({
     );
   }
   
+  console.log("LocationsList - Rendering recommendations:", recommendations);
+  
   return (
     <div className="grid grid-cols-1 gap-6">
       {recommendations.map((recommendation, index) => {
-        // Safely handle availability_days
-        const availabilityDays = recommendation.availability_days || [];
-        const availabilityDaysString = Array.isArray(availabilityDays) 
-          ? availabilityDays.map(day => String(day)) 
-          : [];
+        console.log(`LocationsList - Processing recommendation ${index}:`, recommendation.id);
+        console.log(`Availability days:`, recommendation.availability_days);
+        console.log(`Hours:`, recommendation.hours);
+        console.log(`Start time:`, recommendation.availability_start_time);
+        console.log(`End time:`, recommendation.availability_end_time);
+        
+        // Safely ensure availability_days is an array
+        const availabilityDays = Array.isArray(recommendation.availability_days)
+          ? recommendation.availability_days
+          : (recommendation.availability_days ? [recommendation.availability_days] : []);
           
+        const availabilityDaysString = availabilityDays.map(day => String(day));
+        
         // Get user reviews from localStorage
         const { count: userReviewsCount, avgRating: userAvgRating } = getStoredReviews(recommendation.id);
         

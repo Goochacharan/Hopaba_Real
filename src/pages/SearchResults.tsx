@@ -57,6 +57,15 @@ const SearchResults = () => {
   const error = recommendationsError || marketplaceError;
 
   const enhancedRecommendations = recommendations.map((rec, index) => {
+    console.log("SearchResults - Enhancing recommendation:", rec.name);
+    console.log("Availability data:", {
+      days: rec.availability_days,
+      hours: rec.hours,
+      availability: rec.availability,
+      start_time: rec.availability_start_time,
+      end_time: rec.availability_end_time
+    });
+    
     return {
       ...rec,
       isHiddenGem: rec.isHiddenGem || index % 3 === 0,
