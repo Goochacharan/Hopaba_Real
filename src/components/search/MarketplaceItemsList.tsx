@@ -3,14 +3,14 @@ import React, { useEffect, useState } from 'react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { cn } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Tag } from 'lucide-react';
 import NoResultsMessage from './NoResultsMessage';
 import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Clock } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
-import { matchSearchTermsWithTags } from '@/utils/searchUtils';
+import { matchSearchTermsWithTags, improveSearchByTags } from '@/utils/searchUtils';
 
 interface MarketplaceItemsListProps {
   listings: MarketplaceListing[];
@@ -31,6 +31,22 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
   const [searchParams] = useSearchParams();
   const urlSearchQuery = searchParams.get('q') || '';
   const effectiveSearchQuery = searchQuery || urlSearchQuery;
+  const [matchedTags, setMatchedTags] = useState<string[]>([]);
+
+  // Filter listings to show approved ones or user's own listings regardless of approval status
+  const visibleListings = listings.filter(listing => 
+    listing.approval_status === 'approved' || 
+    (user && listing.seller_id === user.id)
+  );
+
+  useEffect(() => {
+    if (effectiveSearchQuery && visibleListings.length > 0) {
+      const { tagMatches } = improveSearchByTags(visibleListings, effectiveSearchQuery);
+      setMatchedTags(tagMatches);
+    } else {
+      setMatchedTags([]);
+    }
+  }, [effectiveSearchQuery, visibleListings]);
 
   if (loading) {
     return (
@@ -48,20 +64,14 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     );
   }
 
-  // Filter listings to show approved ones or user's own listings regardless of approval status
-  const visibleListings = listings.filter(listing => 
-    listing.approval_status === 'approved' || 
-    (user && listing.seller_id === user.id)
-  );
-
   // Process natural language search query by removing common connector words
   const processNaturalLanguageQuery = (query: string): string[] => {
     const stopwords = ['in', 'at', 'near', 'around', 'by', 'the', 'a', 'an', 'for', 'with', 'to', 'from', 'and', 'or'];
     let processedQuery = query.replace(/,/g, ' ');
     
-    // Get all words with length >= 3 that aren't stopwords
+    // Get all words with length >= 2 that aren't stopwords
     const words = processedQuery.split(/\s+/).filter(word => 
-      word.length >= 3 && !stopwords.includes(word.toLowerCase())
+      word.length >= 2 && !stopwords.includes(word.toLowerCase())
     );
     
     return words;
@@ -79,7 +89,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     
     let result = text;
     sortedWords.forEach(word => {
-      if (word.length < 3) return; // Skip very short words
+      if (word.length < 2) return; // Skip very short words
       
       // Case insensitive replacement with word boundary awareness when possible
       const regex = new RegExp(`(\\b${word}|${word})`, 'gi');
@@ -113,9 +123,20 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
           <Clock className="h-4 w-4 text-yellow-600" />
           <AlertDescription className="text-yellow-800">
             Some of your listings are pending admin approval and are only visible to you.
-            {visibleListings.some(l => l.title.toLowerCase().includes('honda') && l.title.toLowerCase().includes('wrv')) && (
-              <span className="block mt-1 font-medium">Your Honda WRV listing will appear after approval.</span>
-            )}
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {matchedTags.length > 0 && (
+        <Alert variant="default" className="bg-blue-50 border-blue-200">
+          <Tag className="h-4 w-4 text-blue-600 mr-2" />
+          <AlertDescription className="text-blue-800">
+            Found matches for tags: {' '}
+            {matchedTags.map((tag, index) => (
+              <Badge key={index} variant="secondary" className="mr-1 mb-1 bg-blue-100">
+                {tag}
+              </Badge>
+            ))}
           </AlertDescription>
         </Alert>
       )}
@@ -127,7 +148,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
             className={cn(
               "animate-fade-in h-full relative", 
               "hover:shadow-md transition-shadow duration-300",
-              hasMatchingTags(listing) ? "ring-1 ring-amber-300" : "",
+              hasMatchingTags(listing) ? "ring-2 ring-amber-300" : "",
               { "animation-delay": `${index * 100}ms` }
             )}
             style={{ animationDelay: `${index * 100}ms` }}

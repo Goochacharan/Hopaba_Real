@@ -1,4 +1,3 @@
-
 import { calculateDistance } from '@/lib/locationUtils';
 import { Recommendation } from '@/lib/mockData';
 
@@ -69,13 +68,14 @@ export const enhanceRecommendations = (recommendations: Recommendation[]) => {
   });
 };
 
-// Utility function to match search terms against tags
+// Improved utility function to match search terms against tags
 export const matchSearchTermsWithTags = (searchQuery: string, tags: string[] | undefined): boolean => {
   if (!searchQuery || !tags || !Array.isArray(tags) || tags.length === 0) return false;
 
   // Process the search query to get individual terms
   const searchTerms = searchQuery.toLowerCase()
-    .split(/[\s,]+/) // Split by spaces and commas
+    .replace(/,/g, ' ')  // Replace commas with spaces
+    .split(/\s+/)        // Split by spaces 
     .filter(term => term.length >= 2); // Only terms with at least 2 characters
   
   if (searchTerms.length === 0) return false;
@@ -84,7 +84,12 @@ export const matchSearchTermsWithTags = (searchQuery: string, tags: string[] | u
   return searchTerms.some(term => {
     return tags.some(tag => {
       if (typeof tag !== 'string') return false;
-      return tag.toLowerCase().includes(term) || term.includes(tag.toLowerCase());
+      const normalizedTag = tag.toLowerCase();
+      
+      // Check for direct matches or partial matches with word boundaries
+      return normalizedTag === term || 
+             normalizedTag.includes(term) || 
+             term.includes(normalizedTag);
     });
   });
 };
@@ -150,4 +155,48 @@ export const calculateSearchRelevance = (
   }
   
   return score;
+};
+
+// New function to improve search across locations, events, and marketplace
+export const improveSearchByTags = <T extends { tags?: string[] }>(
+  items: T[],
+  searchQuery: string
+): { items: T[], tagMatches: string[] } => {
+  if (!searchQuery) return { items, tagMatches: [] };
+  
+  const searchTerms = searchQuery.toLowerCase()
+    .replace(/,/g, ' ')
+    .split(/\s+/)
+    .filter(term => term.length >= 2);
+  
+  if (searchTerms.length === 0) return { items, tagMatches: [] };
+  
+  // Track which tags were matched
+  const matchedTags: string[] = [];
+  
+  // Count items that match any tag
+  const itemsWithTagMatch = items.filter(item => {
+    const tags = item.tags || [];
+    const hasMatch = tags.some(tag => {
+      if (typeof tag !== 'string') return false;
+      const tagLower = tag.toLowerCase();
+      
+      const matchesAnyTerm = searchTerms.some(term => {
+        const isMatch = tagLower === term || tagLower.includes(term) || term.includes(tagLower);
+        if (isMatch && !matchedTags.includes(tag)) {
+          matchedTags.push(tag);
+        }
+        return isMatch;
+      });
+      
+      return matchesAnyTerm;
+    });
+    
+    return hasMatch;
+  });
+  
+  return {
+    items: itemsWithTagMatch.length > 0 ? itemsWithTagMatch : items,
+    tagMatches: matchedTags
+  };
 };
