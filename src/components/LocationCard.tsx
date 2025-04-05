@@ -75,7 +75,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
   }, []);
 
   useEffect(() => {
-    setCurrentOpenStatus(calculateOpenStatus());
+    const status = calculateOpenStatus();
+    console.log(`${recommendation.name} - Open status calculated:`, status);
+    setCurrentOpenStatus(status);
   }, [currentTime, recommendation]);
 
   const calculateOpenStatus = (): boolean | undefined => {
@@ -91,21 +93,34 @@ const LocationCard: React.FC<LocationCardProps> = ({
     console.log(`Calculating open status for ${recommendation.name}`);
     console.log(`Current day: ${currentDay}, Current time: ${currentHour}:${currentMinute} (${currentTimeInMinutes} minutes)`);
     
-    if (recommendation.availability_days && Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0) {
-      // Check if today is in the available days
+    if (recommendation.availability_days && Array.isArray(recommendation.availability_days)) {
+      console.log(`Availability days for ${recommendation.name}:`, recommendation.availability_days);
+      
       const isAvailableToday = recommendation.availability_days.some(day => {
-        const dayMatch = currentDay.toLowerCase().includes(day.toLowerCase()) || 
-                       day.toLowerCase().includes(currentDay.toLowerCase());
-        console.log(`Checking day: ${day} against current day: ${currentDay}, match: ${dayMatch}`);
+        const normalizedCurrentDay = currentDay.trim().toLowerCase();
+        const normalizedDay = String(day).trim().toLowerCase();
+        
+        const dayMatch = normalizedCurrentDay.includes(normalizedDay) || 
+                         normalizedDay.includes(normalizedCurrentDay) ||
+                         (normalizedCurrentDay.includes('sun') && normalizedDay.includes('sun')) ||
+                         (normalizedCurrentDay.includes('mon') && normalizedDay.includes('mon')) ||
+                         (normalizedCurrentDay.includes('tue') && normalizedDay.includes('tue')) ||
+                         (normalizedCurrentDay.includes('wed') && normalizedDay.includes('wed')) ||
+                         (normalizedCurrentDay.includes('thu') && normalizedDay.includes('thu')) ||
+                         (normalizedCurrentDay.includes('fri') && normalizedDay.includes('fri')) ||
+                         (normalizedCurrentDay.includes('sat') && normalizedDay.includes('sat'));
+                         
+        console.log(`Comparing day: "${normalizedDay}" with current day: "${normalizedCurrentDay}", match: ${dayMatch}`);
         return dayMatch;
       });
       
+      console.log(`${recommendation.name} available today: ${isAvailableToday}`);
+      
       if (!isAvailableToday) {
-        console.log("Not available today");
         return false;
       }
       
-      console.log("Available today, checking hours");
+      console.log(`${recommendation.name} - Checking hours`);
       
       if (recommendation.availability_start_time && recommendation.availability_end_time) {
         const startTime = parseTimeString(recommendation.availability_start_time);
@@ -115,25 +130,22 @@ const LocationCard: React.FC<LocationCardProps> = ({
         console.log(`End time: ${recommendation.availability_end_time} (${endTime} minutes)`);
         console.log(`Current time: ${currentTimeInMinutes} minutes`);
         
-        // If end time is earlier than start time, it means the business closes after midnight
         if (endTime < startTime) {
           const isOpen = currentTimeInMinutes >= startTime || currentTimeInMinutes <= endTime;
-          console.log(`Business operates overnight, is open: ${isOpen}`);
+          console.log(`${recommendation.name} operates overnight, is open: ${isOpen}`);
           return isOpen;
         }
         
         const isOpen = currentTimeInMinutes >= startTime && currentTimeInMinutes <= endTime;
-        console.log(`Is open based on time range: ${isOpen}`);
+        console.log(`${recommendation.name} - Is open based on time range: ${isOpen}`);
         return isOpen;
       }
       
-      // If we have the day but not specific hours, consider it open for the whole day
-      return isAvailableToday;
+      return true;
     }
     
-    // Try to parse hours from the hours field
     if (recommendation.hours) {
-      console.log(`Parsing hours from: ${recommendation.hours}`);
+      console.log(`${recommendation.name} - Parsing hours from: ${recommendation.hours}`);
       const hoursMatch = recommendation.hours.match(/([\d:]+\s*[AP]M)\s*-\s*([\d:]+\s*[AP]M)/i);
       if (hoursMatch) {
         const startTime = parseTimeString(hoursMatch[1]);
@@ -149,10 +161,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
       }
     }
     
-    // Check availability string for clues
     if (recommendation.availability) {
       const availStr = recommendation.availability.toLowerCase();
-      console.log(`Checking availability string: ${availStr}`);
+      console.log(`${recommendation.name} - Checking availability string: ${availStr}`);
       
       if (availStr.includes("appointment")) return false;
       
@@ -169,29 +180,53 @@ const LocationCard: React.FC<LocationCardProps> = ({
       }
     }
     
-    console.log("Could not determine open status");
+    console.log(`${recommendation.name} - Could not determine open status`);
     return undefined;
   };
 
   const parseTimeString = (timeString: string): number => {
     try {
+      if (!timeString) return 0;
+      
       const cleanTimeString = timeString.trim().toUpperCase();
       console.log(`Parsing time string: ${cleanTimeString}`);
       
-      const timeMatch = cleanTimeString.match(/(\d+)(?::(\d+))?\s*(AM|PM)/i);
+      if (cleanTimeString.includes("24") && cleanTimeString.includes("HOUR")) {
+        return -1; // Special code for 24 hours
+      }
+      
+      let timeMatch = cleanTimeString.match(/(\d+)(?::(\d+))?\s*(AM|PM)/i);
       
       if (!timeMatch) {
+        timeMatch = cleanTimeString.match(/(\d{1,2})[:\.](\d{2})/);
+        if (timeMatch) {
+          const hours = parseInt(timeMatch[1], 10);
+          const minutes = parseInt(timeMatch[2], 10);
+          return hours * 60 + minutes;
+        }
+        
+        timeMatch = cleanTimeString.match(/(\d+)/);
+        if (timeMatch) {
+          const hours = parseInt(timeMatch[1], 10);
+          if (hours >= 1 && hours <= 12) {
+            if (hours >= 7 && hours <= 11) {
+              return hours * 60; // AM
+            } else {
+              return (hours + 12) * 60; // PM
+            }
+          }
+          return hours * 60;
+        }
+        
         console.log(`Could not parse time: ${cleanTimeString}`);
         return 0;
       }
       
       let hours = parseInt(timeMatch[1], 10);
       const minutes = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
-      const period = timeMatch[3].toUpperCase();
+      const period = timeMatch[3] ? timeMatch[3].toUpperCase() : 'AM';
       
-      // Adjust hours for PM
       if (period === 'PM' && hours < 12) hours += 12;
-      // Adjust for 12 AM
       if (period === 'AM' && hours === 12) hours = 0;
       
       const totalMinutes = hours * 60 + minutes;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -13,7 +12,6 @@ import SearchHeader from '@/components/search/SearchHeader';
 import SearchTabs from '@/components/search/SearchTabs';
 import SearchLocation from '@/components/search/SearchLocation';
 import SearchControls from '@/components/search/SearchControls';
-// Removed MapViewButton import
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -56,8 +54,10 @@ const SearchResults = () => {
   const loading = recommendationsLoading || marketplaceLoading;
   const error = recommendationsError || marketplaceError;
 
+  console.log("Original recommendations:", recommendations);
+
   const enhancedRecommendations = recommendations.map((rec, index) => {
-    console.log("SearchResults - Enhancing recommendation:", rec.name);
+    console.log(`Enhancing recommendation ${index}:`, rec.name);
     console.log("Availability data:", {
       days: rec.availability_days,
       hours: rec.hours,
@@ -69,7 +69,11 @@ const SearchResults = () => {
     return {
       ...rec,
       isHiddenGem: rec.isHiddenGem || index % 3 === 0,
-      isMustVisit: rec.isMustVisit || index % 5 === 0
+      isMustVisit: rec.isMustVisit || index % 5 === 0,
+      availability_days: rec.availability_days || [],
+      hours: rec.hours || '',
+      availability_start_time: rec.availability_start_time || '',
+      availability_end_time: rec.availability_end_time || ''
     };
   });
 
@@ -84,8 +88,10 @@ const SearchResults = () => {
   });
 
   const recommendationsWithDistance = addDistanceToRecommendations(filteredRecommendations, userCoordinates);
-  const enhancedRecommendationsWithDistance = enhanceRecommendations(recommendationsWithDistance);
-  const rankedRecommendations = sortRecommendations(enhancedRecommendationsWithDistance, filters.sortBy);
+  const fullyEnhancedRecommendations = enhanceRecommendations(recommendationsWithDistance);
+  const rankedRecommendations = sortRecommendations(fullyEnhancedRecommendations, filters.sortBy);
+
+  console.log("Final ranked recommendations:", rankedRecommendations);
 
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
@@ -169,8 +175,6 @@ const SearchResults = () => {
             </div>
           )}
         </div>
-        
-        {/* Removed MapViewButton component */}
       </div>
     </MainLayout>
   );
