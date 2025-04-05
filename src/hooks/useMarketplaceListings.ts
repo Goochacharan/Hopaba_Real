@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -97,12 +96,13 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         console.log(`Processed search query: "${processedSearchQuery}"`);
         
         // Split the search query into individual words for more flexible matching
-        const searchWords = processedSearchQuery.split(/\s+/).filter(word => word.length > 0);
+        const searchWords = processedSearchQuery.split(/\s+/).filter(word => word.length > 2);
         
         if (searchWords.length > 0) {
           // Create a complex OR condition for each word across multiple fields
+          // This allows searching for "rambhavan muddinpallya" to match listings where either word appears in any key field
           const orConditions = searchWords.map(word => {
-            return `title.ilike.%${word}%,description.ilike.%${word}%,category.ilike.%${word}%,location.ilike.%${word}%`;
+            return `title.ilike.%${word}%,description.ilike.%${word}%,category.ilike.%${word}%,location.ilike.%${word}%,seller_name.ilike.%${word}%`;
           }).join(',');
           
           query = query.or(orConditions);
@@ -123,12 +123,13 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
       
       if (searchQuery && searchQuery.trim() !== '') {
         const processedSearchQuery = processNaturalLanguageQuery(searchQuery.trim().toLowerCase());
-        const searchWords = processedSearchQuery.split(/\s+/).filter(word => word.length > 0);
+        const searchWords = processedSearchQuery.split(/\s+/).filter(word => word.length > 2);
         
-        if (searchWords.length > 1) {
-          // Calculate a relevance score for each listing based on how many search words it contains
+        if (searchWords.length > 0) {
+          // Calculate a relevance score for each listing based on how many search words it contains across different fields
           filteredData = filteredData.map(listing => {
-            const listingText = `${listing.title} ${listing.description} ${listing.category} ${listing.location}`.toLowerCase();
+            // Combine all relevant text fields into one searchable text
+            const listingText = `${listing.title} ${listing.description} ${listing.category} ${listing.location} ${listing.seller_name}`.toLowerCase();
             
             // Count how many of the search words appear in the listing
             const matchedWords = searchWords.filter(word => listingText.includes(word));
@@ -146,21 +147,46 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
             const locationMatches = searchWords.filter(word => 
               listing.location.toLowerCase().includes(word)
             ).length;
+
+            // Increase score for seller name matches
+            const sellerNameMatches = searchWords.filter(word => 
+              listing.seller_name.toLowerCase().includes(word)
+            ).length;
             
             // Add bonuses for matches in different fields
             relevanceScore += (titleMatches / totalWords) * 0.5; // 50% bonus for title matches
-            relevanceScore += (locationMatches / totalWords) * 0.3; // 30% bonus for location matches
+            relevanceScore += (locationMatches / totalWords) * 0.4; // 40% bonus for location matches
+            relevanceScore += (sellerNameMatches / totalWords) * 0.3; // 30% bonus for seller name matches
             
-            // For consecutive words matching
-            let consecutiveMatches = 0;
-            for (let i = 0; i < searchWords.length - 1; i++) {
-              if (listingText.includes(`${searchWords[i]} ${searchWords[i + 1]}`)) {
-                consecutiveMatches++;
-              }
+            // Special case: If all words appear somewhere in the listing, give a big boost
+            if (matchedWords.length === searchWords.length) {
+              relevanceScore += 0.5;
             }
             
-            if (consecutiveMatches > 0) {
-              relevanceScore += (consecutiveMatches / (totalWords - 1)) * 0.4; // Bonus for consecutive words
+            // For consecutive words matching
+            for (let i = 0; i < searchWords.length - 1; i++) {
+              if (listingText.includes(`${searchWords[i]} ${searchWords[i + 1]}`)) {
+                relevanceScore += 0.4; // Big boost for consecutive word matches
+              }
+            }
+
+            // Check for cross-field matches (e.g., one word in title, another in location)
+            // This specifically helps with cases like "Rambhavan muddinpallya"
+            if (searchWords.length >= 2) {
+              const titleWords = listing.title.toLowerCase().split(/\s+/);
+              const locationWords = listing.location.toLowerCase().split(/\s+/);
+              const descriptionWords = listing.description.toLowerCase().split(/\s+/);
+              
+              // Check if different search words match in different fields
+              const hasFieldCrossing = searchWords.some(word => 
+                titleWords.includes(word)
+              ) && searchWords.some(word => 
+                locationWords.includes(word) || descriptionWords.includes(word)
+              );
+              
+              if (hasFieldCrossing) {
+                relevanceScore += 0.6; // Significant boost for cross-field matching
+              }
             }
             
             return {
@@ -170,7 +196,7 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
           });
           
           // Filter out listings with low relevance (improved threshold)
-          filteredData = filteredData.filter(listing => (listing as any).relevanceScore > 0.3);
+          filteredData = filteredData.filter(listing => (listing as any).relevanceScore > 0.2);
           
           // Sort by relevance score (higher is better)
           filteredData.sort((a, b) => (b as any).relevanceScore - (a as any).relevanceScore);
@@ -180,10 +206,10 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
       console.log("Marketplace listings fetched:", filteredData?.map(l => ({
         id: l.id,
         title: l.title,
-        category: l.category,
         location: l.location,
         approval_status: l.approval_status,
         seller_id: l.seller_id,
+        seller_name: l.seller_name,
         seller_rating: l.seller_rating,
         current_user_id: user?.id
       })));
@@ -200,45 +226,43 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
   // Process natural language query by removing common connector words
   const processNaturalLanguageQuery = (query: string): string => {
     // List of common connector words/stopwords to remove
-    const stopwords = ['in', 'at', 'near', 'around', 'by', 'the', 'a', 'an', 'for', 'with', 'to', 'from'];
+    const stopwords = ['in', 'at', 'near', 'around', 'by', 'the', 'a', 'an', 'for', 'with', 'to', 'from', 'and', 'or'];
     
     // Replace all commas with spaces for better tokenization
     let processedQuery = query.replace(/,/g, ' ');
     
-    // Split into words and filter out stopwords
-    const words = processedQuery.split(/\s+/).filter(word => 
-      word.length > 0 && !stopwords.includes(word.toLowerCase())
-    );
+    // Split into words and filter out stopwords, but keep location terms
+    const allWords = processedQuery.split(/\s+/).filter(word => word.length > 0);
     
-    // Special handling for certain patterns like "X in Y" where Y is likely a location
-    const locationWords: string[] = [];
-    const searchWords: string[] = [];
-    
-    // Look for location indicators and separate location terms
+    // First pass: identify location terms
+    const possibleLocations: string[] = [];
     let locationMode = false;
     
-    words.forEach((word) => {
-      // These words likely indicate the next word is a location
-      if (['near', 'in', 'at', 'around', 'by'].includes(word.toLowerCase())) {
-        locationMode = true;
-        return; // Skip the connector word itself
-      }
+    // Look for location indicators
+    for (let i = 0; i < allWords.length; i++) {
+      const word = allWords[i].toLowerCase();
       
-      if (locationMode) {
-        locationWords.push(word);
+      // These words likely indicate the next word is a location
+      if (['in', 'at', 'near', 'around', 'by'].includes(word) && i < allWords.length - 1) {
+        possibleLocations.push(allWords[i + 1]);
+        locationMode = true;
+      } else if (locationMode && !stopwords.includes(word)) {
+        possibleLocations.push(word);
       } else {
-        searchWords.push(word);
+        locationMode = false;
       }
-    });
+    }
     
-    // Combine all words back, location words are still included as they're relevant for search
-    const allRelevantWords = [...searchWords, ...locationWords];
+    // Second pass: build the processed query
+    const processedWords = allWords.filter(word => 
+      !stopwords.includes(word.toLowerCase()) || possibleLocations.includes(word)
+    );
     
     console.log('Original query:', query);
-    console.log('Processed words:', allRelevantWords);
-    console.log('Identified location terms:', locationWords);
+    console.log('Processed words:', processedWords);
+    console.log('Identified location terms:', possibleLocations);
     
-    return allRelevantWords.join(' ');
+    return processedWords.join(' ');
   };
 
   useEffect(() => {

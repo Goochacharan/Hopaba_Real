@@ -55,11 +55,12 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
 
   // Process natural language search query by removing common connector words
   const processNaturalLanguageQuery = (query: string): string[] => {
-    const stopwords = ['in', 'at', 'near', 'around', 'by', 'the', 'a', 'an', 'for', 'with', 'to', 'from'];
+    const stopwords = ['in', 'at', 'near', 'around', 'by', 'the', 'a', 'an', 'for', 'with', 'to', 'from', 'and', 'or'];
     let processedQuery = query.replace(/,/g, ' ');
     
+    // Get all words with length >= 3 that aren't stopwords
     const words = processedQuery.split(/\s+/).filter(word => 
-      word.length >= 2 && !stopwords.includes(word.toLowerCase())
+      word.length >= 3 && !stopwords.includes(word.toLowerCase())
     );
     
     console.log('Search terms after processing:', words);
@@ -73,11 +74,15 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     const searchWords = processNaturalLanguageQuery(searchQuery.trim().toLowerCase());
     if (searchWords.length === 0) return text;
     
+    // Sort search words by length (longest first) to avoid highlighting issues
+    const sortedWords = [...searchWords].sort((a, b) => b.length - a.length);
+    
     let result = text;
-    searchWords.forEach(word => {
-      if (word.length < 2) return; // Skip very short words
+    sortedWords.forEach(word => {
+      if (word.length < 3) return; // Skip very short words
       
-      const regex = new RegExp(`(${word})`, 'gi');
+      // Case insensitive replacement with word boundary awareness when possible
+      const regex = new RegExp(`(\\b${word}|${word})`, 'gi');
       result = result.replace(regex, '<mark>$1</mark>');
     });
     
