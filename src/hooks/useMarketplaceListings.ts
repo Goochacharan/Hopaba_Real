@@ -91,10 +91,13 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
       }
       
       if (searchQuery && searchQuery.trim() !== '') {
-        const searchTerms = searchQuery.trim().toLowerCase();
+        // Process natural language search query
+        const processedSearchQuery = processNaturalLanguageQuery(searchQuery.trim().toLowerCase());
+        
+        console.log(`Processed search query: "${processedSearchQuery}"`);
         
         // Split the search query into individual words for more flexible matching
-        const searchWords = searchTerms.split(/\s+/).filter(word => word.length > 0);
+        const searchWords = processedSearchQuery.split(/\s+/).filter(word => word.length > 0);
         
         if (searchWords.length > 0) {
           // Create a complex OR condition for each word across multiple fields
@@ -119,7 +122,8 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
       let filteredData = data || [];
       
       if (searchQuery && searchQuery.trim() !== '') {
-        const searchWords = searchQuery.trim().toLowerCase().split(/\s+/).filter(word => word.length > 0);
+        const processedSearchQuery = processNaturalLanguageQuery(searchQuery.trim().toLowerCase());
+        const searchWords = processedSearchQuery.split(/\s+/).filter(word => word.length > 0);
         
         if (searchWords.length > 1) {
           // Calculate a relevance score for each listing based on how many search words it contains
@@ -128,7 +132,36 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
             
             // Count how many of the search words appear in the listing
             const matchedWords = searchWords.filter(word => listingText.includes(word));
-            const relevanceScore = matchedWords.length / searchWords.length;
+            const totalWords = searchWords.length;
+            
+            // Calculate relevance score with different weights for different fields
+            let relevanceScore = matchedWords.length / totalWords;
+            
+            // Increase score for title matches (most important)
+            const titleMatches = searchWords.filter(word => 
+              listing.title.toLowerCase().includes(word)
+            ).length;
+            
+            // Increase score for location matches (for location-based queries)
+            const locationMatches = searchWords.filter(word => 
+              listing.location.toLowerCase().includes(word)
+            ).length;
+            
+            // Add bonuses for matches in different fields
+            relevanceScore += (titleMatches / totalWords) * 0.5; // 50% bonus for title matches
+            relevanceScore += (locationMatches / totalWords) * 0.3; // 30% bonus for location matches
+            
+            // For consecutive words matching
+            let consecutiveMatches = 0;
+            for (let i = 0; i < searchWords.length - 1; i++) {
+              if (listingText.includes(`${searchWords[i]} ${searchWords[i + 1]}`)) {
+                consecutiveMatches++;
+              }
+            }
+            
+            if (consecutiveMatches > 0) {
+              relevanceScore += (consecutiveMatches / (totalWords - 1)) * 0.4; // Bonus for consecutive words
+            }
             
             return {
               ...listing,
@@ -136,8 +169,8 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
             };
           });
           
-          // Filter out listings with low relevance (less than 50% of words matched)
-          filteredData = filteredData.filter(listing => (listing as any).relevanceScore > 0.35);
+          // Filter out listings with low relevance (improved threshold)
+          filteredData = filteredData.filter(listing => (listing as any).relevanceScore > 0.3);
           
           // Sort by relevance score (higher is better)
           filteredData.sort((a, b) => (b as any).relevanceScore - (a as any).relevanceScore);
@@ -148,6 +181,7 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         id: l.id,
         title: l.title,
         category: l.category,
+        location: l.location,
         approval_status: l.approval_status,
         seller_id: l.seller_id,
         seller_rating: l.seller_rating,
@@ -162,6 +196,50 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
       setLoading(false);
     }
   }, [category, searchQuery, condition, minPrice, maxPrice, minRating, includeAllStatuses, user]);
+
+  // Process natural language query by removing common connector words
+  const processNaturalLanguageQuery = (query: string): string => {
+    // List of common connector words/stopwords to remove
+    const stopwords = ['in', 'at', 'near', 'around', 'by', 'the', 'a', 'an', 'for', 'with', 'to', 'from'];
+    
+    // Replace all commas with spaces for better tokenization
+    let processedQuery = query.replace(/,/g, ' ');
+    
+    // Split into words and filter out stopwords
+    const words = processedQuery.split(/\s+/).filter(word => 
+      word.length > 0 && !stopwords.includes(word.toLowerCase())
+    );
+    
+    // Special handling for certain patterns like "X in Y" where Y is likely a location
+    const locationWords: string[] = [];
+    const searchWords: string[] = [];
+    
+    // Look for location indicators and separate location terms
+    let locationMode = false;
+    
+    words.forEach((word) => {
+      // These words likely indicate the next word is a location
+      if (['near', 'in', 'at', 'around', 'by'].includes(word.toLowerCase())) {
+        locationMode = true;
+        return; // Skip the connector word itself
+      }
+      
+      if (locationMode) {
+        locationWords.push(word);
+      } else {
+        searchWords.push(word);
+      }
+    });
+    
+    // Combine all words back, location words are still included as they're relevant for search
+    const allRelevantWords = [...searchWords, ...locationWords];
+    
+    console.log('Original query:', query);
+    console.log('Processed words:', allRelevantWords);
+    console.log('Identified location terms:', locationWords);
+    
+    return allRelevantWords.join(' ');
+  };
 
   useEffect(() => {
     fetchListings();
