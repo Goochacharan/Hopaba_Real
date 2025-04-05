@@ -28,12 +28,14 @@ interface LocationsListProps {
   recommendations: Recommendation[];
   loading?: boolean;
   error?: string | null;
+  searchQuery?: string; // Added searchQuery prop
 }
 
 const LocationsList: React.FC<LocationsListProps> = ({ 
   recommendations,
   loading = false,
-  error = null
+  error = null,
+  searchQuery = '' // Added default value
 }) => {
   if (loading) {
     return (

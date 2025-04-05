@@ -10,13 +10,15 @@ interface EventsListProps {
   loading?: boolean;
   error?: string | null;
   className?: string;
+  searchQuery?: string; // Added searchQuery prop
 }
 
 const EventsList: React.FC<EventsListProps> = ({ 
   events, 
   loading = false,
   error = null,
-  className 
+  className,
+  searchQuery = '' // Added default value
 }) => {
   if (loading) {
     return (
