@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -6,7 +5,7 @@ import MainLayout from '@/components/MainLayout';
 import useRecommendations from '@/hooks/useRecommendations';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
-import { addDistanceToRecommendations, sortRecommendations, enhanceRecommendations, calculateSearchRelevance } from '@/utils/searchUtils';
+import { addDistanceToRecommendations, sortRecommendations, enhanceRecommendations } from '@/utils/searchUtils';
 
 // Import components
 import SearchHeader from '@/components/search/SearchHeader';
@@ -55,8 +54,18 @@ const SearchResults = () => {
   const loading = recommendationsLoading || marketplaceLoading;
   const error = recommendationsError || marketplaceError;
 
-  // Enhance recommendations with additional attributes
+  console.log("Original recommendations:", recommendations);
+
   const enhancedRecommendations = recommendations.map((rec, index) => {
+    console.log(`Enhancing recommendation ${index}:`, rec.name);
+    console.log("Availability data:", {
+      days: rec.availability_days,
+      hours: rec.hours,
+      availability: rec.availability,
+      start_time: rec.availability_start_time,
+      end_time: rec.availability_end_time
+    });
+    
     return {
       ...rec,
       isHiddenGem: rec.isHiddenGem || index % 3 === 0,
@@ -68,7 +77,6 @@ const SearchResults = () => {
     };
   });
 
-  // Apply filters to recommendations
   const filteredRecommendations = filterRecommendations(enhancedRecommendations, {
     maxDistance: filters.distance[0],
     minRating: filters.minRating[0],
@@ -79,12 +87,11 @@ const SearchResults = () => {
     distanceUnit: 'km'
   });
 
-  // Add distance calculations to recommendations
   const recommendationsWithDistance = addDistanceToRecommendations(filteredRecommendations, userCoordinates);
-  
-  // Apply additional enhancements and sort
   const fullyEnhancedRecommendations = enhanceRecommendations(recommendationsWithDistance);
   const rankedRecommendations = sortRecommendations(fullyEnhancedRecommendations, filters.sortBy);
+
+  console.log("Final ranked recommendations:", rankedRecommendations);
 
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
@@ -164,7 +171,6 @@ const SearchResults = () => {
                 events={events}
                 marketplaceListings={marketplaceListings}
                 handleRSVP={handleRSVP}
-                searchQuery={searchQuery}
               />
             </div>
           )}

@@ -22,7 +22,6 @@ export interface MarketplaceListing {
   updated_at: string;
   approval_status?: string;
   review_count?: number;
-  tags?: string[]; // Added the tags property
 }
 
 interface UseMarketplaceListingsOptions {

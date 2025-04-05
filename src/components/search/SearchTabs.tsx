@@ -17,7 +17,6 @@ interface SearchTabsProps {
   events: Event[];
   marketplaceListings: MarketplaceListing[];
   handleRSVP: (eventTitle: string) => void;
-  searchQuery?: string;
 }
 
 const SearchTabs: React.FC<SearchTabsProps> = ({
@@ -26,8 +25,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
   recommendations,
   events,
   marketplaceListings,
-  handleRSVP,
-  searchQuery = ''
+  handleRSVP
 }) => {
   return (
     <Tabs defaultValue="locations" className="w-full" onValueChange={setActiveTab} value={activeTab}>
@@ -45,7 +43,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
       
       <TabsContent value="locations" className="pt-0">
         {recommendations.length > 0 ? (
-          <LocationsList recommendations={recommendations} searchQuery={searchQuery} />
+          <LocationsList recommendations={recommendations} />
         ) : (
           <NoResultsMessage type="locations" />
         )}
@@ -53,7 +51,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
       
       <TabsContent value="events" className="pt-0">
         {events.length > 0 ? (
-          <EventsList events={events} searchQuery={searchQuery} />
+          <EventsList events={events} />
         ) : (
           <NoResultsMessage type="events" />
         )}
@@ -61,7 +59,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
       
       <TabsContent value="marketplace" className="pt-0">
         {marketplaceListings.length > 0 ? (
-          <MarketplaceItemsList listings={marketplaceListings} searchQuery={searchQuery} />
+          <MarketplaceItemsList listings={marketplaceListings} />
         ) : (
           <NoResultsMessage type="marketplace" />
         )}
