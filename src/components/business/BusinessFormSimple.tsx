@@ -150,7 +150,6 @@ interface BusinessFormProps {
   onCancel: () => void;
 }
 
-// Start with default categories and add option to add custom ones
 let CATEGORIES = [
   "Actor/Actress",
   "Auto Services",
@@ -985,4 +984,71 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
                               ))}
                             </SelectContent>
                           </Select>
-                          <Form
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end gap-4">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : business?.id ? "Update Business" : "Submit Business"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+
+      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Success!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your business/service has been successfully {business?.id ? "updated" : "added"}. It will now be available for others to discover after admin approval.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => {
+              setShowSuccessDialog(false);
+              onSaved();
+            }}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showAddCategoryDialog} onOpenChange={setShowAddCategoryDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Add New Category</AlertDialogTitle>
+            <AlertDialogDescription>
+              Enter a new business category to add to the list.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <Input
+              placeholder="New category name"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleAddCategory} disabled={!newCategory.trim()}>
+              Add Category
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+};
+
+export default BusinessFormSimple;
