@@ -4,18 +4,42 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useAdmin } from '@/hooks/useAdmin';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { 
+  Form, 
+  FormControl, 
+  FormDescription, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage 
+} from '@/components/ui/form';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle,
+  AlertDialogCancel
+} from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { TagsInput } from '@/components/ui/tags-input';
 import { ImageUpload } from '@/components/ui/image-upload';
-import { Building, Clock, MapPin, Phone, MessageSquare, Globe, Instagram, Tag, Star } from 'lucide-react';
+import { Building, Clock, MapPin, Phone, MessageSquare, Globe, Instagram, Tag, Star, Plus } from 'lucide-react';
 import { 
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -79,6 +103,7 @@ export interface Business {
   availability_days?: string[];
   images?: string[];
   approval_status?: string;
+  languages?: string[];
 }
 
 const businessSchema = z.object({
@@ -125,7 +150,8 @@ interface BusinessFormProps {
   onCancel: () => void;
 }
 
-const CATEGORIES = [
+// Start with default categories and add option to add custom ones
+let CATEGORIES = [
   "Actor/Actress",
   "Auto Services",
   "Beauty & Wellness",
@@ -218,9 +244,13 @@ const AVAILABILITY_OPTIONS = [
 const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel }) => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { isAdmin } = useAdmin();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [selectedDays, setSelectedDays] = useState<string[]>(business?.availability_days || []);
+  const [showAddCategoryDialog, setShowAddCategoryDialog] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+  const [categories, setCategories] = useState<string[]>(CATEGORIES);
 
   const parseHours = () => {
     if (business?.hours) {
@@ -312,6 +342,28 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
     form.setValue("availability", updatedDays.join(', '), { shouldValidate: true });
     
     console.log("Updated days:", updatedDays);
+  };
+
+  const handleAddCategory = () => {
+    if (newCategory && !categories.includes(newCategory)) {
+      const updatedCategories = [...categories, newCategory].sort();
+      setCategories(updatedCategories);
+      CATEGORIES = updatedCategories; // Update the global categories list
+      form.setValue("category", newCategory);
+      setNewCategory("");
+      setShowAddCategoryDialog(false);
+      
+      toast({
+        title: "Category Added",
+        description: `${newCategory} has been added to the categories list.`
+      });
+    } else if (categories.includes(newCategory)) {
+      toast({
+        title: "Category Exists",
+        description: "This category already exists in the list.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleSubmit = async (data: BusinessFormValues) => {
@@ -457,20 +509,43 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Category*</FormLabel>
-                        <Select value={field.value} onValueChange={field.onChange}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a category" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="max-h-[300px]">
-                            {CATEGORIES.map(category => (
-                              <SelectItem key={category} value={category}>
-                                {category}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="flex gap-2">
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a category" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="max-h-[300px]">
+                              {categories.map(category => (
+                                <SelectItem key={category} value={category}>
+                                  {category}
+                                </SelectItem>
+                              ))}
+                              {isAdmin && (
+                                <button 
+                                  className="flex w-full items-center px-2 py-1.5 text-sm rounded-sm hover:bg-muted"
+                                  type="button"
+                                  onClick={() => setShowAddCategoryDialog(true)}
+                                >
+                                  <Plus className="mr-2 h-4 w-4" />
+                                  Add New Category
+                                </button>
+                              )}
+                            </SelectContent>
+                          </Select>
+                          {isAdmin && (
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              size="icon" 
+                              onClick={() => setShowAddCategoryDialog(true)}
+                              title="Add New Category"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -910,47 +985,4 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
                               ))}
                             </SelectContent>
                           </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : business?.id ? "Update Business" : "Submit Business"}
-            </Button>
-          </div>
-        </form>
-      </Form>
-      
-      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Success!</AlertDialogTitle>
-            <AlertDialogDescription>
-              Your business/service has been successfully {business?.id ? "updated" : "added"}. It will now be available for others to discover after admin approval.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => {
-              setShowSuccessDialog(false);
-              onSaved();
-            }}>
-              Continue
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
-  );
-};
-
-export default BusinessFormSimple;
+                          <Form

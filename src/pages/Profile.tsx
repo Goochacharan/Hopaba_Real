@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useAuth } from '@/hooks/useAuth';
+import { useAdmin } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,35 +15,35 @@ import { useToast } from '@/hooks/use-toast';
 import BusinessFormSimple from '@/components/business/BusinessFormSimple';
 import BusinessListSimple from '@/components/business/BusinessListSimple';
 import { Business } from '@/components/business/BusinessFormSimple';
+
 const Profile = () => {
   const navigate = useNavigate();
-  const {
-    user,
-    logout,
-    isAdmin
-  } = useAuth();
-  const {
-    toast
-  } = useToast();
+  const { user, logout } = useAuth();
+  const { isAdmin } = useAdmin();
+  const { toast } = useToast();
   const [refreshBusinesses, setRefreshBusinesses] = useState(false);
   const [editingBusiness, setEditingBusiness] = useState<Business | null>(null);
   const [showAddBusinessForm, setShowAddBusinessForm] = useState(false);
   const [activeTab, setActiveTab] = useState("listings");
+  
   useEffect(() => {
     if (!user) {
       navigate('/login');
     }
   }, [user, navigate]);
+
   const handleAddBusiness = () => {
     setEditingBusiness(null);
     setShowAddBusinessForm(true);
     setActiveTab("businesses"); // Ensure we're on the businesses tab
   };
+
   const handleEditBusiness = (business: Business) => {
     setEditingBusiness(business);
     setShowAddBusinessForm(true);
     setActiveTab("businesses"); // Ensure we're on the businesses tab
   };
+
   const handleBusinessSaved = () => {
     console.log("Business saved, refreshing list");
     toast({
@@ -52,10 +54,12 @@ const Profile = () => {
     setShowAddBusinessForm(false);
     setRefreshBusinesses(prev => !prev);
   };
+
   const handleCancelBusinessForm = () => {
     setEditingBusiness(null);
     setShowAddBusinessForm(false);
   };
+
   if (!user) {
     return <MainLayout>
         <div className="container mx-auto py-8 min-h-screen flex items-center justify-center">
@@ -75,6 +79,7 @@ const Profile = () => {
         </div>
       </MainLayout>;
   }
+
   return <MainLayout>
       <div className="container mx-auto py-8 px-4">
         <div className="flex flex-col mb-8">
@@ -136,4 +141,5 @@ const Profile = () => {
       </div>
     </MainLayout>;
 };
+
 export default Profile;
