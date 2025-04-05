@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import BusinessFormSimple from '@/components/business/BusinessFormSimple';
 import BusinessListSimple from '@/components/business/BusinessListSimple';
 import { Business } from '@/components/business/BusinessFormSimple';
+
 const Profile = () => {
   const navigate = useNavigate();
   const {
@@ -27,21 +28,25 @@ const Profile = () => {
   const [editingBusiness, setEditingBusiness] = useState<Business | null>(null);
   const [showAddBusinessForm, setShowAddBusinessForm] = useState(false);
   const [activeTab, setActiveTab] = useState("listings");
+
   useEffect(() => {
     if (!user) {
       navigate('/login');
     }
   }, [user, navigate]);
+
   const handleAddBusiness = () => {
     setEditingBusiness(null);
     setShowAddBusinessForm(true);
-    setActiveTab("businesses"); // Ensure we're on the businesses tab
+    setActiveTab("businesses");
   };
+
   const handleEditBusiness = (business: Business) => {
     setEditingBusiness(business);
     setShowAddBusinessForm(true);
-    setActiveTab("businesses"); // Ensure we're on the businesses tab
+    setActiveTab("businesses");
   };
+
   const handleBusinessSaved = () => {
     console.log("Business saved, refreshing list");
     toast({
@@ -52,10 +57,12 @@ const Profile = () => {
     setShowAddBusinessForm(false);
     setRefreshBusinesses(prev => !prev);
   };
+
   const handleCancelBusinessForm = () => {
     setEditingBusiness(null);
     setShowAddBusinessForm(false);
   };
+
   if (!user) {
     return <MainLayout>
         <div className="container mx-auto py-8 min-h-screen flex items-center justify-center">
@@ -75,6 +82,7 @@ const Profile = () => {
         </div>
       </MainLayout>;
   }
+
   return <MainLayout>
       <div className="container mx-auto py-8 px-4">
         <div className="flex flex-col mb-8">
@@ -136,4 +144,5 @@ const Profile = () => {
       </div>
     </MainLayout>;
 };
+
 export default Profile;
