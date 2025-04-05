@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { cn } from '@/lib/utils';
@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Clock } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 
 interface MarketplaceItemsListProps {
   listings: MarketplaceListing[];
@@ -24,6 +25,8 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
   category
 }) => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get('q') || '';
 
   if (loading) {
     return (
@@ -49,6 +52,32 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     listing.approval_status === 'approved' || 
     (user && listing.seller_id === user.id)
   );
+
+  // Highlight search terms in listing data if there's a search query
+  const highlightSearchTerms = (text: string): React.ReactNode => {
+    if (!searchQuery || !text) return text;
+    
+    const searchWords = searchQuery.trim().toLowerCase().split(/\s+/).filter(word => word.length > 0);
+    if (searchWords.length === 0) return text;
+    
+    let result = text;
+    searchWords.forEach(word => {
+      if (word.length < 3) return; // Skip very short words
+      
+      const regex = new RegExp(`(${word})`, 'gi');
+      result = result.replace(regex, '<mark>$1</mark>');
+    });
+    
+    const parts = result.split(/(<mark>.*?<\/mark>)/g);
+    
+    return parts.map((part, i) => {
+      if (part.startsWith('<mark>') && part.endsWith('</mark>')) {
+        const content = part.replace(/<\/?mark>/g, '');
+        return <span key={i} className="bg-yellow-200 text-gray-900 rounded px-0.5">{content}</span>;
+      }
+      return part;
+    });
+  };
 
   console.log(`After filtering, ${visibleListings.length} listings are visible`);
   console.log('Visible listings:', visibleListings.map(l => `${l.title} (${l.category}) - ${l.approval_status}`));

@@ -93,7 +93,18 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
       if (searchQuery && searchQuery.trim() !== '') {
         const searchTerms = searchQuery.trim().toLowerCase();
         
-        query = query.or(`title.ilike.%${searchTerms}%,description.ilike.%${searchTerms}%,category.ilike.%${searchTerms}%`);
+        // Split the search query into individual words for more flexible matching
+        const searchWords = searchTerms.split(/\s+/).filter(word => word.length > 0);
+        
+        if (searchWords.length > 0) {
+          // Create a complex OR condition for each word across multiple fields
+          const orConditions = searchWords.map(word => {
+            return `title.ilike.%${word}%,description.ilike.%${word}%,category.ilike.%${word}%,location.ilike.%${word}%`;
+          }).join(',');
+          
+          query = query.or(orConditions);
+          console.log(`Advanced search with multiple words: [${searchWords.join(', ')}]`);
+        }
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
@@ -104,7 +115,36 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
 
       console.log(`Found ${data?.length || 0} marketplace listings`);
       
-      console.log("Marketplace listings fetched:", data?.map(l => ({
+      // If there are search words, do additional client-side filtering to improve word combination matching
+      let filteredData = data || [];
+      
+      if (searchQuery && searchQuery.trim() !== '') {
+        const searchWords = searchQuery.trim().toLowerCase().split(/\s+/).filter(word => word.length > 0);
+        
+        if (searchWords.length > 1) {
+          // Calculate a relevance score for each listing based on how many search words it contains
+          filteredData = filteredData.map(listing => {
+            const listingText = `${listing.title} ${listing.description} ${listing.category} ${listing.location}`.toLowerCase();
+            
+            // Count how many of the search words appear in the listing
+            const matchedWords = searchWords.filter(word => listingText.includes(word));
+            const relevanceScore = matchedWords.length / searchWords.length;
+            
+            return {
+              ...listing,
+              relevanceScore
+            };
+          });
+          
+          // Filter out listings with low relevance (less than 50% of words matched)
+          filteredData = filteredData.filter(listing => (listing as any).relevanceScore > 0.35);
+          
+          // Sort by relevance score (higher is better)
+          filteredData.sort((a, b) => (b as any).relevanceScore - (a as any).relevanceScore);
+        }
+      }
+      
+      console.log("Marketplace listings fetched:", filteredData?.map(l => ({
         id: l.id,
         title: l.title,
         category: l.category,
@@ -114,7 +154,7 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         current_user_id: user?.id
       })));
       
-      setListings((data || []) as MarketplaceListing[]);
+      setListings(filteredData as MarketplaceListing[]);
     } catch (err) {
       console.error('Error fetching marketplace listings:', err);
       setError('Failed to fetch listings. Please try again later.');
