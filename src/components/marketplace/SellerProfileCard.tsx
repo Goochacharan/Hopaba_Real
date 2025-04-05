@@ -173,7 +173,7 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
             </div>
             
             <div className="flex flex-wrap gap-3 mt-2 my-[10px] px-[38px]">
-              <Button variant="outline" size="icon" onClick={handleCall} className="h-10 w-10 rounded-full" title="Call Seller">
+              <Button variant="outline" size="icon" onClick={handleCall} title="Call Seller" className="h-10 w-10 text-slate-50 bg-blue-600 hover:bg-blue-500 rounded">
                 <Phone className="h-5 w-5" />
               </Button>
               
