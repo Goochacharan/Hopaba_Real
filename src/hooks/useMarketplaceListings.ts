@@ -160,9 +160,9 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
             
             // Increase score for tag matches
             const tagMatches = searchWords.filter(word => {
-              const tags = listing.tags || [];
-              if (!Array.isArray(tags)) return false;
-              return tags.some(tag => 
+              if (!listing.tags) return false;
+              if (!Array.isArray(listing.tags)) return false;
+              return listing.tags.some(tag => 
                 tag.toLowerCase().includes(word)
               );
             }).length;
@@ -190,7 +190,11 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
               const titleWords = listing.title.toLowerCase().split(/\s+/);
               const locationWords = listing.location.toLowerCase().split(/\s+/);
               const descriptionWords = listing.description.toLowerCase().split(/\s+/);
-              const tagWords = (listing.tags || []).flatMap(tag => tag.toLowerCase().split(/\s+/));
+              
+              // Safely handle tags as they might be undefined
+              const tagWords = listing.tags && Array.isArray(listing.tags) 
+                ? listing.tags.flatMap(tag => tag.toLowerCase().split(/\s+/))
+                : [];
               
               // Check if different search words match in different fields
               const hasFieldCrossing = (
