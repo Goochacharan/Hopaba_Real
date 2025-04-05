@@ -10,23 +10,27 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Clock } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
+import { matchSearchTermsWithTags } from '@/utils/searchUtils';
 
 interface MarketplaceItemsListProps {
   listings: MarketplaceListing[];
   loading?: boolean;
   error?: string | null;
   category?: string;
+  searchQuery?: string;
 }
 
 const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({ 
   listings,
   loading = false,
   error = null,
-  category
+  category,
+  searchQuery = ''
 }) => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
-  const searchQuery = searchParams.get('q') || '';
+  const urlSearchQuery = searchParams.get('q') || '';
+  const effectiveSearchQuery = searchQuery || urlSearchQuery;
 
   if (loading) {
     return (
@@ -44,9 +48,6 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     );
   }
 
-  console.log(`MarketplaceItemsList received ${listings.length} listings`);
-  console.log('Raw listings:', listings.map(l => `${l.title} (${l.category}) - ${l.approval_status}`));
-
   // Filter listings to show approved ones or user's own listings regardless of approval status
   const visibleListings = listings.filter(listing => 
     listing.approval_status === 'approved' || 
@@ -63,15 +64,14 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
       word.length >= 3 && !stopwords.includes(word.toLowerCase())
     );
     
-    console.log('Search terms after processing:', words);
     return words;
   };
 
   // Highlight search terms in listing data if there's a search query
   const highlightSearchTerms = (text: string): React.ReactNode => {
-    if (!searchQuery || !text) return text;
+    if (!effectiveSearchQuery || !text) return text;
     
-    const searchWords = processNaturalLanguageQuery(searchQuery.trim().toLowerCase());
+    const searchWords = processNaturalLanguageQuery(effectiveSearchQuery.trim().toLowerCase());
     if (searchWords.length === 0) return text;
     
     // Sort search words by length (longest first) to avoid highlighting issues
@@ -97,8 +97,10 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     });
   };
 
-  console.log(`After filtering, ${visibleListings.length} listings are visible`);
-  console.log('Visible listings:', visibleListings.map(l => `${l.title} (${l.category}) - ${l.approval_status}`));
+  // Check if a listing has tags that match the search query
+  const hasMatchingTags = (listing: MarketplaceListing): boolean => {
+    return matchSearchTermsWithTags(effectiveSearchQuery, listing.tags);
+  };
 
   if (visibleListings.length === 0) {
     return <NoResultsMessage type="marketplace" />;
@@ -122,7 +124,12 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
         {visibleListings.map((listing, index) => (
           <div 
             key={listing.id} 
-            className="animate-fade-in h-full relative" 
+            className={cn(
+              "animate-fade-in h-full relative", 
+              "hover:shadow-md transition-shadow duration-300",
+              hasMatchingTags(listing) ? "ring-1 ring-amber-300" : "",
+              { "animation-delay": `${index * 100}ms` }
+            )}
             style={{ animationDelay: `${index * 100}ms` }}
           >
             {user && listing.seller_id === user.id && listing.approval_status === 'pending' && (
@@ -130,10 +137,18 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
                 Pending Approval
               </Badge>
             )}
+            
+            {/* Tag match indicator */}
+            {hasMatchingTags(listing) && (
+              <Badge variant="secondary" className="absolute top-2 left-2 z-10 bg-amber-100 text-amber-800 border-amber-300">
+                Tag Match
+              </Badge>
+            )}
+            
             <MarketplaceListingCard 
               listing={{
                 ...listing,
-                title: searchQuery ? 
+                title: effectiveSearchQuery ? 
                   React.isValidElement(highlightSearchTerms(listing.title)) ? 
                     listing.title : 
                     listing.title : 
@@ -145,7 +160,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
                 "search-result-card", // This class will be used to identify search result cards
                 listing.approval_status === 'pending' ? "opacity-75" : ""
               )}
-              highlightText={searchQuery ? highlightSearchTerms : undefined}
+              highlightText={effectiveSearchQuery ? highlightSearchTerms : undefined}
             />
           </div>
         ))}
