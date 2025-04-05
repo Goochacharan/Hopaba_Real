@@ -185,7 +185,7 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
                 <MapPin className="h-5 w-5" />
               </Button>
               
-              <Button variant="outline" size="icon" onClick={handleShare} className="h-10 w-10 rounded-full" title="Share">
+              <Button variant="outline" size="icon" onClick={handleShare} title="Share" className="h-10 w-10 bg-violet-600 hover:bg-violet-500 text-slate-50 rounded">
                 <Share2 className="h-5 w-5" />
               </Button>
             </div>
