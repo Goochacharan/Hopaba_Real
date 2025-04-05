@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+import { MarketplaceListing } from '@/types/marketplace';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Clock } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
+import { processNaturalLanguageQuery } from '@/utils/searchUtils';
 
 interface MarketplaceItemsListProps {
   listings: MarketplaceListing[];

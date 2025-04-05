@@ -1,79 +1,129 @@
 
-import { calculateDistance } from '@/lib/locationUtils';
-import { Recommendation } from '@/lib/mockData';
+// Add natural language search processing utilities
 
-export const addDistanceToRecommendations = (recs: Recommendation[], userCoordinates: {lat: number, lng: number} | null) => {
-  if (!userCoordinates) return recs;
+/**
+ * Process natural language query by removing common connector words
+ */
+export const processNaturalLanguageQuery = (query: string): string => {
+  const stopwords = ['in', 'at', 'near', 'around', 'by', 'the', 'a', 'an', 'for', 'with', 'to', 'from', 'and', 'or'];
   
-  return recs.map(rec => {
-    const latitude = parseFloat(rec.id) % 0.1 + 12.9716;
-    const longitude = parseFloat(rec.id) % 0.1 + 77.5946;
+  let processedQuery = query.replace(/,/g, ' ');
+  
+  const allWords = processedQuery.split(/\s+/).filter(word => word.length > 0);
+  
+  let possibleLocations: string[] = [];
+  let locationMode = false;
+  
+  for (let i = 0; i < allWords.length; i++) {
+    const word = allWords[i].toLowerCase();
     
-    const distanceValue = calculateDistance(
-      userCoordinates.lat,
-      userCoordinates.lng,
-      latitude,
-      longitude,
-      'K'
+    if (['in', 'at', 'near', 'around', 'by'].includes(word) && i < allWords.length - 1) {
+      possibleLocations.push(allWords[i + 1]);
+      locationMode = true;
+    } else if (locationMode && !stopwords.includes(word)) {
+      possibleLocations.push(word);
+    } else {
+      locationMode = false;
+    }
+  }
+  
+  const processedWords = allWords.filter(word => 
+    !stopwords.includes(word.toLowerCase()) || possibleLocations.includes(word)
+  );
+  
+  console.log('Original query:', query);
+  console.log('Processed words:', processedWords);
+  console.log('Identified location terms:', possibleLocations);
+  
+  return processedWords.join(' ');
+};
+
+/**
+ * Calculate relevance score for listing based on search terms
+ */
+export const calculateListingRelevanceScore = (listing: any, searchWords: string[]): number => {
+  // Combine all relevant text fields into one searchable text
+  const tagsArray = listing.tags || [];
+  const tagText = Array.isArray(tagsArray) ? tagsArray.join(' ') : '';
+  
+  const listingText = `${listing.title} ${listing.description} ${listing.category} ${listing.location} ${listing.seller_name} ${tagText}`.toLowerCase();
+  
+  // Count how many of the search words appear in the listing
+  const matchedWords = searchWords.filter(word => listingText.includes(word));
+  const totalWords = searchWords.length;
+  
+  // Calculate relevance score with different weights for different fields
+  let relevanceScore = matchedWords.length / totalWords;
+  
+  // Increase score for title matches (most important)
+  const titleMatches = searchWords.filter(word => 
+    listing.title.toLowerCase().includes(word)
+  ).length;
+  
+  // Increase score for location matches (for location-based queries)
+  const locationMatches = searchWords.filter(word => 
+    listing.location.toLowerCase().includes(word)
+  ).length;
+
+  // Increase score for seller name matches
+  const sellerNameMatches = searchWords.filter(word => 
+    listing.seller_name.toLowerCase().includes(word)
+  ).length;
+  
+  // Increase score for tag matches
+  const tagMatches = searchWords.filter(word => {
+    if (!listing.tags) return false;
+    if (!Array.isArray(listing.tags)) return false;
+    return listing.tags.some(tag => 
+      tag.toLowerCase().includes(word)
+    );
+  }).length;
+  
+  // Add bonuses for matches in different fields
+  relevanceScore += (titleMatches / totalWords) * 0.5; // 50% bonus for title matches
+  relevanceScore += (locationMatches / totalWords) * 0.4; // 40% bonus for location matches
+  relevanceScore += (sellerNameMatches / totalWords) * 0.3; // 30% bonus for seller name matches
+  relevanceScore += (tagMatches / totalWords) * 0.5; // 50% bonus for tag matches
+  
+  // Special case: If all words appear somewhere in the listing, give a big boost
+  if (matchedWords.length === searchWords.length) {
+    relevanceScore += 0.5;
+  }
+  
+  // For consecutive words matching
+  for (let i = 0; i < searchWords.length - 1; i++) {
+    if (listingText.includes(`${searchWords[i]} ${searchWords[i + 1]}`)) {
+      relevanceScore += 0.4; // Big boost for consecutive word matches
+    }
+  }
+
+  // Check for cross-field matches (e.g., one word in title, another in location, another in tags)
+  if (searchWords.length >= 2) {
+    const titleWords = listing.title.toLowerCase().split(/\s+/);
+    const locationWords = listing.location.toLowerCase().split(/\s+/);
+    const descriptionWords = listing.description.toLowerCase().split(/\s+/);
+    
+    // Safely handle tags as they might be undefined
+    const tagWords = listing.tags && Array.isArray(listing.tags) 
+      ? listing.tags.flatMap(tag => tag.toLowerCase().split(/\s+/))
+      : [];
+    
+    // Check if different search words match in different fields
+    const hasFieldCrossing = (
+      searchWords.some(word => titleWords.includes(word)) && 
+      (
+        searchWords.some(word => locationWords.includes(word) || descriptionWords.includes(word)) ||
+        searchWords.some(word => tagWords.includes(word))
+      )
+    ) || (
+      searchWords.some(word => tagWords.includes(word)) && 
+      searchWords.some(word => locationWords.includes(word))
     );
     
-    return {
-      ...rec,
-      calculatedDistance: distanceValue,
-      distance: `${distanceValue.toFixed(1)} km away`
-    };
-  });
-};
-
-export const sortRecommendations = (recommendations: Recommendation[], sortBy: string) => {
-  return [...recommendations].sort((a, b) => {
-    switch (sortBy) {
-      case 'rating':
-        return b.rating - a.rating;
-      case 'distance':
-        if (a.calculatedDistance !== undefined && b.calculatedDistance !== undefined) {
-          return a.calculatedDistance - b.calculatedDistance;
-        }
-        const distanceA = parseFloat(a.distance?.split(' ')[0] || '0');
-        const distanceB = parseFloat(b.distance?.split(' ')[0] || '0');
-        return distanceA - distanceB;
-      case 'reviewCount':
-        return (b.reviewCount || 0) - (a.reviewCount || 0);
-      case 'newest':
-        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-        return dateB - dateA;
-      default:
-        return 0;
+    if (hasFieldCrossing) {
+      relevanceScore += 0.6; // Significant boost for cross-field matching
     }
-  });
-};
-
-export const enhanceRecommendations = (recommendations: Recommendation[]) => {
-  return recommendations.map(rec => {
-    console.log("SearchResults - Processing recommendation:", rec.id, {
-      instagram: rec.instagram || '',
-      availability_days: rec.availability_days || [],
-      availability_start_time: rec.availability_start_time || '',
-      availability_end_time: rec.availability_end_time || '',
-      isHiddenGem: rec.isHiddenGem,
-      isMustVisit: rec.isMustVisit
-    });
-    
-    return {
-      ...rec,
-      hours: rec.hours || rec.availability,
-      price_range_min: rec.price_range_min,
-      price_range_max: rec.price_range_max,
-      price_unit: rec.price_unit,
-      availability: rec.availability,
-      availability_days: rec.availability_days || [],
-      availability_start_time: rec.availability_start_time || '',
-      availability_end_time: rec.availability_end_time || '',
-      instagram: rec.instagram || '',
-      map_link: rec.map_link,
-      isHiddenGem: rec.isHiddenGem,
-      isMustVisit: rec.isMustVisit
-    };
-  });
+  }
+  
+  return relevanceScore;
 };
