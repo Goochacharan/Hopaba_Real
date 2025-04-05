@@ -67,15 +67,17 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         </div>
         
         {isSearchPage ? (
-          <ScrollArea className="h-[180px] mb-4 pr-3">
+          <ScrollArea className="h-[120px] mb-4 pr-3">
             <p className="whitespace-pre-line text-gray-950 text-sm">
               {listing.description}
             </p>
           </ScrollArea>
         ) : (
-          <p className="whitespace-pre-line text-gray-950 text-sm mb-4">
-            {listing.description}
-          </p>
+          <ScrollArea className="h-[120px] mb-4 pr-3">
+            <p className="whitespace-pre-line text-gray-950 text-sm">
+              {listing.description}
+            </p>
+          </ScrollArea>
         )}
 
         <ListingActionButtons listingId={listing.id} title={listing.title} price={listing.price} sellerPhone={listing.seller_phone} sellerWhatsapp={listing.seller_whatsapp} sellerInstagram={listing.seller_instagram} location={listing.location} mapLink={listing.map_link} />
