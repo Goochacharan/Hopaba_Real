@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -36,6 +37,10 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
     if (imageViewerOpen) return;
     navigate(`/marketplace/${listing.id}`);
   };
+  
+  // Check if we're on the search page
+  const isSearchPage = window.location.pathname.includes('/search');
+
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <ListingImageCarousel images={listing.images} onImageClick={handleImageClick} listing={listing} />
       
@@ -56,11 +61,17 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           </div>
         </div>
         
-        <ScrollArea className="h-[280px] mb-4 pr-3">
-          <p className="whitespace-pre-line text-gray-950 text-sm">
+        {isSearchPage ? (
+          <ScrollArea className="h-[280px] mb-4 pr-3">
+            <p className="whitespace-pre-line text-gray-950 text-sm">
+              {listing.description}
+            </p>
+          </ScrollArea>
+        ) : (
+          <p className="whitespace-pre-line text-gray-950 text-sm mb-4">
             {listing.description}
           </p>
-        </ScrollArea>
+        )}
 
         <ListingActionButtons listingId={listing.id} title={listing.title} price={listing.price} sellerPhone={listing.seller_phone} sellerWhatsapp={listing.seller_whatsapp} sellerInstagram={listing.seller_instagram} location={listing.location} mapLink={listing.map_link} />
       </div>
