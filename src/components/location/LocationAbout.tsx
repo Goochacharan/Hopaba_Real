@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface LocationAboutProps {
   name: string;
@@ -12,9 +11,7 @@ const LocationAbout = ({ name, description, tags }: LocationAboutProps) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-6 p-6">
       <h2 className="text-xl font-semibold mb-4">About {name}</h2>
-      <ScrollArea className="h-[150px] mb-4">
-        <p className="text-muted-foreground pr-4">{description}</p>
-      </ScrollArea>
+      <p className="text-muted-foreground">{description}</p>
       
       <div className="mt-4">
         {tags.map((tag, i) => (
