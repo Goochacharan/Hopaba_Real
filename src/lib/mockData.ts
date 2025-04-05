@@ -1,3 +1,4 @@
+
 export interface Recommendation {
   id: string;
   name: string;
@@ -33,6 +34,7 @@ export interface Recommendation {
   mustVisitCount?: number;
   isHiddenGem?: boolean;
   isMustVisit?: boolean;
+  hideAvailabilityDropdown?: boolean;
   created_at?: string;
 }
 
