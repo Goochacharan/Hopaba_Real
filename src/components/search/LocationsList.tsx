@@ -105,7 +105,8 @@ const LocationsList: React.FC<LocationsListProps> = ({
                 hours: recommendation.hours || '',
                 availability: recommendation.availability || '',
                 availability_start_time: recommendation.availability_start_time || undefined,
-                availability_end_time: recommendation.availability_end_time || undefined
+                availability_end_time: recommendation.availability_end_time || undefined,
+                hideAvailabilityDropdown: true // Add this flag to hide the availability dropdown
               }}
               showDistanceUnderAddress={true}
               className="search-result-card h-full"

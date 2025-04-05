@@ -11,7 +11,6 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -39,13 +38,13 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const [user, setUser] = useState<any>(null);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [availabilityOpen, setAvailabilityOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const hiddenGemCount = recommendation.hiddenGemCount || 0;
   const mustVisitCount = recommendation.mustVisitCount || 0;
   const showHiddenGemBadge = recommendation.isHiddenGem || hiddenGemCount >= 20;
   const showMustVisitBadge = recommendation.isMustVisit || mustVisitCount >= 20;
   const isSearchPage = window.location.pathname.includes('/search');
+  const hideAvailabilityDropdown = recommendation.hideAvailabilityDropdown || false;
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -677,18 +676,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          )}
-          
-          {hasAvailabilityInfo() && (
-            <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="mt-0.5">
-              <CollapsibleTrigger onClick={e => e.stopPropagation()} className="flex items-center text-xs font-medium text-muted-foreground hover:text-primary transition-colors px-1 py-0.5 border border-transparent hover:border-border/30 rounded-md">
-                Available days
-                <ChevronDown className={cn("h-3 w-3 ml-1 transition-transform", availabilityOpen ? "transform rotate-180" : "")} />
-              </CollapsibleTrigger>
-              <CollapsibleContent className="mt-0.5 mb-0.5 border-l border-muted pl-0.5">
-                {availabilityInfo}
-              </CollapsibleContent>
-            </Collapsible>
           )}
           
           {recommendation.distance && !showDistanceUnderAddress && (
