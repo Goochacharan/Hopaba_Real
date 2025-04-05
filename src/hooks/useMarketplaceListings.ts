@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -131,8 +130,8 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
           // Calculate a relevance score for each listing based on how many search words it contains across different fields
           filteredData = filteredData.map(listing => {
             // Combine all relevant text fields into one searchable text
-            const tags = listing.tags || [];
-            const tagText = Array.isArray(tags) ? tags.join(' ') : '';
+            const tagsArray = listing.tags || [];
+            const tagText = Array.isArray(tagsArray) ? tagsArray.join(' ') : '';
             
             const listingText = `${listing.title} ${listing.description} ${listing.category} ${listing.location} ${listing.seller_name} ${tagText}`.toLowerCase();
             
@@ -160,8 +159,9 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
             
             // Increase score for tag matches
             const tagMatches = searchWords.filter(word => {
-              if (!Array.isArray(listing.tags)) return false;
-              return listing.tags.some(tag => 
+              const tags = listing.tags || [];
+              if (!Array.isArray(tags)) return false;
+              return tags.some(tag => 
                 tag.toLowerCase().includes(word)
               );
             }).length;
@@ -189,9 +189,7 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
               const titleWords = listing.title.toLowerCase().split(/\s+/);
               const locationWords = listing.location.toLowerCase().split(/\s+/);
               const descriptionWords = listing.description.toLowerCase().split(/\s+/);
-              const tagWords = Array.isArray(listing.tags) 
-                ? listing.tags.flatMap(tag => tag.toLowerCase().split(/\s+/)) 
-                : [];
+              const tagWords = (listing.tags || []).flatMap(tag => tag.toLowerCase().split(/\s+/));
               
               // Check if different search words match in different fields
               const hasFieldCrossing = (
