@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Card,
@@ -67,7 +68,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
           </span>
         </CardTitle>
         <CardDescription className="line-clamp-none">
-          <ScrollArea className="min-h-[20em] max-h-[20em] pr-3">
+          <ScrollArea className="min-h-[12em] max-h-[12em] pr-3">
             <p className="whitespace-pre-line leading-relaxed text-base font-normal text-slate-700">
               {business.description}
             </p>

@@ -64,6 +64,9 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
           <Clock className="h-4 w-4 text-yellow-600" />
           <AlertDescription className="text-yellow-800">
             Some of your listings are pending admin approval and are only visible to you.
+            {visibleListings.some(l => l.title.toLowerCase().includes('honda') && l.title.toLowerCase().includes('wrv')) && (
+              <span className="block mt-1 font-medium">Your Honda WRV listing will appear after approval.</span>
+            )}
           </AlertDescription>
         </Alert>
       )}
