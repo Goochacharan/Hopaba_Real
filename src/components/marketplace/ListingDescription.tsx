@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { format, differenceInDays } from 'date-fns';
 import { Instagram, Film, Sparkles, MapPin, Link2, Tag } from 'lucide-react';

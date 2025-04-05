@@ -12,13 +12,16 @@ import ListingImageCarousel from './marketplace/ListingImageCarousel';
 import ListingMetadata from './marketplace/ListingMetadata';
 import SellerInfo from './marketplace/SellerInfo';
 import ListingActionButtons from './marketplace/ListingActionButtons';
+
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
   className?: string;
 }
+
 const formatPrice = (price: number): string => {
   return price.toLocaleString('en-IN');
 };
+
 const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   listing,
   className
@@ -29,10 +32,12 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   } = useToast();
   const [imageViewerOpen, setImageViewerOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
+
   const handleImageClick = (index: number) => {
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
+
   const handleCardClick = (e: React.MouseEvent) => {
     if (imageViewerOpen) return;
     navigate(`/marketplace/${listing.id}`);
@@ -41,7 +46,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   // Check if we're on the search page
   const isSearchPage = window.location.pathname.includes('/search');
 
-  return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
+  return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <ListingImageCarousel images={listing.images} onImageClick={handleImageClick} listing={listing} />
       
       <div className="p-4 px-[12px] py-[16px]">
@@ -82,4 +87,5 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
     }} />
     </div>;
 };
+
 export default MarketplaceListingCard;

@@ -578,7 +578,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </div>}
 
         {isSearchPage ? (
-          <ScrollArea className="min-h-[12em] max-h-[12em] mb-4">
+          <ScrollArea className="h-[120px] mb-4">
             <p className="font-normal text-slate-700 leading-normal text-sm">
               {recommendation.description}
             </p>
