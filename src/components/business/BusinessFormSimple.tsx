@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,6 +36,14 @@ export interface Business {
   whatsapp?: string;
   contact_email?: string;
   tags?: string[];
+  images?: string[];
+  price_range_min?: number;
+  price_range_max?: number;
+  price_unit?: string;
+  availability?: string;
+  hours?: string;
+  experience?: string;
+  languages?: string[];
 }
 
 const businessSchema = z.object({
