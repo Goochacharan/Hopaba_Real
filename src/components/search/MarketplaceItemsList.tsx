@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { MarketplaceListing } from '@/types/marketplace';
+import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Clock } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
-import { processNaturalLanguageQuery } from '@/utils/searchUtils';
 
 interface MarketplaceItemsListProps {
   listings: MarketplaceListing[];
@@ -98,18 +97,6 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     });
   };
 
-  // Check if listing matches any search terms by tag
-  const matchesByTag = (listing: MarketplaceListing): boolean => {
-    if (!searchQuery || !listing.tags || !Array.isArray(listing.tags)) return false;
-    
-    const searchWords = processNaturalLanguageQuery(searchQuery.trim().toLowerCase());
-    if (searchWords.length === 0) return false;
-
-    return searchWords.some(word => 
-      listing.tags?.some(tag => tag.toLowerCase().includes(word.toLowerCase()))
-    );
-  };
-
   console.log(`After filtering, ${visibleListings.length} listings are visible`);
   console.log('Visible listings:', visibleListings.map(l => `${l.title} (${l.category}) - ${l.approval_status}`));
 
@@ -143,11 +130,6 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
                 Pending Approval
               </Badge>
             )}
-            {searchQuery && matchesByTag(listing) && (
-              <Badge variant="outline" className="absolute top-2 left-2 z-10 bg-green-100 text-green-800 border-green-300">
-                Matches Tag
-              </Badge>
-            )}
             <MarketplaceListingCard 
               listing={{
                 ...listing,
@@ -161,8 +143,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
               className={cn(
                 "h-full flex flex-col",
                 "search-result-card", // This class will be used to identify search result cards
-                listing.approval_status === 'pending' ? "opacity-75" : "",
-                searchQuery && matchesByTag(listing) ? "border-green-400 border-2" : ""
+                listing.approval_status === 'pending' ? "opacity-75" : ""
               )}
               highlightText={searchQuery ? highlightSearchTerms : undefined}
             />

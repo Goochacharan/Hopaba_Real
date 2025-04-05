@@ -1,15 +1,40 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { MarketplaceListing, MarketplaceListingsOptions } from '@/types/marketplace';
-import { processNaturalLanguageQuery } from '@/utils/searchUtils';
-import { filterListingsBySearchQuery } from '@/utils/marketplaceUtils';
 
-/**
- * Hook for fetching and filtering marketplace listings
- */
-export const useMarketplaceListings = (options: MarketplaceListingsOptions = {}) => {
+export interface MarketplaceListing {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  category: string;
+  condition: string;
+  images: string[];
+  seller_name: string;
+  seller_rating: number;
+  seller_phone: string | null;
+  seller_whatsapp: string | null;
+  seller_instagram: string | null;
+  seller_id: string; 
+  location: string;
+  map_link: string | null;
+  created_at: string;
+  updated_at: string;
+  approval_status?: string;
+  review_count?: number;
+}
+
+interface UseMarketplaceListingsOptions {
+  category?: string;
+  searchQuery?: string;
+  condition?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+  includeAllStatuses?: boolean;
+}
+
+export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = {}) => {
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +66,6 @@ export const useMarketplaceListings = (options: MarketplaceListingsOptions = {})
         console.log("Including all approval statuses");
       }
       
-      // Apply additional filters
       if (category && category !== 'all') {
         // Make category filter case-insensitive
         query = query.ilike('category', `%${category}%`);
@@ -76,6 +100,7 @@ export const useMarketplaceListings = (options: MarketplaceListingsOptions = {})
         
         if (searchWords.length > 0) {
           // Create a complex OR condition for each word across multiple fields
+          // This allows searching for "rambhavan muddinpallya" to match listings where either word appears in any key field
           const orConditions = searchWords.map(word => {
             return `title.ilike.%${word}%,description.ilike.%${word}%,category.ilike.%${word}%,location.ilike.%${word}%,seller_name.ilike.%${word}%`;
           }).join(',');
@@ -93,11 +118,89 @@ export const useMarketplaceListings = (options: MarketplaceListingsOptions = {})
 
       console.log(`Found ${data?.length || 0} marketplace listings`);
       
-      let filteredData = data as MarketplaceListing[] || [];
+      // If there are search words, do additional client-side filtering to improve word combination matching
+      let filteredData = data || [];
       
-      // If there is a search query, apply advanced search filtering
       if (searchQuery && searchQuery.trim() !== '') {
-        filteredData = filterListingsBySearchQuery(filteredData, searchQuery);
+        const processedSearchQuery = processNaturalLanguageQuery(searchQuery.trim().toLowerCase());
+        const searchWords = processedSearchQuery.split(/\s+/).filter(word => word.length > 2);
+        
+        if (searchWords.length > 0) {
+          // Calculate a relevance score for each listing based on how many search words it contains across different fields
+          filteredData = filteredData.map(listing => {
+            // Combine all relevant text fields into one searchable text
+            const listingText = `${listing.title} ${listing.description} ${listing.category} ${listing.location} ${listing.seller_name}`.toLowerCase();
+            
+            // Count how many of the search words appear in the listing
+            const matchedWords = searchWords.filter(word => listingText.includes(word));
+            const totalWords = searchWords.length;
+            
+            // Calculate relevance score with different weights for different fields
+            let relevanceScore = matchedWords.length / totalWords;
+            
+            // Increase score for title matches (most important)
+            const titleMatches = searchWords.filter(word => 
+              listing.title.toLowerCase().includes(word)
+            ).length;
+            
+            // Increase score for location matches (for location-based queries)
+            const locationMatches = searchWords.filter(word => 
+              listing.location.toLowerCase().includes(word)
+            ).length;
+
+            // Increase score for seller name matches
+            const sellerNameMatches = searchWords.filter(word => 
+              listing.seller_name.toLowerCase().includes(word)
+            ).length;
+            
+            // Add bonuses for matches in different fields
+            relevanceScore += (titleMatches / totalWords) * 0.5; // 50% bonus for title matches
+            relevanceScore += (locationMatches / totalWords) * 0.4; // 40% bonus for location matches
+            relevanceScore += (sellerNameMatches / totalWords) * 0.3; // 30% bonus for seller name matches
+            
+            // Special case: If all words appear somewhere in the listing, give a big boost
+            if (matchedWords.length === searchWords.length) {
+              relevanceScore += 0.5;
+            }
+            
+            // For consecutive words matching
+            for (let i = 0; i < searchWords.length - 1; i++) {
+              if (listingText.includes(`${searchWords[i]} ${searchWords[i + 1]}`)) {
+                relevanceScore += 0.4; // Big boost for consecutive word matches
+              }
+            }
+
+            // Check for cross-field matches (e.g., one word in title, another in location)
+            // This specifically helps with cases like "Rambhavan muddinpallya"
+            if (searchWords.length >= 2) {
+              const titleWords = listing.title.toLowerCase().split(/\s+/);
+              const locationWords = listing.location.toLowerCase().split(/\s+/);
+              const descriptionWords = listing.description.toLowerCase().split(/\s+/);
+              
+              // Check if different search words match in different fields
+              const hasFieldCrossing = searchWords.some(word => 
+                titleWords.includes(word)
+              ) && searchWords.some(word => 
+                locationWords.includes(word) || descriptionWords.includes(word)
+              );
+              
+              if (hasFieldCrossing) {
+                relevanceScore += 0.6; // Significant boost for cross-field matching
+              }
+            }
+            
+            return {
+              ...listing,
+              relevanceScore
+            };
+          });
+          
+          // Filter out listings with low relevance (improved threshold)
+          filteredData = filteredData.filter(listing => (listing as any).relevanceScore > 0.2);
+          
+          // Sort by relevance score (higher is better)
+          filteredData.sort((a, b) => (b as any).relevanceScore - (a as any).relevanceScore);
+        }
       }
       
       console.log("Marketplace listings fetched:", filteredData?.map(l => ({
@@ -108,11 +211,10 @@ export const useMarketplaceListings = (options: MarketplaceListingsOptions = {})
         seller_id: l.seller_id,
         seller_name: l.seller_name,
         seller_rating: l.seller_rating,
-        tags: l.tags,
         current_user_id: user?.id
       })));
       
-      setListings(filteredData);
+      setListings(filteredData as MarketplaceListing[]);
     } catch (err) {
       console.error('Error fetching marketplace listings:', err);
       setError('Failed to fetch listings. Please try again later.');
@@ -120,6 +222,48 @@ export const useMarketplaceListings = (options: MarketplaceListingsOptions = {})
       setLoading(false);
     }
   }, [category, searchQuery, condition, minPrice, maxPrice, minRating, includeAllStatuses, user]);
+
+  // Process natural language query by removing common connector words
+  const processNaturalLanguageQuery = (query: string): string => {
+    // List of common connector words/stopwords to remove
+    const stopwords = ['in', 'at', 'near', 'around', 'by', 'the', 'a', 'an', 'for', 'with', 'to', 'from', 'and', 'or'];
+    
+    // Replace all commas with spaces for better tokenization
+    let processedQuery = query.replace(/,/g, ' ');
+    
+    // Split into words and filter out stopwords, but keep location terms
+    const allWords = processedQuery.split(/\s+/).filter(word => word.length > 0);
+    
+    // First pass: identify location terms
+    const possibleLocations: string[] = [];
+    let locationMode = false;
+    
+    // Look for location indicators
+    for (let i = 0; i < allWords.length; i++) {
+      const word = allWords[i].toLowerCase();
+      
+      // These words likely indicate the next word is a location
+      if (['in', 'at', 'near', 'around', 'by'].includes(word) && i < allWords.length - 1) {
+        possibleLocations.push(allWords[i + 1]);
+        locationMode = true;
+      } else if (locationMode && !stopwords.includes(word)) {
+        possibleLocations.push(word);
+      } else {
+        locationMode = false;
+      }
+    }
+    
+    // Second pass: build the processed query
+    const processedWords = allWords.filter(word => 
+      !stopwords.includes(word.toLowerCase()) || possibleLocations.includes(word)
+    );
+    
+    console.log('Original query:', query);
+    console.log('Processed words:', processedWords);
+    console.log('Identified location terms:', possibleLocations);
+    
+    return processedWords.join(' ');
+  };
 
   useEffect(() => {
     fetchListings();
@@ -133,9 +277,6 @@ export const useMarketplaceListings = (options: MarketplaceListingsOptions = {})
   };
 };
 
-/**
- * Hook for fetching a single marketplace listing by ID
- */
 export const useMarketplaceListing = (id: string) => {
   const [listing, setListing] = useState<MarketplaceListing | null>(null);
   const [loading, setLoading] = useState(true);
