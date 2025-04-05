@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown, Sparkles, Award, Circle, CircleDot, Calendar } from 'lucide-react';
+import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown, Sparkles, Award, Calendar } from 'lucide-react';
 import { Recommendation } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -40,7 +40,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
-  const [currentOpenStatus, setCurrentOpenStatus] = useState<boolean | undefined>(undefined);
   const [currentTime, setCurrentTime] = useState(new Date());
   const hiddenGemCount = recommendation.hiddenGemCount || 0;
   const mustVisitCount = recommendation.mustVisitCount || 0;
@@ -74,12 +73,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     };
   }, []);
 
-  useEffect(() => {
-    const status = calculateOpenStatus();
-    console.log(`${recommendation.name} - Open status calculated:`, status);
-    setCurrentOpenStatus(status);
-  }, [currentTime, recommendation]);
-
   const calculateOpenStatus = (): boolean | undefined => {
     if (recommendation.openNow === true) return true;
     if (recommendation.openNow === false) return false;
@@ -90,12 +83,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
     const currentMinute = now.getMinutes();
     const currentTimeInMinutes = currentHour * 60 + currentMinute;
     
-    console.log(`Calculating open status for ${recommendation.name}`);
-    console.log(`Current day: ${currentDay}, Current time: ${currentHour}:${currentMinute} (${currentTimeInMinutes} minutes)`);
-    
     if (recommendation.availability_days && Array.isArray(recommendation.availability_days)) {
-      console.log(`Availability days for ${recommendation.name}:`, recommendation.availability_days);
-      
       const isAvailableToday = recommendation.availability_days.some(day => {
         const normalizedCurrentDay = currentDay.trim().toLowerCase();
         const normalizedDay = String(day).trim().toLowerCase();
@@ -110,48 +98,32 @@ const LocationCard: React.FC<LocationCardProps> = ({
                          (normalizedCurrentDay.includes('fri') && normalizedDay.includes('fri')) ||
                          (normalizedCurrentDay.includes('sat') && normalizedDay.includes('sat'));
                          
-        console.log(`Comparing day: "${normalizedDay}" with current day: "${normalizedCurrentDay}", match: ${dayMatch}`);
         return dayMatch;
       });
-      
-      console.log(`${recommendation.name} available today: ${isAvailableToday}`);
       
       if (!isAvailableToday) {
         return false;
       }
       
-      console.log(`${recommendation.name} - Checking hours`);
-      
       if (recommendation.availability_start_time && recommendation.availability_end_time) {
         const startTime = parseTimeString(recommendation.availability_start_time);
         const endTime = parseTimeString(recommendation.availability_end_time);
         
-        console.log(`Start time: ${recommendation.availability_start_time} (${startTime} minutes)`);
-        console.log(`End time: ${recommendation.availability_end_time} (${endTime} minutes)`);
-        console.log(`Current time: ${currentTimeInMinutes} minutes`);
-        
         if (endTime < startTime) {
-          const isOpen = currentTimeInMinutes >= startTime || currentTimeInMinutes <= endTime;
-          console.log(`${recommendation.name} operates overnight, is open: ${isOpen}`);
-          return isOpen;
+          return currentTimeInMinutes >= startTime || currentTimeInMinutes <= endTime;
         }
         
-        const isOpen = currentTimeInMinutes >= startTime && currentTimeInMinutes <= endTime;
-        console.log(`${recommendation.name} - Is open based on time range: ${isOpen}`);
-        return isOpen;
+        return currentTimeInMinutes >= startTime && currentTimeInMinutes <= endTime;
       }
       
       return true;
     }
     
     if (recommendation.hours) {
-      console.log(`${recommendation.name} - Parsing hours from: ${recommendation.hours}`);
       const hoursMatch = recommendation.hours.match(/([\d:]+\s*[AP]M)\s*-\s*([\d:]+\s*[AP]M)/i);
       if (hoursMatch) {
         const startTime = parseTimeString(hoursMatch[1]);
         const endTime = parseTimeString(hoursMatch[2]);
-        
-        console.log(`Extracted hours - start: ${hoursMatch[1]} (${startTime} minutes), end: ${hoursMatch[2]} (${endTime} minutes)`);
         
         if (endTime < startTime) {
           return currentTimeInMinutes >= startTime || currentTimeInMinutes <= endTime;
@@ -163,7 +135,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     
     if (recommendation.availability) {
       const availStr = recommendation.availability.toLowerCase();
-      console.log(`${recommendation.name} - Checking availability string: ${availStr}`);
       
       if (availStr.includes("appointment")) return false;
       
@@ -180,7 +151,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       }
     }
     
-    console.log(`${recommendation.name} - Could not determine open status`);
     return undefined;
   };
 
@@ -189,7 +159,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       if (!timeString) return 0;
       
       const cleanTimeString = timeString.trim().toUpperCase();
-      console.log(`Parsing time string: ${cleanTimeString}`);
       
       if (cleanTimeString.includes("24") && cleanTimeString.includes("HOUR")) {
         return -1; // Special code for 24 hours
@@ -218,7 +187,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
           return hours * 60;
         }
         
-        console.log(`Could not parse time: ${cleanTimeString}`);
         return 0;
       }
       
@@ -230,7 +198,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       if (period === 'AM' && hours === 12) hours = 0;
       
       const totalMinutes = hours * 60 + minutes;
-      console.log(`Parsed ${cleanTimeString} as ${hours}:${minutes} (${totalMinutes} minutes)`);
       return totalMinutes;
     } catch (e) {
       console.error("Error parsing time string:", timeString, e);
@@ -680,33 +647,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </div>
 
         <div className="flex flex-col text-sm mb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              {currentOpenStatus === true ? (
-                <CircleDot className="w-4 h-4 mr-1 flex-shrink-0 text-emerald-600 fill-emerald-600" />
-              ) : currentOpenStatus === false ? (
-                <Circle className="w-4 h-4 mr-1 flex-shrink-0 text-rose-600 fill-rose-600" />
-              ) : (
-                <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
-              )}
-              <span 
-                className={
-                  currentOpenStatus === true 
-                    ? "text-emerald-600 font-medium" 
-                    : currentOpenStatus === false 
-                      ? "text-rose-600 font-medium" 
-                      : "text-muted-foreground"
-                }
-              >
-                {currentOpenStatus === true 
-                  ? "Open now" 
-                  : currentOpenStatus === false 
-                    ? "Closed" 
-                    : "Hours available"}
-              </span>
-            </div>
-            
-            {(hasAvailabilityInfo() || businessHours) && (
+          {(hasAvailabilityInfo() || businessHours) && (
+            <div className="flex justify-end">
               <DropdownMenu>
                 <DropdownMenuTrigger 
                   onClick={e => e.stopPropagation()} 
@@ -734,10 +676,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
-            )}
-          </div>
+            </div>
+          )}
           
-          {hasAvailabilityInfo() && currentOpenStatus !== false && (
+          {hasAvailabilityInfo() && (
             <Collapsible open={availabilityOpen} onOpenChange={setAvailabilityOpen} className="mt-0.5">
               <CollapsibleTrigger onClick={e => e.stopPropagation()} className="flex items-center text-xs font-medium text-muted-foreground hover:text-primary transition-colors px-1 py-0.5 border border-transparent hover:border-border/30 rounded-md">
                 Available days
