@@ -1,132 +1,34 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { 
   FormField, 
   FormItem, 
   FormLabel, 
   FormControl, 
-  FormMessage,
-  FormDescription 
+  FormDescription, 
+  FormMessage 
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Tag, X, Plus, Store } from 'lucide-react';
+import { TagsInput } from '@/components/ui/tags-input';
+import { ImageUpload } from '@/components/ui/image-upload';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BusinessFormValues } from '../AddBusinessForm';
+import { Tag } from 'lucide-react';
 
-const SERVICE_CATEGORIES = [
-  "Accountants",
-  "Actor/Actress",
-  "Auto Repair",
-  "Beauty & Wellness",
-  "Car Dealers",
-  "Carpenters",
-  "Choreographer",
-  "Computer Repair",
-  "Consultants",
-  "Contractors",
-  "Education",
-  "Electricians",
-  "Entertainment",
-  "Event Planning",
-  "Fashion Designer",
-  "Financial Services",
-  "Fitness",
-  "Food & Dining",
-  "Graphic Designer",
-  "Hair Salons",
-  "Healthcare",
-  "Home Cleaning",
-  "Home Services",
-  "HVAC Services",
-  "Ice Cream Shop",
-  "Interior Design",
-  "IT Services",
-  "Landscaping",
-  "Laser Hair Removal",
-  "Legal Services",
-  "Marketing Agencies",
-  "Massage Therapy",
-  "Medical Spas",
-  "Musician",
-  "Nail Technicians",
-  "Painter",
-  "Painters (Service)",
-  "Photographer",
-  "Photographers",
-  "Plumbers",
-  "Pool & Hot Tub Services",
-  "Professional Services",
-  "Real Estate",
-  "Retail",
-  "Roofing",
-  "Skin Care",
-  "Technology",
-  "Towing",
-  "Transmission Repair",
-  "Travel & Transport",
-  "Travel Agents",
-  "Vacation Rentals",
-  "Vehicle Wraps",
-  "Videographers",
-  "Wedding Chapels",
-  "Weight Loss Centers",
-  "Windshield Installation & Repair",
-  "Writer",
-  "Other"
-];
+interface BasicInfoSectionProps {
+  maxImages?: number;
+}
 
-const BasicInfoSection = () => {
-  const form = useFormContext<BusinessFormValues>();
-  const [tagInput, setTagInput] = useState('');
-
-  const handleAddTag = () => {
-    if (tagInput.trim().length === 0) return;
-    
-    const currentTags = form.getValues('tags') || [];
-    
-    // Check if tag already exists
-    if (!currentTags.includes(tagInput.trim())) {
-      form.setValue('tags', [...currentTags, tagInput.trim()]);
-    }
-    
-    setTagInput('');
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    const currentTags = form.getValues('tags') || [];
-    form.setValue(
-      'tags',
-      currentTags.filter(tag => tag !== tagToRemove)
-    );
-  };
-
-  const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddTag();
-    }
-  };
-
+export default function BasicInfoSection({ maxImages = 10 }: BasicInfoSectionProps) { // Changed default from 5 to 10
+  const { control, setValue, getValues } = useFormContext<BusinessFormValues>();
+  
   return (
-    <>
-      <div className="space-y-6 md:col-span-2">
-        <h3 className="text-lg font-medium flex items-center gap-2">
-          <Store className="h-5 w-5 text-primary" />
-          Basic Information
-        </h3>
-      </div>
-
+    <div className="space-y-6">
+      <h3 className="text-lg font-medium">Basic Information</h3>
+      
       <FormField
-        control={form.control}
+        control={control}
         name="name"
         render={({ field }) => (
           <FormItem>
@@ -138,110 +40,94 @@ const BasicInfoSection = () => {
           </FormItem>
         )}
       />
-
+      
       <FormField
-        control={form.control}
+        control={control}
         name="category"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Category*</FormLabel>
-            <Select
-              value={field.value}
-              onValueChange={field.onChange}
+            <Select 
+              onValueChange={field.onChange} 
+              defaultValue={field.value}
             >
               <FormControl>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {SERVICE_CATEGORIES.map(category => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
+                <SelectItem value="education">Education</SelectItem>
+                <SelectItem value="healthcare">Healthcare</SelectItem>
+                <SelectItem value="food">Food</SelectItem>
+                <SelectItem value="home_services">Home Services</SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />
           </FormItem>
         )}
       />
-
+      
       <FormField
-        control={form.control}
+        control={control}
         name="description"
         render={({ field }) => (
-          <FormItem className="md:col-span-2">
+          <FormItem>
             <FormLabel>Description*</FormLabel>
             <FormControl>
-              <Textarea 
-                placeholder="Describe your business or service" 
-                className="min-h-[120px]" 
-                {...field} 
-              />
+              <Textarea placeholder="Describe your business or service" className="min-h-[120px]" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-
+      
       <FormField
-        control={form.control}
+        control={control}
         name="tags"
         render={({ field }) => (
-          <FormItem className="md:col-span-2">
+          <FormItem>
             <FormLabel>
-              <div className="flex items-center gap-2">
-                <Tag className="h-4 w-4" />
-                Tags*
+              <div className="flex items-center gap-1.5">
+                <Tag className="h-4 w-4" /> 
+                Tags* (at least 3)
               </div>
             </FormLabel>
-            <FormDescription>
-              Add at least 3 keywords that describe your services or items
-            </FormDescription>
-            
-            <div className="flex flex-wrap gap-2 mt-2">
-              {(field.value || []).map(tag => (
-                <div key={tag} className="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1">
-                  <span>{tag}</span>
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-5 w-5 p-0 rounded-full"
-                    onClick={() => handleRemoveTag(tag)}
-                  >
-                    <X className="h-3 w-3" />
-                    <span className="sr-only">Remove {tag}</span>
-                  </Button>
-                </div>
-              ))}
-            </div>
-            
-            <div className="flex mt-2">
-              <Input
-                placeholder="Add a tag"
-                value={tagInput}
-                onChange={e => setTagInput(e.target.value)}
-                onKeyDown={handleTagInputKeyDown}
-                className="rounded-r-none"
+            <FormControl>
+              <TagsInput
+                placeholder="Type and press enter to add tags"
+                tags={field.value || []}
+                setTags={(tags) => setValue('tags', tags)}
               />
-              <Button 
-                type="button" 
-                onClick={handleAddTag}
-                className="rounded-l-none"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add
-              </Button>
-            </div>
-            
+            </FormControl>
+            <FormDescription>
+              Keywords that describe your services or products
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
       />
-    </>
+      
+      <FormField
+        control={control}
+        name="images"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Business Photos</FormLabel>
+            <FormControl>
+              <ImageUpload
+                images={field.value || []}
+                onImagesChange={(images) => setValue('images', images, { shouldValidate: true })}
+                maxImages={maxImages}
+              />
+            </FormControl>
+            <FormDescription>
+              Upload up to {maxImages} photos of your business or service
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
   );
-};
-
-export default BasicInfoSection;
+}

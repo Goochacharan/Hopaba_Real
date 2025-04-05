@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,7 +32,6 @@ export interface Business {
   tags?: string[];
 }
 
-// Extend the business schema to include all the fields from the detailed form sections
 const businessSchema = z.object({
   name: z.string().min(2, {
     message: "Business name must be at least 2 characters.",
@@ -138,11 +136,9 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
     try {
       console.log("Submitting business data:", data);
       
-      // Convert price range values to numbers if they're provided as strings
       const priceRangeMin = data.price_range_min ? Number(data.price_range_min) : undefined;
       const priceRangeMax = data.price_range_max ? Number(data.price_range_max) : undefined;
       
-      // Prepare business data for submission
       const businessData = {
         name: data.name,
         category: data.category,
@@ -172,7 +168,6 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
       let result;
       
       if (business?.id) {
-        // Update existing business
         console.log("Updating business with ID:", business.id);
         result = await supabase
           .from('service_providers')
@@ -190,7 +185,6 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
           description: "Your business listing has been updated and will be reviewed by an admin.",
         });
       } else {
-        // Create new business
         console.log("Creating new business");
         result = await supabase
           .from('service_providers')
@@ -226,13 +220,8 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {/* Basic Information Section */}
-            <BasicInfoSection />
-            
-            {/* Location Section */}
+            <BasicInfoSection maxImages={10} />
             <LocationSection />
-            
-            {/* Contact Section */}
             <ContactSection />
           </div>
 

@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TagsInput } from "../ui/tags-input";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 export interface BusinessData {
   id?: string;
@@ -44,6 +45,7 @@ export interface BusinessData {
   price_range_min?: number;
   price_range_max?: number;
   approval_status?: string;
+  images?: string[];
 }
 
 const businessSchema = z.object({
@@ -92,6 +94,7 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [tagInput, setTagInput] = useState('');
+  const [businessImages, setBusinessImages] = useState<string[]>(business?.images || []);
 
   const form = useForm<BusinessFormValues>({
     resolver: zodResolver(businessSchema),
@@ -115,6 +118,7 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
       price_unit: business?.price_unit || "per hour",
       price_range_min: business?.price_range_min,
       price_range_max: business?.price_range_max,
+      images: business?.images || [],
     },
   });
 
@@ -190,6 +194,7 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
         languages: data.languages || [],
         experience: data.experience || null,
         tags: data.tags || [],
+        images: data.images,
       };
 
       console.log("Formatted business data for Supabase:", businessData);
@@ -249,7 +254,6 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {/* Basic Information */}
             <div className="space-y-6">
               <h3 className="text-lg font-medium">Basic Information</h3>
               
@@ -328,7 +332,6 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
               />
             </div>
 
-            {/* Location and Contact Section */}
             <div className="space-y-6">
               <h3 className="text-lg font-medium">Location Information</h3>
               
@@ -442,7 +445,6 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
           <Separator />
           
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {/* Pricing Section */}
             <div className="space-y-6">
               <h3 className="text-lg font-medium">Pricing Information</h3>
               
@@ -512,7 +514,6 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
               />
             </div>
             
-            {/* Additional Information */}
             <div className="space-y-6">
               <h3 className="text-lg font-medium">Additional Information</h3>
               
@@ -576,6 +577,29 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
                 )}
               />
             </div>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="images"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Business Images</FormLabel>
+                  <FormControl>
+                    <ImageUpload 
+                      images={field.value || []} 
+                      onImagesChange={(images) => form.setValue('images', images, { shouldValidate: true })}
+                      maxImages={10}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Upload up to 10 images of your business (previously limited to 5)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
           
           <div className="flex justify-end gap-4">

@@ -613,7 +613,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
                           <ImageUpload 
                             images={field.value || []} 
                             onImagesChange={(images) => form.setValue('images', images, { shouldValidate: true })}
-                            maxImages={5}
+                            maxImages={10}
                           />
                         </FormControl>
                         <FormMessage />
@@ -987,104 +987,4 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
                                   {time}
                                 </SelectItem>
                               ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="hours_to"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
-                            Working Hours To
-                          </FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
-                            value={field.value || "5:00 PM"}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select end time" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="max-h-[300px]">
-                              {TIME_OPTIONS.map(time => (
-                                <SelectItem key={`to-${time}`} value={time}>
-                                  {time}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : business?.id ? "Update Business" : "Submit Business"}
-            </Button>
-          </div>
-        </form>
-      </Form>
-
-      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Success!</AlertDialogTitle>
-            <AlertDialogDescription>
-              Your business/service has been successfully {business?.id ? "updated" : "added"}. It will now be available for others to discover after admin approval.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => {
-              setShowSuccessDialog(false);
-              onSaved();
-            }}>
-              Continue
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={showAddCategoryDialog} onOpenChange={setShowAddCategoryDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Add New Category</AlertDialogTitle>
-            <AlertDialogDescription>
-              Enter a new business category to add to the list.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="py-4">
-            <Input
-              placeholder="New category name"
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-            />
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleAddCategory} disabled={!newCategory.trim()}>
-              Add Category
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
-  );
-};
-
-export default BusinessFormSimple;
+                            </Select
