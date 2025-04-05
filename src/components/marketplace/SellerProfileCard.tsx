@@ -177,7 +177,7 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
                 <Phone className="h-5 w-5" />
               </Button>
               
-              <Button variant="outline" size="icon" onClick={handleWhatsApp} className="h-10 w-10 rounded-full" title="WhatsApp">
+              <Button variant="outline" size="icon" onClick={handleWhatsApp} title="WhatsApp" className="h-10 w-10 text-slate-50 rounded bg-lime-600 hover:bg-lime-500">
                 <MessageSquare className="h-5 w-5" />
               </Button>
               
