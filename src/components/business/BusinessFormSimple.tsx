@@ -150,9 +150,11 @@ interface BusinessFormProps {
   onCancel: () => void;
 }
 
+// Default categories list
 let CATEGORIES = [
   "Actor/Actress",
   "Auto Services",
+  "Bakery & Chats",
   "Beauty & Wellness",
   "Choreographer",
   "Education",
@@ -249,7 +251,25 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
   const [selectedDays, setSelectedDays] = useState<string[]>(business?.availability_days || []);
   const [showAddCategoryDialog, setShowAddCategoryDialog] = useState(false);
   const [newCategory, setNewCategory] = useState("");
-  const [categories, setCategories] = useState<string[]>(CATEGORIES);
+  const [categories, setCategories] = useState<string[]>([]);
+  
+  useEffect(() => {
+    const savedCategories = localStorage.getItem('customCategories');
+    let customCategories: string[] = [];
+    
+    if (savedCategories) {
+      try {
+        customCategories = JSON.parse(savedCategories);
+      } catch (error) {
+        console.error('Error parsing custom categories:', error);
+      }
+    }
+    
+    const allCategories = [...CATEGORIES, ...customCategories];
+    const uniqueCategories = Array.from(new Set(allCategories)).sort();
+    
+    setCategories(uniqueCategories);
+  }, []);
 
   const parseHours = () => {
     if (business?.hours) {
@@ -347,7 +367,23 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
     if (newCategory && !categories.includes(newCategory)) {
       const updatedCategories = [...categories, newCategory].sort();
       setCategories(updatedCategories);
-      CATEGORIES = updatedCategories; // Update the global categories list
+      
+      const savedCategories = localStorage.getItem('customCategories');
+      let customCategories: string[] = [];
+      
+      try {
+        if (savedCategories) {
+          customCategories = JSON.parse(savedCategories);
+        }
+        
+        if (!customCategories.includes(newCategory)) {
+          customCategories.push(newCategory);
+          localStorage.setItem('customCategories', JSON.stringify(customCategories));
+        }
+      } catch (error) {
+        console.error('Error saving custom category:', error);
+      }
+      
       form.setValue("category", newCategory);
       setNewCategory("");
       setShowAddCategoryDialog(false);

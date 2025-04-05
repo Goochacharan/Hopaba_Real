@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Coffee, Utensils, Scissors, ShoppingBag, HeartPulse, Briefcase, BookOpen, Home, Users, MoreHorizontal, Dumbbell } from 'lucide-react';
 
@@ -23,6 +23,7 @@ interface CategoryFilterProps {
   className?: string;
 }
 
+// Default categories with icons
 const defaultCategories: { id: CategoryType; label: string; icon: React.ReactNode }[] = [
   { id: 'all', label: 'All', icon: <div className="w-5 h-5 rounded-full bg-primary opacity-70"></div> },
   { id: 'restaurants', label: 'Restaurants', icon: <Utensils className="w-5 h-5" /> },
@@ -43,8 +44,33 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
   onSelectCategory, 
   className 
 }) => {
+  const [categories, setCategories] = useState([...defaultCategories]);
+
+  // Load custom categories from local storage
+  useEffect(() => {
+    const savedCategories = localStorage.getItem('customCategories');
+    if (savedCategories) {
+      try {
+        const customCategoryNames = JSON.parse(savedCategories) as string[];
+        
+        // Create new category objects for custom categories
+        const customCategories = customCategoryNames.map(name => ({
+          id: name.toLowerCase().replace(/\s+/g, '-'),
+          label: name,
+          icon: <Briefcase className="w-5 h-5" />  // Default icon for custom categories
+        }));
+        
+        // Combine with default categories
+        const allCategories = [...defaultCategories, ...customCategories];
+        setCategories(allCategories);
+      } catch (error) {
+        console.error("Error parsing custom categories:", error);
+      }
+    }
+  }, []);
+
   // Sort categories alphabetically, but keep 'all' at the beginning and 'more' at the end
-  const sortedCategories = [...defaultCategories].sort((a, b) => {
+  const sortedCategories = [...categories].sort((a, b) => {
     if (a.id === 'all') return -1;
     if (b.id === 'all') return 1;
     if (a.id === 'more') return 1;
