@@ -2,8 +2,8 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Event } from '@/hooks/useRecommendations';
-import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { Recommendation } from '@/lib/mockData';
+import { MarketplaceListing } from '@/types/marketplace';
 
 import LocationsList from './LocationsList';
 import EventsList from './EventsList';

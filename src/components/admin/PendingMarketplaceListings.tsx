@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,7 @@ import { CheckCircle, XCircle, RefreshCw, AlertCircle, Eye } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
-import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+import { MarketplaceListing } from '@/types/marketplace';
 
 interface PendingMarketplaceListingsProps {
   listings: MarketplaceListing[];

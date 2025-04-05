@@ -93,11 +93,11 @@ export const useMarketplaceListings = (options: MarketplaceListingsOptions = {})
 
       console.log(`Found ${data?.length || 0} marketplace listings`);
       
-      let filteredData = data || [];
+      let filteredData = data as MarketplaceListing[] || [];
       
       // If there is a search query, apply advanced search filtering
       if (searchQuery && searchQuery.trim() !== '') {
-        filteredData = filterListingsBySearchQuery(filteredData as MarketplaceListing[], searchQuery);
+        filteredData = filterListingsBySearchQuery(filteredData, searchQuery);
       }
       
       console.log("Marketplace listings fetched:", filteredData?.map(l => ({
@@ -112,7 +112,7 @@ export const useMarketplaceListings = (options: MarketplaceListingsOptions = {})
         current_user_id: user?.id
       })));
       
-      setListings(filteredData as MarketplaceListing[]);
+      setListings(filteredData);
     } catch (err) {
       console.error('Error fetching marketplace listings:', err);
       setError('Failed to fetch listings. Please try again later.');

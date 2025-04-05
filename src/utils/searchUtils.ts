@@ -1,4 +1,3 @@
-
 // Add natural language search processing utilities
 
 /**
@@ -126,4 +125,117 @@ export const calculateListingRelevanceScore = (listing: any, searchWords: string
   }
   
   return relevanceScore;
+};
+
+/**
+ * Add distance information to recommendations
+ */
+export const addDistanceToRecommendations = (recommendations: any[], userCoordinates: {lat: number, lng: number} | null) => {
+  if (!userCoordinates) return recommendations;
+  
+  return recommendations.map(rec => {
+    // If recommendation already has distance, use it; otherwise calculate
+    if (rec.distance !== undefined) return rec;
+    
+    // Simple placeholder for distance calculation
+    const distance = 5; // This would normally be calculated based on coordinates
+    return {
+      ...rec,
+      distance
+    };
+  });
+};
+
+/**
+ * Sort recommendations based on selected sort method
+ */
+export const sortRecommendations = (recommendations: any[], sortBy: string) => {
+  const sortedRecommendations = [...recommendations];
+  
+  switch(sortBy) {
+    case 'distance':
+      sortedRecommendations.sort((a, b) => (a.distance || 999) - (b.distance || 999));
+      break;
+    case 'rating':
+      sortedRecommendations.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      break;
+    case 'price-low':
+      sortedRecommendations.sort((a, b) => (a.price_level || 0) - (b.price_level || 0));
+      break;
+    case 'price-high':
+      sortedRecommendations.sort((a, b) => (b.price_level || 0) - (a.price_level || 0));
+      break;
+    case 'relevance':
+    default:
+      // Keep original order which is assumed to be by relevance
+      break;
+  }
+  
+  return sortedRecommendations;
+};
+
+/**
+ * Enhance recommendations with additional metadata
+ */
+export const enhanceRecommendations = (recommendations: any[]) => {
+  return recommendations.map(rec => {
+    // Calculate if it's currently open based on hours and current time
+    const isCurrentlyOpen = calculateIsOpen(rec);
+    
+    return {
+      ...rec,
+      isCurrentlyOpen,
+      // Add any other enhancements here
+    };
+  });
+};
+
+// Helper function to determine if a place is currently open
+const calculateIsOpen = (place: any): boolean => {
+  if (!place.availability_days || !place.availability_start_time || !place.availability_end_time) {
+    return false;
+  }
+  
+  const now = new Date();
+  const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const todayName = dayNames[currentDay];
+  
+  // Check if place is open today
+  if (!place.availability_days.includes(todayName)) {
+    return false;
+  }
+  
+  // Parse opening and closing times
+  const openingTime = parseTimeString(place.availability_start_time);
+  const closingTime = parseTimeString(place.availability_end_time);
+  
+  // Get current hour and minute
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentTimeValue = currentHour * 60 + currentMinute;
+  
+  // Check if current time is within opening hours
+  return currentTimeValue >= openingTime && currentTimeValue <= closingTime;
+};
+
+// Helper function to parse time string (e.g., "09:00") to minutes since midnight
+const parseTimeString = (timeString: string): number => {
+  if (!timeString || typeof timeString !== 'string') {
+    return 0;
+  }
+  
+  const parts = timeString.split(':');
+  if (parts.length !== 2) {
+    return 0;
+  }
+  
+  const hours = parseInt(parts[0], 10);
+  const minutes = parseInt(parts[1], 10);
+  
+  if (isNaN(hours) || isNaN(minutes)) {
+    return 0;
+  }
+  
+  return hours * 60 + minutes;
 };
