@@ -83,9 +83,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         <ListingActionButtons listingId={listing.id} title={listing.title} price={listing.price} sellerPhone={listing.seller_phone} sellerWhatsapp={listing.seller_whatsapp} sellerInstagram={listing.seller_instagram} location={listing.location} mapLink={listing.map_link} />
       </div>
 
-      {/* Add extra padding at the bottom to prevent overlap with navigation */}
-      <div className="pb-16 md:pb-12"></div>
-
       <ImageViewer images={listing.images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={open => {
       setImageViewerOpen(open);
       // The dialog handles its own state, no need to navigate
