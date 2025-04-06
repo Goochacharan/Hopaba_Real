@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -101,13 +100,7 @@ const MarketplaceListingDetails = () => {
               <div className="mb-3">
                 <Badge className="mb-2">{listing?.category}</Badge>
                 <h1 className="text-2xl sm:text-3xl font-bold mb-0">{listing?.title}</h1>
-                <ListingMetadata 
-                  location={listing?.location || ''} 
-                  createdAt={listing?.created_at || ''} 
-                  condition={listing?.condition || ''} 
-                  sellerName={listing?.seller_name || ''}
-                  sellerInstagram={listing?.seller_instagram} 
-                />
+                <ListingMetadata location={listing?.location || ''} createdAt={listing?.created_at || ''} condition={listing?.condition || ''} />
               </div>
               
               <div className="mb-6 bg-black/5 rounded-xl shadow-sm overflow-hidden">

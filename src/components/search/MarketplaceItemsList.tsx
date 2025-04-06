@@ -53,36 +53,18 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     (user && listing.seller_id === user.id)
   );
 
-  // Process natural language search query by removing common connector words
-  const processNaturalLanguageQuery = (query: string): string[] => {
-    const stopwords = ['in', 'at', 'near', 'around', 'by', 'the', 'a', 'an', 'for', 'with', 'to', 'from', 'and', 'or'];
-    let processedQuery = query.replace(/,/g, ' ');
-    
-    // Get all words with length >= 3 that aren't stopwords
-    const words = processedQuery.split(/\s+/).filter(word => 
-      word.length >= 3 && !stopwords.includes(word.toLowerCase())
-    );
-    
-    console.log('Search terms after processing:', words);
-    return words;
-  };
-
   // Highlight search terms in listing data if there's a search query
   const highlightSearchTerms = (text: string): React.ReactNode => {
     if (!searchQuery || !text) return text;
     
-    const searchWords = processNaturalLanguageQuery(searchQuery.trim().toLowerCase());
+    const searchWords = searchQuery.trim().toLowerCase().split(/\s+/).filter(word => word.length > 0);
     if (searchWords.length === 0) return text;
     
-    // Sort search words by length (longest first) to avoid highlighting issues
-    const sortedWords = [...searchWords].sort((a, b) => b.length - a.length);
-    
     let result = text;
-    sortedWords.forEach(word => {
+    searchWords.forEach(word => {
       if (word.length < 3) return; // Skip very short words
       
-      // Case insensitive replacement with word boundary awareness when possible
-      const regex = new RegExp(`(\\b${word}|${word})`, 'gi');
+      const regex = new RegExp(`(${word})`, 'gi');
       result = result.replace(regex, '<mark>$1</mark>');
     });
     
@@ -133,11 +115,6 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
             <MarketplaceListingCard 
               listing={{
                 ...listing,
-                title: searchQuery ? 
-                  React.isValidElement(highlightSearchTerms(listing.title)) ? 
-                    listing.title : 
-                    listing.title : 
-                  listing.title,
                 location: listing.location || "Not specified"
               }} 
               className={cn(
@@ -145,7 +122,6 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
                 "search-result-card", // This class will be used to identify search result cards
                 listing.approval_status === 'pending' ? "opacity-75" : ""
               )}
-              highlightText={searchQuery ? highlightSearchTerms : undefined}
             />
           </div>
         ))}

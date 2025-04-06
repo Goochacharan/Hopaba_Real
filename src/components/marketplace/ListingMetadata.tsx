@@ -1,50 +1,58 @@
-
 import React from 'react';
-import { MapPin, Calendar } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-
+import { MapPin, Calendar, Film } from 'lucide-react';
+import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 interface ListingMetadataProps {
-  location: string;
+  location: string | null;
   createdAt: string;
   condition: string;
   sellerInstagram?: string | null;
-  sellerName: string;
-  highlightText?: (text: string) => React.ReactNode;
+  sellerName?: string;
+  showInCard?: boolean;
 }
-
 const ListingMetadata: React.FC<ListingMetadataProps> = ({
   location,
   createdAt,
   condition,
   sellerInstagram,
   sellerName,
-  highlightText
+  showInCard = false
 }) => {
-  const formattedDate = React.useMemo(() => {
-    try {
-      return formatDistanceToNow(new Date(createdAt), { addSuffix: true });
-    } catch (error) {
-      return 'Recently';
+  const {
+    toast
+  } = useToast();
+  const handleInstagramClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (sellerInstagram) {
+      console.log("Opening video content:", sellerInstagram);
+      window.open(sellerInstagram, '_blank');
+      toast({
+        title: "Opening video content",
+        description: `Visiting ${sellerName || 'seller'}'s video content`,
+        duration: 2000
+      });
+    } else {
+      toast({
+        title: "Video content not available",
+        description: "The seller has not provided any video links",
+        variant: "destructive",
+        duration: 2000
+      });
     }
-  }, [createdAt]);
-
-  return (
-    <div className="flex flex-wrap items-center text-sm text-gray-500 gap-2 mt-1">
-      <div className="flex items-center">
-        <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
-        <span className="truncate max-w-[200px]">
-          {highlightText ? highlightText(location) : location}
-        </span>
+  };
+  return <div className="flex flex-wrap items-center gap-x-2 gap-y-0 text-sm text-muted-foreground py-0 mt-[-2px]">
+      {location && <div className="flex items-center gap-1 py-[3px]">
+          <MapPin className="h-3 w-3" />
+          <span>{location}</span>
+        </div>}
+      <div className="flex items-center gap-1 my-0 py-0 px-0">
+        <Calendar className="h-3 w-3" />
+        <span>Listed on {format(new Date(createdAt), 'PPP')}</span>
+        {sellerInstagram && <button onClick={handleInstagramClick} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 py-2 px-[31px] mx-[26px] shadow-[0_4px_0px_0px_rgba(0,0,0,0.25)] hover:shadow-[0_2px_0px_0px_rgba(0,0,0,0.25)] active:shadow-none active:translate-y-[3px]">
+            <Film className="h-5 w-5 text-white" />
+          </button>}
       </div>
-      <div className="flex items-center">
-        <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
-        <span>{formattedDate}</span>
-      </div>
-      <div className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">
-        {condition}
-      </div>
-    </div>
-  );
+      {/* Condition badge has been moved to the image */}
+    </div>;
 };
-
 export default ListingMetadata;

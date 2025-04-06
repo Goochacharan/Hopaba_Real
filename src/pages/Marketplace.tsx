@@ -235,8 +235,8 @@ const Marketplace = () => {
   const isSortFilterActive = sortOption !== 'newest';
 
   return <MainLayout>
-      <div className="animate-fade-in px-[7px] pt-6">
-        <div className="flex items-center justify-between mt-4">
+      <div className="animate-fade-in px-[7px]">
+        <div className="flex items-center justify-between">
           <LocationSelector selectedLocation={selectedLocation} onLocationChange={handleLocationChange} />
         </div>
         

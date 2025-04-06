@@ -16,7 +16,6 @@ import ListingActionButtons from './marketplace/ListingActionButtons';
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
   className?: string;
-  highlightText?: (text: string) => React.ReactNode;
 }
 
 const formatPrice = (price: number): string => {
@@ -25,8 +24,7 @@ const formatPrice = (price: number): string => {
 
 const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   listing,
-  className,
-  highlightText
+  className
 }) => {
   const navigate = useNavigate();
   const {
@@ -45,31 +43,21 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
     navigate(`/marketplace/${listing.id}`);
   };
   
-  // Check if we're on the search page or marketplace page
+  // Check if we're on the search page
   const isSearchPage = window.location.pathname.includes('/search');
-  const isMarketplacePage = window.location.pathname.includes('/marketplace');
 
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <ListingImageCarousel images={listing.images} onImageClick={handleImageClick} listing={listing} />
       
       <div className="p-4 px-[12px] py-[16px]">
-        <h3 className="font-bold text-xl md:text-2xl mb-1">
-          {highlightText ? highlightText(listing.title) : listing.title}
-        </h3>
+        <h3 className="font-bold text-xl md:text-2xl mb-1">{listing.title}</h3>
         
         <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
           <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
         </p>
         
         <div className="mt-0">
-          <ListingMetadata 
-            location={listing.location} 
-            createdAt={listing.created_at} 
-            condition={listing.condition} 
-            sellerInstagram={listing.seller_instagram} 
-            sellerName={listing.seller_name} 
-            highlightText={highlightText}
-          />
+          <ListingMetadata location={listing.location} createdAt={listing.created_at} condition={listing.condition} sellerInstagram={listing.seller_instagram} sellerName={listing.seller_name} />
         </div>
 
         <div className="flex justify-end items-center mb-4 my-0 px-0 mx-0 py-[10px]">
@@ -78,11 +66,19 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           </div>
         </div>
         
-        <ScrollArea className="h-[120px] mb-4 pr-3">
-          <p className="whitespace-pre-line text-gray-950 text-sm">
-            {highlightText ? highlightText(listing.description) : listing.description}
-          </p>
-        </ScrollArea>
+        {isSearchPage ? (
+          <ScrollArea className="h-[120px] mb-4 pr-3">
+            <p className="whitespace-pre-line text-gray-950 text-sm">
+              {listing.description}
+            </p>
+          </ScrollArea>
+        ) : (
+          <ScrollArea className="h-[120px] mb-4 pr-3">
+            <p className="whitespace-pre-line text-gray-950 text-sm">
+              {listing.description}
+            </p>
+          </ScrollArea>
+        )}
 
         <ListingActionButtons listingId={listing.id} title={listing.title} price={listing.price} sellerPhone={listing.seller_phone} sellerWhatsapp={listing.seller_whatsapp} sellerInstagram={listing.seller_instagram} location={listing.location} mapLink={listing.map_link} />
       </div>
