@@ -202,7 +202,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
   return <div className={cn("w-full max-w-2xl mx-auto", className)}>
       <form ref={formRef} onSubmit={handleSubmit} className="w-full bg-white rounded-xl shadow-md border border-border/50">
-        <div className="flex items-center p-2 px-[6px] py-[13px]">
+        <div className="flex items-center p-2 px-[6px] py-[10px]">
           <Input ref={inputRef} type="text" placeholder={getPlaceholder()} className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-2" value={query} onChange={e => setQuery(e.target.value)} onFocus={() => setIsExpanded(true)} />
           
           {query && <button type="button" onClick={clearSearch} className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full" aria-label="Clear search">
