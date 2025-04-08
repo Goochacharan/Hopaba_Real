@@ -46,7 +46,12 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   // Check if we're on the search page
   const isSearchPage = window.location.pathname.includes('/search');
 
-  return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
+  return <div onClick={handleCardClick} className={cn(
+      "group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", 
+      "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", 
+      "pb-20", // Adding significant bottom padding to prevent overlap with bottom nav
+      className
+    )}>
       <ListingImageCarousel images={listing.images} onImageClick={handleImageClick} listing={listing} />
       
       <div className="p-4 px-[12px] py-[16px]">
