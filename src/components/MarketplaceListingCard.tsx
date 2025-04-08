@@ -45,7 +45,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
       <ListingImageCarousel images={listing.images} onImageClick={handleImageClick} listing={listing} />
       
       <div className="p-4 px-[13px] py-0 my-0">
-        <h3 className="font-bold text-xl md:text-2xl mb-1">{listing.title}</h3>
+        <h3 className="font-bold text-xl md:text-2xl mb-1 py-0">{listing.title}</h3>
         
         <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
           <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
