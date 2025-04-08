@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -12,16 +11,13 @@ import ListingImageCarousel from './marketplace/ListingImageCarousel';
 import ListingMetadata from './marketplace/ListingMetadata';
 import SellerInfo from './marketplace/SellerInfo';
 import ListingActionButtons from './marketplace/ListingActionButtons';
-
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
   className?: string;
 }
-
 const formatPrice = (price: number): string => {
   return price.toLocaleString('en-IN');
 };
-
 const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   listing,
   className
@@ -32,29 +28,23 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   } = useToast();
   const [imageViewerOpen, setImageViewerOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
-
   const handleImageClick = (index: number) => {
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
-
   const handleCardClick = (e: React.MouseEvent) => {
     if (imageViewerOpen) return;
     navigate(`/marketplace/${listing.id}`);
   };
-  
+
   // Check if we're on the search page
   const isSearchPage = window.location.pathname.includes('/search');
-
-  return <div onClick={handleCardClick} className={cn(
-      "group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", 
-      "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", 
-      "pb-5", // Reduced from pb-10 to pb-5
-      className
-    )}>
+  return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5",
+  // Reduced from pb-10 to pb-5
+  className)}>
       <ListingImageCarousel images={listing.images} onImageClick={handleImageClick} listing={listing} />
       
-      <div className="p-4 px-[12px] py-[16px]">
+      <div className="p-4 px-[11px] py-0">
         <h3 className="font-bold text-xl md:text-2xl mb-1">{listing.title}</h3>
         
         <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
@@ -71,19 +61,15 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           </div>
         </div>
         
-        {isSearchPage ? (
-          <ScrollArea className="h-[120px] mb-4 pr-3">
+        {isSearchPage ? <ScrollArea className="h-[120px] mb-4 pr-3">
             <p className="whitespace-pre-line text-gray-950 text-sm">
               {listing.description}
             </p>
-          </ScrollArea>
-        ) : (
-          <ScrollArea className="h-[120px] mb-4 pr-3">
+          </ScrollArea> : <ScrollArea className="h-[120px] mb-4 pr-3">
             <p className="whitespace-pre-line text-gray-950 text-sm">
               {listing.description}
             </p>
-          </ScrollArea>
-        )}
+          </ScrollArea>}
 
         <ListingActionButtons listingId={listing.id} title={listing.title} price={listing.price} sellerPhone={listing.seller_phone} sellerWhatsapp={listing.seller_whatsapp} sellerInstagram={listing.seller_instagram} location={listing.location} mapLink={listing.map_link} />
       </div>
@@ -94,5 +80,4 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
     }} />
     </div>;
 };
-
 export default MarketplaceListingCard;
