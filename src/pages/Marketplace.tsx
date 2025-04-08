@@ -6,7 +6,7 @@ import { useUserMarketplaceListings } from '@/hooks/useUserMarketplaceListings';
 import LocationSelector from '@/components/LocationSelector';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers } from 'lucide-react';
+import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers, Car, Bike, Smartphone, Monitor, Sofa, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -87,31 +87,38 @@ const Marketplace = () => {
   const categories = [
     {
       id: 'all',
-      name: 'All Categories'
+      name: 'All Categories',
+      icon: <div className="w-5 h-5 rounded-full bg-primary opacity-70"></div>
     },
     {
       id: 'cars',
-      name: 'Cars'
+      name: 'Cars',
+      icon: <Car className="w-5 h-5" />
     },
     {
       id: 'bikes',
-      name: 'Bikes'
+      name: 'Bikes',
+      icon: <Bike className="w-5 h-5" />
     },
     {
       id: 'mobiles',
-      name: 'Mobiles'
+      name: 'Mobiles',
+      icon: <Smartphone className="w-5 h-5" />
     },
     {
       id: 'electronics',
-      name: 'Electronics'
+      name: 'Electronics',
+      icon: <Monitor className="w-5 h-5" />
     },
     {
       id: 'furniture',
-      name: 'Furniture'
+      name: 'Furniture',
+      icon: <Sofa className="w-5 h-5" />
     },
     {
       id: 'home_appliances',
-      name: 'Home Appliances'
+      name: 'Home Appliances',
+      icon: <Home className="w-5 h-5" />
     }
   ];
 
@@ -468,7 +475,9 @@ const Marketplace = () => {
         <Tabs defaultValue={currentCategory} value={currentCategory} onValueChange={handleCategoryChange} className="mb-6">
           <TabsList className="mb-4 flex flex-nowrap overflow-auto pb-1 scrollbar-none py-0">
             {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify font-semibold text-sm mx-[8px] px-[7px]">
-                {category.name}
+                <span className="flex items-center justify-center">
+                  {category.icon}
+                </span>
               </TabsTrigger>)}
           </TabsList>
           

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Coffee, Utensils, Scissors, ShoppingBag, HeartPulse, Briefcase, BookOpen, Home, Users, MoreHorizontal, Dumbbell } from 'lucide-react';
+import { Coffee, Utensils, Scissors, ShoppingBag, HeartPulse, Briefcase, BookOpen, Home, Users, MoreHorizontal, Dumbbell, Car, Bike, Smartphone, Monitor, Sofa } from 'lucide-react';
 
 export type CategoryType = 
   | 'all' 
@@ -15,6 +15,12 @@ export type CategoryType =
   | 'community' 
   | 'fitness'  
   | 'more'
+  | 'cars'
+  | 'bikes'
+  | 'mobiles'
+  | 'electronics'
+  | 'furniture'
+  | 'home_appliances'
   | string; // Allow any string for custom categories
 
 interface CategoryFilterProps {
@@ -36,6 +42,12 @@ const defaultCategories: { id: CategoryType; label: string; icon: React.ReactNod
   { id: 'real-estate', label: 'Real Estate', icon: <Home className="w-5 h-5" /> },
   { id: 'community', label: 'Community', icon: <Users className="w-5 h-5" /> },
   { id: 'fitness', label: 'Fitness', icon: <Dumbbell className="w-5 h-5" /> },
+  { id: 'cars', label: 'Cars', icon: <Car className="w-5 h-5" /> },
+  { id: 'bikes', label: 'Bikes', icon: <Bike className="w-5 h-5" /> },
+  { id: 'mobiles', label: 'Mobiles', icon: <Smartphone className="w-5 h-5" /> },
+  { id: 'electronics', label: 'Electronics', icon: <Monitor className="w-5 h-5" /> },
+  { id: 'furniture', label: 'Furniture', icon: <Sofa className="w-5 h-5" /> },
+  { id: 'home_appliances', label: 'Home Appliances', icon: <Home className="w-5 h-5" /> },
   { id: 'more', label: 'More', icon: <MoreHorizontal className="w-5 h-5" /> },
 ];
 
