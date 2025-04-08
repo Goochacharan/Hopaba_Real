@@ -49,7 +49,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   return <div onClick={handleCardClick} className={cn(
       "group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", 
       "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", 
-      "pb-10", // Reduced from pb-20 to pb-10
+      "pb-5", // Reduced from pb-10 to pb-5
       className
     )}>
       <ListingImageCarousel images={listing.images} onImageClick={handleImageClick} listing={listing} />
