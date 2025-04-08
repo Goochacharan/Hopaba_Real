@@ -561,7 +561,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               <DropdownMenu>
                 <DropdownMenuTrigger onClick={e => e.stopPropagation()} className="ml-2 inline-flex items-center text-xs font-medium transition-colors rounded text-slate-50 bg-gray-800 hover:bg-gray-700 px-[12px] mx-[2px]">
                   <Calendar className="h-3.5 w-3.5 mr-1" />
-                  <span className="underline text-base">Hours</span>
+                  <span className="underline text-sm px-0 mx-px">Hours</span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
                   {getAvailabilityDaysDisplay() && <div className="mb-1">
