@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Coffee, Utensils, Scissors, ShoppingBag, HeartPulse, Briefcase, BookOpen, Home, Users, MoreHorizontal, Dumbbell, Car, Bike, Smartphone, Monitor, Sofa } from 'lucide-react';
@@ -47,7 +48,7 @@ const defaultCategories: { id: CategoryType; label: string; icon: React.ReactNod
   { id: 'mobiles', label: 'Mobiles', icon: <Smartphone className="w-5 h-5" /> },
   { id: 'electronics', label: 'Electronics', icon: <Monitor className="w-5 h-5" /> },
   { id: 'furniture', label: 'Furniture', icon: <Sofa className="w-5 h-5" /> },
-  { id: 'home_appliances', label: 'Home Appliances', icon: <Home className="w-5 h-5" /> },
+  { id: 'home_appliances', label: 'Home Appliances', icon: <Home className="w-5 h-5" /> }, // Will be updated in the marketplace component
   { id: 'more', label: 'More', icon: <MoreHorizontal className="w-5 h-5" /> },
 ];
 

@@ -6,7 +6,7 @@ import { useUserMarketplaceListings } from '@/hooks/useUserMarketplaceListings';
 import LocationSelector from '@/components/LocationSelector';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers, Car, Bike, Smartphone, Monitor, Sofa, Home } from 'lucide-react';
+import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers, Car, Bike, Smartphone, Monitor, Sofa } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -84,6 +84,28 @@ const Marketplace = () => {
     setSelectedLocation(location);
   };
 
+  const MixerGrinder = () => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="w-5 h-5"
+    >
+      <path d="M8 2h8a2 2 0 0 1 2 2v2H6V4a2 2 0 0 1 2-2Z"></path>
+      <path d="M6 8h12a0 0 0 0 1 0 0v4a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a0 0 0 0 1 0 0Z"></path>
+      <path d="M7 20h10"></path>
+      <path d="M9 16v4"></path>
+      <path d="M15 16v4"></path>
+      <circle cx="12" cy="11" r="2"></circle>
+    </svg>
+  );
+
   const categories = [
     {
       id: 'all',
@@ -118,7 +140,7 @@ const Marketplace = () => {
     {
       id: 'home_appliances',
       name: 'Home Appliances',
-      icon: <Home className="w-5 h-5" />
+      icon: <MixerGrinder />
     }
   ];
 
@@ -474,11 +496,17 @@ const Marketplace = () => {
         
         <Tabs defaultValue={currentCategory} value={currentCategory} onValueChange={handleCategoryChange} className="mb-6">
           <TabsList className="mb-4 flex flex-nowrap overflow-auto pb-1 scrollbar-none py-0">
-            {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify font-semibold text-sm mx-[8px] px-[7px]">
+            {categories.map(category => (
+              <TabsTrigger 
+                key={category.id} 
+                value={category.id} 
+                className="whitespace-nowrap text-justify font-semibold text-sm mx-[8px] px-[7px]"
+              >
                 <span className="flex items-center justify-center">
                   {category.icon}
                 </span>
-              </TabsTrigger>)}
+              </TabsTrigger>
+            ))}
           </TabsList>
           
           {categories.map(category => <TabsContent key={category.id} value={category.id}>
