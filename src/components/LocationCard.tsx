@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
-
 interface LocationCardProps {
   recommendation: Recommendation;
   className?: string;
@@ -21,7 +20,6 @@ interface LocationCardProps {
   reviewCount?: number;
   showDistanceUnderAddress?: boolean;
 }
-
 const LocationCard: React.FC<LocationCardProps> = ({
   recommendation,
   className,
@@ -51,7 +49,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const showMustVisitBadge = recommendation.isMustVisit || mustVisitCount >= 20;
   const isSearchPage = window.location.pathname.includes('/search');
   const hideAvailabilityDropdown = recommendation.hideAvailabilityDropdown || false;
-
   useEffect(() => {
     const getCurrentUser = async () => {
       const {
@@ -69,7 +66,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       authListener?.subscription.unsubscribe();
     };
   }, []);
-
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -78,7 +74,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       clearInterval(timer);
     };
   }, []);
-
   const calculateOpenStatus = (): boolean | undefined => {
     if (recommendation.openNow === true) return true;
     if (recommendation.openNow === false) return false;
@@ -135,7 +130,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return undefined;
   };
-
   const parseTimeString = (timeString: string): number => {
     try {
       if (!timeString) return 0;
@@ -177,12 +171,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return 0;
     }
   };
-
   const images = recommendation.images && recommendation.images.length > 0 ? recommendation.images : [recommendation.image];
   React.useEffect(() => {
     setImageLoaded(Array(images.length).fill(false));
   }, [images.length]);
-
   const handleImageLoad = (index: number) => {
     setImageLoaded(prev => {
       const newState = [...prev];
@@ -190,13 +182,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return newState;
     });
   };
-
   const handleImageClick = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
-
   const getMedalStyle = (rank: number) => {
     switch (rank) {
       case 1:
@@ -221,7 +211,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
         };
     }
   };
-
   const renderStarRating = (rating: number) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
@@ -239,7 +228,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
         {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />)}
       </div>;
   };
-
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast({
@@ -248,7 +236,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
-
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     const phoneNumber = recommendation.phone || '';
@@ -261,7 +248,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
-
   const handleInstagramClick = (e: React.MouseEvent, instagram: string | undefined, businessName: string) => {
     e.stopPropagation();
     if (instagram) {
@@ -280,7 +266,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
-
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) {
@@ -301,7 +286,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
-
   const handleDirections = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (recommendation.map_link && recommendation.map_link.trim() !== '') {
@@ -327,7 +311,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 2000
     });
   };
-
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (navigator.share) {
@@ -361,11 +344,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
-
   const handleCardClick = () => {
     navigate(`/location/${recommendation.id}`);
   };
-
   const formatDistance = (distanceText: string | undefined) => {
     if (!distanceText) return '';
     const distanceMatch = distanceText.match(/(\d+(\.\d+)?)/);
@@ -377,7 +358,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     formattedDistance = formattedDistance.replace('away away', 'away');
     return formattedDistance;
   };
-
   const formatPrice = () => {
     if (recommendation.price_range_min && recommendation.price_range_max && recommendation.price_unit) {
       return `${recommendation.price_range_min}-${recommendation.price_range_max}/${recommendation.price_unit.replace('per ', '')}`;
@@ -388,7 +368,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return '';
   };
-
   const formatBusinessHours = (hours: string | undefined) => {
     if (!hours) {
       if (recommendation.availability_days && recommendation.availability_days.length > 0) {
@@ -413,22 +392,18 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return hours;
   };
-
   const hasAvailabilityInfo = () => {
     return recommendation.availability_days && Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0;
   };
-
   const hasInstagram = () => {
     return recommendation.instagram && typeof recommendation.instagram === 'string' && recommendation.instagram.trim() !== '';
   };
-
   const formatAvailabilityDays = () => {
     if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
       return null;
     }
     return recommendation.availability_days.map(day => formatDayShort(day)).join(', ');
   };
-
   const formatDayRange = (days: string[]): string => {
     if (!days || days.length === 0) return '';
     const dayAbbreviations: Record<string, string> = {
@@ -473,7 +448,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return ranges.join(', ');
   };
-
   const formatDayShort = (day: string): string => {
     const dayMap: Record<string, string> = {
       'monday': 'Mon',
@@ -486,33 +460,28 @@ const LocationCard: React.FC<LocationCardProps> = ({
     };
     return dayMap[day.toLowerCase()] || day;
   };
-
   const formatTime = (time: string | undefined): string => {
     if (!time) return '';
     return time;
   };
-
   const getAvailabilityHoursDisplay = (): string => {
     if (recommendation.availability_start_time && recommendation.availability_end_time) {
       return `${formatTime(recommendation.availability_start_time)}-${formatTime(recommendation.availability_end_time)}`;
     }
     return businessHours || '';
   };
-
   const getAvailabilityDaysDisplay = (): React.ReactNode => {
     if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
       return null;
     }
     return recommendation.availability_days.map(day => formatDayShort(day)).join(', ');
   };
-
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
   const availabilityInfo = formatAvailabilityDays();
   const isSearchResultCard = className?.includes('search-result-card');
   const isLocationDetailsPage = window.location.pathname.includes('/location/');
   const shouldIncreaseHeight = isSearchResultCard || isLocationDetailsPage;
   const imageHeightClass = shouldIncreaseHeight ? "h-[400px]" : "h-72";
-
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <div className={cn("relative w-full overflow-hidden", imageHeightClass)}>
         <Carousel className="w-full h-full">
@@ -573,10 +542,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
               <span className="truncate">{recommendation.address}</span>
             </div>
-            {hasInstagram() && <button 
-              onClick={e => handleInstagramClick(e, recommendation.instagram, recommendation.name)} 
-              title="Watch video content" 
-              className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 p-1.5 py-[7px] mx-0 px-[25px] flex items-center">
+            {hasInstagram() && <button onClick={e => handleInstagramClick(e, recommendation.instagram, recommendation.name)} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 hover:shadow-md transition-all ml-2 p-1.5 flex items-center rounded px-[18px] py-[4px] mx-[2px]">
                 <Film className="h-4 w-4 text-white mr-1" />
                 <span className="text-white text-xs font-medium">Video</span>
               </button>}
@@ -653,5 +619,4 @@ const LocationCard: React.FC<LocationCardProps> = ({
       {images.length > 0 && <ImageViewer images={images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
     </div>;
 };
-
 export default LocationCard;
