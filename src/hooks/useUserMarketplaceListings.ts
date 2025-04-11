@@ -37,7 +37,8 @@ export const useUserMarketplaceListings = () => {
         ...item,
         // Ensure approval_status is one of the expected values
         approval_status: (item.approval_status as 'pending' | 'approved' | 'rejected'),
-        damage_images: item.damage_images || []
+        damage_images: item.damage_images || [],
+        is_negotiable: item.is_negotiable || false
       })) as MarketplaceListing[];
 
       setListings(typedData || []);

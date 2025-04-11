@@ -75,6 +75,7 @@ export type Database = {
           category: string
           condition: string
           created_at: string
+          damage_images: string[] | null
           description: string
           id: string
           images: string[] | null
@@ -96,6 +97,7 @@ export type Database = {
           category: string
           condition: string
           created_at?: string
+          damage_images?: string[] | null
           description: string
           id?: string
           images?: string[] | null
@@ -117,6 +119,7 @@ export type Database = {
           category?: string
           condition?: string
           created_at?: string
+          damage_images?: string[] | null
           description?: string
           id?: string
           images?: string[] | null

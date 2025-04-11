@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -25,6 +26,17 @@ export interface MarketplaceListing {
   approval_status: 'pending' | 'approved' | 'rejected';
 }
 
+export interface MarketplaceListingsParams {
+  category?: string;
+  searchQuery?: string;
+  condition?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+  includeAllStatuses?: boolean;
+}
+
+// Hook for getting a single marketplace listing by ID
 export const useMarketplaceListing = (id: string) => {
   const [listing, setListing] = useState<MarketplaceListing | null>(null);
   const [loading, setLoading] = useState(true);
@@ -81,4 +93,94 @@ export const useMarketplaceListing = (id: string) => {
   }, [id]);
 
   return { listing, loading, error };
+};
+
+// Hook for getting multiple marketplace listings with filters
+export const useMarketplaceListings = (params: MarketplaceListingsParams = {}) => {
+  const [listings, setListings] = useState<MarketplaceListing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  const { 
+    category, 
+    searchQuery,
+    condition,
+    minPrice,
+    maxPrice,
+    minRating,
+    includeAllStatuses
+  } = params;
+  
+  useEffect(() => {
+    const fetchListings = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        let query = supabase
+          .from('marketplace_listings')
+          .select('*, seller_reviews(count)');
+
+        // Apply filters if provided
+        if (category) {
+          query = query.eq('category', category);
+        }
+        
+        if (searchQuery) {
+          query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
+        }
+        
+        if (condition) {
+          query = query.eq('condition', condition);
+        }
+        
+        if (minPrice !== undefined) {
+          query = query.gte('price', minPrice);
+        }
+        
+        if (maxPrice !== undefined) {
+          query = query.lte('price', maxPrice);
+        }
+        
+        if (minRating !== undefined) {
+          query = query.gte('seller_rating', minRating);
+        }
+        
+        // By default, only show approved listings unless includeAllStatuses is true
+        if (!includeAllStatuses) {
+          query = query.eq('approval_status', 'approved');
+        }
+        
+        // Order by creation date, newest first
+        query = query.order('created_at', { ascending: false });
+        
+        const { data, error } = await query;
+        
+        if (error) {
+          throw error;
+        }
+        
+        // Format the listings
+        const formattedListings = data?.map(item => ({
+          ...item,
+          review_count: item.seller_reviews?.[0]?.count || 0,
+          images: item.images || [],
+          damage_images: item.damage_images || [],
+          is_negotiable: item.is_negotiable || false,
+          approval_status: item.approval_status as 'pending' | 'approved' | 'rejected'
+        })) as MarketplaceListing[];
+        
+        setListings(formattedListings || []);
+      } catch (err: any) {
+        console.error('Error fetching marketplace listings:', err);
+        setError('Failed to fetch listings. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchListings();
+  }, [category, searchQuery, condition, minPrice, maxPrice, minRating, includeAllStatuses]);
+  
+  return { listings, loading, error };
 };
