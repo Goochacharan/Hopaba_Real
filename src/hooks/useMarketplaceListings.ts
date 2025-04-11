@@ -71,13 +71,24 @@ export const useMarketplaceListing = (id: string) => {
           return;
         }
 
+        // Type assertion to help TypeScript understand the data structure
+        interface RawListingWithReviews {
+          [key: string]: any;
+          seller_reviews?: Array<{count: number}> | null;
+          damage_images?: string[];
+          is_negotiable?: boolean;
+          approval_status: string;
+        }
+
+        const rawData = data as RawListingWithReviews;
+
         const formattedListing: MarketplaceListing = {
-          ...data,
-          review_count: data.seller_reviews?.[0]?.count || 0,
-          images: data.images || [],
-          damage_images: data.damage_images || [],
-          is_negotiable: data.is_negotiable || false,
-          approval_status: data.approval_status as 'pending' | 'approved' | 'rejected'
+          ...rawData,
+          review_count: rawData.seller_reviews?.[0]?.count || 0,
+          images: rawData.images || [],
+          damage_images: rawData.damage_images || [],
+          is_negotiable: rawData.is_negotiable || false,
+          approval_status: rawData.approval_status as 'pending' | 'approved' | 'rejected'
         };
 
         setListing(formattedListing);
@@ -160,15 +171,42 @@ export const useMarketplaceListings = (params: MarketplaceListingsParams = {}) =
       }
       
       // Type assertion to help TypeScript understand the data structure
-      type RawListingData = {
+      interface RawListingWithReviews {
         [key: string]: any;
-        seller_reviews: Array<{count: number}> | null;
+        seller_reviews?: Array<{count: number}> | null;
         damage_images?: string[];
-      };
+        is_negotiable?: boolean;
+        approval_status: string;
+        id: string;
+        title: string;
+        description: string;
+        price: number;
+        category: string;
+        condition: string;
+        location: string;
+        seller_name: string;
+        created_at: string;
+        updated_at: string;
+      }
       
       // Format the listings
-      const formattedListings = data?.map((item: RawListingData) => ({
-        ...item,
+      const formattedListings = data?.map((item: RawListingWithReviews) => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        price: item.price,
+        category: item.category,
+        condition: item.condition,
+        location: item.location,
+        seller_name: item.seller_name,
+        seller_id: item.seller_id,
+        seller_phone: item.seller_phone,
+        seller_whatsapp: item.seller_whatsapp,
+        seller_instagram: item.seller_instagram,
+        seller_rating: item.seller_rating,
+        map_link: item.map_link,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
         review_count: item.seller_reviews?.[0]?.count || 0,
         images: item.images || [],
         damage_images: item.damage_images || [],
@@ -193,6 +231,6 @@ export const useMarketplaceListings = (params: MarketplaceListingsParams = {}) =
     listings, 
     loading, 
     error,
-    refetch: fetchListings  // Add the refetch function to the return value
+    refetch: fetchListings  
   };
 };

@@ -33,12 +33,22 @@ export const useUserMarketplaceListings = () => {
       }
 
       // Type assertion to help TypeScript understand the data structure
-      type RawListingData = {
+      interface RawListingData {
         [key: string]: any;
+        id: string;
+        title: string;
+        description: string;
+        price: number;
+        category: string;
+        condition: string;
+        location: string;
+        seller_name: string;
+        created_at: string;
+        updated_at: string;
         damage_images?: string[];
         is_negotiable?: boolean;
         approval_status: string;
-      };
+      }
       
       // Ensure the data matches our MarketplaceListing type
       const typedData = data?.map((item: RawListingData) => ({
