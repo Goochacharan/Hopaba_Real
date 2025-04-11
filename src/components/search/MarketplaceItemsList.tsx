@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { cn } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Unlock, Lock } from 'lucide-react';
 import NoResultsMessage from './NoResultsMessage';
 import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
@@ -112,17 +112,37 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
                 Pending Approval
               </Badge>
             )}
-            <MarketplaceListingCard 
-              listing={{
-                ...listing,
-                location: listing.location || "Not specified"
-              }} 
-              className={cn(
-                "h-full flex flex-col",
-                "search-result-card", // This class will be used to identify search result cards
-                listing.approval_status === 'pending' ? "opacity-75" : ""
+            <div className="h-full">
+              <MarketplaceListingCard 
+                listing={{
+                  ...listing,
+                  location: listing.location || "Not specified"
+                }} 
+                className={cn(
+                  "h-full flex flex-col",
+                  "search-result-card", // This class will be used to identify search result cards
+                  listing.approval_status === 'pending' ? "opacity-75" : ""
+                )}
+              />
+              
+              {/* Display negotiable badge if listing is negotiable */}
+              {listing.is_negotiable && (
+                <div className="flex justify-center -mt-3 mb-3">
+                  <Badge variant="success" className="flex items-center gap-1">
+                    <Unlock className="h-3 w-3" />
+                    <span>Negotiable</span>
+                  </Badge>
+                </div>
               )}
-            />
+              {listing.is_negotiable === false && (
+                <div className="flex justify-center -mt-3 mb-3">
+                  <Badge variant="default" className="flex items-center gap-1">
+                    <Lock className="h-3 w-3" />
+                    <span>Fixed</span>
+                  </Badge>
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </div>
