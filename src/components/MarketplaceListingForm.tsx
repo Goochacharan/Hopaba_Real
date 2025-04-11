@@ -15,11 +15,13 @@ import { Card } from '@/components/ui/card';
 import { Loader2, Save, X, Instagram, Film, MapPin, Link2 } from 'lucide-react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { ImageUpload } from '@/components/ui/image-upload';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const marketplaceListingSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
   description: z.string().min(20, { message: "Description must be at least 20 characters" }),
   price: z.coerce.number().min(1, { message: "Price must be greater than 0" }),
+  is_negotiable: z.boolean().optional(),
   category: z.string().min(1, { message: "Category is required" }),
   condition: z.string().min(1, { message: "Condition is required" }),
   location: z.string().optional(),
@@ -67,6 +69,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     title: listing?.title || '',
     description: listing?.description || '',
     price: listing?.price || 0,
+    is_negotiable: listing?.is_negotiable || false,
     category: listing?.category || '',
     condition: listing?.condition || '',
     location: listing?.location || '',
@@ -130,6 +133,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         title: data.title,
         description: data.description,
         price: data.price,
+        is_negotiable: data.is_negotiable || false,
         category: categoryValue,
         condition: data.condition,
         location: data.location || "Not specified",
@@ -240,50 +244,46 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
 
                 <FormField
                   control={form.control}
-                  name="location"
+                  name="is_negotiable"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
-                          Location (Optional)
-                        </div>
-                      </FormLabel>
+                    <FormItem className="flex flex-row items-end space-x-2 space-y-0 mt-8">
                       <FormControl>
-                        <Input 
-                          placeholder="e.g. Mumbai, Delhi" 
-                          value={field.value}
-                          onChange={(e) => form.setValue('location', e.target.value)}
+                        <Checkbox 
+                          checked={field.value} 
+                          onCheckedChange={field.onChange}
+                          id="is-negotiable"
                         />
                       </FormControl>
-                      <FormDescription>
-                        Enter the location or area where the item is available
-                      </FormDescription>
+                      <FormLabel htmlFor="is-negotiable" className="font-normal cursor-pointer">
+                        Price is negotiable
+                      </FormLabel>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
               </div>
 
               <FormField
                 control={form.control}
-                name="map_link"
+                name="location"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
                       <div className="flex items-center gap-2">
-                        <Link2 className="h-4 w-4" />
-                        Google Maps Link (Optional)
+                        <MapPin className="h-4 w-4" />
+                        Location (Optional)
                       </div>
                     </FormLabel>
                     <FormControl>
                       <Input 
-                        placeholder="Paste your Google Maps link here" 
-                        {...field} 
+                        placeholder="e.g. Mumbai, Delhi" 
+                        value={field.value}
+                        onChange={(e) => form.setValue('location', e.target.value)}
                       />
                     </FormControl>
                     <FormDescription>
-                      Add a Google Maps link for more precise directions
+                      Enter the location or area where the item is available
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

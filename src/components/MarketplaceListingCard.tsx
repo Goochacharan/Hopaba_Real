@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -5,33 +6,37 @@ import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { useToast } from '@/hooks/use-toast';
 import ImageViewer from '@/components/ImageViewer';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 
 // Import our new components
 import ListingImageCarousel from './marketplace/ListingImageCarousel';
 import ListingMetadata from './marketplace/ListingMetadata';
 import SellerInfo from './marketplace/SellerInfo';
 import ListingActionButtons from './marketplace/ListingActionButtons';
+
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
   className?: string;
 }
+
 const formatPrice = (price: number): string => {
   return price.toLocaleString('en-IN');
 };
+
 const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   listing,
   className
 }) => {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [imageViewerOpen, setImageViewerOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
+
   const handleImageClick = (index: number) => {
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
+
   const handleCardClick = (e: React.MouseEvent) => {
     if (imageViewerOpen) return;
     navigate(`/marketplace/${listing.id}`);
@@ -39,45 +44,96 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
 
   // Check if we're on the search page
   const isSearchPage = window.location.pathname.includes('/search');
-  return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5",
-  // Reduced from pb-10 to pb-5
-  className)}>
+
+  return (
+    <div 
+      onClick={handleCardClick} 
+      className={cn(
+        "group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", 
+        "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", 
+        "pb-5",
+        className
+      )}
+    >
       <ListingImageCarousel images={listing.images} onImageClick={handleImageClick} listing={listing} />
       
       <div className="p-4 px-[13px] py-0 my-0">
         <h3 className="font-bold text-xl md:text-2xl mb-1">{listing.title}</h3>
         
-        <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
-          <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
-        </p>
+        <div className="flex flex-col gap-1">
+          <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
+            <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
+          </p>
+          
+          <div>
+            {listing.is_negotiable ? (
+              <Badge variant="success" className="mr-2">Negotiable</Badge>
+            ) : (
+              <Badge variant="condition">Fixed Price</Badge>
+            )}
+          </div>
+        </div>
         
-        <div className="mt-0">
-          <ListingMetadata location={listing.location} createdAt={listing.created_at} condition={listing.condition} sellerInstagram={listing.seller_instagram} sellerName={listing.seller_name} />
+        <div className="mt-2">
+          <ListingMetadata 
+            location={listing.location} 
+            createdAt={listing.created_at} 
+            condition={listing.condition} 
+            sellerInstagram={listing.seller_instagram} 
+            sellerName={listing.seller_name} 
+          />
         </div>
 
         <div className="flex justify-end items-center mb-4 my-0 px-0 mx-0 py-[10px]">
           <div className="flex flex-col items-end py-0">
-            <SellerInfo sellerName={listing.seller_name} sellerRating={listing.seller_rating} sellerId={listing.seller_id} reviewCount={listing.review_count} sellerInstagram={listing.seller_instagram} createdAt={listing.created_at} />
+            <SellerInfo 
+              sellerName={listing.seller_name} 
+              sellerRating={listing.seller_rating} 
+              sellerId={listing.seller_id} 
+              reviewCount={listing.review_count} 
+              sellerInstagram={listing.seller_instagram} 
+              createdAt={listing.created_at} 
+            />
           </div>
         </div>
         
-        {isSearchPage ? <ScrollArea className="h-[120px] mb-4 pr-3">
+        {isSearchPage ? (
+          <ScrollArea className="h-[120px] mb-4 pr-3">
             <p className="whitespace-pre-line text-gray-950 text-sm">
               {listing.description}
             </p>
-          </ScrollArea> : <ScrollArea className="h-[120px] mb-4 pr-3">
+          </ScrollArea>
+        ) : (
+          <ScrollArea className="h-[120px] mb-4 pr-3">
             <p className="whitespace-pre-line text-gray-950 text-sm py-0 my-0">
               {listing.description}
             </p>
-          </ScrollArea>}
+          </ScrollArea>
+        )}
 
-        <ListingActionButtons listingId={listing.id} title={listing.title} price={listing.price} sellerPhone={listing.seller_phone} sellerWhatsapp={listing.seller_whatsapp} sellerInstagram={listing.seller_instagram} location={listing.location} mapLink={listing.map_link} />
+        <ListingActionButtons 
+          listingId={listing.id} 
+          title={listing.title} 
+          price={listing.price} 
+          sellerPhone={listing.seller_phone} 
+          sellerWhatsapp={listing.seller_whatsapp} 
+          sellerInstagram={listing.seller_instagram} 
+          location={listing.location} 
+          mapLink={listing.map_link} 
+        />
       </div>
 
-      <ImageViewer images={listing.images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={open => {
-      setImageViewerOpen(open);
-      // The dialog handles its own state, no need to navigate
-    }} />
-    </div>;
+      <ImageViewer 
+        images={listing.images} 
+        initialIndex={selectedImageIndex} 
+        open={imageViewerOpen} 
+        onOpenChange={open => {
+          setImageViewerOpen(open);
+          // The dialog handles its own state, no need to navigate
+        }} 
+      />
+    </div>
+  );
 };
+
 export default MarketplaceListingCard;
