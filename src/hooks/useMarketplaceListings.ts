@@ -71,24 +71,56 @@ export const useMarketplaceListing = (id: string) => {
           return;
         }
 
-        // Type assertion to help TypeScript understand the data structure
-        interface RawListingWithReviews {
+        // Handle the raw data from Supabase
+        // First cast to unknown then to our expected structure
+        const rawData = data as unknown as {
           [key: string]: any;
+          id: string;
+          title: string;
+          description: string;
+          price: number;
+          category: string;
+          condition: string;
+          location: string;
+          seller_name: string;
+          created_at: string;
+          updated_at: string;
+          images?: string[];
           seller_reviews?: Array<{count: number}> | null;
           damage_images?: string[];
           is_negotiable?: boolean;
           approval_status: string;
-        }
+          seller_id?: string;
+          seller_phone?: string;
+          seller_whatsapp?: string;
+          seller_instagram?: string;
+          seller_rating?: number;
+          map_link?: string;
+        };
 
-        const rawData = data as RawListingWithReviews;
-
+        // Now build the listing with proper type safety
         const formattedListing: MarketplaceListing = {
-          ...rawData,
-          review_count: rawData.seller_reviews?.[0]?.count || 0,
+          id: rawData.id,
+          title: rawData.title,
+          description: rawData.description,
+          price: rawData.price,
+          category: rawData.category,
+          condition: rawData.condition,
+          location: rawData.location,
+          seller_name: rawData.seller_name,
+          created_at: rawData.created_at,
+          updated_at: rawData.updated_at,
           images: rawData.images || [],
           damage_images: rawData.damage_images || [],
           is_negotiable: rawData.is_negotiable || false,
-          approval_status: rawData.approval_status as 'pending' | 'approved' | 'rejected'
+          approval_status: rawData.approval_status as 'pending' | 'approved' | 'rejected',
+          seller_id: rawData.seller_id,
+          seller_phone: rawData.seller_phone,
+          seller_whatsapp: rawData.seller_whatsapp,
+          seller_instagram: rawData.seller_instagram,
+          seller_rating: rawData.seller_rating,
+          map_link: rawData.map_link,
+          review_count: rawData.seller_reviews?.[0]?.count || 0
         };
 
         setListing(formattedListing);
@@ -170,27 +202,13 @@ export const useMarketplaceListings = (params: MarketplaceListingsParams = {}) =
         throw error;
       }
       
-      // Type assertion to help TypeScript understand the data structure
-      interface RawListingWithReviews {
-        [key: string]: any;
-        seller_reviews?: Array<{count: number}> | null;
-        damage_images?: string[];
-        is_negotiable?: boolean;
-        approval_status: string;
-        id: string;
-        title: string;
-        description: string;
-        price: number;
-        category: string;
-        condition: string;
-        location: string;
-        seller_name: string;
-        created_at: string;
-        updated_at: string;
+      if (!data) {
+        setListings([]);
+        return;
       }
       
-      // Format the listings
-      const formattedListings = data?.map((item: RawListingWithReviews) => ({
+      // Process each listing to ensure it matches our expected type
+      const formattedListings: MarketplaceListing[] = data.map((item: any) => ({
         id: item.id,
         title: item.title,
         description: item.description,
@@ -212,9 +230,9 @@ export const useMarketplaceListings = (params: MarketplaceListingsParams = {}) =
         damage_images: item.damage_images || [],
         is_negotiable: item.is_negotiable || false,
         approval_status: item.approval_status as 'pending' | 'approved' | 'rejected'
-      })) as MarketplaceListing[];
+      }));
       
-      setListings(formattedListings || []);
+      setListings(formattedListings);
     } catch (err: any) {
       console.error('Error fetching marketplace listings:', err);
       setError('Failed to fetch listings. Please try again later.');

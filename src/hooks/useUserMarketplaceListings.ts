@@ -32,34 +32,31 @@ export const useUserMarketplaceListings = () => {
         throw error;
       }
 
-      // Type assertion to help TypeScript understand the data structure
-      interface RawListingData {
-        [key: string]: any;
-        id: string;
-        title: string;
-        description: string;
-        price: number;
-        category: string;
-        condition: string;
-        location: string;
-        seller_name: string;
-        created_at: string;
-        updated_at: string;
-        damage_images?: string[];
-        is_negotiable?: boolean;
-        approval_status: string;
-      }
-      
-      // Ensure the data matches our MarketplaceListing type
-      const typedData = data?.map((item: RawListingData) => ({
-        ...item,
-        // Ensure approval_status is one of the expected values
-        approval_status: (item.approval_status as 'pending' | 'approved' | 'rejected'),
+      // Process the data to ensure it matches our MarketplaceListing type
+      const typedData: MarketplaceListing[] = data?.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        price: item.price,
+        category: item.category,
+        condition: item.condition,
+        location: item.location,
+        seller_name: item.seller_name,
+        seller_id: item.seller_id,
+        seller_phone: item.seller_phone,
+        seller_whatsapp: item.seller_whatsapp,
+        seller_instagram: item.seller_instagram,
+        seller_rating: item.seller_rating,
+        map_link: item.map_link,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        images: item.images || [],
         damage_images: item.damage_images || [],
-        is_negotiable: item.is_negotiable || false
-      })) as MarketplaceListing[];
+        is_negotiable: item.is_negotiable || false,
+        approval_status: item.approval_status as 'pending' | 'approved' | 'rejected'
+      })) || [];
 
-      setListings(typedData || []);
+      setListings(typedData);
     } catch (err: any) {
       console.error('Error fetching user marketplace listings:', err);
       setError('Failed to fetch your listings. Please try again later.');
