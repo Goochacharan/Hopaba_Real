@@ -53,7 +53,8 @@ export const useUserMarketplaceListings = () => {
         images: item.images || [],
         damage_images: item.damage_images || [],
         is_negotiable: item.is_negotiable || false,
-        approval_status: item.approval_status as 'pending' | 'approved' | 'rejected'
+        approval_status: item.approval_status as 'pending' | 'approved' | 'rejected',
+        review_count: 0 // Set a default value, could be fetched separately if needed
       })) || [];
 
       setListings(typedData);

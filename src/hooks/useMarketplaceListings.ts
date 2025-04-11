@@ -54,9 +54,10 @@ export const useMarketplaceListing = (id: string) => {
           return;
         }
 
+        // First fetch the marketplace listing
         const { data, error } = await supabase
           .from('marketplace_listings')
-          .select('*, seller_reviews(count)')
+          .select('*')
           .eq('id', id)
           .eq('approval_status', 'approved')
           .single();
@@ -71,56 +72,42 @@ export const useMarketplaceListing = (id: string) => {
           return;
         }
 
-        // Handle the raw data from Supabase
-        // First cast to unknown then to our expected structure
-        const rawData = data as unknown as {
-          [key: string]: any;
-          id: string;
-          title: string;
-          description: string;
-          price: number;
-          category: string;
-          condition: string;
-          location: string;
-          seller_name: string;
-          created_at: string;
-          updated_at: string;
-          images?: string[];
-          seller_reviews?: Array<{count: number}> | null;
-          damage_images?: string[];
-          is_negotiable?: boolean;
-          approval_status: string;
-          seller_id?: string;
-          seller_phone?: string;
-          seller_whatsapp?: string;
-          seller_instagram?: string;
-          seller_rating?: number;
-          map_link?: string;
-        };
+        // Get review count for the seller if there's a seller_id
+        let reviewCount = 0;
+        if (data.seller_id) {
+          const { data: reviewsData, error: reviewsError } = await supabase
+            .from('seller_reviews')
+            .select('count(*)')
+            .eq('seller_id', data.seller_id);
 
-        // Now build the listing with proper type safety
+          if (!reviewsError && reviewsData && reviewsData.length > 0) {
+            reviewCount = reviewsData[0].count || 0;
+          }
+        }
+
+        // Format the listing with proper type safety
         const formattedListing: MarketplaceListing = {
-          id: rawData.id,
-          title: rawData.title,
-          description: rawData.description,
-          price: rawData.price,
-          category: rawData.category,
-          condition: rawData.condition,
-          location: rawData.location,
-          seller_name: rawData.seller_name,
-          created_at: rawData.created_at,
-          updated_at: rawData.updated_at,
-          images: rawData.images || [],
-          damage_images: rawData.damage_images || [],
-          is_negotiable: rawData.is_negotiable || false,
-          approval_status: rawData.approval_status as 'pending' | 'approved' | 'rejected',
-          seller_id: rawData.seller_id,
-          seller_phone: rawData.seller_phone,
-          seller_whatsapp: rawData.seller_whatsapp,
-          seller_instagram: rawData.seller_instagram,
-          seller_rating: rawData.seller_rating,
-          map_link: rawData.map_link,
-          review_count: rawData.seller_reviews?.[0]?.count || 0
+          id: data.id,
+          title: data.title,
+          description: data.description,
+          price: data.price,
+          category: data.category,
+          condition: data.condition,
+          location: data.location,
+          seller_name: data.seller_name,
+          created_at: data.created_at,
+          updated_at: data.updated_at,
+          images: data.images || [],
+          damage_images: data.damage_images || [],
+          is_negotiable: data.is_negotiable || false,
+          approval_status: data.approval_status as 'pending' | 'approved' | 'rejected',
+          seller_id: data.seller_id,
+          seller_phone: data.seller_phone,
+          seller_whatsapp: data.seller_whatsapp,
+          seller_instagram: data.seller_instagram,
+          seller_rating: data.seller_rating,
+          map_link: data.map_link,
+          review_count: reviewCount
         };
 
         setListing(formattedListing);
@@ -161,7 +148,7 @@ export const useMarketplaceListings = (params: MarketplaceListingsParams = {}) =
     try {
       let query = supabase
         .from('marketplace_listings')
-        .select('*, seller_reviews(count)');
+        .select('*');
 
       // Apply filters if provided
       if (category) {
@@ -206,6 +193,31 @@ export const useMarketplaceListings = (params: MarketplaceListingsParams = {}) =
         setListings([]);
         return;
       }
+
+      // Get review counts for each seller with a separate query
+      // This is more efficient than trying to join the tables
+      const sellerIds = data
+        .filter(item => item.seller_id)
+        .map(item => item.seller_id);
+
+      let reviewCounts: Record<string, number> = {};
+      if (sellerIds.length > 0) {
+        const uniqueSellerIds = [...new Set(sellerIds)];
+        
+        // For each seller, get their review count
+        for (const sellerId of uniqueSellerIds) {
+          if (sellerId) {
+            const { data: reviewData } = await supabase
+              .from('seller_reviews')
+              .select('count(*)')
+              .eq('seller_id', sellerId);
+              
+            if (reviewData && reviewData.length > 0) {
+              reviewCounts[sellerId] = reviewData[0].count || 0;
+            }
+          }
+        }
+      }
       
       // Process each listing to ensure it matches our expected type
       const formattedListings: MarketplaceListing[] = data.map((item: any) => ({
@@ -225,7 +237,7 @@ export const useMarketplaceListings = (params: MarketplaceListingsParams = {}) =
         map_link: item.map_link,
         created_at: item.created_at,
         updated_at: item.updated_at,
-        review_count: item.seller_reviews?.[0]?.count || 0,
+        review_count: item.seller_id ? (reviewCounts[item.seller_id] || 0) : 0,
         images: item.images || [],
         damage_images: item.damage_images || [],
         is_negotiable: item.is_negotiable || false,
