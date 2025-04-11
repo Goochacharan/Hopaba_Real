@@ -5,13 +5,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import SellerInfo from './SellerInfo';
 import ListingActionButtons from './ListingActionButtons';
 import ListingMetadata from './ListingMetadata';
-import { Badge } from '@/components/ui/badge';
 
 interface ListingPriceCardProps {
   id: string;
   title: string;
   price: number;
-  isNegotiable?: boolean;
   sellerName: string;
   sellerRating: number;
   sellerPhone: string | null;
@@ -32,7 +30,6 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   id,
   title,
   price,
-  isNegotiable,
   sellerName,
   sellerRating,
   sellerPhone,
@@ -57,17 +54,10 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
         </div>
         
         <div className="flex justify-between items-center mb-8">
-          <div className="space-y-1">
+          <div>
             <h2 className="md:text-6xl font-extrabold text-gray-800 py-0 px-1 text-4xl -mb-1 flex items-center">
               <span className="text-4xl md:text-5xl font-extrabold mr-0.5">₹</span>{formatPrice(price)}
             </h2>
-            <div>
-              {isNegotiable ? (
-                <Badge variant="success" className="mr-2">Negotiable</Badge>
-              ) : (
-                <Badge variant="condition">Fixed Price</Badge>
-              )}
-            </div>
           </div>
           <div className="flex flex-col items-end">
             <SellerInfo sellerName={sellerName} sellerRating={sellerRating} />

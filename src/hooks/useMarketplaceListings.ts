@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -7,20 +8,20 @@ export interface MarketplaceListing {
   title: string;
   description: string;
   price: number;
-  is_negotiable?: boolean;
   category: string;
   condition: string;
-  location: string;
+  images: string[];
   seller_name: string;
-  seller_id?: string;
   seller_rating: number;
   seller_phone: string | null;
   seller_whatsapp: string | null;
   seller_instagram: string | null;
-  map_link?: string | null;
+  seller_id: string; 
+  location: string;
+  map_link: string | null;
   created_at: string;
-  images: string[];
-  approval_status: 'pending' | 'approved' | 'rejected';
+  updated_at: string;
+  approval_status?: string;
   review_count?: number;
 }
 

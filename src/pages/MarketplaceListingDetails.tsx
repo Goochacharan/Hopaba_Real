@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -16,9 +15,17 @@ import SafeTradingTips from '@/components/marketplace/SafeTradingTips';
 import SellerDetailsCard from '@/components/marketplace/SellerDetailsCard';
 
 const MarketplaceListingDetails = () => {
-  const { id = '' } = useParams<{ id: string; }>();
+  const {
+    id = ''
+  } = useParams<{
+    id: string;
+  }>();
   const navigate = useNavigate();
-  const { listing, loading, error } = useMarketplaceListing(id);
+  const {
+    listing,
+    loading,
+    error
+  } = useMarketplaceListing(id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   
@@ -93,17 +100,6 @@ const MarketplaceListingDetails = () => {
               <div className="mb-3">
                 <Badge className="mb-2">{listing?.category}</Badge>
                 <h1 className="text-2xl sm:text-3xl font-bold mb-0">{listing?.title}</h1>
-                <div className="flex items-center gap-2 my-2">
-                  <h2 className="text-2xl font-bold flex items-center">
-                    <span className="text-xl mr-1">₹</span>
-                    {listing?.price.toLocaleString('en-IN')}
-                  </h2>
-                  {listing?.is_negotiable ? (
-                    <Badge variant="success">Negotiable</Badge>
-                  ) : (
-                    <Badge variant="condition">Fixed Price</Badge>
-                  )}
-                </div>
                 <ListingMetadata location={listing?.location || ''} createdAt={listing?.created_at || ''} condition={listing?.condition || ''} />
               </div>
               
@@ -144,7 +140,6 @@ const MarketplaceListingDetails = () => {
                     id={listing.id}
                     title={listing.title}
                     price={listing.price}
-                    isNegotiable={listing.is_negotiable}
                     sellerId={listing.seller_id || ''}
                     sellerName={listing.seller_name}
                     sellerRating={listing.seller_rating}
