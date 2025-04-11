@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -12,10 +13,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card } from '@/components/ui/card';
-import { Loader2, Save, X, Instagram, Film, MapPin, Link2, Unlock } from 'lucide-react';
+import { Loader2, Save, X, Instagram, Film, MapPin, Link2, Unlock, AlertTriangle } from 'lucide-react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
 
 const marketplaceListingSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
@@ -45,6 +47,7 @@ const marketplaceListingSchema = z.object({
   seller_instagram: z.string().optional(),
   images: z.array(z.string()).min(1, { message: "Please upload at least one image" }),
   is_negotiable: z.boolean().optional(),
+  damage_images: z.array(z.string()).optional(),
 });
 
 type MarketplaceListingFormData = z.infer<typeof marketplaceListingSchema>;
@@ -79,6 +82,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     seller_instagram: listing?.seller_instagram || '',
     images: listing?.images || [],
     is_negotiable: listing?.is_negotiable || false,
+    damage_images: listing?.damage_images || [],
   };
 
   const form = useForm<MarketplaceListingFormData>({
@@ -143,6 +147,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         seller_whatsapp: data.seller_whatsapp || null,
         seller_instagram: data.seller_instagram || null,
         images: data.images,
+        damage_images: data.damage_images || [],
         approval_status: 'pending',
         is_negotiable: data.is_negotiable || false
       };
@@ -486,6 +491,40 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
               </FormItem>
             )}
           />
+          
+          <Separator className="my-6" />
+          
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              <h3 className="font-medium text-lg">Damage & Scratch Images</h3>
+            </div>
+            <p className="text-muted-foreground">
+              For transparency, upload clear images of any damage, scratches, or defects your item may have.
+              This helps build trust with potential buyers.
+            </p>
+            
+            <FormField
+              control={form.control}
+              name="damage_images"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Damage/Scratch Images (Optional)</FormLabel>
+                  <FormControl>
+                    <ImageUpload 
+                      images={field.value || []}
+                      onImagesChange={(images) => form.setValue('damage_images', images)}
+                      maxImages={10}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Upload up to 10 images showing any damage or scratches on your item.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <div className="flex justify-end gap-2 pt-4">
             {onCancel && (
