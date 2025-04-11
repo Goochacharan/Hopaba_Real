@@ -1,10 +1,8 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import StarRating from './StarRating';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-
 interface SellerInfoProps {
   sellerName: string;
   sellerRating: number;
@@ -14,7 +12,6 @@ interface SellerInfoProps {
   onInstagramClick?: (e: React.MouseEvent) => void;
   createdAt?: string;
 }
-
 const SellerInfo: React.FC<SellerInfoProps> = ({
   sellerName,
   sellerRating,
@@ -24,36 +21,32 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
   onInstagramClick,
   createdAt
 }) => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [actualRating, setActualRating] = useState<number>(sellerRating);
   const [actualReviewCount, setActualReviewCount] = useState<number>(reviewCount || 0);
-
   useEffect(() => {
     if (sellerId) {
       fetchSellerRating(sellerId);
     }
   }, [sellerId]);
-
   const fetchSellerRating = async (sellerIdValue: string) => {
     try {
-      const { data, error } = await supabase
-        .from('seller_reviews')
-        .select('rating')
-        .eq('seller_id', sellerIdValue);
-
+      const {
+        data,
+        error
+      } = await supabase.from('seller_reviews').select('rating').eq('seller_id', sellerIdValue);
       if (error) {
         console.error('Error fetching seller reviews:', error);
         return;
       }
-
       if (data && data.length > 0) {
         // Calculate average rating
         const totalRating = data.reduce((sum, review) => sum + review.rating, 0);
         const avgRating = totalRating / data.length;
-        
         setActualRating(Math.round(avgRating * 10) / 10);
         setActualReviewCount(data.length);
-        
         console.log(`Fetched ${data.length} reviews for seller ${sellerIdValue}, actual rating: ${avgRating}`);
       } else {
         console.log(`No reviews found for seller ${sellerIdValue}`);
@@ -62,7 +55,6 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
       console.error('Failed to fetch seller rating:', err);
     }
   };
-
   const handleInstagramClick = (e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -90,41 +82,18 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
       });
     }
   };
-
-  const isVideoLink = sellerInstagram && (
-    sellerInstagram.includes('youtube.com') || 
-    sellerInstagram.includes('vimeo.com') || 
-    sellerInstagram.includes('tiktok.com') || 
-    sellerInstagram.includes('instagram.com/reel')
-  );
-
-  return (
-    <div className="flex flex-col w-full">
-      <div className="flex items-center justify-end w-full py-0">
+  const isVideoLink = sellerInstagram && (sellerInstagram.includes('youtube.com') || sellerInstagram.includes('vimeo.com') || sellerInstagram.includes('tiktok.com') || sellerInstagram.includes('instagram.com/reel'));
+  return <div className="flex flex-col w-full">
+      <div className="flex items-center justify-end w-full py-0 rounded mx-0 bg-lime-300 px-[4px]">
         <span className="text-muted-foreground text-xs mr-1">Seller</span>
-        {sellerId ? (
-          <Link 
-            to={`/seller/${sellerId}`} 
-            onClick={e => e.stopPropagation()} 
-            className="text-s hover:text-primary hover:underline"
-          >
+        {sellerId ? <Link to={`/seller/${sellerId}`} onClick={e => e.stopPropagation()} className="text-s hover:text-primary hover:underline">
             {sellerName}
-          </Link>
-        ) : (
-          <span className="text-sm font-medium">{sellerName}</span>
-        )}
+          </Link> : <span className="text-sm font-medium">{sellerName}</span>}
       </div>
 
       <div className="flex items-center justify-end w-full">
-        <StarRating 
-          rating={actualRating} 
-          showCount={true} 
-          count={actualReviewCount} 
-          size="small" 
-        />
+        <StarRating rating={actualRating} showCount={true} count={actualReviewCount} size="small" />
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default SellerInfo;
