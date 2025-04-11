@@ -12,9 +12,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card } from '@/components/ui/card';
-import { Loader2, Save, X, Instagram, Film, MapPin, Link2 } from 'lucide-react';
+import { Loader2, Save, X, Instagram, Film, MapPin, Link2, Unlock } from 'lucide-react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { ImageUpload } from '@/components/ui/image-upload';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const marketplaceListingSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
@@ -43,6 +44,7 @@ const marketplaceListingSchema = z.object({
     .optional(),
   seller_instagram: z.string().optional(),
   images: z.array(z.string()).min(1, { message: "Please upload at least one image" }),
+  is_negotiable: z.boolean().optional(),
 });
 
 type MarketplaceListingFormData = z.infer<typeof marketplaceListingSchema>;
@@ -76,6 +78,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     seller_whatsapp: listing?.seller_whatsapp || '+91',
     seller_instagram: listing?.seller_instagram || '',
     images: listing?.images || [],
+    is_negotiable: listing?.is_negotiable || false,
   };
 
   const form = useForm<MarketplaceListingFormData>({
@@ -140,7 +143,8 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         seller_whatsapp: data.seller_whatsapp || null,
         seller_instagram: data.seller_instagram || null,
         images: data.images,
-        approval_status: 'pending'
+        approval_status: 'pending',
+        is_negotiable: data.is_negotiable || false
       };
 
       if (listing?.id) {
@@ -234,6 +238,29 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                         <Input type="number" min="0" step="100" {...field} />
                       </FormControl>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="is_negotiable"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col mt-8">
+                      <div className="flex items-center space-x-2">
+                        <FormControl>
+                          <Checkbox 
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="flex items-center space-x-2">
+                          <Unlock className="h-4 w-4 text-green-500" />
+                          <FormLabel className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            Negotiable Price
+                          </FormLabel>
+                        </div>
+                      </div>
                     </FormItem>
                   )}
                 />
