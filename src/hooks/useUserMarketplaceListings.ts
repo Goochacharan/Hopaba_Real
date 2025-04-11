@@ -1,8 +1,9 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+import { MarketplaceListing } from '@/types/marketplace';
+import { formatListingData } from '@/utils/marketplaceUtils';
 import { useAuth } from '@/hooks/useAuth';
 
 export const useUserMarketplaceListings = () => {
@@ -12,7 +13,7 @@ export const useUserMarketplaceListings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const fetchUserListings = async () => {
+  const fetchUserListings = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -33,29 +34,9 @@ export const useUserMarketplaceListings = () => {
       }
 
       // Process the data to ensure it matches our MarketplaceListing type
-      const typedData: MarketplaceListing[] = data?.map((item: any) => ({
-        id: item.id,
-        title: item.title,
-        description: item.description,
-        price: item.price,
-        category: item.category,
-        condition: item.condition,
-        location: item.location,
-        seller_name: item.seller_name,
-        seller_id: item.seller_id,
-        seller_phone: item.seller_phone,
-        seller_whatsapp: item.seller_whatsapp,
-        seller_instagram: item.seller_instagram,
-        seller_rating: item.seller_rating,
-        map_link: item.map_link,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-        images: item.images || [],
-        damage_images: item.damage_images || [],
-        is_negotiable: item.is_negotiable || false,
-        approval_status: item.approval_status as 'pending' | 'approved' | 'rejected',
-        review_count: 0 // Set a default value, could be fetched separately if needed
-      })) || [];
+      const typedData: MarketplaceListing[] = data?.map((item: any) => {
+        return formatListingData(item, 0); // We don't need review counts for user's own listings
+      }) || [];
 
       setListings(typedData);
     } catch (err: any) {
@@ -64,7 +45,7 @@ export const useUserMarketplaceListings = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const deleteListing = async (listingId: string) => {
     try {
@@ -97,7 +78,7 @@ export const useUserMarketplaceListings = () => {
 
   useEffect(() => {
     fetchUserListings();
-  }, [user]);
+  }, [fetchUserListings]);
 
   return { 
     listings, 
