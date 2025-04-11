@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -45,14 +44,21 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   
   const handleCardClick = (e: React.MouseEvent) => {
     if (imageViewerOpen) return;
+    if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) {
+      return;
+    }
+    console.log("Navigating to marketplace listing:", listing.id);
     navigate(`/marketplace/${listing.id}`);
   };
 
-  // Check if we're on the search page
   const isSearchPage = window.location.pathname.includes('/search');
   const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
   
-  return <div className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5", className)}>
+  return (
+    <div 
+      className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5", className)}
+      onClick={handleCardClick}
+    >
       {hasDamageImages ? (
         <Tabs defaultValue="regular" className="mb-2">
           <TabsList className="w-full mb-0 p-1 h-auto bg-transparent">
@@ -71,19 +77,19 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           </TabsList>
           
           <TabsContent value="regular" className="mt-0 p-0">
-            <div onClick={handleCardClick}>
+            <div>
               <ListingImageCarousel images={listing.images} onImageClick={(index) => handleImageClick(index, 'regular')} listing={listing} />
             </div>
           </TabsContent>
           
           <TabsContent value="damage" className="mt-0 p-0">
-            <div onClick={handleCardClick}>
+            <div>
               <ListingImageCarousel images={listing.damage_images} onImageClick={(index) => handleImageClick(index, 'damage')} listing={listing} isDamageImages={true} />
             </div>
           </TabsContent>
         </Tabs>
       ) : (
-        <div onClick={handleCardClick}>
+        <div>
           <ListingImageCarousel images={listing.images} onImageClick={(index) => handleImageClick(index)} listing={listing} />
         </div>
       )}
@@ -142,10 +148,10 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         open={imageViewerOpen} 
         onOpenChange={open => {
           setImageViewerOpen(open);
-          // The dialog handles its own state, no need to navigate
         }} 
       />
-    </div>;
+    </div>
+  );
 };
 
 export default MarketplaceListingCard;
