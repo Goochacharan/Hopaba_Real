@@ -58,7 +58,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
             <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
           </p>
-          {listing.is_negotiable ? (
+          {listing.is_negotiable === true ? (
             <Badge variant="success" className="flex items-center gap-1">
               <Unlock className="h-3 w-3" />
               <span>Negotiable</span>
