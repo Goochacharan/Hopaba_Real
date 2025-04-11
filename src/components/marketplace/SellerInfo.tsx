@@ -80,7 +80,7 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
   const isVideoLink = sellerInstagram && (sellerInstagram.includes('youtube.com') || sellerInstagram.includes('vimeo.com') || sellerInstagram.includes('tiktok.com') || sellerInstagram.includes('instagram.com/reel'));
   return <div className="flex flex-col w-full">
       <div className="flex items-center justify-end w-full py-0 rounded mx-0 bg-lime-300 px-[4px]">
-        <span className="text-xs mr-1 text-gray-950 px-0 mx-[5px]">Seller</span>
+        <span className="text-xs mr-1 text-gray-950 px-0 mx-[5px]">seller</span>
         {sellerId ? <Link to={`/seller/${sellerId}`} onClick={e => e.stopPropagation()} className="text-xs font-bold hover:text-primary hover:underline">
             {sellerName}
           </Link> : <span className="text-sm font-medium">{sellerName}</span>}
