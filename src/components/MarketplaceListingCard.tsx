@@ -54,20 +54,25 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
       <div className="p-4 px-[13px] py-0 my-0">
         <h3 className="font-bold text-xl md:text-2xl mb-1">{listing.title}</h3>
         
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col">
           <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
             <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
           </p>
-          {listing.is_negotiable === true ? (
-            <Badge variant="success" className="flex items-center gap-1">
-              <Unlock className="h-3 w-3" />
-              <span>Negotiable</span>
-            </Badge>
-          ) : (
-            <Badge variant="default" className="flex items-center gap-1">
-              <Lock className="h-3 w-3" />
-              <span>Fixed</span>
-            </Badge>
+          
+          {listing.is_negotiable !== undefined && (
+            <div className="mt-1 mb-2">
+              {listing.is_negotiable === true ? (
+                <Badge variant="success" className="flex items-center gap-1">
+                  <Unlock className="h-3 w-3" />
+                  <span>Negotiable</span>
+                </Badge>
+              ) : (
+                <Badge variant="default" className="flex items-center gap-1">
+                  <Lock className="h-3 w-3" />
+                  <span>Fixed</span>
+                </Badge>
+              )}
+            </div>
           )}
         </div>
         
