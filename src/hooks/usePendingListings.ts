@@ -83,14 +83,8 @@ export const usePendingListings = () => {
 
       if (eventsError) throw eventsError;
 
-      // Ensure marketplaceData matches the MarketplaceListing type
-      const typedMarketplaceData = marketplaceData?.map(item => ({
-        ...item,
-        approval_status: (item.approval_status as 'pending' | 'approved' | 'rejected')
-      })) as MarketplaceListing[];
-
       setPendingListings({
-        marketplace: typedMarketplaceData || [],
+        marketplace: marketplaceData || [],
         services: servicesData || [],
         events: eventsData || []
       });

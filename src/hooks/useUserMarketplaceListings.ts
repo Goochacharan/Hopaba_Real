@@ -32,14 +32,7 @@ export const useUserMarketplaceListings = () => {
         throw error;
       }
 
-      // Ensure the data matches our MarketplaceListing type
-      const typedData = data?.map(item => ({
-        ...item,
-        // Ensure approval_status is one of the expected values
-        approval_status: (item.approval_status as 'pending' | 'approved' | 'rejected')
-      })) as MarketplaceListing[];
-
-      setListings(typedData || []);
+      setListings(data || []);
     } catch (err: any) {
       console.error('Error fetching user marketplace listings:', err);
       setError('Failed to fetch your listings. Please try again later.');
