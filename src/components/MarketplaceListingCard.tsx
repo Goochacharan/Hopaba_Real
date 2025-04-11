@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -5,19 +6,24 @@ import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { useToast } from '@/hooks/use-toast';
 import ImageViewer from '@/components/ImageViewer';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { Lock, Unlock } from 'lucide-react';
 
 // Import our new components
 import ListingImageCarousel from './marketplace/ListingImageCarousel';
 import ListingMetadata from './marketplace/ListingMetadata';
 import SellerInfo from './marketplace/SellerInfo';
 import ListingActionButtons from './marketplace/ListingActionButtons';
+
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
   className?: string;
 }
+
 const formatPrice = (price: number): string => {
   return price.toLocaleString('en-IN');
 };
+
 const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   listing,
   className
@@ -39,6 +45,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
 
   // Check if we're on the search page
   const isSearchPage = window.location.pathname.includes('/search');
+  
   return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5",
   // Reduced from pb-10 to pb-5
   className)}>
@@ -47,9 +54,22 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
       <div className="p-4 px-[13px] py-0 my-0">
         <h3 className="font-bold text-xl md:text-2xl mb-1">{listing.title}</h3>
         
-        <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
-          <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
+            <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
+          </p>
+          {listing.is_negotiable ? (
+            <Badge variant="success" className="flex items-center gap-1">
+              <Unlock className="h-3 w-3" />
+              <span>Negotiable</span>
+            </Badge>
+          ) : (
+            <Badge variant="default" className="flex items-center gap-1">
+              <Lock className="h-3 w-3" />
+              <span>Fixed</span>
+            </Badge>
+          )}
+        </div>
         
         <div className="mt-0">
           <ListingMetadata location={listing.location} createdAt={listing.created_at} condition={listing.condition} sellerInstagram={listing.seller_instagram} sellerName={listing.seller_name} />
@@ -80,4 +100,5 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
     }} />
     </div>;
 };
+
 export default MarketplaceListingCard;

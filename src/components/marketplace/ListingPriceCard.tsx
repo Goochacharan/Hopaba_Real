@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { Shield } from 'lucide-react';
+import { Shield, Lock, Unlock } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import SellerInfo from './SellerInfo';
 import ListingActionButtons from './ListingActionButtons';
 import ListingMetadata from './ListingMetadata';
+import { Badge } from '@/components/ui/badge';
 
 interface ListingPriceCardProps {
   id: string;
@@ -19,6 +20,7 @@ interface ListingPriceCardProps {
   createdAt: string;
   condition: string;
   mapLink?: string | null;
+  isNegotiable?: boolean;
 }
 
 const formatPrice = (price: number): string => {
@@ -38,7 +40,8 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   location,
   createdAt,
   condition,
-  mapLink
+  mapLink,
+  isNegotiable = false
 }) => {
   return (
     <div className="sticky top-24 space-y-6">
@@ -58,6 +61,19 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
             <h2 className="md:text-6xl font-extrabold text-gray-800 py-0 px-1 text-4xl -mb-1 flex items-center">
               <span className="text-4xl md:text-5xl font-extrabold mr-0.5">₹</span>{formatPrice(price)}
             </h2>
+            <div className="mt-2">
+              {isNegotiable ? (
+                <Badge variant="success" className="flex items-center gap-1">
+                  <Unlock className="h-3 w-3" />
+                  <span>Negotiable</span>
+                </Badge>
+              ) : (
+                <Badge variant="default" className="flex items-center gap-1">
+                  <Lock className="h-3 w-3" />
+                  <span>Fixed Price</span>
+                </Badge>
+              )}
+            </div>
           </div>
           <div className="flex flex-col items-end">
             <SellerInfo sellerName={sellerName} sellerRating={sellerRating} />

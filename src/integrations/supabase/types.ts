@@ -75,9 +75,11 @@ export type Database = {
           category: string
           condition: string
           created_at: string
+          damage_images: string[] | null
           description: string
           id: string
           images: string[] | null
+          is_negotiable: boolean | null
           location: string
           map_link: string | null
           price: number
@@ -95,9 +97,11 @@ export type Database = {
           category: string
           condition: string
           created_at?: string
+          damage_images?: string[] | null
           description: string
           id?: string
           images?: string[] | null
+          is_negotiable?: boolean | null
           location: string
           map_link?: string | null
           price: number
@@ -115,9 +119,11 @@ export type Database = {
           category?: string
           condition?: string
           created_at?: string
+          damage_images?: string[] | null
           description?: string
           id?: string
           images?: string[] | null
+          is_negotiable?: boolean | null
           location?: string
           map_link?: string | null
           price?: number
