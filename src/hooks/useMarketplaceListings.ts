@@ -77,11 +77,13 @@ export const useMarketplaceListing = (id: string) => {
         if (data.seller_id) {
           const { data: reviewsData, error: reviewsError } = await supabase
             .from('seller_reviews')
-            .select('count(*)')
+            .select('count')
             .eq('seller_id', data.seller_id);
 
           if (!reviewsError && reviewsData && reviewsData.length > 0) {
-            reviewCount = reviewsData[0].count || 0;
+            // Safely handle the count value - it could be a number or null
+            const countValue = reviewsData[0]?.count;
+            reviewCount = typeof countValue === 'number' ? countValue : 0;
           }
         }
 
@@ -209,11 +211,13 @@ export const useMarketplaceListings = (params: MarketplaceListingsParams = {}) =
           if (sellerId) {
             const { data: reviewData } = await supabase
               .from('seller_reviews')
-              .select('count(*)')
+              .select('count')
               .eq('seller_id', sellerId);
               
             if (reviewData && reviewData.length > 0) {
-              reviewCounts[sellerId] = reviewData[0].count || 0;
+              // Safely access the count value
+              const countValue = reviewData[0]?.count;
+              reviewCounts[sellerId] = typeof countValue === 'number' ? countValue : 0;
             }
           }
         }
