@@ -1,7 +1,6 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Recommendation } from '@/lib/mockData';
-import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+import { MarketplaceListing } from '@/types/marketplace';
 import { Event } from '@/hooks/useRecommendations';
 import { useToast } from '@/hooks/use-toast';
 

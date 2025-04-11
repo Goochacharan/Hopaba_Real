@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
-import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
+import { MarketplaceListing } from '@/types/marketplace';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';

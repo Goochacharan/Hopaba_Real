@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+import { MarketplaceListing } from '@/types/marketplace';
 
 export interface SellerReview {
   id: string;

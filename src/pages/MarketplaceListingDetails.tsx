@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
-import { useMarketplaceListing } from '@/hooks/useMarketplaceListings';
+import { useMarketplaceListing } from '@/hooks/useSingleMarketplaceListing';
 import { ArrowLeft, AlertCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
