@@ -23,6 +23,7 @@ export interface MarketplaceListing {
   approval_status?: string;
   review_count?: number;
   is_negotiable?: boolean;
+  damage_images?: string[];
 }
 
 interface UseMarketplaceListingsOptions {
