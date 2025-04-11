@@ -32,8 +32,16 @@ export const useUserMarketplaceListings = () => {
         throw error;
       }
 
+      // Type assertion to help TypeScript understand the data structure
+      type RawListingData = {
+        [key: string]: any;
+        damage_images?: string[];
+        is_negotiable?: boolean;
+        approval_status: string;
+      };
+      
       // Ensure the data matches our MarketplaceListing type
-      const typedData = data?.map(item => ({
+      const typedData = data?.map((item: RawListingData) => ({
         ...item,
         // Ensure approval_status is one of the expected values
         approval_status: (item.approval_status as 'pending' | 'approved' | 'rejected'),

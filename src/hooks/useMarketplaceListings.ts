@@ -111,76 +111,88 @@ export const useMarketplaceListings = (params: MarketplaceListingsParams = {}) =
     includeAllStatuses
   } = params;
   
-  useEffect(() => {
-    const fetchListings = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        let query = supabase
-          .from('marketplace_listings')
-          .select('*, seller_reviews(count)');
-
-        // Apply filters if provided
-        if (category) {
-          query = query.eq('category', category);
-        }
-        
-        if (searchQuery) {
-          query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
-        }
-        
-        if (condition) {
-          query = query.eq('condition', condition);
-        }
-        
-        if (minPrice !== undefined) {
-          query = query.gte('price', minPrice);
-        }
-        
-        if (maxPrice !== undefined) {
-          query = query.lte('price', maxPrice);
-        }
-        
-        if (minRating !== undefined) {
-          query = query.gte('seller_rating', minRating);
-        }
-        
-        // By default, only show approved listings unless includeAllStatuses is true
-        if (!includeAllStatuses) {
-          query = query.eq('approval_status', 'approved');
-        }
-        
-        // Order by creation date, newest first
-        query = query.order('created_at', { ascending: false });
-        
-        const { data, error } = await query;
-        
-        if (error) {
-          throw error;
-        }
-        
-        // Format the listings
-        const formattedListings = data?.map(item => ({
-          ...item,
-          review_count: item.seller_reviews?.[0]?.count || 0,
-          images: item.images || [],
-          damage_images: item.damage_images || [],
-          is_negotiable: item.is_negotiable || false,
-          approval_status: item.approval_status as 'pending' | 'approved' | 'rejected'
-        })) as MarketplaceListing[];
-        
-        setListings(formattedListings || []);
-      } catch (err: any) {
-        console.error('Error fetching marketplace listings:', err);
-        setError('Failed to fetch listings. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchListings = async () => {
+    setLoading(true);
+    setError(null);
     
+    try {
+      let query = supabase
+        .from('marketplace_listings')
+        .select('*, seller_reviews(count)');
+
+      // Apply filters if provided
+      if (category) {
+        query = query.eq('category', category);
+      }
+      
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
+      }
+      
+      if (condition) {
+        query = query.eq('condition', condition);
+      }
+      
+      if (minPrice !== undefined) {
+        query = query.gte('price', minPrice);
+      }
+      
+      if (maxPrice !== undefined) {
+        query = query.lte('price', maxPrice);
+      }
+      
+      if (minRating !== undefined) {
+        query = query.gte('seller_rating', minRating);
+      }
+      
+      // By default, only show approved listings unless includeAllStatuses is true
+      if (!includeAllStatuses) {
+        query = query.eq('approval_status', 'approved');
+      }
+      
+      // Order by creation date, newest first
+      query = query.order('created_at', { ascending: false });
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Type assertion to help TypeScript understand the data structure
+      type RawListingData = {
+        [key: string]: any;
+        seller_reviews: Array<{count: number}> | null;
+        damage_images?: string[];
+      };
+      
+      // Format the listings
+      const formattedListings = data?.map((item: RawListingData) => ({
+        ...item,
+        review_count: item.seller_reviews?.[0]?.count || 0,
+        images: item.images || [],
+        damage_images: item.damage_images || [],
+        is_negotiable: item.is_negotiable || false,
+        approval_status: item.approval_status as 'pending' | 'approved' | 'rejected'
+      })) as MarketplaceListing[];
+      
+      setListings(formattedListings || []);
+    } catch (err: any) {
+      console.error('Error fetching marketplace listings:', err);
+      setError('Failed to fetch listings. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
     fetchListings();
   }, [category, searchQuery, condition, minPrice, maxPrice, minRating, includeAllStatuses]);
   
-  return { listings, loading, error };
+  return { 
+    listings, 
+    loading, 
+    error,
+    refetch: fetchListings  // Add the refetch function to the return value
+  };
 };
