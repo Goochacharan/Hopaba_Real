@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useMarketplaceListing } from '@/hooks/useMarketplaceListings';
-import { ArrowLeft, AlertCircle } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Image, FileWarning } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -13,6 +14,7 @@ import ListingMetadata from '@/components/marketplace/ListingMetadata';
 import ImageViewer from '@/components/ImageViewer';
 import SafeTradingTips from '@/components/marketplace/SafeTradingTips';
 import SellerDetailsCard from '@/components/marketplace/SellerDetailsCard';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const MarketplaceListingDetails = () => {
   const {
@@ -27,10 +29,17 @@ const MarketplaceListingDetails = () => {
     error
   } = useMarketplaceListing(id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [damageImageIndex, setDamageImageIndex] = useState(0);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
+  const [currentImageType, setCurrentImageType] = useState<'regular' | 'damage'>('regular');
   
-  const openImageViewer = (index: number) => {
-    setSelectedImageIndex(index);
+  const openImageViewer = (index: number, type: 'regular' | 'damage') => {
+    if (type === 'regular') {
+      setSelectedImageIndex(index);
+    } else {
+      setDamageImageIndex(index);
+    }
+    setCurrentImageType(type);
     setImageViewerOpen(true);
   };
   
@@ -83,6 +92,8 @@ const MarketplaceListingDetails = () => {
       </MainLayout>;
   }
   
+  const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
+  
   return <MainLayout>
       <div className="w-full py-8 overflow-y-auto pb-32 px-[11px]">
         <div className="max-w-[1400px] mx-auto">
@@ -103,20 +114,66 @@ const MarketplaceListingDetails = () => {
                 <ListingMetadata location={listing?.location || ''} createdAt={listing?.created_at || ''} condition={listing?.condition || ''} />
               </div>
               
-              <div className="mb-6 bg-black/5 rounded-xl shadow-sm overflow-hidden">
-                <ListingImageCarousel images={listing.images} onImageClick={openImageViewer} listing={listing} />
+              <Tabs defaultValue="regular" className="mb-6">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="regular" className="flex items-center gap-2">
+                    <Image className="h-4 w-4" />
+                    <span>Product Images</span>
+                  </TabsTrigger>
+                  {hasDamageImages && (
+                    <TabsTrigger value="damage" className="flex items-center gap-2">
+                      <FileWarning className="h-4 w-4" />
+                      <span>Damage/Scratch Images</span>
+                    </TabsTrigger>
+                  )}
+                </TabsList>
                 
-                <div className="p-4">
-                  <ListingThumbnails images={listing.images} selectedIndex={selectedImageIndex} onSelect={index => {
-                  setSelectedImageIndex(index);
-                  openImageViewer(index);
-                }} />
-                </div>
-              </div>
+                <TabsContent value="regular" className="mt-0 bg-black/5 rounded-xl shadow-sm overflow-hidden">
+                  <ListingImageCarousel 
+                    images={listing.images} 
+                    onImageClick={(index) => openImageViewer(index, 'regular')} 
+                    listing={listing}
+                  />
+                  
+                  <div className="p-4">
+                    <ListingThumbnails 
+                      images={listing.images} 
+                      selectedIndex={selectedImageIndex} 
+                      onSelect={(index) => {
+                        setSelectedImageIndex(index);
+                        openImageViewer(index, 'regular');
+                      }} 
+                    />
+                  </div>
+                </TabsContent>
+                
+                {hasDamageImages && (
+                  <TabsContent value="damage" className="mt-0 bg-black/5 rounded-xl shadow-sm overflow-hidden">
+                    <ListingImageCarousel 
+                      images={listing.damage_images} 
+                      onImageClick={(index) => openImageViewer(index, 'damage')} 
+                      listing={listing}
+                      isDamageImages={true}
+                    />
+                    
+                    <div className="p-4">
+                      <ListingThumbnails 
+                        images={listing.damage_images || []} 
+                        selectedIndex={damageImageIndex} 
+                        onSelect={(index) => {
+                          setDamageImageIndex(index);
+                          openImageViewer(index, 'damage');
+                        }}
+                        isDamageImages={true}
+                      />
+                    </div>
+                  </TabsContent>
+                )}
+              </Tabs>
               
               {listing && <ImageViewer 
-                images={listing.images} 
-                initialIndex={selectedImageIndex} 
+                images={currentImageType === 'regular' ? listing.images : (listing.damage_images || [])} 
+                initialIndex={currentImageType === 'regular' ? selectedImageIndex : damageImageIndex} 
                 open={imageViewerOpen} 
                 onOpenChange={(open) => {
                   setImageViewerOpen(open);

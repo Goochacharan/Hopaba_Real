@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Heart, Sparkles, BadgeCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -14,13 +15,15 @@ interface ListingImageCarouselProps {
   onImageClick?: (index: number) => void;
   className?: string;
   listing: MarketplaceListing;
+  isDamageImages?: boolean;
 }
 
 const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
   images,
   onImageClick,
   className,
-  listing
+  listing,
+  isDamageImages = false
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const {
@@ -136,23 +139,36 @@ const ListingImageCarousel: React.FC<ListingImageCarouselProps> = ({
           onTouchEnd={onTouchEnd} 
         />
         
-        <Button size="icon" variant="secondary" className={cn("absolute top-2 right-2 z-10 opacity-90 shadow-md", isInWishlistAlready ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-background text-foreground")} onClick={toggleWishlist}>
-          <Heart className={cn("h-5 w-5", isInWishlistAlready ? "fill-current" : "")} />
-        </Button>
+        {!isDamageImages && (
+          <Button size="icon" variant="secondary" className={cn("absolute top-2 right-2 z-10 opacity-90 shadow-md", isInWishlistAlready ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-background text-foreground")} onClick={toggleWishlist}>
+            <Heart className={cn("h-5 w-5", isInWishlistAlready ? "fill-current" : "")} />
+          </Button>
+        )}
 
-        {isNew && <div className="absolute top-2 left-2 z-10 text-white text-L font-semibold py-0.5 rounded flex items-center gap-1 shadow-md mx-0 my-0 bg-[#b123bc] px-[14px]">
+        {isDamageImages && (
+          <Badge 
+            variant="destructive" 
+            className="absolute top-2 left-2 z-10"
+          >
+            Damage/Scratch Photo
+          </Badge>
+        )}
+
+        {isNew && !isDamageImages && <div className="absolute top-2 left-2 z-10 text-white text-L font-semibold py-0.5 rounded flex items-center gap-1 shadow-md mx-0 my-0 bg-[#b123bc] px-[14px]">
             <Sparkles className="h-3 w-3" />
             New post
           </div>}
           
         {/* Position the condition badge in the bottom-right corner of the image */}
-        <Badge 
-          variant="outline" 
-          className="absolute bottom-2 right-2 z-10 flex items-center gap-1 text-amber-600 bg-amber-50/90 shadow-sm border-amber-200"
-        >
-          <BadgeCheck className="h-3 w-3" />
-          <span>{listing.condition}</span>
-        </Badge>
+        {!isDamageImages && (
+          <Badge 
+            variant="outline" 
+            className="absolute bottom-2 right-2 z-10 flex items-center gap-1 text-amber-600 bg-amber-50/90 shadow-sm border-amber-200"
+          >
+            <BadgeCheck className="h-3 w-3" />
+            <span>{listing.condition}</span>
+          </Badge>
+        )}
 
         {imageArray.length > 1 && (
           <>

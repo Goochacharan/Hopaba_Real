@@ -7,12 +7,14 @@ interface ListingThumbnailsProps {
   images: string[];
   selectedIndex: number;
   onSelect: (index: number) => void;
+  isDamageImages?: boolean;
 }
 
 const ListingThumbnails: React.FC<ListingThumbnailsProps> = ({
   images,
   selectedIndex,
-  onSelect
+  onSelect,
+  isDamageImages = false
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
@@ -100,7 +102,7 @@ const ListingThumbnails: React.FC<ListingThumbnailsProps> = ({
             onClick={(e) => handleThumbnailClick(index, e)}
             className={`cursor-pointer rounded-lg overflow-hidden transition-all border-2 flex-shrink-0 w-16 sm:w-20 snap-start ${
               selectedIndex === index ? 'border-[#1EAEDB] shadow-md' : 'border-transparent'
-            }`}
+            } ${isDamageImages ? 'border-red-200 bg-red-50' : ''}`}
           >
             <AspectRatio ratio={1/1} className="bg-muted">
               <img
