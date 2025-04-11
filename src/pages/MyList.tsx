@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -11,10 +12,9 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Recommendation } from '@/lib/mockData';
-import { MarketplaceListing } from '@/types/marketplace';
+import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { Event } from '@/hooks/useRecommendations';
 import EventCard from '@/components/EventCard';
-
 const MyList = () => {
   const {
     wishlist,

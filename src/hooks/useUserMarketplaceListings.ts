@@ -1,9 +1,8 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { MarketplaceListing } from '@/types/marketplace';
-import { formatListingData } from '@/utils/marketplaceUtils';
+import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { useAuth } from '@/hooks/useAuth';
 
 export const useUserMarketplaceListings = () => {
@@ -13,7 +12,7 @@ export const useUserMarketplaceListings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const fetchUserListings = useCallback(async () => {
+  const fetchUserListings = async () => {
     setLoading(true);
     setError(null);
 
@@ -33,19 +32,21 @@ export const useUserMarketplaceListings = () => {
         throw error;
       }
 
-      // Process the data to ensure it matches our MarketplaceListing type
-      const typedData: MarketplaceListing[] = data?.map((item: any) => {
-        return formatListingData(item, 0); // We don't need review counts for user's own listings
-      }) || [];
+      // Ensure the data matches our MarketplaceListing type
+      const typedData = data?.map(item => ({
+        ...item,
+        // Ensure approval_status is one of the expected values
+        approval_status: (item.approval_status as 'pending' | 'approved' | 'rejected')
+      })) as MarketplaceListing[];
 
-      setListings(typedData);
+      setListings(typedData || []);
     } catch (err: any) {
       console.error('Error fetching user marketplace listings:', err);
       setError('Failed to fetch your listings. Please try again later.');
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  };
 
   const deleteListing = async (listingId: string) => {
     try {
@@ -78,7 +79,7 @@ export const useUserMarketplaceListings = () => {
 
   useEffect(() => {
     fetchUserListings();
-  }, [fetchUserListings]);
+  }, [user]);
 
   return { 
     listings, 

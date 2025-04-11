@@ -18,7 +18,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from '@/components/ui/badge';
-import { MarketplaceListing } from '@/types/marketplace';
+import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingForm from './MarketplaceListingForm';
 
 interface UserMarketplaceListingsProps {

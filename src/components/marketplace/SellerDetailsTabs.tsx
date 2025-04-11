@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MarketplaceListing } from '@/types/marketplace';
+import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { SellerReview } from '@/hooks/useSellerDetails';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import SellerReviews from './SellerReviews';

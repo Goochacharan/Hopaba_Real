@@ -1,18 +1,18 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MarketplaceListing } from '@/types/marketplace';
+import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { useToast } from '@/hooks/use-toast';
 import ImageViewer from '@/components/ImageViewer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 
-// Import our components
+// Import our new components
 import ListingImageCarousel from './marketplace/ListingImageCarousel';
 import ListingMetadata from './marketplace/ListingMetadata';
 import SellerInfo from './marketplace/SellerInfo';
 import ListingActionButtons from './marketplace/ListingActionButtons';
-import DamageIndicator from './marketplace/DamageIndicator';
 
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
@@ -42,8 +42,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
     navigate(`/marketplace/${listing.id}`);
   };
 
-  const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
-
   // Check if we're on the search page
   const isSearchPage = window.location.pathname.includes('/search');
 
@@ -63,15 +61,9 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         <h3 className="font-bold text-xl md:text-2xl mb-1">{listing.title}</h3>
         
         <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
-              <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
-            </p>
-            
-            {hasDamageImages && (
-              <DamageIndicator damageCount={listing.damage_images?.length || 0} />
-            )}
-          </div>
+          <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
+            <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
+          </p>
           
           <div>
             {listing.is_negotiable ? (
