@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useMarketplaceListing } from '@/hooks/useMarketplaceListings';
-import { ArrowLeft, AlertCircle } from 'lucide-react';
+import { ArrowLeft, AlertCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -14,6 +14,7 @@ import ListingMetadata from '@/components/marketplace/ListingMetadata';
 import ImageViewer from '@/components/ImageViewer';
 import SafeTradingTips from '@/components/marketplace/SafeTradingTips';
 import SellerDetailsCard from '@/components/marketplace/SellerDetailsCard';
+import { Separator } from "@/components/ui/separator";
 
 const MarketplaceListingDetails = () => {
   const { id = '' } = useParams<{ id: string; }>();
@@ -21,10 +22,17 @@ const MarketplaceListingDetails = () => {
   const { listing, loading, error } = useMarketplaceListing(id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
+  const [damageImagesViewerOpen, setDamageImagesViewerOpen] = useState(false);
+  const [selectedDamageImageIndex, setSelectedDamageImageIndex] = useState(0);
   
   const openImageViewer = (index: number) => {
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
+  };
+
+  const openDamageImageViewer = (index: number) => {
+    setSelectedDamageImageIndex(index);
+    setDamageImagesViewerOpen(true);
   };
   
   const handleBackToMarketplace = () => {
@@ -75,6 +83,8 @@ const MarketplaceListingDetails = () => {
         </div>
       </MainLayout>;
   }
+
+  const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
   
   return <MainLayout>
       <div className="w-full py-8 overflow-y-auto pb-32 px-[11px]">
@@ -102,6 +112,22 @@ const MarketplaceListingDetails = () => {
                     <Badge variant="success">Negotiable</Badge>
                   ) : (
                     <Badge variant="condition">Fixed Price</Badge>
+                  )}
+                  
+                  {hasDamageImages && (
+                    <Button 
+                      variant="link" 
+                      className="text-amber-500 flex items-center gap-1 p-0 h-auto"
+                      onClick={() => {
+                        const element = document.getElementById('damage-photos');
+                        if (element) {
+                          element.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }}
+                    >
+                      <AlertTriangle size={16} />
+                      <span>View damage photos</span>
+                    </Button>
                   )}
                 </div>
                 <ListingMetadata location={listing?.location || ''} createdAt={listing?.created_at || ''} condition={listing?.condition || ''} />
@@ -137,6 +163,45 @@ const MarketplaceListingDetails = () => {
                 instagram={listing?.seller_instagram || ''}
                 showMetadata={false} 
               />
+              
+              {hasDamageImages && (
+                <div id="damage-photos" className="mt-8 mb-6 bg-black/5 rounded-xl shadow-sm overflow-hidden">
+                  <div className="p-4 pb-3 bg-amber-50 border-b border-amber-100">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-amber-500" />
+                      <h3 className="text-lg font-medium text-amber-800">Damages & Scratches</h3>
+                    </div>
+                    <p className="text-sm text-amber-700 mt-1">
+                      The seller has provided photos of damages or scratches on this item.
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4 p-4">
+                    {listing.damage_images?.map((image, index) => (
+                      <div 
+                        key={`damage-${index}`} 
+                        className="relative aspect-square cursor-pointer rounded-md overflow-hidden border hover:opacity-90 transition-opacity" 
+                        onClick={() => openDamageImageViewer(index)}
+                      >
+                        <img 
+                          src={image} 
+                          alt={`Damage or scratch ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {listing.damage_images && listing.damage_images.length > 0 && (
+                <ImageViewer 
+                  images={listing.damage_images} 
+                  initialIndex={selectedDamageImageIndex} 
+                  open={damageImagesViewerOpen} 
+                  onOpenChange={setDamageImagesViewerOpen} 
+                />
+              )}
               
               <div className="mt-6">
                 {listing && (

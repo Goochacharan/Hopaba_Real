@@ -78,6 +78,7 @@ export type Database = {
           description: string
           id: string
           images: string[] | null
+          is_negotiable: boolean | null
           location: string
           map_link: string | null
           price: number
@@ -98,6 +99,7 @@ export type Database = {
           description: string
           id?: string
           images?: string[] | null
+          is_negotiable?: boolean | null
           location: string
           map_link?: string | null
           price: number
@@ -118,6 +120,7 @@ export type Database = {
           description?: string
           id?: string
           images?: string[] | null
+          is_negotiable?: boolean | null
           location?: string
           map_link?: string | null
           price?: number
