@@ -5,12 +5,13 @@ import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   isLoading: boolean;
-  socialLoading: boolean;
   user: any | null;
   loginError: string | null;
   loginWithEmail: (email: string, password: string, captchaToken?: string) => Promise<void>;
-  loginWithSocial: (provider: 'google' | 'facebook') => Promise<void>;
+  loginWithPhone: (phone: string) => Promise<void>;
+  verifyOTP: (phone: string, otp: string, isSignup?: boolean) => Promise<void>;
   signupWithEmail: (email: string, password: string, name: string, captchaToken?: string) => Promise<void>;
+  signupWithPhone: (phone: string) => Promise<void>;
   getTestCredentials: () => { email: string; password: string };
   logout: () => Promise<void>;
   isAdmin: boolean;
@@ -29,7 +30,6 @@ const RATE_LIMIT_DURATION = 15 * 60 * 1000; // 15 minutes in milliseconds
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [socialLoading, setSocialLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminLoading, setAdminLoading] = useState(true);
@@ -203,7 +203,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const loginWithSocial = async (provider: 'google' | 'facebook') => {
+  // Add new method for phone authentication
+  const loginWithPhone = async (phone: string) => {
     if (isRateLimited) {
       toast({
         title: "Access temporarily blocked",
@@ -213,37 +214,90 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     
-    setSocialLoading(true);
+    setIsLoading(true);
     setLoginError(null);
     
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/profile`,
-        },
+      // Format phone number if needed
+      const formattedPhone = formatPhoneNumber(phone);
+      
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: formattedPhone
       });
       
       if (error) {
         incrementAuthAttempts();
         setLoginError(error.message);
-        toast({
-          title: "Social login failed",
-          description: error.message,
-          variant: "destructive",
-        });
+        throw error;
       }
+      
+      setAuthAttempts(0);
+      localStorage.removeItem('auth_attempts');
+      
     } catch (error: any) {
       incrementAuthAttempts();
       setLoginError(error.message);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const verifyOTP = async (phone: string, otp: string, isSignup = false) => {
+    if (isRateLimited) {
       toast({
-        title: "Social login error",
-        description: error.message,
+        title: "Access temporarily blocked",
+        description: "Too many verification attempts. Please try again later.",
         variant: "destructive",
       });
-    } finally {
-      setSocialLoading(false);
+      return;
     }
+    
+    setIsLoading(true);
+    setLoginError(null);
+    
+    try {
+      // Format phone number if needed
+      const formattedPhone = formatPhoneNumber(phone);
+      
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone: formattedPhone,
+        token: otp,
+        type: isSignup ? 'signup' : 'sms'
+      });
+      
+      if (error) {
+        incrementAuthAttempts();
+        setLoginError(error.message);
+        throw error;
+      }
+      
+      if (data?.user) {
+        setAuthAttempts(0);
+        localStorage.removeItem('auth_attempts');
+        setUser(data.user);
+      }
+      
+    } catch (error: any) {
+      incrementAuthAttempts();
+      setLoginError(error.message);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Helper function to format phone numbers
+  const formatPhoneNumber = (phone: string): string => {
+    // Remove any non-digit characters
+    let cleaned = phone.replace(/\D/g, '');
+    
+    // Add + prefix if not present
+    if (!cleaned.startsWith('+')) {
+      cleaned = '+' + cleaned;
+    }
+    
+    return cleaned;
   };
 
   const signupWithEmail = async (email: string, password: string, name: string, captchaToken?: string) => {
@@ -311,6 +365,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Add method for phone signup
+  const signupWithPhone = async (phone: string) => {
+    if (isRateLimited) {
+      toast({
+        title: "Access temporarily blocked",
+        description: "Too many signup attempts. Please try again later.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    setLoginError(null);
+    
+    try {
+      // Format phone number if needed
+      const formattedPhone = formatPhoneNumber(phone);
+      
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: formattedPhone,
+        options: {
+          shouldCreateUser: true
+        }
+      });
+      
+      if (error) {
+        incrementAuthAttempts();
+        setLoginError(error.message);
+        throw error;
+      }
+      
+      setAuthAttempts(0);
+      localStorage.removeItem('auth_attempts');
+      
+    } catch (error: any) {
+      incrementAuthAttempts();
+      setLoginError(error.message);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async () => {
     setIsLoading(true);
     try {
@@ -347,13 +444,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider 
       value={{ 
-        isLoading, 
-        socialLoading,
+        isLoading,
         user, 
         loginError, 
-        loginWithEmail, 
-        loginWithSocial,
+        loginWithEmail,
+        loginWithPhone,
+        verifyOTP,
         signupWithEmail,
+        signupWithPhone,
         getTestCredentials,
         logout,
         isAdmin,
