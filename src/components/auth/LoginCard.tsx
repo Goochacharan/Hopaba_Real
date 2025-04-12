@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,25 +5,24 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
 import { OtpVerification } from './OtpVerification';
-
 interface LoginCardProps {
   isRateLimited: boolean;
   captchaToken: string | null;
   isLoading: boolean;
   handleCaptchaVerify: (token: string) => void;
 }
-
 export const LoginCard: React.FC<LoginCardProps> = ({
   isRateLimited,
   captchaToken,
   isLoading,
   handleCaptchaVerify
 }) => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [showOtpVerification, setShowOtpVerification] = useState(false);
-
   const handlePhoneLogin = async () => {
     // Validate phone number: exactly 10 digits
     const cleanedPhone = phoneNumber.replace(/\D/g, '');
@@ -36,17 +34,18 @@ export const LoginCard: React.FC<LoginCardProps> = ({
       });
       return;
     }
-
     setPhoneLoading(true);
     try {
       const formattedPhone = `+91${cleanedPhone}`;
-      const { data, error } = await supabase.functions.invoke('msg91-otp', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('msg91-otp', {
         body: {
           phone: formattedPhone,
           action: 'send'
         }
       });
-
       if (error || !data?.success) {
         throw new Error(error?.message || data?.error || 'Failed to send OTP');
       }
@@ -61,48 +60,29 @@ export const LoginCard: React.FC<LoginCardProps> = ({
       setPhoneLoading(false);
     }
   };
-
   const handleOtpVerified = () => {
     toast({
       title: "Verified"
     });
     setShowOtpVerification(false);
   };
-
   const cancelPhoneVerification = () => {
     setShowOtpVerification(false);
   };
-
   if (showOtpVerification) {
     return <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
-      <OtpVerification 
-        phone={`+91${phoneNumber.replace(/\D/g, '')}`} 
-        onVerified={handleOtpVerified} 
-        onCancel={cancelPhoneVerification} 
-      />
+      <OtpVerification phone={`+91${phoneNumber.replace(/\D/g, '')}`} onVerified={handleOtpVerified} onCancel={cancelPhoneVerification} />
     </div>;
   }
-
-  return <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4 my-[140px]">
+  return <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4 px-[55px] my-[151px]">
     <div className="space-y-4">
-      <Input 
-        type="tel" 
-        placeholder="10-digit mobile number" 
-        value={phoneNumber} 
-        onChange={e => {
-          // Allow only digits
-          const numericValue = e.target.value.replace(/\D/g, '');
-          setPhoneNumber(numericValue.slice(0, 10));
-        }}
-        disabled={phoneLoading} 
-        maxLength={10}
-      />
+      <Input type="tel" placeholder="10-digit mobile number" value={phoneNumber} onChange={e => {
+        // Allow only digits
+        const numericValue = e.target.value.replace(/\D/g, '');
+        setPhoneNumber(numericValue.slice(0, 10));
+      }} disabled={phoneLoading} maxLength={10} />
       
-      <Button 
-        className="w-full" 
-        onClick={handlePhoneLogin} 
-        disabled={phoneLoading || isRateLimited || phoneNumber.length !== 10}
-      >
+      <Button className="w-full" onClick={handlePhoneLogin} disabled={phoneLoading || isRateLimited || phoneNumber.length !== 10}>
         {phoneLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending</> : "Send Verification"}
       </Button>
     </div>
