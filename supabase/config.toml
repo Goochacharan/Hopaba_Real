@@ -4,3 +4,6 @@ project_id = "pswgsxyxhdhhpvugkdqa"
 [auth.external.google]
 client_id = "283319033667-jjc9gb8ntn7duilo3r3s11o7ledg5p8t.apps.googleusercontent.com"
 secret = "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"
+
+[functions.msg91-otp]
+verify_jwt = false
