@@ -18,6 +18,7 @@ export interface MarketplaceListing {
   seller_phone?: string | null;
   seller_whatsapp?: string | null;
   seller_instagram?: string | null;
+  seller_avatar?: string | null;
   seller_rating?: number;
   review_count?: number;
   images: string[];
