@@ -43,7 +43,7 @@ const ListingMetadata: React.FC<ListingMetadataProps> = ({
   return <div className="flex flex-wrap items-center gap-x-2 gap-y-0 text-sm text-muted-foreground py-0 my-0">
       {location && <div className="flex items-center gap-1 py-[3px]">
           <MapPin className="h-3 w-3" />
-          <span>{location}</span>
+          <span className="text-sm">{location}</span>
         </div>}
       <div className="flex items-center gap-1 my-0 py-0 px-0">
         <Calendar className="h-3 w-3" />
