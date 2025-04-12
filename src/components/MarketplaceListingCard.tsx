@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -9,13 +8,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Lock, Unlock, Image, FileWarning } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-
-// Import our components
-import ListingImageCarousel from './marketplace/ListingImageCarousel';
-import ListingMetadata from './marketplace/ListingMetadata';
-import SellerInfo from './marketplace/SellerInfo';
-import ListingActionButtons from './marketplace/ListingActionButtons';
-import CertificateBadge from './marketplace/CertificateBadge';
 
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
@@ -108,7 +100,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
                 <CertificateBadge certificates={listing.inspection_certificates} />
               </span>}
             {listing.model_year && <Badge variant="outline" className="inline-flex items-center gap-1 pr-1.5">
-                <span className="pr-0.5">Model {listing.model_year}</span>
+                <span className="pr-0.5">{listing.model_year} Model</span>
               </Badge>}
           </div>
         </div>
