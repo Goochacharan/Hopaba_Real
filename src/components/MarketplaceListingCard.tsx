@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -94,10 +93,14 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         <div className="flex flex-col">
           <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
             <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
+            {listing.model_year && (
+              <Badge variant="condition" className="text-xs ml-2">
+                {listing.model_year} Model
+              </Badge>
+            )}
           </p>
           
           <div className="mt-1 mb-2 flex flex-wrap gap-2 items-center">
-            {/* All badges in one line */}
             <div className="flex flex-wrap items-center gap-2">
               {listing.is_negotiable !== undefined && (listing.is_negotiable === true ? 
                 <Badge variant="success" className="inline-flex items-center gap-1 pr-1.5">
@@ -113,11 +116,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
                 <span onClick={e => e.stopPropagation()}>
                   <CertificateBadge certificates={listing.inspection_certificates} />
                 </span>
-              )}
-              {listing.model_year && (
-                <Badge variant="condition" className="text-xs">
-                  {listing.model_year} Model
-                </Badge>
               )}
             </div>
           </div>
