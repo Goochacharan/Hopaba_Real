@@ -3,12 +3,13 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Phone, MessageSquare, MapPin, Share2, FileText } from 'lucide-react';
+import { Phone, MessageSquare, MapPin, Share2, FileText, FileCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
 import { format } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface SellerDetailsCardProps {
   id: string;
@@ -26,7 +27,7 @@ interface SellerDetailsCardProps {
   reviewCount?: number;
   avatarUrl?: string | null;
   inspectionCertificates?: string[] | null;
-  isNegotiable?: boolean; // Added this property to match what's being passed in MarketplaceListingDetails.tsx
+  isNegotiable?: boolean;
 }
 
 const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
@@ -46,9 +47,7 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
   avatarUrl,
   inspectionCertificates
 }) => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const isMobile = useIsMobile();
   
   const formatPrice = (price: number): string => {
@@ -159,86 +158,122 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
     });
   };
 
-  const handleViewCertificate = (url: string) => {
-    window.open(url, '_blank');
-  };
-
-  return <Card className="bg-white shadow-sm border rounded-xl overflow-hidden">
-      <CardHeader className="pb-3">
-        <CardTitle className="font-semibold text-sm">Seller Information</CardTitle>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-12 w-12 border border-border">
-            {avatarUrl ? (
-              <AvatarImage src={avatarUrl} alt={sellerName} />
-            ) : (
-              <AvatarFallback className="bg-primary/10 text-primary">
-                {getInitials(sellerName)}
-              </AvatarFallback>
-            )}
-          </Avatar>
-          
-          <div className="flex flex-col">
-            <div className="flex items-center gap-1">
-              <span className="font-semibold">{sellerName}</span>
-              <Link to={`/seller/${sellerId}`} className="text-xs text-primary hover:underline ml-1">
-                View Profile
-              </Link>
-            </div>
+  return (
+    <div className="space-y-4">
+      <Card className="bg-white shadow-sm border rounded-xl overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-semibold text-sm">Seller Information</CardTitle>
+        </CardHeader>
+        
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-12 w-12 border border-border">
+              {avatarUrl ? (
+                <AvatarImage src={avatarUrl} alt={sellerName} />
+              ) : (
+                <AvatarFallback className="bg-primary/10 text-primary">
+                  {getInitials(sellerName)}
+                </AvatarFallback>
+              )}
+            </Avatar>
             
-            <div className="flex items-center mt-1">
-              <StarRating rating={sellerRating} size="small" showCount={true} count={reviewCount} />
-              <span className="text-xs text-muted-foreground ml-2">
-                Member since {format(new Date(createdAt), 'MMM yyyy')}
-              </span>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1">
+                <span className="font-semibold">{sellerName}</span>
+                <Link to={`/seller/${sellerId}`} className="text-xs text-primary hover:underline ml-1">
+                  View Profile
+                </Link>
+              </div>
+              
+              <div className="flex items-center mt-1">
+                <StarRating rating={sellerRating} size="small" showCount={true} count={reviewCount} />
+                <span className="text-xs text-muted-foreground ml-2">
+                  Member since {format(new Date(createdAt), 'MMM yyyy')}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-        
-        {inspectionCertificates && inspectionCertificates.length > 0 && (
-          <div className="mt-2">
-            <div className="flex items-center gap-2 mb-2">
-              <FileText className="h-4 w-4 text-blue-500" />
-              <span className="font-semibold text-sm">Inspection Certificates</span>
-            </div>
+          
+          <div className="flex justify-between items-center gap-2 mt-4">
+            <Button onClick={handleCall} title="Call Seller" className="flex-1 h-12 text-white transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(24,128,163,0.8)] hover:shadow-[0_3px_0px_0px_rgba(24,128,163,0.8)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 rounded">
+              <Phone className="h-5 w-5" />
+            </Button>
+            
+            <Button onClick={handleWhatsApp} title="WhatsApp" className="flex-1 h-12 border border-[#1EAEDB]/20 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px] bg-lime-600 hover:bg-lime-500 text-slate-50 rounded">
+              <MessageSquare className="h-5 w-5" />
+            </Button>
+            
+            <Button onClick={handleLocation} title="Get Directions" className="flex-1 h-12 border border-[#1EAEDB]/20 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px] bg-amber-600 hover:bg-amber-500 rounded text-slate-50">
+              <MapPin className="h-5 w-5" />
+            </Button>
+            
+            <Button onClick={handleShare} title="Share Listing" className="flex-1 h-12 border border-[#1EAEDB]/20 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px] bg-violet-700 hover:bg-violet-600 text-white rounded">
+              <Share2 className="h-5 w-5" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {inspectionCertificates && inspectionCertificates.length > 0 && (
+        <Card className="bg-white shadow-sm border rounded-xl overflow-hidden">
+          <CardHeader className="pb-3">
+            <CardTitle className="font-semibold text-sm">Inspection Certificates</CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="flex flex-wrap gap-2">
               {inspectionCertificates.map((cert, index) => (
-                <Button 
-                  key={index} 
-                  size="sm" 
-                  variant="outline" 
-                  className="text-xs px-2 py-1 h-auto"
-                  onClick={() => handleViewCertificate(cert)}
-                >
-                  <FileText className="h-3 w-3 mr-1" />
-                  Certificate {index + 1}
-                </Button>
+                <Dialog key={index}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="text-xs px-3 py-2 h-auto flex items-center gap-1.5 border-green-500/30 bg-green-50 text-green-700 hover:bg-green-100"
+                    >
+                      <FileCheck className="h-3.5 w-3.5 text-green-600" />
+                      Certificate {index + 1}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+                    <DialogHeader>
+                      <DialogTitle>Inspection Certificate</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex-1 overflow-auto min-h-[60vh]">
+                      <iframe 
+                        src={cert} 
+                        className="w-full h-full border-0" 
+                        title={`Certificate ${index + 1}`}
+                      ></iframe>
+                    </div>
+                    <div className="flex justify-end gap-2 mt-4">
+                      <Button 
+                        variant="outline"
+                        onClick={() => window.open(cert, '_blank')}
+                      >
+                        Open in New Tab
+                      </Button>
+                      <Button 
+                        variant="default"
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = cert;
+                          link.download = `certificate-${index+1}.pdf`;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                      >
+                        Download
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               ))}
             </div>
-          </div>
-        )}
-        
-        <div className="flex justify-between items-center gap-2 mt-4">
-          <Button onClick={handleCall} title="Call Seller" className="flex-1 h-12 text-white transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(24,128,163,0.8)] hover:shadow-[0_3px_0px_0px_rgba(24,128,163,0.8)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 rounded">
-            <Phone className="h-5 w-5" />
-          </Button>
-          
-          <Button onClick={handleWhatsApp} title="WhatsApp" className="flex-1 h-12 border border-[#1EAEDB]/20 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px] bg-lime-600 hover:bg-lime-500 text-slate-50 rounded">
-            <MessageSquare className="h-5 w-5" />
-          </Button>
-          
-          <Button onClick={handleLocation} title="Get Directions" className="flex-1 h-12 border border-[#1EAEDB]/20 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px] bg-amber-600 hover:bg-amber-500 rounded text-slate-50">
-            <MapPin className="h-5 w-5" />
-          </Button>
-          
-          <Button onClick={handleShare} title="Share Listing" className="flex-1 h-12 border border-[#1EAEDB]/20 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px] bg-violet-700 hover:bg-violet-600 text-white rounded">
-            <Share2 className="h-5 w-5" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>;
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
 };
 
 export default SellerDetailsCard;
