@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { MapPin, Phone, MessageCircle, Instagram, FileCheck } from 'lucide-react';
+import { MapPin, Phone, MessageCircle, Instagram, FileCheck, CircleCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import ListingActionButtons from './ListingActionButtons';
@@ -98,10 +97,10 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
           {hasCertificates && (
             <Badge 
               variant="outline" 
-              className="border-amber-400 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-800 cursor-pointer flex items-center gap-1.5"
+              className="border-green-400 bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 cursor-pointer flex items-center gap-1.5"
               onClick={() => setCertificateViewerOpen(true)}
             >
-              <FileCheck className="h-4 w-4 text-amber-600" />
+              <CircleCheck className="h-4 w-4 text-green-600 fill-green-100" />
               <span>View Inspection Certificate</span>
             </Badge>
           )}

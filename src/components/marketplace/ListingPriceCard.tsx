@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Shield, Lock, Unlock, FileCheck } from 'lucide-react';
+import { Shield, Lock, Unlock, FileCheck, CircleCheck } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import SellerInfo from './SellerInfo';
 import ListingActionButtons from './ListingActionButtons';
@@ -83,10 +82,10 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
               {hasCertificates && (
                 <Badge 
                   variant="outline" 
-                  className="border-amber-400 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-800 cursor-pointer flex items-center gap-1.5"
+                  className="border-green-400 bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 cursor-pointer flex items-center gap-1.5"
                   onClick={() => setCertificateViewerOpen(true)}
                 >
-                  <FileCheck className="h-3 w-3 text-amber-600" />
+                  <CircleCheck className="h-3 w-3 text-green-600 fill-green-100" />
                   <span>Inspection Certificate</span>
                 </Badge>
               )}
