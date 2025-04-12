@@ -105,14 +105,14 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           {listing.is_negotiable !== undefined && (
             <div className="mt-1 mb-2">
               {listing.is_negotiable === true ? (
-                <Badge variant="success" className="flex items-center gap-1">
+                <Badge variant="success" className="inline-flex items-center gap-1 pr-1.5">
                   <Unlock className="h-3 w-3" />
-                  <span>Negotiable</span>
+                  <span className="pr-0.5">Negotiable</span>
                 </Badge>
               ) : (
-                <Badge variant="default" className="flex items-center gap-1">
+                <Badge variant="default" className="inline-flex items-center gap-1 pr-1.5">
                   <Lock className="h-3 w-3" />
-                  <span>Fixed</span>
+                  <span className="pr-0.5">Fixed</span>
                 </Badge>
               )}
             </div>
