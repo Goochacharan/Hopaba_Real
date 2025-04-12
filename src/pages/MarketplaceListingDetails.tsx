@@ -94,7 +94,6 @@ const MarketplaceListingDetails = () => {
   }
   
   const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
-  const hasCertificates = listing.inspection_certificates && listing.inspection_certificates.length > 0;
   
   return <MainLayout>
       <div className="w-full py-8 overflow-y-auto pb-32 px-[11px]">
@@ -115,9 +114,6 @@ const MarketplaceListingDetails = () => {
                 <h1 className="text-2xl sm:text-3xl font-bold mb-0">{listing?.title}</h1>
                 <div className="flex flex-wrap items-center gap-2 mt-1">
                   <ListingMetadata location={listing?.location || ''} createdAt={listing?.created_at || ''} condition={listing?.condition || ''} />
-                  {hasCertificates && (
-                    <CertificateBadge certificates={listing.inspection_certificates || []} />
-                  )}
                 </div>
               </div>
               
