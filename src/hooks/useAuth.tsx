@@ -263,7 +263,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await supabase.auth.verifyOtp({
         phone: formattedPhone,
         token: otp,
-        type: isSignup ? 'signup' : 'sms'
+        type: 'sms' // Updated: Using 'sms' type for both login and signup as 'signup' is not a valid MobileOtpType
       });
       
       if (error) {
