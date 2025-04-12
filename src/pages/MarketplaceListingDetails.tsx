@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -14,6 +13,7 @@ import ListingMetadata from '@/components/marketplace/ListingMetadata';
 import ImageViewer from '@/components/ImageViewer';
 import SafeTradingTips from '@/components/marketplace/SafeTradingTips';
 import SellerDetailsCard from '@/components/marketplace/SellerDetailsCard';
+import CertificateBadge from '@/components/marketplace/CertificateBadge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const MarketplaceListingDetails = () => {
@@ -93,6 +93,7 @@ const MarketplaceListingDetails = () => {
   }
   
   const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
+  const hasCertificates = listing.inspection_certificates && listing.inspection_certificates.length > 0;
   
   return <MainLayout>
       <div className="w-full py-8 overflow-y-auto pb-32 px-[11px]">
@@ -111,7 +112,12 @@ const MarketplaceListingDetails = () => {
               <div className="mb-3">
                 <Badge className="mb-2">{listing?.category}</Badge>
                 <h1 className="text-2xl sm:text-3xl font-bold mb-0">{listing?.title}</h1>
-                <ListingMetadata location={listing?.location || ''} createdAt={listing?.created_at || ''} condition={listing?.condition || ''} />
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                  <ListingMetadata location={listing?.location || ''} createdAt={listing?.created_at || ''} condition={listing?.condition || ''} />
+                  {hasCertificates && (
+                    <CertificateBadge certificates={listing.inspection_certificates || []} />
+                  )}
+                </div>
               </div>
               
               <Tabs defaultValue="regular" className="mb-6">
@@ -177,7 +183,6 @@ const MarketplaceListingDetails = () => {
                 open={imageViewerOpen} 
                 onOpenChange={(open) => {
                   setImageViewerOpen(open);
-                  // Stay on the current page when the dialog is closed
                 }} 
               />}
               
@@ -207,6 +212,8 @@ const MarketplaceListingDetails = () => {
                     createdAt={listing.created_at}
                     mapLink={listing.map_link}
                     reviewCount={listing.review_count || 0}
+                    isNegotiable={listing.is_negotiable}
+                    inspectionCertificates={listing.inspection_certificates}
                   />
                 )}
               </div>

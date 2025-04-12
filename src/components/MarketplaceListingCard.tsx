@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -14,6 +15,7 @@ import ListingImageCarousel from './marketplace/ListingImageCarousel';
 import ListingMetadata from './marketplace/ListingMetadata';
 import SellerInfo from './marketplace/SellerInfo';
 import ListingActionButtons from './marketplace/ListingActionButtons';
+import CertificateBadge from './marketplace/CertificateBadge';
 
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
@@ -102,9 +104,9 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
             <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
           </p>
           
-          {listing.is_negotiable !== undefined && (
-            <div className="mt-1 mb-2">
-              {listing.is_negotiable === true ? (
+          <div className="mt-1 mb-2 flex flex-wrap gap-2 items-center">
+            {listing.is_negotiable !== undefined && (
+              listing.is_negotiable === true ? (
                 <Badge variant="success" className="inline-flex items-center gap-1 pr-1.5">
                   <Unlock className="h-3 w-3" />
                   <span className="pr-0.5">Negotiable</span>
@@ -114,9 +116,12 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
                   <Lock className="h-3 w-3" />
                   <span className="pr-0.5">Fixed</span>
                 </Badge>
-              )}
-            </div>
-          )}
+              )
+            )}
+            {listing.inspection_certificates && listing.inspection_certificates.length > 0 && (
+              <CertificateBadge certificates={listing.inspection_certificates} />
+            )}
+          </div>
         </div>
         
         <div className="mt-0">
