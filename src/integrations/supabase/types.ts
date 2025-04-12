@@ -79,6 +79,7 @@ export type Database = {
           description: string
           id: string
           images: string[] | null
+          inspection_certificates: string[] | null
           is_negotiable: boolean | null
           location: string
           map_link: string | null
@@ -101,6 +102,7 @@ export type Database = {
           description: string
           id?: string
           images?: string[] | null
+          inspection_certificates?: string[] | null
           is_negotiable?: boolean | null
           location: string
           map_link?: string | null
@@ -123,6 +125,7 @@ export type Database = {
           description?: string
           id?: string
           images?: string[] | null
+          inspection_certificates?: string[] | null
           is_negotiable?: boolean | null
           location?: string
           map_link?: string | null

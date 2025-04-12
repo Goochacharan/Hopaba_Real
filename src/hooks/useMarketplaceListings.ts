@@ -24,6 +24,7 @@ export interface MarketplaceListing {
   review_count?: number;
   is_negotiable?: boolean;
   damage_images?: string[];
+  inspection_certificates?: string[];
 }
 
 interface UseMarketplaceListingsOptions {

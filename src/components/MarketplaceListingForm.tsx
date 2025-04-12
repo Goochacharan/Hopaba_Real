@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -13,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card } from '@/components/ui/card';
-import { Loader2, Save, X, Instagram, Film, MapPin, Link2, Unlock, AlertTriangle } from 'lucide-react';
+import { Loader2, Save, X, Instagram, Film, MapPin, Link2, Unlock, AlertTriangle, FileText } from 'lucide-react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -48,6 +47,7 @@ const marketplaceListingSchema = z.object({
   images: z.array(z.string()).min(1, { message: "Please upload at least one image" }),
   is_negotiable: z.boolean().optional(),
   damage_images: z.array(z.string()).optional(),
+  inspection_certificates: z.array(z.string()).optional(),
 });
 
 type MarketplaceListingFormData = z.infer<typeof marketplaceListingSchema>;
@@ -83,6 +83,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     images: listing?.images || [],
     is_negotiable: listing?.is_negotiable || false,
     damage_images: listing?.damage_images || [],
+    inspection_certificates: listing?.inspection_certificates || [],
   };
 
   const form = useForm<MarketplaceListingFormData>({
@@ -148,6 +149,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         seller_instagram: data.seller_instagram || null,
         images: data.images,
         damage_images: data.damage_images || [],
+        inspection_certificates: data.inspection_certificates || [],
         approval_status: 'pending',
         is_negotiable: data.is_negotiable || false
       };
@@ -519,6 +521,40 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                   </FormControl>
                   <FormDescription>
                     Upload up to 10 images showing any damage or scratches on your item.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <Separator className="my-6" />
+          
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-blue-500" />
+              <h3 className="font-medium text-lg">Inspection Certificates</h3>
+            </div>
+            <p className="text-muted-foreground">
+              Please upload third-party inspection reports or certificates if you have them.
+              This helps establish the credibility of your listing.
+            </p>
+            
+            <FormField
+              control={form.control}
+              name="inspection_certificates"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Inspection Reports (Optional)</FormLabel>
+                  <FormControl>
+                    <ImageUpload 
+                      images={field.value || []}
+                      onImagesChange={(images) => form.setValue('inspection_certificates', images)}
+                      maxImages={5}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Upload up to 5 inspection certificates or reports (images or PDFs).
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

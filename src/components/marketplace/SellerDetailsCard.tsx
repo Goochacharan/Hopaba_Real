@@ -1,14 +1,14 @@
-
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Phone, MessageSquare, MapPin, Share2 } from 'lucide-react';
+import { Phone, MessageSquare, MapPin, Share2, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
 import { format } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
+
 interface SellerDetailsCardProps {
   id: string;
   title: string;
@@ -24,7 +24,9 @@ interface SellerDetailsCardProps {
   mapLink?: string | null;
   reviewCount?: number;
   avatarUrl?: string | null;
+  inspectionCertificates?: string[] | null;
 }
+
 const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
   id,
   title,
@@ -39,18 +41,22 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
   createdAt,
   mapLink,
   reviewCount = 0,
-  avatarUrl
+  avatarUrl,
+  inspectionCertificates
 }) => {
   const {
     toast
   } = useToast();
   const isMobile = useIsMobile();
+  
   const formatPrice = (price: number): string => {
     return '₹' + price.toLocaleString('en-IN');
   };
+
   const getInitials = (name: string) => {
     return name.split(' ').map(part => part[0]).join('').toUpperCase().substring(0, 2);
   };
+
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerPhone) {
@@ -75,6 +81,7 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
       });
     }
   };
+
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerWhatsapp) {
@@ -101,6 +108,7 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
       });
     }
   };
+
   const handleLocation = (e: React.MouseEvent) => {
     e.stopPropagation();
     let mapsUrl;
@@ -129,6 +137,7 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
       duration: 2000
     });
   };
+
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(window.location.href).then(() => {
@@ -147,6 +156,11 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
       });
     });
   };
+
+  const handleViewCertificate = (url: string) => {
+    window.open(url, '_blank');
+  };
+
   return <Card className="bg-white shadow-sm border rounded-xl overflow-hidden">
       <CardHeader className="pb-3">
         <CardTitle className="font-semibold text-sm">Seller Information</CardTitle>
@@ -181,6 +195,29 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
           </div>
         </div>
         
+        {inspectionCertificates && inspectionCertificates.length > 0 && (
+          <div className="mt-2">
+            <div className="flex items-center gap-2 mb-2">
+              <FileText className="h-4 w-4 text-blue-500" />
+              <span className="font-semibold text-sm">Inspection Certificates</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {inspectionCertificates.map((cert, index) => (
+                <Button 
+                  key={index} 
+                  size="sm" 
+                  variant="outline" 
+                  className="text-xs px-2 py-1 h-auto"
+                  onClick={() => handleViewCertificate(cert)}
+                >
+                  <FileText className="h-3 w-3 mr-1" />
+                  Certificate {index + 1}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+        
         <div className="flex justify-between items-center gap-2 mt-4">
           <Button onClick={handleCall} title="Call Seller" className="flex-1 h-12 text-white transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(24,128,163,0.8)] hover:shadow-[0_3px_0px_0px_rgba(24,128,163,0.8)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 rounded">
             <Phone className="h-5 w-5" />
@@ -201,4 +238,5 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
       </CardContent>
     </Card>;
 };
+
 export default SellerDetailsCard;
