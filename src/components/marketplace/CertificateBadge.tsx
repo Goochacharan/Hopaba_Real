@@ -38,12 +38,12 @@ const CertificateBadge: React.FC<CertificateBadgeProps> = ({ certificates }) => 
             className="flex items-center gap-1 cursor-pointer hover:bg-green-200"
           >
             <CircleCheck className="h-3 w-3 text-green-700" />
-            <span>Certified</span>
+            <span>Inspection report</span>
           </Badge>
         </PopoverTrigger>
         <PopoverContent className="w-64 p-3">
           <div className="text-sm font-medium">
-            This item has {certificates.length > 1 ? `${certificates.length} inspection certificates` : 'an inspection certificate'}.
+            This item has {certificates.length > 1 ? `${certificates.length} inspection reports` : 'an inspection report'}.
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             The seller has provided third-party inspection documents to verify the condition of this item.
@@ -53,7 +53,7 @@ const CertificateBadge: React.FC<CertificateBadgeProps> = ({ certificates }) => 
             className="w-full mt-3"
             onClick={() => setIsDialogOpen(true)}
           >
-            View Certificate{certificates.length > 1 ? 's' : ''}
+            View Report{certificates.length > 1 ? 's' : ''}
           </Button>
         </PopoverContent>
       </Popover>
@@ -62,7 +62,7 @@ const CertificateBadge: React.FC<CertificateBadgeProps> = ({ certificates }) => 
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>
-              Inspection Certificate
+              Inspection Report
               {certificates.length > 1 && ` (${selectedCertificateIndex + 1}/${certificates.length})`}
             </DialogTitle>
           </DialogHeader>
@@ -71,7 +71,7 @@ const CertificateBadge: React.FC<CertificateBadgeProps> = ({ certificates }) => 
             <div className="flex flex-col items-center">
               <img 
                 src={certificates[selectedCertificateIndex]} 
-                alt={`Inspection Certificate ${selectedCertificateIndex + 1}`}
+                alt={`Inspection Report ${selectedCertificateIndex + 1}`}
                 className="max-w-full rounded-md"
               />
             </div>
@@ -103,7 +103,7 @@ const CertificateBadge: React.FC<CertificateBadgeProps> = ({ certificates }) => 
               href={certificates[selectedCertificateIndex]} 
               target="_blank" 
               rel="noopener noreferrer" 
-              download={`certificate-${selectedCertificateIndex + 1}.jpg`}
+              download={`inspection-report-${selectedCertificateIndex + 1}.jpg`}
             >
               <Button variant="outline" size="sm">
                 Download
