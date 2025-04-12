@@ -14,16 +14,13 @@ import ListingImageCarousel from './marketplace/ListingImageCarousel';
 import ListingMetadata from './marketplace/ListingMetadata';
 import SellerInfo from './marketplace/SellerInfo';
 import ListingActionButtons from './marketplace/ListingActionButtons';
-
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
   className?: string;
 }
-
 const formatPrice = (price: number): string => {
   return price.toLocaleString('en-IN');
 };
-
 const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   listing,
   className
@@ -35,13 +32,11 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   const [imageViewerOpen, setImageViewerOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   const [currentImageType, setCurrentImageType] = React.useState<'regular' | 'damage'>('regular');
-  
   const handleImageClick = (index: number, type: 'regular' | 'damage' = 'regular') => {
     setSelectedImageIndex(index);
     setCurrentImageType(type);
     setImageViewerOpen(true);
   };
-  
   const handleCardClick = (e: React.MouseEvent) => {
     if (imageViewerOpen) return;
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) {
@@ -50,17 +45,10 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
     console.log("Navigating to marketplace listing:", listing.id);
     navigate(`/marketplace/${listing.id}`);
   };
-
   const isSearchPage = window.location.pathname.includes('/search');
   const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
-  
-  return (
-    <div 
-      className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5", className)}
-      onClick={handleCardClick}
-    >
-      {hasDamageImages ? (
-        <Tabs defaultValue="regular" className="mb-2">
+  return <div className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5", className)} onClick={handleCardClick}>
+      {hasDamageImages ? <Tabs defaultValue="regular" className="mb-2">
           <TabsList className="w-full mb-0 p-1 h-auto bg-transparent">
             <TabsTrigger value="regular" className="flex-1 h-8 text-xs py-0">
               <div className="flex items-center gap-1">
@@ -68,7 +56,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
                 <span>Images</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="damage" className="flex-1 h-8 text-xs py-0">
+            <TabsTrigger value="damage" className="flex-1 h-8 text-xs py-0 bg-red-500 hover:bg-red-400">
               <div className="flex items-center gap-1">
                 <FileWarning className="h-3 w-3" />
                 <span>Damage/Scratches</span>
@@ -78,21 +66,18 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           
           <TabsContent value="regular" className="mt-0 p-0">
             <div>
-              <ListingImageCarousel images={listing.images} onImageClick={(index) => handleImageClick(index, 'regular')} listing={listing} />
+              <ListingImageCarousel images={listing.images} onImageClick={index => handleImageClick(index, 'regular')} listing={listing} />
             </div>
           </TabsContent>
           
           <TabsContent value="damage" className="mt-0 p-0">
             <div>
-              <ListingImageCarousel images={listing.damage_images} onImageClick={(index) => handleImageClick(index, 'damage')} listing={listing} isDamageImages={true} />
+              <ListingImageCarousel images={listing.damage_images} onImageClick={index => handleImageClick(index, 'damage')} listing={listing} isDamageImages={true} />
             </div>
           </TabsContent>
-        </Tabs>
-      ) : (
-        <div>
-          <ListingImageCarousel images={listing.images} onImageClick={(index) => handleImageClick(index)} listing={listing} />
-        </div>
-      )}
+        </Tabs> : <div>
+          <ListingImageCarousel images={listing.images} onImageClick={index => handleImageClick(index)} listing={listing} />
+        </div>}
       
       <div className="p-4 px-[13px] py-0 my-0">
         <h3 className="font-bold text-xl md:text-2xl mb-1">{listing.title}</h3>
@@ -102,21 +87,15 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
             <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
           </p>
           
-          {listing.is_negotiable !== undefined && (
-            <div className="mt-1 mb-2">
-              {listing.is_negotiable === true ? (
-                <Badge variant="success" className="flex items-center gap-1">
+          {listing.is_negotiable !== undefined && <div className="mt-1 mb-2">
+              {listing.is_negotiable === true ? <Badge variant="success" className="flex items-center gap-1">
                   <Unlock className="h-3 w-3" />
                   <span>Negotiable</span>
-                </Badge>
-              ) : (
-                <Badge variant="default" className="flex items-center gap-1">
+                </Badge> : <Badge variant="default" className="flex items-center gap-1">
                   <Lock className="h-3 w-3" />
                   <span>Fixed</span>
-                </Badge>
-              )}
-            </div>
-          )}
+                </Badge>}
+            </div>}
         </div>
         
         <div className="mt-0">
@@ -142,16 +121,9 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         <ListingActionButtons listingId={listing.id} title={listing.title} price={listing.price} sellerPhone={listing.seller_phone} sellerWhatsapp={listing.seller_whatsapp} sellerInstagram={listing.seller_instagram} location={listing.location} mapLink={listing.map_link} />
       </div>
 
-      <ImageViewer 
-        images={currentImageType === 'regular' ? listing.images : (listing.damage_images || [])} 
-        initialIndex={selectedImageIndex} 
-        open={imageViewerOpen} 
-        onOpenChange={open => {
-          setImageViewerOpen(open);
-        }} 
-      />
-    </div>
-  );
+      <ImageViewer images={currentImageType === 'regular' ? listing.images : listing.damage_images || []} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={open => {
+      setImageViewerOpen(open);
+    }} />
+    </div>;
 };
-
 export default MarketplaceListingCard;
