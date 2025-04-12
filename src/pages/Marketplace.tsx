@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
@@ -203,14 +204,23 @@ const Marketplace = () => {
   }, [highlightedListingId, listings, loading, currentCategory]);
 
   const filteredListings = listings.filter(listing => {
+    // Price filter
     const price = listing.price;
     if (price < priceRange[0] || price > priceRange[1]) return false;
     
-    const listingYear = new Date(listing.created_at).getFullYear();
-    if (listingYear < yearRange[0] || listingYear > yearRange[1]) return false;
+    // Model year filter - convert string year to number for comparison
+    if (listing.model_year) {
+      const modelYear = parseInt(listing.model_year, 10);
+      // Only filter if the model_year is a valid number
+      if (!isNaN(modelYear) && (modelYear < yearRange[0] || modelYear > yearRange[1])) {
+        return false;
+      }
+    }
     
+    // Rating filter
     if (ratingFilter > 0 && listing.seller_rating < ratingFilter) return false;
     
+    // Condition filter
     if (conditionFilter !== 'all' && listing.condition.toLowerCase() !== conditionFilter.toLowerCase()) return false;
     
     return true;
@@ -396,13 +406,13 @@ const Marketplace = () => {
                 >
                   <Calendar className="h-4 w-4" />
                   {isYearFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
-                      {yearRange[0].toString().slice(-2)}
+                      {yearRange[0].toString().slice(-2)}-{yearRange[1].toString().slice(-2)}
                     </Badge>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-80 p-4">
                 <div className="space-y-4">
-                  <h4 className="font-medium">Year Range</h4>
+                  <h4 className="font-medium">Model Year Range</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">From</span>
