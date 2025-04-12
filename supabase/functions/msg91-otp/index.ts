@@ -3,7 +3,7 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 
 const AUTH_KEY = "446710AhIZBtF867fab27eP1"; // MSG91 Auth Key
-const TEMPLATE_ID = "YOUR_TEMPLATE_ID"; // You'll need to set this up in MSG91 dashboard
+const TEMPLATE_ID = "64c13cc8d6fc0549e77c5212"; // Replace with your MSG91 template ID
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

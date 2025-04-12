@@ -1,10 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { SocialLoginButtons } from './SocialLoginButtons';
-import { SignupForm, SignupFormValues } from './SignupForm';
 import { RateLimitAlert } from './RateLimitAlert';
-import { Separator } from '@/components/ui/separator';
 import { OtpVerification } from './OtpVerification';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,30 +9,22 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Phone } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 interface SignupCardProps {
   isRateLimited: boolean;
-  socialLoading: string | null;
   captchaToken: string | null;
-  captchaSiteKey: string;
   isLoading: boolean;
-  handleSocialSignup: (provider: 'google' | 'facebook') => void;
   handleCaptchaVerify: (token: string) => void;
-  onSubmit: (values: SignupFormValues) => void;
 }
 
 export const SignupCard: React.FC<SignupCardProps> = ({
   isRateLimited,
-  socialLoading,
   captchaToken,
-  captchaSiteKey,
   isLoading,
-  handleSocialSignup,
   handleCaptchaVerify,
-  onSubmit,
 }) => {
   const { toast } = useToast();
-  const [phoneSignup, setPhoneSignup] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [showOtpVerification, setShowOtpVerification] = useState(false);
@@ -93,7 +82,6 @@ export const SignupCard: React.FC<SignupCardProps> = ({
     // Here you would typically create a user account with the verified phone
     // For now we just reset the UI
     setShowOtpVerification(false);
-    setPhoneSignup(false);
   };
 
   const cancelPhoneVerification = () => {
@@ -112,9 +100,11 @@ export const SignupCard: React.FC<SignupCardProps> = ({
     );
   }
 
-  if (phoneSignup) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
+  return (
+    <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
+      <RateLimitAlert isVisible={isRateLimited} />
+      
+      <div className="space-y-4">
         <div className="text-center mb-4">
           <h3 className="text-lg font-medium">Sign up with Phone</h3>
           <p className="text-sm text-muted-foreground mt-1">
@@ -133,12 +123,15 @@ export const SignupCard: React.FC<SignupCardProps> = ({
               onChange={(e) => setPhoneNumber(e.target.value)}
               disabled={phoneLoading}
             />
+            <p className="text-xs text-muted-foreground">
+              If using an Indian number, you can enter 10 digits without the country code
+            </p>
           </div>
           
           <Button 
             className="w-full" 
             onClick={handlePhoneSignup}
-            disabled={phoneLoading}
+            disabled={phoneLoading || isRateLimited}
           >
             {phoneLoading ? (
               <>
@@ -148,53 +141,8 @@ export const SignupCard: React.FC<SignupCardProps> = ({
               "Send Verification Code"
             )}
           </Button>
-          
-          <Button 
-            variant="outline" 
-            className="w-full mt-2" 
-            onClick={() => setPhoneSignup(false)}
-            disabled={phoneLoading}
-          >
-            Back to Email Signup
-          </Button>
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
-      <RateLimitAlert isVisible={isRateLimited} />
-
-      <SocialLoginButtons 
-        onSocialLogin={handleSocialSignup}
-        isDisabled={isRateLimited || !captchaToken}
-        isLoading={socialLoading}
-      />
-
-      <Button 
-        variant="outline" 
-        className="w-full flex items-center justify-center gap-2" 
-        onClick={() => setPhoneSignup(true)}
-      >
-        <Phone className="h-4 w-4" /> Sign up with Phone
-      </Button>
-      
-      <div className="relative">
-        <Separator className="my-4" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="bg-white px-2 text-xs text-muted-foreground">or sign up with email</span>
-        </div>
-      </div>
-
-      <SignupForm 
-        onSubmit={onSubmit}
-        isLoading={isLoading}
-        isDisabled={isRateLimited}
-        captchaToken={captchaToken}
-        captchaSiteKey={captchaSiteKey}
-        onCaptchaVerify={handleCaptchaVerify}
-      />
 
       <div className="mt-4 text-center">
         <p className="text-sm text-muted-foreground">
