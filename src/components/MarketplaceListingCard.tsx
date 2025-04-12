@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -8,6 +9,13 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Lock, Unlock, Image, FileWarning } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+
+// Import our components
+import ListingImageCarousel from '@/components/marketplace/ListingImageCarousel';
+import ListingMetadata from '@/components/marketplace/ListingMetadata';
+import SellerInfo from '@/components/marketplace/SellerInfo';
+import ListingActionButtons from '@/components/marketplace/ListingActionButtons';
+import CertificateBadge from '@/components/marketplace/CertificateBadge';
 
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
