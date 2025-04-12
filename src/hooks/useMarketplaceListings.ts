@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,6 +17,7 @@ export interface MarketplaceListing {
   seller_whatsapp: string | null;
   seller_instagram: string | null;
   seller_id: string; 
+  seller_avatar?: string | null;
   location: string;
   map_link: string | null;
   created_at: string;
