@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -96,19 +97,29 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           </p>
           
           <div className="mt-1 mb-2 flex flex-wrap gap-2 items-center">
-            {listing.is_negotiable !== undefined && (listing.is_negotiable === true ? <Badge variant="success" className="inline-flex items-center gap-1 pr-1.5">
+            {/* All badges in one line */}
+            <div className="flex flex-wrap items-center gap-2">
+              {listing.is_negotiable !== undefined && (listing.is_negotiable === true ? 
+                <Badge variant="success" className="inline-flex items-center gap-1 pr-1.5">
                   <Unlock className="h-3 w-3" />
                   <span className="pr-0.5">Negotiable</span>
-                </Badge> : <Badge variant="default" className="inline-flex items-center gap-1 pr-1.5">
+                </Badge> : 
+                <Badge variant="default" className="inline-flex items-center gap-1 pr-1.5">
                   <Lock className="h-3 w-3" />
                   <span className="pr-0.5">Fixed</span>
-                </Badge>)}
-            {listing.inspection_certificates && listing.inspection_certificates.length > 0 && (
-              <span onClick={e => e.stopPropagation()} className="flex items-center gap-2">
-                <CertificateBadge certificates={listing.inspection_certificates} />
-                {listing.model_year && <Badge variant="condition" className="text-xs">{listing.model_year} Model</Badge>}
-              </span>
-            )}
+                </Badge>
+              )}
+              {listing.inspection_certificates && listing.inspection_certificates.length > 0 && (
+                <span onClick={e => e.stopPropagation()}>
+                  <CertificateBadge certificates={listing.inspection_certificates} />
+                </span>
+              )}
+              {listing.model_year && (
+                <Badge variant="condition" className="text-xs">
+                  {listing.model_year} Model
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
         
