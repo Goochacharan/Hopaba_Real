@@ -83,6 +83,7 @@ export type Database = {
           is_negotiable: boolean | null
           location: string
           map_link: string | null
+          model_year: string | null
           price: number
           seller_id: string | null
           seller_instagram: string | null
@@ -106,6 +107,7 @@ export type Database = {
           is_negotiable?: boolean | null
           location: string
           map_link?: string | null
+          model_year?: string | null
           price: number
           seller_id?: string | null
           seller_instagram?: string | null
@@ -129,6 +131,7 @@ export type Database = {
           is_negotiable?: boolean | null
           location?: string
           map_link?: string | null
+          model_year?: string | null
           price?: number
           seller_id?: string | null
           seller_instagram?: string | null
