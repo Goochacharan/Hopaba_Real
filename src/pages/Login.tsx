@@ -31,11 +31,6 @@ export default function Login() {
   return (
     <MainLayout>
       <div className="max-w-md mx-auto space-y-6 py-8">
-        <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold">Log In</h1>
-          <p className="text-muted-foreground">Enter your phone number to access your account</p>
-        </div>
-
         <LoginCard 
           isRateLimited={isRateLimited}
           captchaToken={captchaToken}
