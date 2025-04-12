@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -7,10 +6,10 @@ import { useToast } from '@/hooks/use-toast';
 import ImageViewer from '@/components/ImageViewer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Lock, Unlock, Image, FileWarning, FileCheck, CircleCheck } from 'lucide-react';
+import { Lock, Unlock, Image, FileWarning } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
-// Import our components - fix paths to point to marketplace directory
+// Import our components
 import ListingImageCarousel from './marketplace/ListingImageCarousel';
 import ListingMetadata from './marketplace/ListingMetadata';
 import SellerInfo from './marketplace/SellerInfo';
@@ -54,7 +53,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
 
   const isSearchPage = window.location.pathname.includes('/search');
   const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
-  const hasCertificates = listing.inspection_certificates && listing.inspection_certificates.length > 0;
   
   return (
     <div 
@@ -104,9 +102,9 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
             <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
           </p>
           
-          <div className="mt-1 mb-2 flex flex-wrap gap-2">
-            {listing.is_negotiable !== undefined && (
-              listing.is_negotiable === true ? (
+          {listing.is_negotiable !== undefined && (
+            <div className="mt-1 mb-2">
+              {listing.is_negotiable === true ? (
                 <Badge variant="success" className="inline-flex items-center gap-1 pr-1.5">
                   <Unlock className="h-3 w-3" />
                   <span className="pr-0.5">Negotiable</span>
@@ -116,19 +114,9 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
                   <Lock className="h-3 w-3" />
                   <span className="pr-0.5">Fixed</span>
                 </Badge>
-              )
-            )}
-            
-            {hasCertificates && (
-              <Badge 
-                variant="outline"
-                className="inline-flex items-center gap-1 pr-1.5 border-amber-400 bg-amber-50 text-amber-700"
-              >
-                <FileCheck className="h-3 w-3 text-amber-600" />
-                <span className="pr-0.5">Certified</span>
-              </Badge>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
         
         <div className="mt-0">

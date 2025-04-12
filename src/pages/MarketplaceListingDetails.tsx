@@ -207,7 +207,6 @@ const MarketplaceListingDetails = () => {
                     createdAt={listing.created_at}
                     mapLink={listing.map_link}
                     reviewCount={listing.review_count || 0}
-                    inspectionCertificates={listing.inspection_certificates}
                   />
                 )}
               </div>
