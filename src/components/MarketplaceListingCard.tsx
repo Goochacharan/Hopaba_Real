@@ -56,7 +56,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
                 <span>Images</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="damage" className="flex-1 h-8 text-xs py-0 bg-inherit">
+            <TabsTrigger value="damage" className="flex-1 h-8 text-xs py-0 bg-red-500 hover:bg-red-400">
               <div className="flex items-center gap-1">
                 <FileWarning className="h-3 w-3" />
                 <span>Damage/Scratches</span>
