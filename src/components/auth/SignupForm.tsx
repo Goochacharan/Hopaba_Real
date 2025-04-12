@@ -6,43 +6,42 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Phone } from 'lucide-react';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { CaptchaVerification } from './CaptchaVerification';
 
-const phoneSignupSchema = z.object({
-  phone: z.string().min(10, "Please enter a valid phone number"),
-  otp: z.string().optional(),
+const signupSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
-const otpSchema = z.object({
-  phone: z.string(),
-  otp: z.string().min(6, "Please enter a valid verification code"),
-});
-
-export type SignupFormValues = z.infer<typeof phoneSignupSchema> | z.infer<typeof otpSchema>;
+export type SignupFormValues = z.infer<typeof signupSchema>;
 
 interface SignupFormProps {
   onSubmit: (values: SignupFormValues) => void;
   isLoading: boolean;
   isDisabled: boolean;
-  showOTPInput?: boolean;
-  phoneNumber?: string;
+  captchaToken: string | null;
+  captchaSiteKey: string;
+  onCaptchaVerify: (token: string) => void;
 }
 
 export const SignupForm: React.FC<SignupFormProps> = ({
   onSubmit,
   isLoading,
   isDisabled,
-  showOTPInput = false,
-  phoneNumber = '',
+  captchaToken,
+  captchaSiteKey,
+  onCaptchaVerify,
 }) => {
-  const schema = showOTPInput ? otpSchema : phoneSignupSchema;
-  
   const form = useForm<SignupFormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(signupSchema),
     defaultValues: {
-      phone: phoneNumber || "",
-      otp: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
     },
   });
 
@@ -51,61 +50,75 @@ export const SignupForm: React.FC<SignupFormProps> = ({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="phone"
+          name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone Number</FormLabel>
+              <FormLabel>Email</FormLabel>
               <FormControl>
-                <div className="flex">
-                  <div className="flex items-center bg-muted px-3 rounded-l-md border-y border-l">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <Input
-                    placeholder="+1234567890"
-                    type="tel"
-                    autoComplete="tel"
-                    disabled={isLoading || isDisabled || showOTPInput}
-                    className="rounded-l-none"
-                    {...field}
-                  />
-                </div>
+                <Input
+                  placeholder="your@email.com"
+                  type="email"
+                  autoComplete="email"
+                  disabled={isLoading || isDisabled}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {showOTPInput && (
-          <FormField
-            control={form.control}
-            name="otp"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Verification Code</FormLabel>
-                <FormControl>
-                  <InputOTP maxLength={6} {...field}>
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="••••••••"
+                  type="password"
+                  autoComplete="new-password"
+                  disabled={isLoading || isDisabled}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm Password</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="••••••••"
+                  type="password"
+                  autoComplete="new-password"
+                  disabled={isLoading || isDisabled}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <CaptchaVerification 
+          siteKey={captchaSiteKey} 
+          onVerify={onCaptchaVerify} 
+        />
 
         <Button 
           type="submit" 
           className="w-full mt-4" 
-          disabled={isLoading || isDisabled}
+          disabled={isLoading || isDisabled || !captchaToken}
         >
-          {isLoading ? "Processing..." : showOTPInput ? "Verify Code" : "Send Verification Code"}
+          {isLoading ? "Creating account..." : "Sign up with Email"}
         </Button>
       </form>
     </Form>

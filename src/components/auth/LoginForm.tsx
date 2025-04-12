@@ -6,43 +6,39 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Phone } from 'lucide-react';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { CaptchaVerification } from './CaptchaVerification';
 
-const phoneLoginSchema = z.object({
-  phone: z.string().min(10, "Please enter a valid phone number"),
-  otp: z.string().optional(),
+const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-const otpSchema = z.object({
-  phone: z.string(),
-  otp: z.string().min(6, "Please enter a valid verification code"),
-});
-
-export type LoginFormValues = z.infer<typeof phoneLoginSchema> | z.infer<typeof otpSchema>;
+export type LoginFormValues = z.infer<typeof loginSchema>;
 
 interface LoginFormProps {
   onSubmit: (values: LoginFormValues) => void;
   isLoading: boolean;
   isDisabled: boolean;
-  showOTPInput?: boolean;
-  phoneNumber?: string;
+  captchaToken: string | null;
+  captchaSiteKey: string;
+  onCaptchaVerify: (token: string) => void;
+  requireCaptcha?: boolean; // Added this prop
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   onSubmit,
   isLoading,
   isDisabled,
-  showOTPInput = false,
-  phoneNumber = '',
+  captchaToken,
+  captchaSiteKey,
+  onCaptchaVerify,
+  requireCaptcha = false, // Default to false
 }) => {
-  const schema = showOTPInput ? otpSchema : phoneLoginSchema;
-  
   const form = useForm<LoginFormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(loginSchema),
     defaultValues: {
-      phone: phoneNumber || "",
-      otp: "",
+      email: "",
+      password: "",
     },
   });
 
@@ -51,61 +47,57 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="phone"
+          name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone Number</FormLabel>
+              <FormLabel>Email</FormLabel>
               <FormControl>
-                <div className="flex">
-                  <div className="flex items-center bg-muted px-3 rounded-l-md border-y border-l">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <Input
-                    placeholder="+1234567890"
-                    type="tel"
-                    autoComplete="tel"
-                    disabled={isLoading || isDisabled || showOTPInput}
-                    className="rounded-l-none"
-                    {...field}
-                  />
-                </div>
+                <Input
+                  placeholder="your@email.com"
+                  type="email"
+                  autoComplete="email"
+                  disabled={isLoading || isDisabled}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {showOTPInput && (
-          <FormField
-            control={form.control}
-            name="otp"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Verification Code</FormLabel>
-                <FormControl>
-                  <InputOTP maxLength={6} {...field}>
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="••••••••"
+                  type="password"
+                  autoComplete="current-password"
+                  disabled={isLoading || isDisabled}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        {requireCaptcha && (
+          <CaptchaVerification 
+            siteKey={captchaSiteKey} 
+            onVerify={onCaptchaVerify} 
           />
         )}
 
         <Button 
           type="submit" 
           className="w-full" 
-          disabled={isLoading || isDisabled}
+          disabled={isLoading || isDisabled || (requireCaptcha && !captchaToken)}
         >
-          {isLoading ? "Processing..." : showOTPInput ? "Verify Code" : "Send Verification Code"}
+          {isLoading ? "Logging in..." : "Log in with Email"}
         </Button>
       </form>
     </Form>

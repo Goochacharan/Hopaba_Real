@@ -8,13 +8,16 @@ import { SignupCard } from '@/components/auth/SignupCard';
 import { SignupFormValues } from '@/components/auth/SignupForm';
 import { useAuth } from '@/hooks/useAuth';
 
+// hCaptcha site key
+const HCAPTCHA_SITE_KEY = 'fda043e0-8372-4d8a-b190-84a8fdee1528';
+
 export default function Signup() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [showOTPInput, setShowOTPInput] = useState(false);
-  const { authAttempts, isRateLimited, signupWithPhone, verifyOTP } = useAuth();
+  const [socialLoading, setSocialLoading] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const { authAttempts, isRateLimited, signupWithEmail } = useAuth();
   
   useEffect(() => {
     const checkUser = async () => {
@@ -37,48 +40,84 @@ export default function Signup() {
       return;
     }
 
-    setIsLoading(true);
-    
-    if (!showOTPInput) {
-      try {
-        // Send OTP for signup
-        await signupWithPhone(values.phone);
-        setPhoneNumber(values.phone);
-        setShowOTPInput(true);
-        toast({
-          title: "OTP Sent",
-          description: "A verification code has been sent to your phone number.",
-        });
-      } catch (error: any) {
-        toast({
-          title: "Sign up failed",
-          description: error.message || "Failed to send verification code",
-          variant: "destructive",
-        });
-        console.error("Signup error:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      try {
-        // Verify OTP for signup
-        await verifyOTP(phoneNumber, values.otp, true);
-        navigate('/');
-        toast({
-          title: "Account created",
-          description: "Your account has been created successfully!",
-        });
-      } catch (error: any) {
-        toast({
-          title: "Verification failed",
-          description: error.message || "Invalid verification code",
-          variant: "destructive",
-        });
-        console.error("OTP verification error:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    // Always require captcha
+    if (!captchaToken) {
+      toast({
+        title: "CAPTCHA verification required",
+        description: "Please complete the CAPTCHA verification.",
+        variant: "destructive",
+      });
+      return;
     }
+
+    setIsLoading(true);
+    try {
+      await signupWithEmail(values.email, values.password, "", captchaToken);
+      navigate('/login');
+      toast({
+        title: "Account created",
+        description: "Please check your email to verify your account.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Sign up failed",
+        description: error.message || "Something went wrong",
+        variant: "destructive",
+      });
+      console.error("Signup error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSocialSignup = async (provider: 'google' | 'facebook') => {
+    if (isRateLimited) {
+      toast({
+        title: "Too many attempts",
+        description: "For security reasons, please try again later.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Require captcha for social signup as well
+    if (!captchaToken) {
+      toast({
+        title: "CAPTCHA verification required",
+        description: "Please complete the CAPTCHA verification.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setSocialLoading(provider);
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          queryParams: captchaToken ? {
+            captchaToken
+          } : undefined
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (error: any) {
+      toast({
+        title: "Sign up failed",
+        description: error.message || "Something went wrong with social sign up",
+        variant: "destructive",
+      });
+      console.error("Social signup error:", error);
+      setSocialLoading(null);
+    }
+  };
+
+  const handleCaptchaVerify = (token: string) => {
+    setCaptchaToken(token);
   };
 
   return (
@@ -86,15 +125,18 @@ export default function Signup() {
       <div className="max-w-md mx-auto space-y-6 py-8">
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold">Create an Account</h1>
-          <p className="text-muted-foreground">Enter your phone number to create a new account</p>
+          <p className="text-muted-foreground">Enter your details to create a new account</p>
         </div>
 
         <SignupCard 
           isRateLimited={isRateLimited}
+          socialLoading={socialLoading}
+          captchaToken={captchaToken}
+          captchaSiteKey={HCAPTCHA_SITE_KEY}
           isLoading={isLoading}
+          handleSocialSignup={handleSocialSignup}
+          handleCaptchaVerify={handleCaptchaVerify}
           onSubmit={onSubmit}
-          showOTPInput={showOTPInput}
-          phoneNumber={phoneNumber}
         />
       </div>
     </MainLayout>
