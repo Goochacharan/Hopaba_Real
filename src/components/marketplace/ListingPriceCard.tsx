@@ -1,11 +1,12 @@
 
-import React from 'react';
-import { Shield, Lock, Unlock } from 'lucide-react';
+import React, { useState } from 'react';
+import { Shield, Lock, Unlock, FileCheck } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import SellerInfo from './SellerInfo';
 import ListingActionButtons from './ListingActionButtons';
 import ListingMetadata from './ListingMetadata';
 import { Badge } from '@/components/ui/badge';
+import CertificateViewer from './CertificateViewer';
 
 interface ListingPriceCardProps {
   id: string;
@@ -21,6 +22,7 @@ interface ListingPriceCardProps {
   condition: string;
   mapLink?: string | null;
   isNegotiable?: boolean;
+  inspectionCertificates?: string[];
 }
 
 const formatPrice = (price: number): string => {
@@ -41,8 +43,12 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   createdAt,
   condition,
   mapLink,
-  isNegotiable = false
+  isNegotiable = false,
+  inspectionCertificates = []
 }) => {
+  const [certificateViewerOpen, setCertificateViewerOpen] = useState(false);
+  const hasCertificates = inspectionCertificates && inspectionCertificates.length > 0;
+  
   return (
     <div className="sticky top-24 space-y-6">
       <div className="bg-white rounded-xl border p-6 shadow-sm">
@@ -61,7 +67,7 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
             <h2 className="md:text-6xl font-extrabold text-gray-800 py-0 px-1 text-4xl -mb-1 flex items-center">
               <span className="text-4xl md:text-5xl font-extrabold mr-0.5">₹</span>{formatPrice(price)}
             </h2>
-            <div className="mt-2">
+            <div className="mt-2 flex flex-wrap gap-2">
               {isNegotiable ? (
                 <Badge variant="success" className="flex items-center gap-1">
                   <Unlock className="h-3 w-3" />
@@ -71,6 +77,17 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
                 <Badge variant="default" className="flex items-center gap-1">
                   <Lock className="h-3 w-3" />
                   <span>Fixed Price</span>
+                </Badge>
+              )}
+              
+              {hasCertificates && (
+                <Badge 
+                  variant="outline" 
+                  className="border-amber-400 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-800 cursor-pointer flex items-center gap-1.5"
+                  onClick={() => setCertificateViewerOpen(true)}
+                >
+                  <FileCheck className="h-3 w-3 text-amber-600" />
+                  <span>Inspection Certificate</span>
                 </Badge>
               )}
             </div>
@@ -106,6 +123,14 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
           </div>
         </div>
       </div>
+      
+      {hasCertificates && (
+        <CertificateViewer 
+          certificates={inspectionCertificates}
+          open={certificateViewerOpen}
+          onOpenChange={setCertificateViewerOpen}
+        />
+      )}
     </div>
   );
 };
