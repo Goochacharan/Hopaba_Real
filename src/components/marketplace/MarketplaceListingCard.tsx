@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -9,11 +10,11 @@ import { Badge } from '@/components/ui/badge';
 import { Lock, Unlock, Image, FileWarning, FileCheck, CircleCheck } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
-// Import our components
-import ListingImageCarousel from './marketplace/ListingImageCarousel';
-import ListingMetadata from './marketplace/ListingMetadata';
-import SellerInfo from './marketplace/SellerInfo';
-import ListingActionButtons from './marketplace/ListingActionButtons';
+// Fix the import paths - use relative paths without the marketplace/ prefix
+import ListingImageCarousel from './ListingImageCarousel';
+import ListingMetadata from './ListingMetadata';
+import SellerInfo from './SellerInfo';
+import ListingActionButtons from './ListingActionButtons';
 
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
@@ -29,9 +30,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   className
 }) => {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [imageViewerOpen, setImageViewerOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   const [currentImageType, setCurrentImageType] = React.useState<'regular' | 'damage'>('regular');

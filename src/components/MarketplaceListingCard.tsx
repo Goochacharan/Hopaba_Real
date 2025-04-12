@@ -7,10 +7,10 @@ import { useToast } from '@/hooks/use-toast';
 import ImageViewer from '@/components/ImageViewer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Lock, Unlock, Image, FileWarning, FileCheck } from 'lucide-react';
+import { Lock, Unlock, Image, FileWarning, FileCheck, CircleCheck } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
-// Import our components
+// Import our components - fix paths to point to marketplace directory
 import ListingImageCarousel from './marketplace/ListingImageCarousel';
 import ListingMetadata from './marketplace/ListingMetadata';
 import SellerInfo from './marketplace/SellerInfo';
