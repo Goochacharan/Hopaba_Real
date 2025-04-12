@@ -15,6 +15,7 @@ import SafeTradingTips from '@/components/marketplace/SafeTradingTips';
 import SellerDetailsCard from '@/components/marketplace/SellerDetailsCard';
 import CertificateBadge from '@/components/marketplace/CertificateBadge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import InspectionCertificatesCard from '@/components/marketplace/InspectionCertificatesCard';
 
 const MarketplaceListingDetails = () => {
   const {
@@ -199,21 +200,27 @@ const MarketplaceListingDetails = () => {
               <div className="mt-6">
                 {listing && (
                   <SellerDetailsCard
-                    id={listing.id}
-                    title={listing.title}
-                    price={listing.price}
-                    sellerId={listing.seller_id || ''}
-                    sellerName={listing.seller_name}
-                    sellerRating={listing.seller_rating}
-                    sellerPhone={listing.seller_phone}
-                    sellerWhatsapp={listing.seller_whatsapp}
-                    sellerInstagram={listing.seller_instagram}
-                    location={listing.location}
-                    createdAt={listing.created_at}
-                    mapLink={listing.map_link}
-                    reviewCount={listing.review_count || 0}
-                    isNegotiable={listing.is_negotiable}
-                    inspectionCertificates={listing.inspection_certificates}
+                    id={id || ''}
+                    title={listing?.title || ''}
+                    price={listing?.price || 0}
+                    sellerId={listing?.seller_id || ''}
+                    sellerName={listing?.seller_name || ''}
+                    sellerRating={listing?.seller_rating || 0}
+                    sellerPhone={listing?.seller_phone || null}
+                    sellerWhatsapp={listing?.seller_whatsapp || null}
+                    sellerInstagram={listing?.seller_instagram || null}
+                    location={listing?.location || ''}
+                    createdAt={listing?.created_at || ''}
+                    mapLink={listing?.map_link || null}
+                    reviewCount={listing?.review_count}
+                    avatarUrl={listing?.seller_avatar}
+                    isNegotiable={listing?.is_negotiable}
+                  />
+                )}
+                
+                {listing?.inspection_certificates && listing.inspection_certificates.length > 0 && (
+                  <InspectionCertificatesCard
+                    certificates={listing.inspection_certificates}
                   />
                 )}
               </div>
