@@ -1,7 +1,7 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 export interface MarketplaceListing {
   id: string;
@@ -10,26 +10,25 @@ export interface MarketplaceListing {
   price: number;
   category: string;
   condition: string;
-  images: string[];
+  model_year?: string | null;
+  location: string | null;
+  map_link?: string | null;
   seller_name: string;
-  seller_rating: number;
-  seller_phone: string | null;
-  seller_whatsapp: string | null;
-  seller_instagram: string | null;
-  seller_id: string; 
-  seller_avatar?: string | null;
-  location: string;
-  map_link: string | null;
-  created_at: string;
-  updated_at: string;
-  approval_status?: string;
-  review_count?: number;
-  is_negotiable?: boolean;
+  seller_id?: string | null;
+  seller_phone?: string | null;
+  seller_whatsapp?: string | null;
+  seller_instagram?: string | null;
+  seller_rating?: number;
+  images: string[];
   damage_images?: string[];
   inspection_certificates?: string[];
+  created_at: string;
+  approval_status: 'approved' | 'pending' | 'rejected';
+  is_negotiable?: boolean;
 }
 
-interface UseMarketplaceListingsOptions {
+interface UseMarketplaceListingsProps {
+  limit?: number;
   category?: string;
   searchQuery?: string;
   condition?: string;
@@ -37,78 +36,65 @@ interface UseMarketplaceListingsOptions {
   maxPrice?: number;
   minRating?: number;
   includeAllStatuses?: boolean;
+  sellerID?: string;
 }
 
-export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = {}) => {
+export const useMarketplaceListings = ({
+  limit = 100,
+  category,
+  searchQuery = '',
+  condition,
+  minPrice,
+  maxPrice,
+  minRating,
+  includeAllStatuses = false,
+  sellerID
+}: UseMarketplaceListingsProps = {}) => {
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
-  const { category, searchQuery, condition, minPrice, maxPrice, minRating, includeAllStatuses } = options;
+  const { toast } = useToast();
 
-  const fetchListings = useCallback(async () => {
+  const fetchListings = async () => {
     setLoading(true);
     setError(null);
-    console.log("Fetching marketplace listings with options:", options);
 
     try {
       let query = supabase
         .from('marketplace_listings')
-        .select('*');
-      
-      // Apply approval status filter
+        .select('*')
+        .limit(limit);
+
       if (!includeAllStatuses) {
-        if (user) {
-          // For logged-in users, show approved listings + their own listings (any status)
-          query = query.or(`approval_status.eq.approved,seller_id.eq.${user.id}`);
-          console.log(`Filtering for approved listings OR seller_id=${user.id}`);
-        } else {
-          // For visitors, only show approved listings
-          query = query.eq('approval_status', 'approved');
-          console.log(`Filtering for only approved listings (user not logged in)`);
-        }
-      } else {
-        console.log("Including all approval statuses");
+        query = query.eq('approval_status', 'approved');
       }
-      
-      if (category && category !== 'all') {
-        // Make category filter case-insensitive
-        query = query.ilike('category', `%${category}%`);
-        console.log(`Filtering by category (case-insensitive): "${category}"`);
+
+      if (category) {
+        query = query.eq('category', category);
       }
-      
-      if (condition && condition !== 'all') {
-        query = query.ilike('condition', condition);
+
+      if (condition) {
+        query = query.eq('condition', condition);
       }
-      
+
       if (minPrice !== undefined) {
         query = query.gte('price', minPrice);
       }
-      
+
       if (maxPrice !== undefined) {
         query = query.lte('price', maxPrice);
       }
-      
-      if (minRating !== undefined && minRating > 0) {
+
+      if (minRating !== undefined) {
         query = query.gte('seller_rating', minRating);
-        console.log(`Filtering by minimum rating: ${minRating}`);
       }
-      
-      if (searchQuery && searchQuery.trim() !== '') {
-        const searchTerms = searchQuery.trim().toLowerCase();
-        
-        // Split the search query into individual words for more flexible matching
-        const searchWords = searchTerms.split(/\s+/).filter(word => word.length > 0);
-        
-        if (searchWords.length > 0) {
-          // Create a complex OR condition for each word across multiple fields
-          const orConditions = searchWords.map(word => {
-            return `title.ilike.%${word}%,description.ilike.%${word}%,category.ilike.%${word}%,location.ilike.%${word}%`;
-          }).join(',');
-          
-          query = query.or(orConditions);
-          console.log(`Advanced search with multiple words: [${searchWords.join(', ')}]`);
-        }
+
+      if (sellerID) {
+        query = query.eq('seller_id', sellerID);
+      }
+
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
@@ -117,110 +103,30 @@ export const useMarketplaceListings = (options: UseMarketplaceListingsOptions = 
         throw error;
       }
 
-      console.log(`Found ${data?.length || 0} marketplace listings`);
-      
-      // If there are search words, do additional client-side filtering to improve word combination matching
-      let filteredData = data || [];
-      
-      if (searchQuery && searchQuery.trim() !== '') {
-        const searchWords = searchQuery.trim().toLowerCase().split(/\s+/).filter(word => word.length > 0);
-        
-        if (searchWords.length > 1) {
-          // Calculate a relevance score for each listing based on how many search words it contains
-          filteredData = filteredData.map(listing => {
-            const listingText = `${listing.title} ${listing.description} ${listing.category} ${listing.location}`.toLowerCase();
-            
-            // Count how many of the search words appear in the listing
-            const matchedWords = searchWords.filter(word => listingText.includes(word));
-            const relevanceScore = matchedWords.length / searchWords.length;
-            
-            return {
-              ...listing,
-              relevanceScore
-            };
-          });
-          
-          // Filter out listings with low relevance (less than 50% of words matched)
-          filteredData = filteredData.filter(listing => (listing as any).relevanceScore > 0.35);
-          
-          // Sort by relevance score (higher is better)
-          filteredData.sort((a, b) => (b as any).relevanceScore - (a as any).relevanceScore);
-        }
-      }
-      
-      console.log("Marketplace listings fetched:", filteredData?.map(l => ({
-        id: l.id,
-        title: l.title,
-        category: l.category,
-        approval_status: l.approval_status,
-        seller_id: l.seller_id,
-        seller_rating: l.seller_rating,
-        current_user_id: user?.id
-      })));
-      
-      setListings(filteredData as MarketplaceListing[]);
-    } catch (err) {
+      setListings(data || []);
+    } catch (err: any) {
       console.error('Error fetching marketplace listings:', err);
       setError('Failed to fetch listings. Please try again later.');
+      toast({
+        title: "Error",
+        description: "Failed to fetch marketplace listings.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
-  }, [category, searchQuery, condition, minPrice, maxPrice, minRating, includeAllStatuses, user]);
+  };
 
   useEffect(() => {
     fetchListings();
-  }, [fetchListings]);
+  }, [category, searchQuery, condition, minPrice, maxPrice, minRating, includeAllStatuses, sellerID, limit]);
 
-  return { 
-    listings, 
-    loading, 
-    error, 
-    refetch: fetchListings 
+  return {
+    listings,
+    loading,
+    error,
+    refetch: fetchListings
   };
 };
 
-export const useMarketplaceListing = (id: string) => {
-  const [listing, setListing] = useState<MarketplaceListing | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchListing = async () => {
-      if (!id) {
-        setError('No listing ID provided');
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        const { data, error } = await supabase
-          .from('marketplace_listings')
-          .select('*')
-          .eq('id', id)
-          .maybeSingle();
-
-        if (error) {
-          throw error;
-        }
-
-        if (!data) {
-          setError('Listing not found');
-        } else {
-          setListing(data as MarketplaceListing);
-        }
-      } catch (err) {
-        console.error('Error fetching marketplace listing:', err);
-        setError('Failed to fetch listing details. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchListing();
-  }, [id]);
-
-  return { listing, loading, error };
-};
+export default useMarketplaceListings;

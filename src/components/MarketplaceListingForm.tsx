@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -24,6 +25,7 @@ const marketplaceListingSchema = z.object({
   price: z.coerce.number().min(1, { message: "Price must be greater than 0" }),
   category: z.string().min(1, { message: "Category is required" }),
   condition: z.string().min(1, { message: "Condition is required" }),
+  model_year: z.string().optional(),
   location: z.string().optional(),
   map_link: z.string().optional(),
   seller_name: z.string().min(2, { message: "Seller name is required" }),
@@ -74,6 +76,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     price: listing?.price || 0,
     category: listing?.category || '',
     condition: listing?.condition || '',
+    model_year: listing?.model_year || '',
     location: listing?.location || '',
     map_link: listing?.map_link || '',
     seller_name: listing?.seller_name || user?.user_metadata?.full_name || '',
@@ -140,6 +143,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         price: data.price,
         category: categoryValue,
         condition: data.condition,
+        model_year: data.model_year || null,
         location: data.location || "Not specified",
         map_link: data.map_link || null,
         seller_name: data.seller_name || "Anonymous Seller",
@@ -191,6 +195,18 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    
+    // Generate years from current year down to 1950
+    for (let year = currentYear; year >= 1950; year--) {
+      years.push(year.toString());
+    }
+    
+    return years;
   };
 
   return (
@@ -293,6 +309,35 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                       <FormDescription>
                         Enter the location or area where the item is available
                       </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="model_year"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Model Year (Optional)</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select year" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="">Not Applicable</SelectItem>
+                          {generateYearOptions().map(year => (
+                            <SelectItem key={year} value={year}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
