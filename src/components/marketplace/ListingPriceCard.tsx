@@ -77,7 +77,9 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
                 </Badge>
               )}
               {inspectionCertificates && inspectionCertificates.length > 0 && (
-                <CertificateBadge certificates={inspectionCertificates} />
+                <span onClick={(e) => e.stopPropagation()}>
+                  <CertificateBadge certificates={inspectionCertificates} />
+                </span>
               )}
             </div>
           </div>

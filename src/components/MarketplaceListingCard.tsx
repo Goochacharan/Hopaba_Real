@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -118,7 +119,9 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
               )
             )}
             {listing.inspection_certificates && listing.inspection_certificates.length > 0 && (
-              <CertificateBadge certificates={listing.inspection_certificates} />
+              <span onClick={(e) => e.stopPropagation()}>
+                <CertificateBadge certificates={listing.inspection_certificates} />
+              </span>
             )}
           </div>
         </div>
