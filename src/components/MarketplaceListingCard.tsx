@@ -86,7 +86,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         <div className="flex flex-col">
           <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
             <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
-            {listing.model_year && <Badge variant="condition" className="text-xs ml-2 bg-zinc-500">
+            {listing.model_year && <Badge variant="condition" className="text-xs ml-2 bg-white-500">
                 {listing.model_year} Model
               </Badge>}
           </p>
