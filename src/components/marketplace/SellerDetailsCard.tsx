@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ interface SellerDetailsCardProps {
   reviewCount?: number;
   avatarUrl?: string | null;
   inspectionCertificates?: string[] | null;
+  isNegotiable?: boolean; // Added this property to match what's being passed in MarketplaceListingDetails.tsx
 }
 
 const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
