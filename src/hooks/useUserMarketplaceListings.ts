@@ -32,7 +32,13 @@ export const useUserMarketplaceListings = () => {
         throw error;
       }
 
-      setListings(data || []);
+      // Ensure the data conforms to the MarketplaceListing type
+      const typedData = data?.map(item => ({
+        ...item,
+        approval_status: item.approval_status as 'approved' | 'pending' | 'rejected'
+      })) as MarketplaceListing[];
+
+      setListings(typedData || []);
     } catch (err: any) {
       console.error('Error fetching user marketplace listings:', err);
       setError('Failed to fetch your listings. Please try again later.');
@@ -82,3 +88,5 @@ export const useUserMarketplaceListings = () => {
     deleteListing
   };
 };
+
+export default useUserMarketplaceListings;

@@ -19,6 +19,7 @@ export interface MarketplaceListing {
   seller_whatsapp?: string | null;
   seller_instagram?: string | null;
   seller_rating?: number;
+  review_count?: number;
   images: string[];
   damage_images?: string[];
   inspection_certificates?: string[];
@@ -103,7 +104,13 @@ export const useMarketplaceListings = ({
         throw error;
       }
 
-      setListings(data || []);
+      // Ensure the data conforms to the MarketplaceListing type
+      const typedData = data?.map(item => ({
+        ...item,
+        approval_status: item.approval_status as 'approved' | 'pending' | 'rejected'
+      })) as MarketplaceListing[];
+      
+      setListings(typedData || []);
     } catch (err: any) {
       console.error('Error fetching marketplace listings:', err);
       setError('Failed to fetch listings. Please try again later.');

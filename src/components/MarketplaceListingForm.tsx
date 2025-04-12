@@ -330,7 +330,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">Not Applicable</SelectItem>
+                          <SelectItem value="not_applicable">Not Applicable</SelectItem>
                           {generateYearOptions().map(year => (
                             <SelectItem key={year} value={year}>
                               {year}
@@ -632,3 +632,4 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
 };
 
 export default MarketplaceListingForm;
+
