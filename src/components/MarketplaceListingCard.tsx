@@ -15,16 +15,13 @@ import ListingMetadata from './marketplace/ListingMetadata';
 import SellerInfo from './marketplace/SellerInfo';
 import ListingActionButtons from './marketplace/ListingActionButtons';
 import CertificateBadge from './marketplace/CertificateBadge';
-
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
   className?: string;
 }
-
 const formatPrice = (price: number): string => {
   return price.toLocaleString('en-IN');
 };
-
 const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   listing,
   className
@@ -36,13 +33,11 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   const [imageViewerOpen, setImageViewerOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   const [currentImageType, setCurrentImageType] = React.useState<'regular' | 'damage'>('regular');
-
   const handleImageClick = (index: number, type: 'regular' | 'damage' = 'regular') => {
     setSelectedImageIndex(index);
     setCurrentImageType(type);
     setImageViewerOpen(true);
   };
-
   const handleCardClick = (e: React.MouseEvent) => {
     if (imageViewerOpen) return;
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) {
@@ -51,10 +46,8 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
     console.log("Navigating to marketplace listing:", listing.id);
     navigate(`/marketplace/${listing.id}`);
   };
-
   const isSearchPage = window.location.pathname.includes('/search');
   const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
-
   return <div className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5", className)} onClick={handleCardClick}>
       {hasDamageImages ? <Tabs defaultValue="regular" className="mb-2">
           <TabsList className="w-full mb-0 p-1 h-auto bg-transparent">
@@ -93,30 +86,23 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         <div className="flex flex-col">
           <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
             <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
-            {listing.model_year && (
-              <Badge variant="condition" className="text-xs ml-2">
+            {listing.model_year && <Badge variant="condition" className="text-xs ml-2 bg-zinc-500">
                 {listing.model_year} Model
-              </Badge>
-            )}
+              </Badge>}
           </p>
           
           <div className="mt-1 mb-2 flex flex-wrap gap-2 items-center">
             <div className="flex flex-wrap items-center gap-2">
-              {listing.is_negotiable !== undefined && (listing.is_negotiable === true ? 
-                <Badge variant="success" className="inline-flex items-center gap-1 pr-1.5">
+              {listing.is_negotiable !== undefined && (listing.is_negotiable === true ? <Badge variant="success" className="inline-flex items-center gap-1 pr-1.5">
                   <Unlock className="h-3 w-3" />
                   <span className="pr-0.5">Negotiable</span>
-                </Badge> : 
-                <Badge variant="default" className="inline-flex items-center gap-1 pr-1.5">
+                </Badge> : <Badge variant="default" className="inline-flex items-center gap-1 pr-1.5">
                   <Lock className="h-3 w-3" />
                   <span className="pr-0.5">Fixed</span>
-                </Badge>
-              )}
-              {listing.inspection_certificates && listing.inspection_certificates.length > 0 && (
-                <span onClick={e => e.stopPropagation()}>
+                </Badge>)}
+              {listing.inspection_certificates && listing.inspection_certificates.length > 0 && <span onClick={e => e.stopPropagation()}>
                   <CertificateBadge certificates={listing.inspection_certificates} />
-                </span>
-              )}
+                </span>}
             </div>
           </div>
         </div>
@@ -149,5 +135,4 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
     }} />
     </div>;
 };
-
 export default MarketplaceListingCard;
