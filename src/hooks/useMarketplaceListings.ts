@@ -136,4 +136,60 @@ export const useMarketplaceListings = ({
   };
 };
 
+// Add the missing hook for fetching a single marketplace listing
+export const useMarketplaceListing = (id: string) => {
+  const [listing, setListing] = useState<MarketplaceListing | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const fetchListing = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error } = await supabase
+        .from('marketplace_listings')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      // Ensure the data conforms to the MarketplaceListing type
+      const typedListing = {
+        ...data,
+        approval_status: data.approval_status as 'approved' | 'pending' | 'rejected'
+      } as MarketplaceListing;
+      
+      setListing(typedListing);
+    } catch (err: any) {
+      console.error('Error fetching marketplace listing:', err);
+      setError('Failed to fetch listing. Please try again later.');
+      toast({
+        title: "Error",
+        description: "Failed to fetch marketplace listing.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      fetchListing();
+    }
+  }, [id]);
+
+  return {
+    listing,
+    loading,
+    error,
+    refetch: fetchListing
+  };
+};
+
 export default useMarketplaceListings;
