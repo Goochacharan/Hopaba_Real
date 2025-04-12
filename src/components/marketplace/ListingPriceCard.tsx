@@ -6,7 +6,6 @@ import SellerInfo from './SellerInfo';
 import ListingActionButtons from './ListingActionButtons';
 import ListingMetadata from './ListingMetadata';
 import { Badge } from '@/components/ui/badge';
-import CertificateBadge from './CertificateBadge';
 
 interface ListingPriceCardProps {
   id: string;
@@ -22,7 +21,6 @@ interface ListingPriceCardProps {
   condition: string;
   mapLink?: string | null;
   isNegotiable?: boolean;
-  inspectionCertificates?: string[];
 }
 
 const formatPrice = (price: number): string => {
@@ -43,8 +41,7 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   createdAt,
   condition,
   mapLink,
-  isNegotiable = false,
-  inspectionCertificates = []
+  isNegotiable = false
 }) => {
   return (
     <div className="sticky top-24 space-y-6">
@@ -64,7 +61,7 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
             <h2 className="md:text-6xl font-extrabold text-gray-800 py-0 px-1 text-4xl -mb-1 flex items-center">
               <span className="text-4xl md:text-5xl font-extrabold mr-0.5">₹</span>{formatPrice(price)}
             </h2>
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className="mt-2">
               {isNegotiable ? (
                 <Badge variant="success" className="flex items-center gap-1">
                   <Unlock className="h-3 w-3" />
@@ -75,10 +72,6 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
                   <Lock className="h-3 w-3" />
                   <span>Fixed Price</span>
                 </Badge>
-              )}
-              
-              {inspectionCertificates && inspectionCertificates.length > 0 && (
-                <CertificateBadge certificates={inspectionCertificates} />
               )}
             </div>
           </div>
