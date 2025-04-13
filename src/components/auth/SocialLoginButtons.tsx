@@ -48,11 +48,11 @@ export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
         disabled={isDisabled || isLoading === 'facebook'}
       >
         {isLoading === 'facebook' ? (
-          <span>Connecting...</span>
+          <span>Connecting to Hopaba...</span>
         ) : (
           <>
             <Facebook className="h-4 w-4" />
-            <span>{buttonText} Facebook</span>
+            <span>Continue with Facebook</span>
           </>
         )}
       </Button>
