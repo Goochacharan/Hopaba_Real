@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -59,7 +60,7 @@ export default function Login() {
     }
   };
 
-  const handleSocialLogin = async (provider: 'google' | 'facebook') => {
+  const handleSocialLogin = async (provider: 'google') => {
     if (isRateLimited) {
       toast({
         title: "Too many attempts",

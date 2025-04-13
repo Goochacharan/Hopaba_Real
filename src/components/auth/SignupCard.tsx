@@ -12,7 +12,7 @@ interface SignupCardProps {
   captchaToken: string | null;
   captchaSiteKey: string;
   isLoading: boolean;
-  handleSocialSignup: (provider: 'google' | 'facebook') => void;
+  handleSocialSignup: (provider: 'google') => void;
   handleCaptchaVerify: (token: string) => void;
   onSubmit: (values: SignupFormValues) => void;
 }

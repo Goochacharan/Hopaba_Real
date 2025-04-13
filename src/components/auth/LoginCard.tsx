@@ -12,10 +12,10 @@ interface LoginCardProps {
   captchaToken: string | null;
   captchaSiteKey: string;
   isLoading: boolean;
-  handleSocialLogin: (provider: 'google' | 'facebook') => void;
+  handleSocialLogin: (provider: 'google') => void;
   handleCaptchaVerify: (token: string) => void;
   onSubmit: (values: LoginFormValues) => void;
-  requireCaptcha?: boolean; // Added this prop
+  requireCaptcha?: boolean;
 }
 
 export const LoginCard: React.FC<LoginCardProps> = ({
@@ -27,7 +27,7 @@ export const LoginCard: React.FC<LoginCardProps> = ({
   handleSocialLogin,
   handleCaptchaVerify,
   onSubmit,
-  requireCaptcha = false, // Default to false
+  requireCaptcha = false,
 }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">

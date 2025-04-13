@@ -1,10 +1,9 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Facebook } from 'lucide-react';
 
 interface SocialLoginButtonsProps {
-  onSocialLogin: (provider: 'google' | 'facebook') => void;
+  onSocialLogin: (provider: 'google') => void;
   isDisabled: boolean;
   isLoading: string | null;
   buttonText?: string;
@@ -37,22 +36,6 @@ export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
               </g>
             </svg>
             <span>{buttonText} Google</span>
-          </>
-        )}
-      </Button>
-      
-      <Button 
-        type="button" 
-        className="w-full flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white"
-        onClick={() => onSocialLogin('facebook')}
-        disabled={isDisabled || isLoading === 'facebook'}
-      >
-        {isLoading === 'facebook' ? (
-          <span>Connecting...</span>
-        ) : (
-          <>
-            <Facebook className="h-4 w-4" />
-            <span>{buttonText} Facebook</span>
           </>
         )}
       </Button>
