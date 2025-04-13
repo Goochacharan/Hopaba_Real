@@ -7,3 +7,6 @@ secret = "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"
 
 [functions.msg91-otp]
 verify_jwt = false
+
+[functions.chatbot-data]
+verify_jwt = false
