@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import MainLayout from '@/components/MainLayout';
@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 export default function Login() {
   const navigate = useNavigate();
   const [captchaToken, setCaptchaToken] = React.useState<string | null>(null);
-  const { isRateLimited } = useAuth();
+  const { isRateLimited, isLoading } = useAuth();
   
   useEffect(() => {
     const checkUser = async () => {
@@ -32,7 +32,7 @@ export default function Login() {
         <LoginCard 
           isRateLimited={isRateLimited}
           captchaToken={captchaToken}
-          isLoading={false}
+          isLoading={isLoading}
           handleCaptchaVerify={handleCaptchaVerify}
         />
       </div>
