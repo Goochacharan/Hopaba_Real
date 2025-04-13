@@ -37,7 +37,7 @@ export const LoginCard: React.FC<LoginCardProps> = ({
         <SocialLoginButtons 
           onSocialLogin={handleSocialLogin}
           isDisabled={isRateLimited}
-          isLoading={socialLoading}
+          isLoading={socialLoading as string}
           buttonText="Sign in with"
         />
         
