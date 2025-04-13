@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SendHorizontal, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface Message {
   content: string;
@@ -33,6 +34,7 @@ interface ChatbotResponse {
 }
 
 const Chatbot: React.FC = () => {
+  const { toast } = useToast();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -74,11 +76,15 @@ const Chatbot: React.FC = () => {
         body: { query: userMessage }
       });
       
-      if (error) throw new Error(error.message);
+      if (error) {
+        console.error("Supabase function error:", error);
+        throw new Error(`Error communicating with the server: ${error.message}`);
+      }
       
       const response = data as ChatbotResponse;
       
       if (response.error) {
+        console.error("Chatbot response error:", response.error);
         throw new Error(response.error);
       }
       
@@ -100,6 +106,13 @@ const Chatbot: React.FC = () => {
       
     } catch (error) {
       console.error("Error querying chatbot:", error);
+      
+      // Show error toast
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        variant: "destructive",
+      });
       
       // Add error message to chat
       setMessages(prev => [...prev, {
@@ -178,16 +191,29 @@ const Chatbot: React.FC = () => {
                       : 'bg-muted'
                   }`}
                 >
-                  {message.content.split('\n').map((line, i) => (
-                    <React.Fragment key={i}>
-                      {line.startsWith('**') && line.endsWith('**') ? (
-                        <strong>{line.substring(2, line.length - 2)}</strong>
-                      ) : (
-                        line
-                      )}
-                      {i < message.content.split('\n').length - 1 && <br />}
-                    </React.Fragment>
-                  ))}
+                  {message.content.split('\n').map((line, i) => {
+                    // Check if line contains bold text (wrapped in **)
+                    if (line.includes('**')) {
+                      const parts = line.split('**');
+                      return (
+                        <React.Fragment key={i}>
+                          {parts.map((part, j) => (
+                            // Every odd index is bold text
+                            j % 2 === 1 ? <strong key={j}>{part}</strong> : part
+                          ))}
+                          {i < message.content.split('\n').length - 1 && <br />}
+                        </React.Fragment>
+                      );
+                    } else {
+                      // Regular line without formatting
+                      return (
+                        <React.Fragment key={i}>
+                          {line}
+                          {i < message.content.split('\n').length - 1 && <br />}
+                        </React.Fragment>
+                      );
+                    }
+                  })}
                 </div>
                 
                 {message.sender === 'user' && (
