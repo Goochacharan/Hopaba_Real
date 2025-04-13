@@ -1,88 +1,70 @@
 
-import React, { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { SocialLoginButtons } from './SocialLoginButtons';
-import { useAuth } from '@/hooks/useAuth';
-import { LoginForm, LoginFormValues } from './LoginForm';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RateLimitAlert } from './RateLimitAlert';
+import React from 'react';
 import { Link } from 'react-router-dom';
+import { SocialLoginButtons } from './SocialLoginButtons';
+import { LoginForm, LoginFormValues } from './LoginForm';
+import { RateLimitAlert } from './RateLimitAlert';
+import { Separator } from '@/components/ui/separator';
 
 interface LoginCardProps {
   isRateLimited: boolean;
+  socialLoading: string | null;
   captchaToken: string | null;
+  captchaSiteKey: string;
   isLoading: boolean;
+  handleSocialLogin: (provider: 'google' | 'facebook') => void;
   handleCaptchaVerify: (token: string) => void;
+  onSubmit: (values: LoginFormValues) => void;
+  requireCaptcha?: boolean; // Added this prop
 }
 
 export const LoginCard: React.FC<LoginCardProps> = ({
   isRateLimited,
+  socialLoading,
   captchaToken,
+  captchaSiteKey,
   isLoading,
-  handleCaptchaVerify
+  handleSocialLogin,
+  handleCaptchaVerify,
+  onSubmit,
+  requireCaptcha = false, // Default to false
 }) => {
-  const { toast } = useToast();
-  const { loginWithSocial, socialLoading, loginWithEmail } = useAuth();
-  const [activeTab, setActiveTab] = useState<string>("social");
-  
-  const handleSocialLogin = (provider: 'google' | 'facebook') => {
-    loginWithSocial(provider);
-  };
-
-  const handleEmailLogin = (values: LoginFormValues) => {
-    loginWithEmail(values.email, values.password, captchaToken || undefined);
-  };
-
-  // Captcha site key - replace with your actual site key if needed
-  const captchaSiteKey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"; // Test key
-
   return (
-    <Card className="w-full shadow-lg">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Welcome Back</CardTitle>
-        <CardDescription>
-          Sign in to continue to your account
-        </CardDescription>
-      </CardHeader>
-      
+    <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
       <RateLimitAlert isVisible={isRateLimited} />
+
+      <SocialLoginButtons 
+        onSocialLogin={handleSocialLogin}
+        isDisabled={isRateLimited || (requireCaptcha && !captchaToken)}
+        isLoading={socialLoading}
+        buttonText="Continue with"
+      />
       
-      <CardContent className="space-y-4">
-        <Tabs defaultValue="social" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="social">Social Login</TabsTrigger>
-            <TabsTrigger value="email">Email Login</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="social" className="mt-4">
-            <SocialLoginButtons 
-              onSocialLogin={handleSocialLogin}
-              isDisabled={isRateLimited}
-              isLoading={socialLoading}
-              buttonText="Sign in with"
-            />
-          </TabsContent>
-          
-          <TabsContent value="email" className="mt-4">
-            <LoginForm
-              onSubmit={handleEmailLogin}
-              isLoading={isLoading}
-              isDisabled={isRateLimited}
-              captchaToken={captchaToken}
-              captchaSiteKey={captchaSiteKey}
-              onCaptchaVerify={handleCaptchaVerify}
-              requireCaptcha={false}
-            />
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-      
-      <CardFooter className="flex justify-center">
-        <p className="text-sm text-center text-gray-500">
-          Don't have an account? <Link to="/signup" className="text-blue-600 hover:underline">Sign up</Link>
+      <div className="relative">
+        <Separator className="my-4" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="bg-white px-2 text-xs text-muted-foreground">or continue with email</span>
+        </div>
+      </div>
+
+      <LoginForm 
+        onSubmit={onSubmit}
+        isLoading={isLoading}
+        isDisabled={isRateLimited}
+        captchaToken={captchaToken}
+        captchaSiteKey={captchaSiteKey}
+        onCaptchaVerify={handleCaptchaVerify}
+        requireCaptcha={requireCaptcha}
+      />
+
+      <div className="mt-4 text-center">
+        <p className="text-sm text-muted-foreground">
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-primary hover:underline">
+            Sign up
+          </Link>
         </p>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 };

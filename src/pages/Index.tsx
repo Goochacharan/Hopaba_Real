@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import MainLayout from '@/components/MainLayout';
 import AnimatedLogo from '@/components/AnimatedLogo';
@@ -105,37 +106,6 @@ const Index = () => {
     setIsEnhancing(rawQuery);
     try {
       const categoryHint = queryCategoryMap[rawQuery] || "";
-      
-      const { data: chatbotData, error: chatbotError } = await supabase.functions.invoke('chatbot-data', {
-        body: { query: rawQuery }
-      });
-      
-      if (!chatbotError && chatbotData?.results && chatbotData.results.length > 0) {
-        console.log('Enhanced search using chatbot data:', chatbotData);
-        
-        const keywords = chatbotData.results
-          .flatMap((result: any) => [
-            result.category, 
-            ...(result.tags || [])
-          ])
-          .filter(Boolean)
-          .slice(0, 3)
-          .join(' ');
-          
-        if (keywords) {
-          const enhancedQuery = `${rawQuery} ${keywords}`.trim();
-          console.log(`Enhanced query with chatbot keywords: "${enhancedQuery}"`);
-          
-          toast({
-            title: "Search enhanced with AI",
-            description: `We improved your search with relevant keywords: "${enhancedQuery}"`,
-            duration: 5000
-          });
-          
-          return enhancedQuery;
-        }
-      }
-      
       const {
         data,
         error
@@ -145,12 +115,10 @@ const Index = () => {
           context: categoryHint ? `Category: ${categoryHint}` : undefined
         }
       });
-      
       if (error) {
         console.error('Error enhancing search:', error);
         return rawQuery;
       }
-      
       console.log('AI enhanced search:', data);
       if (data.enhanced && data.enhanced !== rawQuery) {
         toast({

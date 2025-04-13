@@ -1,96 +1,66 @@
 
-import React, { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { SocialLoginButtons } from './SocialLoginButtons';
-import { useAuth } from '@/hooks/useAuth';
-import { SignupForm, SignupFormValues } from './SignupForm';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RateLimitAlert } from './RateLimitAlert';
+import React from 'react';
 import { Link } from 'react-router-dom';
+import { SocialLoginButtons } from './SocialLoginButtons';
+import { SignupForm, SignupFormValues } from './SignupForm';
+import { RateLimitAlert } from './RateLimitAlert';
+import { Separator } from '@/components/ui/separator';
 
 interface SignupCardProps {
   isRateLimited: boolean;
+  socialLoading: string | null;
   captchaToken: string | null;
+  captchaSiteKey: string;
   isLoading: boolean;
+  handleSocialSignup: (provider: 'google' | 'facebook') => void;
   handleCaptchaVerify: (token: string) => void;
+  onSubmit: (values: SignupFormValues) => void;
 }
 
 export const SignupCard: React.FC<SignupCardProps> = ({
   isRateLimited,
+  socialLoading,
   captchaToken,
+  captchaSiteKey,
   isLoading,
-  handleCaptchaVerify
+  handleSocialSignup,
+  handleCaptchaVerify,
+  onSubmit,
 }) => {
-  const { toast } = useToast();
-  const { loginWithSocial, socialLoading, signupWithEmail } = useAuth();
-  const [activeTab, setActiveTab] = useState<string>("social");
-  
-  const handleSocialLogin = (provider: 'google' | 'facebook') => {
-    loginWithSocial(provider);
-  };
-
-  const handleEmailSignup = (values: SignupFormValues) => {
-    if (values.password !== values.confirmPassword) {
-      toast({
-        title: "Passwords do not match",
-        description: "Please ensure both password fields match.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    signupWithEmail(values.email, values.password, "New User", captchaToken || undefined);
-  };
-
-  // Captcha site key - replace with your actual site key if needed
-  const captchaSiteKey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"; // Test key
-
   return (
-    <Card className="w-full shadow-lg">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Create Account</CardTitle>
-        <CardDescription>
-          Sign up to get started with Hopaba
-        </CardDescription>
-      </CardHeader>
-      
+    <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
       <RateLimitAlert isVisible={isRateLimited} />
+
+      <SocialLoginButtons 
+        onSocialLogin={handleSocialSignup}
+        isDisabled={isRateLimited || !captchaToken}
+        isLoading={socialLoading}
+      />
       
-      <CardContent className="space-y-4">
-        <Tabs defaultValue="social" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="social">Social Signup</TabsTrigger>
-            <TabsTrigger value="email">Email Signup</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="social" className="mt-4">
-            <SocialLoginButtons 
-              onSocialLogin={handleSocialLogin}
-              isDisabled={isRateLimited}
-              isLoading={socialLoading}
-              buttonText="Sign up with"
-            />
-          </TabsContent>
-          
-          <TabsContent value="email" className="mt-4">
-            <SignupForm
-              onSubmit={handleEmailSignup}
-              isLoading={isLoading}
-              isDisabled={isRateLimited}
-              captchaToken={captchaToken}
-              captchaSiteKey={captchaSiteKey}
-              onCaptchaVerify={handleCaptchaVerify}
-            />
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-      
-      <CardFooter className="flex justify-center">
-        <p className="text-sm text-center text-gray-500">
-          Already have an account? <Link to="/login" className="text-blue-600 hover:underline">Sign in</Link>
+      <div className="relative">
+        <Separator className="my-4" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="bg-white px-2 text-xs text-muted-foreground">or sign up with email</span>
+        </div>
+      </div>
+
+      <SignupForm 
+        onSubmit={onSubmit}
+        isLoading={isLoading}
+        isDisabled={isRateLimited}
+        captchaToken={captchaToken}
+        captchaSiteKey={captchaSiteKey}
+        onCaptchaVerify={handleCaptchaVerify}
+      />
+
+      <div className="mt-4 text-center">
+        <p className="text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link to="/login" className="text-primary hover:underline">
+            Log in
+          </Link>
         </p>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 };
