@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -209,7 +210,7 @@ const MarketplaceListingDetails = () => {
                     createdAt={listing?.created_at || ''}
                     mapLink={listing?.map_link || null}
                     reviewCount={listing?.review_count}
-                    avatarUrl={listing?.seller_avatar}
+                    // Remove the seller_avatar prop since it doesn't exist in the MarketplaceListing type
                     isNegotiable={listing?.is_negotiable}
                   />
                 )}
