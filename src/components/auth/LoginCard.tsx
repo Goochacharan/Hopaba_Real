@@ -1,90 +1,57 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Loader2 } from 'lucide-react';
-import { OtpVerification } from './OtpVerification';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SocialLoginButtons } from './SocialLoginButtons';
+import { useAuth } from '@/hooks/useAuth';
+
 interface LoginCardProps {
   isRateLimited: boolean;
   captchaToken: string | null;
   isLoading: boolean;
   handleCaptchaVerify: (token: string) => void;
 }
+
 export const LoginCard: React.FC<LoginCardProps> = ({
   isRateLimited,
   captchaToken,
   isLoading,
   handleCaptchaVerify
 }) => {
-  const {
-    toast
-  } = useToast();
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [phoneLoading, setPhoneLoading] = useState(false);
-  const [showOtpVerification, setShowOtpVerification] = useState(false);
-  const handlePhoneLogin = async () => {
-    // Validate phone number: exactly 10 digits
-    const cleanedPhone = phoneNumber.replace(/\D/g, '');
-    if (cleanedPhone.length !== 10) {
-      toast({
-        title: "Invalid number",
-        description: "Please enter a 10-digit phone number",
-        variant: "destructive"
-      });
-      return;
-    }
-    setPhoneLoading(true);
-    try {
-      const formattedPhone = `+91${cleanedPhone}`;
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('msg91-otp', {
-        body: {
-          phone: formattedPhone,
-          action: 'send'
-        }
-      });
-      if (error || !data?.success) {
-        throw new Error(error?.message || data?.error || 'Failed to send OTP');
-      }
-      setShowOtpVerification(true);
-    } catch (error) {
-      toast({
-        title: "Send failed",
-        description: "Unable to send OTP. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setPhoneLoading(false);
-    }
+  const { toast } = useToast();
+  const { loginWithSocial, socialLoading } = useAuth();
+  
+  const handleSocialLogin = (provider: 'google' | 'facebook') => {
+    loginWithSocial(provider);
   };
-  const handleOtpVerified = () => {
-    toast({
-      title: "Verified"
-    });
-    setShowOtpVerification(false);
-  };
-  const cancelPhoneVerification = () => {
-    setShowOtpVerification(false);
-  };
-  if (showOtpVerification) {
-    return <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
-      <OtpVerification phone={`+91${phoneNumber.replace(/\D/g, '')}`} onVerified={handleOtpVerified} onCancel={cancelPhoneVerification} />
-    </div>;
-  }
-  return <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4 px-[55px] my-[151px]">
-    <div className="space-y-4">
-      <Input type="tel" placeholder="10-digit mobile number" value={phoneNumber} onChange={e => {
-        // Allow only digits
-        const numericValue = e.target.value.replace(/\D/g, '');
-        setPhoneNumber(numericValue.slice(0, 10));
-      }} disabled={phoneLoading} maxLength={10} />
-      
-      <Button className="w-full" onClick={handlePhoneLogin} disabled={phoneLoading || isRateLimited || phoneNumber.length !== 10}>
-        {phoneLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending</> : "Send Verification"}
-      </Button>
-    </div>
-  </div>;
+
+  return (
+    <Card className="w-full shadow-lg">
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl">Welcome Back</CardTitle>
+        <CardDescription>
+          Sign in to continue to your account
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <SocialLoginButtons 
+          onSocialLogin={handleSocialLogin}
+          isDisabled={isRateLimited}
+          isLoading={socialLoading}
+          buttonText="Sign in with"
+        />
+        
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-gray-300" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Social Login Only
+            </span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 };

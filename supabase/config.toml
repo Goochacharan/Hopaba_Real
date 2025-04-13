@@ -5,6 +5,10 @@ project_id = "pswgsxyxhdhhpvugkdqa"
 client_id = "283319033667-jjc9gb8ntn7duilo3r3s11o7ledg5p8t.apps.googleusercontent.com"
 secret = "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"
 
+[auth.external.facebook]
+client_id = "your-facebook-client-id"
+secret = "your-facebook-client-secret"
+
 [functions.msg91-otp]
 verify_jwt = false
 

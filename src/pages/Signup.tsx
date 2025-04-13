@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import MainLayout from '@/components/MainLayout';
@@ -7,8 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function Signup() {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = React.useState<string | null>(null);
   const { isRateLimited } = useAuth();
   
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function Signup() {
         <SignupCard 
           isRateLimited={isRateLimited}
           captchaToken={captchaToken}
-          isLoading={isLoading}
+          isLoading={false}
           handleCaptchaVerify={handleCaptchaVerify}
         />
       </div>

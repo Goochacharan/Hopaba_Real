@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import MainLayout from '@/components/MainLayout';
 import { LoginCard } from '@/components/auth/LoginCard';
@@ -8,10 +8,8 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const { loginWithEmail, isRateLimited } = useAuth();
+  const [captchaToken, setCaptchaToken] = React.useState<string | null>(null);
+  const { isRateLimited } = useAuth();
   
   useEffect(() => {
     const checkUser = async () => {
@@ -34,7 +32,7 @@ export default function Login() {
         <LoginCard 
           isRateLimited={isRateLimited}
           captchaToken={captchaToken}
-          isLoading={isLoading}
+          isLoading={false}
           handleCaptchaVerify={handleCaptchaVerify}
         />
       </div>
