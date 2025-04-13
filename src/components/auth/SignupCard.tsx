@@ -83,20 +83,26 @@ export const SignupCard: React.FC<SignupCardProps> = ({
     </div>;
   }
 
-  return <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4 px-[54px] py-[34px] my-[143px]">
+  return <div className="bg-white rounded-lg shadow-sm border p-6">
     <div className="space-y-4">
-      <Input 
-        type="tel" 
-        placeholder="10-digit mobile number" 
-        value={phoneNumber} 
-        onChange={e => {
-          // Allow only digits
-          const numericValue = e.target.value.replace(/\D/g, '');
-          setPhoneNumber(numericValue.slice(0, 10));
-        }}
-        disabled={phoneLoading} 
-        maxLength={10}
-      />
+      <div className="flex items-center">
+        <div className="bg-gray-100 p-2 border border-r-0 rounded-l-md">
+          <span className="text-gray-500">+91</span>
+        </div>
+        <Input 
+          type="tel" 
+          placeholder="10-digit mobile number" 
+          value={phoneNumber} 
+          onChange={e => {
+            // Allow only digits
+            const numericValue = e.target.value.replace(/\D/g, '');
+            setPhoneNumber(numericValue.slice(0, 10));
+          }}
+          disabled={phoneLoading} 
+          maxLength={10}
+          className="rounded-l-none"
+        />
+      </div>
       
       <Button 
         className="w-full" 
