@@ -29,8 +29,8 @@ serve(async (req) => {
       );
     }
 
-    // Generate a 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate a 4-digit OTP instead of 6-digit
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
     
     console.log(`Sending OTP ${otp} to ${phone}`);
 

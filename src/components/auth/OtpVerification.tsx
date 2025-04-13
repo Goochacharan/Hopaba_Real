@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { 
   InputOTP, 
   InputOTPGroup, 
@@ -28,10 +27,10 @@ export const OtpVerification: React.FC<OtpVerificationProps> = ({
   const { toast } = useToast();
 
   const verifyOtp = async () => {
-    if (otp.length !== 6) {
+    if (otp.length !== 4) {
       toast({
         title: "Invalid OTP",
-        description: "Please enter a valid 6-digit OTP",
+        description: "Please enter a valid 4-digit OTP",
         variant: "destructive",
       });
       return;
@@ -106,13 +105,13 @@ export const OtpVerification: React.FC<OtpVerificationProps> = ({
       <div className="text-center mb-6">
         <h3 className="text-lg font-medium">Verify your phone number</h3>
         <p className="text-sm text-muted-foreground mt-1">
-          Enter the 6-digit code sent to {phone}
+          Enter the 4-digit code sent to {phone}
         </p>
       </div>
       
       <div className="flex justify-center mb-6">
         <InputOTP 
-          maxLength={6} 
+          maxLength={4} 
           value={otp} 
           onChange={setOtp}
           disabled={loading}
@@ -122,8 +121,6 @@ export const OtpVerification: React.FC<OtpVerificationProps> = ({
             <InputOTPSlot index={1} />
             <InputOTPSlot index={2} />
             <InputOTPSlot index={3} />
-            <InputOTPSlot index={4} />
-            <InputOTPSlot index={5} />
           </InputOTPGroup>
         </InputOTP>
       </div>
@@ -131,7 +128,7 @@ export const OtpVerification: React.FC<OtpVerificationProps> = ({
       <Button
         className="w-full"
         onClick={verifyOtp}
-        disabled={otp.length !== 6 || loading}
+        disabled={otp.length !== 4 || loading}
       >
         {loading ? (
           <>
