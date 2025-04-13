@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
 import { cn } from '@/lib/utils';
-import { Home, User, ListChecks, Calendar, ShoppingCart, MessageCircleQuestion, LogIn } from 'lucide-react';
+import { Home, User, ListChecks, Calendar, ShoppingCart, LogIn } from 'lucide-react';
 import SearchBar from './SearchBar';
 import { Button } from './ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -92,8 +92,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           <NavButton to="/events" icon={<Calendar className="h-5 w-5" />} label="Events" isActive={location.pathname === '/events'} />
           
           <NavButton to="/my-list" icon={<ListChecks className="h-5 w-5" />} label="My List" isActive={location.pathname === '/my-list'} />
-          
-          <NavButton to="/chatbot" icon={<MessageCircleQuestion className="h-5 w-5" />} label="Chatbot" isActive={location.pathname === '/chatbot'} />
           
           <NavButton to={user ? "/profile" : "/login"} icon={<User className="h-5 w-5" />} label={user ? "Profile" : "Login"} isActive={location.pathname === '/profile' || location.pathname === '/login'} />
         </div>
