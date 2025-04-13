@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useNavigate } from 'react-router-dom';
 
 interface Message {
   content: string;
@@ -38,6 +39,7 @@ interface ChatbotResponse {
 
 const Chatbot: React.FC = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -91,28 +93,42 @@ const Chatbot: React.FC = () => {
         throw new Error(response.error);
       }
       
-      // Format the response for the chat
-      let botMessage = "";
-      
+      // Add a processing message
+      setMessages(prev => [...prev, {
+        content: "Processing your query...",
+        sender: 'bot',
+        timestamp: new Date(),
+      }]);
+
+      // If we have results, redirect to search results page
       if (response.results && response.results.length > 0) {
-        botMessage = `Here are some recommendations based on your query:`;
+        // Extract keywords from results for better search terms
+        const keywords = response.results
+          .flatMap((result) => [
+            result.category,
+            ...(result.tags || [])
+          ])
+          .filter(Boolean)
+          .slice(0, 3)
+          .join(' ');
+          
+        // Create an enhanced query with extracted keywords
+        const enhancedQuery = keywords ? `${userMessage} ${keywords}`.trim() : userMessage;
         
-        // Add bot response with results to chat
-        setMessages(prev => [...prev, {
-          content: botMessage,
-          sender: 'bot',
-          timestamp: new Date(),
-          results: response.results
-        }]);
+        // Short delay to allow user to see the processing message
+        setTimeout(() => {
+          const searchParams = new URLSearchParams();
+          searchParams.set('q', enhancedQuery);
+          navigate(`/search?${searchParams.toString()}`);
+        }, 1000);
       } else {
-        botMessage = "I couldn't find any businesses matching your query. Could you try with different terms or locations?";
-        
-        // Add bot response without results
+        // If no results, just inform the user
         setMessages(prev => [...prev, {
-          content: botMessage,
+          content: "I couldn't find any businesses matching your query. Could you try with different terms or locations?",
           sender: 'bot',
           timestamp: new Date(),
         }]);
+        setLoading(false);
       }
       
     } catch (error) {
@@ -131,7 +147,7 @@ const Chatbot: React.FC = () => {
         sender: 'bot',
         timestamp: new Date(),
       }]);
-    } finally {
+      
       setLoading(false);
     }
   };
@@ -233,19 +249,9 @@ const Chatbot: React.FC = () => {
                   message.sender === 'user'
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted'
-                  } ${message.results && message.results.length > 0 ? 'w-full' : ''}`}
+                  }`}
                 >
                   {message.content}
-                  
-                  {message.results && message.results.length > 0 && (
-                    <div className="mt-2 space-y-2">
-                      <ScrollArea className="h-[300px] pr-2">
-                        <div className="space-y-2">
-                          {message.results.map((result) => renderBusinessCard(result))}
-                        </div>
-                      </ScrollArea>
-                    </div>
-                  )}
                 </div>
                 
                 {message.sender === 'user' && (
