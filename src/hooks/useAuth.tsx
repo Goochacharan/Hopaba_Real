@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   isLoading: boolean;
-  socialLoading: boolean;
+  socialLoading: string | null;
   user: any | null;
   loginError: string | null;
   loginWithEmail: (email: string, password: string, captchaToken?: string) => Promise<void>;
@@ -29,7 +28,7 @@ const RATE_LIMIT_DURATION = 15 * 60 * 1000; // 15 minutes in milliseconds
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [socialLoading, setSocialLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminLoading, setAdminLoading] = useState(true);
@@ -213,7 +212,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     
-    setSocialLoading(true);
+    setSocialLoading(provider);
     setLoginError(null);
     
     try {
@@ -242,7 +241,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         variant: "destructive",
       });
     } finally {
-      setSocialLoading(false);
+      setSocialLoading(null);
     }
   };
 

@@ -6,7 +6,7 @@ import { Facebook } from 'lucide-react';
 interface SocialLoginButtonsProps {
   onSocialLogin: (provider: 'google' | 'facebook') => void;
   isDisabled: boolean;
-  isLoading: string | null;
+  isLoading: string | boolean;
   buttonText?: string;
 }
 
@@ -16,15 +16,20 @@ export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
   isLoading,
   buttonText = "Sign up with",
 }) => {
+  // Convert isLoading to a string for consistent handling
+  const loadingState = typeof isLoading === 'boolean' 
+    ? (isLoading ? 'loading' : null) 
+    : isLoading;
+
   return (
     <div className="space-y-2">
       <Button 
         type="button" 
         className="w-full flex items-center justify-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-50"
         onClick={() => onSocialLogin('google')}
-        disabled={isDisabled || isLoading === 'google'}
+        disabled={isDisabled || loadingState === 'google'}
       >
-        {isLoading === 'google' ? (
+        {loadingState === 'google' ? (
           <span>Connecting...</span>
         ) : (
           <>
@@ -45,9 +50,9 @@ export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
         type="button" 
         className="w-full flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white"
         onClick={() => onSocialLogin('facebook')}
-        disabled={isDisabled || isLoading === 'facebook'}
+        disabled={isDisabled || loadingState === 'facebook'}
       >
-        {isLoading === 'facebook' ? (
+        {loadingState === 'facebook' ? (
           <span>Connecting...</span>
         ) : (
           <>
