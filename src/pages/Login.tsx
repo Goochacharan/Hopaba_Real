@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -8,9 +7,8 @@ import { LoginCard } from '@/components/auth/LoginCard';
 import { LoginFormValues } from '@/components/auth/LoginForm';
 import { useAuth } from '@/hooks/useAuth';
 
-// hCaptcha site key
 const HCAPTCHA_SITE_KEY = 'fda043e0-8372-4d8a-b190-84a8fdee1528';
-const REQUIRE_CAPTCHA = false; // Disable CAPTCHA requirement
+const REQUIRE_CAPTCHA = false;
 
 export default function Login() {
   const navigate = useNavigate();
@@ -41,7 +39,6 @@ export default function Login() {
       return;
     }
 
-    // Only require captcha if REQUIRE_CAPTCHA is true
     if (REQUIRE_CAPTCHA && !captchaToken) {
       toast({
         title: "CAPTCHA verification required",
@@ -53,7 +50,6 @@ export default function Login() {
 
     setIsLoading(true);
     try {
-      // Only pass captchaToken if REQUIRE_CAPTCHA is true
       await loginWithEmail(values.email, values.password, REQUIRE_CAPTCHA ? captchaToken : undefined);
       navigate('/');
     } catch (error: any) {
@@ -73,23 +69,12 @@ export default function Login() {
       return;
     }
     
-    // Only require captcha if REQUIRE_CAPTCHA is true
-    if (REQUIRE_CAPTCHA && !captchaToken) {
-      toast({
-        title: "CAPTCHA verification required",
-        description: "Please complete the CAPTCHA verification.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     setSocialLoading(provider);
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
-          // Only include captchaToken if REQUIRE_CAPTCHA is true
           queryParams: REQUIRE_CAPTCHA && captchaToken ? {
             captchaToken
           } : undefined

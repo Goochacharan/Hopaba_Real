@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -8,7 +7,6 @@ import { SignupCard } from '@/components/auth/SignupCard';
 import { SignupFormValues } from '@/components/auth/SignupForm';
 import { useAuth } from '@/hooks/useAuth';
 
-// hCaptcha site key
 const HCAPTCHA_SITE_KEY = 'fda043e0-8372-4d8a-b190-84a8fdee1528';
 
 export default function Signup() {
@@ -75,16 +73,6 @@ export default function Signup() {
       toast({
         title: "Too many attempts",
         description: "For security reasons, please try again later.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Require captcha for social signup as well
-    if (!captchaToken) {
-      toast({
-        title: "CAPTCHA verification required",
-        description: "Please complete the CAPTCHA verification.",
         variant: "destructive",
       });
       return;
