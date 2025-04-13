@@ -104,13 +104,29 @@ async function processBusinessQuery(query: string) {
       
       // Calculate simple similarity score based on keyword matches
       let matchCount = 0;
+      let totalMatches = 0;
+      
       keywords.forEach(keyword => {
+        if (keyword.length < 3) return; // Skip very short keywords
+        
         if (businessText.includes(keyword)) {
           matchCount++;
+          totalMatches += (businessText.match(new RegExp(keyword, 'g')) || []).length;
+          
+          // Give higher weight to matches in name and category
+          if ((business.name || '').toLowerCase().includes(keyword)) {
+            totalMatches += 3;
+          }
+          if ((business.category || '').toLowerCase().includes(keyword)) {
+            totalMatches += 2;
+          }
         }
       });
       
-      const similarity = keywords.length > 0 ? matchCount / keywords.length : 0;
+      // Calculate a weighted similarity score
+      const keywordCount = keywords.filter(k => k.length >= 3).length;
+      const similarity = keywordCount > 0 ? 
+        (matchCount / keywordCount) * 0.6 + (totalMatches / (businessText.length / 10)) * 0.4 : 0;
       
       return {
         ...business,

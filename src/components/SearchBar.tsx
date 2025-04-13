@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+
 interface SearchBarProps {
   onSearch: (query: string) => void;
   className?: string;
@@ -14,6 +15,7 @@ interface SearchBarProps {
   initialValue?: string;
   currentRoute?: string;
 }
+
 const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   className,
@@ -34,6 +36,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+
   const getPlaceholder = () => {
     if (currentPath === '/events' || currentPath.startsWith('/events')) {
       return "Search for events...";
@@ -46,11 +49,33 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
     return placeholder || "What are you looking for today?";
   };
+
   const suggestionExamples = ["hidden gem restaurants in Indiranagar", "good flute teacher in Malleshwaram", "places to visit in Nagarbhavi", "best unisex salon near me", "plumbers available right now"];
+
   const enhanceSearchQuery = async (rawQuery: string) => {
     if (!rawQuery.trim()) return rawQuery;
     setIsEnhancing(true);
     try {
+      const { data: chatbotData, error: chatbotError } = await supabase.functions.invoke('chatbot-data', {
+        body: { query: rawQuery }
+      });
+
+      if (!chatbotError && chatbotData?.results && chatbotData.results.length > 0) {
+        console.log('Enhanced search using chatbot data:', chatbotData);
+        const keywords = chatbotData.results
+          .flatMap((result: any) => [
+            result.category, 
+            ...(result.tags || [])
+          ])
+          .filter(Boolean)
+          .slice(0, 3)
+          .join(' ');
+          
+        const enhancedQuery = `${rawQuery} ${keywords}`.trim();
+        console.log(`Enhanced query with chatbot keywords: "${enhancedQuery}"`);
+        return enhancedQuery;
+      }
+
       const {
         data,
         error
@@ -59,10 +84,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
           query: rawQuery
         }
       });
+
       if (error) {
         console.error('Error enhancing search:', error);
         return rawQuery;
       }
+
       console.log('AI enhanced search:', data);
       if (data.enhanced && data.enhanced !== rawQuery) {
         toast({
@@ -80,25 +107,30 @@ const SearchBar: React.FC<SearchBarProps> = ({
       setIsEnhancing(false);
     }
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check if user is logged in
     if (!user) {
       setShowAuthDialog(true);
       return;
     }
+
     if (query.trim()) {
       console.log("Original search query:", query);
       let enhancedQuery = query;
+
       if (currentPath !== '/events') {
         enhancedQuery = await enhanceSearchQuery(query);
       }
+
       console.log("Enhanced search query:", enhancedQuery);
       if (enhancedQuery !== query) {
         setQuery(enhancedQuery);
       }
+
       onSearch(enhancedQuery);
+
       if (query.trim().length < 8 && currentPath !== '/events') {
         const randomSuggestion = suggestionExamples[Math.floor(Math.random() * suggestionExamples.length)];
         toast({
@@ -109,6 +141,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       }
     }
   };
+
   const clearSearch = (e: React.MouseEvent) => {
     e.stopPropagation();
     setQuery('');
@@ -116,12 +149,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
       inputRef.current.focus();
     }
   };
+
   const startSpeechRecognition = () => {
-    // Check if user is logged in before allowing voice search
     if (!user) {
       setShowAuthDialog(true);
       return;
     }
+
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       toast({
         title: "Not supported",
@@ -131,6 +165,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       });
       return;
     }
+
     setIsListening(true);
     const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognitionConstructor();
@@ -158,6 +193,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     };
     recognition.start();
   };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node) && isExpanded) {
@@ -169,37 +205,45 @@ const SearchBar: React.FC<SearchBarProps> = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isExpanded]);
+
   useEffect(() => {
     if (initialValue) {
       setQuery(initialValue);
     }
   }, [initialValue]);
+
   const handleSearchButtonClick = async () => {
-    // Check if user is logged in
     if (!user) {
       setShowAuthDialog(true);
       return;
     }
+
     if (query.trim()) {
       console.log("Search button clicked with query:", query);
       let enhancedQuery = query;
+
       if (currentPath !== '/events') {
         enhancedQuery = await enhanceSearchQuery(query);
       }
+
       if (enhancedQuery !== query) {
         setQuery(enhancedQuery);
       }
+
       onSearch(enhancedQuery);
     }
   };
+
   const navigateToLogin = () => {
     navigate('/login');
     setShowAuthDialog(false);
   };
+
   const navigateToSignup = () => {
     navigate('/signup');
     setShowAuthDialog(false);
   };
+
   return <div className={cn("w-full max-w-2xl mx-auto", className)}>
       <form ref={formRef} onSubmit={handleSubmit} className="w-full bg-white rounded-xl shadow-md border border-border/50">
         <div className="flex items-center p-2 px-[6px] py-[10px]">
@@ -241,4 +285,5 @@ const SearchBar: React.FC<SearchBarProps> = ({
       </AlertDialog>
     </div>;
 };
+
 export default SearchBar;
