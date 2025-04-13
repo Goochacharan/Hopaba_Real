@@ -18,7 +18,6 @@ export interface MarketplaceListing {
   seller_phone?: string | null;
   seller_whatsapp?: string | null;
   seller_instagram?: string | null;
-  seller_avatar?: string | null;
   seller_rating?: number;
   review_count?: number;
   images: string[];
@@ -65,13 +64,14 @@ export const useMarketplaceListings = ({
     try {
       if (searchQuery && searchQuery.trim() !== '') {
         // Use the enhanced search function for complex queries
-        const { data, error } = await supabase.rpc(
+        const { data, error: searchError } = await supabase.rpc(
           'search_enhanced_listings', 
           { search_query: searchQuery }
         );
 
-        if (error) {
-          throw error;
+        if (searchError) {
+          console.error("Error using enhanced search:", searchError);
+          throw searchError;
         }
 
         console.log('Enhanced search results:', data);

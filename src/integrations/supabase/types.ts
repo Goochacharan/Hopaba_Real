@@ -385,7 +385,6 @@ export type Database = {
           seller_phone: string
           seller_whatsapp: string
           seller_instagram: string
-          seller_avatar: string
           seller_rating: number
           review_count: number
           images: string[]

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Search, X, Mic, Sparkles, LogIn } from 'lucide-react';
@@ -57,19 +58,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
     setIsEnhancing(true);
     
     try {
-      // First try using the database search_enhanced_listings function for marketplace items
-      if (currentPath === '/marketplace' || currentPath.startsWith('/marketplace')) {
-        try {
-          const { data: enhancedListings, error } = await supabase.rpc('search_enhanced_listings', { search_query: rawQuery });
-          if (!error && enhancedListings && enhancedListings.length > 0) {
-            console.log('Enhanced marketplace search results:', enhancedListings);
-            return rawQuery; // Keep original query since we're already using the enhanced search function
-          }
-        } catch (err) {
-          console.error('Error using enhanced listings search:', err);
-        }
-      }
-      
       // If we're here, either the database search failed or we're not on the marketplace page
       const { data, error } = await supabase.functions.invoke('enhance-search', {
         body: { query: rawQuery }
