@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
 import { cn } from '@/lib/utils';
-import { Home, User, ListChecks, Calendar, ShoppingCart, LogIn } from 'lucide-react';
+import { Home, User, ListChecks, Calendar, ShoppingCart, MessageCircleQuestion, LogIn } from 'lucide-react';
 import SearchBar from './SearchBar';
 import { Button } from './ui/button';
 import { useAuth } from '@/hooks/useAuth';
+
 interface MainLayoutProps {
   children: React.ReactNode;
   className?: string;
 }
+
 const MainLayout: React.FC<MainLayoutProps> = ({
   children,
   className
@@ -19,6 +21,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const {
     user
   } = useAuth();
+
   const onSearch = (query: string) => {
     console.log("MainLayout search triggered with:", query);
     if (!user) {
@@ -33,14 +36,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       }
     }
   };
+
   const navigateToHome = () => {
     navigate('/');
     window.scrollTo(0, 0);
     console.log("Navigating to home page from: ", location.pathname);
   };
+
   const shouldShowSearchBar = () => {
     return !['/location', '/search'].some(path => location.pathname.startsWith(path));
   };
+
   return <div className="min-h-screen w-full bg-background flex flex-col items-center relative">
       <header className="w-full sticky top-0 z-50 glass border-b border-border/50 px-6 py-4">
         <div className="max-w-5xl mx-auto w-full flex items-center justify-between">
@@ -87,17 +93,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           
           <NavButton to="/my-list" icon={<ListChecks className="h-5 w-5" />} label="My List" isActive={location.pathname === '/my-list'} />
           
+          <NavButton to="/chatbot" icon={<MessageCircleQuestion className="h-5 w-5" />} label="Chatbot" isActive={location.pathname === '/chatbot'} />
+          
           <NavButton to={user ? "/profile" : "/login"} icon={<User className="h-5 w-5" />} label={user ? "Profile" : "Login"} isActive={location.pathname === '/profile' || location.pathname === '/login'} />
         </div>
       </div>
     </div>;
 };
+
 interface NavButtonProps {
   to: string;
   icon: React.ReactNode;
   label: string;
   isActive: boolean;
 }
+
 const NavButton: React.FC<NavButtonProps> = ({
   to,
   icon,
@@ -109,4 +119,5 @@ const NavButton: React.FC<NavButtonProps> = ({
       <span className="text-xs font-medium">{label}</span>
     </Link>;
 };
+
 export default MainLayout;
