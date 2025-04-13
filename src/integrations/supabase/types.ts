@@ -368,6 +368,65 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      search_enhanced_listings: {
+        Args: { search_query: string }
+        Returns: {
+          id: string
+          title: string
+          description: string
+          price: number
+          category: string
+          condition: string
+          model_year: string
+          location: string
+          map_link: string
+          seller_name: string
+          seller_id: string
+          seller_phone: string
+          seller_whatsapp: string
+          seller_instagram: string
+          seller_avatar: string
+          seller_rating: number
+          review_count: number
+          images: string[]
+          created_at: string
+          approval_status: string
+          is_negotiable: boolean
+          search_rank: number
+        }[]
+      }
+      search_enhanced_providers: {
+        Args: { search_query: string }
+        Returns: {
+          id: string
+          name: string
+          category: string
+          description: string
+          address: string
+          area: string
+          city: string
+          contact_phone: string
+          contact_email: string
+          website: string
+          instagram: string
+          map_link: string
+          price_range_min: number
+          price_range_max: number
+          price_unit: string
+          availability: string
+          availability_days: string[]
+          availability_start_time: string
+          availability_end_time: string
+          tags: string[]
+          images: string[]
+          hours: string
+          languages: string[]
+          experience: string
+          created_at: string
+          approval_status: string
+          search_rank: number
+        }[]
+      }
       search_recommendations: {
         Args: { search_query: string; category_filter?: string }
         Returns: {

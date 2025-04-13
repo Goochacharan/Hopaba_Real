@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Recommendation } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -93,6 +92,60 @@ const useRecommendations = ({
     try {
       console.log(`Fetching service providers with search term: "${searchTerm}" and category: "${categoryFilter}"`);
       
+      if (searchTerm && searchTerm.trim() !== '') {
+        try {
+          const { data: enhancedProviders, error } = await supabase.rpc(
+            'search_enhanced_providers', 
+            { search_query: searchTerm }
+          );
+
+          if (error) {
+            console.error("Error using enhanced providers search:", error);
+            return [];
+          }
+
+          console.log(`Fetched ${enhancedProviders?.length || 0} enhanced service providers`);
+          
+          let filteredProviders = enhancedProviders || [];
+          if (categoryFilter !== 'all') {
+            const dbCategory = categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1);
+            filteredProviders = filteredProviders.filter(provider => 
+              provider.category.toLowerCase() === dbCategory.toLowerCase()
+            );
+          }
+          
+          return filteredProviders.map(item => ({
+            id: item.id,
+            name: item.name,
+            category: item.category,
+            tags: item.tags || [],
+            rating: 4.5, // Default rating
+            address: `${item.area}, ${item.city}`,
+            distance: "0.5 miles away",
+            image: item.images && item.images.length > 0 ? item.images[0] : "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
+            images: item.images || [],
+            description: item.description || "",
+            phone: item.contact_phone,
+            openNow: false, // Default value
+            hours: item.hours || "Until 8:00 PM",
+            availability: item.availability || null,
+            priceLevel: "$$",
+            price_range_min: item.price_range_min || null,
+            price_range_max: item.price_range_max || null,
+            price_unit: item.price_unit || null,
+            map_link: item.map_link || null,
+            instagram: item.instagram || '',
+            availability_days: item.availability_days || [],
+            availability_start_time: item.availability_start_time || '',
+            availability_end_time: item.availability_end_time || '',
+            created_at: item.created_at || new Date().toISOString(),
+            search_rank: item.search_rank || 0
+          }));
+        } catch (err) {
+          console.error("Failed to use enhanced providers search:", err);
+        }
+      }
+      
       let query = supabase
         .from('service_providers')
         .select('*')
@@ -122,14 +175,14 @@ const useRecommendations = ({
           name: item.name,
           category: item.category,
           tags: item.tags || [],
-          rating: 4.5, // Default rating since it's not in the service_providers table
+          rating: 4.5, // Default rating
           address: `${item.area}, ${item.city}`,
           distance: "0.5 miles away",
           image: item.images && item.images.length > 0 ? item.images[0] : "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
           images: item.images || [],
           description: item.description || "",
           phone: item.contact_phone,
-          openNow: false, // Default value since it's not in the service_providers table
+          openNow: false, // Default value
           hours: "Until 8:00 PM",
           availability: item.availability || null,
           priceLevel: "$$",

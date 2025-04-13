@@ -27,6 +27,7 @@ export interface MarketplaceListing {
   created_at: string;
   approval_status: 'approved' | 'pending' | 'rejected';
   is_negotiable?: boolean;
+  search_rank?: number;
 }
 
 interface UseMarketplaceListingsProps {
@@ -62,56 +63,104 @@ export const useMarketplaceListings = ({
     setError(null);
 
     try {
-      let query = supabase
-        .from('marketplace_listings')
-        .select('*')
-        .limit(limit);
+      if (searchQuery && searchQuery.trim() !== '') {
+        // Use the enhanced search function for complex queries
+        const { data, error } = await supabase.rpc(
+          'search_enhanced_listings', 
+          { search_query: searchQuery }
+        );
 
-      if (!includeAllStatuses) {
-        query = query.eq('approval_status', 'approved');
+        if (error) {
+          throw error;
+        }
+
+        console.log('Enhanced search results:', data);
+        
+        let filteredData = data || [];
+        
+        // Apply any additional filters (these filters are applied after the search)
+        if (category) {
+          filteredData = filteredData.filter(item => item.category === category);
+        }
+        
+        if (condition) {
+          filteredData = filteredData.filter(item => item.condition === condition);
+        }
+        
+        if (minPrice !== undefined) {
+          filteredData = filteredData.filter(item => item.price >= minPrice);
+        }
+        
+        if (maxPrice !== undefined) {
+          filteredData = filteredData.filter(item => item.price <= maxPrice);
+        }
+        
+        if (minRating !== undefined && minRating > 0) {
+          filteredData = filteredData.filter(item => 
+            item.seller_rating !== null && item.seller_rating >= minRating
+          );
+        }
+        
+        if (sellerID) {
+          filteredData = filteredData.filter(item => item.seller_id === sellerID);
+        }
+
+        // Format the data to match MarketplaceListing interface
+        const typedData = filteredData.map(item => ({
+          ...item,
+          approval_status: item.approval_status as 'approved' | 'pending' | 'rejected'
+        })) as MarketplaceListing[];
+        
+        setListings(typedData);
+      } else {
+        // Use the standard query approach for non-search or simple category filtering
+        let query = supabase
+          .from('marketplace_listings')
+          .select('*')
+          .limit(limit);
+
+        if (!includeAllStatuses) {
+          query = query.eq('approval_status', 'approved');
+        }
+
+        if (category) {
+          query = query.eq('category', category);
+        }
+
+        if (condition) {
+          query = query.eq('condition', condition);
+        }
+
+        if (minPrice !== undefined) {
+          query = query.gte('price', minPrice);
+        }
+
+        if (maxPrice !== undefined) {
+          query = query.lte('price', maxPrice);
+        }
+
+        if (minRating !== undefined) {
+          query = query.gte('seller_rating', minRating);
+        }
+
+        if (sellerID) {
+          query = query.eq('seller_id', sellerID);
+        }
+
+        const { data, error } = await query.order('created_at', { ascending: false });
+
+        if (error) {
+          throw error;
+        }
+
+        // Ensure the data conforms to the MarketplaceListing type
+        const typedData = data?.map(item => ({
+          ...item,
+          approval_status: item.approval_status as 'approved' | 'pending' | 'rejected'
+        })) as MarketplaceListing[];
+        
+        setListings(typedData || []);
       }
-
-      if (category) {
-        query = query.eq('category', category);
-      }
-
-      if (condition) {
-        query = query.eq('condition', condition);
-      }
-
-      if (minPrice !== undefined) {
-        query = query.gte('price', minPrice);
-      }
-
-      if (maxPrice !== undefined) {
-        query = query.lte('price', maxPrice);
-      }
-
-      if (minRating !== undefined) {
-        query = query.gte('seller_rating', minRating);
-      }
-
-      if (sellerID) {
-        query = query.eq('seller_id', sellerID);
-      }
-
-      if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
-      }
-
-      const { data, error } = await query.order('created_at', { ascending: false });
-
-      if (error) {
-        throw error;
-      }
-
-      // Ensure the data conforms to the MarketplaceListing type
-      const typedData = data?.map(item => ({
-        ...item,
-        approval_status: item.approval_status as 'approved' | 'pending' | 'rejected'
-      })) as MarketplaceListing[];
-      
-      setListings(typedData || []);
     } catch (err: any) {
       console.error('Error fetching marketplace listings:', err);
       setError('Failed to fetch listings. Please try again later.');
