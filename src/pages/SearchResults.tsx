@@ -20,8 +20,9 @@ const SearchResults = () => {
   
   const searchQuery = searchParams.get('q') || '';
   const categoryParam = searchParams.get('category') || 'all';
+  const tabParam = searchParams.get('tab') || 'locations';
   
-  const [activeTab, setActiveTab] = useState('locations');
+  const [activeTab, setActiveTab] = useState(tabParam);
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
   const [userCoordinates, setUserCoordinates] = useState<{lat: number, lng: number} | null>(null);
   
