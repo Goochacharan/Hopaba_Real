@@ -54,6 +54,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const suggestionExamples = ["hidden gem restaurants in Indiranagar", "good flute teacher in Malleshwaram", "places to visit in Nagarbhavi", "best unisex salon near me", "plumbers available right now"];
   
   const enhanceSearchQuery = async (rawQuery: string) => {
+    // Don't enhance marketplace searches
+    if (currentPath === '/marketplace' || currentPath.startsWith('/marketplace')) {
+      return rawQuery;
+    }
+    
     if (!rawQuery.trim()) return rawQuery;
     setIsEnhancing(true);
     
@@ -99,15 +104,20 @@ const SearchBar: React.FC<SearchBarProps> = ({
     if (query.trim()) {
       console.log("Original search query:", query);
       let enhancedQuery = query;
-      if (currentPath !== '/events') {
+      
+      // Don't enhance if we're on marketplace or events pages
+      if (currentPath !== '/events' && currentPath !== '/marketplace' && !currentPath.startsWith('/marketplace')) {
         enhancedQuery = await enhanceSearchQuery(query);
       }
+      
       console.log("Enhanced search query:", enhancedQuery);
       if (enhancedQuery !== query) {
         setQuery(enhancedQuery);
       }
       onSearch(enhancedQuery);
-      if (query.trim().length < 8 && currentPath !== '/events') {
+      
+      // Only show suggestion toasts on the main search page
+      if (query.trim().length < 8 && currentPath !== '/events' && currentPath !== '/marketplace') {
         const randomSuggestion = suggestionExamples[Math.floor(Math.random() * suggestionExamples.length)];
         toast({
           title: "Try natural language",
@@ -196,9 +206,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
     if (query.trim()) {
       console.log("Search button clicked with query:", query);
       let enhancedQuery = query;
-      if (currentPath !== '/events') {
+      
+      // Don't enhance if we're on marketplace or events pages
+      if (currentPath !== '/events' && currentPath !== '/marketplace' && !currentPath.startsWith('/marketplace')) {
         enhancedQuery = await enhanceSearchQuery(query);
       }
+      
       if (enhancedQuery !== query) {
         setQuery(enhancedQuery);
       }

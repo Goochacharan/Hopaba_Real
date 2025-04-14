@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Event } from '@/hooks/useRecommendations';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { Recommendation } from '@/lib/mockData';
+import { useLocation } from 'react-router-dom';
 
 import LocationsList from './LocationsList';
 import EventsList from './EventsList';
@@ -27,6 +28,24 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
   marketplaceListings,
   handleRSVP
 }) => {
+  const location = useLocation();
+  const isMarketplacePage = location.pathname === '/marketplace' || location.pathname.startsWith('/marketplace');
+  
+  // For marketplace page, only show marketplace listings without tabs
+  if (isMarketplacePage) {
+    return (
+      <div className="w-full">
+        <h2 className="text-xl font-semibold mb-4">Marketplace Listings</h2>
+        {marketplaceListings.length > 0 ? (
+          <MarketplaceItemsList listings={marketplaceListings} />
+        ) : (
+          <NoResultsMessage type="marketplace" />
+        )}
+      </div>
+    );
+  }
+
+  // For other pages, show normal tabs UI
   return (
     <Tabs defaultValue="locations" className="w-full" onValueChange={setActiveTab} value={activeTab}>
       <TabsList className="grid w-full max-w-md grid-cols-3 mb-1 TabsList">
