@@ -85,8 +85,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           
           <NavButton to="/events" icon={<Calendar className="h-5 w-5" />} label="Events" isActive={location.pathname === '/events'} />
           
-          <NavButton to="/my-list" icon={<ListChecks className="h-5 w-5" />} label="My List" isActive={location.pathname === '/my-list'} />
-          
           <NavButton to={user ? "/profile" : "/login"} icon={<User className="h-5 w-5" />} label={user ? "Profile" : "Login"} isActive={location.pathname === '/profile' || location.pathname === '/login'} />
         </div>
       </div>
