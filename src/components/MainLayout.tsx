@@ -85,13 +85,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         <div className="max-w-5xl mx-auto flex justify-around">
           <NavButton to="/" icon={<Home className="h-5 w-5" />} label="Home" isActive={location.pathname === '/'} />
           
-          <NavButton to="/places" icon={<MapPin className="h-5 w-5" />} label="Places" isActive={location.pathname === '/places'} />
+          <NavButton to="/search?tab=locations" icon={<MapPin className="h-5 w-5" />} label="Places" isActive={location.pathname === '/search' && location.search.includes('tab=locations')} />
           
           <NavButton to="/marketplace" icon={<ShoppingCart className="h-5 w-5" />} label="Market" isActive={location.pathname === '/marketplace'} />
           
           <NavButton to="/events" icon={<Calendar className="h-5 w-5" />} label="Events" isActive={location.pathname === '/events'} />
           
-          <NavButton to="/my-list" icon={<ListChecks className="h-5 w-5" />} label="My List" isActive={location.pathname === '/my-list'} />
+          <NavButton to="/my-list" icon={<ListChecks className="h-5 w-5" />} label="List" isActive={location.pathname === '/my-list'} />
           
           <NavButton to={user ? "/profile" : "/login"} icon={<User className="h-5 w-5" />} label={user ? "Profile" : "Login"} isActive={location.pathname === '/profile' || location.pathname === '/login'} />
         </div>

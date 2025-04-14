@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,7 +8,6 @@ import { AuthProvider } from "./hooks/useAuth";
 import React from "react";
 import Index from "./pages/Index";
 import SearchResults from "./pages/SearchResults";
-import Places from "./pages/Places";
 import LocationDetails from "./pages/LocationDetails";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
@@ -37,7 +35,6 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/search" element={<SearchResults />} />
-              <Route path="/places" element={<Places />} />
               <Route path="/location/:id" element={<LocationDetails />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
@@ -50,7 +47,6 @@ const App = () => (
               <Route path="/marketplace/:id" element={<MarketplaceListingDetails />} />
               <Route path="/seller/:id" element={<SellerDetails />} />
               <Route path="/admin" element={<AdminPanel />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
