@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -9,13 +10,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import UserMarketplaceListings from '@/components/UserMarketplaceListings';
 import UserEventListings from '@/components/UserEventListings';
 import { AdminSection } from '@/components/admin/AdminSection';
-import { Plus, Settings as SettingsIcon, LogOut, Heart } from 'lucide-react';
+import { Plus, Settings as SettingsIcon, LogOut } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import BusinessFormSimple from '@/components/business/BusinessFormSimple';
 import BusinessListSimple from '@/components/business/BusinessListSimple';
 import { Business } from '@/components/business/BusinessFormSimple';
-import { useWishlist } from '@/contexts/WishlistContext';
-import WishlistContent from '@/components/profile/WishlistContent';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -26,8 +25,7 @@ const Profile = () => {
   const [editingBusiness, setEditingBusiness] = useState<Business | null>(null);
   const [showAddBusinessForm, setShowAddBusinessForm] = useState(false);
   const [activeTab, setActiveTab] = useState("listings");
-  const { wishlist, toggleWishlist } = useWishlist();
-
+  
   useEffect(() => {
     if (!user) {
       navigate('/login');
@@ -37,13 +35,13 @@ const Profile = () => {
   const handleAddBusiness = () => {
     setEditingBusiness(null);
     setShowAddBusinessForm(true);
-    setActiveTab("businesses");
+    setActiveTab("businesses"); // Ensure we're on the businesses tab
   };
 
   const handleEditBusiness = (business: Business) => {
     setEditingBusiness(business);
     setShowAddBusinessForm(true);
-    setActiveTab("businesses");
+    setActiveTab("businesses"); // Ensure we're on the businesses tab
   };
 
   const handleBusinessSaved = () => {
@@ -114,16 +112,10 @@ const Profile = () => {
               <BusinessFormSimple business={editingBusiness} onSaved={handleBusinessSaved} onCancel={handleCancelBusinessForm} />
             </CardContent>
           </Card> : <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-4 mb-8">
+            <TabsList className="grid grid-cols-3 mb-8">
               <TabsTrigger value="listings">Marketplace</TabsTrigger>
-              <TabsTrigger value="events">Events</TabsTrigger>
+              <TabsTrigger value="events"> Events</TabsTrigger>
               <TabsTrigger value="businesses">Your Businesses</TabsTrigger>
-              <TabsTrigger value="wishlist">
-                <div className="flex items-center gap-2">
-                  <Heart className="h-4 w-4" />
-                  <span>Wishlist</span>
-                </div>
-              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="listings">
@@ -144,10 +136,6 @@ const Profile = () => {
               </div>
 
               <BusinessListSimple onEdit={handleEditBusiness} refresh={refreshBusinesses} />
-            </TabsContent>
-
-            <TabsContent value="wishlist">
-              <WishlistContent wishlist={wishlist} toggleWishlist={toggleWishlist} />
             </TabsContent>
           </Tabs>}
       </div>
