@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
@@ -30,6 +31,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     }
     if (query.trim()) {
       if (location.pathname === '/marketplace' || location.pathname.startsWith('/marketplace')) {
+        // Ensure we're passing search parameters specific to the marketplace page
         navigate(`/marketplace?q=${encodeURIComponent(query)}`);
       } else if (location.pathname === '/events') {
         navigate(`/events?q=${encodeURIComponent(query)}`);
