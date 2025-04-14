@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -149,14 +150,19 @@ const Profile = () => {
             </TabsContent>
 
             <TabsContent value="wishlist">
-              <WishlistContent />
+              <WishlistContent wishlist={wishlist} toggleWishlist={toggleWishlist} />
             </TabsContent>
           </Tabs>}
       </div>
     </MainLayout>;
 };
 
-const WishlistContent = () => {
+interface WishlistContentProps {
+  wishlist: any[];
+  toggleWishlist: (item: any) => void;
+}
+
+const WishlistContent: React.FC<WishlistContentProps> = ({ wishlist, toggleWishlist }) => {
   if (wishlist.length === 0) {
     return (
       <div className="text-center py-8 space-y-4">
