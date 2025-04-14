@@ -9,6 +9,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import React from "react";
 import Index from "./pages/Index";
 import SearchResults from "./pages/SearchResults";
+import Places from "./pages/Places";
 import LocationDetails from "./pages/LocationDetails";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
