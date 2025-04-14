@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
@@ -203,7 +202,14 @@ const Marketplace = () => {
     }
   }, [highlightedListingId, listings, loading, currentCategory]);
 
-  const filteredListings = listings.filter(listing => {
+  const enhancedListings = listings.map(listing => ({
+    ...listing,
+    damage_images: listing.damage_images || [],
+    inspection_certificates: listing.inspection_certificates || [],
+    is_negotiable: listing.is_negotiable !== undefined ? listing.is_negotiable : false
+  }));
+
+  const filteredListings = enhancedListings.filter(listing => {
     // Price filter
     const price = listing.price;
     if (price < priceRange[0] || price > priceRange[1]) return false;

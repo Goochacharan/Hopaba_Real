@@ -80,6 +80,15 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
             `with damage_images:`, listing.damage_images?.length || 0,
             `and certificates:`, listing.inspection_certificates?.length || 0);
             
+          // Make sure all the necessary properties are present
+          const enhancedListing = {
+            ...listing,
+            location: listing.location || "Not specified",
+            damage_images: listing.damage_images || [],
+            inspection_certificates: listing.inspection_certificates || [],
+            is_negotiable: listing.is_negotiable !== undefined ? listing.is_negotiable : false
+          };
+            
           return (
             <div 
               key={listing.id} 
@@ -92,13 +101,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
                 </Badge>
               )}
               <MarketplaceListingCard 
-                listing={{
-                  ...listing,
-                  location: listing.location || "Not specified",
-                  damage_images: listing.damage_images || [],
-                  inspection_certificates: listing.inspection_certificates || [],
-                  is_negotiable: listing.is_negotiable !== undefined ? listing.is_negotiable : false
-                }} 
+                listing={enhancedListing}
                 className={cn(
                   "h-full flex flex-col",
                   "search-result-card", // This class will be used to identify search result cards

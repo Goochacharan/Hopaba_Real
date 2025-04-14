@@ -31,8 +31,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     }
     if (query.trim()) {
       if (location.pathname === '/marketplace' || location.pathname.startsWith('/marketplace')) {
-        // For marketplace searches, make sure we're passing proper search parameters
-        // and staying on the marketplace page
+        // For marketplace searches, stay on marketplace page with query parameter
         console.log("Marketplace search: Navigating to marketplace with query:", query);
         navigate(`/marketplace?q=${encodeURIComponent(query)}`);
       } else if (location.pathname === '/events') {
@@ -51,6 +50,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   
   const shouldShowSearchBar = () => {
     return !['/location', '/search'].some(path => location.pathname.startsWith(path));
+  };
+  
+  // Determine the placeholder text based on current route
+  const getSearchPlaceholder = () => {
+    if (location.pathname === '/events') {
+      return "Search for events...";
+    } else if (location.pathname === '/marketplace' || location.pathname.startsWith('/marketplace')) {
+      return "Search marketplace listings...";
+    } else {
+      return "What are you looking for today?";
+    }
   };
   
   return <div className="min-h-screen w-full bg-background flex flex-col items-center relative">
@@ -88,11 +98,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             <SearchBar 
               onSearch={onSearch} 
               className="mb-0" 
-              placeholder={
-                location.pathname === '/events' ? "Search for events..." : 
-                location.pathname === '/marketplace' ? "Search marketplace listings..." : 
-                "What are you looking for today?"
-              } 
+              placeholder={getSearchPlaceholder()} 
               initialValue="" 
               currentRoute={location.pathname} 
             />
