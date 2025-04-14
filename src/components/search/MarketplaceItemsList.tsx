@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
@@ -44,7 +45,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
   }
 
   console.log(`MarketplaceItemsList received ${listings.length} listings`);
-  console.log('Raw listings:', listings.map(l => `${l.title} (${l.category}) - ${l.approval_status}`));
+  console.log('Raw listings with full details:', listings);
 
   // Filter listings to show approved ones or user's own listings regardless of approval status
   const visibleListings = listings.filter(listing => 
@@ -52,34 +53,8 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     (user && listing.seller_id === user.id)
   );
 
-  // Highlight search terms in listing data if there's a search query
-  const highlightSearchTerms = (text: string): React.ReactNode => {
-    if (!searchQuery || !text) return text;
-    
-    const searchWords = searchQuery.trim().toLowerCase().split(/\s+/).filter(word => word.length > 0);
-    if (searchWords.length === 0) return text;
-    
-    let result = text;
-    searchWords.forEach(word => {
-      if (word.length < 3) return; // Skip very short words
-      
-      const regex = new RegExp(`(${word})`, 'gi');
-      result = result.replace(regex, '<mark>$1</mark>');
-    });
-    
-    const parts = result.split(/(<mark>.*?<\/mark>)/g);
-    
-    return parts.map((part, i) => {
-      if (part.startsWith('<mark>') && part.endsWith('</mark>')) {
-        const content = part.replace(/<\/?mark>/g, '');
-        return <span key={i} className="bg-yellow-200 text-gray-900 rounded px-0.5">{content}</span>;
-      }
-      return part;
-    });
-  };
-
   console.log(`After filtering, ${visibleListings.length} listings are visible`);
-  console.log('Visible listings:', visibleListings.map(l => `${l.title} (${l.category}) - ${l.approval_status}`));
+  console.log('Visible listings with full details:', visibleListings);
 
   if (visibleListings.length === 0) {
     return <NoResultsMessage type="marketplace" />;
@@ -100,30 +75,39 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
       )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {visibleListings.map((listing, index) => (
-          <div 
-            key={listing.id} 
-            className="animate-fade-in h-full relative" 
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            {user && listing.seller_id === user.id && listing.approval_status === 'pending' && (
-              <Badge variant="outline" className="absolute top-2 right-2 z-10 bg-yellow-100 text-yellow-800 border-yellow-300">
-                Pending Approval
-              </Badge>
-            )}
-            <MarketplaceListingCard 
-              listing={{
-                ...listing,
-                location: listing.location || "Not specified"
-              }} 
-              className={cn(
-                "h-full flex flex-col",
-                "search-result-card", // This class will be used to identify search result cards
-                listing.approval_status === 'pending' ? "opacity-75" : ""
+        {visibleListings.map((listing, index) => {
+          console.log(`Rendering listing ${index}:`, listing.title, 
+            `with damage_images:`, listing.damage_images?.length || 0,
+            `and certificates:`, listing.inspection_certificates?.length || 0);
+            
+          return (
+            <div 
+              key={listing.id} 
+              className="animate-fade-in h-full relative" 
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              {user && listing.seller_id === user.id && listing.approval_status === 'pending' && (
+                <Badge variant="outline" className="absolute top-2 right-2 z-10 bg-yellow-100 text-yellow-800 border-yellow-300">
+                  Pending Approval
+                </Badge>
               )}
-            />
-          </div>
-        ))}
+              <MarketplaceListingCard 
+                listing={{
+                  ...listing,
+                  location: listing.location || "Not specified",
+                  damage_images: listing.damage_images || [],
+                  inspection_certificates: listing.inspection_certificates || [],
+                  is_negotiable: listing.is_negotiable !== undefined ? listing.is_negotiable : false
+                }} 
+                className={cn(
+                  "h-full flex flex-col",
+                  "search-result-card", // This class will be used to identify search result cards
+                  listing.approval_status === 'pending' ? "opacity-75" : ""
+                )}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

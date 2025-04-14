@@ -31,7 +31,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     }
     if (query.trim()) {
       if (location.pathname === '/marketplace' || location.pathname.startsWith('/marketplace')) {
-        // Ensure we're passing search parameters specific to the marketplace page
+        // For marketplace searches, make sure we're passing proper search parameters
+        // and staying on the marketplace page
+        console.log("Marketplace search: Navigating to marketplace with query:", query);
         navigate(`/marketplace?q=${encodeURIComponent(query)}`);
       } else if (location.pathname === '/events') {
         navigate(`/events?q=${encodeURIComponent(query)}`);

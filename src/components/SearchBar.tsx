@@ -56,6 +56,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const enhanceSearchQuery = async (rawQuery: string) => {
     // Don't enhance marketplace searches
     if (currentPath === '/marketplace' || currentPath.startsWith('/marketplace')) {
+      console.log("Marketplace search - not enhancing:", rawQuery);
       return rawQuery;
     }
     
@@ -107,17 +108,20 @@ const SearchBar: React.FC<SearchBarProps> = ({
       
       // Don't enhance if we're on marketplace or events pages
       if (currentPath !== '/events' && currentPath !== '/marketplace' && !currentPath.startsWith('/marketplace')) {
+        console.log("Not a marketplace or events page, enhancing query");
         enhancedQuery = await enhanceSearchQuery(query);
+      } else {
+        console.log("Marketplace or events page, not enhancing query");
       }
       
-      console.log("Enhanced search query:", enhancedQuery);
+      console.log("Final search query to use:", enhancedQuery);
       if (enhancedQuery !== query) {
         setQuery(enhancedQuery);
       }
       onSearch(enhancedQuery);
       
       // Only show suggestion toasts on the main search page
-      if (query.trim().length < 8 && currentPath !== '/events' && currentPath !== '/marketplace') {
+      if (query.trim().length < 8 && currentPath !== '/events' && currentPath !== '/marketplace' && !currentPath.startsWith('/marketplace')) {
         const randomSuggestion = suggestionExamples[Math.floor(Math.random() * suggestionExamples.length)];
         toast({
           title: "Try natural language",
@@ -203,15 +207,20 @@ const SearchBar: React.FC<SearchBarProps> = ({
       setShowAuthDialog(true);
       return;
     }
+    
     if (query.trim()) {
       console.log("Search button clicked with query:", query);
       let enhancedQuery = query;
       
       // Don't enhance if we're on marketplace or events pages
       if (currentPath !== '/events' && currentPath !== '/marketplace' && !currentPath.startsWith('/marketplace')) {
+        console.log("Enhancing query from button click");
         enhancedQuery = await enhanceSearchQuery(query);
+      } else {
+        console.log("Not enhancing marketplace/events query from button click");
       }
       
+      console.log("Final search query from button click:", enhancedQuery);
       if (enhancedQuery !== query) {
         setQuery(enhancedQuery);
       }

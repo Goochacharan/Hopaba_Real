@@ -31,6 +31,9 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
   const location = useLocation();
   const isMarketplacePage = location.pathname === '/marketplace' || location.pathname.startsWith('/marketplace');
   
+  console.log("SearchTabs - marketplaceListings received:", marketplaceListings);
+  console.log("First listing details (if available):", marketplaceListings[0]);
+  
   // For marketplace page, only show marketplace listings without tabs
   if (isMarketplacePage) {
     return (
