@@ -38,9 +38,11 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
     }
   }, [isMarketplacePage, setActiveTab]);
 
+  // On marketplace page, only show marketplace listings without tabs
   if (isMarketplacePage) {
     return (
-      <div className="w-full">
+      <div className="w-full mt-2">
+        <h2 className="font-medium text-lg mb-4">Marketplace Items</h2>
         {marketplaceListings.length > 0 ? (
           <MarketplaceItemsList listings={marketplaceListings} />
         ) : (
@@ -50,6 +52,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
     );
   }
 
+  // On search page, show all tabs
   return (
     <Tabs defaultValue="locations" className="w-full" onValueChange={setActiveTab} value={activeTab}>
       <TabsList className="grid w-full max-w-md grid-cols-3 mb-1 TabsList">
