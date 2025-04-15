@@ -32,19 +32,29 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
   const isMarketplacePage = location.pathname === '/marketplace' || location.pathname.startsWith('/marketplace');
   
   console.log("SearchTabs - marketplaceListings received:", marketplaceListings);
+  
+  // Additional logging to verify data completeness
   if (marketplaceListings.length > 0) {
     console.log("First listing details:", marketplaceListings[0]);
-    console.log("First listing has damage images:", marketplaceListings[0].damage_images);
-    console.log("First listing has inspection certificates:", marketplaceListings[0].inspection_certificates);
+    console.log("First listing has damage images:", marketplaceListings[0].damage_images?.length || 0);
+    console.log("First listing has inspection certificates:", marketplaceListings[0].inspection_certificates?.length || 0);
   }
+  
+  // Ensure listings have all required properties
+  const enhancedListings = marketplaceListings.map(listing => ({
+    ...listing,
+    damage_images: listing.damage_images || [],
+    inspection_certificates: listing.inspection_certificates || [],
+    is_negotiable: listing.is_negotiable !== undefined ? listing.is_negotiable : false
+  }));
   
   // For marketplace page, only show marketplace listings without tabs
   if (isMarketplacePage) {
     return (
       <div className="w-full">
         <h2 className="text-xl font-semibold mb-4">Marketplace Listings</h2>
-        {marketplaceListings.length > 0 ? (
-          <MarketplaceItemsList listings={marketplaceListings} />
+        {enhancedListings.length > 0 ? (
+          <MarketplaceItemsList listings={enhancedListings} />
         ) : (
           <NoResultsMessage type="marketplace" />
         )}
@@ -63,7 +73,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
           Events ({events.length})
         </TabsTrigger>
         <TabsTrigger value="marketplace" className="font-medium text-sm py-1">
-          Marketplace ({marketplaceListings.length})
+          Marketplace ({enhancedListings.length})
         </TabsTrigger>
       </TabsList>
       
@@ -84,8 +94,8 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
       </TabsContent>
       
       <TabsContent value="marketplace" className="pt-0">
-        {marketplaceListings.length > 0 ? (
-          <MarketplaceItemsList listings={marketplaceListings} />
+        {enhancedListings.length > 0 ? (
+          <MarketplaceItemsList listings={enhancedListings} />
         ) : (
           <NoResultsMessage type="marketplace" />
         )}

@@ -28,6 +28,16 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
 
+  useEffect(() => {
+    // Log more details for debugging
+    console.log("MarketplaceItemsList - listings length:", listings?.length || 0);
+    if (listings && listings.length > 0) {
+      console.log("Sample listing data for debugging:");
+      console.log("First listing damage images:", listings[0].damage_images);
+      console.log("First listing certificates:", listings[0].inspection_certificates);
+    }
+  }, [listings]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -44,9 +54,6 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     );
   }
 
-  console.log(`MarketplaceItemsList received ${listings.length} listings`);
-  console.log('Raw listings with full details:', listings);
-
   // Filter listings to show approved ones or user's own listings regardless of approval status
   const visibleListings = listings.filter(listing => 
     listing.approval_status === 'approved' || 
@@ -54,8 +61,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
   );
 
   console.log(`After filtering, ${visibleListings.length} listings are visible`);
-  console.log('Visible listings with full details:', visibleListings);
-
+  
   if (visibleListings.length === 0) {
     return <NoResultsMessage type="marketplace" />;
   }

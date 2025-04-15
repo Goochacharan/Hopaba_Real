@@ -33,7 +33,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       if (location.pathname === '/marketplace' || location.pathname.startsWith('/marketplace')) {
         // For marketplace searches, stay on marketplace page with query parameter
         console.log("Marketplace search: Navigating to marketplace with query:", query);
-        navigate(`/marketplace?q=${encodeURIComponent(query)}`);
+        
+        // Preserve current category if exists
+        const currentParams = new URLSearchParams(location.search);
+        const category = currentParams.get('category');
+        
+        if (category) {
+          navigate(`/marketplace?q=${encodeURIComponent(query)}&category=${category}`);
+        } else {
+          navigate(`/marketplace?q=${encodeURIComponent(query)}`);
+        }
       } else if (location.pathname === '/events') {
         navigate(`/events?q=${encodeURIComponent(query)}`);
       } else {
@@ -109,7 +118,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         <div className="max-w-5xl mx-auto flex justify-around">
           <NavButton to="/" icon={<Home className="h-5 w-5" />} label="Home" isActive={location.pathname === '/'} />
           
-          <NavButton to="/marketplace" icon={<ShoppingCart className="h-5 w-5" />} label="Market" isActive={location.pathname === '/marketplace'} />
+          <NavButton to="/marketplace" icon={<ShoppingCart className="h-5 w-5" />} label="Market" isActive={location.pathname.startsWith('/marketplace')} />
           
           <NavButton to="/events" icon={<Calendar className="h-5 w-5" />} label="Events" isActive={location.pathname === '/events'} />
           
