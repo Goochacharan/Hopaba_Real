@@ -142,8 +142,8 @@ const SearchResults = () => {
             category={category}
             resultsCount={{
               locations: rankedRecommendations.length,
-              events: events.length,
-              marketplace: marketplaceListings.length
+              events: 0,
+              marketplace: 0
             }}
             loading={loading}
             error={error}
@@ -156,9 +156,9 @@ const SearchResults = () => {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 recommendations={rankedRecommendations}
-                events={events}
-                marketplaceListings={marketplaceListings}
-                handleRSVP={handleRSVP}
+                events={[]}
+                marketplaceListings={[]}
+                handleRSVP={() => {}}
               />
             </div>
           )}
