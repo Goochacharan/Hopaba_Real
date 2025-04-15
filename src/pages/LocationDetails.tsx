@@ -67,14 +67,13 @@ const LocationDetails = () => {
   }, []);
 
   useEffect(() => {
-    if (!id) {
-      navigate('/');
-      return;
-    }
     setLoading(true);
     
+    // If no ID is provided (home page), use default location
+    const locationId = id || 'corner-house-01';
+    
     // Load reviews from localStorage
-    const savedReviews = getStoredReviews(id);
+    const savedReviews = getStoredReviews(locationId);
     setUserReviews(savedReviews);
     
     // Calculate average rating from user reviews
@@ -83,9 +82,9 @@ const LocationDetails = () => {
       setAverageRating(avgRating);
     }
     
-    const mockLocation = getRecommendationById(id);
+    const mockLocation = getRecommendationById(locationId);
     
-    const isCornerHouseId = id === 'corner-house-01' || id.toLowerCase().includes('corner');
+    const isCornerHouseId = locationId === 'corner-house-01' || locationId.toLowerCase().includes('corner');
     
     if (mockLocation) {
       console.log("Found location in mock data:", mockLocation);
@@ -259,15 +258,17 @@ const LocationDetails = () => {
   return (
     <MainLayout>
       <div className="container mx-auto py-4 max-w-none px-[7px]">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="mb-4 pl-0 text-muted-foreground" 
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="mr-1 h-4 w-4" />
-          Back to results
-        </Button>
+        {id && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mb-4 pl-0 text-muted-foreground" 
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="mr-1 h-4 w-4" />
+            Back to results
+          </Button>
+        )}
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
