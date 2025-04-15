@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { AuthProvider } from "./hooks/useAuth";
 import React from "react";
-import Index from "./pages/Index";
 import SearchResults from "./pages/SearchResults";
 import LocationDetails from "./pages/LocationDetails";
 import NotFound from "./pages/NotFound";
@@ -34,7 +33,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<SearchResults />} />
               <Route path="/search" element={<SearchResults />} />
               <Route path="/location/:id" element={<LocationDetails />} />
               <Route path="/profile" element={<Profile />} />
@@ -48,7 +47,6 @@ const App = () => (
               <Route path="/marketplace/:id" element={<MarketplaceListingDetails />} />
               <Route path="/seller/:id" element={<SellerDetails />} />
               <Route path="/admin" element={<AdminPanel />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>

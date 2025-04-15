@@ -6,8 +6,6 @@ import useRecommendations from '@/hooks/useRecommendations';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { addDistanceToRecommendations, sortRecommendations, enhanceRecommendations } from '@/utils/searchUtils';
-
-// Import components
 import SearchHeader from '@/components/search/SearchHeader';
 import SearchTabs from '@/components/search/SearchTabs';
 import SearchLocation from '@/components/search/SearchLocation';
@@ -39,7 +37,8 @@ const SearchResults = () => {
     filterRecommendations
   } = useRecommendations({
     initialQuery: searchQuery,
-    initialCategory: categoryParam as any
+    initialCategory: categoryParam as any,
+    loadDefaultResults: true
   });
 
   const {
@@ -56,26 +55,15 @@ const SearchResults = () => {
 
   console.log("Original recommendations:", recommendations);
 
-  const enhancedRecommendations = recommendations.map((rec, index) => {
-    console.log(`Enhancing recommendation ${index}:`, rec.name);
-    console.log("Availability data:", {
-      days: rec.availability_days,
-      hours: rec.hours,
-      availability: rec.availability,
-      start_time: rec.availability_start_time,
-      end_time: rec.availability_end_time
-    });
-    
-    return {
-      ...rec,
-      isHiddenGem: rec.isHiddenGem || index % 3 === 0,
-      isMustVisit: rec.isMustVisit || index % 5 === 0,
-      availability_days: rec.availability_days || [],
-      hours: rec.hours || '',
-      availability_start_time: rec.availability_start_time || '',
-      availability_end_time: rec.availability_end_time || ''
-    };
-  });
+  const enhancedRecommendations = recommendations.map((rec, index) => ({
+    ...rec,
+    isHiddenGem: rec.isHiddenGem || index % 3 === 0,
+    isMustVisit: rec.isMustVisit || index % 5 === 0,
+    availability_days: rec.availability_days || [],
+    hours: rec.hours || '',
+    availability_start_time: rec.availability_start_time || '',
+    availability_end_time: rec.availability_end_time || ''
+  }));
 
   const filteredRecommendations = filterRecommendations(enhancedRecommendations, {
     maxDistance: filters.distance[0],

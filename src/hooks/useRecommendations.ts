@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Recommendation } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -7,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface UseRecommendationsProps {
   initialQuery?: string;
   initialCategory?: CategoryType;
+  loadDefaultResults?: boolean;
 }
 
 interface FilterOptions {
@@ -40,7 +40,8 @@ export interface Event {
 
 const useRecommendations = ({ 
   initialQuery = '', 
-  initialCategory = 'all' 
+  initialCategory = 'all',
+  loadDefaultResults = false
 }: UseRecommendationsProps = {}) => {
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState<CategoryType>(initialCategory);
@@ -300,16 +301,20 @@ const useRecommendations = ({
       setError(null);
       
       try {
-        const { processedQuery, inferredCategory } = processNaturalLanguageQuery(query);
-        
-        const effectiveCategory = inferredCategory;
-        console.log("Effective search category:", effectiveCategory);
-        
-        const serviceProviders = await fetchServiceProviders(processedQuery, effectiveCategory);
-        setRecommendations(serviceProviders);
-        
-        const eventsData = await fetchEvents(processedQuery);
-        setEvents(eventsData);
+        if (query) {
+          const { processedQuery, inferredCategory } = processNaturalLanguageQuery(query);
+          const effectiveCategory = inferredCategory;
+          const serviceProviders = await fetchServiceProviders(processedQuery, effectiveCategory);
+          setRecommendations(serviceProviders);
+          const eventsData = await fetchEvents(processedQuery);
+          setEvents(eventsData);
+        } 
+        else if (loadDefaultResults) {
+          const serviceProviders = await fetchServiceProviders('', category);
+          setRecommendations(serviceProviders);
+          const eventsData = await fetchEvents('');
+          setEvents(eventsData);
+        }
         
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -320,7 +325,7 @@ const useRecommendations = ({
     };
 
     fetchRecommendations();
-  }, [query, category]);
+  }, [query, category, loadDefaultResults]);
 
   return {
     query,
