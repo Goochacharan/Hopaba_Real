@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
@@ -31,10 +30,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     }
     if (query.trim()) {
       if (location.pathname === '/marketplace' || location.pathname.startsWith('/marketplace')) {
-        // For marketplace searches, stay on marketplace page with query parameter
         console.log("Marketplace search: Navigating to marketplace with query:", query);
         
-        // Preserve current category if exists
         const currentParams = new URLSearchParams(location.search);
         const category = currentParams.get('category');
         
@@ -61,7 +58,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     return !['/location', '/search'].some(path => location.pathname.startsWith(path));
   };
   
-  // Determine the placeholder text based on current route
   const getSearchPlaceholder = () => {
     if (location.pathname === '/events') {
       return "Search for events...";
@@ -98,7 +94,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         </div>
       </header>
       
-      <main className="w-full flex-1 overflow-y-auto pb-12">
+      <main className="w-full flex-1 overflow-y-auto pb-24">
         {children}
       </main>
       
@@ -114,7 +110,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </div>
         </div>}
       
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 py-1 px-4 z-[60]">
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 py-2 px-4 z-[60]">
         <div className="max-w-5xl mx-auto flex justify-around">
           <NavButton to="/" icon={<Home className="h-5 w-5" />} label="Home" isActive={location.pathname === '/'} />
           
