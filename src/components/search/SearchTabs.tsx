@@ -7,6 +7,12 @@ import NoResultsMessage from './NoResultsMessage';
 
 interface SearchTabsProps {
   recommendations: Recommendation[];
+  // The following props are not currently used but needed for type compatibility
+  activeTab?: string;
+  setActiveTab?: React.Dispatch<React.SetStateAction<string>>;
+  events?: any[];
+  marketplaceListings?: any[];
+  handleRSVP?: () => void;
 }
 
 const SearchTabs: React.FC<SearchTabsProps> = ({
