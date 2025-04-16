@@ -68,7 +68,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     }
   };
   
-  return <div className="min-h-screen w-full bg-background flex flex-col items-center relative">
+  return <div className="min-h-screen w-full bg-background flex flex-col items-center relative pb-24">
       <header className="w-full sticky top-0 z-50 glass border-b border-border/50 px-6 py-4">
         <div className="max-w-5xl mx-auto w-full flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2" role="button" aria-label="Go to home page" onClick={e => {
@@ -94,7 +94,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         </div>
       </header>
       
-      <main className="w-full flex-1 overflow-y-auto pb-24">
+      <main className="w-full flex-1 overflow-y-auto pb-32">
         {children}
       </main>
       
@@ -110,7 +110,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </div>
         </div>}
       
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 py-2 px-4 z-[60]">
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 py-3 px-4 z-[60]">
         <div className="max-w-5xl mx-auto flex justify-around">
           <NavButton to="/" icon={<Home className="h-5 w-5" />} label="Home" isActive={location.pathname === '/'} />
           
