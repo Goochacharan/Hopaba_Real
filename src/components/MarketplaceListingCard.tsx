@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -15,29 +16,32 @@ import ListingMetadata from './marketplace/ListingMetadata';
 import SellerInfo from './marketplace/SellerInfo';
 import ListingActionButtons from './marketplace/ListingActionButtons';
 import CertificateBadge from './marketplace/CertificateBadge';
+
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
   className?: string;
 }
+
 const formatPrice = (price: number): string => {
   return price.toLocaleString('en-IN');
 };
+
 const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   listing,
   className
 }) => {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [imageViewerOpen, setImageViewerOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   const [currentImageType, setCurrentImageType] = React.useState<'regular' | 'damage'>('regular');
+  
   const handleImageClick = (index: number, type: 'regular' | 'damage' = 'regular') => {
     setSelectedImageIndex(index);
     setCurrentImageType(type);
     setImageViewerOpen(true);
   };
+  
   const handleCardClick = (e: React.MouseEvent) => {
     if (imageViewerOpen) return;
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) {
@@ -46,8 +50,14 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
     console.log("Navigating to marketplace listing:", listing.id);
     navigate(`/marketplace/${listing.id}`);
   };
+  
   const isSearchPage = window.location.pathname.includes('/search');
   const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
+  
+  // Check if the listing has inspection certificates and log it for debugging
+  const hasCertificates = listing.inspection_certificates && listing.inspection_certificates.length > 0;
+  console.log(`Listing ${listing.id} has certificates:`, hasCertificates, listing.inspection_certificates);
+
   return <div className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5", className)} onClick={handleCardClick}>
       {hasDamageImages ? <Tabs defaultValue="regular" className="mb-2">
           <TabsList className="w-full mb-0 p-1 h-auto bg-transparent">
@@ -100,9 +110,13 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
                   <Lock className="h-3 w-3" />
                   <span className="pr-0.5">Fixed</span>
                 </Badge>)}
-              {listing.inspection_certificates && listing.inspection_certificates.length > 0 && <span onClick={e => e.stopPropagation()}>
-                  <CertificateBadge certificates={listing.inspection_certificates} />
-                </span>}
+              
+              {/* Always check hasCertificates to prevent empty badge */}
+              {hasCertificates && (
+                <span onClick={e => e.stopPropagation()}>
+                  <CertificateBadge certificates={listing.inspection_certificates || []} />
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -135,4 +149,5 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
     }} />
     </div>;
 };
+
 export default MarketplaceListingCard;

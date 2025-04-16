@@ -4,6 +4,7 @@ import { format, differenceInDays } from 'date-fns';
 import { Instagram, Film, Sparkles, MapPin, Link2, Tag } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import CertificateBadge from './CertificateBadge';
 
 interface ListingDescriptionProps {
   description: string;
@@ -17,6 +18,8 @@ interface ListingDescriptionProps {
   priceUnit?: string;
   experience?: string;
   tags?: string[];
+  inspectionCertificates?: string[];
+  isNegotiable?: boolean;
 }
 
 const ListingDescription: React.FC<ListingDescriptionProps> = ({
@@ -30,11 +33,14 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
   showMetadata = false,
   priceUnit,
   experience,
-  tags
+  tags,
+  inspectionCertificates = [],
+  isNegotiable
 }) => {
   const isVideoContent = instagram && (instagram.includes('youtube.com') || instagram.includes('vimeo.com') || instagram.includes('tiktok.com'));
   const isNew = differenceInDays(new Date(), new Date(createdAt)) < 7;
   const isSearchPage = window.location.pathname.includes('/search');
+  const hasCertificates = inspectionCertificates && inspectionCertificates.length > 0;
 
   return (
     <div className="bg-white rounded-xl border p-6 shadow-sm">
@@ -44,6 +50,13 @@ const ListingDescription: React.FC<ListingDescriptionProps> = ({
           <div className="text-white text-xs font-semibold px-2 py-0.5 rounded flex items-center gap-1 mb-3 bg-fuchsia-700">
             <Sparkles className="h-2.5 w-2.5" />
             <span className="text-[10px]">New post</span>
+          </div>
+        )}
+        
+        {/* Show certificate badge in the description header too if available */}
+        {hasCertificates && (
+          <div className="mb-3">
+            <CertificateBadge certificates={inspectionCertificates} />
           </div>
         )}
       </div>

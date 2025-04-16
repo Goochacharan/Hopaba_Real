@@ -1,11 +1,14 @@
+
 import React, { useState } from 'react';
 import { CircleCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+
 interface CertificateBadgeProps {
   certificates: string[];
 }
+
 const CertificateBadge: React.FC<CertificateBadgeProps> = ({
   certificates
 }) => {
@@ -16,12 +19,15 @@ const CertificateBadge: React.FC<CertificateBadgeProps> = ({
   if (!certificates || certificates.length === 0) {
     return null;
   }
+  
   const handlePrevious = () => {
     setCurrentIndex(prev => prev === 0 ? certificates.length - 1 : prev - 1);
   };
+  
   const handleNext = () => {
     setCurrentIndex(prev => prev === certificates.length - 1 ? 0 : prev + 1);
   };
+  
   return <>
       <Badge variant="success" onClick={() => setOpen(true)} className="flex items-center gap-1 cursor-pointer text-green-800 bg-blue-500 rounded px-[5px] mx-0">
         <CircleCheck className="h-3.5 w-3.5 text-green-600 fill-green-50" />
@@ -63,4 +69,5 @@ const CertificateBadge: React.FC<CertificateBadgeProps> = ({
       </Dialog>
     </>;
 };
+
 export default CertificateBadge;
