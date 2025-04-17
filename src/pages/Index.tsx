@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import MainLayout from '@/components/MainLayout';
 import AnimatedLogo from '@/components/AnimatedLogo';
@@ -9,6 +8,8 @@ import { Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import MapViewButton from '@/components/search/MapViewButton';
+import useRecommendations from '@/hooks/useRecommendations';
 
 const queryCategoryMap = {
   "Find me a cozy café nearby": "cafes",
@@ -38,6 +39,10 @@ const Index = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isEnhancing, setIsEnhancing] = useState<string | null>(null);
+
+  const { recommendations } = useRecommendations({
+    loadDefaultResults: true
+  });
 
   const exampleQueries = [{
     text: "Find me a cozy café nearby",
@@ -183,6 +188,8 @@ const Index = () => {
           </ScrollArea>
         </div>
       </section>
+      
+      {recommendations && recommendations.length > 0 && <MapViewButton />}
     </MainLayout>;
 };
 
