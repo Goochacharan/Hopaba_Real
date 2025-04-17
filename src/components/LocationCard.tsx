@@ -518,15 +518,30 @@ const LocationCard: React.FC<LocationCardProps> = ({
       <div className={cn("relative w-full overflow-hidden", imageHeightClass)}>
         <Carousel className="w-full h-full">
           <CarouselContent className="h-full">
-            {images.map((img, index) => <CarouselItem key={index} className="h-full p-0">
+            {images.map((img, index) => (
+              <CarouselItem key={index} className="h-full p-0">
                 <div className={cn("absolute inset-0 bg-muted/30", imageLoaded[index] ? "opacity-0" : "opacity-100")} />
-                <img src={img} alt={`${recommendation.name} - image ${index + 1}`} onLoad={() => handleImageLoad(index)} onClick={e => handleImageClick(index, e)} className={cn("w-full transition-all-500 cursor-pointer", imageHeightClass, shouldIncreaseHeight ? "object-cover" : "object-contain", imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm")} />
-              </CarouselItem>)}
+                <img 
+                  src={img} 
+                  alt={`${recommendation.name} - image ${index + 1}`} 
+                  onLoad={() => handleImageLoad(index)} 
+                  onClick={e => handleImageClick(index, e)} 
+                  className={cn(
+                    "w-full transition-all-500 cursor-pointer", 
+                    imageHeightClass, 
+                    shouldIncreaseHeight ? "object-cover" : "object-contain", 
+                    imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm"
+                  )} 
+                />
+              </CarouselItem>
+            ))}
           </CarouselContent>
-          {images.length > 1 && <>
+          {images.length > 1 && (
+            <>
               <CarouselPrevious className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2" />
               <CarouselNext className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2" />
-            </>}
+            </>
+          )}
         </Carousel>
 
         <div className="absolute top-3 left-20 z-10">
@@ -536,27 +551,43 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </div>
         
         <div className="absolute bottom-3 left-3 z-10 flex flex-col gap-2">
-          {showHiddenGemBadge && <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/90 backdrop-blur-sm text-white flex items-center">
+          {showHiddenGemBadge && (
+            <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/90 backdrop-blur-sm text-white flex items-center">
               <Sparkles className="h-3 w-3 mr-1" />
               Hidden Gem
-            </span>}
-          {showMustVisitBadge && <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/90 backdrop-blur-sm text-white flex items-center">
+            </span>
+          )}
+          {showMustVisitBadge && (
+            <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/90 backdrop-blur-sm text-white flex items-center">
               <Award className="h-3 w-3 mr-1" />
               Must Visit
-            </span>}
+            </span>
+          )}
         </div>
         
-        <button onClick={handleWishlistToggle} className={cn("absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10", user ? inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500" : "text-muted-foreground")}>
-          {user ? <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} /> : <LogIn className="w-5 h-5" />}
+        <button 
+          onClick={handleWishlistToggle} 
+          className={cn(
+            "absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10", 
+            user ? inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500" : "text-muted-foreground"
+          )}
+        >
+          {user ? (
+            <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} />
+          ) : (
+            <LogIn className="w-5 h-5" />
+          )}
         </button>
       </div>
 
       <div className="p-4">
         <div className="flex justify-between items-start gap-2 mb-2">
           <div className="flex items-center gap-1.5">
-            {ranking !== undefined && ranking <= 10 && <div className={cn("flex items-center justify-center rounded-full border-2 flex-shrink-0", getMedalStyle(ranking).medalClass)}>
+            {ranking !== undefined && ranking <= 10 && (
+              <div className={cn("flex items-center justify-center rounded-full border-2 flex-shrink-0", getMedalStyle(ranking).medalClass)}>
                 {ranking}
-              </div>}
+              </div>
+            )}
             <h3 className="font-bold text-2xl">{recommendation.name}</h3>
           </div>
         </div>
@@ -648,24 +679,56 @@ const LocationCard: React.FC<LocationCardProps> = ({
         )}
 
         <div className="flex gap-2 mt-4 flex-wrap">
-          {formatPrice() && <Badge className="flex items-center gap-1 bg-[#c63e7b] px-[7px] py-[4px]">
+          {formatPrice() && (
+            <Badge className="flex items-center gap-1 bg-[#c63e7b] px-[7px] py-[4px]">
               <IndianRupee className="h-3.5 w-3.5" />
               {formatPrice()}
-            </Badge>}
-          {recommendation.tags && recommendation.tags.map((tag, index) => <Badge key={index} className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
+            </Badge>
+          )}
+          {recommendation.tags && recommendation.tags.map((tag, index) => (
+            <Badge key={index} className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
               {tag}
-            </Badge>)}
+            </Badge>
+          ))}
         </div>
 
         <div className="flex gap-2 mt-4">
-          <button onClick={handleCall} className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 text-slate-50 rounded">
+          <button 
+            onClick={handleCall} 
+            className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 text-slate-50 rounded"
+          >
             <Phone className="h-5 w-5" />
           </button>
-          <button onClick={handleWhatsApp} className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 rounded bg-green-500 hover:bg-green-400">
+          <button 
+            onClick={handleWhatsApp} 
+            className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 rounded bg-green-500 hover:bg-green-400"
+          >
             <MessageCircle className="h-5 w-5" />
           </button>
-          <button onClick={handleDirections} className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 bg-amber-600 hover:bg-amber-500 rounded">
+          <button 
+            onClick={handleDirections} 
+            className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 bg-amber-600 hover:bg-amber-500 rounded"
+          >
             <Navigation2 className="h-5 w-5" />
           </button>
-          <button onClick={handleShare} className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 bg-purple-600 hover:bg-purple-500 rounded">
-            <Share2 className
+          <button 
+            onClick={handleShare} 
+            className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 bg-purple-600 hover:bg-purple-500 rounded"
+          >
+            <Share2 className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+      
+      {imageViewerOpen && (
+        <ImageViewer 
+          images={images} 
+          initialIndex={selectedImageIndex}
+          onClose={() => setImageViewerOpen(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+export default LocationCard;
