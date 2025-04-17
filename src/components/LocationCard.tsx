@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown, Sparkles, Award, Calendar } from 'lucide-react';
@@ -589,9 +590,18 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </div>
 
         <div className="flex flex-col text-sm mb-3">
-          {(hasAvailabilityInfo() || businessHours) && <div className="flex justify-end">
+          <div className="flex justify-between items-center">
+            {recommendation.distance && !showDistanceUnderAddress && <div className="text-muted-foreground pl-5 mt-1 flex items-center">
+              <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
+              {formatDistance(recommendation.distance)}
+            </div>}
+          
+            {(hasAvailabilityInfo() || businessHours) && (
               <DropdownMenu>
-                <DropdownMenuTrigger onClick={e => e.stopPropagation()} className="ml-2 inline-flex items-center text-xs font-medium transition-colors rounded text-slate-50 px-[12px] mx-[2px] bg-zinc-800 hover:bg-zinc-700">
+                <DropdownMenuTrigger 
+                  onClick={e => e.stopPropagation()} 
+                  className="ml-2 inline-flex items-center text-xs font-medium transition-colors rounded text-slate-50 px-[12px] mx-[2px] bg-zinc-800 hover:bg-zinc-700"
+                >
                   <Calendar className="h-3.5 w-3.5 mr-1" />
                   <span className="underline text-sm px-0 mx-px">Hours</span>
                 </DropdownMenuTrigger>
@@ -606,12 +616,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
                     </div>}
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>}
-          
-          {recommendation.distance && !showDistanceUnderAddress && <div className="text-muted-foreground pl-5 mt-1 flex items-center">
-              <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
-              {formatDistance(recommendation.distance)}
-            </div>}
+            )}
+          </div>
         </div>
 
         {isSearchPage ? (
