@@ -8,6 +8,7 @@ import { MapPin, List } from 'lucide-react';
 import useRecommendations from '@/hooks/useRecommendations';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 
 const Map = () => {
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
@@ -145,32 +146,44 @@ const Map = () => {
       
       // Add recommendation markers
       recommendations.forEach(rec => {
-        if (rec.latitude && rec.longitude) {
-          try {
-            const lat = parseFloat(rec.latitude);
-            const lng = parseFloat(rec.longitude);
-            
-            if (!isNaN(lat) && !isNaN(lng)) {
-              const marker = new window.MapmyIndia.Marker({
-                position: [lng, lat] as [number, number],
-                map: map.current,
-                draggable: false,
-                popupHtml: `
-                  <div>
-                    <h3>${rec.name}</h3>
-                    <p>${rec.address || rec.area}</p>
-                    <button onclick="window.location.href='/location/${rec.id}'">View Details</button>
-                  </div>
-                `
-              });
-              
-              markers.current.push(marker);
-            }
-          } catch (error) {
-            console.error(`Error adding marker for ${rec.name}:`, error);
+        try {
+          let lat: number | null = null;
+          let lng: number | null = null;
+          
+          // Try to get coordinates directly from recommendation
+          if (rec.latitude && rec.longitude) {
+            lat = parseFloat(rec.latitude);
+            lng = parseFloat(rec.longitude);
           }
-        } else {
-          console.log(`Location ${rec.name} missing coordinates`);
+          // Try to extract from map_link if available
+          else if (rec.map_link) {
+            const coords = extractCoordinatesFromMapLink(rec.map_link);
+            if (coords) {
+              lat = coords.lat;
+              lng = coords.lng;
+            }
+          }
+          
+          if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
+            const marker = new window.MapmyIndia.Marker({
+              position: [lng, lat] as [number, number],
+              map: map.current,
+              draggable: false,
+              popupHtml: `
+                <div>
+                  <h3>${rec.name}</h3>
+                  <p>${rec.address || rec.area}</p>
+                  <button onclick="window.location.href='/location/${rec.id}'">View Details</button>
+                </div>
+              `
+            });
+            
+            markers.current.push(marker);
+          } else {
+            console.log(`Location ${rec.name} missing valid coordinates`);
+          }
+        } catch (error) {
+          console.error(`Error adding marker for ${rec.name}:`, error);
         }
       });
 
@@ -181,6 +194,11 @@ const Map = () => {
           bounds.extend(marker.getPosition());
         });
         map.current.fitBounds(bounds);
+      } else if (markers.current.length === 1) {
+        // If there's only one marker, center on it
+        const position = markers.current[0].getPosition();
+        map.current.setCenter(position);
+        map.current.setZoom(14);
       }
     };
     
@@ -226,7 +244,7 @@ const Map = () => {
                   View as List
                 </Button>
                 <div className="text-xs text-muted-foreground">
-                  Showing {recommendations.filter(r => r.latitude && r.longitude).length} locations
+                  Showing {markers.current.length} locations
                 </div>
               </div>
             </div>
