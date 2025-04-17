@@ -724,7 +724,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
         <ImageViewer 
           images={images} 
           initialIndex={selectedImageIndex}
-          onClose={() => setImageViewerOpen(false)}
+          open={imageViewerOpen}
+          onOpenChange={setImageViewerOpen}
         />
       )}
     </div>
