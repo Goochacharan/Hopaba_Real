@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -10,6 +11,7 @@ import SearchHeader from '@/components/search/SearchHeader';
 import SearchTabs from '@/components/search/SearchTabs';
 import SearchLocation from '@/components/search/SearchLocation';
 import SearchControls from '@/components/search/SearchControls';
+import MapViewButton from '@/components/search/MapViewButton';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -157,6 +159,9 @@ const SearchResults = () => {
             </div>
           )}
         </div>
+        
+        {/* Add the Map View button directly on the search results page */}
+        {rankedRecommendations.length > 0 && <MapViewButton />}
       </div>
     </MainLayout>
   );
