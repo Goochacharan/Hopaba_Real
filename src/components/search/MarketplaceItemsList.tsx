@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
@@ -10,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Clock } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
+import MapViewButton from '@/components/search/MapViewButton';
 
 interface MarketplaceItemsListProps {
   listings: MarketplaceListing[];
@@ -29,7 +29,6 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
   const searchQuery = searchParams.get('q') || '';
 
   useEffect(() => {
-    // Log more details for debugging
     console.log("MarketplaceItemsList - listings length:", listings?.length || 0);
     if (listings && listings.length > 0) {
       console.log("Sample listing data for debugging:");
@@ -54,7 +53,6 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     );
   }
 
-  // Filter listings to show approved ones or user's own listings regardless of approval status
   const visibleListings = listings.filter(listing => 
     listing.approval_status === 'approved' || 
     (user && listing.seller_id === user.id)
@@ -86,7 +84,6 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
             `with damage_images:`, listing.damage_images?.length || 0,
             `and certificates:`, listing.inspection_certificates?.length || 0);
             
-          // Make sure all the necessary properties are present
           const enhancedListing = {
             ...listing,
             location: listing.location || "Not specified",
@@ -110,7 +107,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
                 listing={enhancedListing}
                 className={cn(
                   "h-full flex flex-col",
-                  "search-result-card", // This class will be used to identify search result cards
+                  "search-result-card",
                   listing.approval_status === 'pending' ? "opacity-75" : ""
                 )}
               />
@@ -118,6 +115,8 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
           );
         })}
       </div>
+
+      {visibleListings.length > 0 && <MapViewButton />}
     </div>
   );
 };
