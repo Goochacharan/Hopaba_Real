@@ -6,7 +6,7 @@ import { useUserMarketplaceListings } from '@/hooks/useUserMarketplaceListings';
 import LocationSelector from '@/components/LocationSelector';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers } from 'lucide-react';
+import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers, Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import NoResultsMessage from '@/components/search/NoResultsMessage';
+import MapFilterButton from '@/components/search/MapFilterButton';
 
 type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
 
@@ -271,6 +272,8 @@ const Marketplace = () => {
         
         <ScrollArea className="w-full">
           <div className="flex items-center gap-3 mb-4 overflow-x-auto py-1 px-1">
+            <MapFilterButton />
+            
             <Popover>
               <PopoverTrigger asChild>
                 <Button 
