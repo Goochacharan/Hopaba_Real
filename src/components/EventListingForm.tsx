@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,6 +13,7 @@ import { Loader2, Save, X, CalendarClock, MapPin, Link2, ImagePlus } from 'lucid
 import { Event } from '@/hooks/useRecommendations';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { Separator } from '@/components/ui/separator';
+import { useMapLinkCoordinates } from '@/hooks/useMapLinkCoordinates';
 
 const eventListingSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
@@ -63,6 +65,9 @@ const EventListingForm: React.FC<EventListingFormProps> = ({
     defaultValues,
     mode: "onBlur",
   });
+
+  // Use the custom hook to handle map link coordinate extraction
+  useMapLinkCoordinates();
 
   const onSubmit = async (data: EventListingFormData) => {
     setIsSubmitting(true);

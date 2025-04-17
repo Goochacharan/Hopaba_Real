@@ -36,6 +36,16 @@ export interface Event {
   user_id?: string;
   isHiddenGem?: boolean;
   isMustVisit?: boolean;
+  
+  category?: string;
+  location_name?: string;
+  address?: string;
+  event_date?: string;
+  start_time?: string;
+  end_time?: string;
+  map_link?: string;
+  latitude?: string;
+  longitude?: string;
 }
 
 const useRecommendations = ({ 
