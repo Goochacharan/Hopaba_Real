@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +13,7 @@ import { Event } from '@/hooks/useRecommendations';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { Separator } from '@/components/ui/separator';
 import { useMapLinkCoordinates } from '@/hooks/useMapLinkCoordinates';
+import MapLinkExtractor from './event-form/MapLinkExtractor';
 
 const eventListingSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
@@ -66,9 +66,6 @@ const EventListingForm: React.FC<EventListingFormProps> = ({
     mode: "onBlur",
   });
 
-  // Use the custom hook to handle map link coordinate extraction
-  useMapLinkCoordinates();
-
   const onSubmit = async (data: EventListingFormData) => {
     setIsSubmitting(true);
 
@@ -88,10 +85,8 @@ const EventListingForm: React.FC<EventListingFormProps> = ({
         images: data.images || [],
       };
 
-      // Simulate saving the event
       console.log('Event data to save:', eventData);
       
-      // After successful save
       onSaved();
     } catch (err) {
       console.error('Error saving event listing:', err);
@@ -319,6 +314,8 @@ const EventListingForm: React.FC<EventListingFormProps> = ({
                 />
               </div>
             </div>
+
+            <MapLinkExtractor />
 
             <div className="flex justify-end gap-2 pt-4">
               {onCancel && (

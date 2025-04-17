@@ -14,11 +14,18 @@ export function useMapLinkCoordinates(
   latitudeFieldName: string = 'latitude',
   longitudeFieldName: string = 'longitude'
 ) {
-  const form = useFormContext();
+  // Get form context safely - will be undefined if used outside a FormProvider
+  const formContext = useFormContext();
   
   useEffect(() => {
+    // Only proceed if form context exists
+    if (!formContext) {
+      console.warn('useMapLinkCoordinates: No form context found. Make sure to use this hook within a FormProvider.');
+      return;
+    }
+
     // Get the map link value from the form
-    const mapLink = form.watch(mapLinkFieldName);
+    const mapLink = formContext.watch(mapLinkFieldName);
     
     if (mapLink) {
       // Try to extract coordinates
@@ -26,13 +33,11 @@ export function useMapLinkCoordinates(
       
       // If coordinates were found, update the form fields
       if (coords) {
-        form.setValue(latitudeFieldName, coords.lat.toString());
-        form.setValue(longitudeFieldName, coords.lng.toString());
+        formContext.setValue(latitudeFieldName, coords.lat.toString());
+        formContext.setValue(longitudeFieldName, coords.lng.toString());
       }
     }
-  }, [form.watch(mapLinkFieldName)]);
-  
-  return null;
+  }, [formContext, mapLinkFieldName, latitudeFieldName, longitudeFieldName, formContext?.watch(mapLinkFieldName)]);
 }
 
 export default useMapLinkCoordinates;
