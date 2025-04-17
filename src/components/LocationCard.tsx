@@ -574,44 +574,52 @@ const LocationCard: React.FC<LocationCardProps> = ({
               <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
               <span className="truncate">{recommendation.address}</span>
             </div>
-            {hasInstagram() && <button onClick={e => handleInstagramClick(e, recommendation.instagram, recommendation.name)} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 hover:shadow-md transition-all ml-2 p-1.5 flex items-center rounded py-[4px] mx-[2px] px-[15px]">
-                <Film className="h-4 w-4 text-white mr-1" />
-                <span className="text-white text-xs font-medium">Video</span>
-              </button>}
+            <div className="flex items-center gap-2">
+              {hasInstagram() && (
+                <button 
+                  onClick={(e) => handleInstagramClick(e, recommendation.instagram, recommendation.name)} 
+                  title="Watch video content" 
+                  className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 hover:shadow-md transition-all p-1.5 flex items-center rounded py-[4px] px-[15px]"
+                >
+                  <Film className="h-4 w-4 text-white mr-1" />
+                  <span className="text-white text-xs font-medium">Video</span>
+                </button>
+              )}
+
+              {(hasAvailabilityInfo() || businessHours) && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger 
+                    onClick={e => e.stopPropagation()} 
+                    className="inline-flex items-center text-xs font-medium transition-colors rounded text-slate-50 px-[12px] py-[4px] bg-zinc-800 hover:bg-zinc-700"
+                  >
+                    <Calendar className="h-3.5 w-3.5 mr-1" />
+                    <span className="underline text-sm px-0 mx-px">Hours</span>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
+                    {getAvailabilityDaysDisplay() && (
+                      <div className="mb-1">
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
+                        <div className="text-sm">{getAvailabilityDaysDisplay()}</div>
+                      </div>
+                    )}
+                    {getAvailabilityHoursDisplay() && (
+                      <div>
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Hours:</div>
+                        <div className="text-sm">{getAvailabilityHoursDisplay()}</div>
+                      </div>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </div>
           
           {recommendation.distance && showDistanceUnderAddress && <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center justify-between my-[3px] px-[2px]">
-              <div className="flex items-center px-0 mx-0">
-                <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
-                {formatDistance(recommendation.distance)}
-              </div>
-            </div>}
-        </div>
-
-        <div className="flex flex-col text-sm mb-3">
-          {(hasAvailabilityInfo() || businessHours) && <div className="flex justify-end">
-              <DropdownMenu>
-                <DropdownMenuTrigger onClick={e => e.stopPropagation()} className="ml-2 inline-flex items-center text-xs font-medium transition-colors rounded text-slate-50 px-[12px] mx-[2px] bg-zinc-800 hover:bg-zinc-700">
-                  <Calendar className="h-3.5 w-3.5 mr-1" />
-                  <span className="underline text-sm px-0 mx-px">Hours</span>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
-                  {getAvailabilityDaysDisplay() && <div className="mb-1">
-                      <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
-                      <div className="text-sm">{getAvailabilityDaysDisplay()}</div>
-                    </div>}
-                  {getAvailabilityHoursDisplay() && <div>
-                      <div className="text-xs font-medium text-muted-foreground mb-1">Hours:</div>
-                      <div className="text-sm">{getAvailabilityHoursDisplay()}</div>
-                    </div>}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>}
-          
-          {recommendation.distance && !showDistanceUnderAddress && <div className="text-muted-foreground pl-5 mt-1 flex items-center">
+            <div className="flex items-center px-0 mx-0">
               <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
               {formatDistance(recommendation.distance)}
-            </div>}
+            </div>
+          </div>}
         </div>
 
         {isSearchPage ? (
