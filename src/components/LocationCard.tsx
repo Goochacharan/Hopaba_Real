@@ -574,7 +574,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
               <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
               <span className="truncate">{recommendation.address}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center space-x-2">
               {hasInstagram() && (
                 <button 
                   onClick={(e) => handleInstagramClick(e, recommendation.instagram, recommendation.name)} 
@@ -585,41 +585,52 @@ const LocationCard: React.FC<LocationCardProps> = ({
                   <span className="text-white text-xs font-medium">Video</span>
                 </button>
               )}
-
-              {(hasAvailabilityInfo() || businessHours) && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger 
-                    onClick={e => e.stopPropagation()} 
-                    className="inline-flex items-center text-xs font-medium transition-colors rounded text-slate-50 px-[12px] py-[4px] bg-zinc-800 hover:bg-zinc-700"
-                  >
-                    <Calendar className="h-3.5 w-3.5 mr-1" />
-                    <span className="underline text-sm px-0 mx-px">Hours</span>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
-                    {getAvailabilityDaysDisplay() && (
-                      <div className="mb-1">
-                        <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
-                        <div className="text-sm">{getAvailabilityDaysDisplay()}</div>
-                      </div>
-                    )}
-                    {getAvailabilityHoursDisplay() && (
-                      <div>
-                        <div className="text-xs font-medium text-muted-foreground mb-1">Hours:</div>
-                        <div className="text-sm">{getAvailabilityHoursDisplay()}</div>
-                      </div>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
             </div>
           </div>
           
-          {recommendation.distance && showDistanceUnderAddress && <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center justify-between my-[3px] px-[2px]">
-            <div className="flex items-center px-0 mx-0">
+          {recommendation.distance && showDistanceUnderAddress && (
+            <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center justify-between my-[3px] px-[2px]">
+              <div className="flex items-center px-0 mx-0">
+                <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
+                {formatDistance(recommendation.distance)}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col text-sm mb-3 space-y-2">
+          {recommendation.distance && !showDistanceUnderAddress && (
+            <div className="text-muted-foreground pl-5 mt-1 flex items-center">
               <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
               {formatDistance(recommendation.distance)}
             </div>
-          </div>}
+          )}
+          
+          {(hasAvailabilityInfo() || businessHours) && (
+            <DropdownMenu>
+              <DropdownMenuTrigger 
+                onClick={e => e.stopPropagation()} 
+                className="inline-flex items-center text-xs font-medium transition-colors rounded text-slate-50 px-[12px] py-[4px] bg-zinc-800 hover:bg-zinc-700 self-start"
+              >
+                <Calendar className="h-3.5 w-3.5 mr-1" />
+                <span className="underline text-sm px-0 mx-px">Hours</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
+                {getAvailabilityDaysDisplay() && (
+                  <div className="mb-1">
+                    <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
+                    <div className="text-sm">{getAvailabilityDaysDisplay()}</div>
+                  </div>
+                )}
+                {getAvailabilityHoursDisplay() && (
+                  <div>
+                    <div className="text-xs font-medium text-muted-foreground mb-1">Hours:</div>
+                    <div className="text-sm">{getAvailabilityHoursDisplay()}</div>
+                  </div>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         {isSearchPage ? (
@@ -657,14 +668,4 @@ const LocationCard: React.FC<LocationCardProps> = ({
             <Navigation2 className="h-5 w-5" />
           </button>
           <button onClick={handleShare} className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 bg-purple-600 hover:bg-purple-500 rounded">
-            <Share2 className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
-
-      {images.length > 0 && <ImageViewer images={images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
-    </div>
-  );
-};
-
-export default LocationCard;
+            <Share2 className
