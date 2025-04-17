@@ -98,8 +98,8 @@ const Map = () => {
     const initializeMap = async () => {
       try {
         // Default center (Bengaluru)
-        const defaultCenter = [77.5946, 12.9716]; 
-        const center = userCoordinates 
+        const defaultCenter: [number, number] = [77.5946, 12.9716]; 
+        const center: [number, number] = userCoordinates 
           ? [userCoordinates.lng, userCoordinates.lat] 
           : defaultCenter;
         
@@ -127,7 +127,7 @@ const Map = () => {
       // Add user location marker if available
       if (userCoordinates) {
         const userMarker = new window.MapmyIndia.Marker({
-          position: [userCoordinates.lng, userCoordinates.lat],
+          position: [userCoordinates.lng, userCoordinates.lat] as [number, number],
           icon: {
             url: 'https://apis.mapmyindia.com/map_v3/1.png',
             width: 25,
@@ -148,7 +148,7 @@ const Map = () => {
         const longitude = parseFloat(rec.id) % 0.1 + 77.5946;
         
         const marker = new window.MapmyIndia.Marker({
-          position: [longitude, latitude],
+          position: [longitude, latitude] as [number, number],
           map: map.current,
           draggable: false,
           popupHtml: `
