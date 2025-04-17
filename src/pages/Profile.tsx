@@ -10,12 +10,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import UserMarketplaceListings from '@/components/UserMarketplaceListings';
 import UserEventListings from '@/components/UserEventListings';
 import { AdminSection } from '@/components/admin/AdminSection';
-import { Plus, Settings as SettingsIcon, LogOut, MapPin } from 'lucide-react';
+import { Plus, Settings as SettingsIcon, LogOut } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import BusinessFormSimple from '@/components/business/BusinessFormSimple';
 import BusinessListSimple from '@/components/business/BusinessListSimple';
 import { Business } from '@/components/business/BusinessFormSimple';
-import LocationMapTab from '@/components/profile/LocationMapTab';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -113,14 +112,10 @@ const Profile = () => {
               <BusinessFormSimple business={editingBusiness} onSaved={handleBusinessSaved} onCancel={handleCancelBusinessForm} />
             </CardContent>
           </Card> : <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-4 mb-8">
+            <TabsList className="grid grid-cols-3 mb-8">
               <TabsTrigger value="listings">Marketplace</TabsTrigger>
-              <TabsTrigger value="events">Events</TabsTrigger>
+              <TabsTrigger value="events"> Events</TabsTrigger>
               <TabsTrigger value="businesses">Your Businesses</TabsTrigger>
-              <TabsTrigger value="map" className="flex items-center gap-1">
-                <MapPin className="h-4 w-4" />
-                <span>Map</span>
-              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="listings">
@@ -141,10 +136,6 @@ const Profile = () => {
               </div>
 
               <BusinessListSimple onEdit={handleEditBusiness} refresh={refreshBusinesses} />
-            </TabsContent>
-            
-            <TabsContent value="map">
-              <LocationMapTab />
             </TabsContent>
           </Tabs>}
       </div>
