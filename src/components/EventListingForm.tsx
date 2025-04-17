@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,13 +10,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card } from '@/components/ui/card';
-import { Loader2, Save, X } from 'lucide-react';
+import { Loader2, Save, X, Map } from 'lucide-react';
 import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { format } from 'date-fns';
 import { ImageUpload } from '@/components/ui/image-upload';
+import { Separator } from '@/components/ui/separator';
+import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 
 const eventFormSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
@@ -25,6 +27,12 @@ const eventFormSchema = z.object({
   time: z.string().min(1, { message: "Time is required" }),
   location: z.string().min(5, { message: "Location must be at least 5 characters" }),
   image: z.string().min(1, { message: "Image is required" }),
+  map_link: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
+  postal_code: z.string().optional(),
+  city: z.string().optional(),
+  area: z.string().optional(),
   attendees: z.coerce.number().optional(),
   price_per_person: z.coerce.number().optional(),
 });
@@ -50,6 +58,12 @@ export const EventListingForm = ({ event, onSaved, onCancel }: EventFormProps) =
     time: event?.time || '',
     location: event?.location || '',
     image: event?.image || '',
+    map_link: event?.map_link || '',
+    latitude: event?.latitude || '',
+    longitude: event?.longitude || '',
+    postal_code: event?.postal_code || '',
+    city: event?.city || '',
+    area: event?.area || '',
     attendees: event?.attendees || 0,
     price_per_person: event?.price_per_person || 0,
   };
@@ -59,6 +73,17 @@ export const EventListingForm = ({ event, onSaved, onCancel }: EventFormProps) =
     defaultValues,
     mode: "onBlur",
   });
+
+  useEffect(() => {
+    const mapLink = form.watch('map_link');
+    if (mapLink) {
+      const coords = extractCoordinatesFromMapLink(mapLink);
+      if (coords) {
+        form.setValue('latitude', coords.lat.toString());
+        form.setValue('longitude', coords.lng.toString());
+      }
+    }
+  }, [form.watch('map_link')]);
 
   const handleImageChange = useCallback((images: string[]) => {
     form.setValue('image', images[0], { shouldValidate: true });
@@ -77,7 +102,6 @@ export const EventListingForm = ({ event, onSaved, onCancel }: EventFormProps) =
     setIsSubmitting(true);
 
     try {
-      // Prepare the event data
       const eventPayload = {
         title: data.title,
         date: data.date,
@@ -85,22 +109,27 @@ export const EventListingForm = ({ event, onSaved, onCancel }: EventFormProps) =
         location: data.location,
         description: data.description,
         image: data.image,
+        map_link: data.map_link || null,
+        latitude: data.latitude || null,
+        longitude: data.longitude || null,
+        postal_code: data.postal_code || null,
+        city: data.city || null,
+        area: data.area || null,
         attendees: data.attendees || 0,
         price_per_person: data.price_per_person || 0,
-        approval_status: 'pending', // Always set approval_status to pending when creating or updating
-        user_id: user.id // Add the user_id to associate the event with the current user
+        approval_status: 'pending',
+        user_id: user.id
       };
 
       console.log("Submitting event with user_id:", user.id);
 
       if (event) {
-        // Update existing event
         const { error } = await supabase
           .from('events')
           .update(eventPayload)
           .eq('id', event.id)
-          .eq('user_id', user.id); // Ensure we're only updating an event that belongs to the user
-        
+          .eq('user_id', user.id);
+
         if (error) throw error;
         
         toast({
@@ -108,11 +137,10 @@ export const EventListingForm = ({ event, onSaved, onCancel }: EventFormProps) =
           description: "Your event has been updated and will be reviewed by an admin.",
         });
       } else {
-        // Create new event
         const { error } = await supabase
           .from('events')
           .insert(eventPayload);
-        
+
         if (error) throw error;
         
         toast({
@@ -188,6 +216,36 @@ export const EventListingForm = ({ event, onSaved, onCancel }: EventFormProps) =
                   </FormItem>
                 )}
               />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. Bengaluru" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="area"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Area/Neighborhood</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. Indiranagar" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <FormField
@@ -279,6 +337,80 @@ export const EventListingForm = ({ event, onSaved, onCancel }: EventFormProps) =
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="map_link"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Google Maps Link</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Paste Google Maps link here" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Add a Google Maps link to help attendees find your event
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Separator className="my-2" />
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Map className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-medium">Geographic Coordinates</h3>
+                </div>
+
+                <FormDescription className="mt-0">
+                  These coordinates help display your event accurately on the map. They'll be automatically filled if you provide a Google Maps link.
+                </FormDescription>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="latitude"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Latitude</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. 12.9716" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="longitude"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Longitude</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. 77.5946" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="postal_code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Postal/ZIP Code</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter postal code" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}

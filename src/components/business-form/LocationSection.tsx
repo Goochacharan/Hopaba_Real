@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { 
   FormField, 
@@ -10,8 +10,9 @@ import {
   FormDescription
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { MapPin, Link2 } from 'lucide-react';
+import { MapPin, Link2, Map } from 'lucide-react';
 import { BusinessFormValues } from '../AddBusinessForm';
+import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 
 const LocationSection = () => {
   const form = useFormContext<BusinessFormValues>();
@@ -26,6 +27,18 @@ const LocationSection = () => {
       onChange(value);
     }
   };
+  
+  // Extract coordinates from map_link if available
+  useEffect(() => {
+    const mapLink = form.watch('map_link');
+    if (mapLink) {
+      const coords = extractCoordinatesFromMapLink(mapLink);
+      if (coords) {
+        form.setValue('latitude', coords.lat.toString());
+        form.setValue('longitude', coords.lng.toString());
+      }
+    }
+  }, [form.watch('map_link')]);
   
   return (
     <>
@@ -79,6 +92,45 @@ const LocationSection = () => {
         )}
       />
 
+      <div className="md:col-span-2">
+        <h4 className="text-sm font-medium flex items-center gap-2 mt-4 mb-2">
+          <Map className="h-4 w-4 text-muted-foreground" />
+          Geographic Coordinates
+        </h4>
+        <FormDescription className="mb-2">
+          These coordinates help display your business accurately on the map. They'll be automatically filled if you provide a Google Maps link.
+        </FormDescription>
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="latitude"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Latitude</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. 12.9716" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="longitude"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Longitude</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. 77.5946" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+
       <FormField
         control={form.control}
         name="city"
@@ -101,6 +153,20 @@ const LocationSection = () => {
             <FormLabel>Area/Neighborhood*</FormLabel>
             <FormControl>
               <Input placeholder="Enter neighborhood or area" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="postal_code"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Postal/ZIP Code</FormLabel>
+            <FormControl>
+              <Input placeholder="Enter postal code" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>

@@ -85,3 +85,44 @@ export function formatDistance(distance: number, unit: 'km' | 'mi' = 'km'): stri
   }
   return `${distance.toFixed(1)} ${unit}`;
 }
+
+/**
+ * Try to extract coordinates from a Google Maps link
+ * @param mapLink Google Maps URL
+ * @returns Object with lat and lng if found, null otherwise
+ */
+export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, lng: number} | null {
+  if (!mapLink) return null;
+  
+  try {
+    // Try to extract coordinates from Google Maps URL
+    // Example formats:
+    // https://www.google.com/maps?q=12.9716,77.5946
+    // https://www.google.com/maps/@12.9716,77.5946,15z
+    // https://goo.gl/maps/XXXX (shortened URL)
+    
+    // Match @latitude,longitude format
+    const atMatch = mapLink.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (atMatch) {
+      return {
+        lat: parseFloat(atMatch[1]),
+        lng: parseFloat(atMatch[2])
+      };
+    }
+    
+    // Match q=latitude,longitude format
+    const qMatch = mapLink.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (qMatch) {
+      return {
+        lat: parseFloat(qMatch[1]),
+        lng: parseFloat(qMatch[2])
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error extracting coordinates from map link:', error);
+    return null;
+  }
+}
+

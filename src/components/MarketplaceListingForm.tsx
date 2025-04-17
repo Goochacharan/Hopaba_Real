@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,11 +12,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card } from '@/components/ui/card';
-import { Loader2, Save, X, Instagram, Film, MapPin, Link2, Unlock, AlertTriangle, FileText } from 'lucide-react';
+import { Loader2, Save, X, Instagram, Film, MapPin, Link2, Unlock, AlertTriangle, FileText, Map } from 'lucide-react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 
 const marketplaceListingSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
@@ -28,6 +28,9 @@ const marketplaceListingSchema = z.object({
   model_year: z.string().optional(),
   location: z.string().optional(),
   map_link: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
+  postal_code: z.string().optional(),
   seller_name: z.string().min(2, { message: "Seller name is required" }),
   seller_phone: z.string()
     .refine(phone => phone.startsWith('+91'), {
@@ -79,6 +82,9 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     model_year: listing?.model_year || '',
     location: listing?.location || '',
     map_link: listing?.map_link || '',
+    latitude: listing?.latitude || '',
+    longitude: listing?.longitude || '',
+    postal_code: listing?.postal_code || '',
     seller_name: listing?.seller_name || user?.user_metadata?.full_name || '',
     seller_phone: listing?.seller_phone || '+91',
     seller_whatsapp: listing?.seller_whatsapp || '+91',
@@ -94,6 +100,17 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     defaultValues,
     mode: "onBlur",
   });
+
+  useEffect(() => {
+    const mapLink = form.watch('map_link');
+    if (mapLink) {
+      const coords = extractCoordinatesFromMapLink(mapLink);
+      if (coords) {
+        form.setValue('latitude', coords.lat.toString());
+        form.setValue('longitude', coords.lng.toString());
+      }
+    }
+  }, [form.watch('map_link')]);
 
   const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'seller_phone' | 'seller_whatsapp') => {
     let value = e.target.value;
@@ -146,6 +163,9 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         model_year: data.model_year || null,
         location: data.location || "Not specified",
         map_link: data.map_link || null,
+        latitude: data.latitude || null,
+        longitude: data.longitude || null,
+        postal_code: data.postal_code || null,
         seller_name: data.seller_name || "Anonymous Seller",
         seller_id: user.id,
         seller_phone: data.seller_phone || null,
@@ -201,7 +221,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     const currentYear = new Date().getFullYear();
     const years = [];
     
-    // Generate years from current year down to 1950
     for (let year = currentYear; year >= 1950; year--) {
       years.push(year.toString());
     }
@@ -364,6 +383,59 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                     <FormDescription>
                       Add a Google Maps link for more precise directions
                     </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div>
+                <h4 className="text-sm font-medium flex items-center gap-2 mb-2">
+                  <Map className="h-4 w-4 text-muted-foreground" />
+                  Geographic Coordinates
+                </h4>
+                <FormDescription className="mb-2">
+                  These coordinates help display your listing accurately on the map. They'll be automatically filled if you provide a Google Maps link.
+                </FormDescription>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="latitude"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Latitude</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. 12.9716" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="longitude"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Longitude</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. 77.5946" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="postal_code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Postal/ZIP Code (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter postal code" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -632,4 +704,3 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
 };
 
 export default MarketplaceListingForm;
-
