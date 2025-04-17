@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import MainLayout from '@/components/MainLayout';
 import { useNavigate } from 'react-router-dom';
@@ -7,8 +8,6 @@ import { MapPin, List } from 'lucide-react';
 import useRecommendations from '@/hooks/useRecommendations';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import mapboxgl from 'mapbox-gl';
 
 const Map = () => {
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
@@ -16,8 +15,8 @@ const Map = () => {
   const [loading, setLoading] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markers = useRef<mapboxgl.Marker[]>([]);
+  const map = useRef<any | null>(null);
+  const markers = useRef<any[]>([]);
   const navigate = useNavigate();
 
   const { recommendations } = useRecommendations({});
@@ -37,83 +36,135 @@ const Map = () => {
     };
     checkUser();
 
+    // Create a new script element for loading MapMyIndia Maps SDK
+    const loadMapScript = async () => {
+      try {
+        // Get MapMyIndia API key from edge function
+        const { data, error } = await supabase.functions.invoke('get-mapmyindia-key');
+        if (error) throw error;
+        
+        const apiKey = data.apiKey;
+        
+        if (!apiKey) {
+          console.error('MapMyIndia API key not found');
+          return;
+        }
+        
+        return new Promise<void>((resolve, reject) => {
+          // Check if MapmyIndia script is already loaded
+          if (window.MapmyIndia) {
+            setMapLoaded(true);
+            resolve();
+            return;
+          }
+          
+          // Load MapmyIndia SDK
+          const script = document.createElement('script');
+          script.src = `https://apis.mapmyindia.com/advancedmaps/v1/${apiKey}/map_load?v=1.5`;
+          script.async = true;
+          script.defer = true;
+          
+          script.onload = () => {
+            setMapLoaded(true);
+            resolve();
+          };
+          
+          script.onerror = (error) => {
+            console.error('Error loading MapMyIndia script:', error);
+            reject(error);
+          };
+          
+          document.head.appendChild(script);
+        });
+      } catch (error) {
+        console.error('Failed to load MapMyIndia script:', error);
+      }
+    };
+
+    loadMapScript();
+    
+    return () => {
+      // Clean up map instance if it exists
+      if (map.current) {
+        map.current.remove();
+      }
+    };
+  }, []);
+  
+  // Initialize the map after the script is loaded
+  useEffect(() => {
+    if (!mapLoaded || !mapContainer.current) return;
+    
     const initializeMap = async () => {
       try {
-        const mapMyIndiaApiKey = await fetchMapMyIndiaApiKey();
+        // Default center (Bengaluru)
+        const defaultCenter = [77.5946, 12.9716]; 
+        const center = userCoordinates 
+          ? [userCoordinates.lng, userCoordinates.lat] 
+          : defaultCenter;
         
-        mapboxgl.accessToken = mapMyIndiaApiKey;
-        
-        const defaultCenter: [number, number] = [77.5946, 12.9716]; // Bengaluru coordinates
-        const center: [number, number] = userCoordinates ? [userCoordinates.lng, userCoordinates.lat] : defaultCenter;
-        
-        map.current = new mapboxgl.Map({
-          container: mapContainer.current,
-          style: 'mapbox://styles/mapbox/streets-v12',
+        // Initialize MapMyIndia map
+        map.current = new window.MapmyIndia.Map(mapContainer.current, {
           center: center,
-          zoom: 12
+          zoom: 12,
+          search: false
         });
-
-        map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
         
-        map.current.on('load', () => {
+        // Add markers when map is ready
+        map.current.addEventListener('load', () => {
           addMarkers();
         });
       } catch (error) {
         console.error('Error initializing map:', error);
       }
     };
-
+    
     const addMarkers = () => {
+      // Clear existing markers
       markers.current.forEach(marker => marker.remove());
       markers.current = [];
       
+      // Add user location marker if available
       if (userCoordinates) {
-        const userMarker = new mapboxgl.Marker({ color: '#FF0000' })
-          .setLngLat([userCoordinates.lng, userCoordinates.lat])
-          .setPopup(new mapboxgl.Popup().setHTML('<p>Your location</p>'))
-          .addTo(map.current!);
+        const userMarker = new window.MapmyIndia.Marker({
+          position: [userCoordinates.lng, userCoordinates.lat],
+          icon: {
+            url: 'https://apis.mapmyindia.com/map_v3/1.png',
+            width: 25,
+            height: 41
+          },
+          map: map.current,
+          draggable: false,
+          popupHtml: '<p>Your location</p>'
+        });
+        
         markers.current.push(userMarker);
       }
       
+      // Add recommendation markers
       recommendations.forEach(rec => {
-        const latitude = parseFloat(rec.id) % 0.1 + 12.9716; // Dummy coordinates for example
-        const longitude = parseFloat(rec.id) % 0.1 + 77.5946; // Dummy coordinates for example
+        // Using dummy coordinates for example
+        const latitude = parseFloat(rec.id) % 0.1 + 12.9716;
+        const longitude = parseFloat(rec.id) % 0.1 + 77.5946;
         
-        const marker = new mapboxgl.Marker({ color: '#3FB1CE' })
-          .setLngLat([longitude, latitude])
-          .setPopup(
-            new mapboxgl.Popup().setHTML(
-              `<div>
-                <h3>${rec.name}</h3>
-                <p>${rec.address}</p>
-                <button onclick="window.location.href='/location/${rec.id}'">View Details</button>
-              </div>`
-            )
-          )
-          .addTo(map.current!);
+        const marker = new window.MapmyIndia.Marker({
+          position: [longitude, latitude],
+          map: map.current,
+          draggable: false,
+          popupHtml: `
+            <div>
+              <h3>${rec.name}</h3>
+              <p>${rec.address}</p>
+              <button onclick="window.location.href='/location/${rec.id}'">View Details</button>
+            </div>
+          `
+        });
+        
         markers.current.push(marker);
       });
     };
-
-    const fetchMapMyIndiaApiKey = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('get-mapmyindia-key');
-        
-        if (error) throw error;
-        return data.apiKey;
-      } catch (error) {
-        console.error('Error fetching MapMyIndia API key:', error);
-        throw error;
-      }
-    };
-
+    
     initializeMap();
-
-    return () => {
-      if (map.current) {
-        map.current.remove();
-      }
-    };
   }, [mapLoaded, recommendations, userCoordinates]);
 
   return (
