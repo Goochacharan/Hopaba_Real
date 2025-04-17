@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown, Sparkles, Award, Calendar } from 'lucide-react';
@@ -590,30 +589,47 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </div>
 
         <div className="flex flex-col text-sm mb-3">
-          <div className="flex justify-between items-center">
-            {recommendation.distance && !showDistanceUnderAddress && <div className="text-muted-foreground pl-5 mt-1 flex items-center">
+          {recommendation.distance && !showDistanceUnderAddress && (
+            <div className="text-muted-foreground pl-5 mt-1 flex items-center">
               <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
               {formatDistance(recommendation.distance)}
-            </div>}
+            </div>
+          )}
           
+          <div className="flex flex-col space-y-2 mt-2">
+            {hasInstagram() && (
+              <button 
+                onClick={(e) => handleInstagramClick(e, recommendation.instagram, recommendation.name)}
+                title="Watch video content" 
+                className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 hover:shadow-md transition-all p-1.5 flex items-center rounded py-[4px] px-[15px] self-start"
+              >
+                <Film className="h-4 w-4 text-white mr-1" />
+                <span className="text-white text-xs font-medium">Video</span>
+              </button>
+            )}
+
             {(hasAvailabilityInfo() || businessHours) && (
               <DropdownMenu>
                 <DropdownMenuTrigger 
                   onClick={e => e.stopPropagation()} 
-                  className="ml-2 inline-flex items-center text-xs font-medium transition-colors rounded text-slate-50 px-[12px] mx-[2px] bg-zinc-800 hover:bg-zinc-700"
+                  className="inline-flex items-center text-xs font-medium transition-colors rounded text-slate-50 px-[12px] py-[4px] bg-zinc-800 hover:bg-zinc-700 self-start"
                 >
                   <Calendar className="h-3.5 w-3.5 mr-1" />
                   <span className="underline text-sm px-0 mx-px">Hours</span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
-                  {getAvailabilityDaysDisplay() && <div className="mb-1">
+                  {getAvailabilityDaysDisplay() && (
+                    <div className="mb-1">
                       <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
                       <div className="text-sm">{getAvailabilityDaysDisplay()}</div>
-                    </div>}
-                  {getAvailabilityHoursDisplay() && <div>
+                    </div>
+                  )}
+                  {getAvailabilityHoursDisplay() && (
+                    <div>
                       <div className="text-xs font-medium text-muted-foreground mb-1">Hours:</div>
                       <div className="text-sm">{getAvailabilityHoursDisplay()}</div>
-                    </div>}
+                    </div>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -654,15 +670,4 @@ const LocationCard: React.FC<LocationCardProps> = ({
           <button onClick={handleDirections} className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 bg-amber-600 hover:bg-amber-500 rounded">
             <Navigation2 className="h-5 w-5" />
           </button>
-          <button onClick={handleShare} className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 bg-purple-600 hover:bg-purple-500 rounded">
-            <Share2 className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
-
-      {images.length > 0 && <ImageViewer images={images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
-    </div>
-  );
-};
-
-export default LocationCard;
+          <
