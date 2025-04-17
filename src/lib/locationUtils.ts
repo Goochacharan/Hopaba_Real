@@ -65,8 +65,12 @@ export async function geocodeAddress(address: string): Promise<{lat: number, lng
       return { lat: 12.9716, lng: 77.5946 };
     }
     
-    // Fallback to dummy coordinates
-    return { lat: 12.9716, lng: 77.5946 };
+    // Generate semi-random coordinates for demo purposes
+    const hash = address.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+    const lat = 12.9716 + (hash % 10) / 100;
+    const lng = 77.5946 + (hash % 15) / 100;
+    
+    return { lat, lng };
   } catch (error) {
     console.error('Geocoding error:', error);
     return null;
