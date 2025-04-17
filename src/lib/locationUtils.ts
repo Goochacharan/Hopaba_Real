@@ -100,6 +100,8 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
     // https://www.google.com/maps?q=12.9716,77.5946
     // https://www.google.com/maps/@12.9716,77.5946,15z
     // https://goo.gl/maps/XXXX (shortened URL)
+    // https://maps.app.goo.gl/XXXXX
+    // https://maps.google.com/?ll=12.9716,77.5946
     
     // Match @latitude,longitude format
     const atMatch = mapLink.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
@@ -111,7 +113,7 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
     }
     
     // Match q=latitude,longitude format
-    const qMatch = mapLink.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    const qMatch = mapLink.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (qMatch) {
       return {
         lat: parseFloat(qMatch[1]),
@@ -119,10 +121,28 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
       };
     }
     
+    // Match ll=latitude,longitude format
+    const llMatch = mapLink.match(/[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (llMatch) {
+      return {
+        lat: parseFloat(llMatch[1]),
+        lng: parseFloat(llMatch[2])
+      };
+    }
+    
+    // Match plain latitude,longitude format that might be in the URL
+    const plainMatch = mapLink.match(/(?:maps\/|place\/|^)(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (plainMatch) {
+      return {
+        lat: parseFloat(plainMatch[1]),
+        lng: parseFloat(plainMatch[2])
+      };
+    }
+    
+    console.log("Could not extract coordinates from map link:", mapLink);
     return null;
   } catch (error) {
     console.error('Error extracting coordinates from map link:', error);
     return null;
   }
 }
-

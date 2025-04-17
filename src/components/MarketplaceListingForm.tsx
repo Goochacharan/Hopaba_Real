@@ -381,51 +381,13 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                       />
                     </FormControl>
                     <FormDescription>
-                      Add a Google Maps link for more precise directions
+                      Add a Google Maps link for precise coordinates and directions.
+                      Latitude and longitude will be automatically extracted.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              <div>
-                <h4 className="text-sm font-medium flex items-center gap-2 mb-2">
-                  <Map className="h-4 w-4 text-muted-foreground" />
-                  Geographic Coordinates
-                </h4>
-                <FormDescription className="mb-2">
-                  These coordinates help display your listing accurately on the map. They'll be automatically filled if you provide a Google Maps link.
-                </FormDescription>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="latitude"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Latitude</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. 12.9716" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="longitude"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Longitude</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. 77.5946" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
 
               <FormField
                 control={form.control}

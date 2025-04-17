@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { EventListingForm } from '../EventListingForm';
 import { Event } from '@/hooks/useRecommendations';
+import MapLinkExtractor from '../event-form/MapLinkExtractor';
 
 interface EventFormWrapperProps {
   event: Event | null;
@@ -26,6 +27,8 @@ const EventFormWrapper: React.FC<EventFormWrapperProps> = ({ event, onSaved, onC
         onSaved={onSaved} 
         onCancel={onCancel}
       />
+      {/* This component will handle extracting coordinates from map links */}
+      <MapLinkExtractor />
     </div>
   );
 };
