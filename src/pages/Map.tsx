@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import MainLayout from '@/components/MainLayout';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import LocationSelector from '@/components/LocationSelector';
 import { Button } from '@/components/ui/button';
 import { MapPin, List } from 'lucide-react';
@@ -18,8 +18,10 @@ const Map = () => {
   const map = useRef<any | null>(null);
   const markers = useRef<any[]>([]);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const { recommendations } = useRecommendations({});
+  // Get recommendations from the same hook that the main page uses
+  const { recommendations, loading: recommendationsLoading } = useRecommendations({});
 
   const handleLocationChange = (location: string, coordinates?: { lat: number; lng: number }) => {
     setSelectedLocation(location);
@@ -93,7 +95,7 @@ const Map = () => {
   
   // Initialize the map after the script is loaded
   useEffect(() => {
-    if (!mapLoaded || !mapContainer.current) return;
+    if (!mapLoaded || !mapContainer.current || recommendationsLoading) return;
     
     const initializeMap = async () => {
       try {
@@ -143,29 +145,47 @@ const Map = () => {
       
       // Add recommendation markers
       recommendations.forEach(rec => {
-        // Using dummy coordinates for example
-        const latitude = parseFloat(rec.id) % 0.1 + 12.9716;
-        const longitude = parseFloat(rec.id) % 0.1 + 77.5946;
-        
-        const marker = new window.MapmyIndia.Marker({
-          position: [longitude, latitude] as [number, number],
-          map: map.current,
-          draggable: false,
-          popupHtml: `
-            <div>
-              <h3>${rec.name}</h3>
-              <p>${rec.address}</p>
-              <button onclick="window.location.href='/location/${rec.id}'">View Details</button>
-            </div>
-          `
-        });
-        
-        markers.current.push(marker);
+        if (rec.latitude && rec.longitude) {
+          try {
+            const lat = parseFloat(rec.latitude);
+            const lng = parseFloat(rec.longitude);
+            
+            if (!isNaN(lat) && !isNaN(lng)) {
+              const marker = new window.MapmyIndia.Marker({
+                position: [lng, lat] as [number, number],
+                map: map.current,
+                draggable: false,
+                popupHtml: `
+                  <div>
+                    <h3>${rec.name}</h3>
+                    <p>${rec.address || rec.area}</p>
+                    <button onclick="window.location.href='/location/${rec.id}'">View Details</button>
+                  </div>
+                `
+              });
+              
+              markers.current.push(marker);
+            }
+          } catch (error) {
+            console.error(`Error adding marker for ${rec.name}:`, error);
+          }
+        } else {
+          console.log(`Location ${rec.name} missing coordinates`);
+        }
       });
+
+      // If we have valid coordinates, fit the map to show all markers
+      if (markers.current.length > 1) {
+        const bounds = new window.MapmyIndia.LatLngBounds();
+        markers.current.forEach(marker => {
+          bounds.extend(marker.getPosition());
+        });
+        map.current.fitBounds(bounds);
+      }
     };
     
     initializeMap();
-  }, [mapLoaded, recommendations, userCoordinates]);
+  }, [mapLoaded, recommendations, userCoordinates, recommendationsLoading]);
 
   return (
     <MainLayout>
@@ -180,7 +200,7 @@ const Map = () => {
             />
           </div>
           
-          {loading ? (
+          {loading || recommendationsLoading ? (
             <div className="flex justify-center items-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
@@ -206,7 +226,7 @@ const Map = () => {
                   View as List
                 </Button>
                 <div className="text-xs text-muted-foreground">
-                  Showing {recommendations.length} locations
+                  Showing {recommendations.filter(r => r.latitude && r.longitude).length} locations
                 </div>
               </div>
             </div>

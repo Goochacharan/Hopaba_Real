@@ -23,6 +23,9 @@ declare global {
         popupHtml?: string;
         [key: string]: any;
       }) => any;
+      LatLngBounds: new () => {
+        extend: (latLng: [number, number]) => void;
+      };
     };
   }
 }
