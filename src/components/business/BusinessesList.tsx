@@ -25,6 +25,7 @@ import {
 import type { BusinessFormValues } from '@/components/AddBusinessForm';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import MapViewButton from '@/components/search/MapViewButton';
 
 interface BusinessesListProps {
   onEdit: (business: BusinessFormValues & { id: string }) => void;
@@ -145,7 +146,7 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       <h3 className="text-xl font-medium">Your Businesses and Services</h3>
       <div className="grid grid-cols-1 gap-6">
         {businesses.map((business) => (
@@ -239,6 +240,8 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
           </Card>
         ))}
       </div>
+
+      {businesses.length > 0 && <MapViewButton />}
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
