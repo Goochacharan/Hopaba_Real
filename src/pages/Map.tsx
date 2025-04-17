@@ -4,17 +4,19 @@ import MainLayout from '@/components/MainLayout';
 import { useNavigate, useLocation } from 'react-router-dom';
 import LocationSelector from '@/components/LocationSelector';
 import { Button } from '@/components/ui/button';
-import { MapPin, List } from 'lucide-react';
+import { MapPin, List, AlertTriangle } from 'lucide-react';
 import useRecommendations from '@/hooks/useRecommendations';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const Map = () => {
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
   const [userCoordinates, setUserCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<any | null>(null);
   const markers = useRef<any[]>([]);
@@ -44,12 +46,19 @@ const Map = () => {
       try {
         // Get MapMyIndia API key from edge function
         const { data, error } = await supabase.functions.invoke('get-mapmyindia-key');
-        if (error) throw error;
+        if (error) {
+          console.error('Error getting MapMyIndia API key:', error);
+          setMapError('Failed to get map API key. Please try again later.');
+          setLoading(false);
+          return;
+        }
         
-        const apiKey = data.apiKey;
+        const apiKey = data?.apiKey;
         
         if (!apiKey) {
           console.error('MapMyIndia API key not found');
+          setMapError('Map API key not found. Please check your configuration.');
+          setLoading(false);
           return;
         }
         
@@ -57,6 +66,7 @@ const Map = () => {
           // Check if MapmyIndia script is already loaded
           if (window.MapmyIndia) {
             setMapLoaded(true);
+            setLoading(false);
             resolve();
             return;
           }
@@ -69,11 +79,14 @@ const Map = () => {
           
           script.onload = () => {
             setMapLoaded(true);
+            setLoading(false);
             resolve();
           };
           
           script.onerror = (error) => {
             console.error('Error loading MapMyIndia script:', error);
+            setMapError('Failed to load map. Please check your internet connection and try again.');
+            setLoading(false);
             reject(error);
           };
           
@@ -81,6 +94,8 @@ const Map = () => {
         });
       } catch (error) {
         console.error('Failed to load MapMyIndia script:', error);
+        setMapError('Failed to load map. Please try again later.');
+        setLoading(false);
       }
     };
 
@@ -119,6 +134,7 @@ const Map = () => {
         });
       } catch (error) {
         console.error('Error initializing map:', error);
+        setMapError('Error initializing map. Please try refreshing the page.');
       }
     };
     
@@ -222,10 +238,21 @@ const Map = () => {
             <div className="flex justify-center items-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
+          ) : mapError ? (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                {mapError}
+                <p className="mt-2">
+                  Please make sure you have added the MapMyIndia API key to your Supabase Edge Function secrets.
+                </p>
+              </AlertDescription>
+            </Alert>
           ) : (
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
               <div className="h-[600px] w-full relative" ref={mapContainer}>
-                {!mapLoaded && (
+                {!mapLoaded && !mapError && (
                   <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
                     <div className="text-center">
                       <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />

@@ -1,7 +1,7 @@
 
 declare global {
   interface Window {
-    MapmyIndia: {
+    MapmyIndia?: {
       Map: new (
         element: HTMLElement, 
         options: {
