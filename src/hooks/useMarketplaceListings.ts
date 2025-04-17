@@ -13,6 +13,9 @@ export interface MarketplaceListing {
   model_year?: string | null;
   location: string | null;
   map_link?: string | null;
+  latitude?: string | null;
+  longitude?: string | null;
+  postal_code?: string | null;
   seller_name: string;
   seller_id?: string | null;
   seller_phone?: string | null;
