@@ -14,6 +14,17 @@ interface BusinessesListProps {
 const BusinessesList: React.FC<BusinessesListProps> = ({ businesses = [], loading = false, error = null }) => {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
+  // Mock functions for onEdit and onDelete if needed
+  const handleEdit = (business: any) => {
+    console.log('Edit business:', business);
+    // Implement edit functionality
+  };
+
+  const handleDelete = (id: string) => {
+    console.log('Delete business:', id);
+    // Implement delete functionality
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -66,7 +77,12 @@ const BusinessesList: React.FC<BusinessesListProps> = ({ businesses = [], loadin
         <div className="grid grid-cols-1 gap-6">
           {businesses.map((business, index) => (
             <div key={business.id} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
-              <BusinessCard business={business} className="h-full" />
+              <BusinessCard 
+                business={business} 
+                className="h-full"
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             </div>
           ))}
         </div>

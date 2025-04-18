@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Card,
@@ -34,9 +33,10 @@ interface BusinessCardProps {
   business: Business;
   onEdit: (business: Business) => void;
   onDelete: (id: string) => void;
+  className?: string;
 }
 
-const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete }) => {
+const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete, className }) => {
   const { toast } = useToast();
 
   const handleInstagramClick = (e: React.MouseEvent, instagram: string | undefined, businessName: string) => {
@@ -59,7 +59,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
   };
 
   return (
-    <Card key={business.id} className="overflow-hidden">
+    <Card key={business.id} className={className || "overflow-hidden"}>
       <CardHeader className="bg-muted/30">
         <CardTitle className="flex justify-between items-start">
           <span>{business.name}</span>
