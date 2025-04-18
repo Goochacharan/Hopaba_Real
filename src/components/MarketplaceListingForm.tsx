@@ -18,6 +18,7 @@ import { ImageUpload } from '@/components/ui/image-upload';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
+import { User, UserCog } from 'lucide-react';
 
 const marketplaceListingSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
@@ -53,6 +54,9 @@ const marketplaceListingSchema = z.object({
   is_negotiable: z.boolean().optional(),
   damage_images: z.array(z.string()).optional(),
   inspection_certificates: z.array(z.string()).optional(),
+  seller_role: z.enum(['owner', 'agent'], {
+    required_error: "Please select your role",
+  }),
 });
 
 type MarketplaceListingFormData = z.infer<typeof marketplaceListingSchema>;
@@ -93,6 +97,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     is_negotiable: listing?.is_negotiable || false,
     damage_images: listing?.damage_images || [],
     inspection_certificates: listing?.inspection_certificates || [],
+    seller_role: listing?.seller_role || 'owner',
   };
 
   const form = useForm<MarketplaceListingFormData>({
@@ -565,6 +570,41 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="seller_role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Your Role*</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="owner">
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            Owner
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="agent">
+                          <div className="flex items-center gap-2">
+                            <UserCog className="h-4 w-4" />
+                            Agent
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Are you the owner of this item or an agent helping with the sale?
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
           </div>
 
