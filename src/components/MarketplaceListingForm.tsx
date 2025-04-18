@@ -180,7 +180,8 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         damage_images: data.damage_images || [],
         inspection_certificates: data.inspection_certificates || [],
         approval_status: 'pending',
-        is_negotiable: data.is_negotiable || false
+        is_negotiable: data.is_negotiable || false,
+        seller_role: data.seller_role
       };
 
       if (listing?.id) {
