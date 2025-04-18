@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import StarRating from './StarRating';
@@ -103,8 +102,8 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
           variant={sellerRole === 'owner' ? 'default' : 'outline'} 
           className={`text-[10px] px-2 py-0.5 flex items-center gap-1 font-bold 
             ${sellerRole === 'owner' 
-              ? 'bg-gradient-to-br from-blue-600 to-blue-500 text-white hover:from-blue-500 hover:to-blue-600' 
-              : 'border-amber-500 text-amber-600 hover:bg-amber-50'}
+              ? 'bg-blue-600 text-white hover:bg-blue-700' 
+              : 'border-amber-500 text-white bg-blue-600 hover:bg-blue-700'}
             transition-all duration-300 ease-in-out 
             shadow-sm hover:shadow-md 
             active:scale-95`}
@@ -125,4 +124,3 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
 };
 
 export default SellerInfo;
-
