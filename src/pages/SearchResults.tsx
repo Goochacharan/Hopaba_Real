@@ -25,7 +25,11 @@ const SearchResults = () => {
   const [userCoordinates, setUserCoordinates] = useState<{
     lat: number;
     lng: number;
-  } | null>(null);
+  } | null>({
+    lat: 12.9716,
+    lng: 77.5946
+  }); // Default to Bengaluru coordinates
+  
   const [isMapView, setIsMapView] = useState(false);
   
   const { filters, setters } = useSearchFilters();
@@ -107,6 +111,17 @@ const SearchResults = () => {
       navigate('/');
     }
   }, [searchQuery, navigate]);
+  
+  // Initialize with Bengaluru coordinates if no user location is set
+  useEffect(() => {
+    if (!userCoordinates) {
+      console.log("Setting default Bengaluru coordinates");
+      setUserCoordinates({
+        lat: 12.9716,
+        lng: 77.5946
+      });
+    }
+  }, [userCoordinates]);
   
   const handleRSVP = (eventTitle: string) => {
     toast({

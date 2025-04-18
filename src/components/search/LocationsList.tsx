@@ -70,7 +70,8 @@ const LocationsList: React.FC<LocationsListProps> = ({
         {recommendations.map((recommendation, index) => {
           console.log(`LocationsList - Processing recommendation ${index}:`, recommendation.id);
           console.log(`Distance:`, recommendation.distance || 'not calculated');
-          console.log(`Calculated Distance:`, recommendation.calculatedDistance || 'not set');
+          console.log(`Calculated Distance:`, recommendation.calculatedDistance !== undefined ? 
+                     `${recommendation.calculatedDistance.toFixed(1)} km` : 'not set');
           console.log(`Availability days:`, recommendation.availability_days);
           console.log(`Hours:`, recommendation.hours);
           
@@ -90,6 +91,13 @@ const LocationsList: React.FC<LocationsListProps> = ({
           // Use user rating if available, otherwise use default rating
           const displayRating = userReviewsCount > 0 ? userAvgRating : recommendation.rating;
           
+          // Ensure we always have a valid distance display
+          const displayDistance = recommendation.distance && recommendation.distance !== '0.5 miles away' ? 
+                                 recommendation.distance : 
+                                 (recommendation.calculatedDistance !== undefined ? 
+                                 `${recommendation.calculatedDistance.toFixed(1)} km away` : 
+                                 'Distance unknown');
+          
           return (
             <div 
               key={recommendation.id} 
@@ -108,7 +116,7 @@ const LocationsList: React.FC<LocationsListProps> = ({
                   availability_end_time: recommendation.availability_end_time || undefined,
                   hideAvailabilityDropdown: true,
                   // Ensure distance is accurately displayed
-                  distance: recommendation.distance || 'Distance unknown'
+                  distance: displayDistance
                 }}
                 showDistanceUnderAddress={true}
                 className="search-result-card h-full"

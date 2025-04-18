@@ -1,3 +1,4 @@
+
 import { calculateDistance } from '@/lib/locationUtils';
 import { Recommendation } from '@/lib/mockData';
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
@@ -26,6 +27,7 @@ export const addDistanceToRecommendations = (recs: Recommendation[], userCoordin
     // If we still don't have coordinates, use fallback values based on ID
     // This is only for backwards compatibility
     if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
+      console.log(`Using fallback coordinates for ${rec.id} because coordinates were invalid or missing`);
       latitude = parseFloat(rec.id) % 0.1 + 12.9716;
       longitude = parseFloat(rec.id) % 0.1 + 77.5946;
     }
@@ -37,6 +39,8 @@ export const addDistanceToRecommendations = (recs: Recommendation[], userCoordin
       longitude,
       'K'
     );
+    
+    console.log(`Calculated distance for ${rec.id}: ${distanceValue.toFixed(1)}km (using coords ${latitude}, ${longitude})`);
     
     return {
       ...rec,
@@ -78,7 +82,8 @@ export const enhanceRecommendations = (recommendations: Recommendation[]) => {
       availability_start_time: rec.availability_start_time || '',
       availability_end_time: rec.availability_end_time || '',
       isHiddenGem: rec.isHiddenGem,
-      isMustVisit: rec.isMustVisit
+      isMustVisit: rec.isMustVisit,
+      distance: rec.distance
     });
     
     return {
