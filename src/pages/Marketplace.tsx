@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import PostalCodeSearch from '@/components/search/PostalCodeSearch';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useMarketplaceListings, MarketplaceListing } from '@/hooks/useMarketplaceListings';
@@ -47,7 +48,8 @@ const Marketplace = () => {
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   const [distanceFilter, setDistanceFilter] = useState<number>(50);
   const itemsPerPage = 9;
-  
+  const [postalCodeFilter, setPostalCodeFilter] = useState<string>('');
+
   useEffect(() => {
     if (categoryParam && categoryParam !== currentCategory) {
       console.log("Setting category from URL:", categoryParam);
@@ -176,6 +178,12 @@ const Marketplace = () => {
   };
 
   const locationFilteredListings = enhancedListingsWithDistance.filter(listing => {
+    if (postalCodeFilter && listing.postal_code) {
+      if (!listing.postal_code.startsWith(postalCodeFilter)) {
+        return false;
+      }
+    }
+
     if (selectedLocation === "Current Location") {
       if (listing.distance === undefined) return true;
       return listing.distance <= distanceFilter;
@@ -330,348 +338,349 @@ const Marketplace = () => {
   const isDistanceFilterActive = distanceFilter < 50;
 
   return <MainLayout>
-      <div className="animate-fade-in px-[7px]">
-        <div className="flex items-center justify-between">
-          {/* Remove LocationSelector component */}
-        </div>
+    <div className="animate-fade-in px-[7px]">
+      <PostalCodeSearch onSearch={setPostalCodeFilter} />
+      <div className="flex items-center justify-between">
         
-        {pendingListings.length > 0 && user && (
-          <Alert className="my-3 bg-muted/50">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Pending Approval</AlertTitle>
-            <AlertDescription>
-              You have {pendingListings.length} listing{pendingListings.length > 1 ? 's' : ''} waiting for admin approval.
-              {pendingListings.some(l => l.title.toLowerCase().includes('honda') && l.title.toLowerCase().includes('wrv')) && (
-                <span className="block mt-1 font-medium">Your Honda WRV listing will appear after approval.</span>
-              )}
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        <ScrollArea className="w-full">
-          <div className="flex items-center gap-3 mb-4 overflow-x-auto py-1 px-1">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button 
-                  variant={isSortFilterActive ? "default" : "outline"} 
-                  size="sm" 
-                  className={cn(
-                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0",
-                    isSortFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
-                  )}
-                >
-                  <ChevronDown className="h-3 w-3" />
-                  {isSortFilterActive && (
-                    <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
-                      •
-                    </Badge>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="start" className="w-48 p-2">
-                <div className="space-y-1">
-                  <Button variant={sortOption === 'newest' ? "default" : "ghost"} size="sm" className="w-full justify-start" onClick={() => handleSortChange('newest')}>
-                    Newest First
-                  </Button>
-                  <Button variant={sortOption === 'price-low-high' ? "default" : "ghost"} size="sm" className="w-full justify-start" onClick={() => handleSortChange('price-low-high')}>
-                    Price: Low to High
-                  </Button>
-                  <Button variant={sortOption === 'price-high-low' ? "default" : "ghost"} size="sm" className="w-full justify-start" onClick={() => handleSortChange('price-high-low')}>
-                    Price: High to Low
-                  </Button>
-                  <Button variant={sortOption === 'top-rated' ? "default" : "ghost"} size="sm" className="w-full justify-start" onClick={() => handleSortChange('top-rated')}>
-                    Top Rated
-                  </Button>
-                  <Button variant={sortOption === 'nearest' ? "default" : "ghost"} size="sm" className="w-full justify-start" onClick={() => handleSortChange('nearest')}>
-                    Nearest First
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            {selectedLocation === "Current Location" && (
-              <Popover open={activeFilter === 'distance'} onOpenChange={open => setActiveFilter(open ? 'distance' : null)}>
-                <PopoverTrigger asChild>
-                  <Button 
-                    variant={isDistanceFilterActive ? "default" : "outline"} 
-                    size="icon" 
-                    className={cn(
-                      "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
-                      activeFilter === 'distance' && "border-primary ring-2 ring-primary/20", 
-                      isDistanceFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
-                    )}
-                  >
-                    <MapPin className="h-4 w-4" />
-                    {isDistanceFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
-                        {distanceFilter}
-                      </Badge>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 p-4">
-                  <div className="space-y-4">
-                    <h4 className="font-medium">Maximum Distance</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Show results within</span>
-                        <span className="text-sm font-medium">{distanceFilter} km</span>
-                      </div>
-                      <Slider value={[distanceFilter]} min={1} max={50} step={1} onValueChange={value => setDistanceFilter(value[0])} />
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
-
-            <Popover open={activeFilter === 'rating'} onOpenChange={open => setActiveFilter(open ? 'rating' : null)}>
-              <PopoverTrigger asChild>
-                <Button 
-                  variant={isRatingFilterActive ? "default" : "outline"} 
-                  size="icon" 
-                  className={cn(
-                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
-                    activeFilter === 'rating' && "border-primary ring-2 ring-primary/20", 
-                    isRatingFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
-                  )}
-                >
-                  <Star className="h-4 w-4" />
-                  {isRatingFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
-                      {ratingFilter}+
-                    </Badge>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-4">
-                <div className="space-y-4">
-                  <h4 className="font-medium">Minimum Seller Rating</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Show results rated</span>
-                      <div className="flex items-center">
-                        <Star className="h-3 w-3 fill-amber-500 text-amber-500 mr-1" />
-                        <span className="text-sm font-medium">{ratingFilter}+</span>
-                      </div>
-                    </div>
-                    <Slider value={[ratingFilter]} min={0} max={5} step={0.5} onValueChange={value => setRatingFilter(value[0])} />
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            <Popover open={activeFilter === 'price'} onOpenChange={open => setActiveFilter(open ? 'price' : null)}>
-              <PopoverTrigger asChild>
-                <Button 
-                  variant={isPriceFilterActive ? "default" : "outline"} 
-                  size="icon" 
-                  className={cn(
-                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
-                    activeFilter === 'price' && "border-primary ring-2 ring-primary/20", 
-                    isPriceFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
-                  )}
-                >
-                  <IndianRupee className="h-4 w-4" />
-                  {isPriceFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
-                      ₹
-                    </Badge>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-4">
-                <div className="space-y-4">
-                  <h4 className="font-medium">Price Range</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">From</span>
-                      <span className="text-sm font-medium inline-flex items-center">
-                        <span className="text-sm">₹</span>
-                        <span className="text-sm">{new Intl.NumberFormat('en-IN', {
-                          maximumFractionDigits: 0
-                        }).format(priceRange[0])}</span>
-                      </span>
-                    </div>
-                    <Slider 
-                      value={[priceRange[0]]} 
-                      min={0} 
-                      max={10000000} 
-                      step={100000} 
-                      onValueChange={value => setPriceRange([value[0], priceRange[1]])} 
-                    />
-                    <div className="flex justify-between mt-4">
-                      <span className="text-sm text-muted-foreground">To</span>
-                      <span className="text-sm font-medium inline-flex items-center">
-                        <span className="text-sm">₹</span>
-                        <span className="text-sm">{new Intl.NumberFormat('en-IN', {
-                          maximumFractionDigits: 0
-                        }).format(priceRange[1])}</span>
-                      </span>
-                    </div>
-                    <Slider 
-                      value={[priceRange[1]]} 
-                      min={0} 
-                      max={10000000} 
-                      step={100000} 
-                      onValueChange={value => setPriceRange([priceRange[0], value[0]])} 
-                    />
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            <Popover open={activeFilter === 'year'} onOpenChange={open => setActiveFilter(open ? 'year' : null)}>
-              <PopoverTrigger asChild>
-                <Button 
-                  variant={isYearFilterActive ? "default" : "outline"} 
-                  size="icon" 
-                  className={cn(
-                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
-                    activeFilter === 'year' && "border-primary ring-2 ring-primary/20", 
-                    isYearFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
-                  )}
-                >
-                  <Calendar className="h-4 w-4" />
-                  {isYearFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
-                      {yearRange[0].toString().slice(-2)}-{yearRange[1].toString().slice(-2)}
-                    </Badge>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-4">
-                <div className="space-y-4">
-                  <h4 className="font-medium">Model Year Range</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">From</span>
-                      <span className="text-sm font-medium">{yearRange[0]}</span>
-                    </div>
-                    <Slider value={[yearRange[0]]} min={2000} max={new Date().getFullYear()} step={1} onValueChange={value => setYearRange([value[0], yearRange[1]])} />
-                    <div className="flex justify-between mt-4">
-                      <span className="text-sm text-muted-foreground">To</span>
-                      <span className="text-sm font-medium">{yearRange[1]}</span>
-                    </div>
-                    <Slider value={[yearRange[1]]} min={2000} max={new Date().getFullYear()} step={1} onValueChange={value => setYearRange([yearRange[0], value[0]])} />
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            <Popover open={activeFilter === 'condition'} onOpenChange={open => setActiveFilter(open ? 'condition' : null)}>
-              <PopoverTrigger asChild>
-                <Button 
-                  variant={isConditionFilterActive ? "default" : "outline"} 
-                  size="icon" 
-                  className={cn(
-                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
-                    activeFilter === 'condition' && "border-primary ring-2 ring-primary/20", 
-                    isConditionFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
-                  )}
-                >
-                  <Layers className="h-4 w-4" />
-                  {isConditionFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
-                      •
-                    </Badge>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-4">
-                <div className="space-y-4">
-                  <h4 className="font-medium">Item Condition</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button variant={conditionFilter === 'all' ? "default" : "outline"} size="sm" onClick={() => setConditionFilter('all')}>
-                      All
-                    </Button>
-                    <Button variant={conditionFilter === 'new' ? "default" : "outline"} size="sm" onClick={() => setConditionFilter('new')}>
-                      New
-                    </Button>
-                    <Button variant={conditionFilter === 'like new' ? "default" : "outline"} size="sm" onClick={() => setConditionFilter('like new')}>
-                      Like New
-                    </Button>
-                    <Button variant={conditionFilter === 'good' ? "default" : "outline"} size="sm" onClick={() => setConditionFilter('good')}>
-                      Good
-                    </Button>
-                    <Button variant={conditionFilter === 'fair' ? "default" : "outline"} size="sm" onClick={() => setConditionFilter('fair')}>
-                      Fair
-                    </Button>
-                    <Button variant={conditionFilter === 'poor' ? "default" : "outline"} size="sm" onClick={() => setConditionFilter('poor')}>
-                      Poor
-                    </Button>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-        </ScrollArea>
-        
-        <Tabs defaultValue={currentCategory} value={currentCategory} onValueChange={handleCategoryChange} className="mb-6">
-          <TabsList className="mb-4 flex flex-nowrap overflow-auto pb-1 scrollbar-none py-0">
-            {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify font-semibold text-sm mx-[8px] px-[7px]">
-                {category.name}
-              </TabsTrigger>)}
-          </TabsList>
-          
-          {categories.map(category => <TabsContent key={category.id} value={category.id}>
-              {error && <Alert variant="destructive" className="mb-4">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>}
-  
-              {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="bg-white/50 h-80 rounded-xl border border-border/50 animate-pulse" />)}
-                </div>
-              ) : paginatedListings.length > 0 ? (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {paginatedListings.map((listing, index) => (
-                      <div 
-                        key={listing.id} 
-                        ref={listing.id === highlightedListingId ? highlightedListingRef : null}
-                        className={cn(
-                          "transition-all duration-300",
-                          listing.id === highlightedListingId ? "ring-4 ring-primary ring-opacity-50" : ""
-                        )}
-                      >
-                        <MarketplaceListingCard 
-                          listing={listing} 
-                          className="relative"
-                        />
-                        {listing.distance !== undefined && (
-                          <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            <span>{listing.distance.toFixed(1)} km</span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {totalPages > 1 && <Pagination className="mt-8">
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} className={currentPage === 1 ? "pointer-events-none opacity-50" : ""} />
-                        </PaginationItem>
-                        
-                        {Array.from({
-                  length: totalPages
-                }).map((_, index) => <PaginationItem key={index}>
-                            <PaginationLink onClick={() => setCurrentPage(index + 1)} isActive={currentPage === index + 1}>
-                              {index + 1}
-                            </PaginationLink>
-                          </PaginationItem>)}
-                        
-                        <PaginationItem>
-                          <PaginationNext onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""} />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>}
-                </>
-              ) : (
-                <NoResultsMessage 
-                  type="marketplace" 
-                  onNewSearch={(query) => {
-                    console.log(`New search requested: ${query}`);
-                  }} 
-                />
-              )}
-            </TabsContent>)}
-        </Tabs>
       </div>
-    </MainLayout>;
+      
+      {pendingListings.length > 0 && user && (
+        <Alert className="my-3 bg-muted/50">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Pending Approval</AlertTitle>
+          <AlertDescription>
+            You have {pendingListings.length} listing{pendingListings.length > 1 ? 's' : ''} waiting for admin approval.
+            {pendingListings.some(l => l.title.toLowerCase().includes('honda') && l.title.toLowerCase().includes('wrv')) && (
+              <span className="block mt-1 font-medium">Your Honda WRV listing will appear after approval.</span>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      <ScrollArea className="w-full">
+        <div className="flex items-center gap-3 mb-4 overflow-x-auto py-1 px-1">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant={isSortFilterActive ? "default" : "outline"} 
+                size="sm" 
+                className={cn(
+                  "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0",
+                  isSortFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
+                )}
+              >
+                <ChevronDown className="h-3 w-3" />
+                {isSortFilterActive && (
+                  <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
+                    •
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-48 p-2">
+              <div className="space-y-1">
+                <Button variant={sortOption === 'newest' ? "default" : "ghost"} size="sm" className="w-full justify-start" onClick={() => handleSortChange('newest')}>
+                  Newest First
+                </Button>
+                <Button variant={sortOption === 'price-low-high' ? "default" : "ghost"} size="sm" className="w-full justify-start" onClick={() => handleSortChange('price-low-high')}>
+                  Price: Low to High
+                </Button>
+                <Button variant={sortOption === 'price-high-low' ? "default" : "ghost"} size="sm" className="w-full justify-start" onClick={() => handleSortChange('price-high-low')}>
+                  Price: High to Low
+                </Button>
+                <Button variant={sortOption === 'top-rated' ? "default" : "ghost"} size="sm" className="w-full justify-start" onClick={() => handleSortChange('top-rated')}>
+                  Top Rated
+                </Button>
+                <Button variant={sortOption === 'nearest' ? "default" : "ghost"} size="sm" className="w-full justify-start" onClick={() => handleSortChange('nearest')}>
+                  Nearest First
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {selectedLocation === "Current Location" && (
+            <Popover open={activeFilter === 'distance'} onOpenChange={open => setActiveFilter(open ? 'distance' : null)}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant={isDistanceFilterActive ? "default" : "outline"} 
+                  size="icon" 
+                  className={cn(
+                    "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
+                    activeFilter === 'distance' && "border-primary ring-2 ring-primary/20", 
+                    isDistanceFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
+                  )}
+                >
+                  <MapPin className="h-4 w-4" />
+                  {isDistanceFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
+                      {distanceFilter}
+                    </Badge>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4">
+                <div className="space-y-4">
+                  <h4 className="font-medium">Maximum Distance</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Show results within</span>
+                      <span className="text-sm font-medium">{distanceFilter} km</span>
+                    </div>
+                    <Slider value={[distanceFilter]} min={1} max={50} step={1} onValueChange={value => setDistanceFilter(value[0])} />
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
+
+          <Popover open={activeFilter === 'rating'} onOpenChange={open => setActiveFilter(open ? 'rating' : null)}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant={isRatingFilterActive ? "default" : "outline"} 
+                size="icon" 
+                className={cn(
+                  "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
+                  activeFilter === 'rating' && "border-primary ring-2 ring-primary/20", 
+                  isRatingFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
+                )}
+              >
+                <Star className="h-4 w-4" />
+                {isRatingFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
+                    {ratingFilter}+
+                  </Badge>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4">
+              <div className="space-y-4">
+                <h4 className="font-medium">Minimum Seller Rating</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Show results rated</span>
+                    <div className="flex items-center">
+                      <Star className="h-3 w-3 fill-amber-500 text-amber-500 mr-1" />
+                      <span className="text-sm font-medium">{ratingFilter}+</span>
+                    </div>
+                  </div>
+                  <Slider value={[ratingFilter]} min={0} max={5} step={0.5} onValueChange={value => setRatingFilter(value[0])} />
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <Popover open={activeFilter === 'price'} onOpenChange={open => setActiveFilter(open ? 'price' : null)}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant={isPriceFilterActive ? "default" : "outline"} 
+                size="icon" 
+                className={cn(
+                  "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
+                  activeFilter === 'price' && "border-primary ring-2 ring-primary/20", 
+                  isPriceFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
+                )}
+              >
+                <IndianRupee className="h-4 w-4" />
+                {isPriceFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
+                    ₹
+                  </Badge>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4">
+              <div className="space-y-4">
+                <h4 className="font-medium">Price Range</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">From</span>
+                    <span className="text-sm font-medium inline-flex items-center">
+                      <span className="text-sm">₹</span>
+                      <span className="text-sm">{new Intl.NumberFormat('en-IN', {
+                        maximumFractionDigits: 0
+                      }).format(priceRange[0])}</span>
+                    </span>
+                  </div>
+                  <Slider 
+                    value={[priceRange[0]]} 
+                    min={0} 
+                    max={10000000} 
+                    step={100000} 
+                    onValueChange={value => setPriceRange([value[0], priceRange[1]])} 
+                  />
+                  <div className="flex justify-between mt-4">
+                    <span className="text-sm text-muted-foreground">To</span>
+                    <span className="text-sm font-medium inline-flex items-center">
+                      <span className="text-sm">₹</span>
+                      <span className="text-sm">{new Intl.NumberFormat('en-IN', {
+                        maximumFractionDigits: 0
+                      }).format(priceRange[1])}</span>
+                    </span>
+                  </div>
+                  <Slider 
+                    value={[priceRange[1]]} 
+                    min={0} 
+                    max={10000000} 
+                    step={100000} 
+                    onValueChange={value => setPriceRange([priceRange[0], value[0]])} 
+                  />
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <Popover open={activeFilter === 'year'} onOpenChange={open => setActiveFilter(open ? 'year' : null)}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant={isYearFilterActive ? "default" : "outline"} 
+                size="icon" 
+                className={cn(
+                  "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
+                  activeFilter === 'year' && "border-primary ring-2 ring-primary/20", 
+                  isYearFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
+                )}
+              >
+                <Calendar className="h-4 w-4" />
+                {isYearFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
+                    {yearRange[0].toString().slice(-2)}-{yearRange[1].toString().slice(-2)}
+                  </Badge>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4">
+              <div className="space-y-4">
+                <h4 className="font-medium">Model Year Range</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">From</span>
+                    <span className="text-sm font-medium">{yearRange[0]}</span>
+                  </div>
+                  <Slider value={[yearRange[0]]} min={2000} max={new Date().getFullYear()} step={1} onValueChange={value => setYearRange([value[0], yearRange[1]])} />
+                  <div className="flex justify-between mt-4">
+                    <span className="text-sm text-muted-foreground">To</span>
+                    <span className="text-sm font-medium">{yearRange[1]}</span>
+                  </div>
+                  <Slider value={[yearRange[1]]} min={2000} max={new Date().getFullYear()} step={1} onValueChange={value => setYearRange([yearRange[0], value[0]])} />
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <Popover open={activeFilter === 'condition'} onOpenChange={open => setActiveFilter(open ? 'condition' : null)}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant={isConditionFilterActive ? "default" : "outline"} 
+                size="icon" 
+                className={cn(
+                  "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
+                  activeFilter === 'condition' && "border-primary ring-2 ring-primary/20", 
+                  isConditionFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
+                )}
+              >
+                <Layers className="h-4 w-4" />
+                {isConditionFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
+                    •
+                  </Badge>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4">
+              <div className="space-y-4">
+                <h4 className="font-medium">Item Condition</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant={conditionFilter === 'all' ? "default" : "outline"} size="sm" onClick={() => setConditionFilter('all')}>
+                    All
+                  </Button>
+                  <Button variant={conditionFilter === 'new' ? "default" : "outline"} size="sm" onClick={() => setConditionFilter('new')}>
+                    New
+                  </Button>
+                  <Button variant={conditionFilter === 'like new' ? "default" : "outline"} size="sm" onClick={() => setConditionFilter('like new')}>
+                    Like New
+                  </Button>
+                  <Button variant={conditionFilter === 'good' ? "default" : "outline"} size="sm" onClick={() => setConditionFilter('good')}>
+                    Good
+                  </Button>
+                  <Button variant={conditionFilter === 'fair' ? "default" : "outline"} size="sm" onClick={() => setConditionFilter('fair')}>
+                    Fair
+                  </Button>
+                  <Button variant={conditionFilter === 'poor' ? "default" : "outline"} size="sm" onClick={() => setConditionFilter('poor')}>
+                    Poor
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </ScrollArea>
+      
+      <Tabs defaultValue={currentCategory} value={currentCategory} onValueChange={handleCategoryChange} className="mb-6">
+        <TabsList className="mb-4 flex flex-nowrap overflow-auto pb-1 scrollbar-none py-0">
+          {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify font-semibold text-sm mx-[8px] px-[7px]">
+              {category.name}
+            </TabsTrigger>)}
+        </TabsList>
+        
+        {categories.map(category => <TabsContent key={category.id} value={category.id}>
+            {error && <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>}
+
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="bg-white/50 h-80 rounded-xl border border-border/50 animate-pulse" />)}
+              </div>
+            ) : paginatedListings.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {paginatedListings.map((listing, index) => (
+                    <div 
+                      key={listing.id} 
+                      ref={listing.id === highlightedListingId ? highlightedListingRef : null}
+                      className={cn(
+                        "transition-all duration-300",
+                        listing.id === highlightedListingId ? "ring-4 ring-primary ring-opacity-50" : ""
+                      )}
+                    >
+                      <MarketplaceListingCard 
+                        listing={listing} 
+                        className="relative"
+                      />
+                      {listing.distance !== undefined && (
+                        <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          <span>{listing.distance.toFixed(1)} km</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                
+                {totalPages > 1 && <Pagination className="mt-8">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} className={currentPage === 1 ? "pointer-events-none opacity-50" : ""} />
+                      </PaginationItem>
+                      
+                      {Array.from({
+                length: totalPages
+              }).map((_, index) => <PaginationItem key={index}>
+                          <PaginationLink onClick={() => setCurrentPage(index + 1)} isActive={currentPage === index + 1}>
+                            {index + 1}
+                          </PaginationLink>
+                        </PaginationItem>)}
+                      
+                      <PaginationItem>
+                        <PaginationNext onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""} />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>}
+              </>
+            ) : (
+              <NoResultsMessage 
+                type="marketplace" 
+                onNewSearch={(query) => {
+                  console.log(`New search requested: ${query}`);
+                }} 
+              />
+            )}
+          </TabsContent>)}
+      </Tabs>
+    </div>
+  </MainLayout>;
 };
 
 export default Marketplace;
