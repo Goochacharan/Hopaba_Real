@@ -13,6 +13,7 @@ export interface MarketplaceListing {
   model_year?: string | null;
   location: string | null;
   city: string; // Added city property
+  area: string; // Added area property
   map_link?: string | null;
   latitude?: string | null;
   longitude?: string | null;

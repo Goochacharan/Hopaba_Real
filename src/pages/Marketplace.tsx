@@ -149,7 +149,9 @@ const Marketplace = () => {
       inspection_certificates: listing.inspection_certificates || [],
       is_negotiable: listing.is_negotiable !== undefined ? listing.is_negotiable : false,
       distance,
-      coordinates: listingCoordinates
+      coordinates: listingCoordinates,
+      area: listing.area || '',
+      postal_code: listing.postal_code || ''
     };
   });
 
@@ -203,7 +205,8 @@ const Marketplace = () => {
     // If no postal code filter, check area
     const searchArea = searchParams.get('area')?.toLowerCase();
     if (searchArea && !postalCodeFilter) {
-      return listing.area.toLowerCase().includes(searchArea);
+      // Make sure to handle undefined area
+      return (listing.area || '').toLowerCase().includes(searchArea);
     }
 
     if (selectedLocation === "Current Location") {
