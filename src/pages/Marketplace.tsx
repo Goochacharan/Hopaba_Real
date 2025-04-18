@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -28,8 +27,8 @@ const Marketplace = () => {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Fix the useMarketplaceListings hook usage
-  const { listings, refetch: fetchListings } = useMarketplaceListings();
+  const { listings, refetch } = useMarketplaceListings();
+  
   const {
     filters,
     setters,
@@ -39,8 +38,8 @@ const Marketplace = () => {
   } = useMarketplaceFilters(listings);
 
   useEffect(() => {
-    fetchListings().finally(() => setLoading(false));
-  }, [selectedLocation, searchParams, fetchListings]);
+    refetch().finally(() => setLoading(false));
+  }, [selectedLocation, searchParams, refetch]);
 
   const filteredListings = filterListings(listings);
   const sortedListings = sortListings(filteredListings);
@@ -58,8 +57,7 @@ const Marketplace = () => {
     navigate('/marketplace/add');
   };
 
-  const handleListingClick = (listing: MarketplaceListingWithDistance) => {
-    // Convert string to number if needed for the distance
+  const handleListingClick = (listing: MarketplaceListing) => {
     setSelectedListing({
       ...listing,
       distance: typeof listing.distance === 'string' ? parseFloat(listing.distance) : listing.distance
@@ -136,7 +134,7 @@ const Marketplace = () => {
           </div>
         </div>
 
-        {selectedListing && (
+        {selectedListing && showListingDetails && (
           <MarketplaceListingDetails
             listing={selectedListing}
           />

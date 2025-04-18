@@ -1,68 +1,68 @@
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Home from '@/pages/Home';
+import SearchResults from '@/pages/SearchResults';
+import RecommendationDetails from '@/pages/RecommendationDetails';
+import About from '@/pages/About';
+import Contact from '@/pages/Contact';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import Profile from '@/pages/Profile';
+import EditProfile from '@/pages/EditProfile';
+import AddRecommendation from '@/pages/AddRecommendation';
+import Marketplace from '@/pages/Marketplace';
+import AddMarketplaceListing from '@/pages/AddMarketplaceListing';
+import BusinessListingForm from '@/components/business/BusinessFormSimple';
+import MarketplaceListingDetails from '@/pages/MarketplaceListingDetails';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { LocationProvider } from '@/contexts/LocationContext';
+import { ToastProvider } from '@/contexts/ToastContext';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { WishlistProvider } from "./contexts/WishlistContext";
-import { AuthProvider } from "./hooks/useAuth";
-import LocationProvider, { useLocation } from "./contexts/LocationContext";
-import React from "react";
-import SearchResults from "./pages/SearchResults";
-import LocationDetails from "./pages/LocationDetails";
-import NotFound from "./pages/NotFound";
-import Profile from "./pages/Profile";
-import MyList from "./pages/MyList";
-import Events from "./pages/Events";
-import Map from "./pages/Map";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Marketplace from "./pages/Marketplace";
-import MarketplaceListingDetails from "./pages/MarketplaceListingDetails";
-import SellerDetails from "./pages/SellerDetails";
-import AdminPanel from "./pages/AdminPanel";
-import Settings from "./pages/Settings";
-
-const queryClient = new QueryClient();
-
-// Create a wrapper component for Map to get userCoordinates from context
-const MapWithLocation = () => {
-  const { userCoordinates } = useLocation();
-  return <Map userCoordinates={userCoordinates} />;
-};
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
+function App() {
+  return (
+    <ToastProvider>
       <AuthProvider>
         <LocationProvider>
-          <WishlistProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <Routes>
-                <Route path="/" element={<SearchResults />} />
-                <Route path="/search" element={<SearchResults />} />
-                <Route path="/location/:id" element={<LocationDetails />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/my-list" element={<MyList />} />
-                <Route path="/events" element={<Events />} />
-                <Route path="/map" element={<MapWithLocation />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/marketplace/:id" element={<MarketplaceListingDetails />} />
-                <Route path="/seller/:id" element={<SellerDetails />} />
-                <Route path="/admin" element={<AdminPanel />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </TooltipProvider>
-          </WishlistProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/search" element={<SearchResults />} />
+              <Route path="/recommendation/:id" element={<RecommendationDetails />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/edit" element={<EditProfile />} />
+              <Route path="/add" element={<AddRecommendation />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/marketplace/add" element={<AddMarketplaceListing />} />
+              <Route path="/business/add" element={<BusinessListingForm />} />
+              <Route 
+                path="/marketplace/:id" 
+                element={
+                  <MarketplaceListingDetails 
+                    listing={{
+                      // Default values that will be overridden when component loads
+                      id: '',
+                      title: '',
+                      price: 0,
+                      description: '',
+                      condition: '',
+                      location: '',
+                      seller_name: '',
+                      created_at: new Date().toISOString(),
+                      images: []
+                    }} 
+                  />
+                } 
+              />
+            </Routes>
+          </Router>
         </LocationProvider>
       </AuthProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+    </ToastProvider>
+  );
+}
 
 export default App;

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,7 +8,6 @@ import { Dot } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DEFAULT_IMAGE } from '@/lib/constants';
-import { extractCityFromText } from '@/lib/locationUtils';
 import { Skeleton } from "@/components/ui/skeleton";
 import { MarketplaceListingWithDistance } from '@/types/marketplace';
 

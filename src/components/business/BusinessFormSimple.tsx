@@ -112,13 +112,13 @@ const SERVICE_CATEGORIES = [
   "Entertainment", "Travel & Transport", "Fitness", "Real Estate", "Retail", "Other"
 ];
 
-interface BusinessListingFormProps {
-  business?: BusinessData;
+interface BusinessFormProps {
+  business?: Business;
   onSaved: () => void;
   onCancel: () => void;
 }
 
-const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onSaved, onCancel }) => {
+const BusinessListingForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel }) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
