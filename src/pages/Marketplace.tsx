@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
-import MarketplaceItemsList from '@/components/marketplace/MarketplaceItemsList';
+import MarketplaceItemsList from '@/components/search/MarketplaceItemsList';
 import MarketplaceFilters from '@/components/marketplace/MarketplaceFilters';
 import MarketplaceSortButton from '@/components/marketplace/MarketplaceSortButton';
 import MarketplaceListingDetails from '@/components/marketplace/MarketplaceListingDetails';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton";
 import { Search as SearchIcon, MapPin, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -59,7 +59,6 @@ const Marketplace = () => {
     navigate('/marketplace/add');
   };
 
-  // Update the handleListingClick function to handle distance as number
   const handleListingClick = (listing: MarketplaceListingWithDistance) => {
     setSelectedListing({
       ...listing,
@@ -129,6 +128,7 @@ const Marketplace = () => {
             ) : (
               <MarketplaceItemsList
                 listings={sortedListings}
+                loading={false}
                 onListingClick={handleListingClick}
               />
             )}
