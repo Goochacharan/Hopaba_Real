@@ -177,11 +177,33 @@ const Marketplace = () => {
     return null;
   };
 
+  const handleLocationSearch = (location: string) => {
+    console.log(`Location changed to: ${location}`);
+    // Check if input is a 6-digit postal code
+    if (/^\d{6}$/.test(location)) {
+      setPostalCodeFilter(location);
+    } else {
+      // If not a postal code, treat as area search
+      setPostalCodeFilter('');
+      setSearchParams(params => {
+        params.set('area', location);
+        return params;
+      });
+    }
+  };
+
   const locationFilteredListings = enhancedListingsWithDistance.filter(listing => {
+    // First check postal code filter if it exists
     if (postalCodeFilter && listing.postal_code) {
       if (!listing.postal_code.startsWith(postalCodeFilter)) {
         return false;
       }
+    }
+
+    // If no postal code filter, check area
+    const searchArea = searchParams.get('area')?.toLowerCase();
+    if (searchArea && !postalCodeFilter) {
+      return listing.area.toLowerCase().includes(searchArea);
     }
 
     if (selectedLocation === "Current Location") {
