@@ -162,38 +162,56 @@ const MapComponent: React.FC<MapComponentProps> = ({
         }
       }
       
-      // Add recommendation markers
+      // Add recommendation markers (service providers)
       if (recommendations && recommendations.length > 0) {
-        console.log('Adding recommendation markers:', recommendations.length);
+        console.log('Adding service provider markers:', recommendations.length);
         recommendations.forEach(rec => {
           try {
             let lat: number | null = null;
             let lng: number | null = null;
             
+            // Try to get coordinates from latitude/longitude properties first
             if (rec.latitude && rec.longitude) {
               lat = parseFloat(rec.latitude);
               lng = parseFloat(rec.longitude);
+              console.log(`Service provider ${rec.name} has explicit coordinates:`, lat, lng);
             }
+            // If not available, try to extract from map_link
             else if (rec.map_link) {
+              console.log(`Service provider ${rec.name} has map_link:`, rec.map_link);
               const coords = extractCoordinatesFromMapLink(rec.map_link);
               if (coords) {
                 lat = coords.lat;
                 lng = coords.lng;
+                console.log(`Extracted coordinates for ${rec.name} from map_link:`, lat, lng);
+              } else {
+                console.log(`Failed to extract coordinates for ${rec.name} from map_link`);
               }
             }
             
             if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
+              console.log(`Adding marker for service provider ${rec.name} at coordinates:`, lat, lng);
+              
+              // Create HTML content for the popup
+              const popupContent = `
+                <div style="max-width: 250px; padding: 8px;">
+                  <h3 style="margin-top: 0; font-weight: bold;">${rec.name}</h3>
+                  <p style="margin: 5px 0;">${rec.address || rec.area || ''}</p>
+                  ${rec.category ? `<p style="margin: 5px 0; font-style: italic;">${rec.category}</p>` : ''}
+                  <button 
+                    style="background: #4f46e5; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px;"
+                    onclick="window.location.href='/location/${rec.id}'"
+                  >
+                    View Details
+                  </button>
+                </div>
+              `;
+              
               const marker = new window.MapmyIndia.Marker({
                 position: [lng, lat] as [number, number],
                 map: map.current,
                 draggable: false,
-                popupHtml: `
-                  <div>
-                    <h3>${rec.name}</h3>
-                    <p>${rec.address || rec.area || ''}</p>
-                    <button onclick="window.location.href='/location/${rec.id}'">View Details</button>
-                  </div>
-                `
+                popupHtml: popupContent
               });
               
               markers.current.push(marker);
@@ -204,14 +222,14 @@ const MapComponent: React.FC<MapComponentProps> = ({
             console.error(`Error adding marker for ${rec.name}:`, error);
           }
         });
+      } else {
+        console.log('No service providers to add to map');
       }
       
-      // Add marketplace listing markers with improved debugging
+      // Add marketplace listing markers
       if (allMarketplaceListings && allMarketplaceListings.length > 0) {
         console.log('Adding marketplace listing markers:', allMarketplaceListings.length);
         allMarketplaceListings.forEach(listing => {
-          console.log(`Processing listing: ${listing.title}`);
-          
           try {
             let lat: number | null = null;
             let lng: number | null = null;
@@ -219,20 +237,16 @@ const MapComponent: React.FC<MapComponentProps> = ({
             if (listing.latitude && listing.longitude) {
               lat = parseFloat(listing.latitude);
               lng = parseFloat(listing.longitude);
-              console.log(`Listing ${listing.title} has coordinates:`, lat, lng);
+              console.log(`Marketplace listing ${listing.title} has coordinates:`, lat, lng);
             }
             else if (listing.map_link) {
-              console.log(`Listing ${listing.title} has map_link:`, listing.map_link);
+              console.log(`Marketplace listing ${listing.title} has map_link:`, listing.map_link);
               const coords = extractCoordinatesFromMapLink(listing.map_link);
               if (coords) {
                 lat = coords.lat;
                 lng = coords.lng;
-                console.log(`Extracted coordinates for ${listing.title}:`, lat, lng);
-              } else {
-                console.log(`Failed to extract coordinates from map_link for ${listing.title}`);
+                console.log(`Extracted coordinates for marketplace listing ${listing.title}:`, lat, lng);
               }
-            } else {
-              console.log(`Listing ${listing.title} has no coordinates or map_link`);
             }
             
             if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
@@ -251,12 +265,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
               });
               
               markers.current.push(marker);
-              console.log(`Successfully added marker for ${listing.title}`);
+              console.log(`Successfully added marker for marketplace listing ${listing.title}`);
             } else {
               console.log(`Marketplace listing ${listing.title} missing valid coordinates`);
             }
           } catch (error) {
-            console.error(`Error adding marker for listing ${listing.title}:`, error);
+            console.error(`Error adding marker for marketplace listing ${listing.title}:`, error);
           }
         });
       }
@@ -337,8 +351,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
   // Update markers when recommendations or marketplace listings change
   useEffect(() => {
     if (map.current && mapInitializedRef.current) {
-      console.log('Recommendations or marketplace listings changed, updating markers');
-      console.log('Number of recommendations:', recommendations.length);
+      console.log('Data changed, updating markers');
+      console.log('Number of service providers:', recommendations.length);
       console.log('Number of marketplace listings:', allMarketplaceListings.length);
       addMarkers();
     }

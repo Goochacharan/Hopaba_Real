@@ -105,6 +105,7 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
     // https://maps.app.goo.gl/XXXXX
     // https://maps.google.com/?ll=12.9716,77.5946
     // https://maps.google.com/maps?q=12.9716,77.5946
+    // https://www.google.com/maps/place/Location+Name/@12.9716,77.5946,15z
     
     // Match @latitude,longitude format
     const atMatch = mapLink.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
@@ -146,6 +147,16 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
       };
     }
     
+    // Match coordinates in URL path or embed
+    const pathMatch = mapLink.match(/maps\/embed\?pb=.*!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if (pathMatch) {
+      console.log('Found coordinates in embed path:', pathMatch[1], pathMatch[2]);
+      return {
+        lat: parseFloat(pathMatch[1]),
+        lng: parseFloat(pathMatch[2])
+      };
+    }
+    
     // Try data parameter format (data=!3m1!4b1!4m5!3m4...)
     const dataParamMatch = mapLink.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
     if (dataParamMatch) {
@@ -156,16 +167,19 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
       };
     }
     
+    // Check for direct coordinates in URL, such as https://maps.app.goo.gl/VBu9kXwezx8XzgrP7
+    // This needs to be translated via API, but we can check common formats
+    
     // Try place ID format for places.google.com links 
     // This might not have direct coordinates but could be an identifier
     const placeMatch = mapLink.match(/place\/([^\/]+)\//i);
     if (placeMatch) {
       console.log('Found place identifier, but no direct coordinates:', placeMatch[1]);
       // This would require an API call to Google Places API to resolve coordinates
-      // For now, we'll return null but log this as a potential enhancement
     }
     
     console.log("Could not extract coordinates from map link:", mapLink);
+    console.log("Try adding explicit latitude and longitude to the business listing");
     return null;
   } catch (error) {
     console.error('Error extracting coordinates from map link:', error);
