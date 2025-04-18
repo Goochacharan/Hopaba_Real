@@ -9,26 +9,7 @@ import { cn } from '@/lib/utils';
 import { DEFAULT_IMAGE } from '@/lib/constants';
 import { extractCityFromText } from '@/lib/locationUtils';
 import { Skeleton } from "@/components/ui/skeleton";
-
-interface MarketplaceListingWithDistance {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  condition: string;
-  category: string;
-  images: string[];
-  created_at: string;
-  area: string;
-  city: string;
-  postal_code: string;
-  seller_name: string;
-  seller_rating: number;
-  seller_avatar?: string;
-  model_year: string;
-  location: string;
-  distance?: number;
-}
+import { MarketplaceListingWithDistance } from '@/types/marketplace';
 
 interface MarketplaceItemsListProps {
   listings: MarketplaceListingWithDistance[] | undefined;

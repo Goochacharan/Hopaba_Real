@@ -23,8 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ImageUpload } from '@/components/ui/image-upload';
 
-export interface BusinessData {
-  id?: string;
+export interface BusinessFormValues {
   name: string;
   category: string;
   description: string;
@@ -46,6 +45,36 @@ export interface BusinessData {
   price_range_max?: number;
   approval_status?: string;
   images?: string[];
+}
+
+export interface Business {
+  id?: string;
+  name: string;
+  category: string;
+  description: string;
+  area: string;
+  city: string;
+  address: string;
+  postal_code: string;
+  contact_phone: string;
+  whatsapp: string;
+  contact_email?: string;
+  website?: string;
+  instagram?: string;
+  price_range_min?: number;
+  price_range_max?: number;
+  price_unit?: string;
+  map_link?: string;
+  tags?: string[];
+  experience?: string;
+  availability?: string;
+  hours?: string;
+  hours_from?: string;
+  hours_to?: string;
+  availability_days?: string[];
+  images?: string[];
+  approval_status?: string;
+  languages?: string[];
 }
 
 const businessSchema = z.object({

@@ -1,10 +1,23 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SortOption } from '@/components/marketplace/MarketplaceSortButton';
 import { useLocation } from '@/contexts/LocationContext';
 import { extractCityFromText, extractLocationCity } from '@/lib/locationUtils';
 import type { MarketplaceListing } from '@/hooks/useMarketplaceListings';
+import { MarketplaceListingWithDistance } from '@/types/marketplace';
+
+export const extractLocationCity = (location: string): string => {
+  if (!location) return '';
+  
+  // Try to extract city from location string, assuming format like "Area, City"
+  const parts = location.split(',');
+  if (parts.length > 1) {
+    return parts[1].trim();
+  }
+  
+  // If no comma found, just return the entire string as the city
+  return location.trim();
+};
 
 export const useMarketplaceFilters = (listings: MarketplaceListing[]) => {
   const [searchParams, setSearchParams] = useSearchParams();

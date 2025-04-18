@@ -5,7 +5,7 @@ import MainLayout from '@/components/MainLayout';
 import MarketplaceItemsList from '@/components/search/MarketplaceItemsList';
 import MarketplaceFilters from '@/components/marketplace/MarketplaceFilters';
 import MarketplaceSortButton from '@/components/marketplace/MarketplaceSortButton';
-import MarketplaceListingDetails from '@/pages/MarketplaceListingDetails'; // Import from pages
+import MarketplaceListingDetails from '@/pages/MarketplaceListingDetails';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search as SearchIcon, MapPin, Plus } from 'lucide-react';
@@ -15,11 +15,7 @@ import { useLocation } from '@/contexts/LocationContext';
 import PostalCodeSearch from '@/components/search/PostalCodeSearch';
 import { useMarketplaceFilters } from '@/hooks/useMarketplaceFilters';
 import { useMarketplaceListings, MarketplaceListing } from '@/hooks/useMarketplaceListings';
-
-// Define the MarketplaceListingWithDistance interface
-interface MarketplaceListingWithDistance extends MarketplaceListing {
-  distance?: number;
-}
+import { MarketplaceListingWithDistance } from '@/types/marketplace';
 
 const Marketplace = () => {
   const navigate = useNavigate();
@@ -44,7 +40,7 @@ const Marketplace = () => {
 
   useEffect(() => {
     fetchListings().finally(() => setLoading(false));
-  }, [selectedLocation, searchParams]);
+  }, [selectedLocation, searchParams, fetchListings]);
 
   const filteredListings = filterListings(listings);
   const sortedListings = sortListings(filteredListings);
