@@ -45,8 +45,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
   
   const allMarketplaceListings = [...marketplaceListings, ...fetchedListings];
 
+  // Added specific function to fetch approved service providers 
   const fetchServiceProviders = async () => {
     try {
+      console.log('Fetching service providers for map display');
       const { data, error } = await supabase
         .from('service_providers')
         .select('*')
@@ -71,7 +73,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
   useEffect(() => {
     const loadServiceProviders = async () => {
       setServiceProvidersLoading(true);
+      console.log('Loading service providers for map...');
       const providers = await fetchServiceProviders();
+      console.log(`Loaded ${providers.length} service providers for map`);
       setServiceProviders(providers);
       setServiceProvidersLoading(false);
     };
@@ -100,6 +104,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
     const loadMapScript = async () => {
       try {
+        // Fetch MapMyIndia API key from Supabase Edge Function
+        console.log('Fetching MapMyIndia API key...');
         const { data, error } = await supabase.functions.invoke('get-mapmyindia-key');
         if (error) {
           console.error('Error getting MapMyIndia API key:', error);
@@ -117,6 +123,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           return;
         }
         
+        // Check if MapmyIndia is already loaded
         if (window.MapmyIndia) {
           console.log('MapmyIndia script already loaded');
           setMapLoaded(true);
@@ -124,6 +131,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
           return;
         }
           
+        // If not, load the MapMyIndia script
+        console.log('Loading MapMyIndia script...');
         const script = document.createElement('script');
         script.src = `https://apis.mapmyindia.com/advancedmaps/v1/${apiKey}/map_load?v=1.5`;
         script.async = true;
@@ -165,6 +174,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
     try {
       console.log("Starting to add markers to map");
       
+      // Clear existing markers
       markers.current.forEach(marker => {
         if (marker && marker.remove) {
           marker.remove();
@@ -172,6 +182,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       });
       markers.current = [];
       
+      // Add user location marker if available
       if (localUserCoordinates) {
         try {
           console.log("Adding user location marker at:", localUserCoordinates);
@@ -193,22 +204,27 @@ const MapComponent: React.FC<MapComponentProps> = ({
         }
       }
       
+      // Combine recommendations and service providers into one array
       const allRecommendations = [...recommendations, ...serviceProviders];
+      console.log(`Total markers to add: ${allRecommendations.length} service providers/recommendations + ${allMarketplaceListings.length} marketplace listings`);
       
+      // Add service provider and recommendation markers
       if (allRecommendations && allRecommendations.length > 0) {
         console.log('Adding service provider markers:', allRecommendations.length);
-        allRecommendations.forEach(rec => {
+        allRecommendations.forEach((rec, index) => {
           try {
             let lat: number | null = null;
             let lng: number | null = null;
             
+            // Get coordinates from explicit lat/lng fields if available
             if (rec.latitude && rec.longitude) {
               lat = parseFloat(rec.latitude);
               lng = parseFloat(rec.longitude);
-              console.log(`Service provider ${rec.name} has explicit coordinates:`, lat, lng);
+              console.log(`Service provider ${rec.name} (${index}) has explicit coordinates:`, lat, lng);
             }
+            // Otherwise try to extract from map_link
             else if (rec.map_link) {
-              console.log(`Service provider ${rec.name} has map_link:`, rec.map_link);
+              console.log(`Service provider ${rec.name} (${index}) has map_link:`, rec.map_link);
               const coords = extractCoordinatesFromMapLink(rec.map_link);
               if (coords) {
                 lat = coords.lat;
@@ -222,6 +238,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
             if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
               console.log(`Adding marker for service provider ${rec.name} at coordinates:`, lat, lng);
               
+              // Create popup content with business details
               const popupContent = `
                 <div style="max-width: 250px; padding: 8px;">
                   <h3 style="margin-top: 0; font-weight: bold;">${rec.name}</h3>
@@ -236,6 +253,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 </div>
               `;
               
+              // Create and add the marker
               const marker = new window.MapmyIndia.Marker({
                 position: [lng, lat] as [number, number],
                 map: map.current,
@@ -245,7 +263,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               
               markers.current.push(marker);
             } else {
-              console.log(`Service provider ${rec.name} missing valid coordinates`);
+              console.log(`Service provider ${rec.name} (${index}) missing valid coordinates`);
             }
           } catch (error) {
             console.error(`Error adding marker for ${rec.name}:`, error);
@@ -255,20 +273,23 @@ const MapComponent: React.FC<MapComponentProps> = ({
         console.log('No service providers to add to map');
       }
       
+      // Add marketplace listing markers
       if (allMarketplaceListings && allMarketplaceListings.length > 0) {
         console.log('Adding marketplace listing markers:', allMarketplaceListings.length);
-        allMarketplaceListings.forEach(listing => {
+        allMarketplaceListings.forEach((listing, index) => {
           try {
             let lat: number | null = null;
             let lng: number | null = null;
             
+            // Get coordinates from explicit lat/lng fields if available
             if (listing.latitude && listing.longitude) {
               lat = parseFloat(listing.latitude);
               lng = parseFloat(listing.longitude);
-              console.log(`Marketplace listing ${listing.title} has coordinates:`, lat, lng);
+              console.log(`Marketplace listing ${listing.title} (${index}) has coordinates:`, lat, lng);
             }
+            // Otherwise try to extract from map_link
             else if (listing.map_link) {
-              console.log(`Marketplace listing ${listing.title} has map_link:`, listing.map_link);
+              console.log(`Marketplace listing ${listing.title} (${index}) has map_link:`, listing.map_link);
               const coords = extractCoordinatesFromMapLink(listing.map_link);
               if (coords) {
                 lat = coords.lat;
@@ -278,6 +299,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
             }
             
             if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
+              // Add marketplace listing marker
               const marker = new window.MapmyIndia.Marker({
                 position: [lng, lat] as [number, number],
                 map: map.current,
@@ -300,7 +322,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               markers.current.push(marker);
               console.log(`Successfully added marker for marketplace listing ${listing.title}`);
             } else {
-              console.log(`Marketplace listing ${listing.title} missing valid coordinates`);
+              console.log(`Marketplace listing ${listing.title} (${index}) missing valid coordinates`);
             }
           } catch (error) {
             console.error(`Error adding marker for marketplace listing ${listing.title}:`, error);
@@ -308,6 +330,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         });
       }
 
+      // Adjust map view to show all markers
       if (markers.current.length > 1) {
         try {
           console.log("Fitting bounds to show all markers:", markers.current.length);
@@ -338,6 +361,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   };
   
+  // Initialize map when MapMyIndia is loaded
   useEffect(() => {
     if (!mapLoaded || !mapContainer.current || mapInitializedRef.current) return;
 
@@ -356,6 +380,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
           return;
         }
 
+        // Create the map instance
         map.current = new window.MapmyIndia.Map(mapContainer.current, {
           center: center,
           zoom: 12,
@@ -364,6 +389,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         
         mapInitializedRef.current = true;
         
+        // Add markers when map is loaded
         map.current.addEventListener('load', () => {
           console.log('Map loaded, adding markers');
           addMarkers();
@@ -379,6 +405,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       }
     };
     
+    // Initialize map with a slight delay to ensure DOM is ready
     const timer = setTimeout(() => {
       initializeMap();
     }, 500);
@@ -386,16 +413,18 @@ const MapComponent: React.FC<MapComponentProps> = ({
     return () => clearTimeout(timer);
   }, [mapLoaded, localUserCoordinates, toast]);
 
+  // Update markers when data changes
   useEffect(() => {
     if (map.current && mapInitializedRef.current) {
       console.log('Data changed, updating markers');
-      console.log('Number of service providers:', recommendations.length);
+      console.log('Number of service providers from search:', recommendations.length);
       console.log('Number of marketplace listings:', allMarketplaceListings.length);
       console.log('Number of service providers from DB:', serviceProviders.length);
       addMarkers();
     }
   }, [recommendations, allMarketplaceListings, serviceProviders, localUserCoordinates]);
 
+  // Show error state if map fails to load
   if (mapError) {
     return (
       <section className="w-full">
@@ -416,6 +445,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
     );
   }
 
+  // Render map container with loading state
   return (
     <section className="w-full">
       <div className="max-w-[1400px] mx-auto">
