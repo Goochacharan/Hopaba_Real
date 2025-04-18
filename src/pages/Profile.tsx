@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -6,11 +7,10 @@ import { useAdmin } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import UserMarketplaceListings from '@/components/UserMarketplaceListings';
 import UserEventListings from '@/components/UserEventListings';
 import { AdminSection } from '@/components/admin/AdminSection';
-import { Plus, Settings as SettingsIcon, LogOut, User, UserCog } from 'lucide-react';
+import { LogOut, Settings as SettingsIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import BusinessFormSimple from '@/components/business/BusinessFormSimple';
 import BusinessListSimple from '@/components/business/BusinessListSimple';
@@ -25,7 +25,6 @@ const Profile = () => {
   const [editingBusiness, setEditingBusiness] = useState<Business | null>(null);
   const [showAddBusinessForm, setShowAddBusinessForm] = useState(false);
   const [activeTab, setActiveTab] = useState("listings");
-  const [userRole, setUserRole] = useState<'owner' | 'agent'>('owner');
 
   useEffect(() => {
     if (!user) {
@@ -90,17 +89,6 @@ const Profile = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <ToggleGroup type="single" value={userRole} onValueChange={(value) => value && setUserRole(value as 'owner' | 'agent')}>
-              <ToggleGroupItem value="owner" aria-label="Toggle owner role" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Owner
-              </ToggleGroupItem>
-              <ToggleGroupItem value="agent" aria-label="Toggle agent role" className="flex items-center gap-2">
-                <UserCog className="h-4 w-4" />
-                Agent
-              </ToggleGroupItem>
-            </ToggleGroup>
-
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => navigate('/settings')} className="flex items-center gap-2" size="sm">
                 <SettingsIcon className="h-4 w-4" />
