@@ -57,7 +57,7 @@ export interface BusinessFormValues {
   description: string;
   area: string;
   city: string;
-  address: string;
+  postal_code: string;
   contact_phone: string;
   whatsapp: string;
   contact_email?: string;
@@ -84,7 +84,7 @@ export interface Business {
   description: string;
   area: string;
   city: string;
-  address: string;
+  postal_code: string;
   contact_phone: string;
   whatsapp: string;
   contact_email?: string;
@@ -112,7 +112,7 @@ const businessSchema = z.object({
   description: z.string().min(10, { message: "Description must be at least 10 characters." }),
   area: z.string().min(2, { message: "Area must be at least 2 characters." }),
   city: z.string().min(2, { message: "City must be at least 2 characters." }),
-  address: z.string().min(5, { message: "Address must be at least 5 characters." }),
+  postal_code: z.string().min(6, { message: "Please enter a valid postal code." }),
   contact_phone: z.string()
     .refine(phone => phone.startsWith('+91'), {
       message: "Phone number must start with +91."
@@ -293,7 +293,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
       description: business?.description || "",
       area: business?.area || "",
       city: business?.city || "",
-      address: business?.address || "",
+      postal_code: business?.postal_code || "",
       contact_phone: business?.contact_phone || "+91",
       whatsapp: business?.whatsapp || "+91",
       contact_email: business?.contact_email || "",
@@ -438,7 +438,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
         description: data.description,
         area: data.area,
         city: data.city,
-        address: data.address,
+        postal_code: data.postal_code,
         contact_phone: data.contact_phone,
         whatsapp: data.whatsapp,
         contact_email: data.contact_email || null,
@@ -631,47 +631,45 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
                   
                   <FormField
                     control={form.control}
-                    name="address"
+                    name="area"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Address*</FormLabel>
+                        <FormLabel>Area/Neighborhood*</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter your street address" {...field} />
+                          <Input placeholder="Enter neighborhood or area" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="city"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>City*</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter city" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>City*</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter city" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <FormField
-                      control={form.control}
-                      name="area"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Area/Neighborhood*</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter neighborhood or area" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="postal_code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Postal/ZIP Code*</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter postal code (required)" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <FormField
                     control={form.control}
@@ -989,119 +987,4 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
                             </SelectContent>
                           </Select>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="hours_to"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
-                            Working Hours To
-                          </FormLabel>
-                          <Select 
-                            onValueChange={field.onChange}
-                            value={field.value || "5:00 PM"}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select end time" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="max-h-[300px]">
-                              {TIME_OPTIONS.map(time => (
-                                <SelectItem key={`to-${time}`} value={time}>
-                                  {time}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 
-                "Saving..." : 
-                business?.id ? "Update Business" : "Submit Business"
-              }
-            </Button>
-          </div>
-        </form>
-      </Form>
-      
-      <AlertDialog open={showAddCategoryDialog} onOpenChange={setShowAddCategoryDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Add New Category</AlertDialogTitle>
-            <AlertDialogDescription>
-              Enter a new business category to add to the list.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="py-4">
-            <Input
-              placeholder="Category name"
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-              autoFocus
-            />
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleAddCategory}>Add Category</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      
-      <AlertDialog 
-        open={showSuccessDialog} 
-        onOpenChange={(open) => {
-          setShowSuccessDialog(open);
-          if (!open) onSaved();
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {business?.id ? "Business Updated" : "Business Added"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {business?.id ? 
-                "Your business listing has been updated and will be reviewed by an admin." :
-                "Your business has been listed and will be reviewed by an admin."
-              }
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => {
-              setShowSuccessDialog(false);
-              onSaved();
-            }}>
-              Continue
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
-  );
-};
-
-export default BusinessFormSimple;
+                        </

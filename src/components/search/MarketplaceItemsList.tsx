@@ -1,187 +1,167 @@
-
-import React, { useEffect, useState } from 'react';
-import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
-import MarketplaceListingCard from '@/components/MarketplaceListingCard';
-import { cn } from '@/lib/utils';
-import { Loader2, Unlock, Lock, MapPin } from 'lucide-react';
-import NoResultsMessage from './NoResultsMessage';
-import { useAuth } from '@/hooks/useAuth';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Clock } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
-import { useLocation } from '@/contexts/LocationContext';
-import { calculateDistance, extractCoordinatesFromMapLink } from '@/lib/locationUtils';
-import MarketplaceLocationSearch from './MarketplaceLocationSearch';
+import { Dot } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { DEFAULT_IMAGE } from '@/lib/constants';
+import { extractCityFromText } from '@/lib/locationUtils';
+import { Skeleton } from "@/components/ui/skeleton"
 
-// Extend the MarketplaceListing type to include the optional distance property
-interface MarketplaceListingWithDistance extends MarketplaceListing {
+interface MarketplaceListing {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  condition: string;
+  category: string;
+  images: string[];
+  created_at: string;
+  area: string;
+  city: string;
+  postal_code: string;
+  seller_name: string;
+  seller_rating: number;
+  seller_avatar: string;
+  model_year: string;
+  location: string;
+  distance?: number;
+}
+
+interface MarketplaceListingWithDistance extends Omit<MarketplaceListing, 'distance'> {
   distance?: number;
 }
 
 interface MarketplaceItemsListProps {
-  listings: MarketplaceListingWithDistance[];
-  loading?: boolean;
-  error?: string | null;
-  category?: string;
+  listings: MarketplaceListingWithDistance[] | undefined;
+  loading: boolean;
 }
 
-const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({ 
-  listings,
-  loading = false,
-  error = null,
-  category
-}) => {
-  const { user } = useAuth();
-  const { userCoordinates } = useLocation();
-  const [searchParams] = useSearchParams();
-  const searchQuery = searchParams.get('q') || '';
-  const [locationFilter, setLocationFilter] = useState('');
-  
-  const filterListingsByLocation = (items: MarketplaceListingWithDistance[]) => {
-    if (!locationFilter) return items;
-    
-    return items.filter(listing => {
-      const searchTerm = locationFilter.toLowerCase();
-      return (
-        (listing.location && listing.location.toLowerCase().includes(searchTerm)) ||
-        (listing.postal_code && listing.postal_code.includes(searchTerm))
-      );
-    });
-  };
-
-  const listingsWithDistance = listings.map(listing => {
-    let distance: number | undefined = undefined;
-    let listingCoordinates = null;
-    
-    // Try to get coordinates from the listing
-    if (listing.latitude && listing.longitude) {
-      listingCoordinates = { 
-        lat: parseFloat(listing.latitude), 
-        lng: parseFloat(listing.longitude) 
-      };
-    } else if (listing.map_link) {
-      const extractedCoords = extractCoordinatesFromMapLink(listing.map_link);
-      if (extractedCoords) {
-        listingCoordinates = extractedCoords;
-      }
-    }
-    
-    // Calculate distance if we have both user and listing coordinates
-    if (userCoordinates && listingCoordinates) {
-      distance = calculateDistance(
-        userCoordinates.lat, 
-        userCoordinates.lng, 
-        listingCoordinates.lat, 
-        listingCoordinates.lng
-      );
-    }
-    
-    return {
-      ...listing,
-      distance
-    } as MarketplaceListingWithDistance;
-  });
-
-  useEffect(() => {
-    console.log("MarketplaceItemsList - listings length:", listings?.length || 0);
-    if (listings && listings.length > 0) {
-      console.log("Sample listing data for debugging:");
-      console.log("First listing damage images:", listings[0].damage_images);
-      console.log("First listing certificates:", listings[0].inspection_certificates);
-    }
-  }, [listings]);
-
-  const visibleListings = filterListingsByLocation(listingsWithDistance.filter(listing => 
-    listing.approval_status === 'approved' || 
-    (user && listing.seller_id === user.id)
-  ));
-
-  const handleLocationSearch = (location: string) => {
-    setLocationFilter(location);
-  };
-
-  console.log(`After filtering, ${visibleListings.length} listings are visible`);
-  
+const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({ listings, loading }) => {
   if (loading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-8 text-destructive">
-        <p>{error}</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4 pb-24">
-      <div className="mb-6">
-        <MarketplaceLocationSearch onLocationSearch={handleLocationSearch} />
-      </div>
-
-      {visibleListings.some(l => l.approval_status === 'pending' && user && l.seller_id === user.id) && (
-        <Alert variant="default" className="bg-yellow-50 border-yellow-200">
-          <Clock className="h-4 w-4 text-yellow-600" />
-          <AlertDescription className="text-yellow-800">
-            Some of your listings are pending admin approval and are only visible to you.
-            {visibleListings.some(l => l.title.toLowerCase().includes('honda') && l.title.toLowerCase().includes('wrv')) && (
-              <span className="block mt-1 font-medium">Your Honda WRV listing will appear after approval.</span>
-            )}
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {visibleListings.map((listing, index) => {
-          console.log(`Rendering listing ${index}:`, listing.title, 
-            `with damage_images:`, listing.damage_images?.length || 0,
-            `and certificates:`, listing.inspection_certificates?.length || 0);
-            
-          const enhancedListing = {
-            ...listing,
-            location: listing.location || "Not specified",
-            damage_images: listing.damage_images || [],
-            inspection_certificates: listing.inspection_certificates || [],
-            is_negotiable: listing.is_negotiable !== undefined ? listing.is_negotiable : false
-          };
-            
-          return (
-            <div 
-              key={listing.id} 
-              className="animate-fade-in h-full relative" 
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              {user && listing.seller_id === user.id && listing.approval_status === 'pending' && (
-                <Badge variant="outline" className="absolute top-2 right-2 z-10 bg-yellow-100 text-yellow-800 border-yellow-300">
-                  Pending Approval
-                </Badge>
-              )}
-              <MarketplaceListingCard 
-                listing={enhancedListing}
-                className={cn(
-                  "h-full flex flex-col",
-                  "search-result-card",
-                  listing.approval_status === 'pending' ? "opacity-75" : ""
-                )}
-              />
-              {listing.distance !== undefined && (
-                <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  <span>{listing.distance.toFixed(1)} km</span>
+    return <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[...Array(6)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader>
+              <CardTitle>
+                <Skeleton className="h-5 w-3/4" />
+              </CardTitle>
+              <CardDescription>
+                <Skeleton className="h-4 w-1/2" />
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Skeleton className="h-24 w-full rounded-md" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <div className="flex items-center space-x-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback>
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-3 w-16" />
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>;
+  }
+
+  if (!listings || listings.length === 0) {
+    return <Card>
+        <CardContent className="py-8 flex items-center justify-center">
+          <p className="text-muted-foreground">No listings found.</p>
+        </CardContent>
+      </Card>;
+  }
+
+  return <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {listings.map(listing => (
+        <Card key={listing.id}>
+          <Link to={`/marketplace/${listing.id}`}>
+            <CardHeader>
+              <CardTitle>{listing.title}</CardTitle>
+              <CardDescription>
+                ₹{listing.price} <Dot className="h-4 w-4 inline-block mx-1" /> {listing.condition}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <img
+                src={listing.images[0] || DEFAULT_IMAGE}
+                alt={listing.title}
+                className="aspect-video w-full rounded-md object-cover"
+                onError={(e: any) => { e.target.src = DEFAULT_IMAGE; }}
+              />
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                {listing.description}
+              </p>
+              <div className="flex items-center space-x-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={listing.seller_avatar} />
+                  <AvatarFallback>{listing.seller_name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-medium">{listing.seller_name}</p>
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <StarIcon
+                        key={i}
+                        className={cn(
+                          "h-4 w-4",
+                          i < listing.seller_rating ? "text-yellow-500" : "text-gray-300"
+                        )}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Link>
+          <CardFooter className="text-xs text-muted-foreground py-2 px-4 flex items-center justify-between">
+            <div className="flex items-center">
+              {listing.distance !== undefined && (
+                <>
+                  {listing.distance.toFixed(1)} km away
+                  <Dot className="h-3 w-3 mx-1" />
+                </>
               )}
+              {listing.city && (
+                <>
+                  {listing.city}
+                  <Dot className="h-3 w-3 mx-1" />
+                </>
+              )}
+              Posted {formatDistanceToNow(new Date(listing.created_at), { addSuffix: true })}
             </div>
-          );
-        })}
-      </div>
-    </div>
-  );
+            <Badge variant="secondary">{listing.category}</Badge>
+          </CardFooter>
+        </Card>
+      ))}
+    </div>;
 };
+
+interface StarIconProps {
+  className?: string;
+}
+
+function StarIcon(props: StarIconProps) {
+  return <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={props.className}>
+      
+    <path
+      fillRule="evenodd"
+      d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.529 1.257 5.27c.271 1.136-.964 2.033-1.96 1.425L12 18.354l-4.335 2.254c-.996.608-2.231-.29-1.96-1.425l1.257-5.27-4.117-3.529c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.005Z"
+      clipRule="evenodd" />
+  </svg>;
+}
 
 export default MarketplaceItemsList;
