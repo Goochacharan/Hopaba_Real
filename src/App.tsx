@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { AuthProvider } from "./hooks/useAuth";
-import LocationProvider from "./contexts/LocationContext";
+import LocationProvider, { useLocation } from "./contexts/LocationContext";
 import React from "react";
 import SearchResults from "./pages/SearchResults";
 import LocationDetails from "./pages/LocationDetails";
@@ -25,6 +25,12 @@ import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
+// Create a wrapper component for Map to get userCoordinates from context
+const MapWithLocation = () => {
+  const { userCoordinates } = useLocation();
+  return <Map userCoordinates={userCoordinates} />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
@@ -42,7 +48,7 @@ const App = () => (
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/my-list" element={<MyList />} />
                 <Route path="/events" element={<Events />} />
-                <Route path="/map" element={<Map />} />
+                <Route path="/map" element={<MapWithLocation />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/marketplace" element={<Marketplace />} />

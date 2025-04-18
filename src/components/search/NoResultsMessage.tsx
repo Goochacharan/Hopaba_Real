@@ -7,17 +7,24 @@ import { ShoppingBag } from 'lucide-react';
 interface NoResultsMessageProps {
   type: 'locations' | 'events' | 'marketplace';
   onNewSearch?: (query: string) => void;
+  title?: string;
+  description?: string;
 }
 
-const NoResultsMessage: React.FC<NoResultsMessageProps> = ({ type, onNewSearch }) => {
+const NoResultsMessage: React.FC<NoResultsMessageProps> = ({ 
+  type, 
+  onNewSearch,
+  title,
+  description
+}) => {
   const navigate = useNavigate();
 
   if (type === 'locations') {
     return (
       <div className="text-center py-10 animate-fade-in">
-        <p className="text-lg font-medium mb-2">No locations found</p>
+        <p className="text-lg font-medium mb-2">{title || "No locations found"}</p>
         <p className="text-muted-foreground mb-4">
-          Try adjusting your search or filters
+          {description || "Try adjusting your search or filters"}
         </p>
         <Button variant="outline" onClick={() => onNewSearch?.("restaurant near me")} className="mr-2">
           Try "Restaurant near me"
@@ -32,9 +39,9 @@ const NoResultsMessage: React.FC<NoResultsMessageProps> = ({ type, onNewSearch }
   if (type === 'events') {
     return (
       <div className="text-center py-10 animate-fade-in">
-        <p className="text-lg font-medium mb-2">No events found</p>
+        <p className="text-lg font-medium mb-2">{title || "No events found"}</p>
         <p className="text-muted-foreground">
-          Try adjusting your search criteria
+          {description || "Try adjusting your search criteria"}
         </p>
       </div>
     );
@@ -42,9 +49,9 @@ const NoResultsMessage: React.FC<NoResultsMessageProps> = ({ type, onNewSearch }
   
   return (
     <div className="text-center py-10 animate-fade-in">
-      <p className="text-lg font-medium mb-2">No marketplace items found</p>
+      <p className="text-lg font-medium mb-2">{title || "No marketplace items found"}</p>
       <p className="text-muted-foreground mb-4">
-        Try searching with different terms or browsing the marketplace directly
+        {description || "Try searching with different terms or browsing the marketplace directly"}
       </p>
       <Button variant="outline" onClick={() => navigate("/marketplace")}>
         <ShoppingBag className="mr-2 h-4 w-4" />

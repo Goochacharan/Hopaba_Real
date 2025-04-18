@@ -13,7 +13,44 @@ interface EventCardProps {
   onRSVP?: (eventId: string) => void;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ event, className, onRSVP }) => {
+// Alternative props structure for backward compatibility
+interface LegacyEventCardProps {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  description: string;
+  image: string;
+  price?: number;
+  attendees?: number;
+  isPast?: boolean;
+  onRSVP?: () => void;
+}
+
+const EventCard: React.FC<EventCardProps | LegacyEventCardProps> = (props) => {
+  // Determine if we're using the new or legacy props structure
+  const isLegacyProps = 'id' in props;
+  
+  // Convert legacy props to new format if necessary
+  const event = isLegacyProps ? {
+    id: props.id,
+    title: props.title,
+    date: props.date,
+    time: props.time,
+    location: props.location,
+    description: props.description,
+    image: props.image,
+    pricePerPerson: props.price,
+    attendees: props.attendees || 0,
+    isPast: props.isPast || false,
+    isHiddenGem: false,
+    isMustVisit: false,
+  } : props.event;
+  
+  const className = isLegacyProps ? '' : props.className;
+  const onRSVP = isLegacyProps ? props.onRSVP : props.onRSVP;
+
   const formatDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), 'MMMM d, yyyy');
@@ -85,9 +122,9 @@ const EventCard: React.FC<EventCardProps> = ({ event, className, onRSVP }) => {
       </CardContent>
       
       <CardFooter className="px-4 py-3 border-t">
-        {onRSVP && (
+        {onRSVP && !event.isPast && (
           <Button 
-            onClick={() => onRSVP(event.id)} 
+            onClick={() => isLegacyProps ? onRSVP() : onRSVP(event.id)} 
             className="w-full"
             variant="outline"
           >

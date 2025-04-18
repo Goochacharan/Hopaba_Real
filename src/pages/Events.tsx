@@ -69,6 +69,19 @@ const Events = () => {
     return eventDate < today;
   });
   
+  const createEventObject = (event: Event, isPast: boolean = false) => ({
+    id: event.id,
+    title: event.title,
+    date: event.date,
+    time: event.time,
+    location: event.location,
+    description: event.description,
+    image: event.image,
+    pricePerPerson: event.price_per_person || 0,
+    attendees: event.attendees || 0,
+    isPast: isPast
+  });
+  
   return (
     <MainLayout>
       <div className="container px-4 pb-16 pt-4">
@@ -107,15 +120,7 @@ const Events = () => {
                 {upcomingEvents.map(event => (
                   <EventCard
                     key={event.id}
-                    id={event.id}
-                    title={event.title}
-                    date={event.date}
-                    time={event.time}
-                    location={event.location}
-                    description={event.description}
-                    image={event.image}
-                    price={event.price_per_person}
-                    attendees={event.attendees}
+                    event={createEventObject(event)}
                     onRSVP={() => {}}
                   />
                 ))}
@@ -152,16 +157,7 @@ const Events = () => {
                 {pastEvents.map(event => (
                   <EventCard
                     key={event.id}
-                    id={event.id}
-                    title={event.title}
-                    date={event.date}
-                    time={event.time}
-                    location={event.location}
-                    description={event.description}
-                    image={event.image}
-                    price={event.price_per_person}
-                    attendees={event.attendees}
-                    isPast={true}
+                    event={createEventObject(event, true)}
                   />
                 ))}
               </div>
