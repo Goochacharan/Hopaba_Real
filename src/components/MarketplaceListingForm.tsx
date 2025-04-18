@@ -231,7 +231,11 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
   return (
     <Card className="p-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form 
+          id="marketplace-listing-form"
+          onSubmit={form.handleSubmit(onSubmit)} 
+          className="space-y-6"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-6">
               <FormField
@@ -241,7 +245,12 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                   <FormItem>
                     <FormLabel>Title*</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. iPhone 13 Pro Max, 256GB" {...field} />
+                      <Input 
+                        id="listing-title" 
+                        name="listing-title"
+                        placeholder="e.g. iPhone 13 Pro Max, 256GB" 
+                        {...field} 
+                      />
                     </FormControl>
                     <FormDescription>
                       A clear, concise title for your listing
@@ -277,7 +286,14 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                     <FormItem>
                       <FormLabel>Price (₹)*</FormLabel>
                       <FormControl>
-                        <Input type="number" min="0" step="100" {...field} />
+                        <Input 
+                          id="listing-price" 
+                          name="listing-price"
+                          type="number" 
+                          min="0" 
+                          step="100" 
+                          {...field} 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
