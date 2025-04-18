@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { AuthProvider } from "./hooks/useAuth";
+import LocationProvider from "./contexts/LocationContext";
 import React from "react";
 import SearchResults from "./pages/SearchResults";
 import LocationDetails from "./pages/LocationDetails";
@@ -28,29 +29,31 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
       <AuthProvider>
-        <WishlistProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              <Route path="/" element={<SearchResults />} />
-              <Route path="/search" element={<SearchResults />} />
-              <Route path="/location/:id" element={<LocationDetails />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/my-list" element={<MyList />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/map" element={<Navigate to="/" />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/marketplace" element={<Marketplace />} />
-              <Route path="/marketplace/:id" element={<MarketplaceListingDetails />} />
-              <Route path="/seller/:id" element={<SellerDetails />} />
-              <Route path="/admin" element={<AdminPanel />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </TooltipProvider>
-        </WishlistProvider>
+        <LocationProvider>
+          <WishlistProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <Routes>
+                <Route path="/" element={<SearchResults />} />
+                <Route path="/search" element={<SearchResults />} />
+                <Route path="/location/:id" element={<LocationDetails />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/my-list" element={<MyList />} />
+                <Route path="/events" element={<Events />} />
+                <Route path="/map" element={<Map />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/marketplace" element={<Marketplace />} />
+                <Route path="/marketplace/:id" element={<MarketplaceListingDetails />} />
+                <Route path="/seller/:id" element={<SellerDetails />} />
+                <Route path="/admin" element={<AdminPanel />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </TooltipProvider>
+          </WishlistProvider>
+        </LocationProvider>
       </AuthProvider>
     </BrowserRouter>
   </QueryClientProvider>

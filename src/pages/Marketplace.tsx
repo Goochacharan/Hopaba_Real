@@ -1,12 +1,13 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
-import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
+import { useMarketplaceListings, MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { useUserMarketplaceListings } from '@/hooks/useUserMarketplaceListings';
 import LocationSelector from '@/components/LocationSelector';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers, Map } from 'lucide-react';
+import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -20,10 +21,11 @@ import { cn } from '@/lib/utils';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import NoResultsMessage from '@/components/search/NoResultsMessage';
+import { useLocation } from '@/contexts/LocationContext';
+import { calculateDistance, extractCityFromText, extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 
-type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
+type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated' | 'nearest';
 
 const Marketplace = () => {
   const { user } = useAuth();
@@ -35,6 +37,9 @@ const Marketplace = () => {
   const highlightedListingId = searchParams.get('highlight') || '';
   const highlightedListingRef = useRef<HTMLDivElement>(null);
   
+  // Get location from context
+  const { selectedLocation, userCoordinates } = useLocation();
+  
   const [currentCategory, setCurrentCategory] = useState<string>(categoryParam);
   const [currentPage, setCurrentPage] = useState(1);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
@@ -43,7 +48,7 @@ const Marketplace = () => {
   const [conditionFilter, setConditionFilter] = useState<string>('all');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('newest');
-  const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
+  const [distanceFilter, setDistanceFilter] = useState<number>(50); // Default to 50 km
   const itemsPerPage = 9;
   
   useEffect(() => {
@@ -77,11 +82,10 @@ const Marketplace = () => {
   
   useEffect(() => {
     setCurrentPage(1);
-  }, [currentCategory, searchQuery, conditionFilter, priceRange, ratingFilter, sortOption]);
+  }, [currentCategory, searchQuery, conditionFilter, priceRange, ratingFilter, sortOption, distanceFilter]);
 
-  const handleLocationChange = (location: string) => {
-    console.log(`Location changed to: ${location}`);
-    setSelectedLocation(location);
+  const handleLocationChange = (location: string, coordinates?: { lat: number; lng: number }) => {
+    console.log(`Location changed to: ${location}`, coordinates);
   };
 
   const categories = [
@@ -115,6 +119,44 @@ const Marketplace = () => {
     }
   ];
 
+  // Enhance listings with distance calculations
+  const enhancedListingsWithDistance = listings.map(listing => {
+    let distance: number | undefined;
+    let listingCoordinates = null;
+    
+    // Try to get coordinates from the listing
+    if (listing.latitude && listing.longitude) {
+      listingCoordinates = { 
+        lat: parseFloat(listing.latitude), 
+        lng: parseFloat(listing.longitude) 
+      };
+    } else if (listing.map_link) {
+      const extractedCoords = extractCoordinatesFromMapLink(listing.map_link);
+      if (extractedCoords) {
+        listingCoordinates = extractedCoords;
+      }
+    }
+    
+    // Calculate distance if we have both user and listing coordinates
+    if (userCoordinates && listingCoordinates) {
+      distance = calculateDistance(
+        userCoordinates.lat, 
+        userCoordinates.lng, 
+        listingCoordinates.lat, 
+        listingCoordinates.lng
+      );
+    }
+    
+    return {
+      ...listing,
+      damage_images: listing.damage_images || [],
+      inspection_certificates: listing.inspection_certificates || [],
+      is_negotiable: listing.is_negotiable !== undefined ? listing.is_negotiable : false,
+      distance,
+      coordinates: listingCoordinates
+    };
+  });
+
   useEffect(() => {
     if (!loading && currentCategory !== 'all') {
       console.log(`Filtering for category: ${currentCategory}`);
@@ -124,6 +166,66 @@ const Marketplace = () => {
       console.log('Available categories in listings:', categoryValues);
     }
   }, [listings, loading, currentCategory]);
+
+  // Extract city from listing location
+  const extractLocationCity = (listing: MarketplaceListing) => {
+    if (!listing.location) return null;
+    
+    // Try to extract a major city from the location string
+    const extractedCity = extractCityFromText(listing.location);
+    if (extractedCity) return extractedCity;
+    
+    // If we have a map_link, try to extract a city from there
+    if (listing.map_link) {
+      const cityFromMapLink = extractCityFromText(listing.map_link);
+      if (cityFromMapLink) return cityFromMapLink;
+    }
+    
+    return null;
+  };
+
+  // Filter by location
+  const locationFilteredListings = enhancedListingsWithDistance.filter(listing => {
+    // If selected location is "Current Location", filter by distance
+    if (selectedLocation === "Current Location") {
+      if (listing.distance === undefined) return true; // Include if we can't calculate distance
+      return listing.distance <= distanceFilter;
+    }
+    
+    // If a specific location is selected, try to match by city
+    if (selectedLocation && selectedLocation !== "Bengaluru, Karnataka") {
+      // Extract city from selected location (e.g., "Mumbai, Maharashtra" -> "Mumbai")
+      const selectedCity = selectedLocation.split(',')[0].trim();
+      
+      // Check if the listing's location contains the selected city
+      if (listing.location && listing.location.includes(selectedCity)) {
+        return true;
+      }
+      
+      // Extract city from listing and check if it matches
+      const listingCity = extractLocationCity(listing);
+      if (listingCity && selectedCity.includes(listingCity)) {
+        return true;
+      }
+      
+      // Check if it's a postal code search and the listing has that postal code
+      if (selectedLocation.includes("Postal Code:")) {
+        const postalCode = selectedLocation.match(/\d{6}/)?.[0];
+        if (postalCode && listing.postal_code === postalCode) {
+          return true;
+        }
+        
+        // If we can't match postal code, just show all results
+        return true;
+      }
+      
+      // If we can't match the city, include the listing anyway to avoid empty results
+      return true;
+    }
+    
+    // Default: show all listings if no location filter is applied
+    return true;
+  });
 
   const handleCategoryChange = (category: string) => {
     console.log(`Category changed to: ${category}`);
@@ -144,7 +246,7 @@ const Marketplace = () => {
     });
   };
 
-  const sortListings = (items: MarketplaceListing[]): MarketplaceListing[] => {
+  const sortListings = (items: typeof enhancedListingsWithDistance): typeof enhancedListingsWithDistance => {
     return [...items].sort((a, b) => {
       switch (sortOption) {
         case 'newest':
@@ -155,6 +257,14 @@ const Marketplace = () => {
           return b.price - a.price;
         case 'top-rated':
           return b.seller_rating - a.seller_rating;
+        case 'nearest':
+          // Sort by distance if available
+          if (a.distance !== undefined && b.distance !== undefined) {
+            return a.distance - b.distance;
+          }
+          if (a.distance !== undefined) return -1; // a has distance, b doesn't
+          if (b.distance !== undefined) return 1; // b has distance, a doesn't
+          return 0; // neither has distance
         default:
           return 0;
       }
@@ -202,14 +312,7 @@ const Marketplace = () => {
     }
   }, [highlightedListingId, listings, loading, currentCategory]);
 
-  const enhancedListings = listings.map(listing => ({
-    ...listing,
-    damage_images: listing.damage_images || [],
-    inspection_certificates: listing.inspection_certificates || [],
-    is_negotiable: listing.is_negotiable !== undefined ? listing.is_negotiable : false
-  }));
-
-  const filteredListings = enhancedListings.filter(listing => {
+  const filteredListings = locationFilteredListings.filter(listing => {
     // Price filter
     const price = listing.price;
     if (price < priceRange[0] || price > priceRange[1]) return false;
@@ -249,6 +352,7 @@ const Marketplace = () => {
   const isRatingFilterActive = ratingFilter > 0;
   const isConditionFilterActive = conditionFilter !== 'all';
   const isSortFilterActive = sortOption !== 'newest';
+  const isDistanceFilterActive = distanceFilter < 50;
 
   return <MainLayout>
       <div className="animate-fade-in px-[7px]">
@@ -303,9 +407,46 @@ const Marketplace = () => {
                   <Button variant={sortOption === 'top-rated' ? "default" : "ghost"} size="sm" className="w-full justify-start" onClick={() => handleSortChange('top-rated')}>
                     Top Rated
                   </Button>
+                  <Button variant={sortOption === 'nearest' ? "default" : "ghost"} size="sm" className="w-full justify-start" onClick={() => handleSortChange('nearest')}>
+                    Nearest First
+                  </Button>
                 </div>
               </PopoverContent>
             </Popover>
+
+            {/* Distance filter - only show when using Current Location */}
+            {selectedLocation === "Current Location" && (
+              <Popover open={activeFilter === 'distance'} onOpenChange={open => setActiveFilter(open ? 'distance' : null)}>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant={isDistanceFilterActive ? "default" : "outline"} 
+                    size="icon" 
+                    className={cn(
+                      "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
+                      activeFilter === 'distance' && "border-primary ring-2 ring-primary/20", 
+                      isDistanceFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
+                    )}
+                  >
+                    <MapPin className="h-4 w-4" />
+                    {isDistanceFilterActive && <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
+                        {distanceFilter}
+                      </Badge>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-4">
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Maximum Distance</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Show results within</span>
+                        <span className="text-sm font-medium">{distanceFilter} km</span>
+                      </div>
+                      <Slider value={[distanceFilter]} min={1} max={50} step={1} onValueChange={value => setDistanceFilter(value[0])} />
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
 
             <Popover open={activeFilter === 'rating'} onOpenChange={open => setActiveFilter(open ? 'rating' : null)}>
               <PopoverTrigger asChild>
@@ -511,7 +652,17 @@ const Marketplace = () => {
                           listing.id === highlightedListingId ? "ring-4 ring-primary ring-opacity-50" : ""
                         )}
                       >
-                        <MarketplaceListingCard listing={listing} />
+                        <MarketplaceListingCard 
+                          listing={listing} 
+                          // Pass additional props but don't modify the card UI
+                          className="relative"
+                        />
+                        {listing.distance !== undefined && (
+                          <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            <span>{listing.distance.toFixed(1)} km</span>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

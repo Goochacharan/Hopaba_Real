@@ -13,6 +13,7 @@ import SearchLocation from '@/components/search/SearchLocation';
 import SearchControls from '@/components/search/SearchControls';
 import ViewToggle from '@/components/search/ViewToggle';
 import MapComponent from '@/pages/Map';
+import { useLocation } from '@/contexts/LocationContext';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -21,16 +22,8 @@ const SearchResults = () => {
   const searchQuery = searchParams.get('q') || '';
   const categoryParam = searchParams.get('category') || 'all';
   
-  const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
-  const [userCoordinates, setUserCoordinates] = useState<{
-    lat: number;
-    lng: number;
-  } | null>({
-    lat: 12.9716,
-    lng: 77.5946
-  }); // Default to Bengaluru coordinates
-  
-  // Remove the isMapView state since we no longer use the map toggle
+  // Get location from context
+  const { userCoordinates } = useLocation();
   
   const { filters, setters } = useSearchFilters();
   
@@ -111,16 +104,6 @@ const SearchResults = () => {
     }
   }, [searchQuery, navigate]);
   
-  useEffect(() => {
-    if (!userCoordinates) {
-      console.log("Setting default Bengaluru coordinates");
-      setUserCoordinates({
-        lat: 12.9716,
-        lng: 77.5946
-      });
-    }
-  }, [userCoordinates]);
-  
   const handleRSVP = (eventTitle: string) => {
     toast({
       title: "RSVP Successful",
@@ -132,11 +115,7 @@ const SearchResults = () => {
   return (
     <MainLayout>
       <div className="w-full animate-fade-in mx-0 px-[2px] search-results-container">
-        <SearchLocation 
-          selectedLocation={selectedLocation} 
-          setSelectedLocation={setSelectedLocation} 
-          setUserCoordinates={setUserCoordinates} 
-        />
+        <SearchLocation />
 
         <SearchControls 
           distance={filters.distance} 

@@ -1,15 +1,17 @@
+
 import React, { useEffect, useState } from 'react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { cn } from '@/lib/utils';
-import { Loader2, Unlock, Lock } from 'lucide-react';
+import { Loader2, Unlock, Lock, MapPin } from 'lucide-react';
 import NoResultsMessage from './NoResultsMessage';
 import { useAuth } from '@/hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Clock } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
-// Removed MapViewButton import
+import { useLocation } from '@/contexts/LocationContext';
+import { calculateDistance, extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 
 interface MarketplaceItemsListProps {
   listings: MarketplaceListing[];
@@ -25,8 +27,43 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
   category
 }) => {
   const { user } = useAuth();
+  const { userCoordinates } = useLocation();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
+
+  // Calculate distances
+  const listingsWithDistance = listings.map(listing => {
+    let distance: number | undefined = undefined;
+    let listingCoordinates = null;
+    
+    // Try to get coordinates from the listing
+    if (listing.latitude && listing.longitude) {
+      listingCoordinates = { 
+        lat: parseFloat(listing.latitude), 
+        lng: parseFloat(listing.longitude) 
+      };
+    } else if (listing.map_link) {
+      const extractedCoords = extractCoordinatesFromMapLink(listing.map_link);
+      if (extractedCoords) {
+        listingCoordinates = extractedCoords;
+      }
+    }
+    
+    // Calculate distance if we have both user and listing coordinates
+    if (userCoordinates && listingCoordinates) {
+      distance = calculateDistance(
+        userCoordinates.lat, 
+        userCoordinates.lng, 
+        listingCoordinates.lat, 
+        listingCoordinates.lng
+      );
+    }
+    
+    return {
+      ...listing,
+      distance
+    };
+  });
 
   useEffect(() => {
     console.log("MarketplaceItemsList - listings length:", listings?.length || 0);
@@ -53,7 +90,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     );
   }
 
-  const visibleListings = listings.filter(listing => 
+  const visibleListings = listingsWithDistance.filter(listing => 
     listing.approval_status === 'approved' || 
     (user && listing.seller_id === user.id)
   );
@@ -111,12 +148,16 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
                   listing.approval_status === 'pending' ? "opacity-75" : ""
                 )}
               />
+              {listing.distance !== undefined && (
+                <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  <span>{listing.distance.toFixed(1)} km</span>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
-
-      
     </div>
   );
 };

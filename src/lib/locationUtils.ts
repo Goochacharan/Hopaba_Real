@@ -1,3 +1,4 @@
+import axios from 'axios';
 
 /**
  * Calculate distance between two coordinates using Haversine formula
@@ -44,6 +45,35 @@ export function calculateDistance(
   return Math.round(dist * 10) / 10; // Round to 1 decimal place
 }
 
+// Dictionary of Indian city coordinates
+const indianCitiesCoordinates: Record<string, { lat: number, lng: number }> = {
+  "Mumbai, Maharashtra": { lat: 19.0760, lng: 72.8777 },
+  "Delhi, Delhi": { lat: 28.7041, lng: 77.1025 },
+  "Bengaluru, Karnataka": { lat: 12.9716, lng: 77.5946 },
+  "Hyderabad, Telangana": { lat: 17.3850, lng: 78.4867 },
+  "Chennai, Tamil Nadu": { lat: 13.0827, lng: 80.2707 },
+  "Kolkata, West Bengal": { lat: 22.5726, lng: 88.3639 },
+  "Pune, Maharashtra": { lat: 18.5204, lng: 73.8567 },
+  "Ahmedabad, Gujarat": { lat: 23.0225, lng: 72.5714 },
+  "Jaipur, Rajasthan": { lat: 26.9124, lng: 75.7873 },
+  "Lucknow, Uttar Pradesh": { lat: 26.8467, lng: 80.9462 },
+  "Kanpur, Uttar Pradesh": { lat: 26.4499, lng: 80.3319 },
+  "Nagpur, Maharashtra": { lat: 21.1458, lng: 79.0882 },
+  "Indore, Madhya Pradesh": { lat: 22.7196, lng: 75.8577 },
+  "Thane, Maharashtra": { lat: 19.2183, lng: 72.9781 },
+  "Bhopal, Madhya Pradesh": { lat: 23.2599, lng: 77.4126 },
+};
+
+/**
+ * Parse Indian postal code from a string
+ * @param input Possible postal code containing text
+ * @returns Postal code if found, null otherwise
+ */
+export function parseIndianPostalCode(input: string): string | null {
+  const match = input.match(/\b[1-9][0-9]{5}\b/);
+  return match ? match[0] : null;
+}
+
 /**
  * Geocode an address to get coordinates
  * @param address Address string to geocode
@@ -51,21 +81,53 @@ export function calculateDistance(
  */
 export async function geocodeAddress(address: string): Promise<{lat: number, lng: number} | null> {
   try {
-    // This is a placeholder. You would need to implement a real geocoding service.
-    // For example, using Mapbox's geocoding API or Google Maps Geocoding API
     console.log('Geocoding address:', address);
     
-    // For demo purposes, return some dummy coordinates based on the address string
-    // In a real implementation, you would call an actual geocoding service
+    // Check for "Current Location"
     if (address === 'Current Location') {
-      return null; // Current location is handled separately via browser geolocation
+      return new Promise((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            });
+          },
+          () => resolve(null)
+        );
+      });
     }
     
-    if (address.toLowerCase().includes('bengaluru') || address.toLowerCase().includes('bangalore')) {
-      return { lat: 12.9716, lng: 77.5946 };
+    // Check if the address contains a postal code
+    const postalCode = parseIndianPostalCode(address);
+    if (postalCode) {
+      // For demo, use a mock location for postal codes
+      // In production, you would use a real geocoding API
+      console.log(`Found postal code: ${postalCode}`);
+      
+      // Generate deterministic but realistic coordinates for PIN codes
+      // This is just for demonstration - not for actual geocoding
+      const seed = parseInt(postalCode) % 1000;
+      const lat = 20.5937 + (seed % 10) / 10; // Range around central India
+      const lng = 78.9629 + (seed % 15) / 10; // Range around central India
+      
+      return { lat, lng };
     }
     
-    // Fallback to dummy coordinates
+    // Check if it's a known Indian city
+    for (const cityName in indianCitiesCoordinates) {
+      if (address.includes(cityName)) {
+        return indianCitiesCoordinates[cityName];
+      }
+    }
+    
+    // For simplicity, check for exact matches in our city list
+    if (indianCitiesCoordinates[address]) {
+      return indianCitiesCoordinates[address];
+    }
+    
+    // Fallback to Bengaluru for unknown locations
+    console.log("Using default Bengaluru coordinates as fallback");
     return { lat: 12.9716, lng: 77.5946 };
   } catch (error) {
     console.error('Geocoding error:', error);
@@ -248,4 +310,24 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
     console.error('Error extracting coordinates from map link:', error);
     return null;
   }
+}
+
+// Function to extract city from a text
+export function extractCityFromText(text: string): string | null {
+  // List of major indian cities to detect
+  const majorCities = [
+    "Mumbai", "Delhi", "Bengaluru", "Bangalore", "Hyderabad", "Chennai", 
+    "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow", "Kanpur", 
+    "Nagpur", "Indore", "Thane", "Bhopal", "Visakhapatnam", "Patna", 
+    "Vadodara", "Ghaziabad", "Ludhiana", "Coimbatore", "Agra", 
+    "Madurai", "Nashik", "Faridabad", "Meerut", "Rajkot", "Varanasi", "Srinagar"
+  ];
+  
+  for (const city of majorCities) {
+    if (text.includes(city)) {
+      return city;
+    }
+  }
+  
+  return null;
 }
