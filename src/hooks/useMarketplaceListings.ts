@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { calculateDistance } from '@/lib/locationUtils';
 
 export interface MarketplaceListing {
   id: string;
@@ -30,6 +31,7 @@ export interface MarketplaceListing {
   is_negotiable?: boolean;
   search_rank?: number;
   seller_role?: 'owner' | 'agent';
+  distance?: number;
 }
 
 interface UseMarketplaceListingsProps {
@@ -42,6 +44,8 @@ interface UseMarketplaceListingsProps {
   minRating?: number;
   includeAllStatuses?: boolean;
   sellerID?: string;
+  userLocation?: {lat: number; lng: number} | null;
+  maxDistance?: number;
 }
 
 export const useMarketplaceListings = ({
@@ -53,7 +57,9 @@ export const useMarketplaceListings = ({
   maxPrice,
   minRating,
   includeAllStatuses = false,
-  sellerID
+  sellerID,
+  userLocation,
+  maxDistance
 }: UseMarketplaceListingsProps = {}) => {
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -111,7 +117,14 @@ export const useMarketplaceListings = ({
           approval_status: item.approval_status as 'approved' | 'pending' | 'rejected'
         })) as MarketplaceListing[];
         
-        setListings(typedData);
+        const listingsWithDistance = addDistanceToListings(typedData, userLocation);
+        
+        const distanceFiltered = maxDistance && maxDistance > 0 
+          ? listingsWithDistance.filter(item => 
+              item.distance !== undefined && item.distance <= maxDistance)
+          : listingsWithDistance;
+        
+        setListings(distanceFiltered);
       } else {
         let query = supabase
           .from('marketplace_listings')
@@ -157,7 +170,14 @@ export const useMarketplaceListings = ({
           approval_status: item.approval_status as 'approved' | 'pending' | 'rejected'
         })) as MarketplaceListing[];
         
-        setListings(typedData || []);
+        const listingsWithDistance = addDistanceToListings(typedData, userLocation);
+        
+        const distanceFiltered = maxDistance && maxDistance > 0 
+          ? listingsWithDistance.filter(item => 
+              item.distance !== undefined && item.distance <= maxDistance)
+          : listingsWithDistance;
+        
+        setListings(distanceFiltered);
       }
     } catch (err: any) {
       console.error('Error fetching marketplace listings:', err);
@@ -172,9 +192,33 @@ export const useMarketplaceListings = ({
     }
   };
 
+  const addDistanceToListings = (
+    listings: MarketplaceListing[], 
+    userLocation: {lat: number; lng: number} | null
+  ): MarketplaceListing[] => {
+    if (!userLocation) return listings;
+
+    return listings.map(listing => {
+      if (listing.latitude && listing.longitude) {
+        const lat = parseFloat(listing.latitude);
+        const lng = parseFloat(listing.longitude);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          const distance = calculateDistance(
+            userLocation.lat, 
+            userLocation.lng, 
+            lat, 
+            lng
+          );
+          return { ...listing, distance };
+        }
+      }
+      return listing;
+    });
+  };
+
   useEffect(() => {
     fetchListings();
-  }, [category, searchQuery, condition, minPrice, maxPrice, minRating, includeAllStatuses, sellerID, limit]);
+  }, [category, searchQuery, condition, minPrice, maxPrice, minRating, includeAllStatuses, sellerID, limit, userLocation, maxDistance]);
 
   return {
     listings,

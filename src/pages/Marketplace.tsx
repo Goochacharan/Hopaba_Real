@@ -22,8 +22,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import NoResultsMessage from '@/components/search/NoResultsMessage';
+import { useLocation } from '@/contexts/LocationContext';
 
-type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
+type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated' | 'nearest';
 
 const Marketplace = () => {
   const { user } = useAuth();
@@ -43,9 +44,11 @@ const Marketplace = () => {
   const [conditionFilter, setConditionFilter] = useState<string>('all');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('newest');
-  const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
+  const [distanceRange, setDistanceRange] = useState<number>(50);
   const itemsPerPage = 9;
   
+  const { selectedLocation, userCoordinates } = useLocation();
+
   useEffect(() => {
     if (categoryParam && categoryParam !== currentCategory) {
       console.log("Setting category from URL:", categoryParam);
@@ -65,7 +68,9 @@ const Marketplace = () => {
     minPrice: priceRange[0] > 0 ? priceRange[0] : undefined,
     maxPrice: priceRange[1] < 10000000 ? priceRange[1] : undefined,
     minRating: ratingFilter > 0 ? ratingFilter : undefined,
-    includeAllStatuses: true
+    includeAllStatuses: true,
+    userLocation: userCoordinates,
+    maxDistance: sortOption === 'nearest' ? distanceRange : undefined
   });
 
   const { 
@@ -77,7 +82,7 @@ const Marketplace = () => {
   
   useEffect(() => {
     setCurrentPage(1);
-  }, [currentCategory, searchQuery, conditionFilter, priceRange, ratingFilter, sortOption]);
+  }, [currentCategory, searchQuery, conditionFilter, priceRange, ratingFilter, sortOption, distanceRange]);
 
   const handleLocationChange = (location: string) => {
     console.log(`Location changed to: ${location}`);
@@ -154,7 +159,9 @@ const Marketplace = () => {
         case 'price-high-low':
           return b.price - a.price;
         case 'top-rated':
-          return b.seller_rating - a.seller_rating;
+          return (b.seller_rating || 0) - (a.seller_rating || 0);
+        case 'nearest':
+          return (a.distance || 9999) - (b.distance || 9999);
         default:
           return 0;
       }
@@ -210,24 +217,23 @@ const Marketplace = () => {
   }));
 
   const filteredListings = enhancedListings.filter(listing => {
-    // Price filter
     const price = listing.price;
     if (price < priceRange[0] || price > priceRange[1]) return false;
     
-    // Model year filter - convert string year to number for comparison
     if (listing.model_year) {
       const modelYear = parseInt(listing.model_year, 10);
-      // Only filter if the model_year is a valid number
       if (!isNaN(modelYear) && (modelYear < yearRange[0] || modelYear > yearRange[1])) {
         return false;
       }
     }
     
-    // Rating filter
-    if (ratingFilter > 0 && listing.seller_rating < ratingFilter) return false;
+    if (ratingFilter > 0 && (listing.seller_rating || 0) < ratingFilter) return false;
     
-    // Condition filter
     if (conditionFilter !== 'all' && listing.condition.toLowerCase() !== conditionFilter.toLowerCase()) return false;
+    
+    if (sortOption === 'nearest' && userCoordinates && listing.distance && listing.distance > distanceRange) {
+      return false;
+    }
     
     return true;
   });
@@ -249,11 +255,12 @@ const Marketplace = () => {
   const isRatingFilterActive = ratingFilter > 0;
   const isConditionFilterActive = conditionFilter !== 'all';
   const isSortFilterActive = sortOption !== 'newest';
+  const isDistanceFilterActive = distanceRange < 50 || sortOption === 'nearest';
 
   return <MainLayout>
       <div className="animate-fade-in px-[7px]">
         <div className="flex items-center justify-between">
-          <LocationSelector selectedLocation={selectedLocation} onLocationChange={handleLocationChange} />
+          <LocationSelector />
         </div>
         
         {pendingListings.length > 0 && user && (
@@ -303,9 +310,53 @@ const Marketplace = () => {
                   <Button variant={sortOption === 'top-rated' ? "default" : "ghost"} size="sm" className="w-full justify-start" onClick={() => handleSortChange('top-rated')}>
                     Top Rated
                   </Button>
+                  <Button variant={sortOption === 'nearest' ? "default" : "ghost"} size="sm" className="w-full justify-start" onClick={() => handleSortChange('nearest')}>
+                    Nearest First
+                  </Button>
                 </div>
               </PopoverContent>
             </Popover>
+
+            {sortOption === 'nearest' && (
+              <Popover open={activeFilter === 'distance'} onOpenChange={open => setActiveFilter(open ? 'distance' : null)}>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant={isDistanceFilterActive ? "default" : "outline"} 
+                    size="icon" 
+                    className={cn(
+                      "rounded-full border border-border/60 flex items-center justify-center bg-background w-8 h-8 relative p-0", 
+                      activeFilter === 'distance' && "border-primary ring-2 ring-primary/20", 
+                      isDistanceFilterActive && "bg-blue-500 hover:bg-blue-600 text-white border-blue-400"
+                    )}
+                  >
+                    <Map className="h-4 w-4" />
+                    {isDistanceFilterActive && (
+                      <Badge variant="default" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-medium">
+                        {distanceRange}
+                      </Badge>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-4">
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Distance Range</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Show results within</span>
+                        <span className="text-sm font-medium">{distanceRange} km</span>
+                      </div>
+                      <Slider 
+                        value={[distanceRange]} 
+                        min={5} 
+                        max={100} 
+                        step={5} 
+                        onValueChange={value => setDistanceRange(value[0])} 
+                      />
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
 
             <Popover open={activeFilter === 'rating'} onOpenChange={open => setActiveFilter(open ? 'rating' : null)}>
               <PopoverTrigger asChild>
@@ -481,6 +532,23 @@ const Marketplace = () => {
           </div>
         </ScrollArea>
         
+        {userCoordinates && sortOption === 'nearest' && (
+          <div className="mb-3">
+            <Alert className="bg-blue-50 border-blue-100">
+              <MapPin className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-800">
+                Showing listings within {distanceRange} km of {selectedLocation || "your location"}
+                {paginatedListings.length > 0 && (
+                  <span className="block mt-1 text-sm">
+                    Nearest: {paginatedListings[0].distance?.toFixed(1) || '?'} km • 
+                    Farthest: {paginatedListings[paginatedListings.length - 1].distance?.toFixed(1) || '?'} km
+                  </span>
+                )}
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
+        
         <Tabs defaultValue={currentCategory} value={currentCategory} onValueChange={handleCategoryChange} className="mb-6">
           <TabsList className="mb-4 flex flex-nowrap overflow-auto pb-1 scrollbar-none py-0">
             {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify font-semibold text-sm mx-[8px] px-[7px]">
@@ -511,7 +579,10 @@ const Marketplace = () => {
                           listing.id === highlightedListingId ? "ring-4 ring-primary ring-opacity-50" : ""
                         )}
                       >
-                        <MarketplaceListingCard listing={listing} />
+                        <MarketplaceListingCard 
+                          listing={listing} 
+                          showDistance={sortOption === 'nearest' && !!userCoordinates}
+                        />
                       </div>
                     ))}
                   </div>
