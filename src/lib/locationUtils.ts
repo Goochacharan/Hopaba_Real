@@ -15,18 +15,28 @@ export const extractCityFromText = (location: string): string => {
 };
 
 /**
- * Extracts city from location text
+ * Extracts city from location text or object
  * Used for filtering and display
  */
-export const extractLocationCity = (location: string): string => {
+export const extractLocationCity = (location: string | any): string => {
   if (!location) return '';
   
-  const parts = location.split(',');
-  if (parts.length > 1) {
-    return parts[1].trim();
+  // If location is a string, use extractCityFromText
+  if (typeof location === 'string') {
+    return extractCityFromText(location);
   }
   
-  return location.trim();
+  // If location is an object with a location property
+  if (location.location && typeof location.location === 'string') {
+    return extractCityFromText(location.location);
+  }
+  
+  // Fall back to city property if it exists
+  if (location.city) {
+    return location.city;
+  }
+  
+  return '';
 };
 
 /**

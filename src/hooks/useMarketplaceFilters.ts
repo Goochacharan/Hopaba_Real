@@ -67,7 +67,7 @@ export const useMarketplaceFilters = (listings: MarketplaceListing[]) => {
         }
         
         // Use the imported extractLocationCity function with the location string
-        const listingCity = listing.location ? extractLocationCity(listing.location) : '';
+        const listingCity = extractLocationCity(listing);
         if (listingCity && selectedCity.includes(listingCity)) {
           return true;
         }

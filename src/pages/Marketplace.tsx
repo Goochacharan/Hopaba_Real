@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -13,7 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from '@/contexts/LocationContext';
 import PostalCodeSearch from '@/components/search/PostalCodeSearch';
 import { useMarketplaceFilters } from '@/hooks/useMarketplaceFilters';
-import { useMarketplaceListings, MarketplaceListing } from '@/hooks/useMarketplaceListings';
+import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { MarketplaceListingWithDistance } from '@/types/marketplace';
 
 const Marketplace = () => {
@@ -38,7 +39,13 @@ const Marketplace = () => {
   } = useMarketplaceFilters(listings);
 
   useEffect(() => {
-    refetch().finally(() => setLoading(false));
+    // Use the refetch function to load listings
+    const fetchData = async () => {
+      await refetch();
+      setLoading(false);
+    };
+    
+    fetchData();
   }, [selectedLocation, searchParams, refetch]);
 
   const filteredListings = filterListings(listings);
@@ -57,11 +64,15 @@ const Marketplace = () => {
     navigate('/marketplace/add');
   };
 
-  const handleListingClick = (listing: MarketplaceListing) => {
-    setSelectedListing({
+  const handleListingClick = (listing: any) => {
+    // Convert the listing to include MarketplaceListingWithDistance properties
+    const listingWithDistance: MarketplaceListingWithDistance = {
       ...listing,
-      distance: typeof listing.distance === 'string' ? parseFloat(listing.distance) : listing.distance
-    });
+      distance: typeof listing.distance === 'string' ? parseFloat(listing.distance) : listing.distance,
+      approval_status: listing.approval_status || 'approved'
+    };
+    
+    setSelectedListing(listingWithDistance);
     setShowListingDetails(true);
   };
 
@@ -98,7 +109,6 @@ const Marketplace = () => {
                 filters={filters}
                 setters={setters}
                 states={states}
-                showDistanceFilter={true}
               />
             </div>
           )}

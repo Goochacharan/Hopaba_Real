@@ -23,7 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ImageUpload } from '@/components/ui/image-upload';
 
-export interface BusinessFormValues {
+interface BusinessFormValues {
   name: string;
   category: string;
   description: string;
@@ -104,7 +104,7 @@ const businessSchema = z.object({
   images: z.array(z.string()).optional(),
 });
 
-type BusinessFormValues = z.infer<typeof businessSchema>;
+type BusinessFormSchemaType = z.infer<typeof businessSchema>;
 
 const SERVICE_CATEGORIES = [
   "Education", "Healthcare", "Food & Dining", "Home Services", "Beauty & Wellness",
@@ -112,7 +112,7 @@ const SERVICE_CATEGORIES = [
   "Entertainment", "Travel & Transport", "Fitness", "Real Estate", "Retail", "Other"
 ];
 
-interface BusinessFormProps {
+export interface BusinessFormProps {
   business?: Business;
   onSaved: () => void;
   onCancel: () => void;
@@ -126,7 +126,7 @@ const BusinessListingForm: React.FC<BusinessFormProps> = ({ business, onSaved, o
   const [tagInput, setTagInput] = useState('');
   const [businessImages, setBusinessImages] = useState<string[]>(business?.images || []);
 
-  const form = useForm<BusinessFormValues>({
+  const form = useForm<BusinessFormSchemaType>({
     resolver: zodResolver(businessSchema),
     defaultValues: {
       name: business?.name || "",
@@ -184,7 +184,7 @@ const BusinessListingForm: React.FC<BusinessFormProps> = ({ business, onSaved, o
     }
   };
 
-  const handleSubmit = async (data: BusinessFormValues) => {
+  const handleSubmit = async (data: BusinessFormSchemaType) => {
     console.log("Form submitted with data:", data);
     
     if (!user) {

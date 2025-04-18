@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { MarketplaceListingWithDistance } from '@/types/marketplace';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 
 interface MarketplaceListingDetailsProps {
   listing: MarketplaceListingWithDistance;
