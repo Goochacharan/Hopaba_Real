@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
@@ -12,6 +11,7 @@ import { Clock } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { useLocation } from '@/contexts/LocationContext';
 import { calculateDistance, extractCoordinatesFromMapLink } from '@/lib/locationUtils';
+import MarketplaceLocationSearch from './MarketplaceLocationSearch';
 
 interface MarketplaceItemsListProps {
   listings: MarketplaceListing[];
@@ -30,8 +30,20 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
   const { userCoordinates } = useLocation();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
+  const [locationFilter, setLocationFilter] = useState('');
+  
+  const filterListingsByLocation = (items: MarketplaceListing[]) => {
+    if (!locationFilter) return items;
+    
+    return items.filter(listing => {
+      const searchTerm = locationFilter.toLowerCase();
+      return (
+        (listing.location && listing.location.toLowerCase().includes(searchTerm)) ||
+        (listing.postal_code && listing.postal_code.includes(searchTerm))
+      );
+    });
+  };
 
-  // Calculate distances
   const listingsWithDistance = listings.map(listing => {
     let distance: number | undefined = undefined;
     let listingCoordinates = null;
@@ -74,6 +86,17 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     }
   }, [listings]);
 
+  const visibleListings = filterListingsByLocation(listingsWithDistance.filter(listing => 
+    listing.approval_status === 'approved' || 
+    (user && listing.seller_id === user.id)
+  ));
+
+  const handleLocationSearch = (location: string) => {
+    setLocationFilter(location);
+  };
+
+  console.log(`After filtering, ${visibleListings.length} listings are visible`);
+  
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -90,19 +113,12 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     );
   }
 
-  const visibleListings = listingsWithDistance.filter(listing => 
-    listing.approval_status === 'approved' || 
-    (user && listing.seller_id === user.id)
-  );
-
-  console.log(`After filtering, ${visibleListings.length} listings are visible`);
-  
-  if (visibleListings.length === 0) {
-    return <NoResultsMessage type="marketplace" />;
-  }
-
   return (
     <div className="space-y-4 pb-24">
+      <div className="mb-6">
+        <MarketplaceLocationSearch onLocationSearch={handleLocationSearch} />
+      </div>
+
       {visibleListings.some(l => l.approval_status === 'pending' && user && l.seller_id === user.id) && (
         <Alert variant="default" className="bg-yellow-50 border-yellow-200">
           <Clock className="h-4 w-4 text-yellow-600" />

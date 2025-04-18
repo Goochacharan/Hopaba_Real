@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -9,11 +8,9 @@ import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { addDistanceToRecommendations, sortRecommendations, enhanceRecommendations } from '@/utils/searchUtils';
 import SearchHeader from '@/components/search/SearchHeader';
 import SearchTabs from '@/components/search/SearchTabs';
-import SearchLocation from '@/components/search/SearchLocation';
 import SearchControls from '@/components/search/SearchControls';
 import ViewToggle from '@/components/search/ViewToggle';
 import MapComponent from '@/pages/Map';
-import { useLocation } from '@/contexts/LocationContext';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -21,9 +18,6 @@ const SearchResults = () => {
   const { toast } = useToast();
   const searchQuery = searchParams.get('q') || '';
   const categoryParam = searchParams.get('category') || 'all';
-  
-  // Get location from context
-  const { userCoordinates } = useLocation();
   
   const { filters, setters } = useSearchFilters();
   
@@ -55,8 +49,6 @@ const SearchResults = () => {
   const loading = recommendationsLoading || marketplaceLoading;
   const error = recommendationsError || marketplaceError;
 
-  console.log("User coordinates for distance calculation:", userCoordinates);
-  console.log("Original recommendations:", recommendations);
   const enhancedRecommendations = recommendations.map((rec, index) => ({
     ...rec,
     isHiddenGem: rec.isHiddenGem || index % 3 === 0,
@@ -80,9 +72,6 @@ const SearchResults = () => {
   const recommendationsWithDistance = addDistanceToRecommendations(filteredRecommendations, userCoordinates);
   const fullyEnhancedRecommendations = enhanceRecommendations(recommendationsWithDistance);
   const rankedRecommendations = sortRecommendations(fullyEnhancedRecommendations, filters.sortBy);
-  
-  console.log("Final ranked recommendations with calculated distances:", rankedRecommendations);
-  console.log("Marketplace listings:", marketplaceListings);
   
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
@@ -115,8 +104,6 @@ const SearchResults = () => {
   return (
     <MainLayout>
       <div className="w-full animate-fade-in mx-0 px-[2px] search-results-container">
-        <SearchLocation />
-
         <SearchControls 
           distance={filters.distance} 
           setDistance={setters.setDistance} 
@@ -135,11 +122,9 @@ const SearchResults = () => {
         />
 
         <div className="flex flex-col items-center justify-center gap-4 py-0">
-          {/* Use ViewToggle without props since it now returns null */}
           <ViewToggle />
         </div>
 
-        {/* Since isMapView is removed, we'll just always show the search results */}
         <div className="w-full">
           <SearchHeader 
             query={query} 
