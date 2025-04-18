@@ -9,6 +9,7 @@ interface LocationContextType {
   userCoordinates: { lat: number; lng: number } | null;
   setUserCoordinates: (coordinates: { lat: number; lng: number } | null) => void;
   isLoadingLocation: boolean;
+  updateLocationWithCoordinates: (location: string, coordinates?: { lat: number; lng: number } | null) => void;
 }
 
 const defaultLocation = "Bengaluru, Karnataka";
@@ -19,7 +20,8 @@ const LocationContext = createContext<LocationContextType>({
   setSelectedLocation: () => {},
   userCoordinates: defaultCoordinates,
   setUserCoordinates: () => {},
-  isLoadingLocation: false
+  isLoadingLocation: false,
+  updateLocationWithCoordinates: () => {}
 });
 
 export const useLocation = () => useContext(LocationContext);
@@ -79,7 +81,7 @@ export const LocationProvider: React.FC<{children: ReactNode}> = ({ children }) 
     initUserLocation();
   }, []);
 
-  const handleLocationChange = (location: string) => {
+  const handleLocationChange = async (location: string) => {
     setSelectedLocation(location);
     
     if (location === "Current Location") {
@@ -88,13 +90,37 @@ export const LocationProvider: React.FC<{children: ReactNode}> = ({ children }) 
     }
     
     // Geocode the address to get coordinates
-    geocodeAddress(location).then(coords => {
+    try {
+      const coords = await geocodeAddress(location);
       if (coords) {
         setUserCoordinates(coords);
+        console.log(`Updated coordinates for ${location}:`, coords);
       } else {
         console.error('Failed to geocode address:', location);
       }
-    });
+    } catch (error) {
+      console.error('Error geocoding address:', error, location);
+    }
+  };
+  
+  // New function to update both location and coordinates at once
+  const updateLocationWithCoordinates = (location: string, coordinates?: { lat: number; lng: number } | null) => {
+    setSelectedLocation(location);
+    
+    if (coordinates) {
+      setUserCoordinates(coordinates);
+      console.log(`Set location to ${location} with coordinates:`, coordinates);
+    } else if (location !== "Current Location") {
+      // If coordinates aren't provided, try to geocode
+      geocodeAddress(location).then(coords => {
+        if (coords) {
+          setUserCoordinates(coords);
+          console.log(`Geocoded ${location} to:`, coords);
+        }
+      }).catch(error => {
+        console.error('Error geocoding in updateLocationWithCoordinates:', error);
+      });
+    }
   };
 
   return (
@@ -104,7 +130,8 @@ export const LocationProvider: React.FC<{children: ReactNode}> = ({ children }) 
         setSelectedLocation: handleLocationChange,
         userCoordinates,
         setUserCoordinates,
-        isLoadingLocation
+        isLoadingLocation,
+        updateLocationWithCoordinates
       }}
     >
       {children}

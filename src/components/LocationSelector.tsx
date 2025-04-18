@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Navigation, X, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -17,6 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { geocodeAddress } from '@/lib/locationUtils';
 
 interface LocationSelectorProps {
   selectedLocation: string;
@@ -143,26 +143,65 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
     }
   };
 
-  const handleSelectLocation = (location: string) => {
+  const handleSelectLocation = async (location: string) => {
     if (isIndianPostalCode(location)) {
       location = formatPostalCode(location);
     }
-    onLocationChange(location);
+    
+    // Get coordinates for the selected location
+    try {
+      const coordinates = await geocodeAddress(location);
+      console.log(`Selected location: ${location}, coordinates:`, coordinates);
+      
+      if (coordinates) {
+        onLocationChange(location, coordinates);
+      } else {
+        onLocationChange(location);
+      }
+    } catch (error) {
+      console.error("Error geocoding location:", error);
+      onLocationChange(location);
+    }
+    
     setLocationInput(location);
     setIsEditing(false);
     setIsPopoverOpen(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (locationInput.trim()) {
       // Check if it's a postal code
       if (isIndianPostalCode(locationInput.trim())) {
         const formattedLocation = formatPostalCode(locationInput.trim());
-        onLocationChange(formattedLocation);
+        
+        // Get coordinates for postal code
+        try {
+          const coordinates = await geocodeAddress(formattedLocation);
+          if (coordinates) {
+            onLocationChange(formattedLocation, coordinates);
+          } else {
+            onLocationChange(formattedLocation);
+          }
+        } catch (error) {
+          console.error("Error geocoding postal code:", error);
+          onLocationChange(formattedLocation);
+        }
       } else {
-        onLocationChange(locationInput);
+        // For regular locations, get coordinates
+        try {
+          const coordinates = await geocodeAddress(locationInput);
+          if (coordinates) {
+            onLocationChange(locationInput, coordinates);
+          } else {
+            onLocationChange(locationInput);
+          }
+        } catch (error) {
+          console.error("Error geocoding location:", error);
+          onLocationChange(locationInput);
+        }
       }
+      
       setIsEditing(false);
       setIsPopoverOpen(false);
     }
