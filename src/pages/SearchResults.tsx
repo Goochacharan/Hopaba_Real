@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -11,7 +10,9 @@ import SearchHeader from '@/components/search/SearchHeader';
 import SearchTabs from '@/components/search/SearchTabs';
 import SearchLocation from '@/components/search/SearchLocation';
 import SearchControls from '@/components/search/SearchControls';
-import MapViewButton from '@/components/search/MapViewButton';
+import { Button } from '@/components/ui/button';
+import { Map, List } from 'lucide-react';
+import Map from '@/pages/Map';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -23,6 +24,7 @@ const SearchResults = () => {
   
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
   const [userCoordinates, setUserCoordinates] = useState<{lat: number, lng: number} | null>(null);
+  const [isMapView, setIsMapView] = useState(false);
   
   const { filters, setters } = useSearchFilters();
   
@@ -119,6 +121,21 @@ const SearchResults = () => {
           setUserCoordinates={setUserCoordinates}
         />
         
+        <div className="flex items-center justify-between px-2 py-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsMapView(!isMapView)}
+            className="rounded-full"
+          >
+            {isMapView ? (
+              <><List className="h-4 w-4 mr-2" /> List View</>
+            ) : (
+              <><Map className="h-4 w-4 mr-2" /> Map View</>
+            )}
+          </Button>
+        </div>
+
         <SearchControls
           distance={filters.distance}
           setDistance={setters.setDistance}
@@ -136,32 +153,33 @@ const SearchResults = () => {
           onSortChange={setters.setSortBy}
         />
 
-        <div className="w-full">
-          <SearchHeader 
-            query={query}
-            searchQuery={searchQuery}
-            category={category}
-            resultsCount={{
-              locations: rankedRecommendations.length,
-              events: 0,
-              marketplace: 0
-            }}
-            loading={loading}
-            error={error}
-            className="search-header"
-          />
-          
-          {!loading && (
-            <div className="search-tabs-container">
-              <SearchTabs 
-                recommendations={rankedRecommendations}
-              />
-            </div>
-          )}
-        </div>
-        
-        {/* Add the Map View button directly on the search results page */}
-        {rankedRecommendations.length > 0 && <MapViewButton />}
+        {isMapView ? (
+          <Map recommendations={rankedRecommendations} userCoordinates={userCoordinates} />
+        ) : (
+          <div className="w-full">
+            <SearchHeader 
+              query={query}
+              searchQuery={searchQuery}
+              category={category}
+              resultsCount={{
+                locations: rankedRecommendations.length,
+                events: 0,
+                marketplace: 0
+              }}
+              loading={loading}
+              error={error}
+              className="search-header"
+            />
+            
+            {!loading && (
+              <div className="search-tabs-container">
+                <SearchTabs 
+                  recommendations={rankedRecommendations}
+                />
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </MainLayout>
   );

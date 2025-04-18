@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import MainLayout from '@/components/MainLayout';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -12,7 +11,12 @@ import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 
-const Map = () => {
+interface MapProps {
+  recommendations: any[];
+  userCoordinates: { lat: number; lng: number } | null;
+}
+
+const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
   const [userCoordinates, setUserCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -25,9 +29,6 @@ const Map = () => {
   const location = useLocation();
   const { toast } = useToast();
   const mapInitializedRef = useRef(false);
-
-  // Get recommendations from the same hook that the main page uses
-  const { recommendations, loading: recommendationsLoading } = useRecommendations({});
 
   const handleLocationChange = (location: string, coordinates?: { lat: number; lng: number }) => {
     setSelectedLocation(location);
@@ -117,7 +118,7 @@ const Map = () => {
     // 2. Map container exists in DOM
     // 3. Recommendations are loaded
     // 4. Map hasn't been initialized yet
-    if (!mapLoaded || !mapContainer.current || recommendationsLoading || mapInitializedRef.current) return;
+    if (!mapLoaded || !mapContainer.current || !recommendations || mapInitializedRef.current) return;
 
     const initializeMap = () => {
       try {
@@ -260,11 +261,11 @@ const Map = () => {
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [mapLoaded, recommendations, userCoordinates, recommendationsLoading, toast]);
+  }, [mapLoaded, recommendations, userCoordinates, toast]);
 
   // Update markers when recommendations or user location changes
   useEffect(() => {
-    if (map.current && mapInitializedRef.current && !recommendationsLoading) {
+    if (map.current && mapInitializedRef.current && recommendations) {
       try {
         // Add markers when recommendations change
         const addMarkers = () => {
@@ -371,67 +372,26 @@ const Map = () => {
   }, [recommendations, userCoordinates]);
 
   return (
-    <MainLayout>
-      <section className="py-8 px-4 w-full pb-28">
-        <div className="max-w-[1400px] mx-auto">
-          <h1 className="text-3xl font-medium mb-6">Locations Map</h1>
-          
-          <div className="mb-4">
-            <LocationSelector 
-              selectedLocation={selectedLocation} 
-              onLocationChange={handleLocationChange} 
-            />
-          </div>
-          
-          {loading || recommendationsLoading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : mapError ? (
-            <Alert variant="destructive" className="mb-4">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>
-                {mapError}
-                <p className="mt-2">
-                  Please make sure you have added the MapMyIndia API key to your Supabase Edge Function secrets.
-                </p>
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
-              <div 
-                className="h-[600px] w-full relative" 
-                ref={mapContainer}
-                id="map-container"
-              >
-                {!mapLoaded && !mapError && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                    <div className="text-center">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
-                      <p className="text-muted-foreground">Loading map...</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="p-4 flex justify-between">
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate('/')}
-                  className="flex items-center gap-2"
-                >
-                  <List className="h-4 w-4" />
-                  View as List
-                </Button>
-                <div className="text-xs text-muted-foreground">
-                  Showing {markers.current.length} locations
+    <section className="w-full">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
+          <div 
+            className="h-[600px] w-full relative" 
+            ref={mapContainer}
+            id="map-container"
+          >
+            {!mapLoaded && !mapError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                <div className="text-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
+                  <p className="text-muted-foreground">Loading map...</p>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </section>
-    </MainLayout>
+      </div>
+    </section>
   );
 };
 
