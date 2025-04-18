@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -84,7 +83,6 @@ const SearchResults = () => {
     distanceUnit: 'km'
   });
 
-  // Apply distance calculation using actual coordinates
   const recommendationsWithDistance = addDistanceToRecommendations(filteredRecommendations, userCoordinates);
   const fullyEnhancedRecommendations = enhanceRecommendations(recommendationsWithDistance);
   const rankedRecommendations = sortRecommendations(fullyEnhancedRecommendations, filters.sortBy);
@@ -112,7 +110,6 @@ const SearchResults = () => {
     }
   }, [searchQuery, navigate]);
   
-  // Initialize with Bengaluru coordinates if no user location is set
   useEffect(() => {
     if (!userCoordinates) {
       console.log("Setting default Bengaluru coordinates");

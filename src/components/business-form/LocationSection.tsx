@@ -16,11 +16,13 @@ import { useMapLinkCoordinates } from '@/hooks/useMapLinkCoordinates';
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 
 const LocationSection = () => {
   const form = useFormContext<BusinessFormValues>();
   const { toast } = useToast();
   const [mapLinkState, setMapLinkState] = useState<'none' | 'checking' | 'valid' | 'invalid'>('none');
+  const [isGeocodingAddress, setIsGeocodingAddress] = useState(false);
   
   // Use the custom hook to automatically extract coordinates from map_link
   useMapLinkCoordinates('map_link', 'latitude', 'longitude');
@@ -63,7 +65,7 @@ const LocationSection = () => {
     }
   };
   
-  // Function to try to geocode the address when button is clicked
+  // Function to try to geocode the address using Google Maps API
   const handleGeocodeAddress = async () => {
     const address = form.getValues('address');
     const city = form.getValues('city');
@@ -81,28 +83,68 @@ const LocationSection = () => {
     // Full address string
     const fullAddress = `${address}, ${area || ''}, ${city}`;
     
+    setIsGeocodingAddress(true);
     toast({
       title: "Finding location...",
       description: "We're extracting coordinates from your address",
     });
     
-    // In a real implementation, you would call a geocoding service here
-    // For this example, we'll simulate a successful geocoding with a delay
-    // and hardcoded coordinates for Bengaluru (replace with actual geocoding)
-    setTimeout(() => {
-      const simulatedCoords = {
-        lat: 12.9716 + (Math.random() - 0.5) * 0.1, // Simulated coordinates for Bengaluru with slight randomization
-        lng: 77.5946 + (Math.random() - 0.5) * 0.1
-      };
+    try {
+      // Get Google Maps API key from edge function
+      const { data, error } = await supabase.functions.invoke('get-google-maps-key');
       
-      form.setValue('latitude', simulatedCoords.lat.toString());
-      form.setValue('longitude', simulatedCoords.lng.toString());
+      if (error || !data?.apiKey) {
+        console.error('Error getting Google Maps API key:', error);
+        toast({
+          title: "Error",
+          description: "Couldn't access mapping service. Please try again later or enter coordinates manually.",
+          variant: "destructive",
+        });
+        setIsGeocodingAddress(false);
+        return;
+      }
       
+      // Use the Geocoding API directly
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${data.apiKey}`
+      );
+      
+      const geocodeData = await response.json();
+      
+      if (geocodeData.status === 'OK' && geocodeData.results && geocodeData.results.length > 0) {
+        const location = geocodeData.results[0].geometry.location;
+        
+        form.setValue('latitude', location.lat.toString());
+        form.setValue('longitude', location.lng.toString());
+        
+        toast({
+          title: "Location found",
+          description: `Coordinates found: (${location.lat.toFixed(4)}, ${location.lng.toFixed(4)})`,
+        });
+        
+        // Generate a Google Maps link for the location and add it if map_link is empty
+        if (!form.getValues('map_link')) {
+          const googleMapsLink = `https://www.google.com/maps?q=${location.lat},${location.lng}`;
+          form.setValue('map_link', googleMapsLink);
+          setMapLinkState('valid');
+        }
+      } else {
+        toast({
+          title: "Location not found",
+          description: "Couldn't find coordinates for this address. Please check the address or enter coordinates manually.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error geocoding address:', error);
       toast({
-        title: "Location found",
-        description: `Coordinates found for your address: (${simulatedCoords.lat.toFixed(4)}, ${simulatedCoords.lng.toFixed(4)})`,
+        title: "Error",
+        description: "Failed to geocode address. Please try again later or enter coordinates manually.",
+        variant: "destructive",
       });
-    }, 1500);
+    } finally {
+      setIsGeocodingAddress(false);
+    }
   };
   
   return (
@@ -173,9 +215,16 @@ const LocationSection = () => {
           variant="outline" 
           className="flex items-center gap-2"
           onClick={handleGeocodeAddress}
+          disabled={isGeocodingAddress}
         >
-          <MapIcon className="h-4 w-4" />
-          Get Coordinates from Address
+          {isGeocodingAddress ? (
+            <>Finding coordinates...</>
+          ) : (
+            <>
+              <MapIcon className="h-4 w-4" />
+              Get Coordinates from Address
+            </>
+          )}
         </Button>
         <p className="text-xs text-muted-foreground mt-1">
           Click to find your location coordinates based on the address you entered

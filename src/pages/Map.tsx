@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Loader2, AlertTriangle } from 'lucide-react';
@@ -7,6 +8,14 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { Button } from '@/components/ui/button';
+
+// Define Google Maps type
+declare global {
+  interface Window {
+    google: any;
+    initMap?: () => void;
+  }
+}
 
 interface MapComponentProps {
   recommendations?: any[];
@@ -29,8 +38,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<any | null>(null);
-  const markers = useRef<any[]>([]);
+  const map = useRef<google.maps.Map | null>(null);
+  const markers = useRef<google.maps.Marker[]>([]);
+  const infoWindows = useRef<google.maps.InfoWindow[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -59,7 +69,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         return [];
       }
       
-      console.log(`Fetched ${data.length} service providers from Supabase`);
+      console.log(`Fetched ${data?.length || 0} service providers from Supabase`);
       return data || [];
     } catch (error) {
       console.error('Error in fetchServiceProviders:', error);
@@ -104,11 +114,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
     const loadMapScript = async () => {
       try {
-        // Fetch MapMyIndia API key from Supabase Edge Function
-        console.log('Fetching MapMyIndia API key...');
-        const { data, error } = await supabase.functions.invoke('get-mapmyindia-key');
+        // Fetch Google Maps API key from Supabase Edge Function
+        console.log('Fetching Google Maps API key...');
+        const { data, error } = await supabase.functions.invoke('get-google-maps-key');
+        
         if (error) {
-          console.error('Error getting MapMyIndia API key:', error);
+          console.error('Error getting Google Maps API key:', error);
           setMapError('Failed to get map API key. Please try again later.');
           setLoading(false);
           return;
@@ -117,42 +128,42 @@ const MapComponent: React.FC<MapComponentProps> = ({
         const apiKey = data?.apiKey;
         
         if (!apiKey) {
-          console.error('MapMyIndia API key not found');
+          console.error('Google Maps API key not found');
           setMapError('Map API key not found. Please check your configuration.');
           setLoading(false);
           return;
         }
         
-        // Check if MapmyIndia is already loaded
-        if (window.MapmyIndia) {
-          console.log('MapmyIndia script already loaded');
+        // Check if Google Maps API is already loaded
+        if (window.google && window.google.maps) {
+          console.log('Google Maps script already loaded');
           setMapLoaded(true);
           setLoading(false);
           return;
         }
           
-        // If not, load the MapMyIndia script
-        console.log('Loading MapMyIndia script...');
-        const script = document.createElement('script');
-        script.src = `https://apis.mapmyindia.com/advancedmaps/v1/${apiKey}/map_load?v=1.5`;
-        script.async = true;
-        script.defer = true;
-          
-        script.onload = () => {
-          console.log('MapmyIndia script loaded successfully');
+        // Define callback function for when Google Maps loads
+        window.initMap = () => {
+          console.log('Google Maps script loaded successfully');
           setMapLoaded(true);
           setLoading(false);
         };
           
+        // Load the Google Maps script with API key
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap&libraries=places`;
+        script.async = true;
+        script.defer = true;
+          
         script.onerror = (error) => {
-          console.error('Error loading MapMyIndia script:', error);
+          console.error('Error loading Google Maps script:', error);
           setMapError('Failed to load map. Please check your internet connection and try again.');
           setLoading(false);
         };
           
         document.head.appendChild(script);
       } catch (error) {
-        console.error('Failed to load MapMyIndia script:', error);
+        console.error('Failed to load Google Maps script:', error);
         setMapError('Failed to load map. Please try again later.');
         setLoading(false);
       }
@@ -161,44 +172,63 @@ const MapComponent: React.FC<MapComponentProps> = ({
     loadMapScript();
     
     return () => {
-      if (map.current) {
-        map.current = null;
+      // Clean up markers and info windows
+      if (markers.current) {
+        markers.current.forEach(marker => marker.setMap(null));
+        markers.current = [];
       }
+      
+      if (infoWindows.current) {
+        infoWindows.current.forEach(infoWindow => infoWindow.close());
+        infoWindows.current = [];
+      }
+      
+      // Reset map reference
+      map.current = null;
       mapInitializedRef.current = false;
+      
+      // Remove the initMap global callback when component unmounts
+      delete window.initMap;
     };
   }, []);
   
   const addMarkers = () => {
-    if (!map.current || !mapInitializedRef.current) return;
+    if (!map.current || !mapInitializedRef.current || !window.google) return;
     
     try {
       console.log("Starting to add markers to map");
       
-      // Clear existing markers
-      markers.current.forEach(marker => {
-        if (marker && marker.remove) {
-          marker.remove();
-        }
-      });
+      // Clear existing markers and info windows
+      markers.current.forEach(marker => marker.setMap(null));
       markers.current = [];
+      
+      infoWindows.current.forEach(infoWindow => infoWindow.close());
+      infoWindows.current = [];
       
       // Add user location marker if available
       if (localUserCoordinates) {
         try {
           console.log("Adding user location marker at:", localUserCoordinates);
-          const userMarker = new window.MapmyIndia.Marker({
-            position: [localUserCoordinates.lng, localUserCoordinates.lat] as [number, number],
-            icon: {
-              url: 'https://apis.mapmyindia.com/map_v3/1.png',
-              width: 25,
-              height: 41
-            },
+          const userMarker = new window.google.maps.Marker({
+            position: localUserCoordinates,
             map: map.current,
-            draggable: false,
-            popupHtml: '<p>Your location</p>'
+            icon: {
+              url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+              scaledSize: new window.google.maps.Size(32, 32)
+            },
+            title: 'Your Location'
+          });
+          
+          const userInfoWindow = new window.google.maps.InfoWindow({
+            content: '<div><strong>Your location</strong></div>'
+          });
+          
+          userMarker.addListener('click', () => {
+            userInfoWindow.open(map.current, userMarker);
           });
           
           markers.current.push(userMarker);
+          infoWindows.current.push(userInfoWindow);
         } catch (error) {
           console.error('Error adding user marker:', error);
         }
@@ -238,10 +268,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
             if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
               console.log(`Adding marker for service provider ${rec.name} at coordinates:`, lat, lng);
               
-              // Create popup content with business details
-              const popupContent = `
+              // Create info window content with business details
+              const infoContent = `
                 <div style="max-width: 250px; padding: 8px;">
-                  <h3 style="margin-top: 0; font-weight: bold;">${rec.name}</h3>
+                  <h3 style="margin-top: 0; font-weight: bold;">${rec.name || 'Business'}</h3>
                   <p style="margin: 5px 0;">${rec.address || rec.area || ''}</p>
                   ${rec.category ? `<p style="margin: 5px 0; font-style: italic;">${rec.category}</p>` : ''}
                   <button 
@@ -253,15 +283,27 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 </div>
               `;
               
-              // Create and add the marker
-              const marker = new window.MapmyIndia.Marker({
-                position: [lng, lat] as [number, number],
+              // Create marker and info window
+              const marker = new window.google.maps.Marker({
+                position: { lat, lng },
                 map: map.current,
-                draggable: false,
-                popupHtml: popupContent
+                title: rec.name || 'Business'
+              });
+              
+              const infoWindow = new window.google.maps.InfoWindow({
+                content: infoContent
+              });
+              
+              marker.addListener('click', () => {
+                // Close all open info windows first
+                infoWindows.current.forEach(window => window.close());
+                
+                // Open this info window
+                infoWindow.open(map.current, marker);
               });
               
               markers.current.push(marker);
+              infoWindows.current.push(infoWindow);
             } else {
               console.log(`Service provider ${rec.name} (${index}) missing valid coordinates`);
             }
@@ -299,27 +341,46 @@ const MapComponent: React.FC<MapComponentProps> = ({
             }
             
             if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
-              // Add marketplace listing marker
-              const marker = new window.MapmyIndia.Marker({
-                position: [lng, lat] as [number, number],
+              // Create info window content
+              const infoContent = `
+                <div style="max-width: 250px; padding: 8px;">
+                  <h3 style="margin-top: 0; font-weight: bold;">${listing.title || 'Listing'}</h3>
+                  <p style="margin: 5px 0;">${listing.price ? '₹' + listing.price : ''}</p>
+                  <p style="margin: 5px 0;">${listing.location || ''}</p>
+                  <button 
+                    style="background: #4f46e5; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px;"
+                    onclick="window.location.href='/marketplace/${listing.id}'"
+                  >
+                    View Details
+                  </button>
+                </div>
+              `;
+              
+              // Create marker with different icon for marketplace listings
+              const marker = new window.google.maps.Marker({
+                position: { lat, lng },
                 map: map.current,
-                draggable: false,
-                popupHtml: `
-                  <div style="max-width: 250px; padding: 8px;">
-                    <h3 style="margin-top: 0; font-weight: bold;">${listing.title}</h3>
-                    <p style="margin: 5px 0;">${listing.price ? '₹' + listing.price : ''}</p>
-                    <p style="margin: 5px 0;">${listing.location || ''}</p>
-                    <button 
-                      style="background: #4f46e5; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px;"
-                      onclick="window.location.href='/marketplace/${listing.id}'"
-                    >
-                      View Details
-                    </button>
-                  </div>
-                `
+                title: listing.title || 'Marketplace Listing',
+                icon: {
+                  url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                  scaledSize: new window.google.maps.Size(32, 32)
+                }
+              });
+              
+              const infoWindow = new window.google.maps.InfoWindow({
+                content: infoContent
+              });
+              
+              marker.addListener('click', () => {
+                // Close all open info windows first
+                infoWindows.current.forEach(window => window.close());
+                
+                // Open this info window
+                infoWindow.open(map.current, marker);
               });
               
               markers.current.push(marker);
+              infoWindows.current.push(infoWindow);
               console.log(`Successfully added marker for marketplace listing ${listing.title}`);
             } else {
               console.log(`Marketplace listing ${listing.title} (${index}) missing valid coordinates`);
@@ -330,30 +391,32 @@ const MapComponent: React.FC<MapComponentProps> = ({
         });
       }
 
-      // Adjust map view to show all markers
-      if (markers.current.length > 1) {
+      // Adjust map view to show all markers if there are any
+      if (markers.current.length > 0) {
         try {
           console.log("Fitting bounds to show all markers:", markers.current.length);
-          const bounds = new window.MapmyIndia.LatLngBounds();
+          
+          const bounds = new window.google.maps.LatLngBounds();
           markers.current.forEach(marker => {
             bounds.extend(marker.getPosition());
           });
+          
           map.current.fitBounds(bounds);
+          
+          // Prevent excessive zoom when there's only one marker or markers are very close
+          const listener = window.google.maps.event.addListener(map.current, 'idle', () => {
+            if (map.current.getZoom() > 16) {
+              map.current.setZoom(16);
+            }
+            window.google.maps.event.removeListener(listener);
+          });
+          
         } catch (error) {
           console.error('Error fitting bounds:', error);
         }
-      } else if (markers.current.length === 1) {
-        try {
-          console.log("Centering map on single marker");
-          const position = markers.current[0].getPosition();
-          map.current.setCenter(position);
-          map.current.setZoom(14);
-        } catch (error) {
-          console.error('Error centering on marker:', error);
-        }
       } else {
         console.log("No markers to display, showing default view");
-        map.current.setCenter([77.5946, 12.9716]); // Bengaluru
+        map.current.setCenter({ lat: 12.9716, lng: 77.5946 }); // Bengaluru
         map.current.setZoom(12);
       }
     } catch (error) {
@@ -361,36 +424,37 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   };
   
-  // Initialize map when MapMyIndia is loaded
+  // Initialize map when Google Maps is loaded
   useEffect(() => {
-    if (!mapLoaded || !mapContainer.current || mapInitializedRef.current) return;
+    if (!mapLoaded || !mapContainer.current || mapInitializedRef.current || !window.google) return;
 
     const initializeMap = () => {
       try {
-        console.log('Initializing map with container:', mapContainer.current);
+        console.log('Initializing Google map with container:', mapContainer.current);
         
-        const defaultCenter: [number, number] = [77.5946, 12.9716]; // Bengaluru 
-        const center: [number, number] = localUserCoordinates 
-          ? [localUserCoordinates.lng, localUserCoordinates.lat] 
-          : defaultCenter;
+        const defaultCenter = { lat: 12.9716, lng: 77.5946 }; // Bengaluru 
+        const center = localUserCoordinates || defaultCenter;
         
-        if (!window.MapmyIndia) {
-          console.error('MapmyIndia SDK not loaded');
+        if (!window.google || !window.google.maps) {
+          console.error('Google Maps SDK not loaded');
           setMapError('Map SDK not loaded properly. Please refresh the page.');
           return;
         }
 
         // Create the map instance
-        map.current = new window.MapmyIndia.Map(mapContainer.current, {
+        map.current = new window.google.maps.Map(mapContainer.current, {
           center: center,
           zoom: 12,
-          search: false
+          mapTypeControl: true,
+          streetViewControl: true,
+          fullscreenControl: true,
+          zoomControl: true
         });
         
         mapInitializedRef.current = true;
         
-        // Add markers when map is loaded
-        map.current.addEventListener('load', () => {
+        // Add markers when map is ready
+        window.google.maps.event.addListenerOnce(map.current, 'idle', () => {
           console.log('Map loaded, adding markers');
           addMarkers();
         });
@@ -415,7 +479,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
   // Update markers when data changes
   useEffect(() => {
-    if (map.current && mapInitializedRef.current) {
+    if (map.current && mapInitializedRef.current && window.google) {
       console.log('Data changed, updating markers');
       console.log('Number of service providers from search:', recommendations.length);
       console.log('Number of marketplace listings:', allMarketplaceListings.length);

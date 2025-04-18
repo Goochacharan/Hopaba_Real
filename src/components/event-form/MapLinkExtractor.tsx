@@ -20,8 +20,10 @@ const MapLinkExtractor: React.FC = () => {
     const mapLink = formContext.watch('map_link');
     
     if (mapLink) {
+      // Use the improved coordinate extraction function that works with Google Maps
       const coords = extractCoordinatesFromMapLink(mapLink);
       if (coords) {
+        console.log('MapLinkExtractor: Extracted coordinates from link:', coords);
         formContext.setValue('latitude', coords.lat.toString());
         formContext.setValue('longitude', coords.lng.toString());
       }
