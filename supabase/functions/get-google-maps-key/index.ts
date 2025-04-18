@@ -18,14 +18,14 @@ serve(async (req) => {
   try {
     console.log("Attempting to retrieve Google Maps API key from environment variables")
     
-    // Verify the exact name of the secret as configured in Supabase
+    // Use the secret name exactly as configured in Supabase
     const apiKey = Deno.env.get('Google_map')
     
     if (!apiKey) {
-      console.error("API key not found in environment variables. Secret name: 'Google_map'")
+      console.error("API key not found in environment variables. Please check Supabase secrets configuration.")
       return new Response(JSON.stringify({ 
         error: 'API key not found',
-        message: 'Please ensure the Google_map secret is configured in Supabase'
+        message: 'Unable to retrieve Google Maps API key. Please contact support.'
       }), {
         headers: { 
           ...corsHeaders, 
@@ -43,10 +43,10 @@ serve(async (req) => {
       }
     })
   } catch (error) {
-    console.error("Error retrieving Google Maps API key:", error.message)
+    console.error("Unexpected error retrieving Google Maps API key:", error)
     return new Response(JSON.stringify({ 
-      error: error.message,
-      trace: error.stack
+      error: 'Internal server error',
+      message: 'An unexpected error occurred while fetching the API key.'
     }), {
       headers: { 
         ...corsHeaders, 
