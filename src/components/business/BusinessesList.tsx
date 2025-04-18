@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -6,6 +5,8 @@ import { useToast } from '@/hooks/use-toast';
 import type { BusinessFormValues } from '@/components/AddBusinessForm';
 import BusinessCard from './BusinessCard';
 import DeleteConfirmDialog from './DeleteConfirmDialog';
+import ViewToggle from '@/components/search/ViewToggle';
+import MapView from './MapView';
 
 interface BusinessesListProps {
   onEdit: (business: BusinessFormValues & { id: string }) => void;
@@ -19,6 +20,8 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
   const [loading, setLoading] = useState(true);
   const [businessToDelete, setBusinessToDelete] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isMapView, setIsMapView] = useState(false);
+  const [userCoordinates, setUserCoordinates] = useState<{lat: number, lng: number}>({ lat: 12.9716, lng: 77.5946 });
 
   const fetchBusinesses = async () => {
     if (!user) return;
@@ -109,16 +112,28 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
   return (
     <div className="space-y-6 relative">
       <h3 className="text-xl font-medium">Your Businesses and Services</h3>
-      <div className="grid grid-cols-1 gap-6">
-        {businesses.map((business) => (
-          <BusinessCard
-            key={business.id}
-            business={business}
-            onEdit={onEdit}
-            onDelete={confirmDelete}
-          />
-        ))}
+      
+      <div className="flex flex-col items-center justify-center gap-4 py-4">
+        <ViewToggle isMapView={isMapView} onToggle={setIsMapView} />
       </div>
+
+      {isMapView ? (
+        <MapView 
+          businesses={businesses}
+          userCoordinates={userCoordinates}
+        />
+      ) : (
+        <div className="grid grid-cols-1 gap-6">
+          {businesses.map((business) => (
+            <BusinessCard
+              key={business.id}
+              business={business}
+              onEdit={onEdit}
+              onDelete={confirmDelete}
+            />
+          ))}
+        </div>
+      )}
 
       <DeleteConfirmDialog
         open={isDeleteDialogOpen}
