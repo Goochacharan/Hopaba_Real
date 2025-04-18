@@ -12,4 +12,8 @@ interface Window {
     render: (container: string | HTMLElement, parameters: object) => string | number;
   };
   onloadCallback?: () => void;
+  
+  // Google Maps related types
+  google?: typeof google;
+  initMap?: () => void;
 }
