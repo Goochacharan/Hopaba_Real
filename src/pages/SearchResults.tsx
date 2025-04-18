@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -11,9 +10,8 @@ import SearchHeader from '@/components/search/SearchHeader';
 import SearchTabs from '@/components/search/SearchTabs';
 import SearchLocation from '@/components/search/SearchLocation';
 import SearchControls from '@/components/search/SearchControls';
-import { Button } from '@/components/ui/button';
-import { Map as MapIcon, List } from 'lucide-react';
-import Map from '@/pages/Map';
+import ViewToggle from '@/components/search/ViewToggle';
+import MapComponent from '@/pages/Map';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -121,20 +119,9 @@ const SearchResults = () => {
           setSelectedLocation={setSelectedLocation}
           setUserCoordinates={setUserCoordinates}
         />
-        
-        <div className="flex items-center justify-between px-2 py-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsMapView(!isMapView)}
-            className="rounded-full"
-          >
-            {isMapView ? (
-              <><List className="h-4 w-4 mr-2" /> List View</>
-            ) : (
-              <><MapIcon className="h-4 w-4 mr-2" /> Map View</>
-            )}
-          </Button>
+
+        <div className="flex flex-col items-center justify-center gap-4 py-4">
+          <ViewToggle isMapView={isMapView} onToggle={setIsMapView} />
         </div>
 
         <SearchControls
@@ -155,7 +142,7 @@ const SearchResults = () => {
         />
 
         {isMapView ? (
-          <Map recommendations={rankedRecommendations} userCoordinates={userCoordinates} />
+          <MapComponent recommendations={rankedRecommendations} userCoordinates={userCoordinates} />
         ) : (
           <div className="w-full">
             <SearchHeader 

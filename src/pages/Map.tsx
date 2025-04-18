@@ -6,12 +6,12 @@ import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 
-interface MapProps {
+interface MapComponentProps {
   recommendations: any[];
   userCoordinates: { lat: number; lng: number } | null;
 }
 
-const Map: React.FC<MapProps> = ({ recommendations, userCoordinates: initialUserCoordinates }) => {
+const MapComponent: React.FC<MapComponentProps> = ({ recommendations, userCoordinates: initialUserCoordinates }) => {
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
   const [localUserCoordinates, setLocalUserCoordinates] = useState<{ lat: number; lng: number } | null>(initialUserCoordinates);
   const [loading, setLoading] = useState(true);
@@ -363,4 +363,4 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates: initialUser
   );
 };
 
-export default Map;
+export default MapComponent;
