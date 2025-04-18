@@ -104,10 +104,14 @@ const MapMarkers: React.FC<MapMarkersProps> = ({
   
   const getCoordinates = (item: any) => {
     if (item.latitude && item.longitude) {
-      return {
-        lat: parseFloat(item.latitude),
-        lng: parseFloat(item.longitude)
-      };
+      const lat = parseFloat(item.latitude);
+      const lng = parseFloat(item.longitude);
+      
+      // Validate that we have valid numerical coordinates
+      if (!isNaN(lat) && !isNaN(lng)) {
+        return { lat, lng };
+      }
+      console.log(`Invalid coordinates for item ${item.id}: lat=${item.latitude}, lng=${item.longitude}`);
     }
     return null;
   };

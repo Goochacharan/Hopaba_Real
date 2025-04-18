@@ -81,9 +81,12 @@ export type Database = {
           images: string[] | null
           inspection_certificates: string[] | null
           is_negotiable: boolean | null
+          latitude: string | null
           location: string
+          longitude: string | null
           map_link: string | null
           model_year: string | null
+          postal_code: string | null
           price: number
           seller_id: string | null
           seller_instagram: string | null
@@ -105,9 +108,12 @@ export type Database = {
           images?: string[] | null
           inspection_certificates?: string[] | null
           is_negotiable?: boolean | null
+          latitude?: string | null
           location: string
+          longitude?: string | null
           map_link?: string | null
           model_year?: string | null
+          postal_code?: string | null
           price: number
           seller_id?: string | null
           seller_instagram?: string | null
@@ -129,9 +135,12 @@ export type Database = {
           images?: string[] | null
           inspection_certificates?: string[] | null
           is_negotiable?: boolean | null
+          latitude?: string | null
           location?: string
+          longitude?: string | null
           map_link?: string | null
           model_year?: string | null
+          postal_code?: string | null
           price?: number
           seller_id?: string | null
           seller_instagram?: string | null

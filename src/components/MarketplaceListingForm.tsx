@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,8 +17,8 @@ import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
-import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 import { User, UserCog } from 'lucide-react';
+import { useMapLinkCoordinates } from '@/hooks/useMapLinkCoordinates';
 
 const marketplaceListingSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
@@ -106,16 +106,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     mode: "onBlur",
   });
 
-  useEffect(() => {
-    const mapLink = form.watch('map_link');
-    if (mapLink) {
-      const coords = extractCoordinatesFromMapLink(mapLink);
-      if (coords) {
-        form.setValue('latitude', coords.lat.toString());
-        form.setValue('longitude', coords.lng.toString());
-      }
-    }
-  }, [form.watch('map_link')]);
+  useMapLinkCoordinates('map_link', 'latitude', 'longitude');
 
   const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'seller_phone' | 'seller_whatsapp') => {
     let value = e.target.value;
@@ -236,68 +227,47 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
 
   return (
     <Card className="p-6">
-      <Form {...form}>
-        <form 
-          id="marketplace-listing-form"
-          onSubmit={form.handleSubmit(onSubmit)} 
-          className="space-y-6"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-6">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title*</FormLabel>
-                    <FormControl>
-                      <Input 
-                        id="listing-title" 
-                        name="listing-title"
-                        placeholder="e.g. iPhone 13 Pro Max, 256GB" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      A clear, concise title for your listing
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description*</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Describe your item, include details like brand, model, age, etc." 
-                        className="min-h-[120px]" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
+      <FormProvider {...form}>
+        <Form {...form}>
+          <form 
+            id="marketplace-listing-form"
+            onSubmit={form.handleSubmit(onSubmit)} 
+            className="space-y-6"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-6">
                 <FormField
                   control={form.control}
-                  name="price"
+                  name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Price (₹)*</FormLabel>
+                      <FormLabel>Title*</FormLabel>
                       <FormControl>
                         <Input 
-                          id="listing-price" 
-                          name="listing-price"
-                          type="number" 
-                          min="0" 
-                          step="100" 
+                          id="listing-title" 
+                          name="listing-title"
+                          placeholder="e.g. iPhone 13 Pro Max, 256GB" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        A clear, concise title for your listing
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description*</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Describe your item, include details like brand, model, age, etc." 
+                          className="min-h-[120px]" 
                           {...field} 
                         />
                       </FormControl>
@@ -305,419 +275,442 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                     </FormItem>
                   )}
                 />
-                
-                <FormField
-                  control={form.control}
-                  name="is_negotiable"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col mt-8">
-                      <div className="flex items-center space-x-2">
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Price (₹)*</FormLabel>
                         <FormControl>
-                          <Checkbox 
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
+                          <Input 
+                            id="listing-price" 
+                            name="listing-price"
+                            type="number" 
+                            min="0" 
+                            step="100" 
+                            {...field} 
                           />
                         </FormControl>
-                        <div className="flex items-center space-x-2">
-                          <Unlock className="h-4 w-4 text-green-500" />
-                          <FormLabel className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                            Negotiable Price
-                          </FormLabel>
-                        </div>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
-                          Location (Optional)
-                        </div>
-                      </FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="e.g. Mumbai, Delhi" 
-                          value={field.value}
-                          onChange={(e) => form.setValue('location', e.target.value)}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Enter the location or area where the item is available
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="model_year"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Model Year (Optional)</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select year" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="not_applicable">Not Applicable</SelectItem>
-                          {generateYearOptions().map(year => (
-                            <SelectItem key={year} value={year}>
-                              {year}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="map_link"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      <div className="flex items-center gap-2">
-                        <Link2 className="h-4 w-4" />
-                        Google Maps Link (Optional)
-                      </div>
-                    </FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Paste your Google Maps link here" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Add a Google Maps link for precise coordinates and directions.
-                      Latitude and longitude will be automatically extracted.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="postal_code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Postal/ZIP Code (Optional)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter postal code" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category*</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="cars">Cars</SelectItem>
-                          <SelectItem value="bikes">Bikes</SelectItem>
-                          <SelectItem value="mobiles">Mobiles</SelectItem>
-                          <SelectItem value="electronics">Electronics</SelectItem>
-                          <SelectItem value="furniture">Furniture</SelectItem>
-                          <SelectItem value="home_appliances">Home Appliances</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="condition"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Condition*</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select condition" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="new">New</SelectItem>
-                          <SelectItem value="like new">Like New</SelectItem>
-                          <SelectItem value="good">Good</SelectItem>
-                          <SelectItem value="fair">Fair</SelectItem>
-                          <SelectItem value="poor">Poor</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="seller_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Your Name*</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Your name (will be displayed with listing)" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      This name will be visible to potential buyers
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="seller_phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number (Optional)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Enter phone number" 
-                        defaultValue="+91"
-                        onInput={(e) => handlePhoneInput(e as React.ChangeEvent<HTMLInputElement>, 'seller_phone')}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Your contact number for buyers
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="seller_whatsapp"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>WhatsApp (Optional)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Enter WhatsApp number" 
-                          defaultValue="+91"
-                          onInput={(e) => handlePhoneInput(e as React.ChangeEvent<HTMLInputElement>, 'seller_whatsapp')}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="seller_instagram"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <div className="flex items-center gap-2">
-                          <Instagram className="h-4 w-4" />
-                          Instagram / Video Content
-                          <Film className="h-4 w-4 ml-1 text-purple-500" />
-                        </div>
-                      </FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="@yourusername or full URL"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Add your Instagram username or video content URL
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="seller_role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Your Role*</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select your role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="owner">
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4" />
-                            Owner
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="agent">
-                          <div className="flex items-center gap-2">
-                            <UserCog className="h-4 w-4" />
-                            Agent
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Are you the owner of this item or an agent helping with the sale?
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          <FormField
-            control={form.control}
-            name="images"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Images*</FormLabel>
-                <FormControl>
-                  <ImageUpload 
-                    images={field.value}
-                    onImagesChange={(images) => form.setValue('images', images, { shouldValidate: true })}
-                    maxImages={10}
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </FormControl>
-                <FormDescription>
-                  Upload up to 10 images of your item. At least one image is required.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <Separator className="my-6" />
-          
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
-              <h3 className="font-medium text-lg">Damage & Scratch Images</h3>
+                  
+                  <FormField
+                    control={form.control}
+                    name="is_negotiable"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col mt-8">
+                        <div className="flex items-center space-x-2">
+                          <FormControl>
+                            <Checkbox 
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="flex items-center space-x-2">
+                            <Unlock className="h-4 w-4 text-green-500" />
+                            <FormLabel className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                              Negotiable Price
+                            </FormLabel>
+                          </div>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            Location (Optional)
+                          </div>
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="e.g. Mumbai, Delhi" 
+                            value={field.value}
+                            onChange={(e) => form.setValue('location', e.target.value)}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Enter the location or area where the item is available
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="model_year"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Model Year (Optional)</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select year" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="not_applicable">Not Applicable</SelectItem>
+                            {generateYearOptions().map(year => (
+                              <SelectItem key={year} value={year}>
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="map_link"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <div className="flex items-center gap-2">
+                          <Link2 className="h-4 w-4" />
+                          Google Maps Link (Optional)
+                        </div>
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Paste your Google Maps link here" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Add a Google Maps link for precise coordinates and directions.
+                        Latitude and longitude will be automatically extracted.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="postal_code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Postal/ZIP Code (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter postal code" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category*</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="cars">Cars</SelectItem>
+                            <SelectItem value="bikes">Bikes</SelectItem>
+                            <SelectItem value="mobiles">Mobiles</SelectItem>
+                            <SelectItem value="electronics">Electronics</SelectItem>
+                            <SelectItem value="furniture">Furniture</SelectItem>
+                            <SelectItem value="home_appliances">Home Appliances</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="condition"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Condition*</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select condition" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="new">New</SelectItem>
+                            <SelectItem value="like new">Like New</SelectItem>
+                            <SelectItem value="good">Good</SelectItem>
+                            <SelectItem value="fair">Fair</SelectItem>
+                            <SelectItem value="poor">Poor</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="seller_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Your Name*</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Your name (will be displayed with listing)" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        This name will be visible to potential buyers
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="seller_phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number (Optional)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Enter phone number" 
+                          defaultValue="+91"
+                          onInput={(e) => handlePhoneInput(e as React.ChangeEvent<HTMLInputElement>, 'seller_phone')}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Your contact number for buyers
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="seller_whatsapp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>WhatsApp (Optional)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter WhatsApp number" 
+                            defaultValue="+91"
+                            onInput={(e) => handlePhoneInput(e as React.ChangeEvent<HTMLInputElement>, 'seller_whatsapp')}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="seller_instagram"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          <div className="flex items-center gap-2">
+                            <Instagram className="h-4 w-4" />
+                            Instagram / Video Content
+                            <Film className="h-4 w-4 ml-1 text-purple-500" />
+                          </div>
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="@yourusername or full URL"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Add your Instagram username or video content URL
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="seller_role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Your Role*</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select your role" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="owner">
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4" />
+                              Owner
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="agent">
+                            <div className="flex items-center gap-2">
+                              <UserCog className="h-4 w-4" />
+                              Agent
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Are you the owner of this item or an agent helping with the sale?
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
-            <p className="text-muted-foreground">
-              For transparency, upload clear images of any damage, scratches, or defects your item may have.
-              This helps build trust with potential buyers.
-            </p>
-            
+
             <FormField
               control={form.control}
-              name="damage_images"
+              name="images"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Damage/Scratch Images (Optional)</FormLabel>
+                  <FormLabel>Images*</FormLabel>
                   <FormControl>
                     <ImageUpload 
-                      images={field.value || []}
-                      onImagesChange={(images) => form.setValue('damage_images', images)}
+                      images={field.value}
+                      onImagesChange={(images) => form.setValue('images', images, { shouldValidate: true })}
                       maxImages={10}
                     />
                   </FormControl>
                   <FormDescription>
-                    Upload up to 10 images showing any damage or scratches on your item.
+                    Upload up to 10 images of your item. At least one image is required.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
-
-          <Separator className="my-6" />
-          
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-500" />
-              <h3 className="font-medium text-lg">Inspection Certificates</h3>
-            </div>
-            <p className="text-muted-foreground">
-              Please upload third-party inspection reports or certificates if you have them.
-              This helps establish the credibility of your listing.
-            </p>
             
-            <FormField
-              control={form.control}
-              name="inspection_certificates"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Inspection Reports (Optional)</FormLabel>
-                  <FormControl>
-                    <ImageUpload 
-                      images={field.value || []}
-                      onImagesChange={(images) => form.setValue('inspection_certificates', images)}
-                      maxImages={5}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Upload up to 5 inspection certificates or reports (images or PDFs).
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+            <Separator className="my-6" />
+            
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                <h3 className="font-medium text-lg">Damage & Scratch Images</h3>
+              </div>
+              <p className="text-muted-foreground">
+                For transparency, upload clear images of any damage, scratches, or defects your item may have.
+                This helps build trust with potential buyers.
+              </p>
+              
+              <FormField
+                control={form.control}
+                name="damage_images"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Damage/Scratch Images (Optional)</FormLabel>
+                    <FormControl>
+                      <ImageUpload 
+                        images={field.value || []}
+                        onImagesChange={(images) => form.setValue('damage_images', images)}
+                        maxImages={10}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Upload up to 10 images showing any damage or scratches on your item.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            {onCancel && (
-              <Button type="button" variant="outline" onClick={onCancel}>
-                <X className="mr-2 h-4 w-4" /> Cancel
-              </Button>
-            )}
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" /> {listing ? 'Update Listing' : 'Create Listing'}
-                </>
+            <Separator className="my-6" />
+            
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-blue-500" />
+                <h3 className="font-medium text-lg">Inspection Certificates</h3>
+              </div>
+              <p className="text-muted-foreground">
+                Please upload third-party inspection reports or certificates if you have them.
+                This helps establish the credibility of your listing.
+              </p>
+              
+              <FormField
+                control={form.control}
+                name="inspection_certificates"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Inspection Reports (Optional)</FormLabel>
+                    <FormControl>
+                      <ImageUpload 
+                        images={field.value || []}
+                        onImagesChange={(images) => form.setValue('inspection_certificates', images)}
+                        maxImages={5}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Upload up to 5 inspection certificates or reports (images or PDFs).
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              {onCancel && (
+                <Button type="button" variant="outline" onClick={onCancel}>
+                  <X className="mr-2 h-4 w-4" /> Cancel
+                </Button>
               )}
-            </Button>
-          </div>
-        </form>
-      </Form>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" /> {listing ? 'Update Listing' : 'Create Listing'}
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </FormProvider>
     </Card>
   );
 };
