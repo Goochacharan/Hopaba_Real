@@ -42,7 +42,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
   const handleInstagramClick = (e: React.MouseEvent, instagram: string | undefined, businessName: string) => {
     e.stopPropagation();
     if (instagram) {
-      window.open(instagram, '_blank', 'noopener,noreferrer');
+      window.open(instagram);
       toast({
         title: "Opening video content",
         description: `Visiting ${businessName}'s video content`,
@@ -68,7 +68,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
           </span>
         </CardTitle>
         <CardDescription className="line-clamp-none">
-          <ScrollArea className="min-h-[12em] max-h-[12em] pr-3">
+          <ScrollArea className="h-[320px] pr-3">
             <p className="whitespace-pre-line leading-relaxed text-base font-normal text-slate-700">
               {business.description}
             </p>
@@ -103,10 +103,9 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
             <button 
               onClick={(e) => handleInstagramClick(e, business.instagram, business.name)}
               title="Watch video content" 
-              className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 px-4 py-2 flex items-center"
+              className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 rounded-full hover:shadow-md transition-all ml-2 px-4 py-2"
             >
-              <Film className="h-5 w-5 text-white mr-1" />
-              <span className="text-white text-xs font-medium">Video</span>
+              <Film className="h-5 w-5 text-white" />
             </button>
           )}
         </div>
