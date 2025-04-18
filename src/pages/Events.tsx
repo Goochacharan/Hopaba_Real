@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import MainLayout from '@/components/MainLayout';
@@ -16,6 +15,7 @@ import NoResultsMessage from '@/components/search/NoResultsMessage';
 import { Clock } from 'lucide-react';
 import { Event } from '@/hooks/useRecommendations';
 import { extractCityFromText, calculateDistance } from '@/lib/locationUtils';
+import PostalCodeSearch from '@/components/search/PostalCodeSearch';
 
 interface EventFromSupabase {
   id: string;
@@ -53,16 +53,13 @@ const Events = () => {
     }
   });
   
-  // Filter events based on location if a specific location is selected
   const filterEventsByLocation = (eventsList: EventFromSupabase[]) => {
     if (!selectedLocation || selectedLocation === "Bengaluru, Karnataka") {
-      return eventsList; // Return all events if no location filter or default location
+      return eventsList;
     }
 
     return eventsList.filter(event => {
-      // If selected location is "Current Location" and we have user coordinates, filter by distance
       if (selectedLocation === "Current Location" && userCoordinates) {
-        // If event has coordinates, calculate distance
         if (event.latitude && event.longitude) {
           const eventCoordinates = {
             lat: parseFloat(event.latitude),
@@ -76,29 +73,23 @@ const Events = () => {
             eventCoordinates.lng
           );
           
-          // Include events within 10km radius
           return distance <= 10;
         }
         
-        return true; // Include events without coordinates
+        return true;
       }
       
-      // For specific city selection
-      // Extract city name from selected location (e.g., "Mumbai, Maharashtra" -> "Mumbai")
       const selectedCity = selectedLocation.split(',')[0].trim();
       
-      // Check if event location contains the selected city
       if (event.location.includes(selectedCity)) {
         return true;
       }
       
-      // Extract city from event location and check if matches
       const eventCity = extractCityFromText(event.location);
       if (eventCity && selectedCity.includes(eventCity)) {
         return true;
       }
       
-      // If postal code search
       if (selectedLocation.includes("Postal Code:")) {
         const postalCode = selectedLocation.match(/\d{6}/)?.[0];
         if (postalCode && event.location.includes(postalCode)) {
@@ -113,14 +104,12 @@ const Events = () => {
   const filteredEvents = filterEventsByLocation(events);
   
   const upcomingEvents = filteredEvents.filter(event => {
-    // Convert event date string to Date object
     const eventDate = new Date(event.date);
     const today = new Date();
     return eventDate >= today;
   });
   
   const pastEvents = filteredEvents.filter(event => {
-    // Convert event date string to Date object
     const eventDate = new Date(event.date);
     const today = new Date();
     return eventDate < today;
@@ -143,7 +132,6 @@ const Events = () => {
 
   const handleLocationChange = (location: string) => {
     console.log(`Location changed to: ${location}`);
-    // Location changes are handled by the LocationContext
   };
   
   return (
