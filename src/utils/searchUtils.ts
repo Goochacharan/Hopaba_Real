@@ -1,36 +1,13 @@
 
 import { calculateDistance } from '@/lib/locationUtils';
 import { Recommendation } from '@/lib/mockData';
-import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 
 export const addDistanceToRecommendations = (recs: Recommendation[], userCoordinates: {lat: number, lng: number} | null) => {
   if (!userCoordinates) return recs;
   
   return recs.map(rec => {
-    let latitude: number | null = null;
-    let longitude: number | null = null;
-    
-    // First try to use explicit latitude/longitude if available
-    if (rec.latitude && rec.longitude) {
-      latitude = parseFloat(rec.latitude);
-      longitude = parseFloat(rec.longitude);
-    } 
-    // Otherwise try to extract from map_link
-    else if (rec.map_link) {
-      const coords = extractCoordinatesFromMapLink(rec.map_link);
-      if (coords) {
-        latitude = coords.lat;
-        longitude = coords.lng;
-      }
-    }
-    
-    // If we still don't have coordinates, use fallback values based on ID
-    // This is only for backwards compatibility
-    if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
-      console.log(`Using fallback coordinates for ${rec.id} because coordinates were invalid or missing`);
-      latitude = parseFloat(rec.id) % 0.1 + 12.9716;
-      longitude = parseFloat(rec.id) % 0.1 + 77.5946;
-    }
+    const latitude = parseFloat(rec.id) % 0.1 + 12.9716;
+    const longitude = parseFloat(rec.id) % 0.1 + 77.5946;
     
     const distanceValue = calculateDistance(
       userCoordinates.lat,
@@ -39,8 +16,6 @@ export const addDistanceToRecommendations = (recs: Recommendation[], userCoordin
       longitude,
       'K'
     );
-    
-    console.log(`Calculated distance for ${rec.id}: ${distanceValue.toFixed(1)}km (using coords ${latitude}, ${longitude})`);
     
     return {
       ...rec,
@@ -82,8 +57,7 @@ export const enhanceRecommendations = (recommendations: Recommendation[]) => {
       availability_start_time: rec.availability_start_time || '',
       availability_end_time: rec.availability_end_time || '',
       isHiddenGem: rec.isHiddenGem,
-      isMustVisit: rec.isMustVisit,
-      distance: rec.distance
+      isMustVisit: rec.isMustVisit
     });
     
     return {

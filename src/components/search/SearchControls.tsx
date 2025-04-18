@@ -1,3 +1,4 @@
+
 import React from 'react';
 import FilterTabs from '@/components/FilterTabs';
 import SortButton, { SortOption } from '@/components/SortButton';
@@ -36,7 +37,7 @@ const SearchControls: React.FC<SearchControlsProps> = ({
   onSortChange
 }) => {
   return (
-    <div className="flex items-center gap-2 mb-1 mt-0 px-1 overflow-x-auto hide-scrollbar">
+    <div className="flex items-center justify-between mb-1 mt-0 filter-tabs-container">
       <FilterTabs 
         distance={distance} 
         setDistance={setDistance} 
@@ -51,10 +52,13 @@ const SearchControls: React.FC<SearchControlsProps> = ({
         mustVisitOnly={mustVisitOnly}
         setMustVisitOnly={setMustVisitOnly}
       />
-      <SortButton 
-        currentSort={sortBy} 
-        onSortChange={onSortChange} 
-      />
+      
+      <div className="flex items-center gap-2">            
+        <SortButton 
+          currentSort={sortBy} 
+          onSortChange={onSortChange} 
+        />
+      </div>
     </div>
   );
 };

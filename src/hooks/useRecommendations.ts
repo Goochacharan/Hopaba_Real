@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Recommendation } from '@/lib/mockData';
 import { CategoryType } from '@/components/CategoryFilter';
@@ -37,17 +36,6 @@ export interface Event {
   user_id?: string;
   isHiddenGem?: boolean;
   isMustVisit?: boolean;
-  isPast?: boolean;
-  
-  category?: string;
-  location_name?: string;
-  address?: string;
-  event_date?: string;
-  start_time?: string;
-  end_time?: string;
-  map_link?: string;
-  latitude?: string;
-  longitude?: string;
 }
 
 const useRecommendations = ({ 

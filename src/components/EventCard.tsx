@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Event } from '@/hooks/useRecommendations';
@@ -6,57 +7,13 @@ import { Calendar, Clock, MapPin, User, Sparkles, Award } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
-// Extended Event interface that includes the isPast property
-interface ExtendedEvent extends Event {
-  isPast?: boolean;
-  isHiddenGem?: boolean;
-  isMustVisit?: boolean;
-}
-
 interface EventCardProps {
-  event: ExtendedEvent;
+  event: Event;
   className?: string;
-  onRSVP?: (eventId?: string) => void;  // Make eventId optional
+  onRSVP?: (eventId: string) => void;
 }
 
-// Alternative props structure for backward compatibility
-interface LegacyEventCardProps {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  description: string;
-  image: string;
-  price?: number;
-  attendees?: number;
-  isPast?: boolean;
-  onRSVP?: () => void;
-}
-
-const EventCard: React.FC<EventCardProps | LegacyEventCardProps> = (props) => {
-  // Determine if we're using the new or legacy props structure
-  const isLegacyProps = 'id' in props;
-  
-  // Convert legacy props to new format if necessary
-  const event = isLegacyProps ? {
-    id: props.id,
-    title: props.title,
-    date: props.date,
-    time: props.time,
-    location: props.location,
-    description: props.description,
-    image: props.image,
-    pricePerPerson: props.price,
-    attendees: props.attendees || 0,
-    isPast: props.isPast || false,
-    isHiddenGem: false,
-    isMustVisit: false,
-  } : props.event;
-  
-  const className = isLegacyProps ? '' : props.className;
-  const onRSVP = isLegacyProps ? props.onRSVP : props.onRSVP;
-
+const EventCard: React.FC<EventCardProps> = ({ event, className, onRSVP }) => {
   const formatDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), 'MMMM d, yyyy');
@@ -128,15 +85,9 @@ const EventCard: React.FC<EventCardProps | LegacyEventCardProps> = (props) => {
       </CardContent>
       
       <CardFooter className="px-4 py-3 border-t">
-        {onRSVP && !event.isPast && (
+        {onRSVP && (
           <Button 
-            onClick={() => {
-              if (isLegacyProps) {
-                onRSVP && onRSVP();  // For legacy props without an argument
-              } else {
-                onRSVP && onRSVP(event.id);  // For new props with event ID
-              }
-            }} 
+            onClick={() => onRSVP(event.id)} 
             className="w-full"
             variant="outline"
           >

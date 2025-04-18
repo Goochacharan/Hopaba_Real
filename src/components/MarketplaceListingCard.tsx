@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -8,11 +9,13 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Lock, Unlock, Image, FileWarning } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import ListingImageCarousel from '@/components/marketplace/ListingImageCarousel';
-import ListingMetadata from '@/components/marketplace/ListingMetadata';
-import CertificateBadge from '@/components/marketplace/CertificateBadge';
-import SellerInfo from '@/components/marketplace/SellerInfo';
-import ListingActionButtons from '@/components/marketplace/ListingActionButtons';
+
+// Import our components
+import ListingImageCarousel from './marketplace/ListingImageCarousel';
+import ListingMetadata from './marketplace/ListingMetadata';
+import SellerInfo from './marketplace/SellerInfo';
+import ListingActionButtons from './marketplace/ListingActionButtons';
+import CertificateBadge from './marketplace/CertificateBadge';
 
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
@@ -51,43 +54,41 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   const isSearchPage = window.location.pathname.includes('/search');
   const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
   
+  // Check if the listing has inspection certificates and log it for debugging
   const hasCertificates = listing.inspection_certificates && listing.inspection_certificates.length > 0;
   console.log(`Listing ${listing.id} has certificates:`, hasCertificates, listing.inspection_certificates);
 
-  return <div className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", 
-    "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", 
-    "pb-5", className)} 
-    onClick={handleCardClick}>
-    {hasDamageImages ? <Tabs defaultValue="regular" className="mb-2">
-        <TabsList className="w-full mb-0 p-1 h-auto bg-transparent">
-          <TabsTrigger value="regular" className="flex-1 h-8 text-xs py-0">
-            <div className="flex items-center gap-1">
-              <Image className="h-3 w-3" />
-              <span>Images</span>
+  return <div className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5", className)} onClick={handleCardClick}>
+      {hasDamageImages ? <Tabs defaultValue="regular" className="mb-2">
+          <TabsList className="w-full mb-0 p-1 h-auto bg-transparent">
+            <TabsTrigger value="regular" className="flex-1 h-8 text-xs py-0">
+              <div className="flex items-center gap-1">
+                <Image className="h-3 w-3" />
+                <span>Images</span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger value="damage" className="flex-1 h-8 text-xs py-0">
+              <div className="flex items-center gap-1">
+                <FileWarning className="h-3 w-3" />
+                <span>Damage/Scratches</span>
+              </div>
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="regular" className="mt-0 p-0">
+            <div>
+              <ListingImageCarousel images={listing.images} onImageClick={index => handleImageClick(index, 'regular')} listing={listing} />
             </div>
-          </TabsTrigger>
-          <TabsTrigger value="damage" className="flex-1 h-8 text-xs py-0">
-            <div className="flex items-center gap-1">
-              <FileWarning className="h-3 w-3" />
-              <span>Damage/Scratches</span>
+          </TabsContent>
+          
+          <TabsContent value="damage" className="mt-0 p-0">
+            <div>
+              <ListingImageCarousel images={listing.damage_images} onImageClick={index => handleImageClick(index, 'damage')} listing={listing} isDamageImages={true} />
             </div>
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="regular" className="mt-0 p-0">
-          <div>
-            <ListingImageCarousel images={listing.images} onImageClick={index => handleImageClick(index, 'regular')} listing={listing} />
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="damage" className="mt-0 p-0">
-          <div>
-            <ListingImageCarousel images={listing.damage_images} onImageClick={index => handleImageClick(index, 'damage')} listing={listing} isDamageImages={true} />
-          </div>
-        </TabsContent>
-      </Tabs> : <div>
-        <ListingImageCarousel images={listing.images} onImageClick={index => handleImageClick(index)} listing={listing} />
-      </div>}
+          </TabsContent>
+        </Tabs> : <div>
+          <ListingImageCarousel images={listing.images} onImageClick={index => handleImageClick(index)} listing={listing} />
+        </div>}
       
       <div className="p-4 px-[13px] py-0 my-0">
         <h3 className="font-bold text-xl md:text-2xl mb-1">{listing.title}</h3>
@@ -110,6 +111,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
                   <span className="pr-0.5">Fixed</span>
                 </Badge>)}
               
+              {/* Always check hasCertificates to prevent empty badge */}
               {hasCertificates && (
                 <span onClick={e => e.stopPropagation()}>
                   <CertificateBadge certificates={listing.inspection_certificates || []} />
@@ -125,15 +127,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
 
         <div className="flex justify-end items-center mb-4 px-0 mx-0 py-0 my-[11px]">
           <div className="flex flex-col items-end py-0">
-            <SellerInfo 
-              sellerName={listing.seller_name} 
-              sellerRating={listing.seller_rating} 
-              sellerId={listing.seller_id} 
-              reviewCount={listing.review_count} 
-              sellerInstagram={listing.seller_instagram} 
-              createdAt={listing.created_at}
-              sellerRole={listing.seller_role} 
-            />
+            <SellerInfo sellerName={listing.seller_name} sellerRating={listing.seller_rating} sellerId={listing.seller_id} reviewCount={listing.review_count} sellerInstagram={listing.seller_instagram} createdAt={listing.created_at} />
           </div>
         </div>
         
@@ -151,8 +145,8 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
       </div>
 
       <ImageViewer images={currentImageType === 'regular' ? listing.images : listing.damage_images || []} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={open => {
-        setImageViewerOpen(open);
-      }} />
+      setImageViewerOpen(open);
+    }} />
     </div>;
 };
 

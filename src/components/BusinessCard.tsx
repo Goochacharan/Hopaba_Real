@@ -32,12 +32,11 @@ interface Business {
 
 interface BusinessCardProps {
   business: Business;
-  onEdit?: (business: Business) => void;
-  onDelete?: (id: string) => void;
-  className?: string; // Add className prop to the interface
+  onEdit: (business: Business) => void;
+  onDelete: (id: string) => void;
 }
 
-const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete, className }) => {
+const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete }) => {
   const { toast } = useToast();
 
   const handleInstagramClick = (e: React.MouseEvent, instagram: string | undefined, businessName: string) => {
@@ -60,7 +59,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete,
   };
 
   return (
-    <Card key={business.id} className={className || "overflow-hidden"}>
+    <Card key={business.id} className="overflow-hidden">
       <CardHeader className="bg-muted/30">
         <CardTitle className="flex justify-between items-start">
           <span>{business.name}</span>
@@ -127,32 +126,26 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete,
           </div>
         )}
       </CardContent>
-      {(onEdit || onDelete) && (
-        <CardFooter className="border-t bg-muted/10 gap-2 justify-end">
-          {onEdit && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => onEdit(business)}
-              className="flex items-center gap-1"
-            >
-              <Pencil className="h-4 w-4" />
-              Edit
-            </Button>
-          )}
-          {onDelete && (
-            <Button 
-              variant="destructive" 
-              size="sm" 
-              onClick={() => onDelete(business.id)}
-              className="flex items-center gap-1"
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete
-            </Button>
-          )}
-        </CardFooter>
-      )}
+      <CardFooter className="border-t bg-muted/10 gap-2 justify-end">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => onEdit(business)}
+          className="flex items-center gap-1"
+        >
+          <Pencil className="h-4 w-4" />
+          Edit
+        </Button>
+        <Button 
+          variant="destructive" 
+          size="sm" 
+          onClick={() => onDelete(business.id)}
+          className="flex items-center gap-1"
+        >
+          <Trash2 className="h-4 w-4" />
+          Delete
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

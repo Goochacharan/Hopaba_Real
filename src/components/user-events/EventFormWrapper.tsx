@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import EventListingForm from '../EventListingForm';
+import { EventListingForm } from '../EventListingForm';
 import { Event } from '@/hooks/useRecommendations';
 
 interface EventFormWrapperProps {
@@ -26,7 +26,6 @@ const EventFormWrapper: React.FC<EventFormWrapperProps> = ({ event, onSaved, onC
         onSaved={onSaved} 
         onCancel={onCancel}
       />
-      {/* MapLinkExtractor is now included inside EventListingForm */}
     </div>
   );
 };

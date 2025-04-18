@@ -3,10 +3,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { AuthProvider } from "./hooks/useAuth";
-import LocationProvider, { useLocation } from "./contexts/LocationContext";
 import React from "react";
 import SearchResults from "./pages/SearchResults";
 import LocationDetails from "./pages/LocationDetails";
@@ -25,41 +24,33 @@ import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
-// Create a wrapper component for Map to get userCoordinates from context
-const MapWithLocation = () => {
-  const { userCoordinates } = useLocation();
-  return <Map userCoordinates={userCoordinates} />;
-};
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
       <AuthProvider>
-        <LocationProvider>
-          <WishlistProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <Routes>
-                <Route path="/" element={<SearchResults />} />
-                <Route path="/search" element={<SearchResults />} />
-                <Route path="/location/:id" element={<LocationDetails />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/my-list" element={<MyList />} />
-                <Route path="/events" element={<Events />} />
-                <Route path="/map" element={<MapWithLocation />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/marketplace/:id" element={<MarketplaceListingDetails />} />
-                <Route path="/seller/:id" element={<SellerDetails />} />
-                <Route path="/admin" element={<AdminPanel />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </TooltipProvider>
-          </WishlistProvider>
-        </LocationProvider>
+        <WishlistProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <Routes>
+              <Route path="/" element={<SearchResults />} />
+              <Route path="/search" element={<SearchResults />} />
+              <Route path="/location/:id" element={<LocationDetails />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/my-list" element={<MyList />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/map" element={<Map />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/marketplace/:id" element={<MarketplaceListingDetails />} />
+              <Route path="/seller/:id" element={<SellerDetails />} />
+              <Route path="/admin" element={<AdminPanel />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </TooltipProvider>
+        </WishlistProvider>
       </AuthProvider>
     </BrowserRouter>
   </QueryClientProvider>

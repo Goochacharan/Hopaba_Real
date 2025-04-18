@@ -1,14 +1,32 @@
 
 import React from 'react';
 import LocationSelector from '@/components/LocationSelector';
-import { useLocation } from '@/contexts/LocationContext';
+import { geocodeAddress } from '@/lib/locationUtils';
 
-const SearchLocation: React.FC = () => {
-  const { selectedLocation, updateLocationWithCoordinates } = useLocation();
+interface SearchLocationProps {
+  selectedLocation: string;
+  setSelectedLocation: (location: string) => void;
+  setUserCoordinates: (coordinates: { lat: number; lng: number } | null) => void;
+}
 
+const SearchLocation: React.FC<SearchLocationProps> = ({
+  selectedLocation,
+  setSelectedLocation,
+  setUserCoordinates
+}) => {
   const handleLocationChange = (location: string, coordinates?: { lat: number; lng: number }) => {
     console.log(`Location changed to: ${location}`, coordinates);
-    updateLocationWithCoordinates(location, coordinates);
+    setSelectedLocation(location);
+    
+    if (coordinates) {
+      setUserCoordinates(coordinates);
+    } else {
+      geocodeAddress(location).then(coords => {
+        if (coords) {
+          setUserCoordinates(coords);
+        }
+      });
+    }
   };
 
   return (

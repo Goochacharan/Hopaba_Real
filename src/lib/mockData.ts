@@ -36,8 +36,6 @@ export interface Recommendation {
   isMustVisit?: boolean;
   hideAvailabilityDropdown?: boolean;
   created_at?: string;
-  latitude?: string;
-  longitude?: string;
 }
 
 export const mockRecommendations: Recommendation[] = [

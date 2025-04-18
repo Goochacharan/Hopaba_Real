@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,7 +9,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge';
 import { Building, MapPin, Phone, MessageSquare, Globe, Instagram, IndianRupee, Calendar, Languages, Award, Tag, Pencil, Trash } from 'lucide-react';
 import { BusinessData } from './BusinessListingForm';
-// Removed MapViewButton import
 
 interface BusinessListProps {
   onEdit: (business: BusinessData) => void;
@@ -110,7 +110,7 @@ const BusinessList: React.FC<BusinessListProps> = ({ onEdit, refresh }) => {
   }
 
   return (
-    <div className="space-y-6 relative">
+    <div className="space-y-6">
       <div className="grid grid-cols-1 gap-6">
         {businesses.map((business) => (
           <Card key={business.id} className="overflow-hidden">
@@ -227,8 +227,6 @@ const BusinessList: React.FC<BusinessListProps> = ({ onEdit, refresh }) => {
           </Card>
         ))}
       </div>
-
-      {/* Removed MapViewButton */}
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>

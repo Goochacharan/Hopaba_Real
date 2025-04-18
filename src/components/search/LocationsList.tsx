@@ -62,70 +62,59 @@ const LocationsList: React.FC<LocationsListProps> = ({
     );
   }
   
-  console.log("LocationsList - Rendering recommendations with distances:", recommendations);
+  console.log("LocationsList - Rendering recommendations:", recommendations);
   
   return (
-    <div className="relative">
-      <div className="grid grid-cols-1 gap-6">
-        {recommendations.map((recommendation, index) => {
-          console.log(`LocationsList - Processing recommendation ${index}:`, recommendation.id);
-          console.log(`Distance:`, recommendation.distance || 'not calculated');
-          console.log(`Calculated Distance:`, recommendation.calculatedDistance !== undefined ? 
-                     `${recommendation.calculatedDistance.toFixed(1)} km` : 'not set');
-          console.log(`Availability days:`, recommendation.availability_days);
-          console.log(`Hours:`, recommendation.hours);
+    <div className="grid grid-cols-1 gap-6">
+      {recommendations.map((recommendation, index) => {
+        console.log(`LocationsList - Processing recommendation ${index}:`, recommendation.id);
+        console.log(`Availability days:`, recommendation.availability_days);
+        console.log(`Hours:`, recommendation.hours);
+        console.log(`Start time:`, recommendation.availability_start_time);
+        console.log(`End time:`, recommendation.availability_end_time);
+        
+        // Safely ensure availability_days is an array
+        const availabilityDays = Array.isArray(recommendation.availability_days)
+          ? recommendation.availability_days
+          : (recommendation.availability_days ? [recommendation.availability_days] : []);
           
-          // Safely ensure availability_days is an array
-          const availabilityDays = Array.isArray(recommendation.availability_days)
-            ? recommendation.availability_days
-            : (recommendation.availability_days ? [recommendation.availability_days] : []);
-            
-          const availabilityDaysString = availabilityDays.map(day => String(day));
-          
-          // Get user reviews from localStorage
-          const { count: userReviewsCount, avgRating: userAvgRating } = getStoredReviews(recommendation.id);
-          
-          // Calculate the total review count
-          const totalReviewCount = userReviewsCount + (recommendation.reviewCount || 0);
-          
-          // Use user rating if available, otherwise use default rating
-          const displayRating = userReviewsCount > 0 ? userAvgRating : recommendation.rating;
-          
-          // Ensure we always have a valid distance display
-          const displayDistance = recommendation.distance && recommendation.distance !== '0.5 miles away' ? 
-                                 recommendation.distance : 
-                                 (recommendation.calculatedDistance !== undefined ? 
-                                 `${recommendation.calculatedDistance.toFixed(1)} km away` : 
-                                 'Distance unknown');
-          
-          return (
-            <div 
-              key={recommendation.id} 
-              className="animate-fade-in" 
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              <LocationCard 
-                recommendation={{
-                  ...recommendation,
-                  rating: displayRating,
-                  address: recommendation.address || (recommendation.area && recommendation.city ? `${recommendation.area}, ${recommendation.city}` : recommendation.address || ''),
-                  availability_days: availabilityDaysString,
-                  hours: recommendation.hours || '',
-                  availability: recommendation.availability || '',
-                  availability_start_time: recommendation.availability_start_time || undefined,
-                  availability_end_time: recommendation.availability_end_time || undefined,
-                  hideAvailabilityDropdown: true,
-                  // Ensure distance is accurately displayed
-                  distance: displayDistance
-                }}
-                showDistanceUnderAddress={true}
-                className="search-result-card h-full"
-                reviewCount={totalReviewCount}
-              />
-            </div>
-          );
-        })}
-      </div>
+        const availabilityDaysString = availabilityDays.map(day => String(day));
+        
+        // Get user reviews from localStorage
+        const { count: userReviewsCount, avgRating: userAvgRating } = getStoredReviews(recommendation.id);
+        
+        // Calculate the total review count
+        const totalReviewCount = userReviewsCount + (recommendation.reviewCount || 0);
+        
+        // Use user rating if available, otherwise use default rating
+        const displayRating = userReviewsCount > 0 ? userAvgRating : recommendation.rating;
+        
+        return (
+          <div 
+            key={recommendation.id} 
+            className="animate-fade-in" 
+            style={{ animationDelay: `${index * 50}ms` }}
+          >
+            <LocationCard 
+              recommendation={{
+                ...recommendation,
+                rating: displayRating, // Override with user rating if available
+                address: recommendation.address || (recommendation.area && recommendation.city ? `${recommendation.area}, ${recommendation.city}` : recommendation.address || ''),
+                availability_days: availabilityDaysString,
+                // Ensure hours data is properly passed
+                hours: recommendation.hours || '',
+                availability: recommendation.availability || '',
+                availability_start_time: recommendation.availability_start_time || undefined,
+                availability_end_time: recommendation.availability_end_time || undefined,
+                hideAvailabilityDropdown: true // Add this flag to hide the availability dropdown
+              }}
+              showDistanceUnderAddress={true}
+              className="search-result-card h-full"
+              reviewCount={totalReviewCount}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 };

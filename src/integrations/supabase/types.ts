@@ -72,9 +72,7 @@ export type Database = {
       marketplace_listings: {
         Row: {
           approval_status: string
-          area: string
           category: string
-          city: string
           condition: string
           created_at: string
           damage_images: string[] | null
@@ -83,28 +81,22 @@ export type Database = {
           images: string[] | null
           inspection_certificates: string[] | null
           is_negotiable: boolean | null
-          latitude: string | null
           location: string
-          longitude: string | null
           map_link: string | null
           model_year: string | null
-          postal_code: string | null
           price: number
           seller_id: string | null
           seller_instagram: string | null
           seller_name: string
           seller_phone: string | null
           seller_rating: number | null
-          seller_role: string | null
           seller_whatsapp: string | null
           title: string
           updated_at: string
         }
         Insert: {
           approval_status?: string
-          area: string
           category: string
-          city: string
           condition: string
           created_at?: string
           damage_images?: string[] | null
@@ -113,28 +105,22 @@ export type Database = {
           images?: string[] | null
           inspection_certificates?: string[] | null
           is_negotiable?: boolean | null
-          latitude?: string | null
           location: string
-          longitude?: string | null
           map_link?: string | null
           model_year?: string | null
-          postal_code?: string | null
           price: number
           seller_id?: string | null
           seller_instagram?: string | null
           seller_name: string
           seller_phone?: string | null
           seller_rating?: number | null
-          seller_role?: string | null
           seller_whatsapp?: string | null
           title: string
           updated_at?: string
         }
         Update: {
           approval_status?: string
-          area?: string
           category?: string
-          city?: string
           condition?: string
           created_at?: string
           damage_images?: string[] | null
@@ -143,19 +129,15 @@ export type Database = {
           images?: string[] | null
           inspection_certificates?: string[] | null
           is_negotiable?: boolean | null
-          latitude?: string | null
           location?: string
-          longitude?: string | null
           map_link?: string | null
           model_year?: string | null
-          postal_code?: string | null
           price?: number
           seller_id?: string | null
           seller_instagram?: string | null
           seller_name?: string
           seller_phone?: string | null
           seller_rating?: number | null
-          seller_role?: string | null
           seller_whatsapp?: string | null
           title?: string
           updated_at?: string
@@ -263,6 +245,7 @@ export type Database = {
       }
       service_providers: {
         Row: {
+          address: string
           approval_status: string | null
           area: string
           availability: string | null
@@ -283,7 +266,6 @@ export type Database = {
           languages: string[] | null
           map_link: string | null
           name: string
-          postal_code: string
           price_range_max: number | null
           price_range_min: number | null
           price_unit: string | null
@@ -294,6 +276,7 @@ export type Database = {
           whatsapp: string
         }
         Insert: {
+          address: string
           approval_status?: string | null
           area: string
           availability?: string | null
@@ -314,7 +297,6 @@ export type Database = {
           languages?: string[] | null
           map_link?: string | null
           name: string
-          postal_code: string
           price_range_max?: number | null
           price_range_min?: number | null
           price_unit?: string | null
@@ -325,6 +307,7 @@ export type Database = {
           whatsapp: string
         }
         Update: {
+          address?: string
           approval_status?: string | null
           area?: string
           availability?: string | null
@@ -345,7 +328,6 @@ export type Database = {
           languages?: string[] | null
           map_link?: string | null
           name?: string
-          postal_code?: string
           price_range_max?: number | null
           price_range_min?: number | null
           price_unit?: string | null

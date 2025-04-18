@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import MainLayout from '@/components/MainLayout';
 import AnimatedLogo from '@/components/AnimatedLogo';
@@ -8,8 +9,6 @@ import { Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import useRecommendations from '@/hooks/useRecommendations';
-import MapView from '@/components/business/MapView';
 
 const queryCategoryMap = {
   "Find me a cozy café nearby": "cafes",
@@ -39,11 +38,6 @@ const Index = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isEnhancing, setIsEnhancing] = useState<string | null>(null);
-  const [showMap, setShowMap] = useState(false);
-
-  const { recommendations } = useRecommendations({
-    loadDefaultResults: true
-  });
 
   const exampleQueries = [{
     text: "Find me a cozy café nearby",
@@ -170,53 +164,26 @@ const Index = () => {
     }
   };
 
-  return (
-    <MainLayout>
+  return <MainLayout>
       <section className="flex flex-col items-center justify-center pt-0 pb-0 mx-[5px] px-0">
         <div className="text-center mb-1 animate-fade-in">
           <AnimatedLogo size="lg" className="mx-auto mb-1" />
           <h1 className="text-3xl sm:text-4xl font-medium tracking-tight">Hopaba</h1>
         </div>
 
-        <div className="w-full max-w-4xl mx-auto">
-          <div className="flex justify-end mb-4">
-            <Button
-              variant={showMap ? "outline" : "default"}
-              onClick={() => setShowMap(false)}
-              className="rounded-r-none"
-            >
-              List View
-            </Button>
-            <Button
-              variant={!showMap ? "outline" : "default"}
-              onClick={() => setShowMap(true)}
-              className="rounded-l-none"
-            >
-              Map View
-            </Button>
-          </div>
-
-          {showMap ? (
-            <div className="rounded-lg overflow-hidden border border-border mb-4">
-              <MapView businesses={recommendations || []} />
+        <div className="w-full max-w-2xl mx-auto">
+          <ScrollArea className="h-[calc(100vh-180px)] w-full px-1 pb-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2 pr-4">
+              {exampleQueries.map((example, idx) => <Button key={idx} variant="outline" onClick={() => handleSearch(example.text)} className="justify-start h-auto border-border/50 text-left px-[17px] py-1.5 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200 overflow-hidden" disabled={isEnhancing === example.text}>
+                  <div className="mr-3 text-base">{example.icon}</div>
+                  <span className="font-normal text-sm sm:text-base truncate">{example.text}</span>
+                  {isEnhancing === example.text && <Sparkles className="h-4 w-4 ml-2 animate-pulse" />}
+                </Button>)}
             </div>
-          ) : (
-            <ScrollArea className="h-[calc(100vh-180px)] w-full px-1 pb-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2 pr-4">
-                {exampleQueries.map((example, idx) => (
-                  <Button key={idx} variant="outline" onClick={() => handleSearch(example.text)} className="justify-start h-auto border-border/50 text-left px-[17px] py-1.5 rounded-md text-neutral-900 bg-pink-300 hover:bg-pink-200 overflow-hidden" disabled={isEnhancing === example.text}>
-                    <div className="mr-3 text-base">{example.icon}</div>
-                    <span className="font-normal text-sm sm:text-base truncate">{example.text}</span>
-                    {isEnhancing === example.text && <Sparkles className="h-4 w-4 ml-2 animate-pulse" />}
-                  </Button>
-                ))}
-              </div>
-            </ScrollArea>
-          )}
+          </ScrollArea>
         </div>
       </section>
-    </MainLayout>
-  );
+    </MainLayout>;
 };
 
 export default Index;

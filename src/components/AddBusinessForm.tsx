@@ -32,9 +32,6 @@ export interface Business {
   contact_email?: string;
   tags?: string[];
   images?: string[];
-  latitude?: string;
-  longitude?: string;
-  postal_code?: string;
 }
 
 const businessSchema = z.object({
@@ -78,9 +75,6 @@ const businessSchema = z.object({
   }).optional().or(z.literal('')),
   instagram: z.string().optional(),
   map_link: z.string().optional(),
-  latitude: z.string().optional(),
-  longitude: z.string().optional(),
-  postal_code: z.string().optional(),
   price_unit: z.string().optional(),
   price_range_min: z.number().optional(),
   price_range_max: z.number().optional(),
@@ -124,9 +118,6 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
       website: business?.website || "",
       instagram: business?.instagram || "",
       map_link: business?.map_link || "",
-      latitude: business?.latitude || "",
-      longitude: business?.longitude || "",
-      postal_code: business?.postal_code || "",
       tags: business?.tags || [],
     },
   });
@@ -164,9 +155,6 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         website: data.website || null,
         instagram: data.instagram || null,
         map_link: data.map_link || null,
-        latitude: data.latitude || null,
-        longitude: data.longitude || null,
-        postal_code: data.postal_code || null,
         user_id: user.id,
         approval_status: 'pending',
         price_unit: data.price_unit || "per hour",

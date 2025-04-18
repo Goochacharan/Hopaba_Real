@@ -3,9 +3,6 @@ import { Link } from 'react-router-dom';
 import StarRating from './StarRating';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Badge } from '@/components/ui/badge';
-import { UserRound, Badge as BadgeIcon } from 'lucide-react';
-
 interface SellerInfoProps {
   sellerName: string;
   sellerRating: number;
@@ -14,9 +11,7 @@ interface SellerInfoProps {
   sellerId?: string | null;
   onInstagramClick?: (e: React.MouseEvent) => void;
   createdAt?: string;
-  sellerRole?: string;
 }
-
 const SellerInfo: React.FC<SellerInfoProps> = ({
   sellerName,
   sellerRating,
@@ -24,21 +19,18 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
   sellerInstagram,
   sellerId,
   onInstagramClick,
-  createdAt,
-  sellerRole = 'owner'
+  createdAt
 }) => {
   const {
     toast
   } = useToast();
   const [actualRating, setActualRating] = useState<number>(sellerRating);
   const [actualReviewCount, setActualReviewCount] = useState<number>(reviewCount || 0);
-
   useEffect(() => {
     if (sellerId) {
       fetchSellerRating(sellerId);
     }
   }, [sellerId]);
-
   const fetchSellerRating = async (sellerIdValue: string) => {
     try {
       const {
@@ -62,7 +54,6 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
       console.error('Failed to fetch seller rating:', err);
     }
   };
-
   const handleInstagramClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onInstagramClick) {
@@ -86,38 +77,18 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
       });
     }
   };
-
   const isVideoLink = sellerInstagram && (sellerInstagram.includes('youtube.com') || sellerInstagram.includes('vimeo.com') || sellerInstagram.includes('tiktok.com') || sellerInstagram.includes('instagram.com/reel'));
-
   return <div className="flex flex-col w-full">
       <div className="flex items-center justify-end w-full rounded bg-lime-300 py-[2px] mx-0 px-[5px]">
         <span className="text-xs mr-1 text-gray-950 px-0 mx-[5px]">seller</span>
-        <span className="text-sm font-medium">{sellerName}</span>
+        {sellerId ? <Link to={`/seller/${sellerId}`} onClick={e => e.stopPropagation()} className="text-xs font-bold hover:text-primary hover">
+            {sellerName}
+          </Link> : <span className="text-sm font-medium">{sellerName}</span>}
       </div>
 
-      <div className="flex items-center justify-between w-full mt-1">
-        <Badge 
-          variant="default" 
-          className={`text-xs px-2 py-0.5 flex items-center gap-1 font-bold 
-            ${sellerRole === 'owner' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-blue-600 text-white'}
-            transition-all duration-300 ease-in-out 
-            shadow-sm`}
-        >
-          {sellerRole === 'owner' ? (
-            <UserRound className="h-3 w-3" />
-          ) : (
-            <BadgeIcon className="h-3 w-3" />
-          )}
-          {sellerRole === 'owner' ? 'Owner' : 'Agent'}
-        </Badge>
-        
-        <div className="flex items-center">
-          <StarRating rating={actualRating} showCount={true} count={actualReviewCount} size="small" />
-        </div>
+      <div className="flex items-center justify-end w-full">
+        <StarRating rating={actualRating} showCount={true} count={actualReviewCount} size="small" />
       </div>
     </div>;
 };
-
 export default SellerInfo;

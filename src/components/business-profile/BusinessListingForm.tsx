@@ -253,11 +253,7 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
   return (
     <>
       <Form {...form}>
-        <form 
-          id="business-listing-form" 
-          onSubmit={form.handleSubmit(handleSubmit)} 
-          className="space-y-8"
-        >
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="space-y-6">
               <h3 className="text-lg font-medium">Basic Information</h3>
@@ -269,12 +265,7 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
                   <FormItem>
                     <FormLabel>Business Name*</FormLabel>
                     <FormControl>
-                      <Input
-                        id="business-name"
-                        name="business-name"
-                        placeholder="Your business name" 
-                        {...field} 
-                      />
+                      <Input placeholder="Your business name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -287,12 +278,9 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category*</FormLabel>
-                    <Select 
-                      value={field.value} 
-                      onValueChange={field.onChange}
-                    >
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
-                        <SelectTrigger id="business-category" name="business-category">
+                        <SelectTrigger>
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                       </FormControl>
