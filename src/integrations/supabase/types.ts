@@ -93,6 +93,7 @@ export type Database = {
           seller_name: string
           seller_phone: string | null
           seller_rating: number | null
+          seller_role: string | null
           seller_whatsapp: string | null
           title: string
           updated_at: string
@@ -120,6 +121,7 @@ export type Database = {
           seller_name: string
           seller_phone?: string | null
           seller_rating?: number | null
+          seller_role?: string | null
           seller_whatsapp?: string | null
           title: string
           updated_at?: string
@@ -147,6 +149,7 @@ export type Database = {
           seller_name?: string
           seller_phone?: string | null
           seller_rating?: number | null
+          seller_role?: string | null
           seller_whatsapp?: string | null
           title?: string
           updated_at?: string
