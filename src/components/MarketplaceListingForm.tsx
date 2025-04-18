@@ -20,10 +20,34 @@ import { Separator } from '@/components/ui/separator';
 import { User, UserCog } from 'lucide-react';
 import { useMapLinkCoordinates } from '@/hooks/useMapLinkCoordinates';
 
+const MAJOR_INDIAN_CITIES = [
+  "Mumbai",
+  "Delhi",
+  "Bangalore",
+  "Hyderabad",
+  "Chennai",
+  "Kolkata",
+  "Pune",
+  "Ahmedabad",
+  "Jaipur",
+  "Surat",
+  "Lucknow",
+  "Kanpur",
+  "Nagpur",
+  "Indore",
+  "Thane",
+  "Bhopal",
+  "Visakhapatnam",
+  "Vadodara",
+  "Ghaziabad",
+  "Ludhiana"
+];
+
 const marketplaceListingSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
   description: z.string().min(20, { message: "Description must be at least 20 characters" }),
   price: z.coerce.number().min(1, { message: "Price must be greater than 0" }),
+  city: z.string().min(1, { message: "City is required" }),
   category: z.string().min(1, { message: "Category is required" }),
   condition: z.string().min(1, { message: "Condition is required" }),
   model_year: z.string().optional(),
@@ -81,6 +105,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     title: listing?.title || '',
     description: listing?.description || '',
     price: listing?.price || 0,
+    city: listing?.city || '',
     category: listing?.category || '',
     condition: listing?.condition || '',
     model_year: listing?.model_year || '',
@@ -154,6 +179,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         title: data.title,
         description: data.description,
         price: data.price,
+        city: data.city,
         category: categoryValue,
         condition: data.condition,
         model_year: data.model_year || null,
@@ -300,73 +326,20 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                   
                   <FormField
                     control={form.control}
-                    name="is_negotiable"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col mt-8">
-                        <div className="flex items-center space-x-2">
-                          <FormControl>
-                            <Checkbox 
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="flex items-center space-x-2">
-                            <Unlock className="h-4 w-4 text-green-500" />
-                            <FormLabel className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                              Negotiable Price
-                            </FormLabel>
-                          </div>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="location"
+                    name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
-                            Location (Optional)
-                          </div>
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="e.g. Mumbai, Delhi" 
-                            value={field.value}
-                            onChange={(e) => form.setValue('location', e.target.value)}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Enter the location or area where the item is available
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="model_year"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Model Year (Optional)</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
+                        <FormLabel>City*</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select year" />
+                              <SelectValue placeholder="Select a city" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="not_applicable">Not Applicable</SelectItem>
-                            {generateYearOptions().map(year => (
-                              <SelectItem key={year} value={year}>
-                                {year}
+                            {MAJOR_INDIAN_CITIES.map((city) => (
+                              <SelectItem key={city} value={city}>
+                                {city}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -379,39 +352,77 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
 
                 <FormField
                   control={form.control}
-                  name="map_link"
+                  name="is_negotiable"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <div className="flex items-center gap-2">
-                          <Link2 className="h-4 w-4" />
-                          Google Maps Link (Optional)
+                    <FormItem className="flex flex-col mt-8">
+                      <div className="flex items-center space-x-2">
+                        <FormControl>
+                          <Checkbox 
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="flex items-center space-x-2">
+                          <Unlock className="h-4 w-4 text-green-500" />
+                          <FormLabel className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            Negotiable Price
+                          </FormLabel>
                         </div>
-                      </FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Paste your Google Maps link here" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Add a Google Maps link for precise coordinates and directions.
-                        Latitude and longitude will be automatically extracted.
-                      </FormDescription>
-                      <FormMessage />
+                      </div>
                     </FormItem>
                   )}
                 />
 
                 <FormField
                   control={form.control}
-                  name="postal_code"
+                  name="location"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Postal/ZIP Code (Optional)</FormLabel>
+                      <FormLabel>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          Location (Optional)
+                        </div>
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter postal code" {...field} />
+                        <Input 
+                          placeholder="e.g. Mumbai, Delhi" 
+                          value={field.value}
+                          onChange={(e) => form.setValue('location', e.target.value)}
+                        />
                       </FormControl>
+                      <FormDescription>
+                        Enter the location or area where the item is available
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                  
+                <FormField
+                  control={form.control}
+                  name="model_year"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Model Year (Optional)</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select year" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="not_applicable">Not Applicable</SelectItem>
+                          {generateYearOptions().map(year => (
+                            <SelectItem key={year} value={year}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
