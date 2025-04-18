@@ -16,8 +16,8 @@ serve(async (req) => {
   }
 
   try {
-    // Use the hardcoded API key instead of environment variable
-    const apiKey = "0fcc1ff3b10331e927089d58334e46ec";
+    // Retrieve the MapMyIndia API key from environment variables
+    const apiKey = Deno.env.get('MAPMYINDIA_API_KEY')
 
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'API key not found' }), {
