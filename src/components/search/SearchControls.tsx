@@ -38,23 +38,25 @@ const SearchControls: React.FC<SearchControlsProps> = ({
   onSortChange
 }) => {
   return (
-    <div className="flex items-center justify-between mb-1 mt-0 filter-tabs-container">
-      <FilterTabs 
-        distance={distance} 
-        setDistance={setDistance} 
-        minRating={minRating} 
-        setMinRating={setMinRating} 
-        priceRange={priceRange} 
-        setPriceRange={setPriceRange} 
-        openNowOnly={openNowOnly} 
-        setOpenNowOnly={setOpenNowOnly}
-        hiddenGemOnly={hiddenGemOnly}
-        setHiddenGemOnly={setHiddenGemOnly}
-        mustVisitOnly={mustVisitOnly}
-        setMustVisitOnly={setMustVisitOnly}
-      />
+    <div className="flex items-center justify-between gap-2 mb-1 mt-0 px-1">
+      <div className="flex-1 overflow-x-auto">
+        <FilterTabs 
+          distance={distance} 
+          setDistance={setDistance} 
+          minRating={minRating} 
+          setMinRating={setMinRating} 
+          priceRange={priceRange} 
+          setPriceRange={setPriceRange} 
+          openNowOnly={openNowOnly} 
+          setOpenNowOnly={setOpenNowOnly}
+          hiddenGemOnly={hiddenGemOnly}
+          setHiddenGemOnly={setHiddenGemOnly}
+          mustVisitOnly={mustVisitOnly}
+          setMustVisitOnly={setMustVisitOnly}
+        />
+      </div>
       
-      <div className="flex items-center gap-2">  
+      <div className="flex items-center gap-2 ml-2">  
         <MapFilterButton />
         <SortButton 
           currentSort={sortBy} 
