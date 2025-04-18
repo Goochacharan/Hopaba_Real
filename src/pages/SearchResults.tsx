@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -12,12 +13,11 @@ import SearchLocation from '@/components/search/SearchLocation';
 import SearchControls from '@/components/search/SearchControls';
 import ViewToggle from '@/components/search/ViewToggle';
 import MapComponent from '@/pages/Map';
+
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const searchQuery = searchParams.get('q') || '';
   const categoryParam = searchParams.get('category') || 'all';
   
@@ -45,6 +45,7 @@ const SearchResults = () => {
     initialCategory: categoryParam as any,
     loadDefaultResults: true
   });
+
   const {
     listings: marketplaceListings,
     loading: marketplaceLoading,
@@ -53,8 +54,10 @@ const SearchResults = () => {
     searchQuery: searchQuery,
     minRating: filters.minRating[0] > 3 ? filters.minRating[0] : undefined
   });
+
   const loading = recommendationsLoading || marketplaceLoading;
   const error = recommendationsError || marketplaceError;
+
   console.log("Original recommendations:", recommendations);
   const enhancedRecommendations = recommendations.map((rec, index) => ({
     ...rec,
@@ -65,6 +68,7 @@ const SearchResults = () => {
     availability_start_time: rec.availability_start_time || '',
     availability_end_time: rec.availability_end_time || ''
   }));
+
   const filteredRecommendations = filterRecommendations(enhancedRecommendations, {
     maxDistance: filters.distance[0],
     minRating: filters.minRating[0],
@@ -74,27 +78,33 @@ const SearchResults = () => {
     mustVisit: filters.mustVisitOnly,
     distanceUnit: 'km'
   });
+
   const recommendationsWithDistance = addDistanceToRecommendations(filteredRecommendations, userCoordinates);
   const fullyEnhancedRecommendations = enhanceRecommendations(recommendationsWithDistance);
   const rankedRecommendations = sortRecommendations(fullyEnhancedRecommendations, filters.sortBy);
+  
   console.log("Final ranked recommendations:", rankedRecommendations);
+  
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
       console.log("SearchResults - Processing search query:", searchQuery);
       handleSearch(searchQuery);
     }
   }, [searchQuery, query, handleSearch]);
+  
   useEffect(() => {
     if (categoryParam !== 'all' && categoryParam !== category) {
       console.log("SearchResults - Setting category from URL:", categoryParam);
       handleCategoryChange(categoryParam as any);
     }
   }, [categoryParam, category, handleCategoryChange]);
+  
   useEffect(() => {
     if (!searchQuery) {
       navigate('/');
     }
   }, [searchQuery, navigate]);
+  
   const handleRSVP = (eventTitle: string) => {
     toast({
       title: "RSVP Successful",
@@ -102,6 +112,7 @@ const SearchResults = () => {
       duration: 3000
     });
   };
+  
   return <MainLayout>
       <div className="w-full animate-fade-in mx-0 px-[2px] search-results-container">
         <SearchLocation 
@@ -164,7 +175,6 @@ const SearchResults = () => {
         )}
       </div>
     </MainLayout>
-  );
 };
 
 export default SearchResults;
