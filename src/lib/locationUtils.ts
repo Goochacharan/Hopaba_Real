@@ -1,3 +1,4 @@
+
 /**
  * Calculate distance between two coordinates using Haversine formula
  * @param lat1 Latitude of first point
@@ -103,6 +104,7 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
     // https://goo.gl/maps/XXXX (shortened URL)
     // https://maps.app.goo.gl/XXXXX
     // https://maps.google.com/?ll=12.9716,77.5946
+    // https://maps.google.com/maps?q=12.9716,77.5946
     
     // Match @latitude,longitude format
     const atMatch = mapLink.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
@@ -152,6 +154,15 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
         lat: parseFloat(dataParamMatch[1]),
         lng: parseFloat(dataParamMatch[2])
       };
+    }
+    
+    // Try place ID format for places.google.com links 
+    // This might not have direct coordinates but could be an identifier
+    const placeMatch = mapLink.match(/place\/([^\/]+)\//i);
+    if (placeMatch) {
+      console.log('Found place identifier, but no direct coordinates:', placeMatch[1]);
+      // This would require an API call to Google Places API to resolve coordinates
+      // For now, we'll return null but log this as a potential enhancement
     }
     
     console.log("Could not extract coordinates from map link:", mapLink);

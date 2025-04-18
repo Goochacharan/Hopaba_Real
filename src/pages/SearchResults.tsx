@@ -84,6 +84,7 @@ const SearchResults = () => {
   const rankedRecommendations = sortRecommendations(fullyEnhancedRecommendations, filters.sortBy);
   
   console.log("Final ranked recommendations:", rankedRecommendations);
+  console.log("Marketplace listings:", marketplaceListings);
   
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
