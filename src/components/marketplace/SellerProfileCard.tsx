@@ -6,6 +6,7 @@ import { UserCircle, Phone, MessageSquare, MapPin, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
+
 interface SellerProfileCardProps {
   sellerName: string;
   sellerRating: number;
@@ -18,6 +19,7 @@ interface SellerProfileCardProps {
   listingId?: string;
   avatarUrl?: string | null;
 }
+
 const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
   sellerName,
   sellerRating,
@@ -173,19 +175,43 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
             </div>
             
             <div className="flex flex-wrap gap-3 mt-2 my-0 py-0 px-[26px] mx-0">
-              <Button variant="outline" size="icon" onClick={handleCall} title="Call Seller" className="h-12 w-12 text-slate-50 bg-blue-600 hover:bg-blue-500 rounded">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleCall} 
+                title="Call Seller" 
+                className="h-12 w-12 text-white bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out"
+              >
                 <Phone className="h-6 w-6" />
               </Button>
               
-              <Button variant="outline" size="icon" onClick={handleWhatsApp} title="WhatsApp" className="h-12 w-12 text-slate-50 rounded bg-lime-600 hover:bg-lime-500">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleWhatsApp} 
+                title="WhatsApp" 
+                className="h-12 w-12 text-white bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out"
+              >
                 <MessageSquare className="h-6 w-6" />
               </Button>
               
-              <Button variant="outline" size="icon" onClick={handleLocation} title="Get Directions" className="h-12 w-12 bg-amber-600 hover:bg-amber-500 rounded text-slate-50">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleLocation} 
+                title="Get Directions" 
+                className="h-12 w-12 text-white bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out"
+              >
                 <MapPin className="h-6 w-6" />
               </Button>
               
-              <Button variant="outline" size="icon" onClick={handleShare} title="Share" className="h-12 w-12 bg-violet-600 hover:bg-violet-500 text-slate-50 rounded">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleShare} 
+                title="Share" 
+                className="h-12 w-12 text-white bg-gradient-to-br from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out"
+              >
                 <Share2 className="h-6 w-6" />
               </Button>
             </div>
@@ -194,4 +220,5 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
       </CardContent>
     </Card>;
 };
+
 export default SellerProfileCard;
