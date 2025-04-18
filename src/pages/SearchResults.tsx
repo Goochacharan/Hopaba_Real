@@ -113,7 +113,8 @@ const SearchResults = () => {
     });
   };
   
-  return <MainLayout>
+  return (
+    <MainLayout>
       <div className="w-full animate-fade-in mx-0 px-[2px] search-results-container">
         <SearchLocation 
           selectedLocation={selectedLocation} 
@@ -175,6 +176,7 @@ const SearchResults = () => {
         )}
       </div>
     </MainLayout>
+  );
 };
 
 export default SearchResults;

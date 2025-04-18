@@ -128,6 +128,151 @@ const MapComponent: React.FC<MapComponentProps> = ({
     };
   }, []);
   
+  // Define the addMarkers function at the module level
+  const addMarkers = () => {
+    if (!map.current || !mapInitializedRef.current) return;
+    
+    try {
+      // Clear existing markers
+      markers.current.forEach(marker => {
+        if (marker && marker.remove) {
+          marker.remove();
+        }
+      });
+      markers.current = [];
+      
+      // Add user location marker
+      if (localUserCoordinates) {
+        try {
+          const userMarker = new window.MapmyIndia.Marker({
+            position: [localUserCoordinates.lng, localUserCoordinates.lat] as [number, number],
+            icon: {
+              url: 'https://apis.mapmyindia.com/map_v3/1.png',
+              width: 25,
+              height: 41
+            },
+            map: map.current,
+            draggable: false,
+            popupHtml: '<p>Your location</p>'
+          });
+          
+          markers.current.push(userMarker);
+        } catch (error) {
+          console.error('Error adding user marker:', error);
+        }
+      }
+      
+      // Add recommendation markers
+      recommendations.forEach(rec => {
+        try {
+          let lat: number | null = null;
+          let lng: number | null = null;
+          
+          if (rec.latitude && rec.longitude) {
+            lat = parseFloat(rec.latitude);
+            lng = parseFloat(rec.longitude);
+          }
+          else if (rec.map_link) {
+            const coords = extractCoordinatesFromMapLink(rec.map_link);
+            if (coords) {
+              lat = coords.lat;
+              lng = coords.lng;
+            }
+          }
+          
+          if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
+            const marker = new window.MapmyIndia.Marker({
+              position: [lng, lat] as [number, number],
+              map: map.current,
+              draggable: false,
+              popupHtml: `
+                <div>
+                  <h3>${rec.name}</h3>
+                  <p>${rec.address || rec.area || ''}</p>
+                  <button onclick="window.location.href='/location/${rec.id}'">View Details</button>
+                </div>
+              `
+            });
+            
+            markers.current.push(marker);
+          } else {
+            console.log(`Service provider ${rec.name} missing valid coordinates`);
+          }
+        } catch (error) {
+          console.error(`Error adding marker for ${rec.name}:`, error);
+        }
+      });
+      
+      // Add marketplace listing markers
+      console.log('Adding marketplace listing markers:', allMarketplaceListings.length);
+      allMarketplaceListings.forEach(listing => {
+        try {
+          let lat: number | null = null;
+          let lng: number | null = null;
+          
+          if (listing.latitude && listing.longitude) {
+            lat = parseFloat(listing.latitude);
+            lng = parseFloat(listing.longitude);
+            console.log(`Listing ${listing.title} has coordinates:`, lat, lng);
+          }
+          else if (listing.map_link) {
+            const coords = extractCoordinatesFromMapLink(listing.map_link);
+            if (coords) {
+              lat = coords.lat;
+              lng = coords.lng;
+              console.log(`Extracted coordinates for ${listing.title}:`, lat, lng);
+            }
+          }
+          
+          if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
+            const marker = new window.MapmyIndia.Marker({
+              position: [lng, lat] as [number, number],
+              map: map.current,
+              draggable: false,
+              popupHtml: `
+                <div>
+                  <h3>${listing.title}</h3>
+                  <p>${listing.price ? '₹' + listing.price : ''}</p>
+                  <p>${listing.location || ''}</p>
+                  <button onclick="window.location.href='/marketplace/${listing.id}'">View Details</button>
+                </div>
+              `
+            });
+            
+            markers.current.push(marker);
+          } else {
+            console.log(`Marketplace listing ${listing.title} missing valid coordinates`);
+          }
+        } catch (error) {
+          console.error(`Error adding marker for listing ${listing.title}:`, error);
+        }
+      });
+
+      // Fit bounds if we have markers
+      if (markers.current.length > 1) {
+        try {
+          const bounds = new window.MapmyIndia.LatLngBounds();
+          markers.current.forEach(marker => {
+            bounds.extend(marker.getPosition());
+          });
+          map.current.fitBounds(bounds);
+        } catch (error) {
+          console.error('Error fitting bounds:', error);
+        }
+      } else if (markers.current.length === 1) {
+        try {
+          const position = markers.current[0].getPosition();
+          map.current.setCenter(position);
+          map.current.setZoom(14);
+        } catch (error) {
+          console.error('Error centering on marker:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error in addMarkers function:', error);
+    }
+  };
+  
   useEffect(() => {
     if (!mapLoaded || !mapContainer.current || mapInitializedRef.current) return;
 
@@ -169,9 +314,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
       }
     };
     
-    // We'll define addMarkers in the next useEffect
-    // to avoid duplicating code
-    
     const timer = setTimeout(() => {
       initializeMap();
     }, 500);
@@ -182,149 +324,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   // Update markers when recommendations or marketplace listings change
   useEffect(() => {
     if (map.current && mapInitializedRef.current) {
-      try {
-        const addMarkers = () => {
-          // Clear existing markers
-          markers.current.forEach(marker => {
-            if (marker && marker.remove) {
-              marker.remove();
-            }
-          });
-          markers.current = [];
-          
-          // Add user location marker
-          if (localUserCoordinates) {
-            try {
-              const userMarker = new window.MapmyIndia.Marker({
-                position: [localUserCoordinates.lng, localUserCoordinates.lat] as [number, number],
-                icon: {
-                  url: 'https://apis.mapmyindia.com/map_v3/1.png',
-                  width: 25,
-                  height: 41
-                },
-                map: map.current,
-                draggable: false,
-                popupHtml: '<p>Your location</p>'
-              });
-              
-              markers.current.push(userMarker);
-            } catch (error) {
-              console.error('Error adding user marker:', error);
-            }
-          }
-          
-          // Add recommendation markers
-          recommendations.forEach(rec => {
-            try {
-              let lat: number | null = null;
-              let lng: number | null = null;
-              
-              if (rec.latitude && rec.longitude) {
-                lat = parseFloat(rec.latitude);
-                lng = parseFloat(rec.longitude);
-              }
-              else if (rec.map_link) {
-                const coords = extractCoordinatesFromMapLink(rec.map_link);
-                if (coords) {
-                  lat = coords.lat;
-                  lng = coords.lng;
-                }
-              }
-              
-              if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
-                const marker = new window.MapmyIndia.Marker({
-                  position: [lng, lat] as [number, number],
-                  map: map.current,
-                  draggable: false,
-                  popupHtml: `
-                    <div>
-                      <h3>${rec.name}</h3>
-                      <p>${rec.address || rec.area || ''}</p>
-                      <button onclick="window.location.href='/location/${rec.id}'">View Details</button>
-                    </div>
-                  `
-                });
-                
-                markers.current.push(marker);
-              } else {
-                console.log(`Service provider ${rec.name} missing valid coordinates`);
-              }
-            } catch (error) {
-              console.error(`Error adding marker for ${rec.name}:`, error);
-            }
-          });
-          
-          // Add marketplace listing markers
-          console.log('Adding marketplace listing markers:', allMarketplaceListings.length);
-          allMarketplaceListings.forEach(listing => {
-            try {
-              let lat: number | null = null;
-              let lng: number | null = null;
-              
-              if (listing.latitude && listing.longitude) {
-                lat = parseFloat(listing.latitude);
-                lng = parseFloat(listing.longitude);
-                console.log(`Listing ${listing.title} has coordinates:`, lat, lng);
-              }
-              else if (listing.map_link) {
-                const coords = extractCoordinatesFromMapLink(listing.map_link);
-                if (coords) {
-                  lat = coords.lat;
-                  lng = coords.lng;
-                  console.log(`Extracted coordinates for ${listing.title}:`, lat, lng);
-                }
-              }
-              
-              if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
-                const marker = new window.MapmyIndia.Marker({
-                  position: [lng, lat] as [number, number],
-                  map: map.current,
-                  draggable: false,
-                  popupHtml: `
-                    <div>
-                      <h3>${listing.title}</h3>
-                      <p>${listing.price ? '₹' + listing.price : ''}</p>
-                      <p>${listing.location || ''}</p>
-                      <button onclick="window.location.href='/marketplace/${listing.id}'">View Details</button>
-                    </div>
-                  `
-                });
-                
-                markers.current.push(marker);
-              } else {
-                console.log(`Marketplace listing ${listing.title} missing valid coordinates`);
-              }
-            } catch (error) {
-              console.error(`Error adding marker for listing ${listing.title}:`, error);
-            }
-          });
-
-          // Fit bounds if we have markers
-          if (markers.current.length > 1) {
-            try {
-              const bounds = new window.MapmyIndia.LatLngBounds();
-              markers.current.forEach(marker => {
-                bounds.extend(marker.getPosition());
-              });
-              map.current.fitBounds(bounds);
-            } catch (error) {
-              console.error('Error fitting bounds:', error);
-            }
-          } else if (markers.current.length === 1) {
-            try {
-              const position = markers.current[0].getPosition();
-              map.current.setCenter(position);
-              map.current.setZoom(14);
-            } catch (error) {
-              console.error('Error centering on marker:', error);
-            }
-          }
-        };
-        
-        addMarkers();
-      } catch (error) {
-        console.error('Error updating markers:', error);
-      }
+      addMarkers();
     }
   }, [recommendations, allMarketplaceListings, localUserCoordinates]);
 
