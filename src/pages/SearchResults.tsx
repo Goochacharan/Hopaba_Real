@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -29,7 +30,7 @@ const SearchResults = () => {
     lng: 77.5946
   }); // Default to Bengaluru coordinates
   
-  const [isMapView, setIsMapView] = useState(false);
+  // Remove the isMapView state since we no longer use the map toggle
   
   const { filters, setters } = useSearchFilters();
   
@@ -155,40 +156,34 @@ const SearchResults = () => {
         />
 
         <div className="flex flex-col items-center justify-center gap-4 py-0">
-          <ViewToggle isMapView={isMapView} onToggle={setIsMapView} />
+          {/* Use ViewToggle without props since it now returns null */}
+          <ViewToggle />
         </div>
 
-        {isMapView ? (
-          <MapComponent 
-            recommendations={rankedRecommendations} 
-            userCoordinates={userCoordinates}
-            marketplaceListings={marketplaceListings} 
+        {/* Since isMapView is removed, we'll just always show the search results */}
+        <div className="w-full">
+          <SearchHeader 
+            query={query} 
+            searchQuery={searchQuery} 
+            category={category} 
+            resultsCount={{
+              locations: rankedRecommendations.length,
+              events: 0,
+              marketplace: 0
+            }} 
+            loading={loading} 
+            error={error} 
+            className="search-header" 
           />
-        ) : (
-          <div className="w-full">
-            <SearchHeader 
-              query={query} 
-              searchQuery={searchQuery} 
-              category={category} 
-              resultsCount={{
-                locations: rankedRecommendations.length,
-                events: 0,
-                marketplace: 0
-              }} 
-              loading={loading} 
-              error={error} 
-              className="search-header" 
-            />
-            
-            {!loading && (
-              <div className="search-tabs-container">
-                <SearchTabs 
-                  recommendations={rankedRecommendations} 
-                />
-              </div>
-            )}
-          </div>
-        )}
+          
+          {!loading && (
+            <div className="search-tabs-container">
+              <SearchTabs 
+                recommendations={rankedRecommendations} 
+              />
+            </div>
+          )}
+        </div>
       </div>
     </MainLayout>
   );
