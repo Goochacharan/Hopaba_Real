@@ -1,3 +1,4 @@
+
 import React from 'react';
 import LocationCard from '@/components/LocationCard';
 import { Recommendation } from '@/lib/mockData';
@@ -61,17 +62,17 @@ const LocationsList: React.FC<LocationsListProps> = ({
     );
   }
   
-  console.log("LocationsList - Rendering recommendations:", recommendations);
+  console.log("LocationsList - Rendering recommendations with distances:", recommendations);
   
   return (
     <div className="relative">
       <div className="grid grid-cols-1 gap-6">
         {recommendations.map((recommendation, index) => {
           console.log(`LocationsList - Processing recommendation ${index}:`, recommendation.id);
+          console.log(`Distance:`, recommendation.distance || 'not calculated');
+          console.log(`Calculated Distance:`, recommendation.calculatedDistance || 'not set');
           console.log(`Availability days:`, recommendation.availability_days);
           console.log(`Hours:`, recommendation.hours);
-          console.log(`Start time:`, recommendation.availability_start_time);
-          console.log(`End time:`, recommendation.availability_end_time);
           
           // Safely ensure availability_days is an array
           const availabilityDays = Array.isArray(recommendation.availability_days)
@@ -105,7 +106,9 @@ const LocationsList: React.FC<LocationsListProps> = ({
                   availability: recommendation.availability || '',
                   availability_start_time: recommendation.availability_start_time || undefined,
                   availability_end_time: recommendation.availability_end_time || undefined,
-                  hideAvailabilityDropdown: true
+                  hideAvailabilityDropdown: true,
+                  // Ensure distance is accurately displayed
+                  distance: recommendation.distance || 'Distance unknown'
                 }}
                 showDistanceUnderAddress={true}
                 className="search-result-card h-full"
@@ -115,8 +118,6 @@ const LocationsList: React.FC<LocationsListProps> = ({
           );
         })}
       </div>
-      
-      {/* Add the Map View button if we have recommendations to display */}
     </div>
   );
 };

@@ -1,13 +1,34 @@
-
 import { calculateDistance } from '@/lib/locationUtils';
 import { Recommendation } from '@/lib/mockData';
+import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 
 export const addDistanceToRecommendations = (recs: Recommendation[], userCoordinates: {lat: number, lng: number} | null) => {
   if (!userCoordinates) return recs;
   
   return recs.map(rec => {
-    const latitude = parseFloat(rec.id) % 0.1 + 12.9716;
-    const longitude = parseFloat(rec.id) % 0.1 + 77.5946;
+    let latitude: number | null = null;
+    let longitude: number | null = null;
+    
+    // First try to use explicit latitude/longitude if available
+    if (rec.latitude && rec.longitude) {
+      latitude = parseFloat(rec.latitude);
+      longitude = parseFloat(rec.longitude);
+    } 
+    // Otherwise try to extract from map_link
+    else if (rec.map_link) {
+      const coords = extractCoordinatesFromMapLink(rec.map_link);
+      if (coords) {
+        latitude = coords.lat;
+        longitude = coords.lng;
+      }
+    }
+    
+    // If we still don't have coordinates, use fallback values based on ID
+    // This is only for backwards compatibility
+    if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
+      latitude = parseFloat(rec.id) % 0.1 + 12.9716;
+      longitude = parseFloat(rec.id) % 0.1 + 77.5946;
+    }
     
     const distanceValue = calculateDistance(
       userCoordinates.lat,

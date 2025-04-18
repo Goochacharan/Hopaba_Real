@@ -58,6 +58,7 @@ const SearchResults = () => {
   const loading = recommendationsLoading || marketplaceLoading;
   const error = recommendationsError || marketplaceError;
 
+  console.log("User coordinates for distance calculation:", userCoordinates);
   console.log("Original recommendations:", recommendations);
   const enhancedRecommendations = recommendations.map((rec, index) => ({
     ...rec,
@@ -79,11 +80,12 @@ const SearchResults = () => {
     distanceUnit: 'km'
   });
 
+  // Apply distance calculation using actual coordinates
   const recommendationsWithDistance = addDistanceToRecommendations(filteredRecommendations, userCoordinates);
   const fullyEnhancedRecommendations = enhanceRecommendations(recommendationsWithDistance);
   const rankedRecommendations = sortRecommendations(fullyEnhancedRecommendations, filters.sortBy);
   
-  console.log("Final ranked recommendations:", rankedRecommendations);
+  console.log("Final ranked recommendations with calculated distances:", rankedRecommendations);
   console.log("Marketplace listings:", marketplaceListings);
   
   useEffect(() => {
