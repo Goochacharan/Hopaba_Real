@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,7 +17,7 @@ export interface Business {
   description: string;
   area: string;
   city: string;
-  postal_code: string;
+  address: string;
   website?: string;
   approval_status: string;
   instagram?: string;
@@ -50,8 +51,8 @@ const businessSchema = z.object({
   city: z.string().min(2, {
     message: "City must be at least 2 characters.",
   }),
-  postal_code: z.string().min(6, {
-    message: "Please enter a valid postal code.",
+  address: z.string().min(5, {
+    message: "Address must be at least 5 characters.",
   }),
   contact_phone: z.string()
     .refine(phone => phone.startsWith('+91'), {
@@ -111,7 +112,7 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
       description: business?.description || "",
       area: business?.area || "",
       city: business?.city || "",
-      postal_code: business?.postal_code || "",
+      address: business?.address || "",
       contact_phone: business?.contact_phone || "+91",
       whatsapp: business?.whatsapp || "+91",
       contact_email: business?.contact_email || "",
@@ -152,7 +153,7 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
         description: data.description,
         area: data.area,
         city: data.city,
-        postal_code: data.postal_code,
+        address: data.address,
         contact_phone: data.contact_phone,
         whatsapp: data.whatsapp,
         contact_email: data.contact_email || null,

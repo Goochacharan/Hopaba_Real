@@ -21,7 +21,7 @@ const MarketplaceLocationSearch: React.FC<MarketplaceLocationSearchProps> = ({ o
         <MapPin className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Search by postal code (560091) or area name (Nagarbhavi)"
+          placeholder="Search by city, location or PIN code"
           value={searchLocation}
           onChange={(e) => setSearchLocation(e.target.value)}
           className="pl-8 pr-4"
