@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Event } from '@/hooks/useRecommendations';
@@ -17,7 +16,7 @@ interface ExtendedEvent extends Event {
 interface EventCardProps {
   event: ExtendedEvent;
   className?: string;
-  onRSVP?: (eventId: string) => void;
+  onRSVP?: (eventId?: string) => void;  // Make eventId optional
 }
 
 // Alternative props structure for backward compatibility
@@ -131,7 +130,13 @@ const EventCard: React.FC<EventCardProps | LegacyEventCardProps> = (props) => {
       <CardFooter className="px-4 py-3 border-t">
         {onRSVP && !event.isPast && (
           <Button 
-            onClick={() => isLegacyProps ? onRSVP && onRSVP() : onRSVP && onRSVP(event.id)} 
+            onClick={() => {
+              if (isLegacyProps) {
+                onRSVP && onRSVP();  // For legacy props without an argument
+              } else {
+                onRSVP && onRSVP(event.id);  // For new props with event ID
+              }
+            }} 
             className="w-full"
             variant="outline"
           >
