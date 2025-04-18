@@ -19,13 +19,15 @@ interface LocationCardProps {
   ranking?: number;
   reviewCount?: number;
   showDistanceUnderAddress?: boolean;
+  hideDistance?: boolean; // New prop to control distance visibility
 }
 const LocationCard: React.FC<LocationCardProps> = ({
   recommendation,
   className,
   ranking,
   reviewCount = 0,
-  showDistanceUnderAddress = false
+  showDistanceUnderAddress = false,
+  hideDistance = false, // Default to false to maintain existing behavior
 }) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState<boolean[]>([]);
@@ -550,19 +552,25 @@ const LocationCard: React.FC<LocationCardProps> = ({
             </div>
           </div>
           
-          {recommendation.distance && showDistanceUnderAddress && <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center justify-between my-[3px] px-[2px]">
+          {!hideDistance && recommendation.distance && showDistanceUnderAddress && (
+            <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center justify-between my-[3px] px-[2px]">
               <div className="flex items-center px-0 mx-0">
                 <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
                 {formatDistance(recommendation.distance)}
               </div>
-            </div>}
+            </div>
+          )}
         </div>
 
+        {!hideDistance && recommendation.distance && !showDistanceUnderAddress && (
+          <div className="text-muted-foreground pl-5 mt-1 flex items-center">
+            <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
+            {formatDistance(recommendation.distance)}
+          </div>
+        )}
+
         <div className="flex flex-col text-sm mb-3 space-y-2">
-          {recommendation.distance && !showDistanceUnderAddress && <div className="text-muted-foreground pl-5 mt-1 flex items-center">
-              <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
-              {formatDistance(recommendation.distance)}
-            </div>}
+          
           
           {(hasAvailabilityInfo() || businessHours) && <DropdownMenu>
               <DropdownMenuTrigger onClick={e => e.stopPropagation()} className="inline-flex items-center text-xs font-medium transition-colors rounded text-slate-50 px-[12px] py-[4px] self-start bg-slate-600 hover:bg-slate-500">
@@ -616,9 +624,3 @@ const LocationCard: React.FC<LocationCardProps> = ({
             <Share2 className="h-5 w-5" />
           </button>
         </div>
-      </div>
-      
-      {imageViewerOpen && <ImageViewer images={images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
-    </div>;
-};
-export default LocationCard;
