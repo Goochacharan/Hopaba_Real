@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { Loader2, AlertTriangle, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -28,6 +28,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [loading, setLoading] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [apiKeyFetchAttempts, setApiKeyFetchAttempts] = useState(0);
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<google.maps.Map | null>(null);
   const markers = useRef<google.maps.Marker[]>([]);
@@ -94,6 +96,37 @@ const MapComponent: React.FC<MapComponentProps> = ({
     setLocalUserCoordinates(initialUserCoordinates);
   }, [initialUserCoordinates]);
 
+  const fetchGoogleMapsApiKey = async () => {
+    try {
+      setIsRetrying(true);
+      console.log('Attempting to fetch Google Maps API key...');
+      const { data, error } = await supabase.functions.invoke('get-google-maps-key');
+      
+      if (error) {
+        console.error('Error invoking get-google-maps-key function:', error);
+        setMapError(`Failed to get map API key: ${error.message}`);
+        setIsRetrying(false);
+        return null;
+      }
+      
+      if (!data?.apiKey) {
+        console.error('Google Maps API key not returned from function');
+        setMapError('Failed to get map API key. The key was not found in Supabase secrets.');
+        setIsRetrying(false);
+        return null;
+      }
+      
+      console.log('Successfully retrieved Google Maps API key');
+      setIsRetrying(false);
+      return data.apiKey;
+    } catch (error) {
+      console.error('Exception fetching Google Maps API key:', error);
+      setMapError(`Failed to get map API key: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setIsRetrying(false);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const checkUser = async () => {
       setLoading(true);
@@ -104,24 +137,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
     const loadMapScript = async () => {
       try {
-        console.log('Fetching Google Maps API key...');
-        const { data, error } = await supabase.functions.invoke('get-google-maps-key');
-        
-        if (error) {
-          console.error('Error getting Google Maps API key:', error);
-          setMapError('Failed to get map API key. Please try again later.');
-          setLoading(false);
-          return;
-        }
-        
-        const apiKey = data?.apiKey;
-        
-        if (!apiKey) {
-          console.error('Google Maps API key not found');
-          setMapError('Map API key not found. Please check your configuration.');
-          setLoading(false);
-          return;
-        }
+        setLoading(true);
         
         if (window.google && window.google.maps) {
           console.log('Google Maps script already loaded');
@@ -129,11 +145,19 @@ const MapComponent: React.FC<MapComponentProps> = ({
           setLoading(false);
           return;
         }
+        
+        console.log('Fetching Google Maps API key...');
+        const apiKey = await fetchGoogleMapsApiKey();
+        
+        if (!apiKey) {
+          return;
+        }
           
         window.initMap = () => {
           console.log('Google Maps script loaded successfully');
           setMapLoaded(true);
           setLoading(false);
+          setMapError(null);
         };
           
         const script = document.createElement('script');
@@ -173,7 +197,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       
       delete window.initMap;
     };
-  }, []);
+  }, [apiKeyFetchAttempts]);
   
   const addMarkers = () => {
     if (!map.current || !mapInitializedRef.current || !window.google) return;
@@ -442,6 +466,15 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   }, [recommendations, allMarketplaceListings, serviceProviders, localUserCoordinates]);
 
+  const handleRetryMapLoad = () => {
+    setMapError(null);
+    setApiKeyFetchAttempts(prev => prev + 1);
+    toast({
+      title: "Retrying...",
+      description: "Attempting to reload the map",
+    });
+  };
+
   if (mapError) {
     return (
       <section className="w-full">
@@ -453,8 +486,22 @@ const MapComponent: React.FC<MapComponentProps> = ({
           </Alert>
           
           <div className="mt-4">
-            <Button onClick={() => window.location.reload()}>
-              Reload
+            <Button 
+              onClick={handleRetryMapLoad}
+              disabled={isRetrying}
+              className="flex items-center gap-2"
+            >
+              {isRetrying ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Retrying...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4" />
+                  Reload
+                </>
+              )}
             </Button>
           </div>
         </div>
