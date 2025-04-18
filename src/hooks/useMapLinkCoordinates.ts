@@ -34,8 +34,8 @@ export function useMapLinkCoordinates(
       // If coordinates were found, update the form fields
       if (coords) {
         console.log('Extracted coordinates from map link:', coords);
-        formContext.setValue(latitudeFieldName, coords.lat.toString());
-        formContext.setValue(longitudeFieldName, coords.lng.toString());
+        formContext.setValue(latitudeFieldName, coords.lat.toString(), { shouldValidate: true });
+        formContext.setValue(longitudeFieldName, coords.lng.toString(), { shouldValidate: true });
       }
     }
   }, [formContext, mapLinkFieldName, latitudeFieldName, longitudeFieldName, formContext?.watch(mapLinkFieldName)]);

@@ -97,6 +97,9 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
   try {
     console.log('Attempting to extract coordinates from map link:', mapLink);
     
+    // Normalize URL parameters
+    let normalizedLink = mapLink.trim();
+    
     // Google Maps URL formats:
     // 1. https://www.google.com/maps?q=12.9716,77.5946
     // 2. https://www.google.com/maps/@12.9716,77.5946,15z
@@ -105,21 +108,76 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
     // 5. https://maps.google.com/?ll=12.9716,77.5946
     // 6. https://maps.google.com/maps?q=12.9716,77.5946
     // 7. https://www.google.com/maps/place/Location+Name/@12.9716,77.5946,15z
+    // 8. https://maps.google.com/maps/place?q=location...
 
-    // Special case for maps.app.goo.gl short URLs
-    if (mapLink.includes('maps.app.goo.gl')) {
-      // For these shortened URLs, we can't directly extract coordinates
-      // Fallback to default Bengaluru coordinates as placeholder
-      console.log('Found shortened Google Maps URL (maps.app.goo.gl). Using default coordinates for Bengaluru.');
+    // First, check if it's a Maps app share link format: https://maps.app.goo.gl/examplelink
+    if (normalizedLink.includes('maps.app.goo.gl')) {
+      // These are shortened URLs - we can't extract coordinates directly
+      console.log('Found shortened Google Maps URL (maps.app.goo.gl). Using default coordinates for placeholder.');
+      // In a real app, you might want to resolve the URL first, but for now we'll use default coordinates
       return { lat: 12.9716, lng: 77.5946 };
     }
     
-    // Try pattern matching for coordinates
+    // Check for URLs with coordinates in query parameters
+    let urlParams: URLSearchParams | null = null;
+    try {
+      // Try to parse URL and get searchParams
+      const url = new URL(normalizedLink);
+      urlParams = url.searchParams;
+      
+      // Check for common query param patterns
+      const q = urlParams.get('q');
+      const ll = urlParams.get('ll');
+      const center = urlParams.get('center');
+      
+      if (q && /^-?\d+\.\d+,-?\d+\.\d+$/.test(q)) {
+        // Format: ?q=lat,lng
+        const [lat, lng] = q.split(',').map(Number);
+        console.log('Found coordinates in q parameter:', lat, lng);
+        return { lat, lng };
+      }
+      
+      if (ll && /^-?\d+\.\d+,-?\d+\.\d+$/.test(ll)) {
+        // Format: ?ll=lat,lng
+        const [lat, lng] = ll.split(',').map(Number);
+        console.log('Found coordinates in ll parameter:', lat, lng);
+        return { lat, lng };
+      }
+      
+      if (center && /^-?\d+\.\d+,-?\d+\.\d+$/.test(center)) {
+        // Format: ?center=lat,lng
+        const [lat, lng] = center.split(',').map(Number);
+        console.log('Found coordinates in center parameter:', lat, lng);
+        return { lat, lng };
+      }
+      
+      // Check for coordinates in the URL path parts
+      const pathParts = url.pathname.split('/');
+      
+      // Common pattern: /maps/@lat,lng,zoom
+      for (const part of pathParts) {
+        if (part.startsWith('@')) {
+          const coordsPart = part.substring(1); // Remove '@'
+          const coordsMatch = coordsPart.match(/^(-?\d+\.\d+),(-?\d+\.\d+)/);
+          if (coordsMatch) {
+            const lat = parseFloat(coordsMatch[1]);
+            const lng = parseFloat(coordsMatch[2]);
+            console.log('Found coordinates in @ path part:', lat, lng);
+            return { lat, lng };
+          }
+        }
+      }
+    } catch (urlError) {
+      console.log('Error parsing URL:', urlError);
+      // Continue with regex approaches
+    }
+    
+    // If URL parsing failed, try regex patterns
     
     // Match @latitude,longitude format (most common in Google Maps share links)
     const atMatch = mapLink.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (atMatch) {
-      console.log('Found coordinates using @lat,lng pattern:', atMatch[1], atMatch[2]);
+      console.log('Found coordinates using @lat,lng regex:', atMatch[1], atMatch[2]);
       return {
         lat: parseFloat(atMatch[1]),
         lng: parseFloat(atMatch[2])
@@ -129,7 +187,7 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
     // Match q=latitude,longitude format
     const qMatch = mapLink.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (qMatch) {
-      console.log('Found coordinates using q=lat,lng pattern:', qMatch[1], qMatch[2]);
+      console.log('Found coordinates using q=lat,lng regex:', qMatch[1], qMatch[2]);
       return {
         lat: parseFloat(qMatch[1]),
         lng: parseFloat(qMatch[2])
@@ -139,7 +197,7 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
     // Match ll=latitude,longitude format
     const llMatch = mapLink.match(/[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (llMatch) {
-      console.log('Found coordinates using ll=lat,lng pattern:', llMatch[1], llMatch[2]);
+      console.log('Found coordinates using ll=lat,lng regex:', llMatch[1], llMatch[2]);
       return {
         lat: parseFloat(llMatch[1]),
         lng: parseFloat(llMatch[2])
@@ -149,7 +207,7 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
     // Match plain latitude,longitude format that might be in the URL
     const plainMatch = mapLink.match(/(?:maps\/|place\/|^)(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (plainMatch) {
-      console.log('Found coordinates using plain lat,lng pattern:', plainMatch[1], plainMatch[2]);
+      console.log('Found coordinates using plain lat,lng regex:', plainMatch[1], plainMatch[2]);
       return {
         lat: parseFloat(plainMatch[1]),
         lng: parseFloat(plainMatch[2])
@@ -177,7 +235,7 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
     }
     
     // If we can't extract coordinates but it's a Google Maps URL,
-    // provide default coordinates for Bengaluru as fallback
+    // provide default coordinates as fallback
     if (mapLink.includes('google.com/maps') || mapLink.includes('goo.gl/maps') || mapLink.includes('maps.app.goo.gl')) {
       console.log("Could not extract coordinates, but URL appears to be Google Maps. Using default Bengaluru coordinates.");
       return { lat: 12.9716, lng: 77.5946 };

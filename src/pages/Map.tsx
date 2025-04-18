@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Loader2, AlertTriangle } from 'lucide-react';
@@ -37,7 +36,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const { toast } = useToast();
   const mapInitializedRef = useRef(false);
   
-  // If we're in a marketplace context, fetch listings
   const { listings: fetchedListings, loading: listingsLoading } = useLocation().pathname.includes('marketplace') 
     ? useMarketplaceListings({
         searchQuery: searchQuery,
@@ -45,9 +43,42 @@ const MapComponent: React.FC<MapComponentProps> = ({
       })
     : { listings: [], loading: false };
   
-  // Combine props marketplaceListings with fetched listings
   const allMarketplaceListings = [...marketplaceListings, ...fetchedListings];
+
+  const fetchServiceProviders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('service_providers')
+        .select('*')
+        .eq('approval_status', 'approved');
+      
+      if (error) {
+        console.error('Error fetching service providers:', error);
+        return [];
+      }
+      
+      console.log(`Fetched ${data.length} service providers from Supabase`);
+      return data || [];
+    } catch (error) {
+      console.error('Error in fetchServiceProviders:', error);
+      return [];
+    }
+  };
+
+  const [serviceProviders, setServiceProviders] = useState<any[]>([]);
+  const [serviceProvidersLoading, setServiceProvidersLoading] = useState(false);
   
+  useEffect(() => {
+    const loadServiceProviders = async () => {
+      setServiceProvidersLoading(true);
+      const providers = await fetchServiceProviders();
+      setServiceProviders(providers);
+      setServiceProvidersLoading(false);
+    };
+    
+    loadServiceProviders();
+  }, []);
+
   const handleLocationChange = (location: string, coordinates?: { lat: number; lng: number }) => {
     setSelectedLocation(location);
     if (coordinates) {
@@ -128,14 +159,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
     };
   }, []);
   
-  // Define the addMarkers function at the module level
   const addMarkers = () => {
     if (!map.current || !mapInitializedRef.current) return;
     
     try {
       console.log("Starting to add markers to map");
       
-      // Clear existing markers
       markers.current.forEach(marker => {
         if (marker && marker.remove) {
           marker.remove();
@@ -143,7 +172,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
       });
       markers.current = [];
       
-      // Add user location marker
       if (localUserCoordinates) {
         try {
           console.log("Adding user location marker at:", localUserCoordinates);
@@ -165,21 +193,20 @@ const MapComponent: React.FC<MapComponentProps> = ({
         }
       }
       
-      // Add recommendation markers (service providers)
-      if (recommendations && recommendations.length > 0) {
-        console.log('Adding service provider markers:', recommendations.length);
-        recommendations.forEach(rec => {
+      const allRecommendations = [...recommendations, ...serviceProviders];
+      
+      if (allRecommendations && allRecommendations.length > 0) {
+        console.log('Adding service provider markers:', allRecommendations.length);
+        allRecommendations.forEach(rec => {
           try {
             let lat: number | null = null;
             let lng: number | null = null;
             
-            // Try to get coordinates from latitude/longitude properties first
             if (rec.latitude && rec.longitude) {
               lat = parseFloat(rec.latitude);
               lng = parseFloat(rec.longitude);
               console.log(`Service provider ${rec.name} has explicit coordinates:`, lat, lng);
             }
-            // If not available, try to extract from map_link
             else if (rec.map_link) {
               console.log(`Service provider ${rec.name} has map_link:`, rec.map_link);
               const coords = extractCoordinatesFromMapLink(rec.map_link);
@@ -195,7 +222,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
             if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
               console.log(`Adding marker for service provider ${rec.name} at coordinates:`, lat, lng);
               
-              // Create HTML content for the popup
               const popupContent = `
                 <div style="max-width: 250px; padding: 8px;">
                   <h3 style="margin-top: 0; font-weight: bold;">${rec.name}</h3>
@@ -229,7 +255,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
         console.log('No service providers to add to map');
       }
       
-      // Add marketplace listing markers
       if (allMarketplaceListings && allMarketplaceListings.length > 0) {
         console.log('Adding marketplace listing markers:', allMarketplaceListings.length);
         allMarketplaceListings.forEach(listing => {
@@ -258,11 +283,16 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 map: map.current,
                 draggable: false,
                 popupHtml: `
-                  <div>
-                    <h3>${listing.title}</h3>
-                    <p>${listing.price ? '₹' + listing.price : ''}</p>
-                    <p>${listing.location || ''}</p>
-                    <button onclick="window.location.href='/marketplace/${listing.id}'">View Details</button>
+                  <div style="max-width: 250px; padding: 8px;">
+                    <h3 style="margin-top: 0; font-weight: bold;">${listing.title}</h3>
+                    <p style="margin: 5px 0;">${listing.price ? '₹' + listing.price : ''}</p>
+                    <p style="margin: 5px 0;">${listing.location || ''}</p>
+                    <button 
+                      style="background: #4f46e5; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px;"
+                      onclick="window.location.href='/marketplace/${listing.id}'"
+                    >
+                      View Details
+                    </button>
                   </div>
                 `
               });
@@ -278,7 +308,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
         });
       }
 
-      // Fit bounds if we have markers
       if (markers.current.length > 1) {
         try {
           console.log("Fitting bounds to show all markers:", markers.current.length);
@@ -300,7 +329,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
           console.error('Error centering on marker:', error);
         }
       } else {
-        // Default view if no markers
         console.log("No markers to display, showing default view");
         map.current.setCenter([77.5946, 12.9716]); // Bengaluru
         map.current.setZoom(12);
@@ -358,15 +386,15 @@ const MapComponent: React.FC<MapComponentProps> = ({
     return () => clearTimeout(timer);
   }, [mapLoaded, localUserCoordinates, toast]);
 
-  // Update markers when recommendations or marketplace listings change
   useEffect(() => {
     if (map.current && mapInitializedRef.current) {
       console.log('Data changed, updating markers');
       console.log('Number of service providers:', recommendations.length);
       console.log('Number of marketplace listings:', allMarketplaceListings.length);
+      console.log('Number of service providers from DB:', serviceProviders.length);
       addMarkers();
     }
-  }, [recommendations, allMarketplaceListings, localUserCoordinates]);
+  }, [recommendations, allMarketplaceListings, serviceProviders, localUserCoordinates]);
 
   if (mapError) {
     return (
@@ -397,7 +425,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
             ref={mapContainer}
             id="map-container"
           >
-            {(!mapLoaded || loading || listingsLoading) && (
+            {(!mapLoaded || loading || listingsLoading || serviceProvidersLoading) && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
                 <div className="text-center">
                   <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
