@@ -3,172 +3,155 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useGoogleMapsKey } from '@/hooks/useGoogleMapsKey';
-import MapMarkers from '@/components/map/MapMarkers';
-import MapError from '@/components/map/MapError';
 
 interface MapViewProps {
   businesses: any[];
-  userCoordinates?: { lat: number; lng: number } | null;
 }
 
-const MapView: React.FC<MapViewProps> = ({ 
-  businesses,
-  userCoordinates = { lat: 12.9716, lng: 77.5946 } // Default to Bangalore
-}) => {
+const MapView: React.FC<MapViewProps> = ({ businesses }) => {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
-  const [isRetrying, setIsRetrying] = useState(false);
-  const [apiKeyFetchAttempts, setApiKeyFetchAttempts] = useState(0);
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<google.maps.Map | null>(null);
   const markers = useRef<google.maps.Marker[]>([]);
   const infoWindows = useRef<google.maps.InfoWindow[]>([]);
   const { toast } = useToast();
-  const { fetchApiKey, loading: apiKeyLoading, error: apiKeyError } = useGoogleMapsKey();
+  const { fetchApiKey } = useGoogleMapsKey();
+  const defaultCenter = { lat: 12.9716, lng: 77.5946 }; // Default to Bengaluru
 
   useEffect(() => {
     const initializeMap = async () => {
       if (!mapContainer.current || map.current) return;
-      
+
       try {
-        console.log("Starting map initialization process");
-        setIsRetrying(true);
-        
         const apiKey = await fetchApiKey();
         if (!apiKey) {
-          console.error("Failed to get Google Maps API key");
-          setMapError(apiKeyError || "Failed to get map API key");
-          setIsRetrying(false);
+          setMapError('Failed to load Google Maps API key');
           return;
         }
-        
+
         if (!window.google) {
-          console.log("Google Maps not loaded yet, loading script");
           const script = document.createElement('script');
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
           script.async = true;
-          script.defer = true;
-          
-          window.initMap = () => {
-            console.log("Google Maps script loaded successfully");
+          script.onload = () => {
             setMapLoaded(true);
-            setMapError(null);
-            setIsRetrying(false);
+            createMap();
           };
-          
-          script.onerror = (error) => {
-            console.error("Error loading Google Maps script:", error);
-            setMapError('Failed to load Google Maps. Please check your internet connection.');
-            setIsRetrying(false);
+          script.onerror = () => {
+            setMapError('Failed to load Google Maps');
           };
-          
           document.head.appendChild(script);
         } else {
-          console.log("Google Maps already loaded");
           setMapLoaded(true);
-          setMapError(null);
-          setIsRetrying(false);
+          createMap();
         }
       } catch (error) {
         console.error('Error initializing map:', error);
-        setMapError('Error initializing map. Please try refreshing the page.');
-        setIsRetrying(false);
+        setMapError('Error initializing map');
       }
     };
-    
+
     initializeMap();
-    
+
     return () => {
+      // Cleanup markers and info windows
       markers.current.forEach(marker => marker.setMap(null));
-      infoWindows.current.forEach(infoWindow => infoWindow.close());
-      map.current = null;
-      
-      if (window.initMap) {
-        delete window.initMap;
-      }
+      infoWindows.current.forEach(window => window.close());
     };
-  }, [apiKeyFetchAttempts]);
+  }, []);
+
+  const createMap = () => {
+    if (!mapContainer.current || !window.google) return;
+
+    map.current = new window.google.maps.Map(mapContainer.current, {
+      center: defaultCenter,
+      zoom: 12,
+      mapTypeControl: true,
+      streetViewControl: true,
+      fullscreenControl: true,
+    });
+
+    addMarkers();
+  };
+
+  const addMarkers = () => {
+    if (!map.current || !businesses.length) return;
+
+    const bounds = new window.google.maps.LatLngBounds();
+
+    businesses.forEach((business) => {
+      if (!business.latitude || !business.longitude) return;
+
+      const position = {
+        lat: parseFloat(business.latitude),
+        lng: parseFloat(business.longitude),
+      };
+
+      const marker = new window.google.maps.Marker({
+        position,
+        map: map.current,
+        title: business.name,
+      });
+
+      const infoContent = `
+        <div style="max-width: 200px;">
+          <h3 style="margin: 0 0 8px; font-weight: bold;">${business.name}</h3>
+          <p style="margin: 0 0 8px;">${business.address || ''}</p>
+          <a href="/business/${business.id}" style="color: #4F46E5; text-decoration: none;">View Details</a>
+        </div>
+      `;
+
+      const infoWindow = new window.google.maps.InfoWindow({
+        content: infoContent,
+      });
+
+      marker.addListener('click', () => {
+        infoWindows.current.forEach(window => window.close());
+        infoWindow.open(map.current!, marker);
+      });
+
+      markers.current.push(marker);
+      infoWindows.current.push(infoWindow);
+      bounds.extend(position);
+    });
+
+    // Only adjust bounds if we have markers
+    if (markers.current.length > 0) {
+      map.current.fitBounds(bounds);
+      // Don't zoom in too far on single marker
+      if (map.current.getZoom()! > 16) {
+        map.current.setZoom(16);
+      }
+    }
+  };
 
   useEffect(() => {
-    if (!mapLoaded || !mapContainer.current || map.current) return;
-    
-    try {
-      console.log("Creating Google Map instance");
-      const center = userCoordinates || { lat: 12.9716, lng: 77.5946 }; // Default to Bangalore
-      
-      map.current = new window.google.maps.Map(mapContainer.current, {
-        center,
-        zoom: 12,
-        mapTypeControl: true,
-        streetViewControl: true,
-        fullscreenControl: true,
-        zoomControl: true
-      });
-      
-      toast({
-        title: "Map loaded successfully",
-        description: "The map has been loaded with your locations.",
-      });
-    } catch (error) {
-      console.error('Error creating map:', error);
-      setMapError('Error creating map. Please try refreshing the page.');
+    if (mapLoaded && map.current) {
+      addMarkers();
     }
-  }, [mapLoaded, userCoordinates, toast]);
-
-  const handleRetryMapLoad = () => {
-    console.log("Retrying map load");
-    setMapError(null);
-    setIsRetrying(true);
-    setApiKeyFetchAttempts(prev => prev + 1);
-    toast({
-      title: "Retrying...",
-      description: "Attempting to reload the map",
-    });
-  };
+  }, [businesses, mapLoaded]);
 
   if (mapError) {
     return (
-      <MapError 
-        error={mapError}
-        onRetry={handleRetryMapLoad}
-        isRetrying={isRetrying}
-      />
+      <div className="rounded-lg bg-destructive/10 p-4 text-center">
+        <p className="text-destructive">{mapError}</p>
+      </div>
     );
   }
 
   return (
-    <div className="w-full">
-      <div className="max-w-[1400px] mx-auto">
-        <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
-          <div 
-            className="h-[600px] w-full relative" 
-            ref={mapContainer}
-            id="map-container"
-          >
-            {(!mapLoaded || apiKeyLoading || isRetrying) && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                <div className="text-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
-                  <p className="text-muted-foreground">
-                    {isRetrying ? "Retrying map load..." : "Loading map..."}
-                  </p>
-                </div>
-              </div>
-            )}
-            
-            {map.current && mapLoaded && (
-              <MapMarkers
-                map={map.current}
-                recommendations={businesses}
-                marketplaceListings={[]}
-                userCoordinates={userCoordinates}
-                markers={markers}
-                infoWindows={infoWindows}
-              />
-            )}
-          </div>
+    <div className="w-full rounded-lg overflow-hidden border border-border">
+      {!mapLoaded && (
+        <div className="flex items-center justify-center h-[600px] bg-muted/10">
+          <Loader2 className="h-8 w-8 animate-spin" />
         </div>
-      </div>
+      )}
+      <div
+        ref={mapContainer}
+        className="w-full h-[600px]"
+        style={{ display: mapLoaded ? 'block' : 'none' }}
+      />
     </div>
   );
 };

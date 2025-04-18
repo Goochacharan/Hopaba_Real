@@ -1,133 +1,78 @@
 
-import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import type { BusinessFormValues } from '@/components/AddBusinessForm';
+import React, { useState } from 'react';
 import BusinessCard from './BusinessCard';
-import DeleteConfirmDialog from './DeleteConfirmDialog';
+import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import MapView from './MapView';
 
 interface BusinessesListProps {
-  onEdit: (business: BusinessFormValues & { id: string }) => void;
-  refresh: boolean;
+  businesses?: any[];
+  loading?: boolean;
+  error?: string | null;
 }
 
-const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [businesses, setBusinesses] = useState<Array<any>>([]);
-  const [loading, setLoading] = useState(true);
-  const [businessToDelete, setBusinessToDelete] = useState<string | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  const fetchBusinesses = async () => {
-    if (!user) return;
-    
-    setLoading(true);
-    try {
-      console.log("Fetching businesses for user:", user.id);
-      const { data, error } = await supabase
-        .from('service_providers')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error fetching businesses:', error);
-        throw error;
-      }
-      
-      console.log("Fetched businesses:", data);
-      setBusinesses(data || []);
-    } catch (error: any) {
-      console.error('Error fetching businesses:', error);
-      toast({
-        title: 'Error',
-        description: 'Unable to load your businesses. Please try again later.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (user) {
-      fetchBusinesses();
-    }
-  }, [user, refresh]);
-
-  const handleDelete = async (id: string) => {
-    try {
-      console.log("Deleting business with ID:", id);
-      const { error } = await supabase
-        .from('service_providers')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user?.id);
-      
-      if (error) {
-        console.error('Error deleting business:', error);
-        throw error;
-      }
-      
-      setBusinesses(businesses.filter(business => business.id !== id));
-      toast({
-        title: 'Success',
-        description: 'Business listing deleted successfully',
-      });
-    } catch (error: any) {
-      console.error('Error deleting business:', error);
-      toast({
-        title: 'Error',
-        description: 'There was a problem deleting your business listing.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsDeleteDialogOpen(false);
-    }
-  };
-
-  const confirmDelete = (id: string) => {
-    setBusinessToDelete(id);
-    setIsDeleteDialogOpen(true);
-  };
+const BusinessesList: React.FC<BusinessesListProps> = ({ businesses = [], loading = false, error = null }) => {
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   if (loading) {
-    return <div className="text-center py-8">Loading your businesses...</div>;
+    return (
+      <div className="flex justify-center items-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8 text-destructive">
+        <p>{error}</p>
+      </div>
+    );
   }
 
   if (businesses.length === 0) {
     return (
-      <div className="text-center py-8 space-y-4">
-        <p className="text-muted-foreground">You haven't added any businesses or services yet.</p>
-        <p>Use the form above to add your first business or service!</p>
+      <div className="text-center py-16">
+        <h3 className="text-lg font-medium mb-2">No businesses found</h3>
+        <p className="text-muted-foreground">
+          There are currently no businesses matching your criteria.
+        </p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h3 className="text-xl font-medium">Your Businesses and Services</h3>
-      
-      <div className="grid grid-cols-1 gap-6">
-        {businesses.map((business) => (
-          <BusinessCard
-            key={business.id}
-            business={business}
-            onEdit={onEdit}
-            onDelete={confirmDelete}
-          />
-        ))}
+      <div className="flex justify-end mb-4">
+        <div className="inline-flex rounded-md shadow-sm" role="group">
+          <Button
+            variant={viewMode === 'list' ? 'default' : 'outline'}
+            onClick={() => setViewMode('list')}
+            className="rounded-r-none"
+          >
+            List View
+          </Button>
+          <Button
+            variant={viewMode === 'map' ? 'default' : 'outline'}
+            onClick={() => setViewMode('map')}
+            className="rounded-l-none"
+          >
+            Map View
+          </Button>
+        </div>
       </div>
 
-      <DeleteConfirmDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        onConfirm={() => businessToDelete && handleDelete(businessToDelete)}
-        title="Are you sure?"
-        description="This will permanently delete your business listing. This action cannot be undone."
-      />
+      {viewMode === 'list' ? (
+        <div className="grid grid-cols-1 gap-6">
+          {businesses.map((business, index) => (
+            <div key={business.id} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
+              <BusinessCard business={business} className="h-full" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <MapView businesses={businesses} />
+      )}
     </div>
   );
 };
