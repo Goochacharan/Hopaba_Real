@@ -20,16 +20,16 @@ const SearchResults = () => {
   } = useToast();
   const searchQuery = searchParams.get('q') || '';
   const categoryParam = searchParams.get('category') || 'all';
+  
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
   const [userCoordinates, setUserCoordinates] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
   const [isMapView, setIsMapView] = useState(false);
-  const {
-    filters,
-    setters
-  } = useSearchFilters();
+  
+  const { filters, setters } = useSearchFilters();
+  
   const {
     recommendations,
     events,
@@ -104,26 +104,67 @@ const SearchResults = () => {
   };
   return <MainLayout>
       <div className="w-full animate-fade-in mx-0 px-[2px] search-results-container">
-        <SearchLocation selectedLocation={selectedLocation} setSelectedLocation={setSelectedLocation} setUserCoordinates={setUserCoordinates} />
+        <SearchLocation 
+          selectedLocation={selectedLocation} 
+          setSelectedLocation={setSelectedLocation} 
+          setUserCoordinates={setUserCoordinates} 
+        />
 
-        <SearchControls distance={filters.distance} setDistance={setters.setDistance} minRating={filters.minRating} setMinRating={setters.setMinRating} priceRange={filters.priceRange} setPriceRange={setters.setPriceRange} openNowOnly={filters.openNowOnly} setOpenNowOnly={setters.setOpenNowOnly} hiddenGemOnly={filters.hiddenGemOnly} setHiddenGemOnly={setters.setHiddenGemOnly} mustVisitOnly={filters.mustVisitOnly} setMustVisitOnly={setters.setMustVisitOnly} sortBy={filters.sortBy} onSortChange={setters.setSortBy} />
+        <SearchControls 
+          distance={filters.distance} 
+          setDistance={setters.setDistance} 
+          minRating={filters.minRating} 
+          setMinRating={setters.setMinRating} 
+          priceRange={filters.priceRange} 
+          setPriceRange={setters.setPriceRange} 
+          openNowOnly={filters.openNowOnly} 
+          setOpenNowOnly={setters.setOpenNowOnly} 
+          hiddenGemOnly={filters.hiddenGemOnly} 
+          setHiddenGemOnly={setters.setHiddenGemOnly} 
+          mustVisitOnly={filters.mustVisitOnly} 
+          setMustVisitOnly={setters.setMustVisitOnly} 
+          sortBy={filters.sortBy} 
+          onSortChange={setters.setSortBy} 
+        />
 
         <div className="flex flex-col items-center justify-center gap-4 py-0">
           <ViewToggle isMapView={isMapView} onToggle={setIsMapView} />
         </div>
 
-        {isMapView ? <MapComponent recommendations={rankedRecommendations} userCoordinates={userCoordinates} /> : <div className="w-full">
-            <SearchHeader query={query} searchQuery={searchQuery} category={category} resultsCount={{
-          locations: rankedRecommendations.length,
-          events: 0,
-          marketplace: 0
-        }} loading={loading} error={error} className="search-header" />
+        {isMapView ? (
+          <MapComponent 
+            recommendations={rankedRecommendations} 
+            userCoordinates={userCoordinates}
+            marketplaceListings={marketplaceListings} 
+          />
+        ) : (
+          <div className="w-full">
+            <SearchHeader 
+              query={query} 
+              searchQuery={searchQuery} 
+              category={category} 
+              resultsCount={{
+                locations: rankedRecommendations.length,
+                events: 0,
+                marketplace: 0
+              }} 
+              loading={loading} 
+              error={error} 
+              className="search-header" 
+            />
             
-            {!loading && <div className="search-tabs-container">
-                <SearchTabs recommendations={rankedRecommendations} />
-              </div>}
-          </div>}
+            {!loading && (
+              <div className="search-tabs-container">
+                <SearchTabs 
+                  recommendations={rankedRecommendations} 
+                />
+              </div>
+            )}
+          </div>
+        )}
       </div>
-    </MainLayout>;
+    </MainLayout>
+  );
 };
+
 export default SearchResults;

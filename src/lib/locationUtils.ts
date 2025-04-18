@@ -1,4 +1,3 @@
-
 /**
  * Calculate distance between two coordinates using Haversine formula
  * @param lat1 Latitude of first point
@@ -95,6 +94,8 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
   if (!mapLink) return null;
   
   try {
+    console.log('Attempting to extract coordinates from map link:', mapLink);
+    
     // Try to extract coordinates from Google Maps URL
     // Example formats:
     // https://www.google.com/maps?q=12.9716,77.5946
@@ -106,6 +107,7 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
     // Match @latitude,longitude format
     const atMatch = mapLink.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (atMatch) {
+      console.log('Found coordinates using @lat,lng pattern:', atMatch[1], atMatch[2]);
       return {
         lat: parseFloat(atMatch[1]),
         lng: parseFloat(atMatch[2])
@@ -115,6 +117,7 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
     // Match q=latitude,longitude format
     const qMatch = mapLink.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (qMatch) {
+      console.log('Found coordinates using q=lat,lng pattern:', qMatch[1], qMatch[2]);
       return {
         lat: parseFloat(qMatch[1]),
         lng: parseFloat(qMatch[2])
@@ -124,6 +127,7 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
     // Match ll=latitude,longitude format
     const llMatch = mapLink.match(/[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (llMatch) {
+      console.log('Found coordinates using ll=lat,lng pattern:', llMatch[1], llMatch[2]);
       return {
         lat: parseFloat(llMatch[1]),
         lng: parseFloat(llMatch[2])
@@ -133,9 +137,20 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
     // Match plain latitude,longitude format that might be in the URL
     const plainMatch = mapLink.match(/(?:maps\/|place\/|^)(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (plainMatch) {
+      console.log('Found coordinates using plain lat,lng pattern:', plainMatch[1], plainMatch[2]);
       return {
         lat: parseFloat(plainMatch[1]),
         lng: parseFloat(plainMatch[2])
+      };
+    }
+    
+    // Try data parameter format (data=!3m1!4b1!4m5!3m4...)
+    const dataParamMatch = mapLink.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if (dataParamMatch) {
+      console.log('Found coordinates using data parameter pattern:', dataParamMatch[1], dataParamMatch[2]);
+      return {
+        lat: parseFloat(dataParamMatch[1]),
+        lng: parseFloat(dataParamMatch[2])
       };
     }
     
