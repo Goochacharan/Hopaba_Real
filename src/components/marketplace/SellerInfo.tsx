@@ -101,7 +101,7 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
       <div className="flex items-center justify-between w-full mt-1">
         <Badge 
           variant={sellerRole === 'owner' ? 'default' : 'outline'} 
-          className={`text-[10px] px-2 py-0.5 flex items-center gap-1 
+          className={`text-[10px] px-2 py-0.5 flex items-center gap-1 font-bold 
             ${sellerRole === 'owner' 
               ? 'bg-gradient-to-br from-blue-600 to-blue-500 text-white hover:from-blue-500 hover:to-blue-600' 
               : 'border-amber-500 text-amber-600 hover:bg-amber-50'}
@@ -125,3 +125,4 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
 };
 
 export default SellerInfo;
+
