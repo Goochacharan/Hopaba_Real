@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceItemsList from '@/components/search/MarketplaceItemsList';
 import MarketplaceFilters from '@/components/marketplace/MarketplaceFilters';
 import MarketplaceSortButton from '@/components/marketplace/MarketplaceSortButton';
-import MarketplaceListingDetails from '@/components/marketplace/MarketplaceListingDetails';
+import MarketplaceListingDetails from '@/pages/MarketplaceListingDetails'; // Updated import path
 import { Button } from '@/components/ui/button';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search as SearchIcon, MapPin, Plus } from 'lucide-react';
