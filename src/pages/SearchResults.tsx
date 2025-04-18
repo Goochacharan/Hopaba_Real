@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -11,7 +12,7 @@ import SearchTabs from '@/components/search/SearchTabs';
 import SearchLocation from '@/components/search/SearchLocation';
 import SearchControls from '@/components/search/SearchControls';
 import { Button } from '@/components/ui/button';
-import { Map, List } from 'lucide-react';
+import { Map as MapIcon, List } from 'lucide-react';
 import Map from '@/pages/Map';
 
 const SearchResults = () => {
@@ -131,7 +132,7 @@ const SearchResults = () => {
             {isMapView ? (
               <><List className="h-4 w-4 mr-2" /> List View</>
             ) : (
-              <><Map className="h-4 w-4 mr-2" /> Map View</>
+              <><MapIcon className="h-4 w-4 mr-2" /> Map View</>
             )}
           </Button>
         </div>

@@ -1,12 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import MainLayout from '@/components/MainLayout';
 import { useNavigate, useLocation } from 'react-router-dom';
-import LocationSelector from '@/components/LocationSelector';
-import { Button } from '@/components/ui/button';
-import { MapPin, List, AlertTriangle } from 'lucide-react';
-import useRecommendations from '@/hooks/useRecommendations';
+import { Loader2, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2 } from 'lucide-react';
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
@@ -16,9 +11,9 @@ interface MapProps {
   userCoordinates: { lat: number; lng: number } | null;
 }
 
-const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
+const Map: React.FC<MapProps> = ({ recommendations, userCoordinates: initialUserCoordinates }) => {
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
-  const [userCoordinates, setUserCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [localUserCoordinates, setLocalUserCoordinates] = useState<{ lat: number; lng: number } | null>(initialUserCoordinates);
   const [loading, setLoading] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
@@ -33,9 +28,13 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
   const handleLocationChange = (location: string, coordinates?: { lat: number; lng: number }) => {
     setSelectedLocation(location);
     if (coordinates) {
-      setUserCoordinates(coordinates);
+      setLocalUserCoordinates(coordinates);
     }
   };
+
+  useEffect(() => {
+    setLocalUserCoordinates(initialUserCoordinates);
+  }, [initialUserCoordinates]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -45,10 +44,8 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
     };
     checkUser();
 
-    // Create a new script element for loading MapMyIndia Maps SDK
     const loadMapScript = async () => {
       try {
-        // Get MapMyIndia API key from edge function
         const { data, error } = await supabase.functions.invoke('get-mapmyindia-key');
         if (error) {
           console.error('Error getting MapMyIndia API key:', error);
@@ -66,7 +63,6 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
           return;
         }
         
-        // Check if MapmyIndia script is already loaded
         if (window.MapmyIndia) {
           console.log('MapmyIndia script already loaded');
           setMapLoaded(true);
@@ -74,7 +70,6 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
           return;
         }
           
-        // Load MapmyIndia SDK
         const script = document.createElement('script');
         script.src = `https://apis.mapmyindia.com/advancedmaps/v1/${apiKey}/map_load?v=1.5`;
         script.async = true;
@@ -103,7 +98,6 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
     loadMapScript();
     
     return () => {
-      // Clean up map instance if it exists
       if (map.current) {
         map.current = null;
       }
@@ -111,23 +105,16 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
     };
   }, []);
   
-  // Initialize the map after the script is loaded
   useEffect(() => {
-    // Only proceed if all conditions are met:
-    // 1. Map script is loaded
-    // 2. Map container exists in DOM
-    // 3. Recommendations are loaded
-    // 4. Map hasn't been initialized yet
     if (!mapLoaded || !mapContainer.current || !recommendations || mapInitializedRef.current) return;
 
     const initializeMap = () => {
       try {
         console.log('Initializing map with container:', mapContainer.current);
         
-        // Default center (Bengaluru)
         const defaultCenter: [number, number] = [77.5946, 12.9716]; 
-        const center: [number, number] = userCoordinates 
-          ? [userCoordinates.lng, userCoordinates.lat] 
+        const center: [number, number] = localUserCoordinates 
+          ? [localUserCoordinates.lng, localUserCoordinates.lat] 
           : defaultCenter;
         
         if (!window.MapmyIndia) {
@@ -136,7 +123,6 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
           return;
         }
 
-        // Initialize MapMyIndia map
         map.current = new window.MapmyIndia.Map(mapContainer.current, {
           center: center,
           zoom: 12,
@@ -145,7 +131,6 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
         
         mapInitializedRef.current = true;
         
-        // Add markers when map is ready
         map.current.addEventListener('load', () => {
           console.log('Map loaded, adding markers');
           addMarkers();
@@ -164,15 +149,13 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
     const addMarkers = () => {
       if (!map.current) return;
       
-      // Clear existing markers
       markers.current.forEach(marker => marker.remove());
       markers.current = [];
       
-      // Add user location marker if available
-      if (userCoordinates) {
+      if (localUserCoordinates) {
         try {
           const userMarker = new window.MapmyIndia.Marker({
-            position: [userCoordinates.lng, userCoordinates.lat] as [number, number],
+            position: [localUserCoordinates.lng, localUserCoordinates.lat] as [number, number],
             icon: {
               url: 'https://apis.mapmyindia.com/map_v3/1.png',
               width: 25,
@@ -189,18 +172,15 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
         }
       }
       
-      // Add recommendation markers
       recommendations.forEach(rec => {
         try {
           let lat: number | null = null;
           let lng: number | null = null;
           
-          // Try to get coordinates directly from recommendation
           if (rec.latitude && rec.longitude) {
             lat = parseFloat(rec.latitude);
             lng = parseFloat(rec.longitude);
           }
-          // Try to extract from map_link if available
           else if (rec.map_link) {
             const coords = extractCoordinatesFromMapLink(rec.map_link);
             if (coords) {
@@ -232,7 +212,6 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
         }
       });
 
-      // If we have valid coordinates, fit the map to show all markers
       if (markers.current.length > 1) {
         try {
           const bounds = new window.MapmyIndia.LatLngBounds();
@@ -244,7 +223,6 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
           console.error('Error fitting bounds:', error);
         }
       } else if (markers.current.length === 1) {
-        // If there's only one marker, center on it
         try {
           const position = markers.current[0].getPosition();
           map.current.setCenter(position);
@@ -255,21 +233,17 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
       }
     };
     
-    // Small delay to ensure DOM is fully rendered
     const timer = setTimeout(() => {
       initializeMap();
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [mapLoaded, recommendations, userCoordinates, toast]);
+  }, [mapLoaded, recommendations, localUserCoordinates, toast]);
 
-  // Update markers when recommendations or user location changes
   useEffect(() => {
     if (map.current && mapInitializedRef.current && recommendations) {
       try {
-        // Add markers when recommendations change
         const addMarkers = () => {
-          // Clear existing markers
           markers.current.forEach(marker => {
             if (marker && marker.remove) {
               marker.remove();
@@ -277,11 +251,10 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
           });
           markers.current = [];
           
-          // Add user location marker if available
-          if (userCoordinates) {
+          if (localUserCoordinates) {
             try {
               const userMarker = new window.MapmyIndia.Marker({
-                position: [userCoordinates.lng, userCoordinates.lat] as [number, number],
+                position: [localUserCoordinates.lng, localUserCoordinates.lat] as [number, number],
                 icon: {
                   url: 'https://apis.mapmyindia.com/map_v3/1.png',
                   width: 25,
@@ -298,18 +271,15 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
             }
           }
           
-          // Add recommendation markers
           recommendations.forEach(rec => {
             try {
               let lat: number | null = null;
               let lng: number | null = null;
               
-              // Try to get coordinates directly from recommendation
               if (rec.latitude && rec.longitude) {
                 lat = parseFloat(rec.latitude);
                 lng = parseFloat(rec.longitude);
               }
-              // Try to extract from map_link if available
               else if (rec.map_link) {
                 const coords = extractCoordinatesFromMapLink(rec.map_link);
                 if (coords) {
@@ -341,7 +311,6 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
             }
           });
 
-          // If we have valid coordinates, fit the map to show all markers
           if (markers.current.length > 1) {
             try {
               const bounds = new window.MapmyIndia.LatLngBounds();
@@ -353,7 +322,6 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
               console.error('Error fitting bounds:', error);
             }
           } else if (markers.current.length === 1) {
-            // If there's only one marker, center on it
             try {
               const position = markers.current[0].getPosition();
               map.current.setCenter(position);
@@ -369,7 +337,7 @@ const Map: React.FC<MapProps> = ({ recommendations, userCoordinates }) => {
         console.error('Error updating markers:', error);
       }
     }
-  }, [recommendations, userCoordinates]);
+  }, [recommendations, localUserCoordinates]);
 
   return (
     <section className="w-full">
