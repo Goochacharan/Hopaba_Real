@@ -22,7 +22,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import NoResultsMessage from '@/components/search/NoResultsMessage';
-import MapFilterButton from '@/components/search/MapFilterButton';
 
 type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
 
@@ -272,8 +271,6 @@ const Marketplace = () => {
         
         <ScrollArea className="w-full">
           <div className="flex items-center gap-3 mb-4 overflow-x-auto py-1 px-1">
-            <MapFilterButton />
-            
             <Popover>
               <PopoverTrigger asChild>
                 <Button 
