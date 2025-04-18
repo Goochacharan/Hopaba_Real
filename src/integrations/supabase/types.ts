@@ -72,7 +72,9 @@ export type Database = {
       marketplace_listings: {
         Row: {
           approval_status: string
+          area: string
           category: string
+          city: string
           condition: string
           created_at: string
           damage_images: string[] | null
@@ -100,7 +102,9 @@ export type Database = {
         }
         Insert: {
           approval_status?: string
+          area: string
           category: string
+          city: string
           condition: string
           created_at?: string
           damage_images?: string[] | null
@@ -128,7 +132,9 @@ export type Database = {
         }
         Update: {
           approval_status?: string
+          area?: string
           category?: string
+          city?: string
           condition?: string
           created_at?: string
           damage_images?: string[] | null
