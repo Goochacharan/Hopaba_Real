@@ -263,6 +263,7 @@ export type Database = {
       }
       service_providers: {
         Row: {
+          address: string
           approval_status: string | null
           area: string
           availability: string | null
@@ -283,7 +284,6 @@ export type Database = {
           languages: string[] | null
           map_link: string | null
           name: string
-          postal_code: string
           price_range_max: number | null
           price_range_min: number | null
           price_unit: string | null
@@ -294,6 +294,7 @@ export type Database = {
           whatsapp: string
         }
         Insert: {
+          address: string
           approval_status?: string | null
           area: string
           availability?: string | null
@@ -314,7 +315,6 @@ export type Database = {
           languages?: string[] | null
           map_link?: string | null
           name: string
-          postal_code: string
           price_range_max?: number | null
           price_range_min?: number | null
           price_unit?: string | null
@@ -325,6 +325,7 @@ export type Database = {
           whatsapp: string
         }
         Update: {
+          address?: string
           approval_status?: string | null
           area?: string
           availability?: string | null
@@ -345,7 +346,6 @@ export type Database = {
           languages?: string[] | null
           map_link?: string | null
           name?: string
-          postal_code?: string
           price_range_max?: number | null
           price_range_min?: number | null
           price_unit?: string | null

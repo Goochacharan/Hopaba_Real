@@ -1,143 +1,159 @@
-import { useState, useMemo } from 'react';
-import { MarketplaceListing } from './useMarketplaceListings';
 
-const useMarketplaceFilters = (initialListings: MarketplaceListing[]) => {
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
-  const [conditionFilter, setConditionFilter] = useState<string | null>(null);
-  const [minPriceFilter, setMinPriceFilter] = useState<number | null>(null);
-  const [maxPriceFilter, setMaxPriceFilter] = useState<number | null>(null);
-  const [cityFilter, setCityFilter] = useState<string | null>(null);
-  const [postalCodeFilter, setPostalCodeFilter] = useState<string | null>(null);
-  const [sortOption, setSortOption] = useState<string>('newest');
-  const [sellerRoleFilter, setSellerRoleFilter] = useState<string | null>(null);
+import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { SortOption } from '@/components/marketplace/MarketplaceSortButton';
+import { useLocation } from '@/contexts/LocationContext';
+import { extractCityFromText, extractLocationCity } from '@/lib/locationUtils';
+import type { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 
-  const filteredListings = useMemo(() => {
-    return initialListings.filter(listing => {
-      // Category filter
-      if (categoryFilter && listing.category !== categoryFilter) {
-        return false;
+export const useMarketplaceFilters = (listings: MarketplaceListing[]) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { selectedLocation, userCoordinates } = useLocation();
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
+  const [yearRange, setYearRange] = useState<[number, number]>([2010, new Date().getFullYear()]);
+  const [ratingFilter, setRatingFilter] = useState<number>(0);
+  const [conditionFilter, setConditionFilter] = useState<string>('all');
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [sortOption, setSortOption] = useState<SortOption>('newest');
+  const [distanceFilter, setDistanceFilter] = useState<number>(50);
+  const [postalCodeFilter, setPostalCodeFilter] = useState<string>('');
+
+  const isPriceFilterActive = priceRange[0] > 0 || priceRange[1] < 10000000;
+  const isYearFilterActive = yearRange[0] > 2010 || yearRange[1] < new Date().getFullYear();
+  const isRatingFilterActive = ratingFilter > 0;
+  const isConditionFilterActive = conditionFilter !== 'all';
+  const isSortFilterActive = sortOption !== 'newest';
+  const isDistanceFilterActive = distanceFilter < 50;
+
+  const handleLocationSearch = (location: string) => {
+    console.log(`Location changed to: ${location}`);
+    if (/^\d{6}$/.test(location)) {
+      setPostalCodeFilter(location);
+    } else {
+      setPostalCodeFilter('');
+      setSearchParams(params => {
+        params.set('area', location);
+        return params;
+      });
+    }
+  };
+
+  const filterListings = (listings: MarketplaceListing[]) => {
+    return listings.filter(listing => {
+      if (postalCodeFilter && listing.postal_code) {
+        if (!listing.postal_code.startsWith(postalCodeFilter)) {
+          return false;
+        }
       }
 
-      // Condition filter
-      if (conditionFilter && listing.condition !== conditionFilter) {
-        return false;
+      const searchArea = searchParams.get('area')?.toLowerCase();
+      if (searchArea && !postalCodeFilter) {
+        return (listing.area || '').toLowerCase().includes(searchArea);
       }
 
-      // Price range filter
-      if (minPriceFilter !== null && listing.price < minPriceFilter) {
-        return false;
+      if (selectedLocation === "Current Location") {
+        if (listing.distance === undefined) return true;
+        return listing.distance <= distanceFilter;
       }
-      if (maxPriceFilter !== null && listing.price > maxPriceFilter) {
-        return false;
+      
+      if (selectedLocation && selectedLocation !== "Bengaluru, Karnataka") {
+        const selectedCity = selectedLocation.split(',')[0].trim();
+        
+        if (listing.location && listing.location.includes(selectedCity)) {
+          return true;
+        }
+        
+        const listingCity = extractLocationCity(listing);
+        if (listingCity && selectedCity.includes(listingCity)) {
+          return true;
+        }
+        
+        if (selectedLocation.includes("Postal Code:")) {
+          const postalCode = selectedLocation.match(/\d{6}/)?.[0];
+          if (postalCode && listing.postal_code === postalCode) {
+            return true;
+          }
+          return true;
+        }
+        return true;
       }
-
-      // City filter
-      if (cityFilter && listing.city !== cityFilter) {
-        return false;
+      
+      const price = listing.price;
+      if (price < priceRange[0] || price > priceRange[1]) return false;
+      
+      if (listing.model_year) {
+        const modelYear = parseInt(listing.model_year, 10);
+        if (!isNaN(modelYear) && (modelYear < yearRange[0] || modelYear > yearRange[1])) {
+          return false;
+        }
       }
-
-      // Postal code filter
-      if (postalCodeFilter && listing.postal_code !== postalCodeFilter) {
-        return false;
-      }
-
-      // Seller role filter
-      if (sellerRoleFilter && listing.seller_role !== sellerRoleFilter) {
-        return false;
-      }
-
+      
+      if (ratingFilter > 0 && listing.seller_rating < ratingFilter) return false;
+      
+      if (conditionFilter !== 'all' && listing.condition.toLowerCase() !== conditionFilter.toLowerCase()) return false;
+      
       return true;
     });
-  }, [
-    initialListings,
-    categoryFilter,
-    conditionFilter,
-    minPriceFilter,
-    maxPriceFilter,
-    cityFilter,
-    postalCodeFilter,
-    sellerRoleFilter
-  ]);
+  };
 
-  const sortedListings = useMemo(() => {
-    const listings = [...filteredListings];
-
-    switch (sortOption) {
-      case 'price_low_high':
-        return listings.sort((a, b) => a.price - b.price);
-      case 'price_high_low':
-        return listings.sort((a, b) => b.price - a.price);
-      case 'newest':
-        return listings.sort((a, b) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-      case 'oldest':
-        return listings.sort((a, b) => 
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        );
-      case 'distance':
-        return listings.sort((a, b) => {
-          const distA = a.distance ? parseFloat(a.distance) : Infinity;
-          const distB = b.distance ? parseFloat(b.distance) : Infinity;
-          return distA - distB;
-        });
-      default:
-        return listings;
-    }
-  }, [filteredListings, sortOption]);
-
-  const uniqueCategories = useMemo(() => {
-    const categories = initialListings.map(listing => listing.category);
-    return Array.from(new Set(categories)).sort();
-  }, [initialListings]);
-
-  const uniqueConditions = useMemo(() => {
-    const conditions = initialListings.map(listing => listing.condition);
-    return Array.from(new Set(conditions)).sort();
-  }, [initialListings]);
-
-  const uniqueCities = useMemo(() => {
-    const cities = initialListings.map(listing => listing.city).filter(Boolean);
-    return Array.from(new Set(cities)).sort();
-  }, [initialListings]);
-
-  const priceRange = useMemo(() => {
-    if (initialListings.length === 0) return { min: 0, max: 0 };
-    
-    let min = Infinity;
-    let max = -Infinity;
-    
-    initialListings.forEach(listing => {
-      if (listing.price < min) min = listing.price;
-      if (listing.price > max) max = listing.price;
+  const sortListings = (items: MarketplaceListing[]) => {
+    return [...items].sort((a, b) => {
+      switch (sortOption) {
+        case 'newest':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case 'price-low-high':
+          return a.price - b.price;
+        case 'price-high-low':
+          return b.price - a.price;
+        case 'top-rated':
+          return b.seller_rating - a.seller_rating;
+        case 'nearest':
+          if (a.distance !== undefined && b.distance !== undefined) {
+            return a.distance - b.distance;
+          }
+          if (a.distance !== undefined) return -1;
+          if (b.distance !== undefined) return 1;
+          return 0;
+        default:
+          return 0;
+      }
     });
-    
-    return { min, max };
-  }, [initialListings]);
+  };
 
   return {
-    filteredListings: sortedListings,
-    categoryFilter,
-    setCategoryFilter,
-    conditionFilter,
-    setConditionFilter,
-    minPriceFilter,
-    setMinPriceFilter,
-    maxPriceFilter,
-    setMaxPriceFilter,
-    cityFilter,
-    setCityFilter,
-    postalCodeFilter,
-    setPostalCodeFilter,
-    sortOption,
-    setSortOption,
-    sellerRoleFilter,
-    setSellerRoleFilter,
-    uniqueCategories,
-    uniqueConditions,
-    uniqueCities,
-    priceRange
+    filters: {
+      priceRange,
+      yearRange,
+      ratingFilter,
+      conditionFilter,
+      distanceFilter,
+      postalCodeFilter,
+      sortOption,
+      currentPage,
+      activeFilter
+    },
+    setters: {
+      setPriceRange,
+      setYearRange,
+      setRatingFilter,
+      setConditionFilter,
+      setDistanceFilter,
+      setSortOption,
+      setCurrentPage,
+      setActiveFilter,
+      handleLocationSearch
+    },
+    states: {
+      isPriceFilterActive,
+      isYearFilterActive,
+      isRatingFilterActive,
+      isConditionFilterActive,
+      isSortFilterActive,
+      isDistanceFilterActive
+    },
+    filterListings,
+    sortListings
   };
 };
-
-export default useMarketplaceFilters;
