@@ -1,4 +1,3 @@
-
 import React from 'react';
 import FilterTabs from '@/components/FilterTabs';
 import SortButton, { SortOption } from '@/components/SortButton';
@@ -38,31 +37,26 @@ const SearchControls: React.FC<SearchControlsProps> = ({
   onSortChange
 }) => {
   return (
-    <div className="flex items-center justify-between gap-2 mb-1 mt-0 px-1">
-      <div className="flex-1 overflow-x-auto">
-        <FilterTabs 
-          distance={distance} 
-          setDistance={setDistance} 
-          minRating={minRating} 
-          setMinRating={setMinRating} 
-          priceRange={priceRange} 
-          setPriceRange={setPriceRange} 
-          openNowOnly={openNowOnly} 
-          setOpenNowOnly={setOpenNowOnly}
-          hiddenGemOnly={hiddenGemOnly}
-          setHiddenGemOnly={setHiddenGemOnly}
-          mustVisitOnly={mustVisitOnly}
-          setMustVisitOnly={setMustVisitOnly}
-        />
-      </div>
-      
-      <div className="flex items-center gap-2 ml-2">  
-        <MapFilterButton />
-        <SortButton 
-          currentSort={sortBy} 
-          onSortChange={onSortChange} 
-        />
-      </div>
+    <div className="flex items-center gap-2 mb-1 mt-0 px-1 overflow-x-auto hide-scrollbar">
+      <FilterTabs 
+        distance={distance} 
+        setDistance={setDistance} 
+        minRating={minRating} 
+        setMinRating={setMinRating} 
+        priceRange={priceRange} 
+        setPriceRange={setPriceRange} 
+        openNowOnly={openNowOnly} 
+        setOpenNowOnly={setOpenNowOnly}
+        hiddenGemOnly={hiddenGemOnly}
+        setHiddenGemOnly={setHiddenGemOnly}
+        mustVisitOnly={mustVisitOnly}
+        setMustVisitOnly={setMustVisitOnly}
+      />
+      <MapFilterButton />
+      <SortButton 
+        currentSort={sortBy} 
+        onSortChange={onSortChange} 
+      />
     </div>
   );
 };
