@@ -7,8 +7,15 @@ import { Calendar, Clock, MapPin, User, Sparkles, Award } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
+// Extended Event interface that includes the isPast property
+interface ExtendedEvent extends Event {
+  isPast?: boolean;
+  isHiddenGem?: boolean;
+  isMustVisit?: boolean;
+}
+
 interface EventCardProps {
-  event: Event;
+  event: ExtendedEvent;
   className?: string;
   onRSVP?: (eventId: string) => void;
 }
@@ -124,7 +131,7 @@ const EventCard: React.FC<EventCardProps | LegacyEventCardProps> = (props) => {
       <CardFooter className="px-4 py-3 border-t">
         {onRSVP && !event.isPast && (
           <Button 
-            onClick={() => isLegacyProps ? onRSVP() : onRSVP(event.id)} 
+            onClick={() => isLegacyProps ? onRSVP && onRSVP() : onRSVP && onRSVP(event.id)} 
             className="w-full"
             variant="outline"
           >

@@ -14,8 +14,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import NoResultsMessage from '@/components/search/NoResultsMessage';
 import { Clock } from 'lucide-react';
+import { Event } from '@/hooks/useRecommendations';
 
-interface Event {
+interface EventFromSupabase {
   id: string;
   title: string;
   date: string;
@@ -45,7 +46,7 @@ const Events = () => {
         throw error;
       }
       
-      return data as Event[];
+      return data as EventFromSupabase[];
     }
   });
   
@@ -69,7 +70,7 @@ const Events = () => {
     return eventDate < today;
   });
   
-  const createEventObject = (event: Event, isPast: boolean = false) => ({
+  const createEventObject = (event: EventFromSupabase, isPast: boolean = false): Event => ({
     id: event.id,
     title: event.title,
     date: event.date,
@@ -79,7 +80,9 @@ const Events = () => {
     image: event.image,
     pricePerPerson: event.price_per_person || 0,
     attendees: event.attendees || 0,
-    isPast: isPast
+    isPast: isPast,
+    isHiddenGem: false,
+    isMustVisit: false
   });
   
   return (
@@ -121,7 +124,7 @@ const Events = () => {
                   <EventCard
                     key={event.id}
                     event={createEventObject(event)}
-                    onRSVP={() => {}}
+                    onRSVP={(id) => console.log(`RSVP for event ${id}`)}
                   />
                 ))}
               </div>
