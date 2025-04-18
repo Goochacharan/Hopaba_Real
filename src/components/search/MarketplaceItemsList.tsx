@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Dot } from 'lucide-react';
@@ -8,9 +8,9 @@ import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DEFAULT_IMAGE } from '@/lib/constants';
 import { extractCityFromText } from '@/lib/locationUtils';
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface MarketplaceListing {
+interface MarketplaceListingWithDistance {
   id: string;
   title: string;
   description: string;
@@ -24,22 +24,19 @@ interface MarketplaceListing {
   postal_code: string;
   seller_name: string;
   seller_rating: number;
-  seller_avatar: string;
+  seller_avatar?: string;
   model_year: string;
   location: string;
-  distance?: number;
-}
-
-interface MarketplaceListingWithDistance extends Omit<MarketplaceListing, 'distance'> {
   distance?: number;
 }
 
 interface MarketplaceItemsListProps {
   listings: MarketplaceListingWithDistance[] | undefined;
   loading: boolean;
+  onListingClick?: (listing: MarketplaceListingWithDistance) => void;
 }
 
-const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({ listings, loading }) => {
+const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({ listings, loading, onListingClick }) => {
   if (loading) {
     return <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[...Array(6)].map((_, i) => (

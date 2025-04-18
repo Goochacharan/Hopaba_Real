@@ -40,14 +40,14 @@ interface MarketplaceFiltersProps {
     setSortOption: (value: SortOption) => void;
     setActiveFilter: (value: string | null) => void;
   };
-  showDistanceFilter: boolean;
+  showDistanceFilter?: boolean; // Make this optional with a default value
 }
 
 const MarketplaceFilters = ({
   filters,
   states,
   setters,
-  showDistanceFilter
+  showDistanceFilter = true // Provide a default value
 }: MarketplaceFiltersProps) => {
   return (
     <ScrollArea className="w-full">

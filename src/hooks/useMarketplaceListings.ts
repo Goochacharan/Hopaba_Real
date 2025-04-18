@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -12,8 +11,8 @@ export interface MarketplaceListing {
   condition: string;
   model_year?: string | null;
   location: string | null;
-  city: string; // Added city property
-  area: string; // Added area property
+  city: string; 
+  area: string;
   map_link?: string | null;
   latitude?: string | null;
   longitude?: string | null;
@@ -33,6 +32,8 @@ export interface MarketplaceListing {
   is_negotiable?: boolean;
   search_rank?: number;
   seller_role?: 'owner' | 'agent';
+  distance?: number;
+  seller_avatar?: string;
 }
 
 interface UseMarketplaceListingsProps {

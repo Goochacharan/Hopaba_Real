@@ -5,7 +5,7 @@ import MainLayout from '@/components/MainLayout';
 import MarketplaceItemsList from '@/components/search/MarketplaceItemsList';
 import MarketplaceFilters from '@/components/marketplace/MarketplaceFilters';
 import MarketplaceSortButton from '@/components/marketplace/MarketplaceSortButton';
-import MarketplaceListingDetails from '@/pages/MarketplaceListingDetails'; // Updated import path
+import MarketplaceListingDetails from '@/pages/MarketplaceListingDetails'; // Import from pages
 import { Button } from '@/components/ui/button';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search as SearchIcon, MapPin, Plus } from 'lucide-react';
@@ -16,7 +16,8 @@ import PostalCodeSearch from '@/components/search/PostalCodeSearch';
 import { useMarketplaceFilters } from '@/hooks/useMarketplaceFilters';
 import { useMarketplaceListings, MarketplaceListing } from '@/hooks/useMarketplaceListings';
 
-interface MarketplaceListingWithDistance extends Omit<MarketplaceListing, 'distance'> {
+// Define the MarketplaceListingWithDistance interface
+interface MarketplaceListingWithDistance extends MarketplaceListing {
   distance?: number;
 }
 
@@ -31,7 +32,8 @@ const Marketplace = () => {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
 
-  const { listings, fetchListings } = useMarketplaceListings();
+  // Fix the useMarketplaceListings hook usage
+  const { listings, refetch: fetchListings } = useMarketplaceListings();
   const {
     filters,
     setters,
@@ -61,9 +63,10 @@ const Marketplace = () => {
   };
 
   const handleListingClick = (listing: MarketplaceListingWithDistance) => {
+    // Convert string to number if needed for the distance
     setSelectedListing({
       ...listing,
-      distance: listing.distance?.toString() || ''
+      distance: typeof listing.distance === 'string' ? parseFloat(listing.distance) : listing.distance
     });
     setShowListingDetails(true);
   };
@@ -101,6 +104,7 @@ const Marketplace = () => {
                 filters={filters}
                 setters={setters}
                 states={states}
+                showDistanceFilter={true}
               />
             </div>
           )}
@@ -128,7 +132,7 @@ const Marketplace = () => {
               </div>
             ) : (
               <MarketplaceItemsList
-                listings={sortedListings}
+                listings={sortedListings as MarketplaceListingWithDistance[]}
                 loading={false}
                 onListingClick={handleListingClick}
               />
@@ -138,8 +142,6 @@ const Marketplace = () => {
 
         {selectedListing && (
           <MarketplaceListingDetails
-            isOpen={showListingDetails}
-            onClose={handleCloseDetails}
             listing={selectedListing}
           />
         )}

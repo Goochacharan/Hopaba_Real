@@ -331,3 +331,27 @@ export function extractCityFromText(text: string): string | null {
   
   return null;
 }
+
+// Extract city from location information in a listing
+export function extractLocationCity(listing: any): string | null {
+  if (!listing) return null;
+
+  // Check for city property first
+  if (listing.city) {
+    return listing.city;
+  }
+  
+  // Then check location property
+  if (listing.location) {
+    const extractedCity = extractCityFromText(listing.location);
+    if (extractedCity) return extractedCity;
+  }
+  
+  // Try to extract from area if available
+  if (listing.area) {
+    const extractedCity = extractCityFromText(listing.area);
+    if (extractedCity) return extractedCity;
+  }
+  
+  return null;
+}
