@@ -14,15 +14,31 @@ interface Window {
   onloadCallback?: () => void;
   
   // Google Maps related types
-  google: {
+  google?: {
     maps: {
-      Map: typeof google.maps.Map;
-      Marker: typeof google.maps.Marker;
-      InfoWindow: typeof google.maps.InfoWindow;
-      LatLngBounds: typeof google.maps.LatLngBounds;
+      Map: new (element: HTMLElement, options: {
+        center: { lat: number, lng: number };
+        zoom: number;
+        [key: string]: any;
+      }) => google.maps.Map;
+      Marker: new (options: {
+        position: { lat: number, lng: number };
+        map?: google.maps.Map;
+        title?: string;
+        icon?: {
+          url: string;
+          scaledSize?: google.maps.Size;
+        };
+      }) => google.maps.Marker;
+      InfoWindow: new (options: {
+        content: string;
+      }) => google.maps.InfoWindow;
+      LatLngBounds: new () => google.maps.LatLngBounds;
+      Size: new (width: number, height: number) => google.maps.Size;
       event: {
-        addListener: typeof google.maps.event.addListener;
-        addListenerOnce: typeof google.maps.event.addListenerOnce;
+        addListener: (instance: any, eventName: string, handler: Function) => google.maps.MapsEventListener;
+        addListenerOnce: (instance: any, eventName: string, handler: Function) => google.maps.MapsEventListener;
+        removeListener: (listener: google.maps.MapsEventListener) => void;
       };
     };
   };
@@ -30,13 +46,49 @@ interface Window {
 }
 
 // Ensure google.maps namespace is globally available
-declare namespace google.maps {
-  export class Map {}
-  export class Marker {}
-  export class InfoWindow {}
-  export class LatLngBounds {}
-  export namespace event {
-    export function addListener(): void;
-    export function addListenerOnce(): void;
+declare namespace google {
+  namespace maps {
+    interface Map {
+      setCenter(position: { lat: number, lng: number }): void;
+      setZoom(zoom: number): void;
+      getZoom(): number;
+      fitBounds(bounds: LatLngBounds): void;
+    }
+    
+    interface Marker {
+      setMap(map: Map | null): void;
+      getPosition(): { lat: number, lng: number };
+      addListener(eventName: string, handler: Function): MapsEventListener;
+    }
+    
+    interface InfoWindow {
+      open(map: Map, marker?: Marker): void;
+      close(): void;
+    }
+    
+    interface LatLngBounds {
+      extend(position: { lat: number, lng: number } | { lat(): number, lng(): number }): void;
+    }
+    
+    interface Size {
+      width: number;
+      height: number;
+    }
+    
+    interface MapsEventListener {
+      remove(): void;
+    }
+    
+    class Map {}
+    class Marker {}
+    class InfoWindow {}
+    class LatLngBounds {}
+    class Size {}
+    
+    namespace event {
+      function addListener(instance: any, eventName: string, handler: Function): MapsEventListener;
+      function addListenerOnce(instance: any, eventName: string, handler: Function): MapsEventListener;
+      function removeListener(listener: MapsEventListener): void;
+    }
   }
 }

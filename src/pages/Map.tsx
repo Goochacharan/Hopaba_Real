@@ -8,13 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { Button } from '@/components/ui/button';
 
-declare global {
-  interface Window {
-    google: typeof google;
-    initMap?: () => void;
-  }
-}
-
 interface MapComponentProps {
   recommendations?: any[];
   userCoordinates: { lat: number; lng: number } | null;
@@ -165,12 +158,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
     loadMapScript();
     
     return () => {
-      if (markers.current) {
+      if (markers.current.length > 0) {
         markers.current.forEach(marker => marker.setMap(null));
         markers.current = [];
       }
       
-      if (infoWindows.current) {
+      if (infoWindows.current.length > 0) {
         infoWindows.current.forEach(infoWindow => infoWindow.close());
         infoWindows.current = [];
       }
@@ -211,8 +204,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
             content: '<div><strong>Your location</strong></div>'
           });
           
-          userMarker.addListener('click', () => {
-            userInfoWindow.open(map.current, userMarker);
+          userMarker.addListener('click', function() {
+            userInfoWindow.open(map.current!, userMarker);
           });
           
           markers.current.push(userMarker);
@@ -275,9 +268,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 content: infoContent
               });
               
-              marker.addListener('click', () => {
+              marker.addListener('click', function() {
                 infoWindows.current.forEach(window => window.close());
-                infoWindow.open(map.current, marker);
+                infoWindow.open(map.current!, marker);
               });
               
               markers.current.push(marker);
@@ -343,9 +336,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
                 content: infoContent
               });
               
-              marker.addListener('click', () => {
+              marker.addListener('click', function() {
                 infoWindows.current.forEach(window => window.close());
-                infoWindow.open(map.current, marker);
+                infoWindow.open(map.current!, marker);
               });
               
               markers.current.push(marker);
@@ -366,16 +359,15 @@ const MapComponent: React.FC<MapComponentProps> = ({
           
           const bounds = new window.google.maps.LatLngBounds();
           markers.current.forEach(marker => {
-            bounds.extend(marker.getPosition());
+            bounds.extend(marker.getPosition()!);
           });
           
           map.current.fitBounds(bounds);
           
-          const listener = window.google.maps.event.addListener(map.current, 'idle', () => {
-            if (map.current.getZoom() > 16) {
-              map.current.setZoom(16);
+          const listener = window.google.maps.event.addListenerOnce(map.current, 'idle', function() {
+            if (map.current!.getZoom() > 16) {
+              map.current!.setZoom(16);
             }
-            window.google.maps.event.removeListener(listener);
           });
           
         } catch (error) {
@@ -418,7 +410,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         
         mapInitializedRef.current = true;
         
-        window.google.maps.event.addListenerOnce(map.current, 'idle', () => {
+        window.google.maps.event.addListenerOnce(map.current, 'idle', function() {
           console.log('Map loaded, adding markers');
           addMarkers();
         });
