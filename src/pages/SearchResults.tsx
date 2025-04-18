@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -120,10 +121,6 @@ const SearchResults = () => {
           setUserCoordinates={setUserCoordinates}
         />
 
-        <div className="flex flex-col items-center justify-center gap-4 py-4">
-          <ViewToggle isMapView={isMapView} onToggle={setIsMapView} />
-        </div>
-
         <SearchControls
           distance={filters.distance}
           setDistance={setters.setDistance}
@@ -140,6 +137,10 @@ const SearchResults = () => {
           sortBy={filters.sortBy}
           onSortChange={setters.setSortBy}
         />
+
+        <div className="flex flex-col items-center justify-center gap-4 py-4">
+          <ViewToggle isMapView={isMapView} onToggle={setIsMapView} />
+        </div>
 
         {isMapView ? (
           <MapComponent recommendations={rankedRecommendations} userCoordinates={userCoordinates} />
