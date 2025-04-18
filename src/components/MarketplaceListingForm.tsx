@@ -52,10 +52,12 @@ const marketplaceListingSchema = z.object({
   condition: z.string().min(1, { message: "Condition is required" }),
   model_year: z.string().optional(),
   area: z.string().min(2, { message: "Area must be at least 2 characters." }),
+  postal_code: z.string().min(6, { message: "Please enter a valid 6-digit postal code" })
+    .max(6, { message: "Postal code must be exactly 6 digits" })
+    .regex(/^[0-9]+$/, { message: "Postal code must contain only numbers" }),
   map_link: z.string().optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
-  postal_code: z.string().optional(),
   seller_name: z.string().min(2, { message: "Seller name is required" }),
   seller_phone: z.string()
     .refine(phone => phone.startsWith('+91'), {
@@ -110,9 +112,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     condition: listing?.condition || '',
     model_year: listing?.model_year || '',
     area: listing?.location || "",
-    map_link: listing?.map_link || '',
-    latitude: listing?.latitude || '',
-    longitude: listing?.longitude || '',
     postal_code: listing?.postal_code || '',
     seller_name: listing?.seller_name || user?.user_metadata?.full_name || '',
     seller_phone: listing?.seller_phone || '+91',
@@ -185,10 +184,10 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         model_year: data.model_year || null,
         location: data.area,
         area: data.area,
+        postal_code: data.postal_code,
         map_link: data.map_link || null,
         latitude: data.latitude || null,
         longitude: data.longitude || null,
-        postal_code: data.postal_code || null,
         seller_name: data.seller_name || "Anonymous Seller",
         seller_id: user.id,
         seller_phone: data.seller_phone || null,
@@ -393,7 +392,32 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                     </FormItem>
                   )}
                 />
-                  
+
+                <FormField
+                  control={form.control}
+                  name="postal_code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Postal Code*</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Enter 6-digit postal code"
+                          maxLength={6}
+                          {...field}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                            field.onChange(value);
+                          }}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Enter your 6-digit postal code
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="model_year"
