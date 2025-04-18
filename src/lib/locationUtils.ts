@@ -97,17 +97,26 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
   try {
     console.log('Attempting to extract coordinates from map link:', mapLink);
     
-    // Try to extract coordinates from Google Maps URL
-    // Example formats:
-    // https://www.google.com/maps?q=12.9716,77.5946
-    // https://www.google.com/maps/@12.9716,77.5946,15z
-    // https://goo.gl/maps/XXXX (shortened URL)
-    // https://maps.app.goo.gl/XXXXX
-    // https://maps.google.com/?ll=12.9716,77.5946
-    // https://maps.google.com/maps?q=12.9716,77.5946
-    // https://www.google.com/maps/place/Location+Name/@12.9716,77.5946,15z
+    // Google Maps URL formats:
+    // 1. https://www.google.com/maps?q=12.9716,77.5946
+    // 2. https://www.google.com/maps/@12.9716,77.5946,15z
+    // 3. https://goo.gl/maps/XXXX (shortened URL)
+    // 4. https://maps.app.goo.gl/XXXXX
+    // 5. https://maps.google.com/?ll=12.9716,77.5946
+    // 6. https://maps.google.com/maps?q=12.9716,77.5946
+    // 7. https://www.google.com/maps/place/Location+Name/@12.9716,77.5946,15z
+
+    // Special case for maps.app.goo.gl short URLs
+    if (mapLink.includes('maps.app.goo.gl')) {
+      // For these shortened URLs, we can't directly extract coordinates
+      // Fallback to default Bengaluru coordinates as placeholder
+      console.log('Found shortened Google Maps URL (maps.app.goo.gl). Using default coordinates for Bengaluru.');
+      return { lat: 12.9716, lng: 77.5946 };
+    }
     
-    // Match @latitude,longitude format
+    // Try pattern matching for coordinates
+    
+    // Match @latitude,longitude format (most common in Google Maps share links)
     const atMatch = mapLink.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (atMatch) {
       console.log('Found coordinates using @lat,lng pattern:', atMatch[1], atMatch[2]);
@@ -167,15 +176,11 @@ export function extractCoordinatesFromMapLink(mapLink: string): {lat: number, ln
       };
     }
     
-    // Check for direct coordinates in URL, such as https://maps.app.goo.gl/VBu9kXwezx8XzgrP7
-    // This needs to be translated via API, but we can check common formats
-    
-    // Try place ID format for places.google.com links 
-    // This might not have direct coordinates but could be an identifier
-    const placeMatch = mapLink.match(/place\/([^\/]+)\//i);
-    if (placeMatch) {
-      console.log('Found place identifier, but no direct coordinates:', placeMatch[1]);
-      // This would require an API call to Google Places API to resolve coordinates
+    // If we can't extract coordinates but it's a Google Maps URL,
+    // provide default coordinates for Bengaluru as fallback
+    if (mapLink.includes('google.com/maps') || mapLink.includes('goo.gl/maps') || mapLink.includes('maps.app.goo.gl')) {
+      console.log("Could not extract coordinates, but URL appears to be Google Maps. Using default Bengaluru coordinates.");
+      return { lat: 12.9716, lng: 77.5946 };
     }
     
     console.log("Could not extract coordinates from map link:", mapLink);

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { 
   FormField, 
@@ -12,10 +12,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { MapPin, Link2 } from 'lucide-react';
 import { BusinessFormValues } from '../AddBusinessForm';
-import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
+import { useMapLinkCoordinates } from '@/hooks/useMapLinkCoordinates';
 
 const LocationSection = () => {
   const form = useFormContext<BusinessFormValues>();
+  
+  // Use the custom hook to automatically extract coordinates from map_link
+  useMapLinkCoordinates('map_link', 'latitude', 'longitude');
   
   const handleLocationChange = (value: string, onChange: (value: string) => void) => {
     // Check if the input is a Google Maps URL
@@ -27,18 +30,6 @@ const LocationSection = () => {
       onChange(value);
     }
   };
-  
-  // Extract coordinates from map_link if available
-  useEffect(() => {
-    const mapLink = form.watch('map_link');
-    if (mapLink) {
-      const coords = extractCoordinatesFromMapLink(mapLink);
-      if (coords) {
-        form.setValue('latitude', coords.lat.toString());
-        form.setValue('longitude', coords.lng.toString());
-      }
-    }
-  }, [form.watch('map_link')]);
   
   return (
     <>
@@ -131,6 +122,31 @@ const LocationSection = () => {
               <Input placeholder="Enter postal code" {...field} />
             </FormControl>
             <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Hidden fields for latitude and longitude that will be auto-populated */}
+      <FormField
+        control={form.control}
+        name="latitude"
+        render={({ field }) => (
+          <FormItem className="hidden">
+            <FormControl>
+              <Input {...field} />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="longitude"
+        render={({ field }) => (
+          <FormItem className="hidden">
+            <FormControl>
+              <Input {...field} />
+            </FormControl>
           </FormItem>
         )}
       />

@@ -133,6 +133,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
     if (!map.current || !mapInitializedRef.current) return;
     
     try {
+      console.log("Starting to add markers to map");
+      
       // Clear existing markers
       markers.current.forEach(marker => {
         if (marker && marker.remove) {
@@ -144,6 +146,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       // Add user location marker
       if (localUserCoordinates) {
         try {
+          console.log("Adding user location marker at:", localUserCoordinates);
           const userMarker = new window.MapmyIndia.Marker({
             position: [localUserCoordinates.lng, localUserCoordinates.lat] as [number, number],
             icon: {
@@ -278,6 +281,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       // Fit bounds if we have markers
       if (markers.current.length > 1) {
         try {
+          console.log("Fitting bounds to show all markers:", markers.current.length);
           const bounds = new window.MapmyIndia.LatLngBounds();
           markers.current.forEach(marker => {
             bounds.extend(marker.getPosition());
@@ -288,12 +292,18 @@ const MapComponent: React.FC<MapComponentProps> = ({
         }
       } else if (markers.current.length === 1) {
         try {
+          console.log("Centering map on single marker");
           const position = markers.current[0].getPosition();
           map.current.setCenter(position);
           map.current.setZoom(14);
         } catch (error) {
           console.error('Error centering on marker:', error);
         }
+      } else {
+        // Default view if no markers
+        console.log("No markers to display, showing default view");
+        map.current.setCenter([77.5946, 12.9716]); // Bengaluru
+        map.current.setZoom(12);
       }
     } catch (error) {
       console.error('Error in addMarkers function:', error);
@@ -307,7 +317,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       try {
         console.log('Initializing map with container:', mapContainer.current);
         
-        const defaultCenter: [number, number] = [77.5946, 12.9716]; 
+        const defaultCenter: [number, number] = [77.5946, 12.9716]; // Bengaluru 
         const center: [number, number] = localUserCoordinates 
           ? [localUserCoordinates.lng, localUserCoordinates.lat] 
           : defaultCenter;
