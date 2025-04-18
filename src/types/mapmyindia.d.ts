@@ -10,7 +10,13 @@ declare global {
           search?: boolean;
           [key: string]: any;
         }
-      ) => any;
+      ) => {
+        addEventListener: (event: string, callback: () => void) => void;
+        remove: () => void;
+        setCenter: (position: [number, number]) => void;
+        setZoom: (zoom: number) => void;
+        fitBounds: (bounds: any) => void;
+      };
       Marker: new (options: {
         position: [number, number];
         map: any;
@@ -22,7 +28,10 @@ declare global {
         draggable?: boolean;
         popupHtml?: string;
         [key: string]: any;
-      }) => any;
+      }) => {
+        remove: () => void;
+        getPosition: () => [number, number];
+      };
       LatLngBounds: new () => {
         extend: (latLng: [number, number]) => void;
       };
