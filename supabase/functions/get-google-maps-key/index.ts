@@ -16,11 +16,11 @@ serve(async (req) => {
   }
 
   try {
-    // Use environment variable or fallback to a hardcoded key for development
-    // In production, always use environment variable via Supabase secrets
-    const apiKey = Deno.env.get('GOOGLE_MAPS_API_KEY') || "AIzaSyBILKz9nTi7-jrjX9Al_rTQEAvZJeZ6X58";
+    // Use the correct environment variable name that matches the Supabase secret
+    const apiKey = Deno.env.get('Google_map');
     
     if (!apiKey) {
+      console.error("API key not found in environment variables");
       return new Response(JSON.stringify({ error: 'API key not found' }), {
         headers: { 
           ...corsHeaders, 
@@ -30,6 +30,7 @@ serve(async (req) => {
       })
     }
 
+    console.log("Successfully retrieved Google Maps API key");
     return new Response(JSON.stringify({ apiKey }), {
       headers: { 
         ...corsHeaders, 
@@ -37,6 +38,7 @@ serve(async (req) => {
       }
     })
   } catch (error) {
+    console.error("Error retrieving Google Maps API key:", error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { 
         ...corsHeaders, 
