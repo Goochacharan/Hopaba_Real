@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Star, Clock, IndianRupee, Sparkles, Award, Map } from 'lucide-react';
+import { Star, Clock, IndianRupee, Sparkles, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -71,16 +70,6 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
   return (
     <ScrollArea className="w-full">
       <div className="flex items-center gap-2 pb-2 pt-1 px-1 overflow-x-auto min-w-max">
-        {/* Map View Button */}
-        <Button 
-          variant="outline"
-          size="sm" 
-          className="rounded-full border flex items-center justify-center w-10 h-10"
-          onClick={handleMapViewClick}
-        >
-          <Map className="w-4 h-4" />
-        </Button>
-
         {/* Rating Filter */}
         <Popover open={activeFilter === 'rating'} onOpenChange={(open) => setActiveFilter(open ? 'rating' : null)}>
           <PopoverTrigger asChild>
