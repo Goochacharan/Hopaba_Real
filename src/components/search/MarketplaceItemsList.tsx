@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
@@ -13,8 +14,13 @@ import { useLocation } from '@/contexts/LocationContext';
 import { calculateDistance, extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 import MarketplaceLocationSearch from './MarketplaceLocationSearch';
 
+// Extend the MarketplaceListing type to include the optional distance property
+interface MarketplaceListingWithDistance extends MarketplaceListing {
+  distance?: number;
+}
+
 interface MarketplaceItemsListProps {
-  listings: MarketplaceListing[];
+  listings: MarketplaceListingWithDistance[];
   loading?: boolean;
   error?: string | null;
   category?: string;
@@ -32,7 +38,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
   const searchQuery = searchParams.get('q') || '';
   const [locationFilter, setLocationFilter] = useState('');
   
-  const filterListingsByLocation = (items: MarketplaceListing[]) => {
+  const filterListingsByLocation = (items: MarketplaceListingWithDistance[]) => {
     if (!locationFilter) return items;
     
     return items.filter(listing => {
@@ -74,7 +80,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     return {
       ...listing,
       distance
-    };
+    } as MarketplaceListingWithDistance;
   });
 
   useEffect(() => {

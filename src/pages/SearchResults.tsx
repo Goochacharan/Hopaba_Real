@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -11,11 +12,13 @@ import SearchTabs from '@/components/search/SearchTabs';
 import SearchControls from '@/components/search/SearchControls';
 import ViewToggle from '@/components/search/ViewToggle';
 import MapComponent from '@/pages/Map';
+import { useLocation } from '@/contexts/LocationContext';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { userCoordinates } = useLocation();
   const searchQuery = searchParams.get('q') || '';
   const categoryParam = searchParams.get('category') || 'all';
   
