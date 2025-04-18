@@ -8,7 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge';
 import { Building, MapPin, Phone, MessageSquare, Globe, Instagram, IndianRupee, Calendar, Languages, Award, Tag, Pencil, Trash } from 'lucide-react';
 import { BusinessData } from './BusinessListingForm';
-import MapViewButton from '@/components/search/MapViewButton';
+// Removed MapViewButton import
 
 interface BusinessListProps {
   onEdit: (business: BusinessData) => void;
@@ -228,7 +228,7 @@ const BusinessList: React.FC<BusinessListProps> = ({ onEdit, refresh }) => {
         ))}
       </div>
 
-      {businesses.length > 0 && <MapViewButton />}
+      {/* Removed MapViewButton */}
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>

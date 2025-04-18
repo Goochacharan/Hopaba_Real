@@ -1,7 +1,7 @@
 
 import React from 'react';
 import BusinessCard from './BusinessCard';
-import MapViewButton from './search/MapViewButton';
+// Removed MapViewButton import
 import { Loader2 } from 'lucide-react';
 
 interface BusinessesListProps {
@@ -48,8 +48,7 @@ const BusinessesList: React.FC<BusinessesListProps> = ({ businesses = [], loadin
         ))}
       </div>
       
-      {/* Add the MapViewButton if we have businesses to display */}
-      {businesses.length > 0 && <MapViewButton />}
+      {/* Removed MapViewButton */}
     </div>
   );
 };

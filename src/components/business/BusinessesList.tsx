@@ -25,7 +25,7 @@ import {
 import type { BusinessFormValues } from '@/components/AddBusinessForm';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import MapViewButton from '@/components/search/MapViewButton';
+// Removed MapViewButton import
 
 interface BusinessesListProps {
   onEdit: (business: BusinessFormValues & { id: string }) => void;
@@ -241,7 +241,7 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
         ))}
       </div>
 
-      {businesses.length > 0 && <MapViewButton />}
+      {/* Removed MapViewButton */}
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
