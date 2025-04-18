@@ -51,7 +51,7 @@ const marketplaceListingSchema = z.object({
   category: z.string().min(1, { message: "Category is required" }),
   condition: z.string().min(1, { message: "Condition is required" }),
   model_year: z.string().optional(),
-  location: z.string().optional(),
+  area: z.string().min(2, { message: "Area must be at least 2 characters." }),
   map_link: z.string().optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
@@ -109,7 +109,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     category: listing?.category || '',
     condition: listing?.condition || '',
     model_year: listing?.model_year || '',
-    location: listing?.location || '',
+    area: listing?.location || "",
     map_link: listing?.map_link || '',
     latitude: listing?.latitude || '',
     longitude: listing?.longitude || '',
@@ -183,7 +183,8 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         category: categoryValue,
         condition: data.condition,
         model_year: data.model_year || null,
-        location: data.location || "Not specified",
+        location: data.area,
+        area: data.area,
         map_link: data.map_link || null,
         latitude: data.latitude || null,
         longitude: data.longitude || null,
@@ -375,24 +376,18 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
 
                 <FormField
                   control={form.control}
-                  name="location"
+                  name="area"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
-                          Location (Optional)
-                        </div>
-                      </FormLabel>
+                      <FormLabel>Area*</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="e.g. Mumbai, Delhi" 
-                          value={field.value}
-                          onChange={(e) => form.setValue('location', e.target.value)}
+                          placeholder="Enter specific area or neighborhood" 
+                          {...field}
                         />
                       </FormControl>
                       <FormDescription>
-                        Enter the location or area where the item is available
+                        Specify the exact area or neighborhood where the item is located
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
