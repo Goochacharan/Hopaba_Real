@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { geocodeAddress } from '@/lib/locationUtils';
 
-type Coordinates = {
+export type Coordinates = {
   lat: number;
   lng: number;
 } | null;

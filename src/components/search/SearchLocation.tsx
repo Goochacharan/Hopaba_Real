@@ -4,7 +4,7 @@ import LocationSelector from '@/components/LocationSelector';
 import { useLocation } from '@/contexts/LocationContext';
 
 const SearchLocation: React.FC = () => {
-  const { setSelectedLocation, setUserCoordinates } = useLocation();
+  const { selectedLocation, setSelectedLocation, setUserCoordinates } = useLocation();
 
   const handleLocationChange = (location: string, coordinates?: { lat: number; lng: number }) => {
     console.log(`Location changed to: ${location}`, coordinates);

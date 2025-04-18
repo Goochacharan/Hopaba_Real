@@ -6,7 +6,7 @@ import { useUserMarketplaceListings } from '@/hooks/useUserMarketplaceListings';
 import LocationSelector from '@/components/LocationSelector';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers, Map } from 'lucide-react';
+import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers, Map, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -47,7 +47,7 @@ const Marketplace = () => {
   const [distanceRange, setDistanceRange] = useState<number>(50);
   const itemsPerPage = 9;
   
-  const { selectedLocation, userCoordinates } = useLocation();
+  const { selectedLocation, userCoordinates, setSelectedLocation } = useLocation();
 
   useEffect(() => {
     if (categoryParam && categoryParam !== currentCategory) {
