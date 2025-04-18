@@ -1,157 +1,159 @@
-
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { MapPin, IndianRupee, Shield, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
-import SellerInfo from './marketplace/SellerInfo';
-import { formatDistance } from '@/lib/locationUtils';
+import { useToast } from '@/hooks/use-toast';
+import ImageViewer from '@/components/ImageViewer';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { Lock, Unlock, Image, FileWarning } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import ListingImageCarousel from '@/components/marketplace/ListingImageCarousel';
+import ListingMetadata from '@/components/marketplace/ListingMetadata';
+import CertificateBadge from '@/components/marketplace/CertificateBadge';
+import SellerInfo from '@/components/marketplace/SellerInfo';
+import ListingActionButtons from '@/components/marketplace/ListingActionButtons';
 
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
   className?: string;
-  showDistance?: boolean;
 }
 
-const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({ 
-  listing, 
-  className,
-  showDistance = false
+const formatPrice = (price: number): string => {
+  return price.toLocaleString('en-IN');
+};
+
+const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
+  listing,
+  className
 }) => {
-  const { 
-    id, 
-    title, 
-    price, 
-    location, 
-    category,
-    condition,
-    images,
-    seller_name,
-    seller_rating,
-    review_count,
-    seller_instagram,
-    seller_id,
-    created_at,
-    is_negotiable,
-    inspection_certificates,
-    model_year,
-    distance,
-    seller_role
-  } = listing;
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(price);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [imageViewerOpen, setImageViewerOpen] = React.useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
+  const [currentImageType, setCurrentImageType] = React.useState<'regular' | 'damage'>('regular');
+  
+  const handleImageClick = (index: number, type: 'regular' | 'damage' = 'regular') => {
+    setSelectedImageIndex(index);
+    setCurrentImageType(type);
+    setImageViewerOpen(true);
   };
+  
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (imageViewerOpen) return;
+    if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) {
+      return;
+    }
+    console.log("Navigating to marketplace listing:", listing.id);
+    navigate(`/marketplace/${listing.id}`);
+  };
+  
+  const isSearchPage = window.location.pathname.includes('/search');
+  const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
+  
+  const hasCertificates = listing.inspection_certificates && listing.inspection_certificates.length > 0;
+  console.log(`Listing ${listing.id} has certificates:`, hasCertificates, listing.inspection_certificates);
 
-  const createdDate = new Date(created_at);
-  const now = new Date();
-  const differenceMs = now.getTime() - createdDate.getTime();
-  const differenceDays = Math.floor(differenceMs / (1000 * 60 * 60 * 24));
-  const differenceHours = Math.floor(differenceMs / (1000 * 60 * 60));
-  const differenceMinutes = Math.floor(differenceMs / (1000 * 60));
-
-  let timeAgo;
-  if (differenceDays > 0) {
-    timeAgo = `${differenceDays} day${differenceDays > 1 ? 's' : ''} ago`;
-  } else if (differenceHours > 0) {
-    timeAgo = `${differenceHours} hour${differenceHours > 1 ? 's' : ''} ago`;
-  } else {
-    timeAgo = `${differenceMinutes} minute${differenceMinutes !== 1 ? 's' : ''} ago`;
-  }
-
-  const hasCertificates = inspection_certificates && inspection_certificates.length > 0;
-
-  return (
-    <Link to={`/marketplace/${id}`}>
-      <Card className={cn(
-        "overflow-hidden transition-all duration-300 hover:shadow-md border-muted/60 rounded-xl h-full group", 
-        className
-      )}>
-        <div className="relative pt-[56.25%] overflow-hidden bg-muted/30">
-          {images && images.length > 0 ? (
-            <img 
-              src={images[0]} 
-              alt={title} 
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-muted">
-              No Image
+  return <div className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", 
+    "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", 
+    "pb-5", className)} 
+    onClick={handleCardClick}>
+    {hasDamageImages ? <Tabs defaultValue="regular" className="mb-2">
+        <TabsList className="w-full mb-0 p-1 h-auto bg-transparent">
+          <TabsTrigger value="regular" className="flex-1 h-8 text-xs py-0">
+            <div className="flex items-center gap-1">
+              <Image className="h-3 w-3" />
+              <span>Images</span>
             </div>
-          )}
-          <div className="absolute top-2 right-2 flex flex-col gap-1.5">
-            {condition && (
-              <Badge variant={condition === 'new' ? "default" : "secondary"} className="capitalize">
-                {condition}
-              </Badge>
-            )}
-            {hasCertificates && (
-              <Badge variant="outline" className="bg-white/90 border-green-200 text-green-800 flex gap-1.5 items-center">
-                <Shield className="h-3 w-3" /> Certified
-              </Badge>
-            )}
+          </TabsTrigger>
+          <TabsTrigger value="damage" className="flex-1 h-8 text-xs py-0">
+            <div className="flex items-center gap-1">
+              <FileWarning className="h-3 w-3" />
+              <span>Damage/Scratches</span>
+            </div>
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="regular" className="mt-0 p-0">
+          <div>
+            <ListingImageCarousel images={listing.images} onImageClick={index => handleImageClick(index, 'regular')} listing={listing} />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="damage" className="mt-0 p-0">
+          <div>
+            <ListingImageCarousel images={listing.damage_images} onImageClick={index => handleImageClick(index, 'damage')} listing={listing} isDamageImages={true} />
+          </div>
+        </TabsContent>
+      </Tabs> : <div>
+        <ListingImageCarousel images={listing.images} onImageClick={index => handleImageClick(index)} listing={listing} />
+      </div>}
+      
+      <div className="p-4 px-[13px] py-0 my-0">
+        <h3 className="font-bold text-xl md:text-2xl mb-1">{listing.title}</h3>
+        
+        <div className="flex flex-col">
+          <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
+            <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
+            {listing.model_year && <Badge variant="condition" className="text-xs ml-2 bg-white-500 bg-slate-200 mx-[28px]">
+                {listing.model_year} Model
+              </Badge>}
+          </p>
+          
+          <div className="mt-1 mb-2 flex flex-wrap gap-2 items-center">
+            <div className="flex flex-wrap items-center gap-2">
+              {listing.is_negotiable !== undefined && (listing.is_negotiable === true ? <Badge variant="success" className="inline-flex items-center gap-1 pr-1.5">
+                  <Unlock className="h-3 w-3" />
+                  <span className="pr-0.5">Negotiable</span>
+                </Badge> : <Badge variant="default" className="inline-flex items-center gap-1 pr-1.5">
+                  <Lock className="h-3 w-3" />
+                  <span className="pr-0.5">Fixed</span>
+                </Badge>)}
+              
+              {hasCertificates && (
+                <span onClick={e => e.stopPropagation()}>
+                  <CertificateBadge certificates={listing.inspection_certificates || []} />
+                </span>
+              )}
+            </div>
           </div>
         </div>
         
-        <CardContent className="p-4">
-          <div className="flex justify-between items-start mb-3">
-            <div>
-              <h3 className="font-semibold line-clamp-2 text-lg">{title}</h3>
-              {model_year && (
-                <div className="text-muted-foreground text-sm mt-0.5">Year: {model_year}</div>
-              )}
-            </div>
-            <div className="font-bold text-lg flex items-center">
-              <IndianRupee className="h-[15px] w-[15px] text-lg" />
-              <span>{formatPrice(price).replace('₹', '')}</span>
-            </div>
-          </div>
-          
-          <div className="flex justify-between items-center mt-1">
-            <div className="flex items-center text-muted-foreground text-sm gap-1.5">
-              <MapPin className="h-3.5 w-3.5" />
-              <span className="truncate max-w-[150px]">{location}</span>
-              
-              {showDistance && distance !== undefined && (
-                <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700 text-[10px] px-1.5 py-0.5 ml-1">
-                  {formatDistance(distance)} away
-                </Badge>
-              )}
-            </div>
+        <div className="mt-0">
+          <ListingMetadata location={listing.location} createdAt={listing.created_at} condition={listing.condition} sellerInstagram={listing.seller_instagram} sellerName={listing.seller_name} />
+        </div>
 
-            <div className="flex items-center text-muted-foreground text-xs">
-              <Clock className="h-3 w-3 mr-1" />
-              {timeAgo}
-            </div>
-          </div>
-          
-          <div className="mt-3 pt-3 border-t border-border">
-            <SellerInfo
-              sellerName={seller_name}
-              sellerRating={seller_rating || 4}
-              reviewCount={review_count}
-              sellerInstagram={seller_instagram}
-              sellerId={seller_id}
-              createdAt={created_at}
-              sellerRole={seller_role}
+        <div className="flex justify-end items-center mb-4 px-0 mx-0 py-0 my-[11px]">
+          <div className="flex flex-col items-end py-0">
+            <SellerInfo 
+              sellerName={listing.seller_name} 
+              sellerRating={listing.seller_rating} 
+              sellerId={listing.seller_id} 
+              reviewCount={listing.review_count} 
+              sellerInstagram={listing.seller_instagram} 
+              createdAt={listing.created_at}
+              sellerRole={listing.seller_role} 
             />
-            
-            {is_negotiable && (
-              <div className="text-xs text-blue-600 font-medium mt-1 text-right">
-                Price negotiable
-              </div>
-            )}
           </div>
-        </CardContent>
-      </Card>
-    </Link>
-  );
+        </div>
+        
+        {isSearchPage ? <ScrollArea className="h-[120px] mb-4 pr-3">
+            <p className="whitespace-pre-line text-gray-950 text-sm">
+              {listing.description}
+            </p>
+          </ScrollArea> : <ScrollArea className="h-[120px] mb-4 pr-3">
+            <p className="whitespace-pre-line text-gray-950 text-sm py-0 my-0">
+              {listing.description}
+            </p>
+          </ScrollArea>}
+
+        <ListingActionButtons listingId={listing.id} title={listing.title} price={listing.price} sellerPhone={listing.seller_phone} sellerWhatsapp={listing.seller_whatsapp} sellerInstagram={listing.seller_instagram} location={listing.location} mapLink={listing.map_link} />
+      </div>
+
+      <ImageViewer images={currentImageType === 'regular' ? listing.images : listing.damage_images || []} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={open => {
+        setImageViewerOpen(open);
+      }} />
+    </div>;
 };
 
 export default MarketplaceListingCard;
