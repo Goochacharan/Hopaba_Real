@@ -251,229 +251,293 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
   };
 
   return (
-    <Form {...form}>
-      <form 
-        id="business-listing-form" 
-        onSubmit={form.handleSubmit(handleSubmit)} 
-        className="space-y-8"
-      >
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium">Basic Information</h3>
-            
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Business Name*</FormLabel>
-                  <FormControl>
-                    <Input
-                      id="business-name"
-                      name="business-name"
-                      placeholder="Your business name" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category*</FormLabel>
-                  <Select 
-                    value={field.value} 
-                    onValueChange={field.onChange}
-                  >
-                    <FormControl>
-                      <SelectTrigger id="business-category" name="business-category">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {SERVICE_CATEGORIES.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description*</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Describe your business or service" className="min-h-[120px]" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="tags"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tags* (minimum 3)</FormLabel>
-                  <FormDescription>
-                    Keywords that describe your services or items
-                  </FormDescription>
-                  <FormControl>
-                    <TagsInput
-                      placeholder="Type and press enter"
-                      tags={field.value || []}
-                      setTags={(newTags) => form.setValue('tags', newTags)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium">Location Information</h3>
-            
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address*</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your street address" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="city"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>City*</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter city" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="area"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Area/Neighborhood*</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter neighborhood or area" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="map_link"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Google Maps Link</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Paste your Google Maps link here" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    This link will be used for directions
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Separator className="my-4" />
-            
-            <h3 className="text-lg font-medium">Contact Information</h3>
-            
-            <FormField
-              control={form.control}
-              name="contact_phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone Number*</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Enter phone number" 
-                      value={field.value} 
-                      onChange={(e) => {
-                        field.onChange(e);
-                        handlePhoneInput(e, 'contact_phone');
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="whatsapp"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>WhatsApp Number*</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Enter WhatsApp number" 
-                      value={field.value}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        handlePhoneInput(e, 'whatsapp');
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        <Separator />
-        
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium">Pricing Information</h3>
-            
-            <div className="grid grid-cols-2 gap-4">
+    <>
+      <Form {...form}>
+        <form 
+          id="business-listing-form" 
+          onSubmit={form.handleSubmit(handleSubmit)} 
+          className="space-y-8"
+        >
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="space-y-6">
+              <h3 className="text-lg font-medium">Basic Information</h3>
+              
               <FormField
                 control={form.control}
-                name="price_range_min"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Minimum Price (₹)</FormLabel>
+                    <FormLabel>Business Name*</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        placeholder="500"
-                        value={field.value || ''}
-                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                        id="business-name"
+                        name="business-name"
+                        placeholder="Your business name" 
+                        {...field} 
                       />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category*</FormLabel>
+                    <Select 
+                      value={field.value} 
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger id="business-category" name="business-category">
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {SERVICE_CATEGORIES.map(category => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description*</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Describe your business or service" className="min-h-[120px]" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tags* (minimum 3)</FormLabel>
+                    <FormDescription>
+                      Keywords that describe your services or items
+                    </FormDescription>
+                    <FormControl>
+                      <TagsInput
+                        placeholder="Type and press enter"
+                        tags={field.value || []}
+                        setTags={(newTags) => form.setValue('tags', newTags)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="space-y-6">
+              <h3 className="text-lg font-medium">Location Information</h3>
+              
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address*</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your street address" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City*</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter city" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="area"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Area/Neighborhood*</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter neighborhood or area" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="map_link"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Google Maps Link</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Paste your Google Maps link here" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      This link will be used for directions
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Separator className="my-4" />
+              
+              <h3 className="text-lg font-medium">Contact Information</h3>
+              
+              <FormField
+                control={form.control}
+                name="contact_phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number*</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Enter phone number" 
+                        value={field.value} 
+                        onChange={(e) => {
+                          field.onChange(e);
+                          handlePhoneInput(e, 'contact_phone');
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="whatsapp"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>WhatsApp Number*</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Enter WhatsApp number" 
+                        value={field.value}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          handlePhoneInput(e, 'whatsapp');
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          <Separator />
+          
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="space-y-6">
+              <h3 className="text-lg font-medium">Pricing Information</h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="price_range_min"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Minimum Price (₹)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="500"
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="price_range_max"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Maximum Price (₹)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="5000"
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="price_unit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price Unit</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a price unit" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="per hour">Per Hour</SelectItem>
+                        <SelectItem value="per day">Per Day</SelectItem>
+                        <SelectItem value="per session">Per Session</SelectItem>
+                        <SelectItem value="per month">Per Month</SelectItem>
+                        <SelectItem value="fixed price">Fixed Price</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <div className="space-y-6">
+              <h3 className="text-lg font-medium">Additional Information</h3>
+              
+              <FormField
+                control={form.control}
+                name="website"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Website <span className="text-xs text-muted-foreground">(optional)</span></FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter website URL" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -482,16 +546,43 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
               
               <FormField
                 control={form.control}
-                name="price_range_max"
+                name="instagram"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Maximum Price (₹)</FormLabel>
+                    <FormLabel>Instagram / Social Media</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="5000"
-                        value={field.value || ''}
-                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                      <Input placeholder="@yourusername or full URL" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="availability"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Availability</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. Weekdays 9AM-5PM" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="languages"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Languages</FormLabel>
+                    <FormControl>
+                      <TagsInput
+                        placeholder="Add languages you speak"
+                        tags={field.value || []}
+                        setTags={(newTags) => form.setValue('languages', newTags)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -499,150 +590,61 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
                 )}
               />
             </div>
-            
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <FormField
               control={form.control}
-              name="price_unit"
+              name="images"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Price Unit</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a price unit" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="per hour">Per Hour</SelectItem>
-                      <SelectItem value="per day">Per Day</SelectItem>
-                      <SelectItem value="per session">Per Session</SelectItem>
-                      <SelectItem value="per month">Per Month</SelectItem>
-                      <SelectItem value="fixed price">Fixed Price</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Business Images</FormLabel>
+                  <FormControl>
+                    <ImageUpload 
+                      images={field.value || []} 
+                      onImagesChange={(images) => form.setValue('images', images, { shouldValidate: true })}
+                      maxImages={10}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Upload up to 10 images of your business (previously limited to 5)
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
           
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium">Additional Information</h3>
-            
-            <FormField
-              control={form.control}
-              name="website"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Website <span className="text-xs text-muted-foreground">(optional)</span></FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter website URL" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="instagram"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Instagram / Social Media</FormLabel>
-                  <FormControl>
-                    <Input placeholder="@yourusername or full URL" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="availability"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Availability</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Weekdays 9AM-5PM" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="languages"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Languages</FormLabel>
-                  <FormControl>
-                    <TagsInput
-                      placeholder="Add languages you speak"
-                      tags={field.value || []}
-                      setTags={(newTags) => form.setValue('languages', newTags)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <div className="flex justify-end gap-4">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : business?.id ? "Update Business" : "Submit Business"}
+            </Button>
           </div>
-        </div>
-        
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="images"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Business Images</FormLabel>
-                <FormControl>
-                  <ImageUpload 
-                    images={field.value || []} 
-                    onImagesChange={(images) => form.setValue('images', images, { shouldValidate: true })}
-                    maxImages={10}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Upload up to 10 images of your business (previously limited to 5)
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        
-        <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : business?.id ? "Update Business" : "Submit Business"}
-          </Button>
-        </div>
-      </form>
-    </Form>
-    
-    <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Success!</AlertDialogTitle>
-          <AlertDialogDescription>
-            Your business/service has been successfully {business?.id ? "updated" : "added"}. It will now be available for others to discover after admin approval.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogAction onClick={() => {
-            setShowSuccessDialog(false);
-            onSaved();
-          }}>
-            Continue
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        </form>
+      </Form>
+      
+      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Success!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your business/service has been successfully {business?.id ? "updated" : "added"}. It will now be available for others to discover after admin approval.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => {
+              setShowSuccessDialog(false);
+              onSaved();
+            }}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
