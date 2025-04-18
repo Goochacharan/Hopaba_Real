@@ -8,7 +8,6 @@ import { Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import MapViewButton from '@/components/search/MapViewButton';
 import useRecommendations from '@/hooks/useRecommendations';
 
 const queryCategoryMap = {
@@ -188,8 +187,6 @@ const Index = () => {
           </ScrollArea>
         </div>
       </section>
-      
-      {recommendations && recommendations.length > 0 && <MapViewButton />}
     </MainLayout>;
 };
 

@@ -1,9 +1,7 @@
-
 import React from 'react';
 import LocationCard from '@/components/LocationCard';
 import { Recommendation } from '@/lib/mockData';
 import { Loader2 } from 'lucide-react';
-import MapViewButton from './MapViewButton';
 
 // Helper function to get stored reviews count and calculate average rating
 const getStoredReviews = (locationId: string) => {
@@ -119,7 +117,6 @@ const LocationsList: React.FC<LocationsListProps> = ({
       </div>
       
       {/* Add the Map View button if we have recommendations to display */}
-      {recommendations.length > 0 && <MapViewButton />}
     </div>
   );
 };

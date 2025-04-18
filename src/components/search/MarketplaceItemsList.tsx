@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Clock } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
-import MapViewButton from '@/components/search/MapViewButton';
+// Removed MapViewButton import
 
 interface MarketplaceItemsListProps {
   listings: MarketplaceListing[];
@@ -116,7 +116,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
         })}
       </div>
 
-      {visibleListings.length > 0 && <MapViewButton />}
+      
     </div>
   );
 };
