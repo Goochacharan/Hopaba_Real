@@ -987,4 +987,82 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
                             </SelectContent>
                           </Select>
                           <FormMessage />
-                        </
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="hours_to"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            Working Hours To
+                          </FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            value={field.value || "5:00 PM"}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select end time" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="max-h-[300px]">
+                              {TIME_OPTIONS.map(time => (
+                                <SelectItem key={`to-${time}`} value={time}>
+                                  {time}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end gap-4 mt-8">
+            {onCancel && (
+              <Button type="button" variant="outline" onClick={onCancel}>
+                Cancel
+              </Button>
+            )}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : business?.id ? "Update Business" : "Submit Business"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+
+      <AlertDialog open={showAddCategoryDialog} onOpenChange={setShowAddCategoryDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Add New Category</AlertDialogTitle>
+            <AlertDialogDescription>
+              Enter a new category name below.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="grid gap-4 py-4">
+            <Input
+              placeholder="Category name"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleAddCategory}>Add</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+};
+
+export default BusinessFormSimple;
