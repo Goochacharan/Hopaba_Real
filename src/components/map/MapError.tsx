@@ -17,7 +17,11 @@ const MapError: React.FC<MapErrorProps> = ({ error, onRetry, isRetrying }) => {
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Map Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription className="whitespace-pre-line">
+            {error}
+            <br />
+            Please try reloading the map or check your connection.
+          </AlertDescription>
         </Alert>
         
         <div className="mt-4">
@@ -34,7 +38,7 @@ const MapError: React.FC<MapErrorProps> = ({ error, onRetry, isRetrying }) => {
             ) : (
               <>
                 <RefreshCw className="h-4 w-4" />
-                Reload
+                Reload Map
               </>
             )}
           </Button>

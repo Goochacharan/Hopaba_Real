@@ -26,41 +26,55 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const markers = useRef<google.maps.Marker[]>([]);
   const infoWindows = useRef<google.maps.InfoWindow[]>([]);
   const { toast } = useToast();
-  const { fetchApiKey, loading: apiKeyLoading } = useGoogleMapsKey();
+  const { fetchApiKey, loading: apiKeyLoading, error: apiKeyError } = useGoogleMapsKey();
   
   useEffect(() => {
     const initializeMap = async () => {
       if (!mapContainer.current || map.current) return;
       
       try {
+        console.log("Starting map initialization process");
+        setIsRetrying(true);
+        
         const apiKey = await fetchApiKey();
         if (!apiKey) {
-          setMapError('Failed to get map API key');
+          console.error("Failed to get Google Maps API key");
+          setMapError(apiKeyError || "Failed to get map API key");
+          setIsRetrying(false);
           return;
         }
         
         if (!window.google) {
+          console.log("Google Maps not loaded yet, loading script");
           const script = document.createElement('script');
           script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
           script.async = true;
           script.defer = true;
           
           window.initMap = () => {
+            console.log("Google Maps script loaded successfully");
             setMapLoaded(true);
             setMapError(null);
+            setIsRetrying(false);
           };
           
-          script.onerror = () => {
-            setMapError('Failed to load map. Please check your internet connection.');
+          script.onerror = (error) => {
+            console.error("Error loading Google Maps script:", error);
+            setMapError('Failed to load Google Maps. Please check your internet connection.');
+            setIsRetrying(false);
           };
           
           document.head.appendChild(script);
         } else {
+          console.log("Google Maps already loaded");
           setMapLoaded(true);
+          setMapError(null);
+          setIsRetrying(false);
         }
       } catch (error) {
         console.error('Error initializing map:', error);
-        setMapError('Error initializing map. Please try refreshing.');
+        setMapError('Error initializing map. Please try refreshing the page.');
+        setIsRetrying(false);
       }
     };
     
@@ -70,7 +84,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
       markers.current.forEach(marker => marker.setMap(null));
       infoWindows.current.forEach(infoWindow => infoWindow.close());
       map.current = null;
-      delete window.initMap;
+      
+      // Clean up the global callback
+      if (window.initMap) {
+        delete window.initMap;
+      }
     };
   }, [apiKeyFetchAttempts]);
   
@@ -78,7 +96,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
     if (!mapLoaded || !mapContainer.current || map.current) return;
     
     try {
-      const center = initialUserCoordinates || { lat: 12.9716, lng: 77.5946 };
+      console.log("Creating Google Map instance");
+      const center = initialUserCoordinates || { lat: 12.9716, lng: 77.5946 }; // Default to Bangalore
       
       map.current = new window.google.maps.Map(mapContainer.current, {
         center,
@@ -95,12 +114,14 @@ const MapComponent: React.FC<MapComponentProps> = ({
       });
     } catch (error) {
       console.error('Error creating map:', error);
-      setMapError('Error creating map. Please try refreshing.');
+      setMapError('Error creating map. Please try refreshing the page.');
     }
   }, [mapLoaded, initialUserCoordinates, toast]);
 
   const handleRetryMapLoad = () => {
+    console.log("Retrying map load");
     setMapError(null);
+    setIsRetrying(true);
     setApiKeyFetchAttempts(prev => prev + 1);
     toast({
       title: "Retrying...",
@@ -108,6 +129,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
     });
   };
 
+  // Early return if there's an error
   if (mapError) {
     return (
       <MapError 
@@ -127,11 +149,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
             ref={mapContainer}
             id="map-container"
           >
-            {(!mapLoaded || apiKeyLoading) && (
+            {(!mapLoaded || apiKeyLoading || isRetrying) && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
                 <div className="text-center">
                   <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
-                  <p className="text-muted-foreground">Loading map...</p>
+                  <p className="text-muted-foreground">
+                    {isRetrying ? "Retrying map load..." : "Loading map..."}
+                  </p>
                 </div>
               </div>
             )}
