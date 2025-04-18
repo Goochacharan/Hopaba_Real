@@ -1,7 +1,6 @@
 import React from 'react';
 import FilterTabs from '@/components/FilterTabs';
 import SortButton, { SortOption } from '@/components/SortButton';
-import MapFilterButton from '@/components/search/MapFilterButton';
 
 interface SearchControlsProps {
   distance: number[];
@@ -52,7 +51,6 @@ const SearchControls: React.FC<SearchControlsProps> = ({
         mustVisitOnly={mustVisitOnly}
         setMustVisitOnly={setMustVisitOnly}
       />
-      <MapFilterButton />
       <SortButton 
         currentSort={sortBy} 
         onSortChange={onSortChange} 
