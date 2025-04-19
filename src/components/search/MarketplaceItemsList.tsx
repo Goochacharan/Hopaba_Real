@@ -33,6 +33,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
     console.log("MarketplaceItemsList - listings length:", listings?.length || 0);
     if (listings && listings.length > 0) {
       console.log("Sample listing data for debugging:");
+      console.log("First listing postal code:", listings[0].postal_code);
       console.log("First listing damage images:", listings[0].damage_images);
       console.log("First listing certificates:", listings[0].inspection_certificates);
     }
@@ -83,6 +84,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {visibleListings.map((listing, index) => {
           console.log(`Rendering listing ${index}:`, listing.title, 
+            `with postal_code:`, listing.postal_code,
             `with damage_images:`, listing.damage_images?.length || 0,
             `and certificates:`, listing.inspection_certificates?.length || 0);
             

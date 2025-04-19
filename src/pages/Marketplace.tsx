@@ -43,9 +43,8 @@ const Marketplace = () => {
   const [conditionFilter, setConditionFilter] = useState<string>('all');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('newest');
-  const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
+  const [postalCodeFilter, setPostalCodeFilter] = useState<string>('');
   const itemsPerPage = 9;
-  const [filteredListings, setFilteredListings] = useState<MarketplaceListing[]>([]);
   
   useEffect(() => {
     if (categoryParam && categoryParam !== currentCategory) {
@@ -55,7 +54,7 @@ const Marketplace = () => {
   }, [categoryParam]);
   
   const {
-    listings,
+    listings: allListings,
     loading,
     error,
     refetch: refetchListings
@@ -76,13 +75,33 @@ const Marketplace = () => {
 
   const pendingListings = userListings.filter(listing => listing.approval_status === 'pending');
   
+  // Apply postal code filter to the listings
+  const listings = allListings.filter(listing => {
+    if (postalCodeFilter && listing.postal_code) {
+      console.log(`Comparing listing postal code: ${listing.postal_code} with filter: ${postalCodeFilter}`);
+      return listing.postal_code === postalCodeFilter;
+    }
+    return true;
+  });
+  
   useEffect(() => {
     setCurrentPage(1);
-  }, [currentCategory, searchQuery, conditionFilter, priceRange, ratingFilter, sortOption]);
+  }, [currentCategory, searchQuery, conditionFilter, priceRange, ratingFilter, sortOption, postalCodeFilter]);
 
-  const handleLocationChange = (location: string) => {
-    console.log(`Location changed to: ${location}`);
-    setSelectedLocation(location);
+  const handlePostalCodeSearch = (postalCode: string) => {
+    console.log(`Searching listings in postal code: ${postalCode}`);
+    setPostalCodeFilter(postalCode);
+    // Clear any existing postal code filter if the input is empty
+    if (!postalCode) {
+      setPostalCodeFilter('');
+    }
+    // Reset to the first page when applying a new filter
+    setCurrentPage(1);
+    // Show a toast notification
+    toast({
+      title: "Searching by postal code",
+      description: `Showing listings with postal code: ${postalCode}`,
+    });
   };
 
   const categories = [
@@ -210,9 +229,7 @@ const Marketplace = () => {
     is_negotiable: listing.is_negotiable !== undefined ? listing.is_negotiable : false
   }));
 
-  const postalCodeSearchListings = filteredListings.length > 0 ? filteredListings : enhancedListings;
-
-  const filteredListingsByCriteria = postalCodeSearchListings.filter(listing => {
+  const filteredListingsByCriteria = enhancedListings.filter(listing => {
     // Price filter
     const price = listing.price;
     if (price < priceRange[0] || price > priceRange[1]) return false;
@@ -253,18 +270,32 @@ const Marketplace = () => {
   const isConditionFilterActive = conditionFilter !== 'all';
   const isSortFilterActive = sortOption !== 'newest';
 
-  const handlePostalCodeSearch = (postalCode: string) => {
-    console.log(`Searching listings in postal code: ${postalCode}`);
-    const filtered = enhancedListings.filter(listing => 
-      listing.postal_code?.toLowerCase() === postalCode.toLowerCase()
-    );
-    setFilteredListings(filtered);
-  };
-
   return (
     <MainLayout>
       <div className="animate-fade-in px-[7px]">
         <PostalCodeSearch onSearch={handlePostalCodeSearch} />
+        
+        {postalCodeFilter && (
+          <Alert className="my-3 bg-blue-50 border-blue-200">
+            <AlertTitle className="text-blue-800">Postal Code Filter</AlertTitle>
+            <AlertDescription className="text-blue-700">
+              Showing listings with postal code: {postalCodeFilter}
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-blue-600" 
+                onClick={() => {
+                  setPostalCodeFilter('');
+                  toast({
+                    title: "Filter cleared",
+                    description: "Showing all listings"
+                  });
+                }}
+              >
+                Clear filter
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
         
         {pendingListings.length > 0 && user && (
           <Alert className="my-3 bg-muted/50">
