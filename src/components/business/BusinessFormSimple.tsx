@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -58,6 +59,7 @@ export interface BusinessFormValues {
   area: string;
   city: string;
   address: string;
+  postal_code: string;
   contact_phone: string;
   whatsapp: string;
   contact_email?: string;
@@ -85,6 +87,7 @@ export interface Business {
   area: string;
   city: string;
   address: string;
+  postal_code: string;
   contact_phone: string;
   whatsapp: string;
   contact_email?: string;
@@ -104,6 +107,9 @@ export interface Business {
   images?: string[];
   approval_status?: string;
   languages?: string[];
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 const businessSchema = z.object({
@@ -113,6 +119,7 @@ const businessSchema = z.object({
   area: z.string().min(2, { message: "Area must be at least 2 characters." }),
   city: z.string().min(2, { message: "City must be at least 2 characters." }),
   address: z.string().min(5, { message: "Address must be at least 5 characters." }),
+  postal_code: z.string().regex(/^\d{6}$/, { message: "Postal code must be 6 digits" }),
   contact_phone: z.string()
     .refine(phone => phone.startsWith('+91'), {
       message: "Phone number must start with +91."
@@ -439,6 +446,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
         area: data.area,
         city: data.city,
         address: data.address,
+        postal_code: data.postal_code, // Ensure this is included
         contact_phone: data.contact_phone,
         whatsapp: data.whatsapp,
         contact_email: data.contact_email || null,
@@ -484,7 +492,7 @@ const BusinessFormSimple: React.FC<BusinessFormProps> = ({ business, onSaved, on
         console.log("Creating new business");
         result = await supabase
           .from('service_providers')
-          .insert([businessData]);
+          .insert([businessData]); // Make sure we're using array here
 
         if (result.error) {
           console.error("Supabase insert error:", result.error);

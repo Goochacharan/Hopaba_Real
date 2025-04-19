@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Building, MapPin, Phone, MessageSquare, Globe, Instagram, IndianRupee, Pencil, Trash, Tag, Clock, Star, Image } from 'lucide-react';
-import { Business } from './BusinessForm';
+import { Business } from './BusinessFormSimple';
 
 interface BusinessListProps {
   onEdit: (business: Business) => void;
-  refresh: boolean;
+  refresh?: boolean;
 }
 
 const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) => {
@@ -19,45 +19,40 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
   const { toast } = useToast();
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
-  const [businessToDelete, setBusinessToDelete] = useState<string | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  const fetchBusinesses = async () => {
-    if (!user) return;
-    
-    setLoading(true);
-    try {
-      console.log("Fetching businesses for user:", user.id);
-      const { data, error } = await supabase
-        .from('service_providers')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error fetching businesses:', error);
-        throw error;
-      }
-      
-      console.log("Fetched businesses:", data);
-      setBusinesses(data as unknown as Business[] || []);
-    } catch (error: any) {
-      console.error('Error fetching businesses:', error);
-      toast({
-        title: 'Error',
-        description: 'Unable to load your businesses. Please try again later.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [deleteBusinessId, setDeleteBusinessId] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchBusinesses();
     }
   }, [user, refresh]);
+
+  const fetchBusinesses = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('service_providers')
+        .select('*')
+        .eq('user_id', user?.id);
+        
+      if (error) {
+        throw error;
+      }
+      
+      console.log("Fetched businesses:", data);
+      setBusinesses(data as Business[] || []);
+    } catch (error: any) {
+      console.error('Error fetching businesses:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load your businesses. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -86,13 +81,13 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
         variant: 'destructive',
       });
     } finally {
-      setIsDeleteDialogOpen(false);
+      setShowDeleteDialog(false);
     }
   };
 
   const confirmDelete = (id: string) => {
-    setBusinessToDelete(id);
-    setIsDeleteDialogOpen(true);
+    setDeleteBusinessId(id);
+    setShowDeleteDialog(true);
   };
 
   if (loading) {
@@ -253,7 +248,7 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
         ))}
       </div>
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -264,7 +259,7 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={() => businessToDelete && handleDelete(businessToDelete)}
+              onClick={() => deleteBusinessId && handleDelete(deleteBusinessId)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
