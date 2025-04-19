@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import StarRating from './StarRating';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
+
 interface SellerInfoProps {
   sellerName: string;
   sellerRating: number;
@@ -11,7 +13,9 @@ interface SellerInfoProps {
   sellerId?: string | null;
   onInstagramClick?: (e: React.MouseEvent) => void;
   createdAt?: string;
+  sellerRole?: 'owner' | 'dealer';
 }
+
 const SellerInfo: React.FC<SellerInfoProps> = ({
   sellerName,
   sellerRating,
@@ -19,7 +23,8 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
   sellerInstagram,
   sellerId,
   onInstagramClick,
-  createdAt
+  createdAt,
+  sellerRole = 'owner'
 }) => {
   const {
     toast
@@ -86,9 +91,16 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
           </Link> : <span className="text-sm font-medium">{sellerName}</span>}
       </div>
 
-      <div className="flex items-center justify-end w-full">
+      <div className="flex items-center justify-end w-full gap-2">
+        <Badge 
+          variant="default" 
+          className="bg-[#8B5CF6] text-white font-bold text-xs capitalize px-2"
+        >
+          {sellerRole}
+        </Badge>
         <StarRating rating={actualRating} showCount={true} count={actualReviewCount} size="small" />
       </div>
     </div>;
 };
+
 export default SellerInfo;
