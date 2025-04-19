@@ -36,6 +36,9 @@ const marketplaceListingSchema = z.object({
   location: z.string().optional(),
   map_link: z.string().optional(),
   seller_name: z.string().min(2, { message: "Seller name is required" }),
+  seller_role: z.enum(['owner', 'agent'], { 
+    required_error: "Please select whether you are an owner or an agent" 
+  }),
   seller_phone: z.string()
     .refine(phone => phone.startsWith('+91'), {
       message: "Phone number must start with +91."
@@ -57,9 +60,6 @@ const marketplaceListingSchema = z.object({
   is_negotiable: z.boolean().optional(),
   damage_images: z.array(z.string()).optional(),
   inspection_certificates: z.array(z.string()).optional(),
-  seller_role: z.enum(['owner', 'agent'], { 
-    required_error: "Please select whether you are an owner or an agent" 
-  }),
   area: z.string().min(2, { message: "Area must be at least 2 characters" }),
   city: z.string().min(1, { message: "City is required" }),
   postal_code: z.string().regex(/^\d{6}$/, { message: "Postal code must be 6 digits" }),
@@ -468,6 +468,31 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                 )}
               />
 
+          <FormField
+            control={form.control}
+            name="seller_role"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Seller Role*</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select seller role" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="owner">Owner</SelectItem>
+                    <SelectItem value="agent">Agent</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
               <FormField
                 control={form.control}
                 name="seller_phone"
@@ -627,31 +652,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
               )}
             />
           </div>
-
-          <FormField
-            control={form.control}
-            name="seller_role"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Seller Role*</FormLabel>
-                <Select 
-                  onValueChange={field.onChange} 
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select seller role" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="owner">Owner</SelectItem>
-                    <SelectItem value="agent">Agent</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           <FormField
             control={form.control}
