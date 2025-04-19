@@ -72,8 +72,13 @@ export default function Login() {
     
     setSocialLoading(provider);
     try {
-      // Get the current deployment URL for proper redirection
-      const redirectUrl = window.location.origin;
+      // Set the exact production URL for proper redirection
+      const redirectUrl = 'https://hopaba.in';
+      
+      // For development, you can use the current origin instead
+      // const redirectUrl = window.location.origin;
+      
+      console.log("Using redirect URL:", redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
