@@ -28,8 +28,8 @@ export const marketplaceListingSchema = z.object({
   approval_status: z.enum(['approved', 'pending', 'rejected']),
   is_negotiable: z.boolean().nullable(),
   search_rank: z.number().nullable(),
-  seller_role: z.enum(['owner', 'agent'], { 
-    required_error: "Please select whether you are an owner or an agent" 
+  seller_role: z.enum(['owner', 'dealer'], { 
+    required_error: "Please select whether you are an owner or a dealer" 
   }),
   area: z.string().min(2, { message: "Area must be at least 2 characters" }),
   city: z.string().min(1, { message: "City is required" }),
@@ -49,7 +49,7 @@ export type MarketplaceListing = z.infer<typeof marketplaceListingSchema> & {
   condition: string;
   images: string[];
   is_negotiable?: boolean;
-  seller_role: 'owner' | 'agent';
+  seller_role: 'owner' | 'dealer';
   area: string;
   city: string;
   postal_code: string;
