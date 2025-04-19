@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
+import { usePaginatedQuery } from './usePaginatedQuery';
 
 export const marketplaceListingSchema = z.object({
   id: z.string(),
@@ -68,7 +68,7 @@ interface UseMarketplaceListingsProps {
 }
 
 export const useMarketplaceListings = ({
-  limit = 100,
+  limit = 10,
   category,
   searchQuery = '',
   condition,
@@ -78,132 +78,140 @@ export const useMarketplaceListings = ({
   includeAllStatuses = false,
   sellerID
 }: UseMarketplaceListingsProps = {}) => {
+  const {
+    page,
+    setPage,
+    isLoading,
+    setIsLoading,
+    error,
+    setError,
+    hasMore,
+    setHasMore,
+    handleError,
+    pageSize
+  } = usePaginatedQuery({ pageSize: limit });
+
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const fetchListings = async () => {
-    setLoading(true);
+  const fetchListings = async (shouldReset = false) => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
     setError(null);
 
     try {
+      const startIndex = shouldReset ? 0 : (page - 1) * pageSize;
+
       if (searchQuery && searchQuery.trim() !== '') {
-        const { data, error: searchError } = await supabase.rpc(
-          'search_enhanced_listings', 
+        const { data: enhancedResults, error: searchError } = await supabase.rpc(
+          'search_enhanced_listings',
           { search_query: searchQuery }
         );
 
-        if (searchError) {
-          console.error("Error using enhanced search:", searchError);
-          throw searchError;
-        }
+        if (searchError) throw searchError;
 
-        console.log('Enhanced search results:', data);
-        
-        let filteredData = data || [];
+        let filteredData = enhancedResults || [];
         
         if (category) {
           filteredData = filteredData.filter(item => item.category === category);
         }
-        
         if (condition) {
           filteredData = filteredData.filter(item => item.condition === condition);
         }
-        
         if (minPrice !== undefined) {
           filteredData = filteredData.filter(item => item.price >= minPrice);
         }
-        
         if (maxPrice !== undefined) {
           filteredData = filteredData.filter(item => item.price <= maxPrice);
         }
-        
         if (minRating !== undefined && minRating > 0) {
           filteredData = filteredData.filter(item => 
             item.seller_rating !== null && item.seller_rating >= minRating
           );
         }
-        
         if (sellerID) {
           filteredData = filteredData.filter(item => item.seller_id === sellerID);
         }
 
-        const typedData = filteredData.map(item => ({
+        const paginatedData = filteredData.slice(startIndex, startIndex + pageSize);
+        
+        setHasMore(startIndex + pageSize < filteredData.length);
+        
+        const typedData = paginatedData.map(item => ({
           ...item,
           approval_status: item.approval_status as 'approved' | 'pending' | 'rejected'
         })) as MarketplaceListing[];
         
-        setListings(typedData);
+        setListings(shouldReset ? typedData : [...listings, ...typedData]);
       } else {
         let query = supabase
           .from('marketplace_listings')
-          .select('*')
-          .limit(limit);
+          .select('*', { count: 'exact' });
 
         if (!includeAllStatuses) {
           query = query.eq('approval_status', 'approved');
         }
-
         if (category) {
           query = query.eq('category', category);
         }
-
         if (condition) {
           query = query.eq('condition', condition);
         }
-
         if (minPrice !== undefined) {
           query = query.gte('price', minPrice);
         }
-
         if (maxPrice !== undefined) {
           query = query.lte('price', maxPrice);
         }
-
         if (minRating !== undefined) {
           query = query.gte('seller_rating', minRating);
         }
-
         if (sellerID) {
           query = query.eq('seller_id', sellerID);
         }
 
-        const { data, error } = await query.order('created_at', { ascending: false });
+        const { data, error, count } = await query
+          .range(startIndex, startIndex + pageSize - 1)
+          .order('created_at', { ascending: false });
 
-        if (error) {
-          throw error;
-        }
+        if (error) throw error;
 
         const typedData = data?.map(item => ({
           ...item,
           approval_status: item.approval_status as 'approved' | 'pending' | 'rejected'
         })) as MarketplaceListing[];
-        
-        setListings(typedData || []);
+
+        setListings(shouldReset ? typedData : [...listings, ...typedData]);
+        setHasMore(count ? startIndex + pageSize < count : false);
       }
     } catch (err: any) {
-      console.error('Error fetching marketplace listings:', err);
-      setError('Failed to fetch listings. Please try again later.');
-      toast({
-        title: "Error",
-        description: "Failed to fetch marketplace listings.",
-        variant: "destructive",
-      });
+      handleError(err);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchListings();
-  }, [category, searchQuery, condition, minPrice, maxPrice, minRating, includeAllStatuses, sellerID, limit]);
+    setPage(1);
+    setListings([]);
+    fetchListings(true);
+  }, [category, searchQuery, condition, minPrice, maxPrice, minRating, includeAllStatuses, sellerID]);
+
+  const loadMore = () => {
+    if (!isLoading && hasMore) {
+      setPage(prev => prev + 1);
+      fetchListings();
+    }
+  };
 
   return {
     listings,
-    loading,
+    loading: isLoading,
     error,
-    refetch: fetchListings
+    hasMore,
+    loadMore,
+    refetch: () => fetchListings(true)
   };
 };
 
