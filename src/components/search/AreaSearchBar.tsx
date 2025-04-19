@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -64,7 +65,16 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
     inputRef.current?.focus();
   };
 
-  return <div className="w-full bg-white rounded-xl border border-border p-3 mb-4 py-0 px-0">
+  const handleInputClick = () => {
+    setOpen(true);
+    // Ensure the input gets focus
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  return (
+    <div className="w-full bg-white rounded-xl border border-border p-3 mb-4 py-0 px-0">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <div className="relative">
@@ -73,10 +83,14 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
               value={searchValue} 
               onChange={e => setSearchValue(e.target.value)} 
               placeholder="Search by area or city..." 
-              className="w-full p-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary" 
-              onFocus={() => setOpen(true)} 
+              className="w-full p-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary cursor-text" 
+              onFocus={() => setOpen(true)}
+              onClick={handleInputClick}
             />
-            <Search className="absolute right-10 top-2.5 h-4 w-4 text-muted-foreground" onClick={() => inputRef.current?.focus()} />
+            <Search 
+              className="absolute right-10 top-2.5 h-4 w-4 text-muted-foreground cursor-pointer" 
+              onClick={handleInputClick} 
+            />
             {searchValue && (
               <X 
                 className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground cursor-pointer" 
@@ -99,7 +113,8 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
             </Command>}
         </PopoverContent>
       </Popover>
-    </div>;
+    </div>
+  );
 };
 
 export default AreaSearchBar;
