@@ -22,7 +22,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import NoResultsMessage from '@/components/search/NoResultsMessage';
-import PostalCodeSearch from '@/components/search/PostalCodeSearch';
 
 type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
 
@@ -83,11 +82,6 @@ const Marketplace = () => {
   const handleLocationChange = (location: string) => {
     console.log(`Location changed to: ${location}`);
     setSelectedLocation(location);
-  };
-
-  const handleLocationSearch = (postalCode: string, area: string) => {
-    console.log(`Searching with postal code: ${postalCode} and area: ${area}`);
-    // We can implement actual search logic here later
   };
 
   const categories = [
@@ -258,7 +252,9 @@ const Marketplace = () => {
 
   return <MainLayout>
       <div className="animate-fade-in px-[7px]">
-        <PostalCodeSearch onSearch={handleLocationSearch} />
+        <div className="flex items-center justify-between">
+          <LocationSelector selectedLocation={selectedLocation} onLocationChange={handleLocationChange} />
+        </div>
         
         {pendingListings.length > 0 && user && (
           <Alert className="my-3 bg-muted/50">
