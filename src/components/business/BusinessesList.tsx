@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import BusinessCard from './BusinessCard';
 import { Loader2 } from 'lucide-react';
+import { BusinessFormValues } from '@/components/business/BusinessForm';
 import {
   AlertDialog,
   AlertDialogAction,
