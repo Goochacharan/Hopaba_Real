@@ -87,16 +87,16 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
               onFocus={() => setOpen(true)}
               onClick={handleInputClick}
             />
-            <Search 
-              className="absolute right-10 top-2.5 h-4 w-4 text-muted-foreground cursor-pointer" 
-              onClick={handleInputClick} 
-            />
             {searchValue && (
               <X 
-                className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground cursor-pointer" 
+                className="absolute right-10 top-2.5 h-4 w-4 text-muted-foreground cursor-pointer" 
                 onClick={clearSearch} 
               />
             )}
+            <Search 
+              className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground cursor-pointer" 
+              onClick={handleInputClick} 
+            />
           </div>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0" align="start">
