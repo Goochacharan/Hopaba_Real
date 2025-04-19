@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -96,34 +95,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const getUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      
-      if (data?.user) {
-        setUser(data.user);
-        checkAdminStatus(data.user.id);
-      }
-      
-      if (error) {
-        console.error('Error fetching user:', error);
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (data?.session) {
+          console.log("Found existing session for user:", data.session.user.id);
+          setUser(data.session.user);
+          
+          // Use setTimeout to prevent Supabase auth deadlock
+          setTimeout(() => {
+            checkAdminStatus(data.session.user.id);
+          }, 0);
+        }
+        
+        if (error) {
+          console.error('Error fetching user session:', error);
+        }
+      } catch (err) {
+        console.error('Exception when fetching user session:', err);
       }
     };
 
     getUser();
 
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state change event:", event, "User:", session?.user?.id);
+      
       if (event === 'SIGNED_IN' && session?.user) {
         setUser(session.user);
-        checkAdminStatus(session.user.id);
+        // Use setTimeout to prevent Supabase auth deadlock
+        setTimeout(() => {
+          checkAdminStatus(session.user.id);
+        }, 0);
+        
+        toast({
+          title: "Signed in",
+          description: "You have been signed in successfully."
+        });
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setIsAdmin(false);
+        
+        toast({
+          title: "Signed out",
+          description: "You have been signed out successfully."
+        });
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log("Auth token refreshed");
       }
     });
 
     return () => {
       data.subscription.unsubscribe();
     };
-  }, []);
+  }, [toast]);
 
   const checkAdminStatus = async (userId: string) => {
     setAdminLoading(true);
@@ -217,10 +242,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoginError(null);
     
     try {
+      const redirectUrl = 'https://hopaba.in/login';
+      
+      console.log("Starting OAuth with redirect to:", redirectUrl);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/profile`,
+          redirectTo: redirectUrl,
         },
       });
       
@@ -232,6 +261,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: error.message,
           variant: "destructive",
         });
+      } else {
+        console.log("OAuth flow initiated successfully");
       }
     } catch (error: any) {
       incrementAuthAttempts();

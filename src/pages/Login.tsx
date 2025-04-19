@@ -20,6 +20,45 @@ export default function Login() {
   const { loginWithEmail, isRateLimited, authAttempts } = useAuth();
   
   useEffect(() => {
+    // Check for URL hash which indicates a redirect from OAuth
+    const handleRedirectResponse = async () => {
+      const hasHashParams = window.location.hash && window.location.hash.length > 1;
+      
+      if (hasHashParams) {
+        setIsLoading(true);
+        
+        try {
+          // Process the OAuth callback
+          const { data, error } = await supabase.auth.getSession();
+          
+          console.log("Auth session after redirect:", data);
+          
+          if (error) {
+            console.error("Auth redirect error:", error);
+            toast({
+              title: "Login failed",
+              description: error.message || "Could not complete authentication",
+              variant: "destructive",
+            });
+          } else if (data.session) {
+            toast({
+              title: "Login successful",
+              description: "You've been signed in with Google",
+            });
+            // Clear hash from URL to prevent duplicate processing
+            window.location.hash = '';
+            navigate('/');
+          }
+        } catch (err) {
+          console.error("Error handling redirect:", err);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    handleRedirectResponse();
+    
     const checkUser = async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
@@ -28,7 +67,7 @@ export default function Login() {
     };
     
     checkUser();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const onSubmit = async (values: LoginFormValues) => {
     if (isRateLimited) {
@@ -72,13 +111,10 @@ export default function Login() {
     
     setSocialLoading(provider);
     try {
-      // Set the exact production URL for proper redirection
-      const redirectUrl = 'https://hopaba.in';
+      // Hardcode the production URL
+      const redirectUrl = 'https://hopaba.in/login';
       
-      // For development, you can use the current origin instead
-      // const redirectUrl = window.location.origin;
-      
-      console.log("Using redirect URL:", redirectUrl);
+      console.log("Starting OAuth flow with redirect URL:", redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -94,6 +130,7 @@ export default function Login() {
         throw error;
       }
       
+      console.log("OAuth initiation response:", data);
       // No need to navigate here as OAuth will redirect
     } catch (error: any) {
       toast({
