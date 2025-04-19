@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -41,7 +42,18 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
       }
       
       console.log("Fetched businesses:", data);
-      setBusinesses(data as Business[] || []);
+      
+      // Type cast the data to ensure it matches the Business interface
+      const typedData: Business[] = (data || []).map(item => ({
+        ...item,
+        // Add any required properties that might be missing from the database
+        address: item.address || "",
+        contact_phone: item.contact_phone || "",
+        postal_code: item.postal_code || "",
+        // Add any other required properties that might be missing
+      }));
+      
+      setBusinesses(typedData);
     } catch (error: any) {
       console.error('Error fetching businesses:', error);
       toast({
