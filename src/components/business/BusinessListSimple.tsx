@@ -46,11 +46,13 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
       // Type cast the data to ensure it matches the Business interface
       const typedData: Business[] = (data || []).map(item => ({
         ...item,
-        // Add any required properties that might be missing from the database
-        address: item.address || "",
-        contact_phone: item.contact_phone || "",
+        // Add required properties that might be missing from the database
+        address: `${item.area}, ${item.city}` || "",
+        contact_phone: item.contact_phone || "+91",
+        whatsapp: item.whatsapp || "+91",
         postal_code: item.postal_code || "",
-        // Add any other required properties that might be missing
+        images: item.images || [],
+        tags: item.tags || [],
       }));
       
       setBusinesses(typedData);
