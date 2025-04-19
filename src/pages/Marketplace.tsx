@@ -3,7 +3,6 @@ import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { useUserMarketplaceListings } from '@/hooks/useUserMarketplaceListings';
-import LocationSelector from '@/components/LocationSelector';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertCircle, Clock, ChevronDown, IndianRupee, Star, Calendar, Layers } from 'lucide-react';
@@ -22,6 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import NoResultsMessage from '@/components/search/NoResultsMessage';
+import PostalCodeSearch from '@/components/search/PostalCodeSearch';
 
 type SortOption = 'newest' | 'price-low-high' | 'price-high-low' | 'top-rated';
 
@@ -45,6 +45,7 @@ const Marketplace = () => {
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
   const itemsPerPage = 9;
+  const [filteredListings, setFilteredListings] = useState<MarketplaceListing[]>([]);
   
   useEffect(() => {
     if (categoryParam && categoryParam !== currentCategory) {
@@ -209,7 +210,9 @@ const Marketplace = () => {
     is_negotiable: listing.is_negotiable !== undefined ? listing.is_negotiable : false
   }));
 
-  const filteredListings = enhancedListings.filter(listing => {
+  const postalCodeSearchListings = filteredListings.length > 0 ? filteredListings : enhancedListings;
+
+  const filteredListingsByCriteria = postalCodeSearchListings.filter(listing => {
     // Price filter
     const price = listing.price;
     if (price < priceRange[0] || price > priceRange[1]) return false;
@@ -232,7 +235,7 @@ const Marketplace = () => {
     return true;
   });
 
-  const sortedListings = sortListings(filteredListings);
+  const sortedListings = sortListings(filteredListingsByCriteria);
   const totalPages = Math.ceil(sortedListings.length / itemsPerPage);
   const paginatedListings = sortedListings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
@@ -250,11 +253,18 @@ const Marketplace = () => {
   const isConditionFilterActive = conditionFilter !== 'all';
   const isSortFilterActive = sortOption !== 'newest';
 
-  return <MainLayout>
+  const handlePostalCodeSearch = (postalCode: string) => {
+    console.log(`Searching listings in postal code: ${postalCode}`);
+    const filtered = enhancedListings.filter(listing => 
+      listing.postal_code?.toLowerCase() === postalCode.toLowerCase()
+    );
+    setFilteredListings(filtered);
+  };
+
+  return (
+    <MainLayout>
       <div className="animate-fade-in px-[7px]">
-        <div className="flex items-center justify-between">
-          <LocationSelector selectedLocation={selectedLocation} onLocationChange={handleLocationChange} />
-        </div>
+        <PostalCodeSearch onSearch={handlePostalCodeSearch} />
         
         {pendingListings.length > 0 && user && (
           <Alert className="my-3 bg-muted/50">
@@ -483,21 +493,28 @@ const Marketplace = () => {
         
         <Tabs defaultValue={currentCategory} value={currentCategory} onValueChange={handleCategoryChange} className="mb-6">
           <TabsList className="mb-4 flex flex-nowrap overflow-auto pb-1 scrollbar-none py-0">
-            {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify font-semibold text-sm mx-[8px] px-[7px]">
+            {categories.map(category => (
+              <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify font-semibold text-sm mx-[8px] px-[7px]">
                 {category.name}
-              </TabsTrigger>)}
+              </TabsTrigger>
+            ))}
           </TabsList>
           
-          {categories.map(category => <TabsContent key={category.id} value={category.id}>
-              {error && <Alert variant="destructive" className="mb-4">
+          {categories.map(category => (
+            <TabsContent key={category.id} value={category.id}>
+              {error && (
+                <Alert variant="destructive" className="mb-4">
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Error</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
-                </Alert>}
+                </Alert>
+              )}
   
               {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="bg-white/50 h-80 rounded-xl border border-border/50 animate-pulse" />)}
+                  {[1, 2, 3, 4, 5, 6].map(i => (
+                    <div key={i} className="bg-white/50 h-80 rounded-xl border border-border/50 animate-pulse" />
+                  ))}
                 </div>
               ) : paginatedListings.length > 0 ? (
                 <>
@@ -516,25 +533,27 @@ const Marketplace = () => {
                     ))}
                   </div>
                   
-                  {totalPages > 1 && <Pagination className="mt-8">
+                  {totalPages > 1 && (
+                    <Pagination className="mt-8">
                       <PaginationContent>
                         <PaginationItem>
                           <PaginationPrevious onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} className={currentPage === 1 ? "pointer-events-none opacity-50" : ""} />
                         </PaginationItem>
                         
-                        {Array.from({
-                  length: totalPages
-                }).map((_, index) => <PaginationItem key={index}>
+                        {Array.from({ length: totalPages }).map((_, index) => (
+                          <PaginationItem key={index}>
                             <PaginationLink onClick={() => setCurrentPage(index + 1)} isActive={currentPage === index + 1}>
                               {index + 1}
                             </PaginationLink>
-                          </PaginationItem>)}
+                          </PaginationItem>
+                        ))}
                         
                         <PaginationItem>
                           <PaginationNext onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""} />
                         </PaginationItem>
                       </PaginationContent>
-                    </Pagination>}
+                    </Pagination>
+                  )}
                 </>
               ) : (
                 <NoResultsMessage 
@@ -544,10 +563,12 @@ const Marketplace = () => {
                   }} 
                 />
               )}
-            </TabsContent>)}
+            </TabsContent>
+          ))}
         </Tabs>
       </div>
-    </MainLayout>;
+    </MainLayout>
+  );
 };
 
 export default Marketplace;
