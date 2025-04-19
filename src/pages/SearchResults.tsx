@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +21,10 @@ const SearchResults = () => {
   const categoryParam = searchParams.get('category') || 'all';
   
   const [selectedArea, setSelectedArea] = useState<string>('');
+  const [userCoordinates, setUserCoordinates] = useState<{ lat: number, lng: number } | null>({
+    lat: 12.9716,
+    lng: 77.5946
+  });
   
   const { filters, setters } = useSearchFilters();
   
