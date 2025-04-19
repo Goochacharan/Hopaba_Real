@@ -75,7 +75,6 @@ const Marketplace = () => {
 
   const pendingListings = userListings.filter(listing => listing.approval_status === 'pending');
   
-  // Apply postal code filter to the listings
   const listings = allListings.filter(listing => {
     if (postalCodeFilter && listing.postal_code) {
       console.log(`Comparing listing postal code: ${listing.postal_code} with filter: ${postalCodeFilter}`);
@@ -91,17 +90,16 @@ const Marketplace = () => {
   const handlePostalCodeSearch = (postalCode: string) => {
     console.log(`Searching listings in postal code: ${postalCode}`);
     setPostalCodeFilter(postalCode);
-    // Clear any existing postal code filter if the input is empty
     if (!postalCode) {
       setPostalCodeFilter('');
     }
-    // Reset to the first page when applying a new filter
     setCurrentPage(1);
-    // Show a toast notification
-    toast({
-      title: "Searching by postal code",
-      description: `Showing listings with postal code: ${postalCode}`,
-    });
+    if (postalCode) {
+      toast({
+        title: "Filtering by postal code",
+        description: `Showing listings with postal code: ${postalCode}`,
+      });
+    }
   };
 
   const categories = [
@@ -230,23 +228,18 @@ const Marketplace = () => {
   }));
 
   const filteredListingsByCriteria = enhancedListings.filter(listing => {
-    // Price filter
     const price = listing.price;
     if (price < priceRange[0] || price > priceRange[1]) return false;
     
-    // Model year filter - convert string year to number for comparison
     if (listing.model_year) {
       const modelYear = parseInt(listing.model_year, 10);
-      // Only filter if the model_year is a valid number
       if (!isNaN(modelYear) && (modelYear < yearRange[0] || modelYear > yearRange[1])) {
         return false;
       }
     }
     
-    // Rating filter
     if (ratingFilter > 0 && listing.seller_rating < ratingFilter) return false;
     
-    // Condition filter
     if (conditionFilter !== 'all' && listing.condition.toLowerCase() !== conditionFilter.toLowerCase()) return false;
     
     return true;
@@ -273,29 +266,10 @@ const Marketplace = () => {
   return (
     <MainLayout>
       <div className="animate-fade-in px-[7px]">
-        <PostalCodeSearch onSearch={handlePostalCodeSearch} />
-        
-        {postalCodeFilter && (
-          <Alert className="my-3 bg-blue-50 border-blue-200">
-            <AlertTitle className="text-blue-800">Postal Code Filter</AlertTitle>
-            <AlertDescription className="text-blue-700">
-              Showing listings with postal code: {postalCodeFilter}
-              <Button 
-                variant="link" 
-                className="p-0 h-auto text-blue-600" 
-                onClick={() => {
-                  setPostalCodeFilter('');
-                  toast({
-                    title: "Filter cleared",
-                    description: "Showing all listings"
-                  });
-                }}
-              >
-                Clear filter
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
+        <PostalCodeSearch 
+          onSearch={handlePostalCodeSearch} 
+          initialValue={postalCodeFilter}
+        />
         
         {pendingListings.length > 0 && user && (
           <Alert className="my-3 bg-muted/50">

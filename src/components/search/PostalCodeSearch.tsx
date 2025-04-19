@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, X } from 'lucide-react';
@@ -7,11 +7,16 @@ import { useToast } from '@/hooks/use-toast';
 
 interface PostalCodeSearchProps {
   onSearch: (postalCode: string) => void;
+  initialValue?: string;
 }
 
-const PostalCodeSearch = ({ onSearch }: PostalCodeSearchProps) => {
-  const [postalCode, setPostalCode] = useState('');
+const PostalCodeSearch = ({ onSearch, initialValue = '' }: PostalCodeSearchProps) => {
+  const [postalCode, setPostalCode] = useState(initialValue);
   const { toast } = useToast();
+  
+  useEffect(() => {
+    setPostalCode(initialValue);
+  }, [initialValue]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,23 +54,25 @@ const PostalCodeSearch = ({ onSearch }: PostalCodeSearchProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-border p-3 mb-4 animate-fade-in">
-      <div className="flex items-center gap-2 relative">
-        <Input
-          type="text"
-          placeholder="Search by postal code..."
-          value={postalCode}
-          onChange={(e) => setPostalCode(e.target.value)}
-          className="flex-1 pr-10" // Add padding for clear icon
-        />
-        {postalCode && (
-          <button
-            type="button"
-            onClick={clearPostalCode}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Input
+            type="text"
+            placeholder="Search by postal code..."
+            value={postalCode}
+            onChange={(e) => setPostalCode(e.target.value)}
+            className="w-full pr-8" // Ensure space for the clear icon
+          />
+          {postalCode && (
+            <button
+              type="button"
+              onClick={clearPostalCode}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
         <Button type="submit" size="icon">
           <Search className="h-4 w-4" />
         </Button>
