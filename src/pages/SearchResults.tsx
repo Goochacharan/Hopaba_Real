@@ -8,8 +8,8 @@ import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { addDistanceToRecommendations, sortRecommendations, enhanceRecommendations } from '@/utils/searchUtils';
 import SearchHeader from '@/components/search/SearchHeader';
 import SearchTabs from '@/components/search/SearchTabs';
-import SearchLocation from '@/components/search/SearchLocation';
 import SearchControls from '@/components/search/SearchControls';
+import AreaSearchBar from '@/components/search/AreaSearchBar';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -19,8 +19,7 @@ const SearchResults = () => {
   const searchQuery = searchParams.get('q') || '';
   const categoryParam = searchParams.get('category') || 'all';
   
-  const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
-  const [userCoordinates, setUserCoordinates] = useState<{lat: number, lng: number} | null>(null);
+  const [selectedArea, setSelectedArea] = useState<string>('');
   
   const { filters, setters } = useSearchFilters();
   
@@ -108,13 +107,17 @@ const SearchResults = () => {
     });
   };
 
+  const handleAreaSelect = (area: string) => {
+    setSelectedArea(area);
+    // Filter recommendations based on selected area if needed
+  };
+
   return (
     <MainLayout>
       <div className="w-full animate-fade-in mx-0 px-[2px] search-results-container">
-        <SearchLocation
-          selectedLocation={selectedLocation}
-          setSelectedLocation={setSelectedLocation}
-          setUserCoordinates={setUserCoordinates}
+        <AreaSearchBar
+          selectedArea={selectedArea}
+          onAreaSelect={handleAreaSelect}
         />
         
         <SearchControls
