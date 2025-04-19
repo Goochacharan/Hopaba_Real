@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Search, X, Mic, Sparkles, LogIn } from 'lucide-react';
@@ -132,8 +131,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   };
   
-  const clearSearch = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const clearSearch = () => {
     setQuery('');
     if (inputRef.current) {
       inputRef.current.focus();
