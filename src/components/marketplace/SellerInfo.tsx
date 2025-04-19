@@ -1,11 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import StarRating from './StarRating';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
-
 interface SellerInfoProps {
   sellerName: string;
   sellerRating: number;
@@ -16,7 +14,6 @@ interface SellerInfoProps {
   createdAt?: string;
   sellerRole?: 'owner' | 'dealer';
 }
-
 const SellerInfo: React.FC<SellerInfoProps> = ({
   sellerName,
   sellerRating,
@@ -93,15 +90,11 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
       </div>
 
       <div className="flex items-center justify-end w-full gap-2">
-        <Badge 
-          variant="default" 
-          className="bg-[#8B5CF6] text-white font-bold text-xs capitalize px-2"
-        >
+        <Badge variant="default" className="text-white font-bold text-xs capitalize py-0 my-[3px] bg-violet-500 px-[11px] mx-[23px]">
           {sellerRole}
         </Badge>
         <StarRating rating={actualRating} showCount={true} count={actualReviewCount} size="small" />
       </div>
     </div>;
 };
-
 export default SellerInfo;
