@@ -31,6 +31,7 @@ export interface BusinessData {
   area: string;
   city: string;
   address: string;
+  postal_code: string;
   contact_phone: string;
   whatsapp: string;
   contact_email?: string;
@@ -55,6 +56,7 @@ const businessSchema = z.object({
   area: z.string().min(2, { message: "Area must be at least 2 characters." }),
   city: z.string().min(2, { message: "City must be at least 2 characters." }),
   address: z.string().min(5, { message: "Address must be at least 5 characters." }),
+  postal_code: z.string().regex(/^\d{6}$/, { message: "Postal code must be 6 digits" }),
   contact_phone: z.string()
     .refine(phone => phone.startsWith('+91'), { message: "Phone number must start with +91." })
     .refine(phone => phone.slice(3).replace(/\D/g, '').length === 10, { message: "Please enter a 10-digit phone number (excluding +91)." }),
@@ -106,6 +108,7 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
       area: business?.area || "",
       city: business?.city || "",
       address: business?.address || "",
+      postal_code: business?.postal_code || "",
       contact_phone: business?.contact_phone || "+91",
       whatsapp: business?.whatsapp || "+91",
       contact_email: business?.contact_email || "",
@@ -180,6 +183,7 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
         area: data.area,
         city: data.city,
         address: data.address,
+        postal_code: data.postal_code,
         contact_phone: data.contact_phone,
         whatsapp: data.whatsapp,
         contact_email: data.contact_email || null,
@@ -372,6 +376,20 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
                     <FormLabel>Area/Neighborhood*</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter neighborhood or area" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="postal_code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Postal Code*</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter 6-digit postal code" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

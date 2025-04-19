@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -48,6 +49,10 @@ export type MarketplaceListing = z.infer<typeof marketplaceListingSchema> & {
   condition: string;
   images: string[];
   is_negotiable?: boolean;
+  seller_role: 'owner' | 'agent';
+  area: string;
+  city: string;
+  postal_code: string;
 };
 
 interface UseMarketplaceListingsProps {

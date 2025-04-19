@@ -31,7 +31,14 @@ export interface Business {
   whatsapp?: string;
   contact_email?: string;
   tags?: string[];
+  languages?: string[];
+  experience?: string;
+  availability?: string;
+  price_unit?: string;
+  price_range_min?: number;
+  price_range_max?: number;
   images?: string[];
+  postal_code: string;
 }
 
 const businessSchema = z.object({
@@ -52,6 +59,9 @@ const businessSchema = z.object({
   }),
   address: z.string().min(5, {
     message: "Address must be at least 5 characters.",
+  }),
+  postal_code: z.string().regex(/^\d{6}$/, { 
+    message: "Postal code must be 6 digits" 
   }),
   contact_phone: z.string()
     .refine(phone => phone.startsWith('+91'), {
@@ -112,6 +122,7 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
       area: business?.area || "",
       city: business?.city || "",
       address: business?.address || "",
+      postal_code: business?.postal_code || "",
       contact_phone: business?.contact_phone || "+91",
       whatsapp: business?.whatsapp || "+91",
       contact_email: business?.contact_email || "",
@@ -149,6 +160,7 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         area: data.area,
         city: data.city,
         address: data.address,
+        postal_code: data.postal_code,
         contact_phone: data.contact_phone,
         whatsapp: data.whatsapp,
         contact_email: data.contact_email || null,
