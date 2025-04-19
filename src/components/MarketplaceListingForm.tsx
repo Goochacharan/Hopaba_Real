@@ -36,8 +36,8 @@ const marketplaceListingSchema = z.object({
   location: z.string().optional(),
   map_link: z.string().optional(),
   seller_name: z.string().min(2, { message: "Seller name is required" }),
-  seller_role: z.enum(['owner', 'agent'], { 
-    required_error: "Please select whether you are an owner or an agent" 
+  seller_role: z.enum(['owner', 'dealer'], { 
+    required_error: "Please select whether you are an owner or a dealer" 
   }),
   seller_phone: z.string()
     .refine(phone => phone.startsWith('+91'), {
@@ -308,32 +308,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
-                          Location (Optional)
-                        </div>
-                      </FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="e.g. Mumbai, Delhi" 
-                          value={field.value}
-                          onChange={(e) => form.setValue('location', e.target.value)}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Enter the location or area where the item is available
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 
                 <FormField
                   control={form.control}
@@ -364,31 +338,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                   )}
                 />
               </div>
-
-              <FormField
-                control={form.control}
-                name="map_link"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      <div className="flex items-center gap-2">
-                        <Link2 className="h-4 w-4" />
-                        Google Maps Link (Optional)
-                      </div>
-                    </FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Paste your Google Maps link here" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Add a Google Maps link for more precise directions
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             <div className="space-y-6">
@@ -468,30 +417,30 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                 )}
               />
 
-          <FormField
-            control={form.control}
-            name="seller_role"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Seller Role*</FormLabel>
-                <Select 
-                  onValueChange={field.onChange} 
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select seller role" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="owner">Owner</SelectItem>
-                    <SelectItem value="agent">Agent</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <FormField
+                control={form.control}
+                name="seller_role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Seller Role*</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select seller role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="owner">Owner</SelectItem>
+                        <SelectItem value="dealer">Dealer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
