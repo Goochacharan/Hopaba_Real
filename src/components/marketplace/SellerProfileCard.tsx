@@ -159,7 +159,7 @@ const SellerProfileCard: React.FC<SellerProfileCardProps> = ({
           </Avatar>
           
           <div className="space-y-4 text-center md:text-left w-full">
-            <h3 className="text-3xl font-bold">{sellerName}</h3>
+            <h3 className="font-bold text-2xl">{sellerName}</h3>
             
             <div className="flex items-center gap-1">
               <StarRating rating={sellerRating} size="medium" showCount={true} count={reviewCount} />
