@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -47,8 +46,8 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
     );
     setSuggestions(filtered.slice(0, 5)); // Limit to 5 suggestions
     
-    // Only open popover if there's search text and suggestions
-    if (searchValue && filtered.length > 0) {
+    // Keep popover open if there's a search value, even if there are no suggestions
+    if (searchValue) {
       setOpen(true);
     } else {
       setOpen(false);
@@ -69,6 +68,17 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
     }
   };
 
+  // Handle focus changes properly
+  const handleInputFocus = () => {
+    setOpen(true);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(e.target.value);
+    // Ensure popover stays open when typing
+    setOpen(true);
+  };
+
   return (
     <div className="w-full bg-white rounded-xl border border-border p-3 mb-4 py-0 px-0">
       <Popover open={open} onOpenChange={setOpen}>
@@ -77,7 +87,8 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
             <input
               ref={inputRef}
               value={searchValue}
-              onChange={e => setSearchValue(e.target.value)}
+              onChange={handleInputChange}
+              onFocus={handleInputFocus}
               onClick={() => setOpen(true)}
               placeholder="Search by area or city..."
               className="w-full p-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
