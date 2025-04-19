@@ -36,6 +36,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
       console.log("First listing postal code:", listings[0].postal_code);
       console.log("First listing damage images:", listings[0].damage_images);
       console.log("First listing certificates:", listings[0].inspection_certificates);
+      console.log("First listing seller role:", listings[0].seller_role);
     }
   }, [listings]);
 
@@ -86,6 +87,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
           console.log(`Rendering listing ${index}:`, listing.title, 
             `with postal_code:`, listing.postal_code,
             `with damage_images:`, listing.damage_images?.length || 0,
+            `seller role:`, listing.seller_role,
             `and certificates:`, listing.inspection_certificates?.length || 0);
             
           // Make sure all the necessary properties are present

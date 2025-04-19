@@ -127,7 +127,15 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
 
         <div className="flex justify-end items-center mb-4 px-0 mx-0 py-0 my-[11px]">
           <div className="flex flex-col items-end py-0">
-            <SellerInfo sellerName={listing.seller_name} sellerRating={listing.seller_rating} sellerId={listing.seller_id} reviewCount={listing.review_count} sellerInstagram={listing.seller_instagram} createdAt={listing.created_at} />
+            <SellerInfo 
+              sellerName={listing.seller_name} 
+              sellerRating={listing.seller_rating} 
+              sellerId={listing.seller_id} 
+              reviewCount={listing.review_count} 
+              sellerInstagram={listing.seller_instagram} 
+              createdAt={listing.created_at} 
+              sellerRole={listing.seller_role}
+            />
           </div>
         </div>
         
