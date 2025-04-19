@@ -72,11 +72,13 @@ export default function Login() {
     
     setSocialLoading(provider);
     try {
-      // Using redirectTo with current origin to ensure proper redirect after authentication
+      // Get the current deployment URL for proper redirection
+      const redirectUrl = window.location.origin;
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: redirectUrl,
           queryParams: REQUIRE_CAPTCHA && captchaToken ? {
             captchaToken
           } : undefined
