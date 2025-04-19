@@ -1,9 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Search, Check, ChevronsUpDown } from 'lucide-react';
+import { Check, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -16,6 +16,8 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({ onAreaSelect, selectedAre
   const [open, setOpen] = useState(false);
   const [areas, setAreas] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchAreas = async () => {
@@ -41,56 +43,67 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({ onAreaSelect, selectedAre
     fetchAreas();
   }, []);
 
-  const filteredAreas = areas.filter(area =>
-    area.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  useEffect(() => {
+    if (searchValue) {
+      const filtered = areas.filter(area =>
+        area.toLowerCase().includes(searchValue.toLowerCase())
+      );
+      setSuggestions(filtered.slice(0, 5)); // Limit to 5 suggestions
+    } else {
+      setSuggestions([]);
+    }
+  }, [searchValue, areas]);
+
+  const handleSelect = (value: string) => {
+    onAreaSelect(value);
+    setSearchValue(value);
+    setOpen(false);
+  };
 
   return (
     <div className="w-full bg-white rounded-xl border border-border p-3 mb-4">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-full justify-between text-muted-foreground"
-          >
-            {selectedArea || "Search by area..."}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
-          <Command>
-            <CommandInput
-              placeholder="Search areas..."
+          <div className="relative">
+            <input
+              ref={inputRef}
               value={searchValue}
-              onValueChange={setSearchValue}
-              className="h-9"
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder="Search by area or city..."
+              className="w-full p-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              onFocus={() => setOpen(true)}
             />
-            <CommandList>
-              <CommandEmpty>No area found.</CommandEmpty>
-              <CommandGroup>
-                {filteredAreas.map((area) => (
-                  <CommandItem
-                    key={area}
-                    value={area}
-                    onSelect={() => {
-                      onAreaSelect(area);
-                      setOpen(false);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        selectedArea === area ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {area}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
+            <Search 
+              className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground"
+              onClick={() => inputRef.current?.focus()}
+            />
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0" align="start">
+          {suggestions.length > 0 && (
+            <Command>
+              <CommandList>
+                <CommandEmpty>No area found.</CommandEmpty>
+                <CommandGroup>
+                  {suggestions.map((area) => (
+                    <CommandItem
+                      key={area}
+                      value={area}
+                      onSelect={() => handleSelect(area)}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          selectedArea === area ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {area}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          )}
         </PopoverContent>
       </Popover>
     </div>

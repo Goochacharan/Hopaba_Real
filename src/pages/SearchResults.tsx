@@ -68,7 +68,13 @@ const SearchResults = () => {
     availability_end_time: rec.availability_end_time || ''
   }));
 
-  const filteredRecommendations = filterRecommendations(enhancedRecommendations, {
+  // Filter recommendations by area if selected
+  const areaFilteredRecommendations = selectedArea 
+    ? enhancedRecommendations.filter(rec => 
+        rec.address && rec.address.toLowerCase().includes(selectedArea.toLowerCase()))
+    : enhancedRecommendations;
+
+  const filteredRecommendations = filterRecommendations(areaFilteredRecommendations, {
     maxDistance: filters.distance[0],
     minRating: filters.minRating[0],
     priceLevel: filters.priceRange,
@@ -83,6 +89,7 @@ const SearchResults = () => {
   const rankedRecommendations = sortRecommendations(fullyEnhancedRecommendations, filters.sortBy);
 
   console.log("Final ranked recommendations:", rankedRecommendations);
+  console.log("Selected area:", selectedArea);
 
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
@@ -114,7 +121,7 @@ const SearchResults = () => {
 
   const handleAreaSelect = (area: string) => {
     setSelectedArea(area);
-    // Filter recommendations based on selected area if needed
+    console.log("Area selected:", area);
   };
 
   return (
