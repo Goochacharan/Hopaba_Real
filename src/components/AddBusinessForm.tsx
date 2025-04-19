@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -39,6 +38,13 @@ export interface Business {
   price_range_max?: number;
   images?: string[];
   postal_code: string;
+  availability_days?: string[];
+  availability_start_time?: string;
+  availability_end_time?: string;
+  hours?: string;
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 const businessSchema = z.object({
@@ -203,7 +209,7 @@ export default function AddBusinessForm({ business, onSaved, onCancel }: AddBusi
         console.log("Creating new business");
         result = await supabase
           .from('service_providers')
-          .insert(businessData);
+          .insert([businessData]);
 
         if (result.error) {
           console.error("Supabase insert error:", result.error);

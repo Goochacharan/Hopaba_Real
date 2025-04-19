@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Building, MapPin, Phone, MessageSquare, Globe, Instagram, IndianRupee, Pencil, Trash, Tag, Clock, Star, Image } from 'lucide-react';
-import { Business } from './BusinessFormSimple';
+import { Business } from './BusinessForm';
 
 interface BusinessListProps {
   onEdit: (business: Business) => void;
@@ -41,7 +40,7 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
       }
       
       console.log("Fetched businesses:", data);
-      setBusinesses(data || []);
+      setBusinesses(data as unknown as Business[] || []);
     } catch (error: any) {
       console.error('Error fetching businesses:', error);
       toast({

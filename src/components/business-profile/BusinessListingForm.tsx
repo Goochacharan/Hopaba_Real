@@ -47,6 +47,13 @@ export interface BusinessData {
   price_range_max?: number;
   approval_status?: string;
   images?: string[];
+  availability_days?: string[];
+  availability_start_time?: string;
+  availability_end_time?: string;
+  hours?: string;
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 const businessSchema = z.object({

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,6 +33,13 @@ export interface Business {
   price_range_max?: number;
   images?: string[];
   postal_code: string;
+  availability_days?: string[];
+  availability_start_time?: string;
+  availability_end_time?: string;
+  hours?: string;
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 const businessSchema = z.object({
@@ -175,6 +181,7 @@ const BusinessForm: React.FC<BusinessFormProps> = ({ business, onSaved, onCancel
         languages: data.languages || [],
         experience: data.experience || null,
         tags: data.tags || [],
+        images: data.images || [],
       };
 
       console.log("Formatted business data for Supabase:", businessData);

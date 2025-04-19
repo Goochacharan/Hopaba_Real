@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -41,7 +40,7 @@ const BusinessList: React.FC<BusinessListProps> = ({ onEdit, refresh }) => {
       }
       
       console.log("Fetched businesses:", data);
-      setBusinesses(data || []);
+      setBusinesses(data as unknown as BusinessData[] || []);
     } catch (error: any) {
       console.error('Error fetching businesses:', error);
       toast({
