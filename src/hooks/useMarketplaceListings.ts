@@ -1,33 +1,54 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { z } from 'zod';
 
-export interface MarketplaceListing {
+export const marketplaceListingSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  price: z.number(),
+  category: z.string(),
+  condition: z.string(),
+  model_year: z.string().nullable(),
+  location: z.string().nullable(),
+  map_link: z.string().nullable(),
+  seller_name: z.string(),
+  seller_id: z.string().nullable(),
+  seller_phone: z.string().nullable(),
+  seller_whatsapp: z.string().nullable(),
+  seller_instagram: z.string().nullable(),
+  seller_rating: z.number().nullable(),
+  review_count: z.number().nullable(),
+  images: z.array(z.string()),
+  damage_images: z.array(z.string()).nullable(),
+  inspection_certificates: z.array(z.string()).nullable(),
+  created_at: z.string(),
+  approval_status: z.enum(['approved', 'pending', 'rejected']),
+  is_negotiable: z.boolean().nullable(),
+  search_rank: z.number().nullable(),
+  seller_role: z.enum(['owner', 'agent'], { 
+    required_error: "Please select whether you are an owner or an agent" 
+  }),
+  area: z.string().min(2, { message: "Area must be at least 2 characters" }),
+  city: z.string().min(1, { message: "City is required" }),
+  postal_code: z.string().regex(/^\d{6}$/, { message: "Postal code must be 6 digits" }),
+});
+
+export type MarketplaceListing = z.infer<typeof marketplaceListingSchema> & {
   id: string;
+  created_at: string;
+  approval_status: string;
+  seller_id?: string;
+  seller_name: string;
   title: string;
   description: string;
   price: number;
   category: string;
   condition: string;
-  model_year?: string | null;
-  location: string | null;
-  map_link?: string | null;
-  seller_name: string;
-  seller_id?: string | null;
-  seller_phone?: string | null;
-  seller_whatsapp?: string | null;
-  seller_instagram?: string | null;
-  seller_rating?: number;
-  review_count?: number;
   images: string[];
-  damage_images?: string[];
-  inspection_certificates?: string[];
-  created_at: string;
-  approval_status: 'approved' | 'pending' | 'rejected';
   is_negotiable?: boolean;
-  search_rank?: number;
-}
+};
 
 interface UseMarketplaceListingsProps {
   limit?: number;
@@ -63,7 +84,6 @@ export const useMarketplaceListings = ({
 
     try {
       if (searchQuery && searchQuery.trim() !== '') {
-        // Use the enhanced search function for complex queries
         const { data, error: searchError } = await supabase.rpc(
           'search_enhanced_listings', 
           { search_query: searchQuery }
@@ -78,7 +98,6 @@ export const useMarketplaceListings = ({
         
         let filteredData = data || [];
         
-        // Apply any additional filters (these filters are applied after the search)
         if (category) {
           filteredData = filteredData.filter(item => item.category === category);
         }
@@ -105,7 +124,6 @@ export const useMarketplaceListings = ({
           filteredData = filteredData.filter(item => item.seller_id === sellerID);
         }
 
-        // Format the data to match MarketplaceListing interface
         const typedData = filteredData.map(item => ({
           ...item,
           approval_status: item.approval_status as 'approved' | 'pending' | 'rejected'
@@ -113,7 +131,6 @@ export const useMarketplaceListings = ({
         
         setListings(typedData);
       } else {
-        // Use the standard query approach for non-search or simple category filtering
         let query = supabase
           .from('marketplace_listings')
           .select('*')
@@ -153,7 +170,6 @@ export const useMarketplaceListings = ({
           throw error;
         }
 
-        // Ensure the data conforms to the MarketplaceListing type
         const typedData = data?.map(item => ({
           ...item,
           approval_status: item.approval_status as 'approved' | 'pending' | 'rejected'
@@ -186,7 +202,6 @@ export const useMarketplaceListings = ({
   };
 };
 
-// Add the missing hook for fetching a single marketplace listing
 export const useMarketplaceListing = (id: string) => {
   const [listing, setListing] = useState<MarketplaceListing | null>(null);
   const [loading, setLoading] = useState(true);
@@ -208,7 +223,6 @@ export const useMarketplaceListing = (id: string) => {
         throw error;
       }
 
-      // Ensure the data conforms to the MarketplaceListing type
       const typedListing = {
         ...data,
         approval_status: data.approval_status as 'approved' | 'pending' | 'rejected'

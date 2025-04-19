@@ -88,14 +88,14 @@ export type Database = {
           longitude: string | null
           map_link: string | null
           model_year: string | null
-          postal_code: string | null
+          postal_code: string
           price: number
           seller_id: string | null
           seller_instagram: string | null
           seller_name: string
           seller_phone: string | null
           seller_rating: number | null
-          seller_role: string | null
+          seller_role: string
           seller_whatsapp: string | null
           title: string
           updated_at: string
@@ -118,14 +118,14 @@ export type Database = {
           longitude?: string | null
           map_link?: string | null
           model_year?: string | null
-          postal_code?: string | null
+          postal_code: string
           price: number
           seller_id?: string | null
           seller_instagram?: string | null
           seller_name: string
           seller_phone?: string | null
           seller_rating?: number | null
-          seller_role?: string | null
+          seller_role?: string
           seller_whatsapp?: string | null
           title: string
           updated_at?: string
@@ -148,14 +148,14 @@ export type Database = {
           longitude?: string | null
           map_link?: string | null
           model_year?: string | null
-          postal_code?: string | null
+          postal_code?: string
           price?: number
           seller_id?: string | null
           seller_instagram?: string | null
           seller_name?: string
           seller_phone?: string | null
           seller_rating?: number | null
-          seller_role?: string | null
+          seller_role?: string
           seller_whatsapp?: string | null
           title?: string
           updated_at?: string
