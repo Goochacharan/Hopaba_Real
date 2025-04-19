@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Building, MapPin, Phone, MessageSquare, Globe, Instagram, IndianRupee, Pencil, Trash, Tag, Clock, Star, Image } from 'lucide-react';
 import { Business } from './BusinessFormSimple';
+import PostalCodeSearch from '@/components/search/PostalCodeSearch';
 
 interface BusinessListProps {
   onEdit: (business: Business) => void;
@@ -117,8 +117,15 @@ const BusinessListSimple: React.FC<BusinessListProps> = ({ onEdit, refresh }) =>
     );
   }
 
+  const handleLocationSearch = (postalCode: string, area: string) => {
+    console.log(`Searching businesses with postal code: ${postalCode} and area: ${area}`);
+    // We can implement actual search logic here later
+  };
+
   return (
     <div className="space-y-6">
+      <PostalCodeSearch onSearch={handleLocationSearch} />
+      
       <div className="grid grid-cols-1 gap-6">
         {businesses.map((business) => (
           <Card key={business.id} className="overflow-hidden">

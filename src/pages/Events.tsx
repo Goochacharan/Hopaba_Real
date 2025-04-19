@@ -8,6 +8,7 @@ import { Event } from '@/hooks/useRecommendations';
 import { supabase } from '@/integrations/supabase/client';
 import { Map as MapIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import PostalCodeSearch from '@/components/search/PostalCodeSearch';
 
 interface SupabaseEvent {
   approval_status: string;
@@ -102,14 +103,16 @@ const Events = () => {
     setSelectedLocation(location);
   };
 
+  const handleLocationSearch = (postalCode: string, area: string) => {
+    console.log(`Searching events with postal code: ${postalCode} and area: ${area}`);
+    // We can implement actual search logic here later
+  };
+
   return (
     <MainLayout>
       <section className="py-8 px-4 w-full pb-32">
         <div className="max-w-[1400px] mx-auto">
-          <LocationSelector 
-            selectedLocation={selectedLocation}
-            onLocationChange={handleLocationChange}
-          />
+          <PostalCodeSearch onSearch={handleLocationSearch} />
           <h1 className="text-3xl font-medium mb-6 mt-4">
             {searchQuery ? `Events matching "${searchQuery}"` : "Upcoming Events"}
           </h1>
