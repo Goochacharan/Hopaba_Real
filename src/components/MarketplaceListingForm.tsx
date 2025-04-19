@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -13,12 +12,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card } from '@/components/ui/card';
-import { Loader2, Save, X, Instagram, Film, MapPin, Link2, Unlock, AlertTriangle, FileText } from 'lucide-react';
+import { Loader2, Save, X, Film, Navigation2, Instagram, MapPin, Link2, Unlock, AlertTriangle, FileText } from 'lucide-react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 
+// List of major cities in India
+const INDIAN_CITIES = [
+  "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai", 
+  "Kolkata", "Surat", "Pune", "Jaipur", "Lucknow", "Kanpur", 
+  "Nagpur", "Indore", "Bhopal", "Visakhapatnam", "Patna", "Gwalior"
+];
+
+// Update the marketplace listing schema to include new fields
 const marketplaceListingSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
   description: z.string().min(20, { message: "Description must be at least 20 characters" }),
@@ -50,6 +57,12 @@ const marketplaceListingSchema = z.object({
   is_negotiable: z.boolean().optional(),
   damage_images: z.array(z.string()).optional(),
   inspection_certificates: z.array(z.string()).optional(),
+  seller_role: z.enum(['owner', 'agent'], { 
+    required_error: "Please select whether you are an owner or an agent" 
+  }),
+  area: z.string().min(2, { message: "Area must be at least 2 characters" }),
+  city: z.string().min(1, { message: "City is required" }),
+  postal_code: z.string().regex(/^\d{6}$/, { message: "Postal code must be 6 digits" }),
 });
 
 type MarketplaceListingFormData = z.infer<typeof marketplaceListingSchema>;
@@ -87,6 +100,10 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     is_negotiable: listing?.is_negotiable || false,
     damage_images: listing?.damage_images || [],
     inspection_certificates: listing?.inspection_certificates || [],
+    seller_role: listing?.seller_role || 'owner',
+    area: listing?.area || '',
+    city: listing?.city || '',
+    postal_code: listing?.postal_code || '',
   };
 
   const form = useForm<MarketplaceListingFormData>({
@@ -155,7 +172,11 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         damage_images: data.damage_images || [],
         inspection_certificates: data.inspection_certificates || [],
         approval_status: 'pending',
-        is_negotiable: data.is_negotiable || false
+        is_negotiable: data.is_negotiable || false,
+        seller_role: data.seller_role,
+        area: data.area,
+        city: data.city,
+        postal_code: data.postal_code,
       };
 
       if (listing?.id) {
@@ -607,6 +628,94 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
             />
           </div>
 
+          <FormField
+            control={form.control}
+            name="seller_role"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Seller Role*</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select seller role" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="owner">Owner</SelectItem>
+                    <SelectItem value="agent">Agent</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="area"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Area*</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter your area" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="city"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>City*</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select city" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {INDIAN_CITIES.map(city => (
+                      <SelectItem key={city} value={city}>
+                        {city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="postal_code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Postal Code*</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Enter 6-digit postal code" 
+                    {...field} 
+                    maxLength={6}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Enter a valid 6-digit Indian postal code
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <div className="flex justify-end gap-2 pt-4">
             {onCancel && (
               <Button type="button" variant="outline" onClick={onCancel}>
@@ -632,4 +741,3 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
 };
 
 export default MarketplaceListingForm;
-
