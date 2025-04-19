@@ -53,7 +53,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const suggestionExamples = ["hidden gem restaurants in Indiranagar", "good flute teacher in Malleshwaram", "places to visit in Nagarbhavi", "best unisex salon near me", "plumbers available right now"];
   
   const enhanceSearchQuery = async (rawQuery: string) => {
-    // Don't enhance marketplace searches
     if (currentPath === '/marketplace' || currentPath.startsWith('/marketplace')) {
       console.log("Marketplace search - not enhancing:", rawQuery);
       return rawQuery;
@@ -63,7 +62,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
     setIsEnhancing(true);
     
     try {
-      // If we're here, either the database search failed or we're not on the marketplace page
       const { data, error } = await supabase.functions.invoke('enhance-search', {
         body: { query: rawQuery }
       });
@@ -96,7 +94,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check if user is logged in
     if (!user) {
       setShowAuthDialog(true);
       return;
@@ -105,7 +102,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
       console.log("Original search query:", query);
       let enhancedQuery = query;
       
-      // Don't enhance if we're on marketplace or events pages
       if (currentPath !== '/events' && currentPath !== '/marketplace' && !currentPath.startsWith('/marketplace')) {
         console.log("Not a marketplace or events page, enhancing query");
         enhancedQuery = await enhanceSearchQuery(query);
@@ -119,7 +115,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
       }
       onSearch(enhancedQuery);
       
-      // Only show suggestion toasts on the main search page
       if (query.trim().length < 8 && currentPath !== '/events' && currentPath !== '/marketplace' && !currentPath.startsWith('/marketplace')) {
         const randomSuggestion = suggestionExamples[Math.floor(Math.random() * suggestionExamples.length)];
         toast({
@@ -139,7 +134,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
   
   const startSpeechRecognition = () => {
-    // Check if user is logged in before allowing voice search
     if (!user) {
       setShowAuthDialog(true);
       return;
@@ -200,7 +194,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
   }, [initialValue]);
   
   const handleSearchButtonClick = async () => {
-    // Check if user is logged in
     if (!user) {
       setShowAuthDialog(true);
       return;
@@ -210,7 +203,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
       console.log("Search button clicked with query:", query);
       let enhancedQuery = query;
       
-      // Don't enhance if we're on marketplace or events pages
       if (currentPath !== '/events' && currentPath !== '/marketplace' && !currentPath.startsWith('/marketplace')) {
         console.log("Enhancing query from button click");
         enhancedQuery = await enhanceSearchQuery(query);
@@ -247,7 +239,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
             className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pl-2" 
             value={query} 
             onChange={e => setQuery(e.target.value)} 
-            onFocus={() => setIsExpanded(true)} 
+            onFocus={() => setIsExpanded(true)}
+            onClick={() => setIsExpanded(true)}
           />
           
           {query && (
