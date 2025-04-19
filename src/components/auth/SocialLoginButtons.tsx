@@ -19,6 +19,7 @@ export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = ({
     <div className="space-y-2">
       <Button 
         type="button" 
+        variant="outline"
         className="w-full flex items-center justify-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-50"
         onClick={() => onSocialLogin('google')}
         disabled={isDisabled || isLoading === 'google'}

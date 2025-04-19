@@ -72,6 +72,7 @@ export default function Login() {
     
     setSocialLoading(provider);
     try {
+      // Using redirectTo with current origin to ensure proper redirect after authentication
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
@@ -85,6 +86,8 @@ export default function Login() {
       if (error) {
         throw error;
       }
+      
+      // No need to navigate here as OAuth will redirect
     } catch (error: any) {
       toast({
         title: "Login failed",
