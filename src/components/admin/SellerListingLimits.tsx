@@ -47,13 +47,15 @@ const SellerListingLimits = () => {
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-card">
       <h3 className="text-lg font-medium">Update Seller Listing Limit</h3>
-      <div className="flex gap-2">
-        <div className="flex-1">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-2">
+        <div className="flex items-center">
+          <span className="mr-2 text-muted-foreground">+91</span>
           <Input
             type="text"
             placeholder="Enter seller phone number"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
+            className="flex-1"
           />
         </div>
         <Button
