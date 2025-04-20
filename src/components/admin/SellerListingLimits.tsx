@@ -85,10 +85,15 @@ const SellerListingLimits = () => {
       // Format phone number the same way as in search
       const formattedPhone = phoneNumber.replace(/\D/g, '');
       
+      // If incrementing, add 1 to current limit
+      const newLimit = increment 
+        ? (sellerDetails ? sellerDetails.listing_limit + 1 : 6) 
+        : 5;
+
       const { data, error } = await supabase.rpc('update_seller_listing_limit', {
         admin_user_id: user.id,
         target_seller_phone: formattedPhone,
-        new_limit: increment ? 10 : 5
+        new_limit: newLimit
       });
 
       if (error) throw error;
@@ -97,7 +102,7 @@ const SellerListingLimits = () => {
       if (sellerDetails) {
         setSellerDetails({
           ...sellerDetails,
-          listing_limit: increment ? 10 : 5
+          listing_limit: newLimit
         });
       }
 
