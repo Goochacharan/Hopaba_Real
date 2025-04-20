@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -22,11 +21,6 @@ interface SellerLimit {
   seller_name: string;
 }
 
-// Create a type-safe client for tables not in the TypeScript definitions
-const customClient = {
-  from: (table: string) => supabase.from(table as any)
-};
-
 const SellerLimitsSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
@@ -35,18 +29,10 @@ const SellerLimitsSection = () => {
     queryKey: ['seller-limits'],
     queryFn: async () => {
       try {
-        // Use the custom client to access the seller_listing_limits table
-        const { data: limits, error: limitsError } = await customClient
+        // First get all seller limits
+        const { data: limits, error: limitsError } = await supabase
           .from('seller_listing_limits')
-          .select(`
-            user_id,
-            max_listings,
-            marketplace_listings!inner(
-              seller_name,
-              seller_id
-            )
-          `)
-          .gt('max_listings', 5);
+          .select('user_id, max_listings');
 
         if (limitsError) throw limitsError;
 
@@ -54,20 +40,25 @@ const SellerLimitsSection = () => {
           return [];
         }
 
-        // Remove duplicates and format data
-        const uniqueSellers = limits.reduce((acc: SellerLimit[], curr: any) => {
-          const marketplace_listings = curr.marketplace_listings || [];
-          if (!acc.find((item: any) => item.user_id === curr.user_id)) {
-            acc.push({
-              user_id: curr.user_id,
-              max_listings: curr.max_listings,
-              seller_name: marketplace_listings[0]?.seller_name || 'Unknown Seller'
-            });
-          }
-          return acc;
-        }, []);
+        // Then get seller names from marketplace_listings
+        const { data: sellers, error: sellersError } = await supabase
+          .from('marketplace_listings')
+          .select('seller_id, seller_name')
+          .in('seller_id', limits.map(l => l.user_id));
 
-        return uniqueSellers;
+        if (sellersError) throw sellersError;
+
+        // Combine the data
+        const sellerLimits: SellerLimit[] = limits.map(limit => {
+          const seller = sellers?.find(s => s.seller_id === limit.user_id);
+          return {
+            user_id: limit.user_id,
+            max_listings: limit.max_listings,
+            seller_name: seller?.seller_name || 'Unknown Seller'
+          };
+        });
+
+        return sellerLimits;
       } catch (err) {
         console.error('Error fetching seller limits:', err);
         throw err;
@@ -77,8 +68,7 @@ const SellerLimitsSection = () => {
 
   const updateLimit = async (userId: string, newLimit: number) => {
     try {
-      // Use the custom client for the update operation as well
-      const { error } = await customClient
+      const { error } = await supabase
         .from('seller_listing_limits')
         .upsert({ 
           user_id: userId, 
@@ -118,16 +108,9 @@ const SellerLimitsSection = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search sellers..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
-          />
-        </div>
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold">Seller Listing Limits</h2>
+        <p className="text-muted-foreground">Manage maximum listings allowed per seller</p>
       </div>
 
       {isLoading ? (
