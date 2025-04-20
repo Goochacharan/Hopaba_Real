@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -81,17 +82,64 @@ const SellerListingLimits = () => {
       
       const newLimit = increment ? sellerDetails.listing_limit + 1 : 5;
 
-      const { data, error } = await supabase
-        .from('sellers')
-        .update({ listing_limit: newLimit })
-        .eq('seller_phone', formattedPhone);
+      // Try to find the correct phone number format that was matched during search
+      let matchedPhones = [formattedPhone];
+      
+      // Add the +91 prefix version
+      matchedPhones.push(`+91${formattedPhone}`);
+      
+      // Add the last 10 digits version if applicable
+      if (formattedPhone.length >= 10) {
+        matchedPhones.push(`%${formattedPhone.slice(-10)}`);
+      }
+      
+      let updateSuccess = false;
+      
+      // Try updating with each possible phone number format
+      for (const phone of matchedPhones) {
+        const isLike = phone.includes('%');
+        let result;
+        
+        if (isLike) {
+          // For partial matches, we need to do a separate query first to find the exact record
+          const { data } = await supabase
+            .from('sellers')
+            .select('seller_phone')
+            .ilike('seller_phone', phone)
+            .maybeSingle();
+            
+          if (data?.seller_phone) {
+            result = await supabase
+              .from('sellers')
+              .update({ listing_limit: newLimit })
+              .eq('seller_phone', data.seller_phone);
+          }
+        } else {
+          // For exact matches, update directly
+          result = await supabase
+            .from('sellers')
+            .update({ listing_limit: newLimit })
+            .eq('seller_phone', phone);
+        }
+        
+        if (result && !result.error && result.count > 0) {
+          updateSuccess = true;
+          break;
+        }
+      }
 
-      if (error) throw error;
+      if (!updateSuccess) {
+        throw new Error("Failed to update seller listing limit.");
+      }
 
+      // Update the local state to show the new limit
       setSellerDetails({
         ...sellerDetails,
         listing_limit: newLimit
       });
+
+      // Search again to make sure we have the latest data
+      searchSeller();
 
       toast({
         title: "Success",
