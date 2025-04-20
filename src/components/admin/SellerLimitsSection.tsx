@@ -1,0 +1,156 @@
+
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Search, Loader2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+const SellerLimitsSection = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const { toast } = useToast();
+
+  const { data: sellers, isLoading, error, refetch } = useQuery({
+    queryKey: ['seller-limits'],
+    queryFn: async () => {
+      const { data: limits, error: limitsError } = await supabase
+        .from('seller_listing_limits')
+        .select(`
+          user_id,
+          max_listings,
+          marketplace_listings!marketplace_listings_seller_id_fkey (
+            seller_name,
+            seller_id
+          )
+        `)
+        .gt('max_listings', 5);
+
+      if (limitsError) throw limitsError;
+
+      // Remove duplicates and format data
+      const uniqueSellers = limits.reduce((acc: any[], curr: any) => {
+        if (!acc.find((item: any) => item.user_id === curr.user_id)) {
+          acc.push({
+            user_id: curr.user_id,
+            max_listings: curr.max_listings,
+            seller_name: curr.marketplace_listings?.[0]?.seller_name || 'Unknown Seller'
+          });
+        }
+        return acc;
+      }, []);
+
+      return uniqueSellers;
+    }
+  });
+
+  const updateLimit = async (userId: string, newLimit: number) => {
+    try {
+      const { error } = await supabase
+        .from('seller_listing_limits')
+        .upsert({ 
+          user_id: userId, 
+          max_listings: newLimit,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Listing limit updated successfully"
+      });
+
+      refetch();
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const filteredSellers = sellers?.filter(seller =>
+    seller.seller_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>Failed to load seller limits</AlertDescription>
+      </Alert>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search sellers..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Seller Name</TableHead>
+              <TableHead>Current Limit</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredSellers?.map((seller) => (
+              <TableRow key={seller.user_id}>
+                <TableCell>{seller.seller_name}</TableCell>
+                <TableCell>{seller.max_listings}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => updateLimit(seller.user_id, seller.max_listings - 1)}
+                    >
+                      -
+                    </Button>
+                    <span className="w-12 text-center">{seller.max_listings}</span>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => updateLimit(seller.user_id, seller.max_listings + 1)}
+                    >
+                      +
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+    </div>
+  );
+};
+
+export default SellerLimitsSection;
