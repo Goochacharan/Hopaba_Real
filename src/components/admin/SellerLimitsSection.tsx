@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Table, 
@@ -24,8 +24,6 @@ interface SellerLimit {
 
 const SellerLimitsSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [mockData, setMockData] = useState<SellerLimit[]>([]);
-  const [isUsingMockData, setIsUsingMockData] = useState(false);
   const { toast } = useToast();
 
   // Query to fetch seller limits
@@ -50,7 +48,7 @@ const SellerLimitsSection = () => {
         // Then fetch unique seller details from marketplace listings
         const { data: listings, error: listingsError } = await supabase
           .from('marketplace_listings')
-          .select('seller_id, seller_name')
+          .select('seller_id, seller_name, seller_phone')
           .order('seller_name');
           
         if (listingsError) {
@@ -60,11 +58,14 @@ const SellerLimitsSection = () => {
 
         console.log("Fetched listings:", listings);
         
-        // Create a map of seller IDs to seller names
+        // Create a map of seller IDs to seller details
         const sellerMap = new Map();
         listings?.forEach(listing => {
-          if (listing.seller_id && listing.seller_name) {
-            sellerMap.set(listing.seller_id, listing.seller_name);
+          if (listing.seller_id && (listing.seller_name || listing.seller_phone)) {
+            sellerMap.set(listing.seller_id, {
+              name: listing.seller_name,
+              phone: listing.seller_phone
+            });
           }
         });
         
@@ -73,7 +74,8 @@ const SellerLimitsSection = () => {
         
         // Process limits with known sellers
         limits?.forEach(limit => {
-          const sellerName = sellerMap.get(limit.user_id) || `Seller (${limit.user_id.substring(0, 8)})`;
+          const sellerInfo = sellerMap.get(limit.user_id);
+          const sellerName = sellerInfo?.name || `Seller (${limit.user_id.substring(0, 8)})`;
           sellerLimits.push({
             user_id: limit.user_id,
             max_listings: limit.max_listings,
@@ -82,12 +84,12 @@ const SellerLimitsSection = () => {
         });
         
         // Add sellers from listings who don't have limits yet
-        sellerMap.forEach((name, id) => {
+        sellerMap.forEach((info, id) => {
           if (!limits?.some(l => l.user_id === id)) {
             sellerLimits.push({
               user_id: id,
               max_listings: 10, // Default value
-              seller_name: name
+              seller_name: info.name
             });
           }
         });
@@ -102,45 +104,8 @@ const SellerLimitsSection = () => {
     refetchOnWindowFocus: false
   });
 
-  // If real data fails to load, use mock data
-  useEffect(() => {
-    if (error) {
-      console.log("Error detected, using mock data instead");
-      // Generate some mock data 
-      const mockSellers = [
-        { user_id: '1', max_listings: 10, seller_name: 'John Doe' },
-        { user_id: '2', max_listings: 15, seller_name: 'Jane Smith' },
-        { user_id: '3', max_listings: 5, seller_name: 'Alex Johnson' },
-        { user_id: '4', max_listings: 20, seller_name: 'Maria Garcia' },
-        { user_id: '5', max_listings: 8, seller_name: 'Sam Wilson' },
-      ];
-      setMockData(mockSellers);
-      setIsUsingMockData(true);
-    } else {
-      setIsUsingMockData(false);
-    }
-  }, [error]);
-
   const updateLimit = async (userId: string, newLimit: number) => {
     try {
-      if (isUsingMockData) {
-        // Update mock data
-        setMockData(prev => 
-          prev.map(seller => 
-            seller.user_id === userId 
-              ? { ...seller, max_listings: newLimit }
-              : seller
-          )
-        );
-        
-        toast({
-          title: "Success",
-          description: "Listing limit updated successfully (in mock mode)"
-        });
-        return;
-      }
-
-      // Update real data in Supabase
       const { error } = await supabase
         .from('seller_listing_limits')
         .upsert({ 
@@ -165,14 +130,17 @@ const SellerLimitsSection = () => {
       });
     }
   };
-
-  // Determine which data to use
-  const displayData = isUsingMockData ? mockData : sellers || [];
   
-  // Filter the data based on search query
-  const filteredSellers = displayData.filter(seller =>
-    seller.seller_name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter sellers based on search query (name or phone)
+  const filteredSellers = sellers?.filter(seller => {
+    const searchLower = searchQuery.toLowerCase();
+    return seller.seller_name.toLowerCase().includes(searchLower) ||
+           // Check if any listing with this seller_id has a matching phone number
+           sellers.some(s => 
+             s.user_id === seller.user_id && 
+             s.seller_phone?.includes(searchQuery.startsWith('+91') ? searchQuery : `+91${searchQuery}`)
+           );
+  }) || [];
 
   return (
     <div className="space-y-4">
@@ -186,39 +154,26 @@ const SellerLimitsSection = () => {
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search sellers..."
+          placeholder="Search by seller name or phone number (with +91 prefix)"
           className="pl-8 w-full md:max-w-sm"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
-      {error && !isUsingMockData ? (
+      {error ? (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error loading seller limits</AlertTitle>
           <AlertDescription>
             There was a problem fetching seller limits. Please try again later or contact support.
             {error instanceof Error ? ` (${error.message})` : ''}
-            {isUsingMockData && <p className="mt-2 font-medium">Using demo data for now.</p>}
           </AlertDescription>
-          <div className="mt-2 flex gap-2">
-            <Button onClick={() => refetch()} variant="outline" size="sm" className="mt-2">
-              Retry
-            </Button>
-            {!isUsingMockData && (
-              <Button 
-                onClick={() => setIsUsingMockData(true)} 
-                variant="secondary" 
-                size="sm" 
-                className="mt-2"
-              >
-                Use Demo Data
-              </Button>
-            )}
-          </div>
+          <Button onClick={() => refetch()} variant="outline" size="sm" className="mt-2">
+            Retry
+          </Button>
         </Alert>
-      ) : isLoading && !isUsingMockData ? (
+      ) : isLoading ? (
         <div className="flex justify-center p-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -263,26 +218,6 @@ const SellerLimitsSection = () => {
             ))}
           </TableBody>
         </Table>
-      )}
-
-      {isUsingMockData && (
-        <Alert className="mt-4 bg-amber-50">
-          <AlertTitle className="text-amber-700">Demo Mode Active</AlertTitle>
-          <AlertDescription className="text-amber-600">
-            You are currently viewing demo data. Changes won't be saved to the database.
-            <Button 
-              onClick={() => {
-                setIsUsingMockData(false);
-                refetch();
-              }} 
-              variant="outline" 
-              size="sm" 
-              className="ml-2 border-amber-500 text-amber-700"
-            >
-              Try Real Data
-            </Button>
-          </AlertDescription>
-        </Alert>
       )}
     </div>
   );
