@@ -78,20 +78,61 @@ const SellerListingLimits = () => {
 
     setLoading(true);
     try {
+      // First, retrieve the exact seller record with the current listing limit
       const formattedPhone = phoneNumber.replace(/\D/g, '');
       const newLimit = increment ? sellerDetails.listing_limit + 1 : 5;
       
-      // Use the RPC function to update the seller listing limit
-      // This function handles all the phone number format variations internally
-      const { data: success, error } = await supabase.rpc('update_seller_listing_limit', { 
-        admin_user_id: user.id,
-        target_seller_phone: formattedPhone,
-        new_limit: newLimit
-      });
-
-      if (error || !success) {
-        console.error('Error updating listing limit:', error);
-        throw new Error("Failed to update seller listing limit.");
+      // Try different phone number formats to find the matching record
+      let matched = false;
+      let updateResult = null;
+      
+      // Try exact match
+      updateResult = await supabase
+        .from('sellers')
+        .update({ listing_limit: newLimit })
+        .eq('seller_phone', formattedPhone);
+        
+      if (updateResult?.count > 0) {
+        matched = true;
+      }
+      
+      // Try with +91 prefix
+      if (!matched) {
+        updateResult = await supabase
+          .from('sellers')
+          .update({ listing_limit: newLimit })
+          .eq('seller_phone', `+91${formattedPhone}`);
+          
+        if (updateResult?.count > 0) {
+          matched = true;
+        }
+      }
+      
+      // Try with last 10 digits for partial match
+      if (!matched && formattedPhone.length >= 10) {
+        const last10Digits = formattedPhone.slice(-10);
+        // First find the exact record that matches the pattern
+        const { data } = await supabase
+          .from('sellers')
+          .select('seller_phone')
+          .ilike('seller_phone', `%${last10Digits}%`)
+          .maybeSingle();
+          
+        if (data?.seller_phone) {
+          // Then update that specific record
+          updateResult = await supabase
+            .from('sellers')
+            .update({ listing_limit: newLimit })
+            .eq('seller_phone', data.seller_phone);
+            
+          if (updateResult?.count > 0) {
+            matched = true;
+          }
+        }
+      }
+      
+      if (!matched) {
+        throw new Error("Failed to update seller listing limit. No matching seller record found.");
       }
 
       // Update the local state to show the new limit
