@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, Minus } from 'lucide-react';
+import { Search, Plus, Minus, Info } from 'lucide-react';
 
 interface SellerDetails {
   seller_name: string;
@@ -24,20 +24,51 @@ const SellerListingLimits = () => {
     
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // Format phone number by removing non-digit characters
+      const formattedPhone = phoneNumber.replace(/\D/g, '');
+      
+      // First try with exact match
+      let { data, error } = await supabase
         .from('sellers')
         .select('seller_name, listing_limit')
-        .eq('seller_phone', phoneNumber)
-        .single();
-
-      if (error) throw error;
+        .eq('seller_phone', formattedPhone)
+        .maybeSingle();
       
-      setSellerDetails(data);
+      // If no exact match, try with the number including +91 prefix
+      if (!data) {
+        const withPrefix = `+91${formattedPhone}`;
+        ({ data, error } = await supabase
+          .from('sellers')
+          .select('seller_name, listing_limit')
+          .eq('seller_phone', withPrefix)
+          .maybeSingle());
+      }
+      
+      // If still no match, try with just the last 10 digits
+      if (!data && formattedPhone.length >= 10) {
+        const last10Digits = formattedPhone.slice(-10);
+        ({ data, error } = await supabase
+          .from('sellers')
+          .select('seller_name, listing_limit')
+          .ilike('seller_phone', `%${last10Digits}`)
+          .maybeSingle());
+      }
+
+      if (data) {
+        setSellerDetails(data);
+      } else {
+        toast({
+          title: "Error",
+          description: "Seller not found with this phone number.",
+          variant: "destructive",
+        });
+        setSellerDetails(null);
+      }
     } catch (err: any) {
       console.error('Error fetching seller:', err);
       toast({
         title: "Error",
-        description: "Seller not found with this phone number.",
+        description: "Failed to search for seller. Please try again.",
         variant: "destructive",
       });
       setSellerDetails(null);
@@ -51,9 +82,12 @@ const SellerListingLimits = () => {
 
     setLoading(true);
     try {
+      // Format phone number the same way as in search
+      const formattedPhone = phoneNumber.replace(/\D/g, '');
+      
       const { data, error } = await supabase.rpc('update_seller_listing_limit', {
         admin_user_id: user.id,
-        target_seller_phone: phoneNumber,
+        target_seller_phone: formattedPhone,
         new_limit: increment ? 10 : 5
       });
 
