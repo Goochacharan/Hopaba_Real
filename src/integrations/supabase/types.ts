@@ -380,9 +380,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      high_limit_sellers: {
+        Row: {
+          current_listing_count: number | null
+          max_listings: number | null
+          seller_names: string[] | null
+          seller_phones: string[] | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      get_high_limit_sellers: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          max_listings: number
+          updated_at: string
+          seller_names: string[]
+          seller_phones: string[]
+          current_listing_count: number
+        }[]
+      }
       gtrgm_compress: {
         Args: { "": unknown }
         Returns: unknown

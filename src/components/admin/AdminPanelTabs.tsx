@@ -4,6 +4,7 @@ import { PendingMarketplaceListings } from "./PendingMarketplaceListings";
 import { PendingServiceProviders } from "./PendingServiceProviders";
 import { PendingEvents } from "./PendingEvents";
 import SellerLimitsSection from "./SellerLimitsSection";
+import HighLimitSellers from "./HighLimitSellers";
 import { usePendingListings } from "@/hooks/usePendingListings";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
@@ -65,11 +66,22 @@ export function AdminPanelTabs() {
 
       <Separator />
 
-      {/* Seller Limits Section - Now in its own Card container */}
+      {/* Seller Management Section */}
       <div>
         <h2 className="text-2xl font-bold mb-6">Seller Management</h2>
         <Card className="p-6">
-          <SellerLimitsSection />
+          <Tabs defaultValue="all-sellers">
+            <TabsList>
+              <TabsTrigger value="all-sellers">All Sellers</TabsTrigger>
+              <TabsTrigger value="high-limit">High Limit Sellers</TabsTrigger>
+            </TabsList>
+            <TabsContent value="all-sellers">
+              <SellerLimitsSection />
+            </TabsContent>
+            <TabsContent value="high-limit">
+              <HighLimitSellers />
+            </TabsContent>
+          </Tabs>
         </Card>
       </div>
     </div>
