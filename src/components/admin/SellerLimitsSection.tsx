@@ -30,56 +30,61 @@ const SellerLimitsSection = () => {
     queryKey: ['seller-limits'],
     queryFn: async () => {
       try {
-        // Directly fetch from seller_listing_limits table without any joins
+        // Simpler approach: first fetch directly from seller_listing_limits
         const { data: limits, error: limitsError } = await supabase
           .from('seller_listing_limits')
           .select('*');
 
         if (limitsError) throw limitsError;
-
-        if (!limits || !Array.isArray(limits)) {
-          return [];
-        }
-
-        // Then fetch marketplace listings with seller information
+        
+        // Then fetch unique seller details from marketplace listings
         const { data: listings, error: listingsError } = await supabase
           .from('marketplace_listings')
           .select('seller_id, seller_name')
-          .in('approval_status', ['approved', 'pending'])
           .order('seller_name');
-
+          
         if (listingsError) throw listingsError;
 
-        // Combine the data - with fallback names for sellers without listings
-        const sellerLimits: SellerLimit[] = limits.map(limit => {
-          const listing = listings?.find(l => l.seller_id === limit.user_id);
-          return {
+        // Create a map of seller IDs to seller names
+        const sellerMap = new Map();
+        listings?.forEach(listing => {
+          if (listing.seller_id && listing.seller_name) {
+            sellerMap.set(listing.seller_id, listing.seller_name);
+          }
+        });
+        
+        // Combine the data
+        const sellerLimits: SellerLimit[] = [];
+        
+        // Process limits with known sellers
+        limits?.forEach(limit => {
+          const sellerName = sellerMap.get(limit.user_id) || `Seller (${limit.user_id.substring(0, 8)})`;
+          sellerLimits.push({
             user_id: limit.user_id,
             max_listings: limit.max_listings,
-            seller_name: listing?.seller_name || `Seller (${limit.user_id.substring(0, 8)})`
-          };
+            seller_name: sellerName
+          });
         });
-
-        // Add any sellers from listings that don't have limits set
-        const existingUserIds = new Set(limits.map(l => l.user_id));
-        const uniqueSellers = new Map();
         
-        listings?.forEach(listing => {
-          if (listing.seller_id && !existingUserIds.has(listing.seller_id) && !uniqueSellers.has(listing.seller_id)) {
-            uniqueSellers.set(listing.seller_id, {
-              user_id: listing.seller_id,
+        // Add sellers from listings who don't have limits yet
+        sellerMap.forEach((name, id) => {
+          if (!limits?.some(l => l.user_id === id)) {
+            sellerLimits.push({
+              user_id: id,
               max_listings: 10, // Default value
-              seller_name: listing.seller_name
+              seller_name: name
             });
           }
         });
         
-        return [...sellerLimits, ...Array.from(uniqueSellers.values())];
+        return sellerLimits;
       } catch (err) {
         console.error('Error fetching seller limits:', err);
         throw err;
       }
-    }
+    },
+    retry: 1,
+    refetchOnWindowFocus: false
   });
 
   const updateLimit = async (userId: string, newLimit: number) => {
