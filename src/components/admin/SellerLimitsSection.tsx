@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Table, 
@@ -24,18 +24,28 @@ interface SellerLimit {
 
 const SellerLimitsSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [mockData, setMockData] = useState<SellerLimit[]>([]);
+  const [isUsingMockData, setIsUsingMockData] = useState(false);
   const { toast } = useToast();
 
+  // Query to fetch seller limits
   const { data: sellers, isLoading, error, refetch } = useQuery({
     queryKey: ['seller-limits'],
     queryFn: async () => {
       try {
-        // Simpler approach: first fetch directly from seller_listing_limits
+        console.log("Fetching seller limits...");
+        
+        // First fetch directly from seller_listing_limits
         const { data: limits, error: limitsError } = await supabase
           .from('seller_listing_limits')
           .select('*');
 
-        if (limitsError) throw limitsError;
+        if (limitsError) {
+          console.error("Error fetching limits:", limitsError);
+          throw limitsError;
+        }
+
+        console.log("Fetched limits:", limits);
         
         // Then fetch unique seller details from marketplace listings
         const { data: listings, error: listingsError } = await supabase
@@ -43,8 +53,13 @@ const SellerLimitsSection = () => {
           .select('seller_id, seller_name')
           .order('seller_name');
           
-        if (listingsError) throw listingsError;
+        if (listingsError) {
+          console.error("Error fetching listings:", listingsError);
+          throw listingsError;
+        }
 
+        console.log("Fetched listings:", listings);
+        
         // Create a map of seller IDs to seller names
         const sellerMap = new Map();
         listings?.forEach(listing => {
@@ -87,8 +102,45 @@ const SellerLimitsSection = () => {
     refetchOnWindowFocus: false
   });
 
+  // If real data fails to load, use mock data
+  useEffect(() => {
+    if (error) {
+      console.log("Error detected, using mock data instead");
+      // Generate some mock data 
+      const mockSellers = [
+        { user_id: '1', max_listings: 10, seller_name: 'John Doe' },
+        { user_id: '2', max_listings: 15, seller_name: 'Jane Smith' },
+        { user_id: '3', max_listings: 5, seller_name: 'Alex Johnson' },
+        { user_id: '4', max_listings: 20, seller_name: 'Maria Garcia' },
+        { user_id: '5', max_listings: 8, seller_name: 'Sam Wilson' },
+      ];
+      setMockData(mockSellers);
+      setIsUsingMockData(true);
+    } else {
+      setIsUsingMockData(false);
+    }
+  }, [error]);
+
   const updateLimit = async (userId: string, newLimit: number) => {
     try {
+      if (isUsingMockData) {
+        // Update mock data
+        setMockData(prev => 
+          prev.map(seller => 
+            seller.user_id === userId 
+              ? { ...seller, max_listings: newLimit }
+              : seller
+          )
+        );
+        
+        toast({
+          title: "Success",
+          description: "Listing limit updated successfully (in mock mode)"
+        });
+        return;
+      }
+
+      // Update real data in Supabase
       const { error } = await supabase
         .from('seller_listing_limits')
         .upsert({ 
@@ -114,9 +166,13 @@ const SellerLimitsSection = () => {
     }
   };
 
-  const filteredSellers = sellers?.filter(seller =>
+  // Determine which data to use
+  const displayData = isUsingMockData ? mockData : sellers || [];
+  
+  // Filter the data based on search query
+  const filteredSellers = displayData.filter(seller =>
     seller.seller_name.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  );
 
   return (
     <div className="space-y-4">
@@ -137,19 +193,32 @@ const SellerLimitsSection = () => {
         />
       </div>
 
-      {error ? (
+      {error && !isUsingMockData ? (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error loading seller limits</AlertTitle>
           <AlertDescription>
             There was a problem fetching seller limits. Please try again later or contact support.
             {error instanceof Error ? ` (${error.message})` : ''}
+            {isUsingMockData && <p className="mt-2 font-medium">Using demo data for now.</p>}
           </AlertDescription>
-          <Button onClick={() => refetch()} variant="outline" size="sm" className="mt-2">
-            Retry
-          </Button>
+          <div className="mt-2 flex gap-2">
+            <Button onClick={() => refetch()} variant="outline" size="sm" className="mt-2">
+              Retry
+            </Button>
+            {!isUsingMockData && (
+              <Button 
+                onClick={() => setIsUsingMockData(true)} 
+                variant="secondary" 
+                size="sm" 
+                className="mt-2"
+              >
+                Use Demo Data
+              </Button>
+            )}
+          </div>
         </Alert>
-      ) : isLoading ? (
+      ) : isLoading && !isUsingMockData ? (
         <div className="flex justify-center p-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -194,6 +263,26 @@ const SellerLimitsSection = () => {
             ))}
           </TableBody>
         </Table>
+      )}
+
+      {isUsingMockData && (
+        <Alert className="mt-4 bg-amber-50">
+          <AlertTitle className="text-amber-700">Demo Mode Active</AlertTitle>
+          <AlertDescription className="text-amber-600">
+            You are currently viewing demo data. Changes won't be saved to the database.
+            <Button 
+              onClick={() => {
+                setIsUsingMockData(false);
+                refetch();
+              }} 
+              variant="outline" 
+              size="sm" 
+              className="ml-2 border-amber-500 text-amber-700"
+            >
+              Try Real Data
+            </Button>
+          </AlertDescription>
+        </Alert>
       )}
     </div>
   );
