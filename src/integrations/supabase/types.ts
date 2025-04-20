@@ -552,6 +552,14 @@ export type Database = {
         Args: { "": string }
         Returns: string[]
       }
+      update_seller_listing_limit: {
+        Args: {
+          admin_user_id: string
+          target_seller_phone: string
+          new_limit: number
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

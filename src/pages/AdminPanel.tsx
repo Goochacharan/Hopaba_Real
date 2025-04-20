@@ -7,6 +7,8 @@ import { useAdmin } from '@/hooks/useAdmin';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SellerListingLimits from '@/components/admin/SellerListingLimits';
+import HighLimitSellers from '@/components/admin/HighLimitSellers';
 
 const AdminPanel = () => {
   const { isAdmin, loading, error } = useAdmin();
@@ -70,8 +72,18 @@ const AdminPanel = () => {
           <p className="text-muted-foreground">Manage and approve content across the platform</p>
         </div>
         
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <AdminPanelTabs />
+        <div className="space-y-8">
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <SellerListingLimits />
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <HighLimitSellers />
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <AdminPanelTabs />
+          </div>
         </div>
       </div>
     </MainLayout>
