@@ -108,6 +108,3 @@ export const PendingServiceProviders: React.FC<PendingServiceProvidersProps> = (
     </div>
   );
 };
-
-// Add a default export that re-exports the named export
-export default PendingServiceProviders;
