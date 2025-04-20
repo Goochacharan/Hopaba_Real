@@ -3,36 +3,71 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { AuthProvider } from "./hooks/useAuth";
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
-// Lazy load route components
-const SearchResults = React.lazy(() => import("./pages/SearchResults"));
-const LocationDetails = React.lazy(() => import("./pages/LocationDetails"));
-const NotFound = React.lazy(() => import("./pages/NotFound"));
-const Profile = React.lazy(() => import("./pages/Profile"));
-const MyList = React.lazy(() => import("./pages/MyList"));
-const Events = React.lazy(() => import("./pages/Events"));
-const Map = React.lazy(() => import("./pages/Map"));
-const Login = React.lazy(() => import("./pages/Login"));
-const Signup = React.lazy(() => import("./pages/Signup"));
-const Marketplace = React.lazy(() => import("./pages/Marketplace"));
-const MarketplaceListingDetails = React.lazy(() => import("./pages/MarketplaceListingDetails"));
-const SellerDetails = React.lazy(() => import("./pages/SellerDetails"));
-const AdminPanel = React.lazy(() => import("./pages/AdminPanel"));
-const Settings = React.lazy(() => import("./pages/Settings"));
+// Lazy load route components with chunks named for better debugging
+const SearchResults = React.lazy(() => import(/* webpackChunkName: "search-results" */ "./pages/SearchResults"));
+const LocationDetails = React.lazy(() => import(/* webpackChunkName: "location-details" */ "./pages/LocationDetails"));
+const NotFound = React.lazy(() => import(/* webpackChunkName: "not-found" */ "./pages/NotFound"));
+const Profile = React.lazy(() => import(/* webpackChunkName: "profile" */ "./pages/Profile"));
+const MyList = React.lazy(() => import(/* webpackChunkName: "my-list" */ "./pages/MyList"));
+const Events = React.lazy(() => import(/* webpackChunkName: "events" */ "./pages/Events"));
+const Map = React.lazy(() => import(/* webpackChunkName: "map" */ "./pages/Map"));
+const Login = React.lazy(() => import(/* webpackChunkName: "login" */ "./pages/Login"));
+const Signup = React.lazy(() => import(/* webpackChunkName: "signup" */ "./pages/Signup"));
+const Marketplace = React.lazy(() => import(/* webpackChunkName: "marketplace" */ "./pages/Marketplace"));
+const MarketplaceListingDetails = React.lazy(() => import(/* webpackChunkName: "marketplace-listing" */ "./pages/MarketplaceListingDetails"));
+const SellerDetails = React.lazy(() => import(/* webpackChunkName: "seller-details" */ "./pages/SellerDetails"));
+const AdminPanel = React.lazy(() => import(/* webpackChunkName: "admin-panel" */ "./pages/AdminPanel"));
+const Settings = React.lazy(() => import(/* webpackChunkName: "settings" */ "./pages/Settings"));
 
-const queryClient = new QueryClient();
+// Configure Query Client with performance optimizations
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // Data stays fresh for 5 minutes
+      cacheTime: 1000 * 60 * 30, // Cache persists for 30 minutes
+      retry: 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
-// Loading component for Suspense
+// Loading component with better UX
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  <div className="min-h-screen flex items-center justify-center bg-background/50 backdrop-blur-sm">
+    <div className="flex flex-col items-center gap-2">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <span className="text-sm text-muted-foreground">Loading...</span>
+    </div>
   </div>
 );
+
+// Route prefetching component
+const RoutePrefetcher = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Prefetch adjacent routes based on current location
+    const prefetchRoutes = () => {
+      if (location.pathname === '/') {
+        import("./pages/SearchResults");
+        import("./pages/Marketplace");
+      } else if (location.pathname.startsWith('/marketplace')) {
+        import("./pages/MarketplaceListingDetails");
+        import("./pages/SellerDetails");
+      }
+    };
+
+    prefetchRoutes();
+  }, [location]);
+
+  return null;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -42,6 +77,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <RoutePrefetcher />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<SearchResults />} />
