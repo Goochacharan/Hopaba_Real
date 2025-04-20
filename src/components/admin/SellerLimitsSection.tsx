@@ -22,6 +22,11 @@ interface SellerLimit {
   seller_name: string;
 }
 
+// Create a type-safe client for tables not in the TypeScript definitions
+const customClient = {
+  from: (table: string) => supabase.from(table as any)
+};
+
 const SellerLimitsSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
@@ -30,9 +35,8 @@ const SellerLimitsSection = () => {
     queryKey: ['seller-limits'],
     queryFn: async () => {
       try {
-        // Since the seller_listing_limits table might be new, we need to fetch
-        // data in a way that handles tables that may not be in the TypeScript definitions yet
-        const { data: limits, error: limitsError } = await supabase
+        // Use the custom client to access the seller_listing_limits table
+        const { data: limits, error: limitsError } = await customClient
           .from('seller_listing_limits')
           .select(`
             user_id,
@@ -42,7 +46,7 @@ const SellerLimitsSection = () => {
               seller_id
             )
           `)
-          .gt('max_listings', 5) as any;
+          .gt('max_listings', 5);
 
         if (limitsError) throw limitsError;
 
@@ -73,14 +77,14 @@ const SellerLimitsSection = () => {
 
   const updateLimit = async (userId: string, newLimit: number) => {
     try {
-      // Using 'as any' to bypass TypeScript errors with tables not in the definition
-      const { error } = await (supabase
+      // Use the custom client for the update operation as well
+      const { error } = await customClient
         .from('seller_listing_limits')
         .upsert({ 
           user_id: userId, 
           max_listings: newLimit,
           updated_at: new Date().toISOString()
-        }) as any);
+        });
 
       if (error) throw error;
 
