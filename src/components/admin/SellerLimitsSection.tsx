@@ -21,8 +21,8 @@ interface Seller {
   seller_id: string;
   seller_name: string;
   seller_phone?: string;
-  seller_whatsapp?: string;
-  seller_instagram?: string;
+  seller_whatsapp?: string; // Keep in interface even though not displayed
+  seller_instagram?: string; // Keep in interface even though not displayed
   listing_limit: number;
   seller_rating?: number;
 }
@@ -85,63 +85,48 @@ const SellerLimitsSection = () => {
     return phone.replace(/\D/g, '');
   };
 
-  // Handle phone number search
-  const matchesPhoneNumber = (seller: Seller, query: string): boolean => {
-    if (!query) return true; // If no query, all sellers match
+  // Apply phone number search filter
+  const applyPhoneFilter = () => {
+    if (!sellers) return;
     
-    // Clean the query to have only digits
-    const cleanQuery = query.replace(/\D/g, '');
-    
-    if (cleanQuery.length < 1) return true; // If empty query after cleaning, all sellers match
-    
-    const cleanSellerPhone = normalizePhone(seller.seller_phone);
-    const cleanSellerWhatsapp = normalizePhone(seller.seller_whatsapp);
-    
-    // Check if any phone number contains the query digits
-    return cleanSellerPhone.includes(cleanQuery) || cleanSellerWhatsapp.includes(cleanQuery);
-  };
-
-  // Filter sellers based on search criteria whenever sellers, searchQuery, or phoneSearchQuery changes
-  useEffect(() => {
-    if (!sellers) {
-      setFilteredSellers([]);
+    // If empty search, show all sellers
+    if (!phoneSearchQuery.trim() && !searchQuery.trim()) {
+      setFilteredSellers(sellers);
       return;
     }
     
+    // Apply text search and phone number search
     const filtered = sellers.filter(seller => {
-      // Text search (name, instagram)
-      const textMatch = !searchQuery.trim() || 
-        seller.seller_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        (seller.seller_instagram && seller.seller_instagram.toLowerCase().includes(searchQuery.toLowerCase()));
+      // Text search for seller name
+      const nameMatch = !searchQuery.trim() || 
+        seller.seller_name.toLowerCase().includes(searchQuery.toLowerCase());
       
       // Phone number search
-      const phoneMatch = matchesPhoneNumber(seller, phoneSearchQuery);
+      let phoneMatch = true;
+      if (phoneSearchQuery.trim()) {
+        // Clean the query to have only digits
+        const cleanQuery = phoneSearchQuery.replace(/\D/g, '');
+        
+        if (cleanQuery.length > 0) {
+          const cleanSellerPhone = normalizePhone(seller.seller_phone);
+          phoneMatch = cleanSellerPhone.includes(cleanQuery);
+        }
+      }
       
       // Both conditions must be met
-      return textMatch && phoneMatch;
+      return nameMatch && phoneMatch;
     });
     
     setFilteredSellers(filtered);
-  }, [sellers, searchQuery, phoneSearchQuery]);
-
-  // Handle search button click
-  const handleSearch = () => {
-    if (!sellers) return;
     
-    const filtered = sellers.filter(seller => {
-      // Text search (name, instagram)
-      const textMatch = !searchQuery.trim() || 
-        seller.seller_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        (seller.seller_instagram && seller.seller_instagram.toLowerCase().includes(searchQuery.toLowerCase()));
-      
-      // Phone number search
-      const phoneMatch = matchesPhoneNumber(seller, phoneSearchQuery);
-      
-      // Both conditions must be met
-      return textMatch && phoneMatch;
-    });
-    
-    setFilteredSellers(filtered);
+    // Provide feedback on search results
+    if (filtered.length === 0) {
+      toast({
+        title: "No matches found",
+        description: "No sellers match your search criteria",
+        duration: 3000
+      });
+    }
   };
 
   // Initialize filtered sellers when sellers data is loaded
@@ -163,7 +148,7 @@ const SellerLimitsSection = () => {
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search sellers by name or Instagram"
+            placeholder="Search by seller name"
             className="pl-8 w-full"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -174,14 +159,14 @@ const SellerLimitsSection = () => {
           <Phone className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Filter by phone number (digits only)"
+            placeholder="Search by phone number"
             className="pl-8 w-full"
             value={phoneSearchQuery}
             onChange={(e) => setPhoneSearchQuery(e.target.value)}
           />
         </div>
         
-        <Button onClick={handleSearch} className="md:w-auto w-full">
+        <Button onClick={applyPhoneFilter} className="md:w-auto w-full">
           Search
         </Button>
       </div>
@@ -211,7 +196,7 @@ const SellerLimitsSection = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Seller Name</TableHead>
-              <TableHead>Contact Information</TableHead>
+              <TableHead>Phone Number</TableHead>
               <TableHead>Current Limit</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
@@ -223,17 +208,7 @@ const SellerLimitsSection = () => {
                   {seller.seller_name}
                 </TableCell>
                 <TableCell>
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    {seller.seller_phone && (
-                      <div>📞 {seller.seller_phone}</div>
-                    )}
-                    {seller.seller_whatsapp && (
-                      <div>WhatsApp: {seller.seller_whatsapp}</div>
-                    )}
-                    {seller.seller_instagram && (
-                      <div>Instagram: @{seller.seller_instagram}</div>
-                    )}
-                  </div>
+                  {seller.seller_phone || 'No phone number'}
                 </TableCell>
                 <TableCell>{seller.listing_limit}</TableCell>
                 <TableCell>
