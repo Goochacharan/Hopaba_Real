@@ -54,7 +54,6 @@ const HighLimitSellers = () => {
     );
   }
 
-  // If no high limit sellers exist, show a message
   if (!highLimitSellers || highLimitSellers.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
