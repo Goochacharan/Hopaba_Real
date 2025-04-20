@@ -1,12 +1,14 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Search, X, Mic, Sparkles, LogIn } from 'lucide-react';
+import { Search, X, Mic, Sparkles } from 'lucide-react';
 import { Input } from './ui/input';
 import { toast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useVoiceSearch } from '@/hooks/useVoiceSearch';
+import { useSearchEnhancement } from '@/hooks/useSearchEnhancement';
+import SearchAuthDialog from './search/SearchAuthDialog';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -16,6 +18,14 @@ interface SearchBarProps {
   currentRoute?: string;
 }
 
+const suggestionExamples = [
+  "hidden gem restaurants in Indiranagar",
+  "good flute teacher in Malleshwaram",
+  "places to visit in Nagarbhavi",
+  "best unisex salon near me",
+  "plumbers available right now"
+];
+
 const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   className,
@@ -24,19 +34,26 @@ const SearchBar: React.FC<SearchBarProps> = ({
   currentRoute
 }) => {
   const location = useLocation();
-  const navigate = useNavigate();
   const { user } = useAuth();
-  
   const currentPath = location.pathname;
+  
   const [query, setQuery] = useState(initialValue);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [isEnhancing, setIsEnhancing] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   
+  const { isEnhancing, enhanceSearchQuery } = useSearchEnhancement();
+  const { isListening, startSpeechRecognition } = useVoiceSearch({
+    onTranscript: (transcript) => {
+      setQuery(transcript);
+      setTimeout(() => {
+        onSearch(transcript);
+      }, 500);
+    }
+  });
+
   const getPlaceholder = () => {
     if (currentPath === '/events' || currentPath.startsWith('/events')) {
       return "Search for events...";
@@ -49,64 +66,22 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
     return placeholder || "What are you looking for today?";
   };
-  
-  const suggestionExamples = ["hidden gem restaurants in Indiranagar", "good flute teacher in Malleshwaram", "places to visit in Nagarbhavi", "best unisex salon near me", "plumbers available right now"];
-  
-  const enhanceSearchQuery = async (rawQuery: string) => {
-    if (currentPath === '/marketplace' || currentPath.startsWith('/marketplace')) {
-      console.log("Marketplace search - not enhancing:", rawQuery);
-      return rawQuery;
-    }
-    
-    if (!rawQuery.trim()) return rawQuery;
-    setIsEnhancing(true);
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('enhance-search', {
-        body: { query: rawQuery }
-      });
-      
-      if (error) {
-        console.error('Error enhancing search:', error);
-        return rawQuery;
-      }
-      
-      console.log('AI enhanced search:', data);
-      
-      if (data.enhanced && data.enhanced !== rawQuery) {
-        toast({
-          title: "Search enhanced with AI",
-          description: `We improved your search to: "${data.enhanced}"`,
-          duration: 5000
-        });
-        return data.enhanced;
-      }
-      
-      return rawQuery;
-    } catch (err) {
-      console.error('Failed to enhance search:', err);
-      return rawQuery;
-    } finally {
-      setIsEnhancing(false);
-    }
-  };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     if (!user) {
       setShowAuthDialog(true);
       return;
     }
+
     if (query.trim()) {
       console.log("Original search query:", query);
       let enhancedQuery = query;
       
       if (currentPath !== '/events' && currentPath !== '/marketplace' && !currentPath.startsWith('/marketplace')) {
         console.log("Not a marketplace or events page, enhancing query");
-        enhancedQuery = await enhanceSearchQuery(query);
-      } else {
-        console.log("Marketplace or events page, not enhancing query");
+        enhancedQuery = await enhanceSearchQuery(query, currentPath);
       }
       
       console.log("Final search query to use:", enhancedQuery);
@@ -125,56 +100,42 @@ const SearchBar: React.FC<SearchBarProps> = ({
       }
     }
   };
-  
+
   const clearSearch = () => {
     setQuery('');
     if (inputRef.current) {
       inputRef.current.focus();
     }
   };
-  
-  const startSpeechRecognition = () => {
+
+  const handleSearchButtonClick = async () => {
     if (!user) {
       setShowAuthDialog(true);
       return;
     }
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      toast({
-        title: "Not supported",
-        description: "Voice search is not supported in your browser",
-        variant: "destructive",
-        duration: 3000
-      });
+    
+    if (query.trim()) {
+      let enhancedQuery = query;
+      
+      if (currentPath !== '/events' && currentPath !== '/marketplace' && !currentPath.startsWith('/marketplace')) {
+        enhancedQuery = await enhanceSearchQuery(query, currentPath);
+      }
+      
+      if (enhancedQuery !== query) {
+        setQuery(enhancedQuery);
+      }
+      onSearch(enhancedQuery);
+    }
+  };
+
+  const handleVoiceSearch = () => {
+    if (!user) {
+      setShowAuthDialog(true);
       return;
     }
-    setIsListening(true);
-    const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognitionConstructor();
-    recognition.lang = 'en-US';
-    recognition.interimResults = false;
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      const transcript = event.results[0][0].transcript;
-      setQuery(transcript);
-      setIsListening(false);
-      setTimeout(() => {
-        onSearch(transcript);
-      }, 500);
-    };
-    recognition.onerror = () => {
-      setIsListening(false);
-      toast({
-        title: "Error",
-        description: "Could not recognize speech",
-        variant: "destructive",
-        duration: 3000
-      });
-    };
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-    recognition.start();
+    startSpeechRecognition();
   };
-  
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node) && isExpanded) {
@@ -186,48 +147,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isExpanded]);
-  
+
   useEffect(() => {
     if (initialValue) {
       setQuery(initialValue);
     }
   }, [initialValue]);
-  
-  const handleSearchButtonClick = async () => {
-    if (!user) {
-      setShowAuthDialog(true);
-      return;
-    }
-    
-    if (query.trim()) {
-      console.log("Search button clicked with query:", query);
-      let enhancedQuery = query;
-      
-      if (currentPath !== '/events' && currentPath !== '/marketplace' && !currentPath.startsWith('/marketplace')) {
-        console.log("Enhancing query from button click");
-        enhancedQuery = await enhanceSearchQuery(query);
-      } else {
-        console.log("Not enhancing marketplace/events query from button click");
-      }
-      
-      console.log("Final search query from button click:", enhancedQuery);
-      if (enhancedQuery !== query) {
-        setQuery(enhancedQuery);
-      }
-      onSearch(enhancedQuery);
-    }
-  };
-  
-  const navigateToLogin = () => {
-    navigate('/login');
-    setShowAuthDialog(false);
-  };
-  
-  const navigateToSignup = () => {
-    navigate('/signup');
-    setShowAuthDialog(false);
-  };
-  
+
   return (
     <div className={cn("w-full max-w-2xl mx-auto", className)}>
       <form ref={formRef} onSubmit={handleSubmit} className="w-full bg-white rounded-xl shadow-md border border-border/50">
@@ -256,7 +182,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           
           <button 
             type="button" 
-            onClick={startSpeechRecognition} 
+            onClick={handleVoiceSearch} 
             className={cn(
               "p-2 transition-colors rounded-full", 
               isListening ? "text-red-500 animate-pulse" : "text-muted-foreground hover:text-foreground"
@@ -281,26 +207,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
         </div>
       </form>
 
-      <AlertDialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Authentication Required</AlertDialogTitle>
-            <AlertDialogDescription>
-              You need to be logged in to search on Hopaba. Please login or sign up to continue.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex justify-between">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <div className="flex gap-2">
-              <AlertDialogAction onClick={navigateToLogin} className="flex items-center gap-2 bg-primary">
-                <LogIn className="h-4 w-4" />
-                Login
-              </AlertDialogAction>
-              <AlertDialogAction onClick={navigateToSignup}>Sign Up</AlertDialogAction>
-            </div>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <SearchAuthDialog 
+        open={showAuthDialog} 
+        onOpenChange={setShowAuthDialog}
+      />
     </div>
   );
 };
