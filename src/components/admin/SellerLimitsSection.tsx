@@ -16,6 +16,12 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
+interface SellerLimit {
+  user_id: string;
+  max_listings: number;
+  seller_name: string;
+}
+
 const SellerLimitsSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
@@ -23,35 +29,45 @@ const SellerLimitsSection = () => {
   const { data: sellers, isLoading, error, refetch } = useQuery({
     queryKey: ['seller-limits'],
     queryFn: async () => {
-      // Since the seller_listing_limits table might be new, we need to fetch
-      // data in a way that handles tables that may not be in the TypeScript definitions yet
-      const { data: limits, error: limitsError } = await supabase
-        .from('seller_listing_limits')
-        .select(`
-          user_id,
-          max_listings,
-          marketplace_listings!marketplace_listings_seller_id_fkey (
-            seller_name,
-            seller_id
-          )
-        `)
-        .gt('max_listings', 5) as any;
+      try {
+        // Since the seller_listing_limits table might be new, we need to fetch
+        // data in a way that handles tables that may not be in the TypeScript definitions yet
+        const { data: limits, error: limitsError } = await supabase
+          .from('seller_listing_limits')
+          .select(`
+            user_id,
+            max_listings,
+            marketplace_listings!inner(
+              seller_name,
+              seller_id
+            )
+          `)
+          .gt('max_listings', 5) as any;
 
-      if (limitsError) throw limitsError;
+        if (limitsError) throw limitsError;
 
-      // Remove duplicates and format data
-      const uniqueSellers = limits.reduce((acc: any[], curr: any) => {
-        if (!acc.find((item: any) => item.user_id === curr.user_id)) {
-          acc.push({
-            user_id: curr.user_id,
-            max_listings: curr.max_listings,
-            seller_name: curr.marketplace_listings?.[0]?.seller_name || 'Unknown Seller'
-          });
+        if (!limits || !Array.isArray(limits)) {
+          return [];
         }
-        return acc;
-      }, []);
 
-      return uniqueSellers;
+        // Remove duplicates and format data
+        const uniqueSellers = limits.reduce((acc: SellerLimit[], curr: any) => {
+          const marketplace_listings = curr.marketplace_listings || [];
+          if (!acc.find((item: any) => item.user_id === curr.user_id)) {
+            acc.push({
+              user_id: curr.user_id,
+              max_listings: curr.max_listings,
+              seller_name: marketplace_listings[0]?.seller_name || 'Unknown Seller'
+            });
+          }
+          return acc;
+        }, []);
+
+        return uniqueSellers;
+      } catch (err) {
+        console.error('Error fetching seller limits:', err);
+        throw err;
+      }
     }
   });
 
@@ -85,7 +101,7 @@ const SellerLimitsSection = () => {
 
   const filteredSellers = sellers?.filter(seller =>
     seller.seller_name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ) || [];
 
   if (error) {
     return (
@@ -124,7 +140,7 @@ const SellerLimitsSection = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredSellers?.map((seller) => (
+            {filteredSellers.map((seller) => (
               <TableRow key={seller.user_id}>
                 <TableCell>{seller.seller_name}</TableCell>
                 <TableCell>{seller.max_listings}</TableCell>

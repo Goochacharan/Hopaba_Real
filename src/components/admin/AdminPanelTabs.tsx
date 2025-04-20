@@ -4,8 +4,17 @@ import { PendingMarketplaceListings } from "./PendingMarketplaceListings";
 import { PendingServiceProviders } from "./PendingServiceProviders";
 import { PendingEvents } from "./PendingEvents";
 import SellerLimitsSection from "./SellerLimitsSection";
+import { usePendingListings } from "@/hooks/usePendingListings";
 
 export function AdminPanelTabs() {
+  const { 
+    pendingListings, 
+    loading, 
+    error, 
+    updateApprovalStatus,
+    refreshListings
+  } = usePendingListings();
+
   return (
     <Tabs defaultValue="marketplace" className="w-full">
       <TabsList>
@@ -15,13 +24,34 @@ export function AdminPanelTabs() {
         <TabsTrigger value="seller-limits">Seller Limits</TabsTrigger>
       </TabsList>
       <TabsContent value="marketplace">
-        <PendingMarketplaceListings />
+        <PendingMarketplaceListings 
+          listings={pendingListings.marketplace}
+          loading={loading}
+          error={error}
+          onApprove={(id) => updateApprovalStatus('marketplace', id, 'approved')}
+          onReject={(id) => updateApprovalStatus('marketplace', id, 'rejected')}
+          onRefresh={refreshListings}
+        />
       </TabsContent>
       <TabsContent value="services">
-        <PendingServiceProviders />
+        <PendingServiceProviders 
+          services={pendingListings.services}
+          loading={loading}
+          error={error}
+          onApprove={(id) => updateApprovalStatus('services', id, 'approved')}
+          onReject={(id) => updateApprovalStatus('services', id, 'rejected')}
+          onRefresh={refreshListings}
+        />
       </TabsContent>
       <TabsContent value="events">
-        <PendingEvents />
+        <PendingEvents 
+          events={pendingListings.events}
+          loading={loading}
+          error={error}
+          onApprove={(id) => updateApprovalStatus('events', id, 'approved')}
+          onReject={(id) => updateApprovalStatus('events', id, 'rejected')}
+          onRefresh={refreshListings}
+        />
       </TabsContent>
       <TabsContent value="seller-limits">
         <SellerLimitsSection />
