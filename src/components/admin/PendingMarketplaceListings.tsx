@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
@@ -115,3 +116,6 @@ export const PendingMarketplaceListings: React.FC<PendingMarketplaceListingsProp
     </div>
   );
 };
+
+// Add a default export that re-exports the named export
+export default PendingMarketplaceListings;

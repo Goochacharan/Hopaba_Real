@@ -23,6 +23,8 @@ const SellerLimitsSection = () => {
   const { data: sellers, isLoading, error, refetch } = useQuery({
     queryKey: ['seller-limits'],
     queryFn: async () => {
+      // Since the seller_listing_limits table might be new, we need to fetch
+      // data in a way that handles tables that may not be in the TypeScript definitions yet
       const { data: limits, error: limitsError } = await supabase
         .from('seller_listing_limits')
         .select(`
@@ -33,7 +35,7 @@ const SellerLimitsSection = () => {
             seller_id
           )
         `)
-        .gt('max_listings', 5);
+        .gt('max_listings', 5) as any;
 
       if (limitsError) throw limitsError;
 
@@ -55,13 +57,14 @@ const SellerLimitsSection = () => {
 
   const updateLimit = async (userId: string, newLimit: number) => {
     try {
-      const { error } = await supabase
+      // Using 'as any' to bypass TypeScript errors with tables not in the definition
+      const { error } = await (supabase
         .from('seller_listing_limits')
         .upsert({ 
           user_id: userId, 
           max_listings: newLimit,
           updated_at: new Date().toISOString()
-        });
+        }) as any);
 
       if (error) throw error;
 

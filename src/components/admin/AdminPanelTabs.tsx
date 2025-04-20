@@ -1,8 +1,8 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PendingMarketplaceListings from "./PendingMarketplaceListings";
-import PendingServiceProviders from "./PendingServiceProviders";
-import PendingEvents from "./PendingEvents";
+import { PendingMarketplaceListings } from "./PendingMarketplaceListings";
+import { PendingServiceProviders } from "./PendingServiceProviders";
+import { PendingEvents } from "./PendingEvents";
 import SellerLimitsSection from "./SellerLimitsSection";
 
 export function AdminPanelTabs() {

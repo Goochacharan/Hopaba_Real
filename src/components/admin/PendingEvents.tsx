@@ -108,3 +108,6 @@ export const PendingEvents: React.FC<PendingEventsProps> = ({
     </div>
   );
 };
+
+// Add a default export that re-exports the named export
+export default PendingEvents;
