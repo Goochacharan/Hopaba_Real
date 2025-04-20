@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -11,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Loader2, AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -29,10 +30,10 @@ const SellerLimitsSection = () => {
     queryKey: ['seller-limits'],
     queryFn: async () => {
       try {
-        // First get all seller limits
+        // Directly fetch from seller_listing_limits table without any joins
         const { data: limits, error: limitsError } = await supabase
           .from('seller_listing_limits')
-          .select('user_id, max_listings');
+          .select('*');
 
         if (limitsError) throw limitsError;
 
@@ -40,25 +41,40 @@ const SellerLimitsSection = () => {
           return [];
         }
 
-        // Then get seller names from marketplace_listings
-        const { data: sellers, error: sellersError } = await supabase
+        // Then fetch marketplace listings with seller information
+        const { data: listings, error: listingsError } = await supabase
           .from('marketplace_listings')
           .select('seller_id, seller_name')
-          .in('seller_id', limits.map(l => l.user_id));
+          .in('approval_status', ['approved', 'pending'])
+          .order('seller_name');
 
-        if (sellersError) throw sellersError;
+        if (listingsError) throw listingsError;
 
-        // Combine the data
+        // Combine the data - with fallback names for sellers without listings
         const sellerLimits: SellerLimit[] = limits.map(limit => {
-          const seller = sellers?.find(s => s.seller_id === limit.user_id);
+          const listing = listings?.find(l => l.seller_id === limit.user_id);
           return {
             user_id: limit.user_id,
             max_listings: limit.max_listings,
-            seller_name: seller?.seller_name || 'Unknown Seller'
+            seller_name: listing?.seller_name || `Seller (${limit.user_id.substring(0, 8)})`
           };
         });
 
-        return sellerLimits;
+        // Add any sellers from listings that don't have limits set
+        const existingUserIds = new Set(limits.map(l => l.user_id));
+        const uniqueSellers = new Map();
+        
+        listings?.forEach(listing => {
+          if (listing.seller_id && !existingUserIds.has(listing.seller_id) && !uniqueSellers.has(listing.seller_id)) {
+            uniqueSellers.set(listing.seller_id, {
+              user_id: listing.seller_id,
+              max_listings: 10, // Default value
+              seller_name: listing.seller_name
+            });
+          }
+        });
+        
+        return [...sellerLimits, ...Array.from(uniqueSellers.values())];
       } catch (err) {
         console.error('Error fetching seller limits:', err);
         throw err;
@@ -97,15 +113,6 @@ const SellerLimitsSection = () => {
     seller.seller_name.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>Failed to load seller limits</AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
     <div className="space-y-4">
       <div className="mb-6">
@@ -113,9 +120,37 @@ const SellerLimitsSection = () => {
         <p className="text-muted-foreground">Manage maximum listings allowed per seller</p>
       </div>
 
-      {isLoading ? (
+      {/* Search input */}
+      <div className="relative">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder="Search sellers..."
+          className="pl-8 w-full md:max-w-sm"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      {error ? (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error loading seller limits</AlertTitle>
+          <AlertDescription>
+            There was a problem fetching seller limits. Please try again later or contact support.
+            {error instanceof Error ? ` (${error.message})` : ''}
+          </AlertDescription>
+          <Button onClick={() => refetch()} variant="outline" size="sm" className="mt-2">
+            Retry
+          </Button>
+        </Alert>
+      ) : isLoading ? (
         <div className="flex justify-center p-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : filteredSellers.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">No sellers found</p>
         </div>
       ) : (
         <Table>
@@ -136,7 +171,7 @@ const SellerLimitsSection = () => {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => updateLimit(seller.user_id, seller.max_listings - 1)}
+                      onClick={() => updateLimit(seller.user_id, Math.max(1, seller.max_listings - 1))}
                     >
                       -
                     </Button>
