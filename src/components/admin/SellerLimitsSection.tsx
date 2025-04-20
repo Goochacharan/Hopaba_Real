@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -15,14 +16,15 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-interface SellerLimit {
-  user_id: string;
-  max_listings: number;
+interface Seller {
+  id: string;
+  seller_id: string;
   seller_name: string;
   seller_phone?: string;
-  listing_id?: string;
-  listing_title?: string;
-  seller_listing_limit?: number;
+  seller_whatsapp?: string;
+  seller_instagram?: string;
+  listing_limit: number;
+  seller_rating?: number;
 }
 
 const SellerLimitsSection = () => {
@@ -30,92 +32,39 @@ const SellerLimitsSection = () => {
   const { toast } = useToast();
 
   const { data: sellers, isLoading, error, refetch } = useQuery({
-    queryKey: ['seller-limits'],
+    queryKey: ['sellers'],
     queryFn: async () => {
       try {
-        // First fetch directly from seller_listing_limits
-        const { data: limits, error: limitsError } = await supabase
-          .from('seller_listing_limits')
-          .select('*');
-
-        if (limitsError) throw limitsError;
-        
-        // Then fetch marketplace listings to get individual limits
-        const { data: listings, error: listingsError } = await supabase
-          .from('marketplace_listings')
-          .select('id, seller_id, title, seller_name, seller_phone, seller_listing_limit')
+        const { data: sellersData, error: sellersError } = await supabase
+          .from('sellers')
+          .select('*')
           .order('seller_name');
-          
-        if (listingsError) throw listingsError;
 
-        // Create a map of seller IDs to seller details
-        const sellerLimits: SellerLimit[] = [];
+        if (sellersError) throw sellersError;
         
-        // Add global limits
-        limits?.forEach(limit => {
-          const sellerListings = listings?.filter(l => l.seller_id === limit.user_id) || [];
-          const firstListing = sellerListings[0];
-          
-          sellerLimits.push({
-            user_id: limit.user_id,
-            max_listings: limit.max_listings,
-            seller_name: firstListing?.seller_name || `Seller (${limit.user_id.substring(0, 8)})`,
-            seller_phone: firstListing?.seller_phone
-          });
-          
-          // Add individual listing limits if different from default
-          sellerListings.forEach(listing => {
-            if (listing.seller_listing_limit && listing.seller_listing_limit !== 5) {
-              sellerLimits.push({
-                user_id: limit.user_id,
-                max_listings: limit.max_listings,
-                seller_name: listing.seller_name,
-                seller_phone: listing.seller_phone,
-                listing_id: listing.id,
-                listing_title: listing.title,
-                seller_listing_limit: listing.seller_listing_limit
-              });
-            }
-          });
-        });
-        
-        return sellerLimits;
+        return sellersData as Seller[];
       } catch (err) {
-        console.error('Error fetching seller limits:', err);
+        console.error('Error fetching sellers:', err);
         throw err;
       }
     }
   });
 
-  const updateLimit = async (userId: string, newLimit: number, listingId?: string) => {
+  const updateLimit = async (sellerId: string, newLimit: number) => {
     try {
-      if (listingId) {
-        // Update individual listing limit
-        const { error } = await supabase
-          .from('marketplace_listings')
-          .update({ 
-            seller_listing_limit: newLimit,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', listingId);
+      const { error } = await supabase
+        .from('sellers')
+        .update({ 
+          listing_limit: newLimit,
+          updated_at: new Date().toISOString()
+        })
+        .eq('seller_id', sellerId);
 
-        if (error) throw error;
-      } else {
-        // Update global seller limit
-        const { error } = await supabase
-          .from('seller_listing_limits')
-          .upsert({ 
-            user_id: userId, 
-            max_listings: newLimit,
-            updated_at: new Date().toISOString()
-          });
-
-        if (error) throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "Success",
-        description: listingId ? "Individual listing limit updated" : "Global listing limit updated"
+        description: "Seller listing limit updated"
       });
 
       refetch();
@@ -128,26 +77,26 @@ const SellerLimitsSection = () => {
     }
   };
   
-  // Filter sellers based on search query
   const filteredSellers = sellers?.filter(seller => {
     const searchLower = searchQuery.toLowerCase();
     return seller.seller_name.toLowerCase().includes(searchLower) ||
            (seller.seller_phone && seller.seller_phone.includes(searchQuery)) ||
-           (seller.listing_title && seller.listing_title.toLowerCase().includes(searchLower));
+           (seller.seller_whatsapp && seller.seller_whatsapp.includes(searchQuery)) ||
+           (seller.seller_instagram && seller.seller_instagram.toLowerCase().includes(searchLower));
   }) || [];
 
   return (
     <div className="space-y-4">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold">Seller Listing Limits</h2>
-        <p className="text-muted-foreground">Manage maximum listings allowed per seller</p>
+        <h2 className="text-2xl font-bold">Seller Management</h2>
+        <p className="text-muted-foreground">Manage seller information and listing limits</p>
       </div>
 
       <div className="relative">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search by seller name or phone number (with +91 prefix)"
+          placeholder="Search sellers by name or contact info"
           className="pl-8 w-full md:max-w-sm"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -157,9 +106,9 @@ const SellerLimitsSection = () => {
       {error ? (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error loading seller limits</AlertTitle>
+          <AlertTitle>Error loading sellers</AlertTitle>
           <AlertDescription>
-            There was a problem fetching seller limits. Please try again later or contact support.
+            There was a problem fetching seller information. Please try again later or contact support.
             {error instanceof Error ? ` (${error.message})` : ''}
           </AlertDescription>
           <Button onClick={() => refetch()} variant="outline" size="sm" className="mt-2">
@@ -179,58 +128,47 @@ const SellerLimitsSection = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Seller Name</TableHead>
-              <TableHead>Listing</TableHead>
+              <TableHead>Contact Information</TableHead>
               <TableHead>Current Limit</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredSellers.map((seller) => (
-              <TableRow key={seller.listing_id || seller.user_id}>
+              <TableRow key={seller.id}>
                 <TableCell className="font-medium">
                   {seller.seller_name}
-                  {seller.seller_phone && (
-                    <div className="text-sm text-muted-foreground">
-                      {seller.seller_phone}
-                    </div>
-                  )}
                 </TableCell>
                 <TableCell>
-                  {seller.listing_title ? (
-                    <span className="text-sm text-muted-foreground">
-                      Individual limit for: {seller.listing_title}
-                    </span>
-                  ) : (
-                    <span className="text-sm font-medium">
-                      Global Limit
-                    </span>
-                  )}
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    {seller.seller_phone && (
+                      <div>📞 {seller.seller_phone}</div>
+                    )}
+                    {seller.seller_whatsapp && (
+                      <div>WhatsApp: {seller.seller_whatsapp}</div>
+                    )}
+                    {seller.seller_instagram && (
+                      <div>Instagram: @{seller.seller_instagram}</div>
+                    )}
+                  </div>
                 </TableCell>
-                <TableCell>{seller.seller_listing_limit || seller.max_listings}</TableCell>
+                <TableCell>{seller.listing_limit}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => updateLimit(
-                        seller.user_id, 
-                        (seller.seller_listing_limit || seller.max_listings) - 1,
-                        seller.listing_id
-                      )}
+                      onClick={() => updateLimit(seller.seller_id, seller.listing_limit - 1)}
                     >
                       -
                     </Button>
                     <span className="w-12 text-center">
-                      {seller.seller_listing_limit || seller.max_listings}
+                      {seller.listing_limit}
                     </span>
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => updateLimit(
-                        seller.user_id, 
-                        (seller.seller_listing_limit || seller.max_listings) + 1,
-                        seller.listing_id
-                      )}
+                      onClick={() => updateLimit(seller.seller_id, seller.listing_limit + 1)}
                     >
                       +
                     </Button>

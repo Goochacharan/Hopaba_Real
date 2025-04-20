@@ -285,6 +285,45 @@ export type Database = {
         }
         Relationships: []
       }
+      sellers: {
+        Row: {
+          created_at: string | null
+          id: string
+          listing_limit: number | null
+          seller_id: string | null
+          seller_instagram: string | null
+          seller_name: string
+          seller_phone: string | null
+          seller_rating: number | null
+          seller_whatsapp: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          listing_limit?: number | null
+          seller_id?: string | null
+          seller_instagram?: string | null
+          seller_name: string
+          seller_phone?: string | null
+          seller_rating?: number | null
+          seller_whatsapp?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          listing_limit?: number | null
+          seller_id?: string | null
+          seller_instagram?: string | null
+          seller_name?: string
+          seller_phone?: string | null
+          seller_rating?: number | null
+          seller_whatsapp?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       service_providers: {
         Row: {
           approval_status: string | null
