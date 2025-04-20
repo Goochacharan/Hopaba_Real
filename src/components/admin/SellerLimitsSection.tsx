@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Loader2, AlertCircle } from 'lucide-react';
+import { Search, Loader2, AlertCircle, Phone } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,6 +29,7 @@ interface Seller {
 
 const SellerLimitsSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [phoneSearchQuery, setPhoneSearchQuery] = useState('');
   const { toast } = useToast();
 
   const { data: sellers, isLoading, error, refetch } = useQuery({
@@ -76,31 +77,45 @@ const SellerLimitsSection = () => {
       });
     }
   };
+
+  // Normalize phone number to remove all non-digit characters
+  const normalizePhone = (phone: string | undefined): string => {
+    if (!phone) return '';
+    return phone.replace(/\D/g, '');
+  };
+
+  // Handle phone number search
+  const matchesPhoneNumber = (seller: Seller, query: string): boolean => {
+    if (!query) return false;
+    
+    // Clean the query to have only digits
+    const cleanQuery = query.replace(/\D/g, '');
+    
+    if (cleanQuery.length < 3) return false; // Too short to be meaningful
+    
+    const cleanSellerPhone = normalizePhone(seller.seller_phone);
+    const cleanSellerWhatsapp = normalizePhone(seller.seller_whatsapp);
+    
+    return cleanSellerPhone.includes(cleanQuery) || cleanSellerWhatsapp.includes(cleanQuery);
+  };
   
-  const filteredSellers = sellers?.filter(seller => {
-    // If search is empty, return all sellers
+  // Filter sellers based on regular search (name, instagram)
+  const filteredByTextSearch = sellers?.filter(seller => {
     if (!searchQuery.trim()) return true;
     
     const searchLower = searchQuery.toLowerCase();
     
-    // Handle phone number search - remove any non-digit characters for comparison
-    const cleanSearchQuery = searchQuery.replace(/\D/g, '');
-    const cleanSellerPhone = seller.seller_phone ? seller.seller_phone.replace(/\D/g, '') : '';
-    const cleanSellerWhatsapp = seller.seller_whatsapp ? seller.seller_whatsapp.replace(/\D/g, '') : '';
-    
-    // Check if the cleaned search query is found in the cleaned phone numbers
-    const phoneMatches = 
-      cleanSearchQuery && 
-      (cleanSellerPhone.includes(cleanSearchQuery) || 
-       cleanSellerWhatsapp.includes(cleanSearchQuery));
-    
-    // Check for other fields matches
     const nameMatches = seller.seller_name.toLowerCase().includes(searchLower);
     const instagramMatches = seller.seller_instagram ? 
       seller.seller_instagram.toLowerCase().includes(searchLower) : false;
       
-    return nameMatches || phoneMatches || instagramMatches;
+    return nameMatches || instagramMatches;
   }) || [];
+
+  // Further filter by phone number if present
+  const filteredSellers = phoneSearchQuery.trim() 
+    ? filteredByTextSearch.filter(seller => matchesPhoneNumber(seller, phoneSearchQuery))
+    : filteredByTextSearch;
 
   return (
     <div className="space-y-4">
@@ -109,15 +124,28 @@ const SellerLimitsSection = () => {
         <p className="text-muted-foreground">Manage seller information and listing limits</p>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Search sellers by name, phone number or Instagram"
-          className="pl-8 w-full md:max-w-sm"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search sellers by name or Instagram"
+            className="pl-8 w-full"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        
+        <div className="relative flex-1">
+          <Phone className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Filter by phone number (digits only)"
+            className="pl-8 w-full"
+            value={phoneSearchQuery}
+            onChange={(e) => setPhoneSearchQuery(e.target.value)}
+          />
+        </div>
       </div>
 
       {error ? (
