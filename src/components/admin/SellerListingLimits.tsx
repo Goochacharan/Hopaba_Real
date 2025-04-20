@@ -79,56 +79,18 @@ const SellerListingLimits = () => {
     setLoading(true);
     try {
       const formattedPhone = phoneNumber.replace(/\D/g, '');
-      
       const newLimit = increment ? sellerDetails.listing_limit + 1 : 5;
+      
+      // Use the RPC function to update the seller listing limit
+      // This function handles all the phone number format variations internally
+      const { data: success, error } = await supabase.rpc('update_seller_listing_limit', { 
+        admin_user_id: user.id,
+        target_seller_phone: formattedPhone,
+        new_limit: newLimit
+      });
 
-      // Try to find the correct phone number format that was matched during search
-      let matchedPhones = [formattedPhone];
-      
-      // Add the +91 prefix version
-      matchedPhones.push(`+91${formattedPhone}`);
-      
-      // Add the last 10 digits version if applicable
-      if (formattedPhone.length >= 10) {
-        matchedPhones.push(`%${formattedPhone.slice(-10)}`);
-      }
-      
-      let updateSuccess = false;
-      
-      // Try updating with each possible phone number format
-      for (const phone of matchedPhones) {
-        const isLike = phone.includes('%');
-        let result;
-        
-        if (isLike) {
-          // For partial matches, we need to do a separate query first to find the exact record
-          const { data } = await supabase
-            .from('sellers')
-            .select('seller_phone')
-            .ilike('seller_phone', phone)
-            .maybeSingle();
-            
-          if (data?.seller_phone) {
-            result = await supabase
-              .from('sellers')
-              .update({ listing_limit: newLimit })
-              .eq('seller_phone', data.seller_phone);
-          }
-        } else {
-          // For exact matches, update directly
-          result = await supabase
-            .from('sellers')
-            .update({ listing_limit: newLimit })
-            .eq('seller_phone', phone);
-        }
-        
-        if (result && !result.error && result.count > 0) {
-          updateSuccess = true;
-          break;
-        }
-      }
-
-      if (!updateSuccess) {
+      if (error || !success) {
+        console.error('Error updating listing limit:', error);
         throw new Error("Failed to update seller listing limit.");
       }
 
@@ -139,7 +101,7 @@ const SellerListingLimits = () => {
       });
 
       // Search again to make sure we have the latest data
-      searchSeller();
+      await searchSeller();
 
       toast({
         title: "Success",
