@@ -12,14 +12,21 @@ import {
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
 
 const HighLimitSellers = () => {
-  const { data: highLimitSellers, isLoading, error } = useQuery({
+  const { data: highLimitSellers, isLoading, error, refetch } = useQuery({
     queryKey: ['high-limit-sellers'],
     queryFn: async () => {
+      console.log('Fetching high limit sellers...');
       const { data, error } = await supabase.rpc('get_high_limit_sellers');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching high limit sellers:', error);
+        throw error;
+      }
+      
+      console.log('High limit sellers data:', data);
       return data;
     }
   });
@@ -32,6 +39,9 @@ const HighLimitSellers = () => {
         <AlertDescription>
           {error instanceof Error ? error.message : 'Failed to load high limit sellers'}
         </AlertDescription>
+        <Button onClick={() => refetch()} variant="outline" size="sm" className="mt-2">
+          Retry
+        </Button>
       </Alert>
     );
   }
@@ -48,7 +58,7 @@ const HighLimitSellers = () => {
   if (!highLimitSellers || highLimitSellers.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        No sellers with more than 5 listing limits found.
+        No sellers with listing limits greater than 5 found.
       </div>
     );
   }
@@ -77,7 +87,7 @@ const HighLimitSellers = () => {
               <TableCell>{seller.seller_phones?.join(', ') || 'No contact number'}</TableCell>
               <TableCell>{seller.max_listings}</TableCell>
               <TableCell>{seller.current_listing_count}</TableCell>
-              <TableCell>{new Date(seller.updated_at).toLocaleDateString()}</TableCell>
+              <TableCell>{seller.updated_at ? new Date(seller.updated_at).toLocaleDateString() : 'Not available'}</TableCell>
             </TableRow>
           ))}
         </TableBody>
