@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Table, 
@@ -30,6 +30,7 @@ interface Seller {
 const SellerLimitsSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [phoneSearchQuery, setPhoneSearchQuery] = useState('');
+  const [filteredSellers, setFilteredSellers] = useState<Seller[]>([]);
   const { toast } = useToast();
 
   const { data: sellers, isLoading, error, refetch } = useQuery({
@@ -86,36 +87,69 @@ const SellerLimitsSection = () => {
 
   // Handle phone number search
   const matchesPhoneNumber = (seller: Seller, query: string): boolean => {
-    if (!query) return false;
+    if (!query) return true; // If no query, all sellers match
     
     // Clean the query to have only digits
     const cleanQuery = query.replace(/\D/g, '');
     
-    if (cleanQuery.length < 3) return false; // Too short to be meaningful
+    if (cleanQuery.length < 1) return true; // If empty query after cleaning, all sellers match
     
     const cleanSellerPhone = normalizePhone(seller.seller_phone);
     const cleanSellerWhatsapp = normalizePhone(seller.seller_whatsapp);
     
+    // Check if any phone number contains the query digits
     return cleanSellerPhone.includes(cleanQuery) || cleanSellerWhatsapp.includes(cleanQuery);
   };
-  
-  // Filter sellers based on regular search (name, instagram)
-  const filteredByTextSearch = sellers?.filter(seller => {
-    if (!searchQuery.trim()) return true;
-    
-    const searchLower = searchQuery.toLowerCase();
-    
-    const nameMatches = seller.seller_name.toLowerCase().includes(searchLower);
-    const instagramMatches = seller.seller_instagram ? 
-      seller.seller_instagram.toLowerCase().includes(searchLower) : false;
-      
-    return nameMatches || instagramMatches;
-  }) || [];
 
-  // Further filter by phone number if present
-  const filteredSellers = phoneSearchQuery.trim() 
-    ? filteredByTextSearch.filter(seller => matchesPhoneNumber(seller, phoneSearchQuery))
-    : filteredByTextSearch;
+  // Filter sellers based on search criteria whenever sellers, searchQuery, or phoneSearchQuery changes
+  useEffect(() => {
+    if (!sellers) {
+      setFilteredSellers([]);
+      return;
+    }
+    
+    const filtered = sellers.filter(seller => {
+      // Text search (name, instagram)
+      const textMatch = !searchQuery.trim() || 
+        seller.seller_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        (seller.seller_instagram && seller.seller_instagram.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      // Phone number search
+      const phoneMatch = matchesPhoneNumber(seller, phoneSearchQuery);
+      
+      // Both conditions must be met
+      return textMatch && phoneMatch;
+    });
+    
+    setFilteredSellers(filtered);
+  }, [sellers, searchQuery, phoneSearchQuery]);
+
+  // Handle search button click
+  const handleSearch = () => {
+    if (!sellers) return;
+    
+    const filtered = sellers.filter(seller => {
+      // Text search (name, instagram)
+      const textMatch = !searchQuery.trim() || 
+        seller.seller_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        (seller.seller_instagram && seller.seller_instagram.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      // Phone number search
+      const phoneMatch = matchesPhoneNumber(seller, phoneSearchQuery);
+      
+      // Both conditions must be met
+      return textMatch && phoneMatch;
+    });
+    
+    setFilteredSellers(filtered);
+  };
+
+  // Initialize filtered sellers when sellers data is loaded
+  useEffect(() => {
+    if (sellers) {
+      setFilteredSellers(sellers);
+    }
+  }, [sellers]);
 
   return (
     <div className="space-y-4">
@@ -146,6 +180,10 @@ const SellerLimitsSection = () => {
             onChange={(e) => setPhoneSearchQuery(e.target.value)}
           />
         </div>
+        
+        <Button onClick={handleSearch} className="md:w-auto w-full">
+          Search
+        </Button>
       </div>
 
       {error ? (
