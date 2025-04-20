@@ -20,6 +20,7 @@ interface SellerLimit {
   user_id: string;
   max_listings: number;
   seller_name: string;
+  seller_phone?: string; // Added seller_phone property as optional
 }
 
 const SellerLimitsSection = () => {
@@ -79,7 +80,8 @@ const SellerLimitsSection = () => {
           sellerLimits.push({
             user_id: limit.user_id,
             max_listings: limit.max_listings,
-            seller_name: sellerName
+            seller_name: sellerName,
+            seller_phone: sellerInfo?.phone || undefined
           });
         });
         
@@ -89,7 +91,8 @@ const SellerLimitsSection = () => {
             sellerLimits.push({
               user_id: id,
               max_listings: 10, // Default value
-              seller_name: info.name
+              seller_name: info.name,
+              seller_phone: info.phone
             });
           }
         });
@@ -135,11 +138,9 @@ const SellerLimitsSection = () => {
   const filteredSellers = sellers?.filter(seller => {
     const searchLower = searchQuery.toLowerCase();
     return seller.seller_name.toLowerCase().includes(searchLower) ||
-           // Check if any listing with this seller_id has a matching phone number
-           sellers.some(s => 
-             s.user_id === seller.user_id && 
-             s.seller_phone?.includes(searchQuery.startsWith('+91') ? searchQuery : `+91${searchQuery}`)
-           );
+           // Check if seller has a phone number that includes the search query
+           (seller.seller_phone && 
+            seller.seller_phone.includes(searchQuery.startsWith('+91') ? searchQuery : `+91${searchQuery}`));
   }) || [];
 
   return (
