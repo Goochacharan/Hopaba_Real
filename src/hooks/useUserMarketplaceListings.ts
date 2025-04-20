@@ -5,12 +5,41 @@ import { useToast } from '@/hooks/use-toast';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { useAuth } from '@/hooks/useAuth';
 
+interface ListingStatus {
+  currentListingCount: number;
+  maxListings: number;
+  canCreateListing: boolean;
+}
+
 export const useUserMarketplaceListings = () => {
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [listingStatus, setListingStatus] = useState<ListingStatus | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const fetchListingStatus = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .rpc('get_seller_listing_status', { seller_id_param: user.id });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setListingStatus({
+          currentListingCount: Number(data[0].current_listing_count),
+          maxListings: data[0].max_listings,
+          canCreateListing: data[0].can_create_listing
+        });
+      }
+    } catch (err: any) {
+      console.error('Error fetching listing status:', err);
+      setError('Failed to fetch listing status');
+    }
+  };
 
   const fetchUserListings = async () => {
     setLoading(true);
@@ -39,6 +68,9 @@ export const useUserMarketplaceListings = () => {
       })) as MarketplaceListing[];
 
       setListings(typedData || []);
+      
+      // Fetch updated listing status after getting listings
+      await fetchListingStatus();
     } catch (err: any) {
       console.error('Error fetching user marketplace listings:', err);
       setError('Failed to fetch your listings. Please try again later.');
@@ -64,8 +96,8 @@ export const useUserMarketplaceListings = () => {
         description: "Your listing has been successfully deleted.",
       });
 
-      // Refresh listings
-      fetchUserListings();
+      // Refresh listings and status
+      await fetchUserListings();
     } catch (err: any) {
       console.error('Error deleting marketplace listing:', err);
       toast({
@@ -85,7 +117,8 @@ export const useUserMarketplaceListings = () => {
     loading, 
     error, 
     refetch: fetchUserListings,
-    deleteListing
+    deleteListing,
+    listingStatus
   };
 };
 

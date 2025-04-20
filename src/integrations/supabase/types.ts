@@ -92,6 +92,7 @@ export type Database = {
           price: number
           seller_id: string | null
           seller_instagram: string | null
+          seller_listing_limit: number | null
           seller_name: string
           seller_phone: string | null
           seller_rating: number | null
@@ -122,6 +123,7 @@ export type Database = {
           price: number
           seller_id?: string | null
           seller_instagram?: string | null
+          seller_listing_limit?: number | null
           seller_name: string
           seller_phone?: string | null
           seller_rating?: number | null
@@ -152,6 +154,7 @@ export type Database = {
           price?: number
           seller_id?: string | null
           seller_instagram?: string | null
+          seller_listing_limit?: number | null
           seller_name?: string
           seller_phone?: string | null
           seller_rating?: number | null
@@ -261,6 +264,45 @@ export type Database = {
         }
         Relationships: []
       }
+      sellers: {
+        Row: {
+          created_at: string | null
+          id: string
+          listing_limit: number | null
+          seller_id: string | null
+          seller_instagram: string | null
+          seller_name: string
+          seller_phone: string | null
+          seller_rating: number | null
+          seller_whatsapp: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          listing_limit?: number | null
+          seller_id?: string | null
+          seller_instagram?: string | null
+          seller_name: string
+          seller_phone?: string | null
+          seller_rating?: number | null
+          seller_whatsapp?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          listing_limit?: number | null
+          seller_id?: string | null
+          seller_instagram?: string | null
+          seller_name?: string
+          seller_phone?: string | null
+          seller_rating?: number | null
+          seller_whatsapp?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       service_providers: {
         Row: {
           approval_status: string | null
@@ -359,9 +401,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      high_limit_sellers: {
+        Row: {
+          current_listing_count: number | null
+          max_listings: number | null
+          seller_names: string[] | null
+          seller_phones: string[] | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      get_high_limit_sellers: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          max_listings: number
+          updated_at: string
+          seller_names: string[]
+          seller_phones: string[]
+          current_listing_count: number
+        }[]
+      }
       gtrgm_compress: {
         Args: { "": unknown }
         Returns: unknown
