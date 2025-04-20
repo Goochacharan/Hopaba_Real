@@ -24,17 +24,21 @@ export const useUserMarketplaceListings = () => {
 
     try {
       const { data, error } = await supabase
-        .rpc('get_seller_listing_status', { seller_id_param: user.id });
+        .from('sellers')
+        .select('listing_limit')
+        .eq('seller_id', user.id)
+        .single();
 
       if (error) throw error;
 
-      if (data && data.length > 0) {
-        setListingStatus({
-          currentListingCount: Number(data[0].current_listing_count),
-          maxListings: data[0].max_listings,
-          canCreateListing: data[0].can_create_listing
-        });
-      }
+      const listingCount = listings.length;
+      const maxListings = data?.listing_limit || 5; // Default to 5 if no custom limit
+
+      setListingStatus({
+        currentListingCount: listingCount,
+        maxListings: maxListings,
+        canCreateListing: listingCount < maxListings
+      });
     } catch (err: any) {
       console.error('Error fetching listing status:', err);
       setError('Failed to fetch listing status');

@@ -31,7 +31,7 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
   refresh 
 }) => {
   const navigate = useNavigate();
-  const { listings, loading, error, refetch, deleteListing } = useUserMarketplaceListings();
+  const { listings, loading, error, refetch, deleteListing, listingStatus } = useUserMarketplaceListings();
   const [listingToDelete, setListingToDelete] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [listingToEdit, setListingToEdit] = useState<MarketplaceListing | null>(null);
@@ -124,11 +124,13 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
       <div className="flex justify-between items-center">
         <div>
           <h3 className="text-lg font-medium">Your Marketplace Listings</h3>
-          <p className="text-muted-foreground text-sm">
-            {listings.length} of 10 listings used
-          </p>
+          {listingStatus && (
+            <p className="text-muted-foreground text-sm">
+              {listingStatus.currentListingCount} of {listingStatus.maxListings} listings used
+            </p>
+          )}
         </div>
-        {userCanAddMore && (
+        {listingStatus?.canCreateListing && (
           <Button 
             onClick={() => setShowAddForm(true)} 
             className="flex items-center gap-1.5"
