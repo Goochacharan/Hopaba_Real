@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, Minus, Info } from 'lucide-react';
+import { Search, Plus, Minus } from 'lucide-react';
 
 interface SellerDetails {
   seller_name: string;
@@ -24,17 +23,14 @@ const SellerListingLimits = () => {
     
     setLoading(true);
     try {
-      // Format phone number by removing non-digit characters
       const formattedPhone = phoneNumber.replace(/\D/g, '');
       
-      // First try with exact match
       let { data, error } = await supabase
         .from('sellers')
         .select('seller_name, listing_limit')
         .eq('seller_phone', formattedPhone)
         .maybeSingle();
       
-      // If no exact match, try with the number including +91 prefix
       if (!data) {
         const withPrefix = `+91${formattedPhone}`;
         ({ data, error } = await supabase
@@ -44,7 +40,6 @@ const SellerListingLimits = () => {
           .maybeSingle());
       }
       
-      // If still no match, try with just the last 10 digits
       if (!data && formattedPhone.length >= 10) {
         const last10Digits = formattedPhone.slice(-10);
         ({ data, error } = await supabase
@@ -78,33 +73,25 @@ const SellerListingLimits = () => {
   };
 
   const handleUpdateLimit = async (increment: boolean) => {
-    if (!user || !phoneNumber) return;
+    if (!user || !phoneNumber || !sellerDetails) return;
 
     setLoading(true);
     try {
-      // Format phone number the same way as in search
       const formattedPhone = phoneNumber.replace(/\D/g, '');
       
-      // If incrementing, add 1 to current limit
-      const newLimit = increment 
-        ? (sellerDetails ? sellerDetails.listing_limit + 1 : 6) 
-        : 5;
+      const newLimit = increment ? sellerDetails.listing_limit + 1 : 5;
 
-      const { data, error } = await supabase.rpc('update_seller_listing_limit', {
-        admin_user_id: user.id,
-        target_seller_phone: formattedPhone,
-        new_limit: newLimit
-      });
+      const { data, error } = await supabase
+        .from('sellers')
+        .update({ listing_limit: newLimit })
+        .eq('seller_phone', formattedPhone);
 
       if (error) throw error;
 
-      // Update local state to show new limit
-      if (sellerDetails) {
-        setSellerDetails({
-          ...sellerDetails,
-          listing_limit: newLimit
-        });
-      }
+      setSellerDetails({
+        ...sellerDetails,
+        listing_limit: newLimit
+      });
 
       toast({
         title: "Success",
@@ -157,10 +144,10 @@ const SellerListingLimits = () => {
           <div className="flex gap-2">
             <Button
               onClick={() => handleUpdateLimit(true)}
-              disabled={loading || sellerDetails.listing_limit >= 10}
+              disabled={loading}
               className="gap-1"
             >
-              <Plus className="h-4 w-4" /> Increase to 10
+              <Plus className="h-4 w-4" /> Increase by 1
             </Button>
             <Button
               onClick={() => handleUpdateLimit(false)}
