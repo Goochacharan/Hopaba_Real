@@ -17,9 +17,7 @@ const HighLimitSellers = () => {
   const { data: highLimitSellers, isLoading, error } = useQuery({
     queryKey: ['high-limit-sellers'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('high_limit_sellers')
-        .select('*');
+      const { data, error } = await supabase.rpc('get_high_limit_sellers');
       
       if (error) throw error;
       return data;
@@ -46,6 +44,15 @@ const HighLimitSellers = () => {
     );
   }
 
+  // If no high limit sellers exist, show a message
+  if (!highLimitSellers || highLimitSellers.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        No sellers with more than 5 listing limits found.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="mb-6">
@@ -64,7 +71,7 @@ const HighLimitSellers = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {highLimitSellers?.map((seller) => (
+          {highLimitSellers.map((seller) => (
             <TableRow key={seller.user_id}>
               <TableCell>{seller.seller_names.join(', ')}</TableCell>
               <TableCell>{seller.seller_phones?.join(', ') || 'No contact number'}</TableCell>
