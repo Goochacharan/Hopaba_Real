@@ -78,11 +78,28 @@ const SellerLimitsSection = () => {
   };
   
   const filteredSellers = sellers?.filter(seller => {
+    // If search is empty, return all sellers
+    if (!searchQuery.trim()) return true;
+    
     const searchLower = searchQuery.toLowerCase();
-    return seller.seller_name.toLowerCase().includes(searchLower) ||
-           (seller.seller_phone && seller.seller_phone.includes(searchQuery)) ||
-           (seller.seller_whatsapp && seller.seller_whatsapp.includes(searchQuery)) ||
-           (seller.seller_instagram && seller.seller_instagram.toLowerCase().includes(searchLower));
+    
+    // Handle phone number search - remove any non-digit characters for comparison
+    const cleanSearchQuery = searchQuery.replace(/\D/g, '');
+    const cleanSellerPhone = seller.seller_phone ? seller.seller_phone.replace(/\D/g, '') : '';
+    const cleanSellerWhatsapp = seller.seller_whatsapp ? seller.seller_whatsapp.replace(/\D/g, '') : '';
+    
+    // Check if the cleaned search query is found in the cleaned phone numbers
+    const phoneMatches = 
+      cleanSearchQuery && 
+      (cleanSellerPhone.includes(cleanSearchQuery) || 
+       cleanSellerWhatsapp.includes(cleanSearchQuery));
+    
+    // Check for other fields matches
+    const nameMatches = seller.seller_name.toLowerCase().includes(searchLower);
+    const instagramMatches = seller.seller_instagram ? 
+      seller.seller_instagram.toLowerCase().includes(searchLower) : false;
+      
+    return nameMatches || phoneMatches || instagramMatches;
   }) || [];
 
   return (
@@ -96,7 +113,7 @@ const SellerLimitsSection = () => {
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search sellers by name or contact info"
+          placeholder="Search sellers by name, phone number or Instagram"
           className="pl-8 w-full md:max-w-sm"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
