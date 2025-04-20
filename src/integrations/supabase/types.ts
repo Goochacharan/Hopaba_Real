@@ -92,6 +92,7 @@ export type Database = {
           price: number
           seller_id: string | null
           seller_instagram: string | null
+          seller_listing_limit: number | null
           seller_name: string
           seller_phone: string | null
           seller_rating: number | null
@@ -122,6 +123,7 @@ export type Database = {
           price: number
           seller_id?: string | null
           seller_instagram?: string | null
+          seller_listing_limit?: number | null
           seller_name: string
           seller_phone?: string | null
           seller_rating?: number | null
@@ -152,6 +154,7 @@ export type Database = {
           price?: number
           seller_id?: string | null
           seller_instagram?: string | null
+          seller_listing_limit?: number | null
           seller_name?: string
           seller_phone?: string | null
           seller_rating?: number | null

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -20,81 +19,64 @@ interface SellerLimit {
   user_id: string;
   max_listings: number;
   seller_name: string;
-  seller_phone?: string; // Added seller_phone property as optional
+  seller_phone?: string;
+  listing_id?: string;
+  listing_title?: string;
+  seller_listing_limit?: number;
 }
 
 const SellerLimitsSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
 
-  // Query to fetch seller limits
   const { data: sellers, isLoading, error, refetch } = useQuery({
     queryKey: ['seller-limits'],
     queryFn: async () => {
       try {
-        console.log("Fetching seller limits...");
-        
         // First fetch directly from seller_listing_limits
         const { data: limits, error: limitsError } = await supabase
           .from('seller_listing_limits')
           .select('*');
 
-        if (limitsError) {
-          console.error("Error fetching limits:", limitsError);
-          throw limitsError;
-        }
-
-        console.log("Fetched limits:", limits);
+        if (limitsError) throw limitsError;
         
-        // Then fetch unique seller details from marketplace listings
+        // Then fetch marketplace listings to get individual limits
         const { data: listings, error: listingsError } = await supabase
           .from('marketplace_listings')
-          .select('seller_id, seller_name, seller_phone')
+          .select('id, seller_id, title, seller_name, seller_phone, seller_listing_limit')
           .order('seller_name');
           
-        if (listingsError) {
-          console.error("Error fetching listings:", listingsError);
-          throw listingsError;
-        }
+        if (listingsError) throw listingsError;
 
-        console.log("Fetched listings:", listings);
-        
         // Create a map of seller IDs to seller details
-        const sellerMap = new Map();
-        listings?.forEach(listing => {
-          if (listing.seller_id && (listing.seller_name || listing.seller_phone)) {
-            sellerMap.set(listing.seller_id, {
-              name: listing.seller_name,
-              phone: listing.seller_phone
-            });
-          }
-        });
-        
-        // Combine the data
         const sellerLimits: SellerLimit[] = [];
         
-        // Process limits with known sellers
+        // Add global limits
         limits?.forEach(limit => {
-          const sellerInfo = sellerMap.get(limit.user_id);
-          const sellerName = sellerInfo?.name || `Seller (${limit.user_id.substring(0, 8)})`;
+          const sellerListings = listings?.filter(l => l.seller_id === limit.user_id) || [];
+          const firstListing = sellerListings[0];
+          
           sellerLimits.push({
             user_id: limit.user_id,
             max_listings: limit.max_listings,
-            seller_name: sellerName,
-            seller_phone: sellerInfo?.phone || undefined
+            seller_name: firstListing?.seller_name || `Seller (${limit.user_id.substring(0, 8)})`,
+            seller_phone: firstListing?.seller_phone
           });
-        });
-        
-        // Add sellers from listings who don't have limits yet
-        sellerMap.forEach((info, id) => {
-          if (!limits?.some(l => l.user_id === id)) {
-            sellerLimits.push({
-              user_id: id,
-              max_listings: 10, // Default value
-              seller_name: info.name,
-              seller_phone: info.phone
-            });
-          }
+          
+          // Add individual listing limits if different from default
+          sellerListings.forEach(listing => {
+            if (listing.seller_listing_limit && listing.seller_listing_limit !== 5) {
+              sellerLimits.push({
+                user_id: limit.user_id,
+                max_listings: limit.max_listings,
+                seller_name: listing.seller_name,
+                seller_phone: listing.seller_phone,
+                listing_id: listing.id,
+                listing_title: listing.title,
+                seller_listing_limit: listing.seller_listing_limit
+              });
+            }
+          });
         });
         
         return sellerLimits;
@@ -102,26 +84,38 @@ const SellerLimitsSection = () => {
         console.error('Error fetching seller limits:', err);
         throw err;
       }
-    },
-    retry: 1,
-    refetchOnWindowFocus: false
+    }
   });
 
-  const updateLimit = async (userId: string, newLimit: number) => {
+  const updateLimit = async (userId: string, newLimit: number, listingId?: string) => {
     try {
-      const { error } = await supabase
-        .from('seller_listing_limits')
-        .upsert({ 
-          user_id: userId, 
-          max_listings: newLimit,
-          updated_at: new Date().toISOString()
-        });
+      if (listingId) {
+        // Update individual listing limit
+        const { error } = await supabase
+          .from('marketplace_listings')
+          .update({ 
+            seller_listing_limit: newLimit,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', listingId);
 
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        // Update global seller limit
+        const { error } = await supabase
+          .from('seller_listing_limits')
+          .upsert({ 
+            user_id: userId, 
+            max_listings: newLimit,
+            updated_at: new Date().toISOString()
+          });
+
+        if (error) throw error;
+      }
 
       toast({
         title: "Success",
-        description: "Listing limit updated successfully"
+        description: listingId ? "Individual listing limit updated" : "Global listing limit updated"
       });
 
       refetch();
@@ -134,13 +128,12 @@ const SellerLimitsSection = () => {
     }
   };
   
-  // Filter sellers based on search query (name or phone)
+  // Filter sellers based on search query
   const filteredSellers = sellers?.filter(seller => {
     const searchLower = searchQuery.toLowerCase();
     return seller.seller_name.toLowerCase().includes(searchLower) ||
-           // Check if seller has a phone number that includes the search query
-           (seller.seller_phone && 
-            seller.seller_phone.includes(searchQuery.startsWith('+91') ? searchQuery : `+91${searchQuery}`));
+           (seller.seller_phone && seller.seller_phone.includes(searchQuery)) ||
+           (seller.listing_title && seller.listing_title.toLowerCase().includes(searchLower));
   }) || [];
 
   return (
@@ -150,7 +143,6 @@ const SellerLimitsSection = () => {
         <p className="text-muted-foreground">Manage maximum listings allowed per seller</p>
       </div>
 
-      {/* Search input */}
       <div className="relative">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
@@ -187,29 +179,58 @@ const SellerLimitsSection = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Seller Name</TableHead>
+              <TableHead>Listing</TableHead>
               <TableHead>Current Limit</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredSellers.map((seller) => (
-              <TableRow key={seller.user_id}>
-                <TableCell>{seller.seller_name}</TableCell>
-                <TableCell>{seller.max_listings}</TableCell>
+              <TableRow key={seller.listing_id || seller.user_id}>
+                <TableCell className="font-medium">
+                  {seller.seller_name}
+                  {seller.seller_phone && (
+                    <div className="text-sm text-muted-foreground">
+                      {seller.seller_phone}
+                    </div>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {seller.listing_title ? (
+                    <span className="text-sm text-muted-foreground">
+                      Individual limit for: {seller.listing_title}
+                    </span>
+                  ) : (
+                    <span className="text-sm font-medium">
+                      Global Limit
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell>{seller.seller_listing_limit || seller.max_listings}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => updateLimit(seller.user_id, Math.max(1, seller.max_listings - 1))}
+                      onClick={() => updateLimit(
+                        seller.user_id, 
+                        (seller.seller_listing_limit || seller.max_listings) - 1,
+                        seller.listing_id
+                      )}
                     >
                       -
                     </Button>
-                    <span className="w-12 text-center">{seller.max_listings}</span>
+                    <span className="w-12 text-center">
+                      {seller.seller_listing_limit || seller.max_listings}
+                    </span>
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => updateLimit(seller.user_id, seller.max_listings + 1)}
+                      onClick={() => updateLimit(
+                        seller.user_id, 
+                        (seller.seller_listing_limit || seller.max_listings) + 1,
+                        seller.listing_id
+                      )}
                     >
                       +
                     </Button>
