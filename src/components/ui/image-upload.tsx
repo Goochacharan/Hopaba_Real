@@ -2,21 +2,88 @@
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, X, Image as ImageIcon } from 'lucide-react';
+import { UploadCloud, X } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 interface ImageUploadProps {
   images: string[];
   onImagesChange: (images: string[]) => void;
   maxImages?: number;
+  bucketName?: string;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ 
   images, 
   onImagesChange, 
-  maxImages = 10 
+  maxImages = 10,
+  bucketName = 'optimized-images'
 }) => {
   const [uploading, setUploading] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const compressImage = async (file: File, maxSizeKB = 200): Promise<Blob> => {
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    
+    await new Promise(resolve => { img.onload = resolve; });
+    
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    
+    let width = img.width;
+    let height = img.height;
+    
+    // Reduce image dimensions if needed
+    const scale = Math.min(1, Math.sqrt((maxSizeKB * 1024) / file.size));
+    width *= scale;
+    height *= scale;
+    
+    canvas.width = width;
+    canvas.height = height;
+    
+    ctx.drawImage(img, 0, 0, width, height);
+    
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(blob => {
+        if (blob) resolve(blob);
+        else reject(new Error('Compression failed'));
+      }, file.type, 0.7);
+    });
+  };
+
+  const uploadToStorage = async (file: Blob) => {
+    if (!user) {
+      toast({ title: 'Error', description: 'Please log in first', variant: 'destructive' });
+      return null;
+    }
+
+    const fileExt = file.type.split('/')[1];
+    const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+    
+    const { data, error } = await supabase.storage
+      .from(bucketName)
+      .upload(fileName, file);
+    
+    if (error) {
+      console.error('Upload error:', error);
+      toast({ 
+        title: 'Upload Failed', 
+        description: error.message, 
+        variant: 'destructive' 
+      });
+      return null;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from(bucketName)
+      .getPublicUrl(fileName);
+    
+    return publicUrl;
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -33,14 +100,22 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         const file = files[i];
         if (!file.type.startsWith('image/')) continue;
         
-        // Convert the file to a base64 string
-        const base64 = await convertFileToBase64(file);
-        newImages.push(base64);
+        const compressedBlob = await compressImage(file);
+        const publicUrl = await uploadToStorage(compressedBlob);
+        
+        if (publicUrl) {
+          newImages.push(publicUrl);
+        }
       }
       
       onImagesChange(newImages);
     } catch (error) {
       console.error('Error uploading images:', error);
+      toast({ 
+        title: 'Upload Error', 
+        description: 'Failed to upload images', 
+        variant: 'destructive' 
+      });
     } finally {
       setUploading(false);
       // Clear the input
@@ -48,16 +123,22 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     }
   };
 
-  const convertFileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
+  const removeImage = async (index: number) => {
+    const imageToRemove = images[index];
+    
+    // Delete from storage if it's a Supabase URL
+    if (imageToRemove.includes('/storage/v1/object/public/')) {
+      const path = imageToRemove.split('public/')[1];
+      
+      const { error } = await supabase.storage
+        .from(bucketName)
+        .remove([path]);
+      
+      if (error) {
+        console.error('Error removing image:', error);
+      }
+    }
 
-  const removeImage = (index: number) => {
     const newImages = [...images];
     newImages.splice(index, 1);
     onImagesChange(newImages);
