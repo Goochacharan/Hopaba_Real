@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { EventListingForm } from '../EventListingForm';
-import { Event } from '@/hooks/useRecommendations';
+import { Event } from '@/hooks/types/recommendationTypes';
 
 interface EventFormWrapperProps {
   event: Event | null;

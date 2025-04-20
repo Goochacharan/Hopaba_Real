@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Event } from '@/hooks/useRecommendations';
+import { Event } from '@/hooks/types/recommendationTypes';
 
 export const useUserEvents = () => {
   const { user } = useAuth();
@@ -14,7 +13,6 @@ export const useUserEvents = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<Event | null>(null);
 
-  // Fetch user's events from Supabase
   useEffect(() => {
     const fetchUserEvents = async () => {
       if (!user) {
@@ -35,7 +33,6 @@ export const useUserEvents = () => {
           throw error;
         }
         
-        // Ensure we properly convert price_per_person to pricePerPerson for frontend
         const formattedEvents = data?.map((event) => ({
           ...event,
           pricePerPerson: event.price_per_person || 0
@@ -69,7 +66,6 @@ export const useUserEvents = () => {
 
     if (eventToDelete) {
       try {
-        // First check if this event belongs to current user
         const { data: eventData } = await supabase
           .from('events')
           .select('user_id')
@@ -114,7 +110,6 @@ export const useUserEvents = () => {
     setShowAddForm(false);
     setEventToEdit(null);
     
-    // Refresh the event list from the database
     if (user) {
       setLoading(true);
       supabase

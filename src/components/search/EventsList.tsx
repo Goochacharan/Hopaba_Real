@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Event } from '@/hooks/useRecommendations';
+import { Event } from '@/hooks/types/recommendationTypes';
 import EventCard from '@/components/EventCard';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';

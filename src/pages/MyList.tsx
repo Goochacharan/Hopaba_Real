@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -13,8 +12,9 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Recommendation } from '@/lib/mockData';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
-import { Event } from '@/hooks/useRecommendations';
+import { Event } from '@/hooks/types/recommendationTypes';
 import EventCard from '@/components/EventCard';
+
 const MyList = () => {
   const {
     wishlist,

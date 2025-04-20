@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Event } from '@/hooks/useRecommendations';
+import { Event } from '@/hooks/types/recommendationTypes';
 import { cn } from '@/lib/utils';
 import { Calendar, Clock, MapPin, User, Sparkles, Award } from 'lucide-react';
 import { format, parseISO } from 'date-fns';

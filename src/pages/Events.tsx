@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useToast } from '@/hooks/use-toast';
 import EventsList from '@/components/search/EventsList';
 import LocationSelector from '@/components/LocationSelector';
-import { Event } from '@/hooks/useRecommendations';
+import { Event } from '@/hooks/types/recommendationTypes';
 import { supabase } from '@/integrations/supabase/client';
 import { Map as MapIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';

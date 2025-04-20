@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Edit2, Eye, Trash2, Calendar, Clock, MapPin, Users, IndianRupee } from 
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useNavigate } from 'react-router-dom';
-import { Event } from '@/hooks/useRecommendations';
+import { Event } from '@/hooks/types/recommendationTypes';
 
 interface UserEventCardProps {
   event: Event;

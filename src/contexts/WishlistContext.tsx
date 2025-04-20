@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Recommendation } from '@/lib/mockData';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
-import { Event } from '@/hooks/useRecommendations';
+import { Event } from '@/hooks/types/recommendationTypes';
 import { useToast } from '@/hooks/use-toast';
 
 export type WishlistItem = 
