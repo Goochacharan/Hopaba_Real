@@ -3,10 +3,10 @@ import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 
-// Extended category list to match Add Business page
+// Fallback category list if database fetch fails
 const DEFAULT_SERVICE_CATEGORIES = [
   "All",
-  "Bakery",
+  "Bakery and Chats",
   "Ice Cream Shops",
   "Cafes",
   "Restaurants",
@@ -129,12 +129,43 @@ const CategoryScrollBar: React.FC<CategoryScrollBarProps> = ({
   onSelect,
   className,
 }) => {
-  const [categories, setCategories] = useState<string[]>(DEFAULT_SERVICE_CATEGORIES);
+  const [categories, setCategories] = useState<string[]>(["All"]);
   
   useEffect(() => {
-    // Log the selected category for debugging
     console.log("Selected category in CategoryScrollBar:", selected);
-  }, [selected]);
+    
+    // Fetch actual categories from the database
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('service_providers')
+          .select('category')
+          .eq('approval_status', 'approved')
+          .not('category', 'is', null);
+          
+        if (error) {
+          console.error('Error fetching categories:', error);
+          setCategories(DEFAULT_SERVICE_CATEGORIES);
+          return;
+        }
+        
+        if (data && data.length > 0) {
+          // Extract unique categories
+          const uniqueCategories = ["All", ...new Set(data.map(item => item.category))];
+          console.log("Categories fetched from DB:", uniqueCategories);
+          setCategories(uniqueCategories);
+        } else {
+          console.log("No categories found in DB, using default list");
+          setCategories(DEFAULT_SERVICE_CATEGORIES);
+        }
+      } catch (err) {
+        console.error('Error in category fetch:', err);
+        setCategories(DEFAULT_SERVICE_CATEGORIES);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
   
   return (
     <div
@@ -163,8 +194,8 @@ const CategoryScrollBar: React.FC<CategoryScrollBarProps> = ({
 
           console.log(`Button: ${cat}, Selected: ${isSelected}`, { 
             buttonCat: cat.toLowerCase(), 
-            selected: selected.toLowerCase(), 
-            match: cat.toLowerCase() === selected.toLowerCase() 
+            selected: selected ? selected.toLowerCase() : 'undefined', 
+            match: cat.toLowerCase() === (selected ? selected.toLowerCase() : '')
           });
           
           return (
