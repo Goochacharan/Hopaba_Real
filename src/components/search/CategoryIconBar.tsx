@@ -3,13 +3,12 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import {
   IceCream,
-  Restaurant,
   Scissors,
   MoreHorizontal,
   Coffee,
   Activity,
   ShoppingBag,
-  BeautySalon,
+  Utensils,    // Replacing Restaurant with Utensils
 } from "lucide-react";
 
 // Mapping icons to categories
@@ -33,7 +32,7 @@ const CATEGORY_DETAILS = [
   {
     id: "Food & Dining",
     label: "Food & Dining",
-    icon: <Restaurant size={32} strokeWidth={2.2} className="text-[#8B5CF6]" />,
+    icon: <Utensils size={32} strokeWidth={2.2} className="text-[#8B5CF6]" />, // replaced icon here
     color: "bg-[#F7F0FF]",
     border: "border-[#8B5CF6]",
   },
@@ -49,7 +48,7 @@ const CATEGORY_DETAILS = [
   {
     id: "Beauty & Wellness",
     label: "Beauty & Wellness",
-    icon: <BeautySalon size={32} strokeWidth={2.2} className="text-[#7E69AB]" />,
+    icon: <Scissors size={32} strokeWidth={2.2} className="text-[#7E69AB]" />, // replaced icon here
     color: "bg-[#E5DEFF]",
     border: "border-[#7E69AB]",
   },
@@ -173,7 +172,7 @@ const CategoryIconBar: React.FC<CategoryIconBarProps> = ({
               onClick={() => onSelect(cat.id)}
               className={cn(
                 "flex flex-col items-center justify-center w-16 h-20 min-w-[70px] max-w-[80px] group hover:scale-105 transition-all rounded-full shadow-md",
-                "border",
+                "border border-gray-200",
                 cat.color,
                 cat.border,
                 selectedCategory === cat.id
@@ -216,3 +215,4 @@ const CategoryIconBar: React.FC<CategoryIconBarProps> = ({
 };
 
 export default CategoryIconBar;
+
