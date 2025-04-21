@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,8 @@ import { ReviewFormValues } from '@/components/location/ReviewForm';
 import LocationHeader from '@/components/location/LocationHeader';
 import LocationAbout from '@/components/location/LocationAbout';
 import ReviewsSection from '@/components/location/ReviewsSection';
+import CommunityNoteForm from '@/components/location/CommunityNoteForm';
+import CommunityNotesList from '@/components/location/CommunityNotesList';
 
 const getStoredReviews = (locationId: string): Review[] => {
   try {
@@ -73,11 +74,9 @@ const LocationDetails = () => {
     }
     setLoading(true);
     
-    // Load reviews from localStorage
     const savedReviews = getStoredReviews(id);
     setUserReviews(savedReviews);
     
-    // Calculate average rating from user reviews
     if (savedReviews.length > 0) {
       const avgRating = calculateAverageRating(savedReviews);
       setAverageRating(avgRating);
@@ -180,7 +179,6 @@ const LocationDetails = () => {
       return;
     }
 
-    // Check if this user has already submitted a review
     const existingUserReview = userReviews.find(
       review => review.userId === user.id
     );
@@ -197,7 +195,6 @@ const LocationDetails = () => {
     const reviewId = Math.random().toString(36).substring(2, 9);
     const currentDate = "Just now";
     
-    // Get user name from metadata or use email as fallback
     const userName = user.user_metadata?.full_name || user.email || user.id;
     
     const newReview: Review = {
@@ -208,18 +205,15 @@ const LocationDetails = () => {
       text: values.reviewText,
       isMustVisit: values.isMustVisit,
       isHiddenGem: values.isHiddenGem,
-      userId: user.id // Store the user ID to check for duplicate reviews
+      userId: user.id
     };
     
-    // Add the new review to the state
     const updatedReviews = [newReview, ...userReviews];
     setUserReviews(updatedReviews);
     
-    // Calculate new average rating
     const newAverageRating = calculateAverageRating(updatedReviews);
     setAverageRating(newAverageRating);
     
-    // Save to localStorage
     if (id) {
       storeReviews(id, updatedReviews);
     }
@@ -231,12 +225,10 @@ const LocationDetails = () => {
     });
   };
 
-  // Only include user reviews, no mock data
   const allReviews = [...userReviews];
   const locationImages = location?.images && location.images.length > 0 ? location.images : [location?.image];
   const reviewCount = userReviews.length;
   
-  // Use user ratings if available, otherwise fall back to location rating
   const displayRating = userReviews.length > 0 ? averageRating : (location?.rating || 4.5);
 
   if (loading) {
@@ -295,6 +287,11 @@ const LocationDetails = () => {
               currentUser={user}
               hasUserReviewed={userReviews.some(review => review.userId === (user?.id || null))}
             />
+
+            <div className="mt-8">
+              <CommunityNoteForm locationId={location.id} onNoteCreated={() => {}} />
+              <CommunityNotesList locationId={location.id} />
+            </div>
           </div>
           
           <div className="space-y-4">

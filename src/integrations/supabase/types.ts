@@ -24,6 +24,48 @@ export type Database = {
         }
         Relationships: []
       }
+      community_notes: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          images: string[] | null
+          location_id: string
+          social_links: Json | null
+          thumbs_up: number | null
+          thumbs_up_users: string[] | null
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          id?: string
+          images?: string[] | null
+          location_id: string
+          social_links?: Json | null
+          thumbs_up?: number | null
+          thumbs_up_users?: string[] | null
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          images?: string[] | null
+          location_id?: string
+          social_links?: Json | null
+          thumbs_up?: number | null
+          thumbs_up_users?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           approval_status: string
