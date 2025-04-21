@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +10,7 @@ import SearchHeader from '@/components/search/SearchHeader';
 import SearchTabs from '@/components/search/SearchTabs';
 import SearchControls from '@/components/search/SearchControls';
 import AreaSearchBar from '@/components/search/AreaSearchBar';
+import CategoryIconBar from "@/components/search/CategoryIconBar";
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -26,6 +26,8 @@ const SearchResults = () => {
     lng: 77.5946
   });
   
+  const [selectedCategoryBar, setSelectedCategoryBar] = useState<string>("all");
+
   const { filters, setters } = useSearchFilters();
   
   const {
@@ -132,9 +134,20 @@ const SearchResults = () => {
     }
   };
 
+  const handleCategoryBarSelect = (catId: string) => {
+    setSelectedCategoryBar(catId);
+    handleCategoryChange(catId === 'more' ? 'all' : catId);
+  };
+
   return (
     <MainLayout>
       <div className="w-full animate-fade-in mx-0 px-[2px] search-results-container">
+        <CategoryIconBar
+          selectedCategory={selectedCategoryBar}
+          onSelect={handleCategoryBarSelect}
+          className="mb-2"
+        />
+        
         <AreaSearchBar
           selectedArea={selectedArea}
           onAreaSelect={handleAreaSelect}
