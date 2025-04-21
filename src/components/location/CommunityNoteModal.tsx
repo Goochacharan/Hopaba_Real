@@ -3,8 +3,24 @@ import React from "react";
 import { ThumbsUp } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 
+interface NoteContentType {
+  text: string;
+  videoUrl?: string;
+}
+
+interface Note {
+  id: string;
+  title: string;
+  content: NoteContentType;
+  images: string[] | null;
+  social_links: any[];
+  user_id: string | null;
+  user_avatar_url?: string | null;
+  user_display_name?: string | null;
+}
+
 interface CommunityNoteModalProps {
-  note: any;
+  note: Note;
   open: boolean;
   onClose: () => void;
   onThumb: (noteId: string, rating: number) => void;
@@ -19,9 +35,19 @@ const isYouTubeUrl = (url: string) => {
   return ytRegex.test(url);
 };
 
+const isVimeoUrl = (url: string) => {
+  const vimeoRegex = /^(?:https?:\/\/)?(?:www\.)?(?:vimeo\.com\/)([^\s&]+)/;
+  return vimeoRegex.test(url);
+};
+
 const getYouTubeEmbedUrl = (url: string) => {
   const match = url.match(/^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([^\s&]+)/);
   return match ? `https://www.youtube.com/embed/${match[1]}` : "";
+};
+
+const getVimeoEmbedUrl = (url: string) => {
+  const match = url.match(/^(?:https?:\/\/)?(?:www\.)?(?:vimeo\.com\/)([^\s&]+)/);
+  return match ? `https://player.vimeo.com/video/${match[1]}` : "";
 };
 
 const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
@@ -29,12 +55,20 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
 }) => {
   if (!open || !note) return null;
 
-  const userRating = userHasThumbed ? 1 : 0; // The rating is not passed deeply, so using boolean for now.
-
   const userAvatarUrl = note.user_avatar_url;
   const userDisplayName = note.user_display_name || "Anonymous";
 
   const videoUrl = note.content?.videoUrl || null;
+  
+  // Determine which video service to use
+  const getEmbedUrl = (url: string | null) => {
+    if (!url) return null;
+    if (isYouTubeUrl(url)) return getYouTubeEmbedUrl(url);
+    if (isVimeoUrl(url)) return getVimeoEmbedUrl(url);
+    return null;
+  };
+  
+  const embedUrl = getEmbedUrl(videoUrl);
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
@@ -55,14 +89,17 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
               <AvatarFallback>{(userDisplayName[0] || "A").toUpperCase()}</AvatarFallback>
             )}
           </Avatar>
-          <h2 className="text-2xl font-bold">{note.title}</h2>
+          <div>
+            <h2 className="text-2xl font-bold">{note.title}</h2>
+            <div className="text-sm text-gray-500">{userDisplayName}</div>
+          </div>
         </div>
 
-        {videoUrl && isYouTubeUrl(videoUrl) && (
+        {videoUrl && embedUrl && (
           <div className="w-full aspect-video rounded-md overflow-hidden mb-4">
             <iframe
-              src={getYouTubeEmbedUrl(videoUrl)}
-              title="YouTube video player"
+              src={embedUrl}
+              title="Video player"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -74,13 +111,15 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
         {note.images && note.images.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
             {note.images.map((img: string, idx: number) => (
-              <img key={idx} src={img} className="w-32 h-20 object-cover rounded border" />
+              <img key={idx} src={img} alt={`image-${idx}`} className="w-32 h-20 object-cover rounded border" />
             ))}
           </div>
         )}
+        
         <div className="prose prose-lg mb-4" style={{ whiteSpace: "pre-wrap" }}>
           {note.content?.text}
         </div>
+        
         {note.social_links && Array.isArray(note.social_links) && note.social_links.length > 0 ? (
           <div className="mb-3">
             <label className="font-semibold">Links:</label>
@@ -121,4 +160,3 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
 };
 
 export default CommunityNoteModal;
-

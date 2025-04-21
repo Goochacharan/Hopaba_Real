@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -29,15 +30,67 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
+    
+    // Process each file to compress and convert to base64
     for (const file of files) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setImages(prev => [...prev, result]);
-      };
-      reader.readAsDataURL(file);
+      if (file.size > 1024 * 1024) {
+        // If file is larger than 1MB, compress it
+        const compressedImage = await compressImage(file);
+        if (compressedImage) {
+          setImages(prev => [...prev, compressedImage]);
+        }
+      } else {
+        // If file is small enough, just convert to base64
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          setImages(prev => [...prev, result]);
+        };
+        reader.readAsDataURL(file);
+      }
     }
     (e.target as HTMLInputElement).value = "";
+  };
+
+  // Compress image before storing it
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Calculate new dimensions to maintain aspect ratio
+          const maxDimension = 800;
+          if (width > height && width > maxDimension) {
+            height = (height * maxDimension) / width;
+            width = maxDimension;
+          } else if (height > maxDimension) {
+            width = (width * maxDimension) / height;
+            height = maxDimension;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve("");
+            return;
+          }
+          
+          ctx.drawImage(img, 0, 0, width, height);
+          // Lower quality (0.7) for more compression
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          resolve(compressedDataUrl);
+        };
+        img.src = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const isValidVideoUrl = (url: string) => {
@@ -77,15 +130,17 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
     }
     setAdding(true);
     try {
-      const contentObj = { text: content };
-      if (videoUrl) {
-        contentObj.videoUrl = videoUrl;
-      }
+      // Create a content object that includes the text and optional videoUrl
+      const contentObj = {
+        text: content,
+        ...(videoUrl ? { videoUrl } : {})
+      };
+
       const { error } = await supabase
         .from("community_notes")
         .insert({
           location_id: locationId,
-          user_id: supabase.auth.getUser().then(resp => resp.data.user?.id).catch(() => null),
+          user_id: (await supabase.auth.getUser()).data.user?.id || null,
           title: title.trim(),
           content: contentObj,
           images,
@@ -93,6 +148,7 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
           thumbs_up: 0,
           thumbs_up_users: []
         });
+
       if (error) throw error;
       toast({ title: "Community Note submitted!", description: "Thank you for sharing your article." });
       setTitle("");

@@ -9,13 +9,23 @@ interface CommunityNotesListProps {
   locationId: string;
 }
 
+interface NoteContentType {
+  text: string;
+  videoUrl?: string;
+}
+
+interface ThumbsUpUser {
+  user_id: string;
+  rating: number;
+}
+
 interface Note {
   id: string;
   title: string;
-  content: { text: string; videoUrl?: string };
+  content: NoteContentType;
   images: string[] | null;
   social_links: any[];
-  thumbs_up_users: { user_id: string; rating: number }[] | null; // rating 1-5
+  thumbs_up_users: ThumbsUpUser[] | null;
   thumbs_up: number | null;
   user_id: string | null;
   user_avatar_url?: string | null;
@@ -43,7 +53,7 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
     setUserId(data.session?.user?.id ?? null);
   }
 
-  // Fetch community notes with author avatar and display name
+  // Fetch community notes with author info
   async function fetchNotes() {
     setLoading(true);
     const { data, error } = await supabase
@@ -57,43 +67,77 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
       `)
       .eq("location_id", locationId)
       .order("created_at", { ascending: false });
+
     if (error) {
+      console.error("Error fetching notes:", error);
       setNotes([]);
       setLoading(false);
       return;
     }
-    // Fetch user profile pics and names for notes owners
-    const userIds = data?.map((note) => note.user_id).filter(Boolean) || [];
-    const uniqueUserIds = Array.from(new Set(userIds));
-    const { data: usersData, error: userError } = await supabase
-      .from("profiles")
-      .select("id, avatar_url, full_name")
-      .in("id", uniqueUserIds);
-    if (userError) {
-      // proceed without avatars if error
-      setNotes(data);
-      setLoading(false);
-      return;
-    }
-    // Map user info by user id
-    const userMap = new Map(
-      (usersData || []).map((user) => [user.id, user])
-    );
-    // Enhance notes with user_avatar_url and display_name
-    const enhancedNotes = (data || []).map((note) => ({
-      ...note,
-      user_avatar_url: note.user_id ? userMap.get(note.user_id)?.avatar_url : null,
-      user_display_name: note.user_id ? userMap.get(note.user_id)?.full_name : "Anonymous",
-      thumbs_up_users: note.thumbs_up_users || [],
-    }));
 
-    setNotes(enhancedNotes);
+    // Process notes and add user info
+    if (data && data.length > 0) {
+      const processedNotes: Note[] = [];
+      
+      for (const note of data) {
+        let userAvatarUrl: string | null = null;
+        let userDisplayName: string | null = "Anonymous";
+        
+        // If there's a user_id, try to get user info from auth.users
+        if (note.user_id) {
+          try {
+            const { data: userData } = await supabase.auth.admin.getUserById(
+              note.user_id
+            );
+            
+            if (userData && userData.user) {
+              userAvatarUrl = userData.user.user_metadata?.avatar_url || null;
+              userDisplayName = userData.user.user_metadata?.full_name || userData.user.email || "Anonymous";
+            }
+          } catch (authError) {
+            // Fallback to using user_id as display if auth query fails
+            console.error("Could not fetch user data:", authError);
+            userDisplayName = `User ${note.user_id.substring(0, 6)}`;
+          }
+        }
+        
+        // Ensure content is in the right format
+        const contentObj: NoteContentType = typeof note.content === 'string' 
+          ? { text: note.content }
+          : (note.content as NoteContentType);
+          
+        // Ensure thumbs_up_users is in the right format
+        const thumbsUpUsers = Array.isArray(note.thumbs_up_users) 
+          ? note.thumbs_up_users.map((user: any) => {
+              if (typeof user === 'string') {
+                // Convert legacy format to new format
+                return { user_id: user, rating: 1 };
+              }
+              return user as ThumbsUpUser;
+            })
+          : [];
+        
+        processedNotes.push({
+          ...note,
+          content: contentObj,
+          user_avatar_url: userAvatarUrl,
+          user_display_name: userDisplayName,
+          thumbs_up_users: thumbsUpUsers
+        });
+      }
+      
+      setNotes(processedNotes);
+    } else {
+      setNotes([]);
+    }
+    
     setLoading(false);
   }
 
   // Compute overall thumbs up count as sum of user ratings
   const computeThumbsUpCount = (note: Note) => {
-    return note.thumbs_up_users?.reduce((sum, u) => sum + u.rating, 0) || 0;
+    if (!note.thumbs_up_users || note.thumbs_up_users.length === 0) return 0;
+    return note.thumbs_up_users.reduce((sum, u) => sum + u.rating, 0);
   };
 
   // Check if user already gave a thumbs up and at what value
@@ -120,7 +164,8 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
     if (rating < 1 || rating > MAX_THUMBS) return;
 
     // Add or update thumbs_up_users array
-    const newThumbsUpUsers = [...note.thumbs_up_users, { user_id: userId, rating }];
+    const newThumbsUpUsers = [...(note.thumbs_up_users || [])];
+    newThumbsUpUsers.push({ user_id: userId, rating });
     const totalThumbsUp = newThumbsUpUsers.reduce((sum, u) => sum + u.rating, 0);
 
     const { error } = await supabase
@@ -133,8 +178,14 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
 
     if (!error) {
       setNotes(prev =>
-        prev.map(n => n.id === noteId ? { ...n, thumbs_up_users: newThumbsUpUsers, thumbs_up: totalThumbsUp } : n)
+        prev.map(n => n.id === noteId ? { 
+          ...n, 
+          thumbs_up_users: newThumbsUpUsers, 
+          thumbs_up: totalThumbsUp 
+        } : n)
       );
+    } else {
+      console.error("Error updating rating:", error);
     }
   }
 
@@ -157,6 +208,8 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
         <div className="flex flex-col gap-3">
           {notes.map(note => {
             const userRating = userThumbRating(note, userId);
+            const totalThumbsUp = computeThumbsUpCount(note);
+            
             return (
               <div
                 className="border p-3 rounded bg-white shadow-sm flex items-center justify-between cursor-pointer hover:shadow-md"
@@ -194,11 +247,12 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
                       }`}
                       aria-label={`${i} thumbs up`}
                       title={`${i} thumbs up`}
+                      disabled={userRating > 0}
                     >
                       <ThumbsUp size={20} />
                     </button>
                   ))}
-                  <span className="font-bold ml-1">{computeThumbsUpCount(note)}</span>
+                  <span className="font-bold ml-1">{totalThumbsUp}</span>
                 </div>
               </div>
             );
@@ -220,4 +274,3 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
 };
 
 export default CommunityNotesList;
-
