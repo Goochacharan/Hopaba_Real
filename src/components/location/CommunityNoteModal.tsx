@@ -1,10 +1,10 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getEmbedUrl } from "@/utils/videoUtils";
 
 interface NoteContentType {
   text: string;
@@ -39,38 +39,6 @@ interface CommunityNoteModalProps {
   onClose: () => void;
 }
 
-// Helper functions for video embedding
-const isYouTubeUrl = (url: string): boolean => {
-  return url.includes('youtube.com') || url.includes('youtu.be');
-};
-
-const isVimeoUrl = (url: string): boolean => {
-  return url.includes('vimeo.com');
-};
-
-const getYouTubeEmbedUrl = (url: string): string => {
-  if (url.includes('watch?v=')) {
-    const videoId = new URL(url).searchParams.get('v');
-    return `https://www.youtube.com/embed/${videoId}`;
-  } else if (url.includes('youtu.be')) {
-    const videoId = url.split('youtu.be/')[1]?.split('?')[0];
-    return `https://www.youtube.com/embed/${videoId}`;
-  }
-  return url;
-};
-
-const getVimeoEmbedUrl = (url: string): string => {
-  const vimeoId = url.split('vimeo.com/')[1]?.split('?')[0];
-  return `https://player.vimeo.com/video/${vimeoId}`;
-};
-
-const getEmbedUrl = (url: string | null): string | null => {
-  if (!url) return null;
-  if (isYouTubeUrl(url)) return getYouTubeEmbedUrl(url);
-  if (isVimeoUrl(url)) return getVimeoEmbedUrl(url);
-  return null;
-};
-
 const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
   note, open, onClose
 }) => {
@@ -79,22 +47,34 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (open && note.id) {
       loadComments();
     }
   }, [open, note.id]);
 
   const loadComments = async () => {
-    // Since we don't have a note_comments table yet, let's create a temporary solution
-    // We'll store comments in localStorage until we add the proper table via SQL migration
-    const storedComments = localStorage.getItem(`note_comments_${note.id}`);
-    try {
-      const parsedComments = storedComments ? JSON.parse(storedComments) : [];
-      setComments(parsedComments);
-    } catch (error) {
-      console.error('Error parsing comments:', error);
-      setComments([]);
+    const { data: commentsData, error } = await supabase
+      .from('note_comments')
+      .select('*')
+      .eq('note_id', note.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error loading comments:', error);
+      return;
+    }
+
+    if (commentsData) {
+      const processedComments = await Promise.all(commentsData.map(async (comment) => {
+        const { data: userData } = await supabase.auth.admin.getUserById(comment.user_id);
+        return {
+          ...comment,
+          user_display_name: userData?.user?.user_metadata?.full_name || 'Anonymous',
+          user_avatar_url: userData?.user?.user_metadata?.avatar_url
+        };
+      }));
+      setComments(processedComments);
     }
   };
 
@@ -116,30 +96,32 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
     }
 
     try {
-      const commentId = crypto.randomUUID();
+      const { data: comment, error } = await supabase
+        .from('note_comments')
+        .insert({
+          note_id: note.id,
+          user_id: userData.user.id,
+          content: newComment.trim()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
       const newCommentObj: Comment = {
-        id: commentId,
-        note_id: note.id,
-        user_id: userData.user.id,
-        content: newComment.trim(),
-        created_at: new Date().toISOString(),
+        ...comment,
         user_display_name: userData.user.user_metadata?.full_name || userData.user.email,
         user_avatar_url: userData.user.user_metadata?.avatar_url
       };
       
-      const updatedComments = [...comments, newCommentObj];
-      
-      // Save to localStorage until we add a proper table
-      localStorage.setItem(`note_comments_${note.id}`, JSON.stringify(updatedComments));
-      
-      setComments(updatedComments);
+      setComments(prev => [newCommentObj, ...prev]);
       setNewComment("");
       
       toast({
         title: "Success",
         description: "Comment posted successfully"
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: "Failed to post comment",
@@ -152,11 +134,9 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
 
   if (!open || !note) return null;
 
+  const embedUrl = getEmbedUrl(note.content?.videoUrl || null);
   const userAvatarUrl = note.user_avatar_url;
   const userDisplayName = note.user_display_name || "Anonymous";
-  const videoUrl = note.content?.videoUrl || null;
-  
-  const embedUrl = getEmbedUrl(videoUrl);
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
@@ -183,7 +163,7 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
           </div>
         </div>
 
-        {videoUrl && embedUrl && (
+        {embedUrl && (
           <div className="w-full aspect-video mb-6 rounded-lg overflow-hidden">
             <iframe
               src={embedUrl}
