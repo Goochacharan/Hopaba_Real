@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { SocialLoginButtons } from './SocialLoginButtons';
@@ -50,6 +51,7 @@ export const SignupCard: React.FC<SignupCardProps> = ({
         captchaToken={captchaToken}
         captchaSiteKey={captchaSiteKey}
         onCaptchaVerify={handleCaptchaVerify}
+        requireCaptcha={true}
       />
 
       <div className="mt-4 text-center">

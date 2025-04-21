@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { SocialLoginButtons } from './SocialLoginButtons';
@@ -32,6 +33,7 @@ export const LoginCard: React.FC<LoginCardProps> = ({
     <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
       <RateLimitAlert isVisible={isRateLimited} />
 
+      {/* Social login buttons never require captcha (disable only for isRateLimited) */}
       <SocialLoginButtons 
         onSocialLogin={handleSocialLogin}
         isDisabled={isRateLimited}
