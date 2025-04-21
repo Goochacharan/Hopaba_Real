@@ -3,23 +3,21 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import {
   IceCream,
+  Restaurant,
   Scissors,
   MoreHorizontal,
   Coffee,
+  Activity,
+  ShoppingBag,
+  BeautySalon,
 } from "lucide-react";
 
-// Category definitions aligned with SERVICE_CATEGORIES in the business listing form
-const CATEGORY_DETAILS: {
-  id: string;
-  label: string;
-  icon: React.ReactNode;
-  color: string;
-  border: string;
-}[] = [
+// Mapping icons to categories
+const CATEGORY_DETAILS = [
   {
     id: "Education",
     label: "Education",
-    icon: <Coffee size={30} className="text-[#0EA5E9]" />, // coffee for study/reading
+    icon: <Coffee size={32} strokeWidth={2.2} className="text-[#0EA5E9]" />,
     color: "bg-[#D3E4FD]",
     border: "border-[#33C3F0]",
   },
@@ -27,9 +25,7 @@ const CATEGORY_DETAILS: {
     id: "Healthcare",
     label: "Healthcare",
     icon: (
-      <span className="w-[30px] h-[30px] flex items-center justify-center bg-[#E5DEFF] rounded-full text-[#6E59A5] border-2 border-[#D6BCFA] text-xl font-bold">
-        H
-      </span>
+      <Activity size={32} strokeWidth={2.2} className="text-[#6E59A5]" />
     ),
     color: "bg-[#E5DEFF]",
     border: "border-[#D6BCFA]",
@@ -37,7 +33,7 @@ const CATEGORY_DETAILS: {
   {
     id: "Food & Dining",
     label: "Food & Dining",
-    icon: <IceCream size={30} className="text-[#8B5CF6]" />,
+    icon: <Restaurant size={32} strokeWidth={2.2} className="text-[#8B5CF6]" />,
     color: "bg-[#F7F0FF]",
     border: "border-[#8B5CF6]",
   },
@@ -45,9 +41,7 @@ const CATEGORY_DETAILS: {
     id: "Home Services",
     label: "Home Services",
     icon: (
-      <span className="w-[30px] h-[30px] flex items-center justify-center bg-[#fbed96] rounded-full text-[#c1c161] border-2 border-[#abecd6] text-xl font-bold">
-        HS
-      </span>
+      <ShoppingBag size={32} strokeWidth={2.2} className="text-[#c1c161]" />
     ),
     color: "bg-[#FBED96]",
     border: "border-[#ABECD6]",
@@ -55,7 +49,7 @@ const CATEGORY_DETAILS: {
   {
     id: "Beauty & Wellness",
     label: "Beauty & Wellness",
-    icon: <Scissors size={30} className="text-[#7E69AB]" />,
+    icon: <BeautySalon size={32} strokeWidth={2.2} className="text-[#7E69AB]" />,
     color: "bg-[#E5DEFF]",
     border: "border-[#7E69AB]",
   },
@@ -63,9 +57,7 @@ const CATEGORY_DETAILS: {
     id: "Professional Services",
     label: "Professional Services",
     icon: (
-      <span className="w-[30px] h-[30px] flex items-center justify-center bg-[#fff0c7] rounded-full text-[#FFA99F] border-2 border-[#FF719A] text-xl font-bold">
-        P
-      </span>
+      <Scissors size={32} strokeWidth={2.2} className="text-[#FFA99F]" />
     ),
     color: "bg-[#FFF0C7]",
     border: "border-[#FF719A]",
@@ -74,9 +66,7 @@ const CATEGORY_DETAILS: {
     id: "Auto Services",
     label: "Auto Services",
     icon: (
-      <span className="w-[30px] h-[30px] flex items-center justify-center bg-[#d3eafd] rounded-full text-[#1EAEDB] border-2 border-[#1EAEDB] text-xl font-bold">
-        A
-      </span>
+      <Activity size={32} strokeWidth={2.2} className="text-[#1EAEDB]" />
     ),
     color: "bg-[#D3EAFD]",
     border: "border-[#1EAEDB]",
@@ -85,9 +75,7 @@ const CATEGORY_DETAILS: {
     id: "Technology",
     label: "Technology",
     icon: (
-      <span className="w-[30px] h-[30px] flex items-center justify-center bg-[#fdfcfb] rounded-full text-[#6E59A5] border-2 border-[#e2d1c3] text-xl font-bold">
-        T
-      </span>
+      <Activity size={32} strokeWidth={2.2} className="text-[#6E59A5]" />
     ),
     color: "bg-[#FDFCFB]",
     border: "border-[#E2D1C3]",
@@ -96,9 +84,7 @@ const CATEGORY_DETAILS: {
     id: "Financial Services",
     label: "Financial Services",
     icon: (
-      <span className="w-[30px] h-[30px] flex items-center justify-center bg-[#eef1f5] rounded-full text-[#33C3F0] border-2 border-[#304352] text-xl font-bold">
-        F
-      </span>
+      <ShoppingBag size={32} strokeWidth={2.2} className="text-[#33C3F0]" />
     ),
     color: "bg-[#EEF1F5]",
     border: "border-[#33C3F0]",
@@ -107,9 +93,7 @@ const CATEGORY_DETAILS: {
     id: "Entertainment",
     label: "Entertainment",
     icon: (
-      <span className="w-[30px] h-[30px] flex items-center justify-center bg-[#ffdde1] rounded-full text-[#EE9CA7] border-2 border-[#ee9ca7] text-xl font-bold">
-        E
-      </span>
+      <IceCream size={32} strokeWidth={2.2} className="text-[#EE9CA7]" />
     ),
     color: "bg-[#FFDDE1]",
     border: "border-[#EE9CA7]",
@@ -118,9 +102,7 @@ const CATEGORY_DETAILS: {
     id: "Travel & Transport",
     label: "Travel & Transport",
     icon: (
-      <span className="w-[30px] h-[30px] flex items-center justify-center bg-[#e7f0fd] rounded-full text-[#0EA5E9] border-2 border-[#8B5CF6] text-xl font-bold">
-        TT
-      </span>
+      <Activity size={32} strokeWidth={2.2} className="text-[#0EA5E9]" />
     ),
     color: "bg-[#E7F0FD]",
     border: "border-[#0EA5E9]",
@@ -129,9 +111,7 @@ const CATEGORY_DETAILS: {
     id: "Fitness",
     label: "Fitness",
     icon: (
-      <span className="w-[30px] h-[30px] flex items-center justify-center bg-[#D3E4FD] rounded-full text-[#8E9196] border-2 border-[#8E9196] text-xl font-bold">
-        F
-      </span>
+      <Activity size={32} strokeWidth={2.2} className="text-[#8E9196]" />
     ),
     color: "bg-[#D3E4FD]",
     border: "border-[#8E9196]",
@@ -140,9 +120,7 @@ const CATEGORY_DETAILS: {
     id: "Real Estate",
     label: "Real Estate",
     icon: (
-      <span className="w-[30px] h-[30px] flex items-center justify-center bg-[#eacda3] rounded-full text-[#E6B980] border-2 border-[#E6B980] text-xl font-bold">
-        RE
-      </span>
+      <ShoppingBag size={32} strokeWidth={2.2} className="text-[#E6B980]" />
     ),
     color: "bg-[#EACDA3]",
     border: "border-[#E6B980]",
@@ -151,9 +129,7 @@ const CATEGORY_DETAILS: {
     id: "Retail",
     label: "Retail",
     icon: (
-      <span className="w-[30px] h-[30px] flex items-center justify-center bg-[#d6bcfa] rounded-full text-[#33C3F0] border-2 border-[#33C3F0] text-xl font-bold">
-        R
-      </span>
+      <ShoppingBag size={32} strokeWidth={2.2} className="text-[#33C3F0]" />
     ),
     color: "bg-[#D6BCFA]",
     border: "border-[#33C3F0]",
@@ -161,7 +137,9 @@ const CATEGORY_DETAILS: {
   {
     id: "Other",
     label: "Other",
-    icon: <MoreHorizontal size={30} className="text-[#aaadb0]" />,
+    icon: (
+      <MoreHorizontal size={32} strokeWidth={2.2} className="text-[#aaadb0]" />
+    ),
     color: "bg-[#eef1f5]",
     border: "border-[#aaadb0]",
   },
@@ -186,7 +164,7 @@ const CategoryIconBar: React.FC<CategoryIconBarProps> = ({
       )}
       aria-label="Category icons"
     >
-      <ul className="flex flex-row gap-5 min-w-max">
+      <ul className="flex flex-row gap-4 min-w-max">
         {CATEGORY_DETAILS.map((cat) => (
           <li key={cat.id}>
             <button
@@ -194,30 +172,38 @@ const CategoryIconBar: React.FC<CategoryIconBarProps> = ({
               aria-label={cat.label}
               onClick={() => onSelect(cat.id)}
               className={cn(
-                "flex flex-col items-center justify-center min-w-[80px] group hover:scale-105 transition-all py-2 rounded-xl shadow-md",
+                "flex flex-col items-center justify-center w-16 h-20 min-w-[70px] max-w-[80px] group hover:scale-105 transition-all rounded-full shadow-md",
+                "border",
                 cat.color,
                 cat.border,
                 selectedCategory === cat.id
                   ? "ring-2 ring-[#8B5CF6] border-2"
-                  : "border"
+                  : ""
               )}
               style={{
                 borderColor: selectedCategory === cat.id ? "#8B5CF6" : undefined,
-                boxShadow: selectedCategory === cat.id
-                  ? "0 4px 16px 0 rgba(139, 92, 246, 0.07)"
-                  : "0 2px 8px 0 rgba(0,0,0,0.04)"
+                boxShadow:
+                  selectedCategory === cat.id
+                    ? "0 4px 16px 0 rgba(139, 92, 246, 0.12)"
+                    : "0 2px 8px 0 rgba(0,0,0,0.06)",
+                aspectRatio: "1/1",
               }}
             >
-              <span className="mb-1">
+              <span className="flex items-center justify-center w-16 h-16">
                 {cat.icon}
               </span>
               <span
                 className={cn(
-                  "text-xs font-semibold",
+                  "text-xs font-semibold text-center mt-1 w-16 leading-tight",
                   selectedCategory === cat.id
                     ? "text-[#8B5CF6]"
                     : "text-neutral-700"
                 )}
+                style={{
+                  overflowWrap: 'anywhere',
+                  wordBreak: 'break-word',
+                  whiteSpace: 'normal',
+                }}
               >
                 {cat.label}
               </span>
