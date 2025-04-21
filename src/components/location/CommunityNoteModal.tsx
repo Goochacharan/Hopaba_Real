@@ -11,16 +11,14 @@ interface NoteContentType {
   videoUrl?: string;
 }
 
-export interface Note {
+interface Reply {
   id: string;
-  title: string;
-  content: NoteContentType;
-  images: string[] | null;
-  social_links: any[];
-  user_id: string | null;
-  user_avatar_url?: string | null;
-  user_display_name?: string | null;
-  created_at?: string;
+  comment_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  user_display_name?: string;
+  user_avatar_url?: string;
 }
 
 interface Comment {
@@ -31,6 +29,19 @@ interface Comment {
   created_at: string;
   user_display_name?: string;
   user_avatar_url?: string;
+  replies?: Reply[];
+}
+
+export interface Note {
+  id: string;
+  title: string;
+  content: NoteContentType;
+  images: string[] | null;
+  social_links: any[];
+  user_id: string | null;
+  user_avatar_url?: string | null;
+  user_display_name?: string | null;
+  created_at?: string;
 }
 
 interface CommunityNoteModalProps {
@@ -46,12 +57,21 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (open && note.id) {
       loadComments();
+      getCurrentUser();
     }
   }, [open, note.id]);
+
+  const getCurrentUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setCurrentUserId(user?.id || null);
+  };
 
   const loadComments = async () => {
     const { data: commentsData, error } = await supabase
@@ -67,11 +87,28 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
 
     if (commentsData) {
       const processedComments = await Promise.all(commentsData.map(async (comment) => {
-        const { data: userData } = await supabase.auth.admin.getUserById(comment.user_id);
+        const { data: userData } = await supabase.auth.getUser(comment.user_id);
+        
+        const { data: repliesData } = await supabase
+          .from('comment_replies')
+          .select('*')
+          .eq('comment_id', comment.id)
+          .order('created_at', { ascending: true });
+
+        const processedReplies = await Promise.all((repliesData || []).map(async (reply) => {
+          const { data: replyUserData } = await supabase.auth.getUser(reply.user_id);
+          return {
+            ...reply,
+            user_display_name: replyUserData?.user?.user_metadata?.full_name || 'Anonymous',
+            user_avatar_url: replyUserData?.user?.user_metadata?.avatar_url
+          };
+        }));
+
         return {
           ...comment,
           user_display_name: userData?.user?.user_metadata?.full_name || 'Anonymous',
-          user_avatar_url: userData?.user?.user_metadata?.avatar_url
+          user_avatar_url: userData?.user?.user_metadata?.avatar_url,
+          replies: processedReplies
         };
       }));
       setComments(processedComments);
@@ -132,11 +169,75 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
     setSubmitting(false);
   };
 
+  const handleSubmitReply = async (commentId: string) => {
+    if (!replyContent.trim()) return;
+
+    setSubmitting(true);
+    const { data: userData } = await supabase.auth.getUser();
+    
+    if (!userData.user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to reply",
+        variant: "destructive"
+      });
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      const { data: reply, error } = await supabase
+        .from('comment_replies')
+        .insert({
+          comment_id: commentId,
+          user_id: userData.user.id,
+          content: replyContent.trim()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newReply: Reply = {
+        ...reply,
+        user_display_name: userData.user.user_metadata?.full_name || userData.user.email,
+        user_avatar_url: userData.user.user_metadata?.avatar_url
+      };
+      
+      setComments(prevComments => prevComments.map(comment => {
+        if (comment.id === commentId) {
+          return {
+            ...comment,
+            replies: [...(comment.replies || []), newReply]
+          };
+        }
+        return comment;
+      }));
+      
+      setReplyContent("");
+      setReplyingTo(null);
+      
+      toast({
+        title: "Success",
+        description: "Reply posted successfully"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to post reply",
+        variant: "destructive"
+      });
+    }
+    
+    setSubmitting(false);
+  };
+
   if (!open || !note) return null;
 
   const embedUrl = getEmbedUrl(note.content?.videoUrl || null);
   const userAvatarUrl = note.user_avatar_url;
   const userDisplayName = note.user_display_name || "Anonymous";
+  const isAuthor = currentUserId === note.user_id;
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
@@ -212,7 +313,7 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
           <h3 className="text-lg font-semibold mb-4">Comments</h3>
           <div className="space-y-4 mb-6">
             {comments.map((comment) => (
-              <div key={comment.id} className="bg-gray-50 p-4 rounded-lg">
+              <div key={comment.id} className="bg-gray-50 p-4 rounded-lg space-y-3">
                 <div className="flex items-center gap-2 mb-2">
                   <Avatar className="h-8 w-8">
                     {comment.user_avatar_url ? (
@@ -231,6 +332,76 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
                   </div>
                 </div>
                 <p className="text-gray-700">{comment.content}</p>
+
+                {comment.replies && comment.replies.length > 0 && (
+                  <div className="ml-8 mt-2 space-y-3">
+                    {comment.replies.map((reply) => (
+                      <div key={reply.id} className="bg-white p-3 rounded-lg border">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Avatar className="h-6 w-6">
+                            {reply.user_avatar_url ? (
+                              <AvatarImage src={reply.user_avatar_url} alt={reply.user_display_name} />
+                            ) : (
+                              <AvatarFallback>
+                                {(reply.user_display_name?.[0] || "A").toUpperCase()}
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                          <div>
+                            <div className="font-medium text-sm">{reply.user_display_name || "Anonymous"}</div>
+                            <div className="text-xs text-gray-500">
+                              {new Date(reply.created_at).toLocaleDateString()}
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-gray-700 text-sm">{reply.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {isAuthor && (
+                  <div className="mt-2">
+                    {replyingTo === comment.id ? (
+                      <div className="space-y-2">
+                        <Textarea
+                          placeholder="Write a reply..."
+                          value={replyContent}
+                          onChange={(e) => setReplyContent(e.target.value)}
+                          className="min-h-[80px] text-sm"
+                        />
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm"
+                            onClick={() => handleSubmitReply(comment.id)} 
+                            disabled={submitting}
+                          >
+                            {submitting ? "Posting..." : "Post Reply"}
+                          </Button>
+                          <Button 
+                            size="sm"
+                            variant="ghost" 
+                            onClick={() => {
+                              setReplyingTo(null);
+                              setReplyContent("");
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-sm"
+                        onClick={() => setReplyingTo(comment.id)}
+                      >
+                        Reply
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
