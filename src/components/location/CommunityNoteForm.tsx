@@ -79,6 +79,8 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
       toast({ title: "Community Note submitted!", description: "Thank you for sharing your article." });
       setTitle("");
       setBlocks([{ type: 'text', content: '' }]);
+      
+      // Make sure to call onNoteCreated to refresh the list
       onNoteCreated();
     } catch (error: any) {
       toast({ title: "Error submitting note", description: error.message || "Unknown error", variant: "destructive" });

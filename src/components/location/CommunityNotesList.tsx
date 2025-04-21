@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText } from "lucide-react";
@@ -35,6 +36,8 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
 
   async function fetchNotes() {
     setLoading(true);
+    console.log("Fetching notes for location:", locationId);
+    
     const { data, error } = await supabase
       .from("community_notes")
       .select(`
@@ -54,6 +57,8 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
       return;
     }
 
+    console.log("Notes data from database:", data);
+    
     if (data && data.length > 0) {
       const processedNotes: Note[] = [];
       
@@ -63,9 +68,8 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
         
         if (note.user_id) {
           try {
-            const { data: userData } = await supabase.auth.admin.getUserById(
-              note.user_id
-            );
+            // Using getUser instead of admin.getUserById which might not be accessible
+            const { data: userData } = await supabase.auth.getUser(note.user_id);
             
             if (userData && userData.user) {
               userAvatarUrl = userData.user.user_metadata?.avatar_url || null;
@@ -110,8 +114,10 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
         });
       }
       
+      console.log("Processed notes:", processedNotes);
       setNotes(processedNotes);
     } else {
+      console.log("No notes found for this location");
       setNotes([]);
     }
     

@@ -50,6 +50,7 @@ const LocationDetails = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [averageRating, setAverageRating] = useState<number>(0);
+  const [communityNotesRefreshTrigger, setCommunityNotesRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -225,6 +226,10 @@ const LocationDetails = () => {
     });
   };
 
+  const refreshCommunityNotes = () => {
+    setCommunityNotesRefreshTrigger(prev => prev + 1);
+  };
+
   const allReviews = [...userReviews];
   const locationImages = location?.images && location.images.length > 0 ? location.images : [location?.image];
   const reviewCount = userReviews.length;
@@ -289,8 +294,8 @@ const LocationDetails = () => {
             />
 
             <div className="mt-8">
-              <CommunityNoteForm locationId={location.id} onNoteCreated={() => {}} />
-              <CommunityNotesList locationId={location.id} />
+              <CommunityNoteForm locationId={location.id} onNoteCreated={refreshCommunityNotes} />
+              <CommunityNotesList locationId={location.id} key={`notes-list-${communityNotesRefreshTrigger}`} />
             </div>
           </div>
           
