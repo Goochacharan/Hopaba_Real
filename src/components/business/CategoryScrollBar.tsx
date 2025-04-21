@@ -1,8 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
 
-// Array of distinct dark, rich background color classes for variety 
+// All service categories, with an "All" category first
+const SERVICE_CATEGORIES = [
+  "All",
+  "Education", "Healthcare", "Food & Dining", "Home Services", "Beauty & Wellness",
+  "Professional Services", "Auto Services", "Technology", "Financial Services",
+  "Entertainment", "Travel & Transport", "Fitness", "Real Estate", "Retail", "Other"
+];
+
+// Array of dark, rich background color classes
 const darkBgColors = [
   "bg-[#1A1F2C]",  // Deep navy
   "bg-[#403E43]",  // Charcoal gray
@@ -11,80 +18,42 @@ const darkBgColors = [
   "bg-[#000000e6]", // Black
   "bg-[#555555]",  // Mid dark gray
   "bg-[#333333]",  // Very dark gray
+  "bg-[#0006]",    // Slightly transparent black
   "bg-[#221F26]",  // Almost black purple
   "bg-[#302D46]",  // Rich deep indigo
-  "bg-[#2e3742]",  // Space gray
-  "bg-[#292933]",  // Shadowy black
-  "bg-[#45465c]",  // Muted dark indigo
-  "bg-[#18181B]", // Extra dark
   "bg-[#222]",     // Short hex dark gray
   "bg-[#333]",     // Short hex
-  "bg-[#3B3B3B]",  // Gray-black
+  "bg-[#2226]",    // Short hex semi-transparent dark
+  "bg-[#2e3742]",  // Space gray
+  "bg-[#45465c]",  // Muted dark indigo
+  "bg-[#292933]",  // Shadowy black
 ];
 
-// "All" button styling
+// "All" button background: white
 const allButtonBg = "bg-white";
+
+// "All" button text: gray
 const allButtonText = "text-[#555] font-bold";
 
 // Others: white bold font
 const categoryButtonText = "text-white font-bold";
 
-// Button shape/styles
+// Unified border — subtle and consistent for all
+const borderStyle = "border border-[#161922]";
+
+// Feather shadow for nice depth
+const depthShadow = "shadow-[0_2px_14px_0_rgba(22,25,34,0.24)]";
+
+// Rectangular and spacing
 const buttonShapeStyles =
   "flex-shrink-0 px-5 py-2 rounded-[10px] text-base select-none cursor-pointer min-w-[148px] h-12 transition-all duration-150 flex items-center justify-center";
 
 // Selected state
 const selectedStyles = "ring-2 ring-[#F97316] border-[#F97316] scale-105";
+// Not selected: strong opacity, hover feedback
 const idleStyles = "opacity-95 hover:opacity-100 hover:scale-105";
 
-// Unified border — subtle and consistent for all
-const borderStyle = "border border-[#161922]";
-
-// Feather shadow for depth
-const depthShadow = "shadow-[0_2px_10px_0_rgba(22,25,34,0.17)]";
-
-// Default categories to use as fallback if fetch fails
-const DEFAULT_CATEGORIES = [
-  "Actor/Actress",
-  "Auto Services",
-  "Bakery & Chats",
-  "Beauty & Wellness",
-  "Choreographer",
-  "Education",
-  "Electrician",
-  "Entertainment",
-  "Event Planning",
-  "Fashion Designer",
-  "Financial Services",
-  "Fitness",
-  "Food & Dining",
-  "Graphic Designer",
-  "Hair Salons",
-  "Healthcare",
-  "Home Services",
-  "Ice Cream Shop",
-  "Massage Therapy",
-  "Medical Spas",
-  "Model",
-  "Musician",
-  "Nail Technicians",
-  "Painter",
-  "Photographer",
-  "Plumber",
-  "Professional Services",
-  "Real Estate",
-  "Retail",
-  "Skin Care",
-  "Technology",
-  "Travel Agents",
-  "Vacation Rentals",
-  "Videographers",
-  "Weight Loss Centers",
-  "Writer",
-  "Other"
-].sort();
-
-// Component props
+// Main component
 interface CategoryScrollBarProps {
   selected: string;
   onSelect: (category: string) => void;
@@ -96,55 +65,6 @@ const CategoryScrollBar: React.FC<CategoryScrollBarProps> = ({
   onSelect,
   className,
 }) => {
-  const [categories, setCategories] = useState<string[]>([]);
-
-  // Fetch category list from Supabase, distinct categories from service_providers
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        // Fetch all categories from service_providers table
-        const { data, error } = await supabase
-          .from("service_providers")
-          .select("category")
-          .neq("category", "")
-          .order("category", { ascending: true });
-          
-        if (error) {
-          console.error("Failed to fetch categories:", error);
-          setCategories(DEFAULT_CATEGORIES);
-          return;
-        }
-
-        // Safely collect all unique categories (no empty and no duplicates, trim whitespace)
-        const uniqueCategories = Array.from(
-          new Set(
-            (data || [])
-              .map((row) => (row.category ? row.category.trim() : null))
-              .filter((v): v is string => Boolean(v))
-          )
-        );
-
-        // If we found categories, use them. Otherwise, use the default list
-        if (uniqueCategories.length > 0) {
-          setCategories(uniqueCategories);
-        } else {
-          console.log("No categories found, using default list");
-          setCategories(DEFAULT_CATEGORIES);
-        }
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-        setCategories(DEFAULT_CATEGORIES);
-      }
-    };
-
-    fetchCategories();
-    // No deps, run once (or else add [supabase] if using instance context)
-    // eslint-disable-next-line
-  }, []);
-
-  // Final categories to display: All button + unique category list
-  const displayCategories = ["All", ...categories];
-
   return (
     <div
       className={cn(
@@ -154,17 +74,11 @@ const CategoryScrollBar: React.FC<CategoryScrollBarProps> = ({
       style={{ WebkitOverflowScrolling: "touch" }}
     >
       <div className="flex gap-3 min-w-max">
-        {displayCategories.map((cat, idx) => {
+        {SERVICE_CATEGORIES.map((cat, idx) => {
+          // Button color and text logic
           const isAll = cat === "All";
-          // Assign a dark color to each category, cycling through the list for >16 categories
-          const bgColor = isAll
-            ? allButtonBg
-            : darkBgColors[idx % darkBgColors.length];
-
-          // Font color: gray on white, white otherwise
+          const bgColor = isAll ? allButtonBg : darkBgColors[(idx - 1 + darkBgColors.length) % darkBgColors.length];
           const textColor = isAll ? allButtonText : categoryButtonText;
-
-          // Selected logic: match case-insensitive
           const isSelected = selected
             ? cat.toLowerCase() === selected.toLowerCase()
             : isAll;
