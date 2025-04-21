@@ -18,14 +18,14 @@ const categories = [
   { label: "More", value: "more", color: "bg-gradient-to-br from-[#1EAEDB] to-[#33C3F0]", border: "border-[#6E59A5]" }
 ];
 
-interface Props {
+interface CategoryScrollBarProps {
   selected: string;
   onSelect: (cat: string) => void;
   className?: string;
 }
 
 // Makes a horizontally scrollable bar of category buttons with colored backgrounds and light border/shadow.
-const CategoryScrollBar: React.FC<Props> = ({ selected, onSelect, className }) => {
+const CategoryScrollBar: React.FC<CategoryScrollBarProps> = ({ selected, onSelect, className }) => {
   return (
     <div
       className={cn(

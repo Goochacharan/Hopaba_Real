@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -69,7 +68,6 @@ const SearchResults = () => {
     availability_end_time: rec.availability_end_time || ''
   }));
 
-  // Filter recommendations by area if selected
   const areaFilteredRecommendations = selectedArea 
     ? enhancedRecommendations.filter(rec => 
         rec.address && rec.address.toLowerCase().includes(selectedArea.toLowerCase()))
@@ -96,7 +94,6 @@ const SearchResults = () => {
   const handleCategorySelect = (selectedCategory: string) => {
     handleCategoryChange(selectedCategory as any);
     
-    // Update URL with the selected category
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('category', selectedCategory);
     navigate(`/search?${newSearchParams.toString()}`);
