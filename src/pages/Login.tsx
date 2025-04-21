@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -107,7 +108,8 @@ export default function Login() {
     
     setSocialLoading(provider);
     try {
-      const redirectUrl = 'https://hopaba.in/login';
+      // Use the public URL from window.location.origin instead of hardcoded URL
+      const redirectUrl = `${window.location.origin}/login`;
       
       console.log("Starting OAuth flow with redirect URL:", redirectUrl);
       

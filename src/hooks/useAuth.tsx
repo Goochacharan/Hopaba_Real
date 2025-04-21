@@ -242,7 +242,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoginError(null);
     
     try {
-      const redirectUrl = 'https://hopaba.in/login';
+      // Use the public URL from window.location.origin instead of hardcoded URL
+      const redirectUrl = `${window.location.origin}/login`;
       
       console.log("Starting OAuth with redirect to:", redirectUrl);
       

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 
 // Use the type definition from global.d.ts
@@ -6,14 +7,15 @@ interface CaptchaProps {
   onVerify: (token: string) => void;
 }
 
-// We'll remove the duplicate window interface declaration and use the global one instead
-
 export function Captcha({ siteKey, onVerify }: CaptchaProps) {
   const divRef = useRef<HTMLDivElement>(null);
   const isScriptLoaded = useRef(false);
   const widgetId = useRef<number | null>(null);
 
   useEffect(() => {
+    // Add domain information to hCaptcha
+    window.hcaptcha = window.hcaptcha || {};
+    
     // Skip if hCaptcha is already loaded
     if (window.hcaptcha && divRef.current && !isScriptLoaded.current) {
       renderCaptcha();
@@ -30,7 +32,7 @@ export function Captcha({ siteKey, onVerify }: CaptchaProps) {
 
       const script = document.createElement('script');
       script.id = 'hcaptcha-script';
-      script.src = `https://js.hcaptcha.com/1/api.js?onload=onloadCallback&render=explicit`;
+      script.src = `https://js.hcaptcha.com/1/api.js?onload=onloadCallback&render=explicit&host=hopaba.in`;
       script.async = true;
       script.defer = true;
       document.head.appendChild(script);
@@ -62,6 +64,7 @@ export function Captcha({ siteKey, onVerify }: CaptchaProps) {
           widgetId.current = window.hcaptcha.render(divRef.current, {
             sitekey: siteKey,
             callback: onVerify,
+            'host-url': 'hopaba.in'
           });
         }
       } catch (error) {
@@ -71,7 +74,7 @@ export function Captcha({ siteKey, onVerify }: CaptchaProps) {
   };
 
   // Add a debugging message to help troubleshoot
-  console.log('Rendering hCaptcha with site key:', siteKey);
+  console.log('Rendering hCaptcha with site key:', siteKey, 'for domain: hopaba.in');
 
   return <div ref={divRef} className="h-captcha mt-4"></div>;
 }
