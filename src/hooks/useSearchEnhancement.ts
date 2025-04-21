@@ -1,52 +1,99 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { getUserLocation } from '@/lib/locationUtils';
 
 export const useSearchEnhancement = () => {
-  const [isEnhancing, setIsEnhancing] = useState(false);
-  
-  const enhanceSearchQuery = async (rawQuery: string, currentPath: string) => {
-    if (currentPath === '/marketplace' || currentPath.startsWith('/marketplace')) {
-      console.log("Marketplace search - not enhancing:", rawQuery);
-      return rawQuery;
-    }
+  const [enhancing, setEnhancing] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const enhanceQuery = async (query: string, includeNearMe: boolean = false): Promise<string> => {
+    if (!query) return '';
     
-    if (!rawQuery.trim()) return rawQuery;
-    setIsEnhancing(true);
+    setEnhancing(true);
+    setError(null);
     
     try {
+      let userCoordinates = null;
+      
+      if (includeNearMe) {
+        userCoordinates = await getUserLocation();
+      }
+      
       const { data, error } = await supabase.functions.invoke('enhance-search', {
-        body: { query: rawQuery }
+        body: {
+          query,
+          nearMe: includeNearMe,
+          userLocation: userCoordinates
+        }
       });
       
       if (error) {
-        console.error('Error enhancing search:', error);
-        return rawQuery;
+        console.error('Error enhancing search query:', error);
+        setError('Failed to enhance search query');
+        return query;
       }
       
-      console.log('AI enhanced search:', data);
-      
-      if (data.enhanced && data.enhanced !== rawQuery) {
-        toast({
-          title: "Search enhanced with AI",
-          description: `We improved your search to: "${data.enhanced}"`,
-          duration: 5000
-        });
+      if (data?.enhanced) {
+        console.log('Search query enhanced:', data.enhanced);
         return data.enhanced;
       }
       
-      return rawQuery;
+      return query;
     } catch (err) {
-      console.error('Failed to enhance search:', err);
-      return rawQuery;
+      console.error('Exception while enhancing search query:', err);
+      setError('Failed to enhance search query');
+      return query;
     } finally {
-      setIsEnhancing(false);
+      setEnhancing(false);
+    }
+  };
+  
+  const searchWithLocation = async (
+    query: string, 
+    categoryFilter: string = 'all'
+  ) => {
+    setEnhancing(true);
+    setError(null);
+    
+    try {
+      // First try to get user's location
+      const userCoordinates = await getUserLocation();
+      
+      const { data, error } = await supabase.functions.invoke('enhanced-search-with-location', {
+        body: {
+          searchQuery: query,
+          categoryFilter,
+          userLat: userCoordinates?.lat,
+          userLng: userCoordinates?.lng
+        }
+      });
+      
+      if (error) {
+        console.error('Error performing location-based search:', error);
+        setError('Failed to perform location-based search');
+        return { providers: [], userLocation: null };
+      }
+      
+      return {
+        providers: data.providers || [],
+        userLocation: data.userLocation
+      };
+    } catch (err) {
+      console.error('Exception during location-based search:', err);
+      setError('Failed to perform location-based search');
+      return { providers: [], userLocation: null };
+    } finally {
+      setEnhancing(false);
     }
   };
 
   return {
-    isEnhancing,
-    enhanceSearchQuery
+    enhanceQuery,
+    searchWithLocation,
+    enhancing,
+    error
   };
 };
+
+export default useSearchEnhancement;

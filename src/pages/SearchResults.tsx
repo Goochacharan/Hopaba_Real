@@ -90,6 +90,7 @@ const SearchResults = () => {
 
   console.log("Final ranked recommendations:", rankedRecommendations);
   console.log("Selected area:", selectedArea);
+  console.log("User coordinates:", userCoordinates);
 
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
@@ -124,12 +125,20 @@ const SearchResults = () => {
     console.log("Area selected:", area);
   };
 
+  const handleLocationSelect = (coordinates: { lat: number, lng: number } | null) => {
+    if (coordinates) {
+      setUserCoordinates(coordinates);
+      console.log("User coordinates set:", coordinates);
+    }
+  };
+
   return (
     <MainLayout>
       <div className="w-full animate-fade-in mx-0 px-[2px] search-results-container">
         <AreaSearchBar
           selectedArea={selectedArea}
           onAreaSelect={handleAreaSelect}
+          onLocationSelect={handleLocationSelect}
         />
         
         <SearchControls

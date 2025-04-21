@@ -85,3 +85,62 @@ export function formatDistance(distance: number, unit: 'km' | 'mi' = 'km'): stri
   }
   return `${distance.toFixed(1)} ${unit}`;
 }
+
+/**
+ * Extract coordinates from Google Maps link
+ * @param mapLink Google Maps URL
+ * @returns Object with lat and lng or null if not found
+ */
+export function extractCoordinatesFromMapLink(mapLink: string | null): { lat: number, lng: number } | null {
+  if (!mapLink) return null;
+  
+  try {
+    // Match patterns like @12.9716,77.5946 or ?q=12.9716,77.5946
+    const coordinatesRegex = /@(-?\d+\.\d+),(-?\d+\.\d+)|q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+    const match = mapLink.match(coordinatesRegex);
+    
+    if (match) {
+      // Check which pattern matched (@lat,lng or q=lat,lng)
+      const lat = parseFloat(match[1] || match[3]);
+      const lng = parseFloat(match[2] || match[4]);
+      
+      if (!isNaN(lat) && !isNaN(lng)) {
+        return { lat, lng };
+      }
+    }
+    
+    console.log('Could not extract coordinates from map link:', mapLink);
+    return null;
+  } catch (error) {
+    console.error('Error extracting coordinates from map link:', error);
+    return null;
+  }
+}
+
+/**
+ * Get user's current location using browser's geolocation API
+ * @returns Promise with user's coordinates or null if unavailable/denied
+ */
+export function getUserLocation(): Promise<{ lat: number, lng: number } | null> {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      console.log('Geolocation is not supported by this browser');
+      resolve(null);
+      return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        });
+      },
+      (error) => {
+        console.error('Error getting user location:', error);
+        resolve(null);
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  });
+}

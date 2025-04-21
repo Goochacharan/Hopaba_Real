@@ -34,10 +34,11 @@ serve(async (req) => {
       );
     }
 
-    const { query, context } = await req.json();
+    const { query, context, nearMe } = await req.json();
     
     console.log('Enhancing search query:', query);
     console.log('With context:', context ? 'Provided' : 'None');
+    console.log('Near me search:', nearMe ? 'Yes' : 'No');
 
     // DeepSeek API endpoint
     const url = 'https://api.deepseek.com/v1/chat/completions';
@@ -51,14 +52,15 @@ Your task is to improve the search query by:
 4. Adding relevant context that might be missing
 5. Consider both business locations and local events in your enhancements
 6. Adding search category tags to help categorization (e.g., #yoga, #restaurant, #education)
-7. Return ONLY the enhanced search query with appropriate category tags. Do not add any explanation or additional text.
+${nearMe ? '7. Include terms related to proximity and location since the user wants nearby results' : ''}
+8. Return ONLY the enhanced search query with appropriate category tags. Do not add any explanation or additional text.
 
 For specialized searches like "yoga classes", ensure the enhanced query contains terms that would match specifically with yoga studios or fitness centers, not general businesses.`;
 
     // Create messages with context if provided
     const messages = [
       { role: "system", content: systemPrompt },
-      { role: "user", content: `Original search query: "${query}"${context ? `\nContext: ${context}` : ''}` }
+      { role: "user", content: `Original search query: "${query}"${context ? `\nContext: ${context}` : ''}${nearMe ? '\nThe user is looking for results near their current location.' : ''}` }
     ];
 
     try {
@@ -106,6 +108,7 @@ For specialized searches like "yoga classes", ensure the enhanced query contains
         JSON.stringify({ 
           original: query,
           enhanced: enhancedQuery,
+          nearMe: !!nearMe
         }),
         { 
           headers: { 

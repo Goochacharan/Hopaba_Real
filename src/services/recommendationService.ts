@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Event, SupabaseEvent } from '@/hooks/types/recommendationTypes';
 import { toast } from '@/components/ui/use-toast';
+import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 
 export const fetchServiceProviders = async (searchTerm: string, categoryFilter: string) => {
   try {
@@ -29,33 +30,40 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
           );
         }
         
-        return filteredProviders.map(item => ({
-          id: item.id,
-          name: item.name,
-          category: item.category,
-          tags: item.tags || [],
-          rating: 4.5,
-          address: `${item.area}, ${item.city}`,
-          distance: "0.5 miles away",
-          image: item.images && item.images.length > 0 ? item.images[0] : "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
-          images: item.images || [],
-          description: item.description || "",
-          phone: item.contact_phone,
-          openNow: false,
-          hours: item.hours || "Until 8:00 PM",
-          availability: item.availability || null,
-          priceLevel: "$$",
-          price_range_min: item.price_range_min || null,
-          price_range_max: item.price_range_max || null,
-          price_unit: item.price_unit || null,
-          map_link: item.map_link || null,
-          instagram: item.instagram || '',
-          availability_days: item.availability_days || [],
-          availability_start_time: item.availability_start_time || '',
-          availability_end_time: item.availability_end_time || '',
-          created_at: item.created_at || new Date().toISOString(),
-          search_rank: item.search_rank || 0
-        }));
+        return filteredProviders.map(item => {
+          // Extract coordinates from map_link if available
+          const coordinates = extractCoordinatesFromMapLink(item.map_link);
+          
+          return {
+            id: item.id,
+            name: item.name,
+            category: item.category,
+            tags: item.tags || [],
+            rating: 4.5,
+            address: `${item.area}, ${item.city}`,
+            distance: "0.5 miles away", // This will be calculated based on user location later
+            image: item.images && item.images.length > 0 ? item.images[0] : "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
+            images: item.images || [],
+            description: item.description || "",
+            phone: item.contact_phone,
+            openNow: false,
+            hours: item.hours || "Until 8:00 PM",
+            availability: item.availability || null,
+            priceLevel: "$$",
+            price_range_min: item.price_range_min || null,
+            price_range_max: item.price_range_max || null,
+            price_unit: item.price_unit || null,
+            map_link: item.map_link || null,
+            instagram: item.instagram || '',
+            availability_days: item.availability_days || [],
+            availability_start_time: item.availability_start_time || '',
+            availability_end_time: item.availability_end_time || '',
+            created_at: item.created_at || new Date().toISOString(),
+            search_rank: item.search_rank || 0,
+            latitude: coordinates ? coordinates.lat : null,
+            longitude: coordinates ? coordinates.lng : null
+          };
+        });
       } catch (err) {
         console.error("Failed to use enhanced providers search:", err);
         return [];
@@ -86,32 +94,39 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
     console.log(`Fetched ${data?.length || 0} service providers from Supabase`);
     
     if (data && data.length > 0) {
-      return data.map(item => ({
-        id: item.id,
-        name: item.name,
-        category: item.category,
-        tags: item.tags || [],
-        rating: 4.5,
-        address: `${item.area}, ${item.city}`,
-        distance: "0.5 miles away",
-        image: item.images && item.images.length > 0 ? item.images[0] : "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
-        images: item.images || [],
-        description: item.description || "",
-        phone: item.contact_phone,
-        openNow: false,
-        hours: "Until 8:00 PM",
-        availability: item.availability || null,
-        priceLevel: "$$",
-        price_range_min: item.price_range_min || null,
-        price_range_max: item.price_range_max || null,
-        price_unit: item.price_unit || null,
-        map_link: item.map_link || null,
-        instagram: item.instagram || '',
-        availability_days: item.availability_days || [],
-        availability_start_time: item.availability_start_time || '',
-        availability_end_time: item.availability_end_time || '',
-        created_at: item.created_at || new Date().toISOString()
-      }));
+      return data.map(item => {
+        // Extract coordinates from map_link if available
+        const coordinates = extractCoordinatesFromMapLink(item.map_link);
+        
+        return {
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          tags: item.tags || [],
+          rating: 4.5,
+          address: `${item.area}, ${item.city}`,
+          distance: "0.5 miles away", // This will be calculated based on user location later
+          image: item.images && item.images.length > 0 ? item.images[0] : "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
+          images: item.images || [],
+          description: item.description || "",
+          phone: item.contact_phone,
+          openNow: false,
+          hours: "Until 8:00 PM",
+          availability: item.availability || null,
+          priceLevel: "$$",
+          price_range_min: item.price_range_min || null,
+          price_range_max: item.price_range_max || null,
+          price_unit: item.price_unit || null,
+          map_link: item.map_link || null,
+          instagram: item.instagram || '',
+          availability_days: item.availability_days || [],
+          availability_start_time: item.availability_start_time || '',
+          availability_end_time: item.availability_end_time || '',
+          created_at: item.created_at || new Date().toISOString(),
+          latitude: coordinates ? coordinates.lat : null,
+          longitude: coordinates ? coordinates.lng : null
+        };
+      });
     }
     
     return [];

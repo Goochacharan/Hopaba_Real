@@ -6,21 +6,26 @@ import { Button } from '@/components/ui/button';
 import { Check, Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { getUserLocation } from '@/lib/locationUtils';
+import { useToast } from '@/hooks/use-toast';
 
 interface AreaSearchBarProps {
   onAreaSelect: (area: string) => void;
   selectedArea: string;
+  onLocationSelect?: (coordinates: {lat: number, lng: number} | null) => void;
 }
 
 const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
   onAreaSelect,
-  selectedArea
+  selectedArea,
+  onLocationSelect
 }) => {
   const [open, setOpen] = useState(false);
   const [areas, setAreas] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchAreas = async () => {
@@ -47,15 +52,45 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
 
   useEffect(() => {
     if (searchValue) {
-      const filtered = areas.filter(area => area.toLowerCase().includes(searchValue.toLowerCase()));
+      let filtered: string[];
+      
+      if (searchValue.toLowerCase() === 'near me' || searchValue.toLowerCase() === 'near' || searchValue.toLowerCase() === 'nearby') {
+        filtered = ['Near me (Use my current location)'];
+      } else {
+        filtered = areas.filter(area => area.toLowerCase().includes(searchValue.toLowerCase()));
+      }
+      
       setSuggestions(filtered.slice(0, 5)); // Limit to 5 suggestions
     } else {
       setSuggestions([]);
     }
   }, [searchValue, areas]);
 
-  const handleSelect = (value: string) => {
-    onAreaSelect(value);
+  const handleSelect = async (value: string) => {
+    if (value === 'Near me (Use my current location)') {
+      const userLocation = await getUserLocation();
+      if (userLocation) {
+        if (onLocationSelect) {
+          onLocationSelect(userLocation);
+          toast({
+            title: "Location detected",
+            description: "Using your current location for nearby search results",
+          });
+        }
+        onAreaSelect("Near me");
+      } else {
+        toast({
+          title: "Location access denied",
+          description: "Please allow location access or choose a specific area",
+          variant: "destructive",
+        });
+      }
+    } else {
+      onAreaSelect(value);
+      if (onLocationSelect) {
+        onLocationSelect(null);
+      }
+    }
     setSearchValue(value);
     setOpen(false);
   };

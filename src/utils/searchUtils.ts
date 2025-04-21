@@ -1,13 +1,28 @@
 
-import { calculateDistance } from '@/lib/locationUtils';
+import { calculateDistance, extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 import { Recommendation } from '@/lib/mockData';
 
 export const addDistanceToRecommendations = (recs: Recommendation[], userCoordinates: {lat: number, lng: number} | null) => {
   if (!userCoordinates) return recs;
   
   return recs.map(rec => {
-    const latitude = parseFloat(rec.id) % 0.1 + 12.9716;
-    const longitude = parseFloat(rec.id) % 0.1 + 77.5946;
+    let latitude: number | null = null;
+    let longitude: number | null = null;
+    
+    // Try to extract coordinates from map_link if available
+    if (rec.map_link) {
+      const coordinates = extractCoordinatesFromMapLink(rec.map_link);
+      if (coordinates) {
+        latitude = coordinates.lat;
+        longitude = coordinates.lng;
+      }
+    }
+    
+    // Fallback to generated coordinates if extraction fails
+    if (latitude === null || longitude === null) {
+      latitude = parseFloat(rec.id) % 0.1 + 12.9716;
+      longitude = parseFloat(rec.id) % 0.1 + 77.5946;
+    }
     
     const distanceValue = calculateDistance(
       userCoordinates.lat,
@@ -57,7 +72,8 @@ export const enhanceRecommendations = (recommendations: Recommendation[]) => {
       availability_start_time: rec.availability_start_time || '',
       availability_end_time: rec.availability_end_time || '',
       isHiddenGem: rec.isHiddenGem,
-      isMustVisit: rec.isMustVisit
+      isMustVisit: rec.isMustVisit,
+      map_link: rec.map_link || ''
     });
     
     return {
