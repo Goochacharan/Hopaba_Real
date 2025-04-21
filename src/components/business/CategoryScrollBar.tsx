@@ -1,56 +1,119 @@
+
 import React from "react";
 import { cn } from "@/lib/utils";
 
-// All service categories, with an "All" category first
+// Extended category list to match Add Business page
 const SERVICE_CATEGORIES = [
   "All",
-  "Education", "Healthcare", "Food & Dining", "Home Services", "Beauty & Wellness",
-  "Professional Services", "Auto Services", "Technology", "Financial Services",
-  "Entertainment", "Travel & Transport", "Fitness", "Real Estate", "Retail", "Other"
+  "Bakery",
+  "Ice Cream Shops",
+  "Cafes",
+  "Restaurants",
+  "Caterers",
+  "Grocery & Vegetable Shops",
+  "Electronics Repair",
+  "Electricians",
+  "Plumbers",
+  "Home Cleaning",
+  "Carpenters",
+  "Home Decor",
+  "Tutoring",
+  "Music Teachers",
+  "Dance Classes",
+  "Language Tutors",
+  "Art & Craft",
+  "Sports & Fitness",
+  "Gyms",
+  "Yoga Instructors",
+  "Hair Salons",
+  "Spas",
+  "Beauticians",
+  "Massage Therapists",
+  "Tailors",
+  "Dry Cleaners",
+  "Laundry Services",
+  "Travel Agents",
+  "Packers & Movers",
+  "Auto Services",
+  "Real Estate Agents",
+  "Boutiques",
+  "Florists",
+  "Bookstores",
+  "Medical Clinics",
+  "Dentists",
+  "Pharmacies",
+  "Veterinarians",
+  "Photographers",
+  "Event Planners",
+  "Financial Consultants",
+  "Legal Advisors",
+  "Tech Services",
+  "Other"
 ];
 
-// Array of dark, rich background color classes
-const darkBgColors = [
-  "bg-[#1A1F2C]",  // Deep navy
-  "bg-[#403E43]",  // Charcoal gray
-  "bg-[#222222]",  // Blackish gray
-  "bg-[#7E69AB]",  // Deep purple
-  "bg-[#000000e6]", // Black
-  "bg-[#555555]",  // Mid dark gray
-  "bg-[#333333]",  // Very dark gray
-  "bg-[#0006]",    // Slightly transparent black
-  "bg-[#221F26]",  // Almost black purple
-  "bg-[#302D46]",  // Rich deep indigo
-  "bg-[#222]",     // Short hex dark gray
-  "bg-[#333]",     // Short hex
-  "bg-[#2226]",    // Short hex semi-transparent dark
-  "bg-[#2e3742]",  // Space gray
-  "bg-[#45465c]",  // Muted dark indigo
-  "bg-[#292933]",  // Shadowy black
+// Array of bold, vibrant Tailwind background color classes
+const categoryButtonColors = [
+  "bg-[#ea384c]",  // Red
+  "bg-[#9b87f5]",  // Primary Purple
+  "bg-[#7E69AB]",  // Secondary Purple
+  "bg-[#12b981]",  // Emerald Green
+  "bg-[#F97316]",  // Bright Orange
+  "bg-[#0EA5E9]",  // Ocean Blue
+  "bg-[#8B5CF6]",  // Vivid Purple
+  "bg-[#D946EF]",  // Magenta Pink
+  "bg-[#22d3ee]",  // Cyan
+  "bg-[#34d399]",  // Soft Green
+  "bg-[#FBBF24]",  // Yellow
+  "bg-[#ec4899]",  // Fuchsia
+  "bg-[#6366f1]",  // Indigo
+  "bg-[#ef4444]",  // Soft Red
+  "bg-[#FDBA74]",  // Soft Orange
+  "bg-[#38bdf8]",  // Light Blue
+  "bg-[#a3e635]",  // Lime Green
+  "bg-[#f43f5e]",  // Rose
+  "bg-[#c084fc]",  // Light Purple
+  "bg-[#14b8a6]",  // Teal
+  "bg-[#bbf7d0]",  // Mint
+  "bg-[#facc15]",  // Gold
+  "bg-[#eab308]",  // Mustard
+  "bg-[#fde68a]",  // Pale Yellow
+  "bg-[#60a5fa]",  // Blue
+  "bg-[#d1fae5]",  // Pale Green
+  "bg-[#fef08a]",  // Light Yellow
+  "bg-[#fda4af]",  // Pink
+  "bg-[#f59e42]",  // Orange
+  "bg-[#7dd3fc]",  // Sky Blue
+  "bg-[#b91c1c]",  // Deep Red
+  "bg-[#7c3aed]",  // Deep Indigo
+  "bg-[#e879f9]",  // Light Magenta
+  "bg-[#86efac]",  // Pale Mint
+  "bg-[#6366f1]",  // Dark Indigo
+  "bg-[#065f46]",  // Forest Green
+  "bg-[#f472b6]",  // Bubblegum Pink
+  "bg-[#c7d2fe]",  // Periwinkle
+  "bg-[#3b82f6]",  // Medium Blue
+  "bg-[#0d9488]",  // Dark Teal
+  "bg-[#1e40af]",  // Navy Blue
+  "bg-[#f3e8ff]",  // Lavender
+  "bg-[#f1f5f9]"   // Off White (for "Other")
 ];
 
-// "All" button background: white
+// "All" button background: white, gray bold font for contrast
 const allButtonBg = "bg-white";
-
-// "All" button text: gray
 const allButtonText = "text-[#555] font-bold";
-
-// Others: white bold font
 const categoryButtonText = "text-white font-bold";
 
-// Unified border — subtle and consistent for all
-const borderStyle = "border border-[#161922]";
+// Unified subtle border
+const borderStyle = "border border-[#eaeaea]";
+// Shadow for depth
+const depthShadow = "shadow-[0_2px_14px_0_rgba(22,25,34,0.13)]";
 
-// Feather shadow for nice depth
-const depthShadow = "shadow-[0_2px_14px_0_rgba(22,25,34,0.24)]";
-
-// Rectangular and spacing
+// Rectangular shape & spacing
 const buttonShapeStyles =
-  "flex-shrink-0 px-5 py-2 rounded-[10px] text-base select-none cursor-pointer min-w-[148px] h-12 transition-all duration-150 flex items-center justify-center";
+  "flex-shrink-0 px-5 py-2.5 rounded-[11px] text-base select-none cursor-pointer min-w-[156px] h-12 transition-all duration-150 flex items-center justify-center";
 
-// Selected state
-const selectedStyles = "ring-2 ring-[#F97316] border-[#F97316] scale-105";
-// Not selected: strong opacity, hover feedback
+// Selected and idle states
+const selectedStyles = "ring-2 ring-[#ea384c] border-[#ea384c] scale-105";
 const idleStyles = "opacity-95 hover:opacity-100 hover:scale-105";
 
 // Main component
@@ -75,10 +138,15 @@ const CategoryScrollBar: React.FC<CategoryScrollBarProps> = ({
     >
       <div className="flex gap-3 min-w-max">
         {SERVICE_CATEGORIES.map((cat, idx) => {
-          // Button color and text logic
+          // "All" button and color assignment for categories
           const isAll = cat === "All";
-          const bgColor = isAll ? allButtonBg : darkBgColors[(idx - 1 + darkBgColors.length) % darkBgColors.length];
-          const textColor = isAll ? allButtonText : categoryButtonText;
+          const bgColor = isAll
+            ? allButtonBg
+            : categoryButtonColors[(idx - 1 + categoryButtonColors.length) % categoryButtonColors.length];
+          // Make font dark for very light backgrounds ("All" and "Other" buttons)
+          const isVeryLight =
+            (isAll || cat === "Other" || bgColor === "bg-[#f1f5f9]" || bgColor === "bg-[#fde68a]");
+          const textColor = isVeryLight ? "text-[#555] font-bold" : categoryButtonText;
           const isSelected = selected
             ? cat.toLowerCase() === selected.toLowerCase()
             : isAll;
@@ -99,7 +167,7 @@ const CategoryScrollBar: React.FC<CategoryScrollBarProps> = ({
               type="button"
               aria-label={cat}
               style={{
-                boxShadow: "0px 4px 18px rgba(22,25,34,0.20)",
+                boxShadow: "0px 4px 18px rgba(22,25,34,0.11)",
               }}
             >
               <span className="block truncate">{cat}</span>
@@ -112,3 +180,4 @@ const CategoryScrollBar: React.FC<CategoryScrollBarProps> = ({
 };
 
 export default CategoryScrollBar;
+
