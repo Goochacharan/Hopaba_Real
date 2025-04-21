@@ -23,19 +23,50 @@ export const useUserMarketplaceListings = () => {
     if (!user) return;
 
     try {
-      // Check if the user exists in the sellers table
-      const { data, error } = await supabase
-        .from('sellers')
-        .select('listing_limit')
-        .eq('seller_id', user.id)
+      // First check if the user has an entry in the seller_listing_limits table
+      const { data: limitData, error: limitError } = await supabase
+        .from('seller_listing_limits')
+        .select('max_listings')
+        .eq('user_id', user.id)
         .maybeSingle();
+
+      if (limitError && !limitError.message.includes('No rows found')) {
+        throw limitError;
+      }
+      
+      // If no entry in seller_listing_limits, fall back to sellers table
+      let maxListings = limitData?.max_listings;
+      
+      if (maxListings === undefined) {
+        // Check if the user exists in the sellers table
+        const { data: sellerData, error: sellerError } = await supabase
+          .from('sellers')
+          .select('listing_limit')
+          .eq('seller_id', user.id)
+          .maybeSingle();
+          
+        if (sellerError && !sellerError.message.includes('No rows found')) {
+          throw sellerError;
+        }
+        
+        // Use the seller's limit or default to 5
+        maxListings = sellerData?.listing_limit || 5;
+      }
+
+      // Create an entry in seller_listing_limits if one doesn't exist
+      if (limitData === null) {
+        await supabase
+          .from('seller_listing_limits')
+          .upsert({
+            user_id: user.id,
+            max_listings: maxListings
+          })
+          .eq('user_id', user.id);
+      }
 
       // Get the current listings count
       const listingCount = listings.length;
       
-      // If the user is not in the sellers table or there's an error, use default limit
-      const maxListings = data?.listing_limit || 5; // Default to 5 if no custom limit
-
       setListingStatus({
         currentListingCount: listingCount,
         maxListings: maxListings,

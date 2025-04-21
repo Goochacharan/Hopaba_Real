@@ -234,6 +234,30 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_listing_limits: {
+        Row: {
+          created_at: string
+          id: string
+          max_listings: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          max_listings?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          max_listings?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       seller_reviews: {
         Row: {
           comment: string
