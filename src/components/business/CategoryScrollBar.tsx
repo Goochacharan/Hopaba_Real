@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,6 +43,47 @@ const borderStyle = "border border-[#161922]";
 // Feather shadow for depth
 const depthShadow = "shadow-[0_2px_10px_0_rgba(22,25,34,0.17)]";
 
+// Default categories to use as fallback if fetch fails
+const DEFAULT_CATEGORIES = [
+  "Actor/Actress",
+  "Auto Services",
+  "Bakery & Chats",
+  "Beauty & Wellness",
+  "Choreographer",
+  "Education",
+  "Electrician",
+  "Entertainment",
+  "Event Planning",
+  "Fashion Designer",
+  "Financial Services",
+  "Fitness",
+  "Food & Dining",
+  "Graphic Designer",
+  "Hair Salons",
+  "Healthcare",
+  "Home Services",
+  "Ice Cream Shop",
+  "Massage Therapy",
+  "Medical Spas",
+  "Model",
+  "Musician",
+  "Nail Technicians",
+  "Painter",
+  "Photographer",
+  "Plumber",
+  "Professional Services",
+  "Real Estate",
+  "Retail",
+  "Skin Care",
+  "Technology",
+  "Travel Agents",
+  "Vacation Rentals",
+  "Videographers",
+  "Weight Loss Centers",
+  "Writer",
+  "Other"
+].sort();
+
 // Component props
 interface CategoryScrollBarProps {
   selected: string;
@@ -61,27 +101,40 @@ const CategoryScrollBar: React.FC<CategoryScrollBarProps> = ({
   // Fetch category list from Supabase, distinct categories from service_providers
   useEffect(() => {
     const fetchCategories = async () => {
-      // Avoid refetch if already loaded
-      if (categories.length > 0) return;
-      const { data, error } = await supabase
-        .from("service_providers")
-        .select("category")
-        .neq("category", "")
-        .order("category", { ascending: true });
-      if (error) {
-        console.error("Failed to fetch categories:", error);
-        setCategories([]);
-        return;
+      try {
+        // Fetch all categories from service_providers table
+        const { data, error } = await supabase
+          .from("service_providers")
+          .select("category")
+          .neq("category", "")
+          .order("category", { ascending: true });
+          
+        if (error) {
+          console.error("Failed to fetch categories:", error);
+          setCategories(DEFAULT_CATEGORIES);
+          return;
+        }
+
+        // Safely collect all unique categories (no empty and no duplicates, trim whitespace)
+        const uniqueCategories = Array.from(
+          new Set(
+            (data || [])
+              .map((row) => (row.category ? row.category.trim() : null))
+              .filter((v): v is string => Boolean(v))
+          )
+        );
+
+        // If we found categories, use them. Otherwise, use the default list
+        if (uniqueCategories.length > 0) {
+          setCategories(uniqueCategories);
+        } else {
+          console.log("No categories found, using default list");
+          setCategories(DEFAULT_CATEGORIES);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        setCategories(DEFAULT_CATEGORIES);
       }
-      // Safely collect all unique categories (no empty and no duplicates, trim whitespace)
-      const uniqueCategories = Array.from(
-        new Set(
-          (data || [])
-            .map((row) => (row.category ? row.category.trim() : null))
-            .filter((v): v is string => Boolean(v))
-        )
-      );
-      setCategories(uniqueCategories);
     };
 
     fetchCategories();
@@ -89,7 +142,7 @@ const CategoryScrollBar: React.FC<CategoryScrollBarProps> = ({
     // eslint-disable-next-line
   }, []);
 
-  // Final categories to display: All button + unique category list (removed "Other")
+  // Final categories to display: All button + unique category list
   const displayCategories = ["All", ...categories];
 
   return (
@@ -106,7 +159,7 @@ const CategoryScrollBar: React.FC<CategoryScrollBarProps> = ({
           // Assign a dark color to each category, cycling through the list for >16 categories
           const bgColor = isAll
             ? allButtonBg
-            : darkBgColors[(idx - 1) % darkBgColors.length];
+            : darkBgColors[idx % darkBgColors.length];
 
           // Font color: gray on white, white otherwise
           const textColor = isAll ? allButtonText : categoryButtonText;
