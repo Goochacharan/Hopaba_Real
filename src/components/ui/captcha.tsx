@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 
 // Use the type definition from global.d.ts
@@ -7,18 +6,7 @@ interface CaptchaProps {
   onVerify: (token: string) => void;
 }
 
-// Extend the existing Window interface from global.d.ts rather than redefining it
-declare global {
-  interface Window {
-    hcaptcha: {
-      render: (element: HTMLElement | string, options: any) => number;
-      reset: (widgetId?: number) => void;
-      execute: (widgetId?: number) => void;
-      ready: (callback: () => void) => void;
-    };
-    onloadCallback: () => void;
-  }
-}
+// We'll remove the duplicate window interface declaration and use the global one instead
 
 export function Captcha({ siteKey, onVerify }: CaptchaProps) {
   const divRef = useRef<HTMLDivElement>(null);
