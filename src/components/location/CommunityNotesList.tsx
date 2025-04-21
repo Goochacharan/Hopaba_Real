@@ -173,13 +173,13 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
     const totalThumbsUp = newThumbsUpUsers.reduce((sum, u) => sum + u.rating, 0);
 
     // Convert the array of ThumbsUpUser objects to an array of strings (just user_ids)
-    // This is what the database schema expects
-    const userIdsForDb = newThumbsUpUsers.map(u => u.user_id);
+    // and explicitly cast to Json for Supabase compatibility
+    const userIdsForDb = newThumbsUpUsers.map(u => u.user_id) as unknown as Json;
 
     const { error } = await supabase
       .from("community_notes")
       .update({
-        thumbs_up_users: userIdsForDb as unknown as Json,
+        thumbs_up_users: userIdsForDb,
         thumbs_up: totalThumbsUp,
       })
       .eq("id", noteId);
