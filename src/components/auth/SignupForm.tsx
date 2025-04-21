@@ -19,13 +19,14 @@ const signupSchema = z.object({
 
 export type SignupFormValues = z.infer<typeof signupSchema>;
 
-interface SignupFormProps {
+export interface SignupFormProps {
   onSubmit: (values: SignupFormValues) => void;
   isLoading: boolean;
   isDisabled: boolean;
   captchaToken: string | null;
   captchaSiteKey: string;
   onCaptchaVerify: (token: string) => void;
+  requireCaptcha?: boolean;
 }
 
 export const SignupForm: React.FC<SignupFormProps> = ({
@@ -35,6 +36,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
   captchaToken,
   captchaSiteKey,
   onCaptchaVerify,
+  requireCaptcha = true,
 }) => {
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -108,15 +110,17 @@ export const SignupForm: React.FC<SignupFormProps> = ({
           )}
         />
 
-        <CaptchaVerification 
-          siteKey={captchaSiteKey} 
-          onVerify={onCaptchaVerify} 
-        />
+        {requireCaptcha && (
+          <CaptchaVerification 
+            siteKey={captchaSiteKey} 
+            onVerify={onCaptchaVerify} 
+          />
+        )}
 
         <Button 
           type="submit" 
           className="w-full mt-4" 
-          disabled={isLoading || isDisabled || !captchaToken}
+          disabled={isLoading || isDisabled || (requireCaptcha && !captchaToken)}
         >
           {isLoading ? "Creating account..." : "Sign up with Email"}
         </Button>
