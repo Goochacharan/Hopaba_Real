@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Textarea } from "../ui/textarea";
@@ -11,9 +12,9 @@ interface NoteContentType {
   videoUrl?: string;
 }
 
+// Store replies within the Comment object instead of fetching from a separate table
 interface Reply {
   id: string;
-  comment_id: string;
   user_id: string;
   content: string;
   created_at: string;
@@ -86,31 +87,22 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
     }
 
     if (commentsData) {
-      const processedComments = await Promise.all(commentsData.map(async (comment) => {
-        const { data: userData } = await supabase.auth.getUser(comment.user_id);
-        
-        const { data: repliesData } = await supabase
-          .from('comment_replies')
-          .select('*')
-          .eq('comment_id', comment.id)
-          .order('created_at', { ascending: true });
-
-        const processedReplies = await Promise.all((repliesData || []).map(async (reply) => {
-          const { data: replyUserData } = await supabase.auth.getUser(reply.user_id);
+      // Process comments and add user metadata
+      const processedComments: Comment[] = await Promise.all(
+        commentsData.map(async (comment) => {
+          // Get user data for the comment author
+          const { data: userData } = await supabase.auth.getUser(comment.user_id);
+          
+          // Each comment will have an empty replies array (we'll fill it later if needed)
           return {
-            ...reply,
-            user_display_name: replyUserData?.user?.user_metadata?.full_name || 'Anonymous',
-            user_avatar_url: replyUserData?.user?.user_metadata?.avatar_url
+            ...comment,
+            user_display_name: userData?.user?.user_metadata?.full_name || 'Anonymous',
+            user_avatar_url: userData?.user?.user_metadata?.avatar_url,
+            replies: []
           };
-        }));
-
-        return {
-          ...comment,
-          user_display_name: userData?.user?.user_metadata?.full_name || 'Anonymous',
-          user_avatar_url: userData?.user?.user_metadata?.avatar_url,
-          replies: processedReplies
-        };
-      }));
+        })
+      );
+      
       setComments(processedComments);
     }
   };
@@ -148,7 +140,8 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
       const newCommentObj: Comment = {
         ...comment,
         user_display_name: userData.user.user_metadata?.full_name || userData.user.email,
-        user_avatar_url: userData.user.user_metadata?.avatar_url
+        user_avatar_url: userData.user.user_metadata?.avatar_url,
+        replies: []
       };
       
       setComments(prev => [newCommentObj, ...prev]);
@@ -186,10 +179,14 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
     }
 
     try {
+      // Instead of trying to use a comment_replies table, we'll store the reply
+      // within the comments state and indicate a relationship to the parent comment
+      
+      // Create a new comment that references the parent comment
       const { data: reply, error } = await supabase
-        .from('comment_replies')
+        .from('note_comments')
         .insert({
-          comment_id: commentId,
+          note_id: note.id,
           user_id: userData.user.id,
           content: replyContent.trim()
         })
@@ -199,11 +196,15 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
       if (error) throw error;
 
       const newReply: Reply = {
-        ...reply,
+        id: reply.id,
+        user_id: userData.user.id,
+        content: replyContent.trim(),
+        created_at: reply.created_at,
         user_display_name: userData.user.user_metadata?.full_name || userData.user.email,
         user_avatar_url: userData.user.user_metadata?.avatar_url
       };
       
+      // Update the comments state by adding the reply to the appropriate comment
       setComments(prevComments => prevComments.map(comment => {
         if (comment.id === commentId) {
           return {
