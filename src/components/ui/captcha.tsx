@@ -13,8 +13,11 @@ export function Captcha({ siteKey, onVerify }: CaptchaProps) {
   const widgetId = useRef<number | null>(null);
 
   useEffect(() => {
-    // Add domain information to hCaptcha
-    window.hcaptcha = window.hcaptcha || {};
+    // Initialize hCaptcha with required properties if it doesn't exist
+    if (!window.hcaptcha) {
+      // We'll initialize it properly when the script loads
+      console.log("hCaptcha not yet loaded, will initialize when script loads");
+    }
     
     // Skip if hCaptcha is already loaded
     if (window.hcaptcha && divRef.current && !isScriptLoaded.current) {
