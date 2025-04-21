@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -140,7 +139,7 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
       // Filter valid social links and convert them to a format compatible with Json type
       const validSocialLinks = socialLinks
         .filter(l => l.label && l.url)
-        .map(l => ({ label: l.label, url: l.url })) as Json;
+        .map(l => ({ label: l.label, url: l.url })) as unknown as Json;
 
       const { error } = await supabase
         .from("community_notes")

@@ -86,13 +86,22 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
         
         // Ensure content is in the right format
         const contentData = note.content as Json;
-        const contentObj: NoteContentType = typeof contentData === 'string' 
-          ? { text: contentData as string }
-          : Array.isArray(contentData) 
-            ? { text: 'No content available' } // Handle unexpected array
-            : (contentData as unknown as NoteContentType);
+        let contentObj: NoteContentType;
+        
+        if (typeof contentData === 'string') {
+          contentObj = { text: contentData };
+        } else if (Array.isArray(contentData)) {
+          contentObj = { text: 'No content available' }; // Handle unexpected array
+        } else {
+          // Cast to unknown first, then to NoteContentType
+          const tempContent = contentData as unknown as { text: string; videoUrl?: string };
+          contentObj = { 
+            text: tempContent.text || 'No content available',
+            videoUrl: tempContent.videoUrl
+          };
+        }
           
-        // Ensure thumbs_up_users is in the right format
+        // Ensure thumbs_up_users is in the right format and convert as needed
         const rawThumbsUpUsers = note.thumbs_up_users || [];
         const thumbsUpUsers: ThumbsUpUser[] = Array.isArray(rawThumbsUpUsers) 
           ? rawThumbsUpUsers.map((user: any) => {
@@ -104,13 +113,16 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
             })
           : [];
         
+        // Ensure social_links is in the right format
+        const socialLinks = Array.isArray(note.social_links) ? note.social_links : [];
+        
         processedNotes.push({
           ...note,
           content: contentObj,
           user_avatar_url: userAvatarUrl,
           user_display_name: userDisplayName,
           thumbs_up_users: thumbsUpUsers,
-          social_links: Array.isArray(note.social_links) ? note.social_links : []
+          social_links: socialLinks
         });
       }
       
@@ -156,10 +168,16 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
     newThumbsUpUsers.push({ user_id: userId, rating });
     const totalThumbsUp = newThumbsUpUsers.reduce((sum, u) => sum + u.rating, 0);
 
+    // Convert ThumbsUpUser array to a format that Supabase accepts
+    const thumbsUpUsersForDb = newThumbsUpUsers.map(u => ({ 
+      user_id: u.user_id, 
+      rating: u.rating 
+    })) as Json;
+
     const { error } = await supabase
       .from("community_notes")
       .update({
-        thumbs_up_users: newThumbsUpUsers,
+        thumbs_up_users: thumbsUpUsersForDb,
         thumbs_up: totalThumbsUp,
       })
       .eq("id", noteId);
