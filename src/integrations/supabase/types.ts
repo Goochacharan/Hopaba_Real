@@ -83,9 +83,9 @@ export type Database = {
           images: string[] | null
           inspection_certificates: string[] | null
           is_negotiable: boolean | null
-          latitude: string | null
+          latitude: number | null
           location: string
-          longitude: string | null
+          longitude: number | null
           map_link: string | null
           model_year: string | null
           postal_code: string
@@ -114,9 +114,9 @@ export type Database = {
           images?: string[] | null
           inspection_certificates?: string[] | null
           is_negotiable?: boolean | null
-          latitude?: string | null
+          latitude?: number | null
           location: string
-          longitude?: string | null
+          longitude?: number | null
           map_link?: string | null
           model_year?: string | null
           postal_code: string
@@ -145,9 +145,9 @@ export type Database = {
           images?: string[] | null
           inspection_certificates?: string[] | null
           is_negotiable?: boolean | null
-          latitude?: string | null
+          latitude?: number | null
           location?: string
-          longitude?: string | null
+          longitude?: number | null
           map_link?: string | null
           model_year?: string | null
           postal_code?: string
@@ -323,6 +323,8 @@ export type Database = {
           images: string[] | null
           instagram: string | null
           languages: string[] | null
+          latitude: number | null
+          longitude: number | null
           map_link: string | null
           name: string
           postal_code: string
@@ -354,6 +356,8 @@ export type Database = {
           images?: string[] | null
           instagram?: string | null
           languages?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
           map_link?: string | null
           name: string
           postal_code: string
@@ -385,6 +389,8 @@ export type Database = {
           images?: string[] | null
           instagram?: string | null
           languages?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
           map_link?: string | null
           name?: string
           postal_code?: string

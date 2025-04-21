@@ -44,7 +44,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   
-  const { isEnhancing, enhanceSearchQuery } = useSearchEnhancement();
+  // Get correct variables and methods from the hook
+  const { enhancing, enhanceQuery } = useSearchEnhancement();
   const { isListening, startSpeechRecognition } = useVoiceSearch({
     onTranscript: (transcript) => {
       setQuery(transcript);
@@ -81,7 +82,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       
       if (currentPath !== '/events' && currentPath !== '/marketplace' && !currentPath.startsWith('/marketplace')) {
         console.log("Not a marketplace or events page, enhancing query");
-        enhancedQuery = await enhanceSearchQuery(query, currentPath);
+        enhancedQuery = await enhanceQuery(query, currentPath);
       }
       
       console.log("Final search query to use:", enhancedQuery);
@@ -118,7 +119,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       let enhancedQuery = query;
       
       if (currentPath !== '/events' && currentPath !== '/marketplace' && !currentPath.startsWith('/marketplace')) {
-        enhancedQuery = await enhanceSearchQuery(query, currentPath);
+        enhancedQuery = await enhanceQuery(query, currentPath);
       }
       
       if (enhancedQuery !== query) {
@@ -196,13 +197,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
             type="submit" 
             className={cn(
               "p-2 text-primary hover:text-primary-foreground hover:bg-primary rounded-full transition-colors flex items-center", 
-              isEnhancing && "opacity-70"
+              enhancing && "opacity-70"
             )} 
             aria-label="Search" 
             onClick={handleSearchButtonClick} 
-            disabled={isEnhancing}
+            disabled={enhancing}
           >
-            {isEnhancing ? <Sparkles className="h-5 w-5 animate-pulse" /> : <Search className="h-5 w-5" />}
+            {enhancing ? <Sparkles className="h-5 w-5 animate-pulse" /> : <Search className="h-5 w-5" />}
           </button>
         </div>
       </form>
@@ -216,3 +217,4 @@ const SearchBar: React.FC<SearchBarProps> = ({
 };
 
 export default SearchBar;
+
