@@ -23,15 +23,17 @@ export const useUserMarketplaceListings = () => {
     if (!user) return;
 
     try {
+      // Check if the user exists in the sellers table
       const { data, error } = await supabase
         .from('sellers')
         .select('listing_limit')
         .eq('seller_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
-
+      // Get the current listings count
       const listingCount = listings.length;
+      
+      // If the user is not in the sellers table or there's an error, use default limit
       const maxListings = data?.listing_limit || 5; // Default to 5 if no custom limit
 
       setListingStatus({
