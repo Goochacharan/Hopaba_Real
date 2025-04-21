@@ -11,6 +11,8 @@ export const CaptchaVerification: React.FC<CaptchaVerificationProps> = ({
   siteKey,
   onVerify,
 }) => {
+  console.log('CaptchaVerification rendering with site key:', siteKey);
+  
   return (
     <div className="mt-4">
       <p className="text-sm text-muted-foreground mb-2">Please complete the CAPTCHA verification:</p>

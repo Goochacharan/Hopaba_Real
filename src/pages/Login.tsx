@@ -8,7 +8,7 @@ import { LoginFormValues } from '@/components/auth/LoginForm';
 import { useAuth } from '@/hooks/useAuth';
 
 const HCAPTCHA_SITE_KEY = 'fda043e0-8372-4d8a-b190-84a8fdee1528';
-const REQUIRE_CAPTCHA = false;
+const REQUIRE_CAPTCHA = true;
 
 export default function Login() {
   const navigate = useNavigate();

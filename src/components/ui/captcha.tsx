@@ -10,6 +10,7 @@ interface CaptchaProps {
 export function Captcha({ siteKey, onVerify }: CaptchaProps) {
   const divRef = useRef<HTMLDivElement>(null);
   const isScriptLoaded = useRef(false);
+  const widgetId = useRef<number | null>(null);
 
   useEffect(() => {
     // Skip if hCaptcha is already loaded
@@ -38,21 +39,38 @@ export function Captcha({ siteKey, onVerify }: CaptchaProps) {
       // Clean up the global callback when component unmounts
       // but keep the script for potential reuse
       window.onloadCallback = () => {};
+      
+      // Reset the captcha when component unmounts
+      if (window.hcaptcha && widgetId.current !== null) {
+        try {
+          window.hcaptcha.reset(widgetId.current);
+        } catch (error) {
+          console.error('Error resetting hCaptcha:', error);
+        }
+      }
     };
   }, [siteKey]);
 
   const renderCaptcha = () => {
     if (divRef.current && window.hcaptcha && window.hcaptcha.render) {
       try {
-        window.hcaptcha.render(divRef.current, {
-          sitekey: siteKey,
-          callback: onVerify,
-        });
+        // Try to reset first if already rendered
+        if (widgetId.current !== null) {
+          window.hcaptcha.reset(widgetId.current);
+        } else {
+          widgetId.current = window.hcaptcha.render(divRef.current, {
+            sitekey: siteKey,
+            callback: onVerify,
+          });
+        }
       } catch (error) {
-        console.error('hCaptcha already rendered in this element', error);
+        console.error('hCaptcha rendering error:', error);
       }
     }
   };
+
+  // Add a debugging message to help troubleshoot
+  console.log('Rendering hCaptcha with site key:', siteKey);
 
   return <div ref={divRef} className="h-captcha mt-4"></div>;
 }
