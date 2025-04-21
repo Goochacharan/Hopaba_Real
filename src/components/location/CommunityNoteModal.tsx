@@ -105,7 +105,7 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
         </div>
 
         {videoUrl && embedUrl && (
-          <div className="w-full aspect-video rounded-md overflow-hidden mb-4">
+          <div className="w-full aspect-video mb-6 rounded-lg overflow-hidden">
             <iframe
               src={embedUrl}
               title="Video player"
@@ -118,14 +118,19 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
         )}
 
         {note.images && note.images.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="mb-6 space-y-4">
             {note.images.map((img: string, idx: number) => (
-              <img key={idx} src={img} alt={`image-${idx}`} className="w-32 h-20 object-cover rounded border" />
+              <img 
+                key={idx} 
+                src={img} 
+                alt={`Image ${idx + 1} for ${note.title}`}
+                className="w-full rounded-lg object-contain max-h-[600px]"
+              />
             ))}
           </div>
         )}
         
-        <div className="prose prose-lg mb-4" style={{ whiteSpace: "pre-wrap" }}>
+        <div className="prose prose-lg max-w-none mb-6 min-h-[200px]" style={{ whiteSpace: "pre-wrap" }}>
           {note.content?.text}
         </div>
         
