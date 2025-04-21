@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ThumbsUp, FileText } from "lucide-react";
@@ -36,7 +35,6 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
     setUserId(data.session?.user?.id ?? null);
   }
 
-  // Fetch community notes with author info
   async function fetchNotes() {
     setLoading(true);
     const { data, error } = await supabase
@@ -58,7 +56,6 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
       return;
     }
 
-    // Process notes and add user info
     if (data && data.length > 0) {
       const processedNotes: Note[] = [];
       
@@ -66,7 +63,6 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
         let userAvatarUrl: string | null = null;
         let userDisplayName: string | null = "Anonymous";
         
-        // If there's a user_id, try to get user info from auth.users
         if (note.user_id) {
           try {
             const { data: userData } = await supabase.auth.admin.getUserById(
@@ -78,22 +74,19 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
               userDisplayName = userData.user.user_metadata?.full_name || userData.user.email || "Anonymous";
             }
           } catch (authError) {
-            // Fallback to using user_id as display if auth query fails
             console.error("Could not fetch user data:", authError);
             userDisplayName = `User ${note.user_id.substring(0, 6)}`;
           }
         }
         
-        // Ensure content is in the right format
         const contentData = note.content as Json;
         let contentObj: NoteContentType;
         
         if (typeof contentData === 'string') {
           contentObj = { text: contentData };
         } else if (Array.isArray(contentData)) {
-          contentObj = { text: 'No content available' }; // Handle unexpected array
+          contentObj = { text: 'No content available' };
         } else {
-          // Cast to unknown first, then to NoteContentType
           const tempContent = contentData as unknown as { text: string; videoUrl?: string };
           contentObj = { 
             text: tempContent.text || 'No content available',
@@ -101,25 +94,21 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
           };
         }
           
-        // Ensure thumbs_up_users is in the right format and convert as needed
         const rawThumbsUpUsers = note.thumbs_up_users || [];
         const thumbsUpUsers: ThumbsUpUser[] = Array.isArray(rawThumbsUpUsers) 
           ? rawThumbsUpUsers.map((user: any) => {
               if (typeof user === 'string') {
-                // Convert legacy format to new format
                 return { user_id: user, rating: 1 };
               }
               return user as ThumbsUpUser;
             })
           : [];
         
-        // Ensure social_links is in the right format
         let socialLinks: any[] = [];
         if (note.social_links) {
           if (Array.isArray(note.social_links)) {
             socialLinks = note.social_links;
           } else if (typeof note.social_links === 'object') {
-            // Try to convert object to array if possible
             socialLinks = Object.values(note.social_links);
           }
         }
@@ -142,20 +131,17 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
     setLoading(false);
   }
 
-  // Compute overall thumbs up count as sum of user ratings
   const computeThumbsUpCount = (note: Note) => {
     if (!note.thumbs_up_users || note.thumbs_up_users.length === 0) return 0;
     return note.thumbs_up_users.reduce((sum, u) => sum + u.rating, 0);
   };
 
-  // Check if user already gave a thumbs up and at what value
   const userThumbRating = (note: Note, userId: string | null) => {
     if (!userId || !note.thumbs_up_users) return 0;
     const entry = note.thumbs_up_users.find(u => u.user_id === userId);
     return entry?.rating || 0;
   };
 
-  // Handle rating: user can rate 1-5 individual thumbs
   async function handleThumb(noteId: string, rating: number) {
     if (!userId) {
       alert("You need to be logged in to rate articles.");
@@ -165,27 +151,24 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
     if (!note) return;
     const existingUserRating = userThumbRating(note, userId);
     if (existingUserRating !== 0) {
-      // Allow update of rating? For simplicity, disallow multiple ratings or changes
       alert("You have already rated this article.");
       return;
     }
     if (rating < 1 || rating > MAX_THUMBS) return;
 
-    // Add or update thumbs_up_users array
     const newThumbsUpUsers = [...(note.thumbs_up_users || [])];
     newThumbsUpUsers.push({ user_id: userId, rating });
     const totalThumbsUp = newThumbsUpUsers.reduce((sum, u) => sum + u.rating, 0);
 
-    // Convert ThumbsUpUser array to a format that Supabase accepts
-    const thumbsUpUsersForDb = newThumbsUpUsers.map(u => ({ 
+    const thumbsUpUsersForDb: { user_id: string, rating: number }[] = newThumbsUpUsers.map(u => ({ 
       user_id: u.user_id, 
       rating: u.rating 
-    })) as unknown as Json;
+    }));
 
     const { error } = await supabase
       .from("community_notes")
       .update({
-        thumbs_up_users: thumbsUpUsersForDb,
+        thumbs_up_users: thumbsUpUsersForDb as unknown as Json,
         thumbs_up: totalThumbsUp,
       })
       .eq("id", noteId);

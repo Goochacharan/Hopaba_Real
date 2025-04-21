@@ -131,6 +131,15 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
     }
     setAdding(true);
     try {
+      // First, get the current user to ensure we have a valid user session
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        throw new Error("You must be logged in to submit a note");
+      }
+      
+      const userId = userData.user?.id;
+      
       // Create a content object that includes the text and optional videoUrl
       const contentObj = {
         text: content,
@@ -146,7 +155,7 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
         .from("community_notes")
         .insert({
           location_id: locationId,
-          user_id: (await supabase.auth.getUser()).data.user?.id || null,
+          user_id: userId,
           title: title.trim(),
           content: contentObj as Json,
           images,
