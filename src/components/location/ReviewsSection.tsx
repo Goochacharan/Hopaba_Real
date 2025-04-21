@@ -12,8 +12,8 @@ interface ReviewsSectionProps {
   locationId?: string;
   locationName?: string;
   onSubmitReview: (values: ReviewFormValues) => void;
-  currentUser?: any; // Add current user prop
-  hasUserReviewed?: boolean; // Add flag to check if user has already reviewed
+  currentUser?: any;
+  hasUserReviewed?: boolean;
 }
 
 const ReviewsSection = ({ 
@@ -38,7 +38,12 @@ const ReviewsSection = ({
   };
 
   const handleSubmitReview = (values: ReviewFormValues) => {
-    onSubmitReview(values);
+    // Update to handle new form values without review text
+    onSubmitReview({
+      rating: values.rating, 
+      isMustVisit: values.isMustVisit, 
+      isHiddenGem: values.isHiddenGem
+    });
     setReviewFormVisible(false);
   };
 
@@ -75,3 +80,4 @@ const ReviewsSection = ({
 };
 
 export default ReviewsSection;
+

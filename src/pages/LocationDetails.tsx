@@ -203,9 +203,9 @@ const LocationDetails = () => {
       name: userName,
       date: currentDate,
       rating: values.rating,
-      text: values.reviewText,
       isMustVisit: values.isMustVisit,
       isHiddenGem: values.isHiddenGem,
+      text: "", // Removed review text
       userId: user.id
     };
     
