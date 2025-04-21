@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -20,7 +19,6 @@ export default function Login() {
   const { loginWithEmail, isRateLimited, authAttempts } = useAuth();
   
   useEffect(() => {
-    // Check for URL hash which indicates a redirect from OAuth
     const handleRedirectResponse = async () => {
       const hasHashParams = window.location.hash && window.location.hash.length > 1;
       
@@ -28,7 +26,6 @@ export default function Login() {
         setIsLoading(true);
         
         try {
-          // Process the OAuth callback
           const { data, error } = await supabase.auth.getSession();
           
           console.log("Auth session after redirect:", data);
@@ -45,7 +42,6 @@ export default function Login() {
               title: "Login successful",
               description: "You've been signed in with Google",
             });
-            // Clear hash from URL to prevent duplicate processing
             window.location.hash = '';
             navigate('/');
           }
@@ -111,7 +107,6 @@ export default function Login() {
     
     setSocialLoading(provider);
     try {
-      // Hardcode the production URL
       const redirectUrl = 'https://hopaba.in/login';
       
       console.log("Starting OAuth flow with redirect URL:", redirectUrl);
@@ -120,9 +115,6 @@ export default function Login() {
         provider,
         options: {
           redirectTo: redirectUrl,
-          queryParams: REQUIRE_CAPTCHA && captchaToken ? {
-            captchaToken
-          } : undefined
         },
       });
 
@@ -131,7 +123,6 @@ export default function Login() {
       }
       
       console.log("OAuth initiation response:", data);
-      // No need to navigate here as OAuth will redirect
     } catch (error: any) {
       toast({
         title: "Login failed",

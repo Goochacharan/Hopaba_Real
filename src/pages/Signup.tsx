@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -85,9 +84,6 @@ export default function Signup() {
         provider,
         options: {
           redirectTo: `${window.location.origin}/`,
-          queryParams: captchaToken ? {
-            captchaToken
-          } : undefined
         },
       });
 

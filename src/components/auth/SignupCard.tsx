@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { SocialLoginButtons } from './SocialLoginButtons';
@@ -33,7 +32,7 @@ export const SignupCard: React.FC<SignupCardProps> = ({
 
       <SocialLoginButtons 
         onSocialLogin={handleSocialSignup}
-        isDisabled={isRateLimited || !captchaToken}
+        isDisabled={isRateLimited}
         isLoading={socialLoading}
       />
       

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { SocialLoginButtons } from './SocialLoginButtons';
@@ -35,7 +34,7 @@ export const LoginCard: React.FC<LoginCardProps> = ({
 
       <SocialLoginButtons 
         onSocialLogin={handleSocialLogin}
-        isDisabled={isRateLimited || (requireCaptcha && !captchaToken)}
+        isDisabled={isRateLimited}
         isLoading={socialLoading}
         buttonText="Continue with"
       />
