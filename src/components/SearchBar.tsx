@@ -82,7 +82,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       
       if (currentPath !== '/events' && currentPath !== '/marketplace' && !currentPath.startsWith('/marketplace')) {
         console.log("Not a marketplace or events page, enhancing query");
-        enhancedQuery = await enhanceQuery(query, currentPath);
+        enhancedQuery = await enhanceQuery(query, currentPath !== '/');
       }
       
       console.log("Final search query to use:", enhancedQuery);
@@ -119,7 +119,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       let enhancedQuery = query;
       
       if (currentPath !== '/events' && currentPath !== '/marketplace' && !currentPath.startsWith('/marketplace')) {
-        enhancedQuery = await enhanceQuery(query, currentPath);
+        enhancedQuery = await enhanceQuery(query, currentPath !== '/');
       }
       
       if (enhancedQuery !== query) {
@@ -217,4 +217,3 @@ const SearchBar: React.FC<SearchBarProps> = ({
 };
 
 export default SearchBar;
-
