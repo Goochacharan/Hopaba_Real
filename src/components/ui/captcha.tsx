@@ -7,7 +7,7 @@ interface CaptchaProps {
   onVerify: (token: string) => void;
 }
 
-// Add proper typings for the hCaptcha object
+// Extend the existing Window interface from global.d.ts rather than redefining it
 declare global {
   interface Window {
     hcaptcha: {
