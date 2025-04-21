@@ -3,6 +3,7 @@ import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 interface CommunityNoteFormProps {
   locationId: string;
@@ -136,15 +137,20 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
         ...(videoUrl ? { videoUrl } : {})
       };
 
+      // Filter valid social links and convert them to a format compatible with Json type
+      const validSocialLinks = socialLinks
+        .filter(l => l.label && l.url)
+        .map(l => ({ label: l.label, url: l.url })) as Json;
+
       const { error } = await supabase
         .from("community_notes")
         .insert({
           location_id: locationId,
           user_id: (await supabase.auth.getUser()).data.user?.id || null,
           title: title.trim(),
-          content: contentObj,
+          content: contentObj as Json,
           images,
-          social_links: socialLinks.filter(l => l.label && l.url),
+          social_links: validSocialLinks,
           thumbs_up: 0,
           thumbs_up_users: []
         });

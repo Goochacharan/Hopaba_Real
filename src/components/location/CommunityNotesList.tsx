@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ThumbsUp, FileText } from "lucide-react";
 import CommunityNoteModal from "./CommunityNoteModal";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
+import { Note, ThumbsUpUser } from "./CommunityNoteModal";
+import { Json } from "@/integrations/supabase/types";
 
 interface CommunityNotesListProps {
   locationId: string;
@@ -12,25 +14,6 @@ interface CommunityNotesListProps {
 interface NoteContentType {
   text: string;
   videoUrl?: string;
-}
-
-interface ThumbsUpUser {
-  user_id: string;
-  rating: number;
-}
-
-interface Note {
-  id: string;
-  title: string;
-  content: NoteContentType;
-  images: string[] | null;
-  social_links: any[];
-  thumbs_up_users: ThumbsUpUser[] | null;
-  thumbs_up: number | null;
-  user_id: string | null;
-  user_avatar_url?: string | null;
-  user_display_name?: string | null;
-  created_at: string;
 }
 
 const MAX_THUMBS = 5;
@@ -102,13 +85,17 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
         }
         
         // Ensure content is in the right format
-        const contentObj: NoteContentType = typeof note.content === 'string' 
-          ? { text: note.content }
-          : (note.content as NoteContentType);
+        const contentData = note.content as Json;
+        const contentObj: NoteContentType = typeof contentData === 'string' 
+          ? { text: contentData as string }
+          : Array.isArray(contentData) 
+            ? { text: 'No content available' } // Handle unexpected array
+            : (contentData as unknown as NoteContentType);
           
         // Ensure thumbs_up_users is in the right format
-        const thumbsUpUsers = Array.isArray(note.thumbs_up_users) 
-          ? note.thumbs_up_users.map((user: any) => {
+        const rawThumbsUpUsers = note.thumbs_up_users || [];
+        const thumbsUpUsers: ThumbsUpUser[] = Array.isArray(rawThumbsUpUsers) 
+          ? rawThumbsUpUsers.map((user: any) => {
               if (typeof user === 'string') {
                 // Convert legacy format to new format
                 return { user_id: user, rating: 1 };
@@ -122,7 +109,8 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
           content: contentObj,
           user_avatar_url: userAvatarUrl,
           user_display_name: userDisplayName,
-          thumbs_up_users: thumbsUpUsers
+          thumbs_up_users: thumbsUpUsers,
+          social_links: Array.isArray(note.social_links) ? note.social_links : []
         });
       }
       

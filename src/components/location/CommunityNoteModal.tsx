@@ -2,13 +2,19 @@
 import React from "react";
 import { ThumbsUp } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
+import { Json } from "@/integrations/supabase/types";
 
 interface NoteContentType {
   text: string;
   videoUrl?: string;
 }
 
-interface Note {
+export interface ThumbsUpUser {
+  user_id: string;
+  rating: number;
+}
+
+export interface Note {
   id: string;
   title: string;
   content: NoteContentType;
@@ -17,6 +23,8 @@ interface Note {
   user_id: string | null;
   user_avatar_url?: string | null;
   user_display_name?: string | null;
+  thumbs_up?: number | null;
+  thumbs_up_users?: ThumbsUpUser[] | null;
 }
 
 interface CommunityNoteModalProps {
