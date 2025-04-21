@@ -114,7 +114,15 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
           : [];
         
         // Ensure social_links is in the right format
-        const socialLinks = Array.isArray(note.social_links) ? note.social_links : [];
+        let socialLinks: any[] = [];
+        if (note.social_links) {
+          if (Array.isArray(note.social_links)) {
+            socialLinks = note.social_links;
+          } else if (typeof note.social_links === 'object') {
+            // Try to convert object to array if possible
+            socialLinks = Object.values(note.social_links);
+          }
+        }
         
         processedNotes.push({
           ...note,
@@ -172,7 +180,7 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
     const thumbsUpUsersForDb = newThumbsUpUsers.map(u => ({ 
       user_id: u.user_id, 
       rating: u.rating 
-    })) as Json;
+    })) as unknown as Json;
 
     const { error } = await supabase
       .from("community_notes")

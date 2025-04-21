@@ -19,12 +19,13 @@ export interface Note {
   title: string;
   content: NoteContentType;
   images: string[] | null;
-  social_links: any[];
+  social_links: any[]; // Using any[] to accommodate different formats
   user_id: string | null;
   user_avatar_url?: string | null;
   user_display_name?: string | null;
   thumbs_up?: number | null;
   thumbs_up_users?: ThumbsUpUser[] | null;
+  created_at?: string;
 }
 
 interface CommunityNoteModalProps {
