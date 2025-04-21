@@ -188,8 +188,8 @@ const Index = () => {
 
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
-    
-    if (category !== "all") {
+
+    if (category !== "All" && category !== "Other") {
       const searchParams = new URLSearchParams();
       searchParams.set('category', category);
       navigate(`/search?${searchParams.toString()}`);

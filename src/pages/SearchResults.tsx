@@ -91,9 +91,10 @@ const SearchResults = () => {
   console.log("Selected area:", selectedArea);
   console.log("User coordinates:", userCoordinates);
 
+  // Update: match categories using the Add Business list (case-insensitive match)
   const handleCategorySelect = (selectedCategory: string) => {
     handleCategoryChange(selectedCategory as any);
-    
+
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('category', selectedCategory);
     navigate(`/search?${newSearchParams.toString()}`);
