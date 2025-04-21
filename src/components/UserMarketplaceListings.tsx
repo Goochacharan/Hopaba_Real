@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserMarketplaceListings } from '@/hooks/useUserMarketplaceListings';
@@ -66,8 +65,6 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
     setListingToEdit(null);
     refetch();
   };
-
-  const userCanAddMore = listings.length < 10;
 
   const renderApprovalBadge = (status: string = 'pending') => {
     switch(status) {
