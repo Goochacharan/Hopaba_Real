@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ThumbsUp, FileText } from "lucide-react";
@@ -171,7 +172,9 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
     newThumbsUpUsers.push({ user_id: userId, rating });
     const totalThumbsUp = newThumbsUpUsers.reduce((sum, u) => sum + u.rating, 0);
 
-    const userIdsForDb: string[] = newThumbsUpUsers.map(u => u.user_id);
+    // Convert the array of ThumbsUpUser objects to an array of strings (just user_ids)
+    // This is what the database schema expects
+    const userIdsForDb = newThumbsUpUsers.map(u => u.user_id);
 
     const { error } = await supabase
       .from("community_notes")
