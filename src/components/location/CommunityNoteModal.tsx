@@ -39,6 +39,38 @@ interface CommunityNoteModalProps {
   onClose: () => void;
 }
 
+// Helper functions for video embedding
+const isYouTubeUrl = (url: string): boolean => {
+  return url.includes('youtube.com') || url.includes('youtu.be');
+};
+
+const isVimeoUrl = (url: string): boolean => {
+  return url.includes('vimeo.com');
+};
+
+const getYouTubeEmbedUrl = (url: string): string => {
+  if (url.includes('watch?v=')) {
+    const videoId = new URL(url).searchParams.get('v');
+    return `https://www.youtube.com/embed/${videoId}`;
+  } else if (url.includes('youtu.be')) {
+    const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+    return `https://www.youtube.com/embed/${videoId}`;
+  }
+  return url;
+};
+
+const getVimeoEmbedUrl = (url: string): string => {
+  const vimeoId = url.split('vimeo.com/')[1]?.split('?')[0];
+  return `https://player.vimeo.com/video/${vimeoId}`;
+};
+
+const getEmbedUrl = (url: string | null): string | null => {
+  if (!url) return null;
+  if (isYouTubeUrl(url)) return getYouTubeEmbedUrl(url);
+  if (isVimeoUrl(url)) return getVimeoEmbedUrl(url);
+  return null;
+};
+
 const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
   note, open, onClose
 }) => {
@@ -54,18 +86,16 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
   }, [open, note.id]);
 
   const loadComments = async () => {
-    const { data, error } = await supabase
-      .from('note_comments')
-      .select('*')
-      .eq('note_id', note.id)
-      .order('created_at', { ascending: true });
-
-    if (error) {
-      console.error('Error loading comments:', error);
-      return;
+    // Since we don't have a note_comments table yet, let's create a temporary solution
+    // We'll store comments in localStorage until we add the proper table via SQL migration
+    const storedComments = localStorage.getItem(`note_comments_${note.id}`);
+    try {
+      const parsedComments = storedComments ? JSON.parse(storedComments) : [];
+      setComments(parsedComments);
+    } catch (error) {
+      console.error('Error parsing comments:', error);
+      setComments([]);
     }
-
-    setComments(data || []);
   };
 
   const handleSubmitComment = async (e: React.FormEvent) => {
@@ -85,28 +115,38 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
       return;
     }
 
-    const { error } = await supabase
-      .from('note_comments')
-      .insert({
+    try {
+      const commentId = crypto.randomUUID();
+      const newCommentObj: Comment = {
+        id: commentId,
         note_id: note.id,
+        user_id: userData.user.id,
         content: newComment.trim(),
-        user_id: userData.user.id
+        created_at: new Date().toISOString(),
+        user_display_name: userData.user.user_metadata?.full_name || userData.user.email,
+        user_avatar_url: userData.user.user_metadata?.avatar_url
+      };
+      
+      const updatedComments = [...comments, newCommentObj];
+      
+      // Save to localStorage until we add a proper table
+      localStorage.setItem(`note_comments_${note.id}`, JSON.stringify(updatedComments));
+      
+      setComments(updatedComments);
+      setNewComment("");
+      
+      toast({
+        title: "Success",
+        description: "Comment posted successfully"
       });
-
-    if (error) {
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to post comment",
         variant: "destructive"
       });
-    } else {
-      setNewComment("");
-      loadComments();
-      toast({
-        title: "Success",
-        description: "Comment posted successfully"
-      });
     }
+    
     setSubmitting(false);
   };
 
@@ -115,14 +155,6 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
   const userAvatarUrl = note.user_avatar_url;
   const userDisplayName = note.user_display_name || "Anonymous";
   const videoUrl = note.content?.videoUrl || null;
-  
-  // Determine which video service to use
-  const getEmbedUrl = (url: string | null) => {
-    if (!url) return null;
-    if (isYouTubeUrl(url)) return getYouTubeEmbedUrl(url);
-    if (isVimeoUrl(url)) return getVimeoEmbedUrl(url);
-    return null;
-  };
   
   const embedUrl = getEmbedUrl(videoUrl);
 

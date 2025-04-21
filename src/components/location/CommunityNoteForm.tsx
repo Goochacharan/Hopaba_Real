@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -32,16 +31,13 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
     
-    // Process each file to compress and convert to base64
     for (const file of files) {
       if (file.size > 1024 * 1024) {
-        // If file is larger than 1MB, compress it
         const compressedImage = await compressImage(file);
         if (compressedImage) {
           setImages(prev => [...prev, compressedImage]);
         }
       } else {
-        // If file is small enough, just convert to base64
         const reader = new FileReader();
         reader.onloadend = () => {
           const result = reader.result as string;
@@ -53,7 +49,6 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
     (e.target as HTMLInputElement).value = "";
   };
 
-  // Compress image before storing it
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -64,7 +59,6 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
           let width = img.width;
           let height = img.height;
           
-          // Calculate new dimensions to maintain aspect ratio
           const maxDimension = 800;
           if (width > height && width > maxDimension) {
             height = (height * maxDimension) / width;
@@ -84,7 +78,6 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
           }
           
           ctx.drawImage(img, 0, 0, width, height);
-          // Lower quality (0.7) for more compression
           const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
           resolve(compressedDataUrl);
         };
@@ -131,7 +124,6 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
     }
     setAdding(true);
     try {
-      // First, get the current user to ensure we have a valid user session
       const { data: userData, error: userError } = await supabase.auth.getUser();
       
       if (userError) {
@@ -140,13 +132,11 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
       
       const userId = userData.user?.id;
       
-      // Create a content object that includes the text and optional videoUrl
       const contentObj = {
         text: content,
         ...(videoUrl ? { videoUrl } : {})
       };
 
-      // Filter valid social links and convert them to a format compatible with Json type
       const validSocialLinks = socialLinks
         .filter(l => l.label && l.url)
         .map(l => ({ label: l.label, url: l.url }));
@@ -196,7 +186,7 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
 
       <div className="mb-3">
         <textarea
-          className="w-full min-h-[240px] border rounded px-2 py-2"
+          className="w-full min-h-[480px] border rounded px-2 py-2"
           placeholder="Write your article here (you can share your tips, experiences, stories, etc)"
           value={content}
           onChange={e => setContent(e.target.value)}
