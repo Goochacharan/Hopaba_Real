@@ -33,7 +33,6 @@ const CategoryScrollBar: React.FC<Props> = ({ selected, onSelect, className }) =
         className
       )}
       style={{ WebkitOverflowScrolling: "touch" }}
-      tabIndex={0}
     >
       <div className="flex gap-2 min-w-max">
         {categories.map((cat) => (

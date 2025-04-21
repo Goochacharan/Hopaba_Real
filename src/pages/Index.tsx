@@ -40,67 +40,88 @@ const Index = () => {
   const [isEnhancing, setIsEnhancing] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const exampleQueries = [{
-    text: "Find me a cozy café nearby",
-    icon: "☕"
-  }, {
-    text: "Looking for a Kannada-speaking actor",
-    icon: "🎭"
-  }, {
-    text: "Best electrician in Jayanagar",
-    icon: "⚡"
-  }, {
-    text: "Where can I buy a pre-owned bike?",
-    icon: "🏍️"
-  }, {
-    text: "Recommend a good Italian restaurant",
-    icon: "🍕"
-  }, {
-    text: "Find a flower shop in Koramangala",
-    icon: "🌸"
-  }, {
-    text: "Best dance classes for kids",
-    icon: "💃"
-  }, {
-    text: "Need a plumber for water leak",
-    icon: "🔧"
-  }, {
-    text: "Bookstores with rare collections",
-    icon: "📚"
-  }, {
-    text: "Top rated hair salon near me",
-    icon: "💇"
-  }, {
-    text: "Auto repair shops open on Sunday",
-    icon: "🔧"
-  }, {
-    text: "Pet-friendly cafes in Indiranagar",
-    icon: "🐶"
-  }, {
-    text: "Yoga classes for beginners",
-    icon: "🧘"
-  }, {
-    text: "Wedding photographers with good reviews",
-    icon: "📸"
-  }, {
-    text: "Where to buy organic vegetables",
-    icon: "🥦"
-  }, {
-    text: "Best dentists that accept insurance",
-    icon: "🦷"
-  }, {
-    text: "Computer repair services near me",
-    icon: "💻"
-  }, {
-    text: "Piano teachers for adults",
-    icon: "🎹"
-  }, {
-    text: "Tailors who can alter ethnic wear",
-    icon: "👔"
-  }, {
-    text: "Schools with good sports programs",
-    icon: "🏫"
-  }];
+  const exampleQueries = [
+    {
+      text: "Find me a cozy café nearby",
+      icon: "☕"
+    },
+    {
+      text: "Looking for a Kannada-speaking actor",
+      icon: "🎭"
+    },
+    {
+      text: "Best electrician in Jayanagar",
+      icon: "⚡"
+    },
+    {
+      text: "Where can I buy a pre-owned bike?",
+      icon: "🏍️"
+    },
+    {
+      text: "Recommend a good Italian restaurant",
+      icon: "🍕"
+    },
+    {
+      text: "Find a flower shop in Koramangala",
+      icon: "🌸"
+    },
+    {
+      text: "Best dance classes for kids",
+      icon: "💃"
+    },
+    {
+      text: "Need a plumber for water leak",
+      icon: "🔧"
+    },
+    {
+      text: "Bookstores with rare collections",
+      icon: "📚"
+    },
+    {
+      text: "Top rated hair salon near me",
+      icon: "💇"
+    },
+    {
+      text: "Auto repair shops open on Sunday",
+      icon: "🔧"
+    },
+    {
+      text: "Pet-friendly cafes in Indiranagar",
+      icon: "🐶"
+    },
+    {
+      text: "Yoga classes for beginners",
+      icon: "🧘"
+    },
+    {
+      text: "Wedding photographers with good reviews",
+      icon: "📸"
+    },
+    {
+      text: "Where to buy organic vegetables",
+      icon: "🥦"
+    },
+    {
+      text: "Best dentists that accept insurance",
+      icon: "🦷"
+    },
+    {
+      text: "Computer repair services near me",
+      icon: "💻"
+    },
+    {
+      text: "Piano teachers for adults",
+      icon: "🎹"
+    },
+    {
+      text: "Tailors who can alter ethnic wear",
+      icon: "👔"
+    },
+    {
+      text: "Schools with good sports programs",
+      icon: "🏫"
+    }
+  ];
 
   const enhanceSearchQuery = async (rawQuery: string) => {
     if (!rawQuery.trim()) return rawQuery;
@@ -148,7 +169,7 @@ const Index = () => {
       try {
         const enhancedQuery = await enhanceSearchQuery(query);
 
-        const categoryHint = queryCategoryMap[query] || "";
+        const categoryHint = queryCategoryMap[query] || selectedCategory !== "all" ? selectedCategory : "";
 
         setTimeout(() => {
           const searchParams = new URLSearchParams();
@@ -165,6 +186,16 @@ const Index = () => {
     }
   };
 
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    
+    if (category !== "all") {
+      const searchParams = new URLSearchParams();
+      searchParams.set('category', category);
+      navigate(`/search?${searchParams.toString()}`);
+    }
+  };
+
   return <MainLayout>
       <section className="flex flex-col items-center justify-center pt-0 pb-0 mx-[5px] px-0">
         <div className="text-center mb-1 animate-fade-in">
@@ -175,7 +206,7 @@ const Index = () => {
           <ScrollArea className="h-[calc(100vh-180px)] w-full px-1 pb-0">
             <CategoryScrollBar
               selected={selectedCategory}
-              onSelect={setSelectedCategory}
+              onSelect={handleCategorySelect}
               className="mb-2"
             />
 

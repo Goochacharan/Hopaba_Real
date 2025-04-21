@@ -11,6 +11,7 @@ import SearchHeader from '@/components/search/SearchHeader';
 import SearchTabs from '@/components/search/SearchTabs';
 import SearchControls from '@/components/search/SearchControls';
 import AreaSearchBar from '@/components/search/AreaSearchBar';
+import CategoryScrollBar from '@/components/business/CategoryScrollBar';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -92,6 +93,15 @@ const SearchResults = () => {
   console.log("Selected area:", selectedArea);
   console.log("User coordinates:", userCoordinates);
 
+  const handleCategorySelect = (selectedCategory: string) => {
+    handleCategoryChange(selectedCategory as any);
+    
+    // Update URL with the selected category
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('category', selectedCategory);
+    navigate(`/search?${newSearchParams.toString()}`);
+  };
+
   useEffect(() => {
     if (searchQuery && searchQuery !== query) {
       console.log("SearchResults - Processing search query:", searchQuery);
@@ -139,6 +149,12 @@ const SearchResults = () => {
           selectedArea={selectedArea}
           onAreaSelect={handleAreaSelect}
           onLocationSelect={handleLocationSelect}
+        />
+
+        <CategoryScrollBar
+          selected={category}
+          onSelect={handleCategorySelect}
+          className="my-2"
         />
         
         <SearchControls
