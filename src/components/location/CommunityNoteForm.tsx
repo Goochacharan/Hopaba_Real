@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -9,14 +8,20 @@ interface CommunityNoteFormProps {
   onNoteCreated: () => void;
 }
 
+interface SocialLink {
+  label: string;
+  url: string;
+}
+
 const defaultSocialLinks = [{ label: "", url: "" }];
 
 const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNoteCreated }) => {
   const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
-  const [socialLinks, setSocialLinks] = useState(defaultSocialLinks);
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>(defaultSocialLinks);
   const [adding, setAdding] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -24,15 +29,30 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
-    // Here you can add logic to store images to Supabase Storage later.
-    // For now, just store URLs from local uploads as data URLs.
     for (const file of files) {
       const reader = new FileReader();
-      reader.onloadend = () => setImages(prev => [...prev, reader.result as string]);
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setImages(prev => [...prev, result]);
+      };
       reader.readAsDataURL(file);
     }
-    // Reset for next pick
     (e.target as HTMLInputElement).value = "";
+  };
+
+  const isValidVideoUrl = (url: string) => {
+    const ytRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
+    const vimeoRegex = /^(https?:\/\/)?(www\.)?vimeo\.com\/.+$/;
+    return ytRegex.test(url) || vimeoRegex.test(url);
+  };
+
+  const handleVideoUrlChange = (value: string) => {
+    if (value === "" || isValidVideoUrl(value)) {
+      setVideoUrl(value || null);
+    } else {
+      setVideoUrl(null);
+      toast({ title: "Invalid video URL", description: "Only YouTube or Vimeo links are allowed", variant: "destructive" });
+    }
   };
 
   const handleAddSocialLink = () => {
@@ -40,7 +60,7 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
   };
 
   const handleSocialLinkChange = (i: number, field: 'label' | 'url', value: string) => {
-    setSocialLinks(prev => prev.map((link, idx) => 
+    setSocialLinks(prev => prev.map((link, idx) =>
       idx === i ? { ...link, [field]: value } : link
     ));
   };
@@ -57,19 +77,27 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
     }
     setAdding(true);
     try {
+      const contentObj = { text: content };
+      if (videoUrl) {
+        contentObj.videoUrl = videoUrl;
+      }
       const { error } = await supabase
         .from("community_notes")
         .insert({
           location_id: locationId,
+          user_id: supabase.auth.getUser().then(resp => resp.data.user?.id).catch(() => null),
           title: title.trim(),
-          content: { text: content },
+          content: contentObj,
           images,
           social_links: socialLinks.filter(l => l.label && l.url),
+          thumbs_up: 0,
+          thumbs_up_users: []
         });
       if (error) throw error;
       toast({ title: "Community Note submitted!", description: "Thank you for sharing your article." });
       setTitle("");
       setContent("");
+      setVideoUrl(null);
       setImages([]);
       setSocialLinks(defaultSocialLinks);
       onNoteCreated();
@@ -83,6 +111,7 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
   return (
     <form className="mb-6 bg-white border rounded-lg p-5" onSubmit={handleSubmit}>
       <h3 className="text-lg font-semibold mb-3">Write a Community Note</h3>
+
       <div className="mb-3">
         <input
           className="w-full border rounded px-2 py-2 mb-1 text-lg font-medium"
@@ -93,6 +122,7 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
           required
         />
       </div>
+
       <div className="mb-3">
         <textarea
           className="w-full min-h-[120px] border rounded px-2 py-2"
@@ -103,6 +133,17 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
           required
         />
       </div>
+
+      <div className="mb-3">
+        <label className="block mb-1 font-medium">Video URL (YouTube or Vimeo):</label>
+        <input
+          className="w-full border rounded px-2 py-2"
+          placeholder="https://youtube.com/..."
+          value={videoUrl || ""}
+          onChange={e => handleVideoUrlChange(e.target.value)}
+        />
+      </div>
+
       <div className="mb-3">
         <label className="block mb-1 font-medium">Upload Images or Screenshots:</label>
         <input
@@ -118,6 +159,7 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
           ))}
         </div>
       </div>
+
       <div className="mb-3">
         <label className="block font-medium">Social Media Links:</label>
         {socialLinks.map((link, i) => (
@@ -143,6 +185,7 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
           + Add another link
         </button>
       </div>
+
       <div className="flex mt-4">
         <Button type="submit" disabled={adding}>
           {adding ? "Submitting..." : "Submit Note"}
