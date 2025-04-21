@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ThumbsUp, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import CommunityNoteModal from "./CommunityNoteModal";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
-import { Note, ThumbsUpUser } from "./CommunityNoteModal";
+import { Note } from "./CommunityNoteModal";
 import { Json } from "@/integrations/supabase/types";
 
 interface CommunityNotesListProps {
@@ -14,8 +14,6 @@ interface NoteContentType {
   text: string;
   videoUrl?: string;
 }
-
-const MAX_THUMBS = 5;
 
 const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -94,27 +92,6 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
           };
         }
         
-        let thumbsUpUsers: ThumbsUpUser[] = [];
-        const rawThumbsUpUsers = note.thumbs_up_users;
-        
-        if (rawThumbsUpUsers) {
-          if (Array.isArray(rawThumbsUpUsers)) {
-            thumbsUpUsers = rawThumbsUpUsers.map((user: any) => {
-              if (typeof user === 'string') {
-                return { user_id: user, rating: 1 };
-              }
-              return user as ThumbsUpUser;
-            });
-          } else if (typeof rawThumbsUpUsers === 'string') {
-            thumbsUpUsers = [{ user_id: rawThumbsUpUsers, rating: 1 }];
-          } else if (typeof rawThumbsUpUsers === 'object' && rawThumbsUpUsers !== null) {
-            const entries = Object.entries(rawThumbsUpUsers);
-            thumbsUpUsers = entries.map(([key, value]) => {
-              return { user_id: key, rating: typeof value === 'number' ? value : 1 };
-            });
-          }
-        }
-        
         let socialLinks: any[] = [];
         if (note.social_links) {
           if (Array.isArray(note.social_links)) {
@@ -129,7 +106,6 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
           content: contentObj,
           user_avatar_url: userAvatarUrl,
           user_display_name: userDisplayName,
-          thumbs_up_users: thumbsUpUsers,
           social_links: socialLinks
         });
       }
@@ -140,58 +116,6 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
     }
     
     setLoading(false);
-  }
-
-  const computeThumbsUpCount = (note: Note) => {
-    if (!note.thumbs_up_users || note.thumbs_up_users.length === 0) return 0;
-    return note.thumbs_up_users.reduce((sum, u) => sum + u.rating, 0);
-  };
-
-  const userThumbRating = (note: Note, userId: string | null) => {
-    if (!userId || !note.thumbs_up_users) return 0;
-    const entry = note.thumbs_up_users.find(u => u.user_id === userId);
-    return entry?.rating || 0;
-  };
-
-  async function handleThumb(noteId: string, rating: number) {
-    if (!userId) {
-      alert("You need to be logged in to rate articles.");
-      return;
-    }
-    const note = notes.find(n => n.id === noteId);
-    if (!note) return;
-    const existingUserRating = userThumbRating(note, userId);
-    if (existingUserRating !== 0) {
-      alert("You have already rated this article.");
-      return;
-    }
-    if (rating < 1 || rating > MAX_THUMBS) return;
-
-    const newThumbsUpUsers = [...(note.thumbs_up_users || [])];
-    newThumbsUpUsers.push({ user_id: userId, rating });
-    const totalThumbsUp = newThumbsUpUsers.reduce((sum, u) => sum + u.rating, 0);
-
-    const userIdsForDb = newThumbsUpUsers.map(u => u.user_id);
-
-    const { error } = await supabase
-      .from("community_notes")
-      .update({
-        thumbs_up_users: userIdsForDb,
-        thumbs_up: totalThumbsUp,
-      })
-      .eq("id", noteId);
-
-    if (!error) {
-      setNotes(prev =>
-        prev.map(n => n.id === noteId ? { 
-          ...n, 
-          thumbs_up_users: newThumbsUpUsers, 
-          thumbs_up: totalThumbsUp 
-        } : n)
-      );
-    } else {
-      console.error("Error updating rating:", error);
-    }
   }
 
   if (loading) {
@@ -211,57 +135,32 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
         <div className="text-muted-foreground mb-6">No articles yet. Be the first to write a community note!</div>
       ) : (
         <div className="flex flex-col gap-3">
-          {notes.map(note => {
-            const userRating = userThumbRating(note, userId);
-            const totalThumbsUp = computeThumbsUpCount(note);
-            
-            return (
-              <div
-                className="border p-3 rounded bg-white shadow-sm flex items-center justify-between cursor-pointer hover:shadow-md"
-                key={note.id}
-                onClick={() => {
-                  setSelectedNote(note);
-                  setModalOpen(true);
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
-                    {note.user_avatar_url ? (
-                      <AvatarImage src={note.user_avatar_url} alt={note.user_display_name || "User avatar"} />
-                    ) : (
-                      <AvatarFallback>{(note.user_display_name?.[0] || "A").toUpperCase()}</AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div>
-                    <div className="font-semibold text-lg">{note.title}</div>
-                    <div className="text-sm text-gray-500 line-clamp-1 max-w-[340px]">
-                      {note.content?.text?.slice(0, 120)}
-                    </div>
+          {notes.map(note => (
+            <div
+              className="border p-3 rounded bg-white shadow-sm flex items-center justify-between cursor-pointer hover:shadow-md"
+              key={note.id}
+              onClick={() => {
+                setSelectedNote(note);
+                setModalOpen(true);
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10">
+                  {note.user_avatar_url ? (
+                    <AvatarImage src={note.user_avatar_url} alt={note.user_display_name || "User avatar"} />
+                  ) : (
+                    <AvatarFallback>{(note.user_display_name?.[0] || "A").toUpperCase()}</AvatarFallback>
+                  )}
+                </Avatar>
+                <div>
+                  <div className="font-semibold text-lg">{note.title}</div>
+                  <div className="text-sm text-gray-500 line-clamp-1 max-w-[340px]">
+                    {note.content?.text?.slice(0, 120)}
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  {[1, 2, 3, 4, 5].map(i => (
-                    <button
-                      key={i}
-                      onClick={e => {
-                        e.stopPropagation();
-                        handleThumb(note.id, i);
-                      }}
-                      className={`cursor-pointer ${
-                        userRating >= i ? "text-blue-500" : "text-gray-300"
-                      }`}
-                      aria-label={`${i} thumbs up`}
-                      title={`${i} thumbs up`}
-                      disabled={userRating > 0}
-                    >
-                      <ThumbsUp size={20} />
-                    </button>
-                  ))}
-                  <span className="font-bold ml-1">{totalThumbsUp}</span>
-                </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       )}
       {modalOpen && selectedNote && (
@@ -269,9 +168,6 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
           note={selectedNote}
           open={modalOpen}
           onClose={() => setModalOpen(false)}
-          thumbsUpCount={computeThumbsUpCount(selectedNote)}
-          userHasThumbed={userThumbRating(selectedNote, userId) > 0}
-          onThumb={handleThumb}
         />
       )}
     </div>

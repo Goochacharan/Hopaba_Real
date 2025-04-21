@@ -196,7 +196,7 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({ locationId, onNot
 
       <div className="mb-3">
         <textarea
-          className="w-full min-h-[120px] border rounded px-2 py-2"
+          className="w-full min-h-[240px] border rounded px-2 py-2"
           placeholder="Write your article here (you can share your tips, experiences, stories, etc)"
           value={content}
           onChange={e => setContent(e.target.value)}

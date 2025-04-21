@@ -1,17 +1,14 @@
 
-import React from "react";
-import { ThumbsUp } from "lucide-react";
+import React, { useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
-import { Json } from "@/integrations/supabase/types";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface NoteContentType {
   text: string;
   videoUrl?: string;
-}
-
-export interface ThumbsUpUser {
-  user_id: string;
-  rating: number;
 }
 
 export interface Note {
@@ -19,54 +16,104 @@ export interface Note {
   title: string;
   content: NoteContentType;
   images: string[] | null;
-  social_links: any[]; // Using any[] to accommodate different formats
+  social_links: any[];
   user_id: string | null;
   user_avatar_url?: string | null;
   user_display_name?: string | null;
-  thumbs_up?: number | null;
-  thumbs_up_users?: ThumbsUpUser[] | null;
   created_at?: string;
+}
+
+interface Comment {
+  id: string;
+  note_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  user_display_name?: string;
+  user_avatar_url?: string;
 }
 
 interface CommunityNoteModalProps {
   note: Note;
   open: boolean;
   onClose: () => void;
-  onThumb: (noteId: string, rating: number) => void;
-  thumbsUpCount: number;
-  userHasThumbed: boolean;
 }
 
-const MAX_THUMBS = 5;
-
-const isYouTubeUrl = (url: string) => {
-  const ytRegex = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([^\s&]+)/;
-  return ytRegex.test(url);
-};
-
-const isVimeoUrl = (url: string) => {
-  const vimeoRegex = /^(?:https?:\/\/)?(?:www\.)?(?:vimeo\.com\/)([^\s&]+)/;
-  return vimeoRegex.test(url);
-};
-
-const getYouTubeEmbedUrl = (url: string) => {
-  const match = url.match(/^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([^\s&]+)/);
-  return match ? `https://www.youtube.com/embed/${match[1]}` : "";
-};
-
-const getVimeoEmbedUrl = (url: string) => {
-  const match = url.match(/^(?:https?:\/\/)?(?:www\.)?(?:vimeo\.com\/)([^\s&]+)/);
-  return match ? `https://player.vimeo.com/video/${match[1]}` : "";
-};
-
 const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
-  note, open, onClose, onThumb, thumbsUpCount, userHasThumbed
+  note, open, onClose
 }) => {
+  const { toast } = useToast();
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  React.useEffect(() => {
+    if (open && note.id) {
+      loadComments();
+    }
+  }, [open, note.id]);
+
+  const loadComments = async () => {
+    const { data, error } = await supabase
+      .from('note_comments')
+      .select('*')
+      .eq('note_id', note.id)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error loading comments:', error);
+      return;
+    }
+
+    setComments(data || []);
+  };
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    setSubmitting(true);
+    const { data: userData } = await supabase.auth.getUser();
+    
+    if (!userData.user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to comment",
+        variant: "destructive"
+      });
+      setSubmitting(false);
+      return;
+    }
+
+    const { error } = await supabase
+      .from('note_comments')
+      .insert({
+        note_id: note.id,
+        content: newComment.trim(),
+        user_id: userData.user.id
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to post comment",
+        variant: "destructive"
+      });
+    } else {
+      setNewComment("");
+      loadComments();
+      toast({
+        title: "Success",
+        description: "Comment posted successfully"
+      });
+    }
+    setSubmitting(false);
+  };
+
   if (!open || !note) return null;
 
   const userAvatarUrl = note.user_avatar_url;
   const userDisplayName = note.user_display_name || "Anonymous";
-
   const videoUrl = note.content?.videoUrl || null;
   
   // Determine which video service to use
@@ -134,8 +181,8 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
           {note.content?.text}
         </div>
         
-        {note.social_links && Array.isArray(note.social_links) && note.social_links.length > 0 ? (
-          <div className="mb-3">
+        {note.social_links && Array.isArray(note.social_links) && note.social_links.length > 0 && (
+          <div className="mb-6">
             <label className="font-semibold">Links:</label>
             <ul className="ml-4 mt-1">
               {note.social_links.map((link: any, i: number) => (
@@ -147,26 +194,46 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
               ))}
             </ul>
           </div>
-        ) : null}
+        )}
 
-        <div className="mb-3 flex items-center gap-1">
-          <span className="font-semibold">Rate this article:</span>
-          {[1, 2, 3, 4, 5].map(i => (
-            <button
-              key={i}
-              disabled={userHasThumbed}
-              onClick={() => onThumb(note.id, i)}
-              className={`cursor-pointer px-2 py-1 rounded ${
-                userHasThumbed ? "bg-blue-100 text-blue-500" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-              }`}
-              aria-label={`${i} thumbs up`}
-              title={`${i} thumbs up`}
-            >
-              <ThumbsUp size={18} />
-            </button>
-          ))}
-          <span className="ml-3 font-bold text-lg">{thumbsUpCount}</span>
-          {userHasThumbed && <span className="ml-2 text-green-600 font-semibold">Thank you!</span>}
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold mb-4">Comments</h3>
+          <div className="space-y-4 mb-6">
+            {comments.map((comment) => (
+              <div key={comment.id} className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Avatar className="h-8 w-8">
+                    {comment.user_avatar_url ? (
+                      <AvatarImage src={comment.user_avatar_url} alt={comment.user_display_name} />
+                    ) : (
+                      <AvatarFallback>
+                        {(comment.user_display_name?.[0] || "A").toUpperCase()}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div>
+                    <div className="font-medium">{comment.user_display_name || "Anonymous"}</div>
+                    <div className="text-xs text-gray-500">
+                      {new Date(comment.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-gray-700">{comment.content}</p>
+              </div>
+            ))}
+          </div>
+
+          <form onSubmit={handleSubmitComment} className="space-y-4">
+            <Textarea
+              placeholder="Write a comment..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="min-h-[100px]"
+            />
+            <Button type="submit" disabled={submitting}>
+              {submitting ? "Posting..." : "Post Comment"}
+            </Button>
+          </form>
         </div>
       </div>
     </div>
