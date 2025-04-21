@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ThumbsUp, FileText } from "lucide-react";
@@ -95,12 +94,10 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
           };
         }
         
-        // Properly handle thumbs_up_users based on its structure
         let thumbsUpUsers: ThumbsUpUser[] = [];
         const rawThumbsUpUsers = note.thumbs_up_users;
         
         if (rawThumbsUpUsers) {
-          // Handle both array and non-array cases
           if (Array.isArray(rawThumbsUpUsers)) {
             thumbsUpUsers = rawThumbsUpUsers.map((user: any) => {
               if (typeof user === 'string') {
@@ -109,10 +106,8 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
               return user as ThumbsUpUser;
             });
           } else if (typeof rawThumbsUpUsers === 'string') {
-            // Handle case where it's a single string
             thumbsUpUsers = [{ user_id: rawThumbsUpUsers, rating: 1 }];
           } else if (typeof rawThumbsUpUsers === 'object' && rawThumbsUpUsers !== null) {
-            // Handle object case
             const entries = Object.entries(rawThumbsUpUsers);
             thumbsUpUsers = entries.map(([key, value]) => {
               return { user_id: key, rating: typeof value === 'number' ? value : 1 };
@@ -120,7 +115,6 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
           }
         }
         
-        // Handle social_links properly
         let socialLinks: any[] = [];
         if (note.social_links) {
           if (Array.isArray(note.social_links)) {
@@ -177,16 +171,12 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
     newThumbsUpUsers.push({ user_id: userId, rating });
     const totalThumbsUp = newThumbsUpUsers.reduce((sum, u) => sum + u.rating, 0);
 
-    // Convert the ThumbsUpUser[] to a format compatible with the database
-    const thumbsUpUsersForDb: { user_id: string, rating: number }[] = newThumbsUpUsers.map(u => ({ 
-      user_id: u.user_id, 
-      rating: u.rating 
-    }));
+    const userIdsForDb: string[] = newThumbsUpUsers.map(u => u.user_id);
 
     const { error } = await supabase
       .from("community_notes")
       .update({
-        thumbs_up_users: thumbsUpUsersForDb as unknown as Json,
+        thumbs_up_users: userIdsForDb as unknown as Json,
         thumbs_up: totalThumbsUp,
       })
       .eq("id", noteId);
