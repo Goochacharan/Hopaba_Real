@@ -2,7 +2,8 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { 
-  IceCreamBowl, Restaurant, Scissors, Store, ShoppingCart, Utensils, Cake, Pizza, Spa, Dumbbell 
+  IceCream, Utensils, Scissors, Store, ShoppingCart, 
+  Cake, Pizza, Dumbbell, Coffee, MoreHorizontal 
 } from "lucide-react";
 
 type CategoryOption = {
@@ -15,7 +16,7 @@ const CATEGORIES: CategoryOption[] = [
   {
     id: "ice-cream",
     label: "Ice Cream",
-    icon: <IceCreamBowl size={30} className="text-[#8B5CF6]" />,
+    icon: <IceCream size={30} className="text-[#8B5CF6]" />,
   },
   {
     id: "restaurants",
@@ -25,7 +26,7 @@ const CATEGORIES: CategoryOption[] = [
   {
     id: "beauty-salon",
     label: "Beauty Salon",
-    icon: <Spa size={30} className="text-[#6E59A5]" />,
+    icon: <Scissors size={30} className="text-[#6E59A5]" />,
   },
   {
     id: "salons",
@@ -60,7 +61,7 @@ const CATEGORIES: CategoryOption[] = [
   {
     id: "more",
     label: "More",
-    icon: <Restaurant size={30} className="text-[#aaadb0]" />,
+    icon: <MoreHorizontal size={30} className="text-[#aaadb0]" />,
   },
 ];
 
