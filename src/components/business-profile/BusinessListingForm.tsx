@@ -22,6 +22,7 @@ import { TagsInput } from "../ui/tags-input";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ImageUpload } from '@/components/ui/image-upload';
+import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 
 export interface BusinessData {
   id?: string;
@@ -183,6 +184,8 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
       const priceRangeMin = data.price_range_min ? Number(data.price_range_min) : undefined;
       const priceRangeMax = data.price_range_max ? Number(data.price_range_max) : undefined;
       
+      const coordinates = extractCoordinatesFromMapLink(data.map_link || null);
+      
       const businessData = {
         name: data.name,
         category: data.category,
@@ -207,6 +210,8 @@ const BusinessListingForm: React.FC<BusinessListingFormProps> = ({ business, onS
         experience: data.experience || null,
         tags: data.tags || [],
         images: data.images,
+        latitude: coordinates ? coordinates.lat : null,
+        longitude: coordinates ? coordinates.lng : null,
       };
 
       console.log("Formatted business data for Supabase:", businessData);

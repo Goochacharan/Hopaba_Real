@@ -17,6 +17,7 @@ import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 
 const INDIAN_CITIES = [
   "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai", 
@@ -152,6 +153,8 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
       const categoryValue = data.category.toLowerCase().trim();
       console.log("Submitting listing with category:", categoryValue);
 
+      const coordinates = extractCoordinatesFromMapLink(data.map_link || null);
+      
       const listingData = {
         title: data.title,
         description: data.description,
@@ -175,6 +178,8 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         area: data.area,
         city: data.city,
         postal_code: data.postal_code,
+        latitude: coordinates ? coordinates.lat : null,
+        longitude: coordinates ? coordinates.lng : null,
       };
 
       if (listing?.id) {

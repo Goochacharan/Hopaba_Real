@@ -72,7 +72,7 @@ const LocationSection = () => {
               />
             </FormControl>
             <FormDescription>
-              This link will be used for the directions button on your listing
+              Adding a Google Maps link will enable distance calculation and make your listing more discoverable to nearby users
             </FormDescription>
             <FormMessage />
           </FormItem>
