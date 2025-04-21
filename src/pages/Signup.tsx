@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -7,7 +8,7 @@ import { SignupCard } from '@/components/auth/SignupCard';
 import { SignupFormValues } from '@/components/auth/SignupForm';
 import { useAuth } from '@/hooks/useAuth';
 
-const HCAPTCHA_SITE_KEY = '10000000-ffff-ffff-ffff-000000000001';
+const HCAPTCHA_SITE_KEY = 'fda043e0-8372-4d8a-b190-84a8fdee1528';
 
 export default function Signup() {
   const navigate = useNavigate();
