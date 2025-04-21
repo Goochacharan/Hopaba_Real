@@ -18,14 +18,12 @@ import { ImageUpload } from '@/components/ui/image-upload';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 
-// List of major cities in India
 const INDIAN_CITIES = [
   "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai", 
   "Kolkata", "Surat", "Pune", "Jaipur", "Lucknow", "Kanpur", 
   "Nagpur", "Indore", "Bhopal", "Visakhapatnam", "Patna", "Gwalior"
 ];
 
-// Update the marketplace listing schema to include new fields
 const marketplaceListingSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
   description: z.string().min(20, { message: "Description must be at least 20 characters" }),
@@ -222,7 +220,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     const currentYear = new Date().getFullYear();
     const years = [];
     
-    // Generate years from current year down to 1950
     for (let year = currentYear; year >= 1950; year--) {
       years.push(year.toString());
     }
@@ -659,6 +656,26 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                 </FormControl>
                 <FormDescription>
                   Enter a valid 6-digit Indian postal code
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="map_link"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Google Maps Link (Optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Paste your Google Maps link here"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  This link helps buyers find the exact location of your item.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
