@@ -7,6 +7,19 @@ interface CaptchaProps {
   onVerify: (token: string) => void;
 }
 
+// Add proper typings for the hCaptcha object
+declare global {
+  interface Window {
+    hcaptcha: {
+      render: (element: HTMLElement | string, options: any) => number;
+      reset: (widgetId?: number) => void;
+      execute: (widgetId?: number) => void;
+      ready: (callback: () => void) => void;
+    };
+    onloadCallback: () => void;
+  }
+}
+
 export function Captcha({ siteKey, onVerify }: CaptchaProps) {
   const divRef = useRef<HTMLDivElement>(null);
   const isScriptLoaded = useRef(false);

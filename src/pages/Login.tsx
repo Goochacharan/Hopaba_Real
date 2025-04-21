@@ -7,7 +7,7 @@ import { LoginCard } from '@/components/auth/LoginCard';
 import { LoginFormValues } from '@/components/auth/LoginForm';
 import { useAuth } from '@/hooks/useAuth';
 
-const HCAPTCHA_SITE_KEY = 'fda043e0-8372-4d8a-b190-84a8fdee1528';
+const HCAPTCHA_SITE_KEY = '10000000-ffff-ffff-ffff-000000000001';
 const REQUIRE_CAPTCHA = true;
 
 export default function Login() {
