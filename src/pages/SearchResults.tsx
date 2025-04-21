@@ -90,13 +90,19 @@ const SearchResults = () => {
   console.log("Final ranked recommendations:", rankedRecommendations);
   console.log("Selected area:", selectedArea);
   console.log("User coordinates:", userCoordinates);
+  console.log("Current category for filtering:", category);
 
   // Update: match categories using the Add Business list (case-insensitive match)
   const handleCategorySelect = (selectedCategory: string) => {
-    handleCategoryChange(selectedCategory as any);
+    console.log("Category selected:", selectedCategory);
+    
+    // Normalize the category for consistent comparison
+    const normalizedCategory = selectedCategory === "All" ? "all" : selectedCategory;
+    
+    handleCategoryChange(normalizedCategory as any);
 
     const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set('category', selectedCategory);
+    newSearchParams.set('category', normalizedCategory);
     navigate(`/search?${newSearchParams.toString()}`);
   };
 

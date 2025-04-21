@@ -1,9 +1,10 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 // Extended category list to match Add Business page
-const SERVICE_CATEGORIES = [
+const DEFAULT_SERVICE_CATEGORIES = [
   "All",
   "Bakery",
   "Ice Cream Shops",
@@ -128,6 +129,13 @@ const CategoryScrollBar: React.FC<CategoryScrollBarProps> = ({
   onSelect,
   className,
 }) => {
+  const [categories, setCategories] = useState<string[]>(DEFAULT_SERVICE_CATEGORIES);
+  
+  useEffect(() => {
+    // Log the selected category for debugging
+    console.log("Selected category in CategoryScrollBar:", selected);
+  }, [selected]);
+  
   return (
     <div
       className={cn(
@@ -137,7 +145,7 @@ const CategoryScrollBar: React.FC<CategoryScrollBarProps> = ({
       style={{ WebkitOverflowScrolling: "touch" }}
     >
       <div className="flex gap-3 min-w-max">
-        {SERVICE_CATEGORIES.map((cat, idx) => {
+        {categories.map((cat, idx) => {
           // "All" button and color assignment for categories
           const isAll = cat === "All";
           const bgColor = isAll
@@ -147,10 +155,18 @@ const CategoryScrollBar: React.FC<CategoryScrollBarProps> = ({
           const isVeryLight =
             (isAll || cat === "Other" || bgColor === "bg-[#f1f5f9]" || bgColor === "bg-[#fde68a]");
           const textColor = isVeryLight ? "text-[#555] font-bold" : categoryButtonText;
-          const isSelected = selected
-            ? cat.toLowerCase() === selected.toLowerCase()
-            : isAll;
+          
+          // Fix the category comparison logic - make it case-insensitive
+          const isSelected = isAll 
+            ? selected.toLowerCase() === "all" || !selected
+            : selected && cat.toLowerCase() === selected.toLowerCase();
 
+          console.log(`Button: ${cat}, Selected: ${isSelected}`, { 
+            buttonCat: cat.toLowerCase(), 
+            selected: selected.toLowerCase(), 
+            match: cat.toLowerCase() === selected.toLowerCase() 
+          });
+          
           return (
             <button
               key={cat}
@@ -180,4 +196,3 @@ const CategoryScrollBar: React.FC<CategoryScrollBarProps> = ({
 };
 
 export default CategoryScrollBar;
-
