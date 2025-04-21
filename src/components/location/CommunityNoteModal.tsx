@@ -12,7 +12,7 @@ interface NoteContentType {
   videoUrl?: string;
 }
 
-// Store replies within the Comment object instead of fetching from a separate table
+// Update Reply interface to match how we're actually storing replies
 interface Reply {
   id: string;
   user_id: string;
@@ -179,9 +179,6 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
     }
 
     try {
-      // Instead of trying to use a comment_replies table, we'll store the reply
-      // within the comments state and indicate a relationship to the parent comment
-      
       // Create a new comment that references the parent comment
       const { data: reply, error } = await supabase
         .from('note_comments')
@@ -425,3 +422,4 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
 };
 
 export default CommunityNoteModal;
+
