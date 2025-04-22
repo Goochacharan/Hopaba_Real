@@ -14,10 +14,8 @@ const getStoredCriteriaRatings = (locationId: string) => {
     const storedReviews = localStorage.getItem(`reviews_${locationId}`);
     const reviews = storedReviews ? JSON.parse(storedReviews) : [];
     
-    // Initialize an object to store total ratings and count for each criterion
     const criteriaAggregates: { [key: string]: { total: number; count: number } } = {};
     
-    // Aggregate ratings for each criterion across all reviews
     reviews.forEach((review: any) => {
       if (review.criteriaRatings) {
         Object.entries(review.criteriaRatings).forEach(([criterionId, rating]) => {
@@ -30,7 +28,6 @@ const getStoredCriteriaRatings = (locationId: string) => {
       }
     });
     
-    // Calculate averages
     const averageRatings: { [key: string]: number } = {};
     Object.entries(criteriaAggregates).forEach(([criterionId, { total, count }]) => {
       averageRatings[criterionId] = count > 0 ? total / count : 0;
@@ -45,14 +42,14 @@ const getStoredCriteriaRatings = (locationId: string) => {
 
 // Define criterion names
 const criterionNames: { [key: string]: string } = {
-  taste: 'Taste',
-  service: 'Service',
+  hygiene: 'Hygiene',
   ambiance: 'Ambiance',
+  service: 'Service',
+  food: 'Food Quality',
+  value: 'Value for Money',
   cleanliness: 'Cleanliness',
-  'value-for-money': 'Value for Money',
-  'food-quality': 'Food Quality',
-  'waiting-time': 'Waiting Time',
-  'staff-behavior': 'Staff Behavior'
+  location: 'Location',
+  parking: 'Parking'
 };
 
 const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings, locationId }) => {
@@ -60,31 +57,37 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
   const mergedRatings = { ...criteriaRatings, ...storedRatings };
 
   const getColorForRating = (rating: number) => {
-    if (rating <= 1) return '#ea384c'; // Dark red for very bad
-    if (rating <= 2) return '#ff6b6b'; // Light red
-    if (rating <= 3) return '#222222'; // Dark gray for neutral
-    if (rating <= 4) return '#90be6d'; // Light green
+    if (rating <= 2) return '#ea384c'; // Dark red for very bad
+    if (rating <= 4) return '#ff6b6b'; // Light red for bad
+    if (rating <= 6) return '#ffba08'; // Yellow for okay
+    if (rating <= 8) return '#90be6d'; // Light green for good
     return '#2d5a27'; // Dark green for excellent
   };
 
   return (
-    <div className="w-full space-y-2 mt-2 mb-4">
+    <div className="w-full space-y-3 mt-2 mb-4">
       {Object.entries(mergedRatings).map(([criterionId, rating]) => {
-        const normalizedRating = (rating / 5) * 100; // Convert 0-5 rating to percentage
+        const normalizedRating = (rating / 10) * 100; // Convert 1-10 rating to percentage
         const color = getColorForRating(rating);
         const criterionName = criterionNames[criterionId] || criterionId;
 
         return (
-          <div key={criterionId} className="space-y-1">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{criterionName}</span>
-              <span className="text-muted-foreground font-medium">{rating.toFixed(1)}</span>
+          <div key={criterionId} className="flex items-center gap-4">
+            <div className="w-32 text-sm text-muted-foreground text-right">
+              {criterionName}
             </div>
-            <Progress 
-              value={normalizedRating} 
-              className="h-2" 
-              style={{ '--progress-color': color } as React.CSSProperties}
-            />
+            <div className="flex-1 space-y-1">
+              <Progress 
+                value={normalizedRating} 
+                className="h-2" 
+                style={{ '--progress-color': color } as React.CSSProperties}
+              />
+              <div className="flex justify-end">
+                <span className="text-xs text-muted-foreground">
+                  {rating.toFixed(1)}/10
+                </span>
+              </div>
+            </div>
           </div>
         );
       })}
