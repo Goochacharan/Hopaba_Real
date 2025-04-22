@@ -22,12 +22,13 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     fetchNotes();
     fetchUserId();
     // eslint-disable-next-line
-  }, [locationId]);
+  }, [locationId, refreshTrigger]);
 
   async function fetchUserId() {
     const { data } = await supabase.auth.getSession();
@@ -124,6 +125,11 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
     setLoading(false);
   }
 
+  const handleNoteDeleted = () => {
+    setRefreshTrigger(prev => prev + 1);
+    setModalOpen(false);
+  };
+
   if (loading) {
     return (
       <div className="py-8 text-center">
@@ -174,6 +180,7 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
           note={selectedNote}
           open={modalOpen}
           onClose={() => setModalOpen(false)}
+          onNoteDeleted={handleNoteDeleted}
         />
       )}
     </div>

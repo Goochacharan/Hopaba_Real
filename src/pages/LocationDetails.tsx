@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -293,7 +294,7 @@ const LocationDetails = () => {
               hasUserReviewed={userReviews.some(review => review.userId === (user?.id || null))}
             />
 
-            <div className="mt-8">
+            <div className="mt-8" id="community-notes">
               <CommunityNoteForm locationId={location.id} onNoteCreated={refreshCommunityNotes} />
               <CommunityNotesList locationId={location.id} key={`notes-list-${communityNotesRefreshTrigger}`} />
             </div>

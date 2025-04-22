@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Textarea } from "../ui/textarea";
@@ -49,12 +50,14 @@ interface CommunityNoteModalProps {
   note: Note;
   open: boolean;
   onClose: () => void;
+  onNoteDeleted?: () => void;
 }
 
 const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
   note,
   open,
-  onClose
+  onClose,
+  onNoteDeleted
 }) => {
   const { toast } = useToast();
   const [comments, setComments] = useState<Comment[]>([]);
@@ -237,6 +240,10 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
             .eq('id', note.id)
             .eq('user_id', currentUserId);
           success = !noteError;
+          
+          if (success && onNoteDeleted) {
+            onNoteDeleted();
+          }
           break;
           
         case 'comment':
