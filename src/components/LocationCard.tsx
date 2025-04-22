@@ -619,18 +619,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
           <span className="text-xs text-muted-foreground ml-1">
             ({reviewCount})
           </span>
-          {notesCount > 0 && (
-            <div className="ml-auto">
-              <CommunityContributors
-                contributors={contributors}
-                total={notesCount}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleContributorsClick();
-                }}
-              />
-            </div>
-          )}
         </div>
 
         <div className="flex flex-col mb-3">
@@ -650,26 +638,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
               </button>
             )}
           </div>
-          
-          {recommendation.distance && showDistanceUnderAddress && (
-            <div className="text-muted-foreground text-sm pl-5 mt-1 flex items-center justify-between my-[3px] px-[2px]">
-              <div className="flex items-center px-0 mx-0">
-                <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
-                {formatDistance(recommendation.distance)}
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="flex flex-col text-sm mb-3">
           <div className="flex justify-between items-center">
-            {recommendation.distance && !showDistanceUnderAddress && (
-              <div className="text-muted-foreground pl-5 mt-1 flex items-center">
-                <Navigation2 className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
-                {formatDistance(recommendation.distance)}
-              </div>
-            )}
-          
             <div className="flex items-center gap-2">
               {(hasAvailabilityInfo() || businessHours) && (
                 <DropdownMenu>
