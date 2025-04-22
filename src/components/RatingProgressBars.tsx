@@ -40,26 +40,6 @@ const getStoredCriteriaRatings = (locationId: string) => {
   }
 };
 
-// Define criterion names
-const criterionNames: { [key: string]: string } = {
-  hygiene: 'Hygiene',
-  ambiance: 'Ambiance',
-  service: 'Service',
-  food: 'Food Quality',
-  value: 'Value for Money',
-  cleanliness: 'Cleanliness',
-  location: 'Location',
-  parking: 'Parking',
-  taste: 'Taste',
-  price: 'Price',
-  quality: 'Quality',
-  atmosphere: 'Atmosphere',
-  friendliness: 'Friendliness',
-  speed: 'Speed of Service',
-  variety: 'Menu Variety',
-  presentation: 'Presentation'
-};
-
 const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings, locationId }) => {
   const storedRatings = getStoredCriteriaRatings(locationId);
   const mergedRatings = { ...criteriaRatings, ...storedRatings };
@@ -77,32 +57,11 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
       {Object.entries(mergedRatings).map(([criterionId, rating]) => {
         const normalizedRating = (rating / 10) * 100; // Convert 1-10 rating to percentage
         const color = getColorForRating(rating);
-        
-        // Extract the proper name from the criterionId
-        // If it's a UUID, try to extract the actual criterion name
-        let criterionName = criterionNames[criterionId.toLowerCase()] || criterionId;
-        
-        // If criterionId contains hyphens or underscores, it might be a concatenated name or UUID
-        if (criterionId.includes('-') || criterionId.includes('_')) {
-          // Try to extract a readable name from the criterionId
-          const lastPart = criterionId.split('-').pop()?.split('_').pop();
-          if (lastPart && criterionNames[lastPart.toLowerCase()]) {
-            criterionName = criterionNames[lastPart.toLowerCase()];
-          } else if (lastPart) {
-            // Try to make it readable by capitalizing and replacing underscores/hyphens
-            criterionName = lastPart
-              .replace(/_/g, ' ')
-              .replace(/-/g, ' ')
-              .split(' ')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-              .join(' ');
-          }
-        }
 
         return (
           <div key={criterionId} className="flex items-center gap-4">
             <div className="w-32 text-sm text-muted-foreground text-right">
-              {criterionName}
+              {criterionId}
             </div>
             <div className="flex-1 space-y-1">
               <Progress 

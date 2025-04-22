@@ -17,7 +17,6 @@ const CategoryReviewCriteria = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       setLoading(true);
@@ -30,7 +29,6 @@ const CategoryReviewCriteria = () => {
         
         if (error) throw error;
         
-        // Extract unique categories
         const uniqueCategories = Array.from(new Set(data.map(item => item.category)));
         setCategories(uniqueCategories);
         
@@ -48,7 +46,6 @@ const CategoryReviewCriteria = () => {
     fetchCategories();
   }, [selectedCategory]);
 
-  // Fetch criteria when category changes
   useEffect(() => {
     if (!selectedCategory) return;
     
@@ -89,11 +86,19 @@ const CategoryReviewCriteria = () => {
       return;
     }
 
+    const formattedName = newCriterion
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('review_criteria')
-        .insert([{ name: newCriterion, category: selectedCategory }])
+        .insert([{ 
+          name: formattedName,
+          category: selectedCategory 
+        }])
         .select()
         .single();
         
@@ -104,7 +109,7 @@ const CategoryReviewCriteria = () => {
       
       toast({
         title: "Criterion Added",
-        description: `"${newCriterion}" added to ${selectedCategory} category.`,
+        description: `"${formattedName}" added to ${selectedCategory} category.`,
       });
     } catch (err: any) {
       console.error('Error adding criterion:', err);
@@ -192,7 +197,7 @@ const CategoryReviewCriteria = () => {
                 <Input
                   value={newCriterion}
                   onChange={(e) => setNewCriterion(e.target.value)}
-                  placeholder="Add new criterion..."
+                  placeholder="Add new criterion (e.g., Hygiene, Ambiance)..."
                   className="flex-1"
                   disabled={loading}
                 />
