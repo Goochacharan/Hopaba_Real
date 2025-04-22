@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Card,
@@ -25,40 +26,135 @@ interface Location {
   description: string;
 }
 
-interface LocationCardProps {
+// Define interfaces for both types of props
+interface LocationProps {
   location: Location;
 }
 
-const LocationCard: React.FC<LocationCardProps> = ({ location }) => {
+interface RecommendationProps {
+  recommendation: any;  // Using any for now to accommodate various recommendation shapes
+  className?: string;
+  reviewCount?: number;
+  showDistanceUnderAddress?: boolean;
+}
+
+// Use union type to accept either prop structure
+type LocationCardProps = LocationProps | RecommendationProps;
+
+const LocationCard: React.FC<LocationCardProps> = (props) => {
   const navigate = useNavigate();
+  
+  // Determine if we're using location or recommendation props
+  const isLocationProps = 'location' in props;
+  
+  // Extract the id from either location or recommendation
+  const id = isLocationProps ? props.location.id : props.recommendation.id;
   
   // Add query to fetch community notes data
   const { data: communityData } = useQuery({
-    queryKey: ['communityNotes', location.id],
+    queryKey: ['communityNotes', id],
     queryFn: async () => {
+      // Query now selects only fields that exist in the community_notes table
       const { data: notes, error } = await supabase
         .from('community_notes')
-        .select('user_id, user_display_name, user_avatar_url')
-        .eq('location_id', location.id);
+        .select('user_id')
+        .eq('location_id', id);
       
       if (error) throw error;
+      
+      // Transform the notes to match the Contributor interface structure
+      const contributors = (notes || []).map(note => ({
+        user_display_name: 'Contributor', // Default display name
+        user_avatar_url: undefined // No avatar URL from this table
+      }));
+      
       return {
-        contributors: notes || [],
+        contributors,
         count: notes?.length || 0
       };
     }
   });
 
+  // If using location props
+  if (isLocationProps) {
+    const { location } = props;
+    
+    return (
+      <Card className="group relative overflow-hidden hover:shadow-md transition-shadow">
+        <div className="relative">
+          <img
+            src={location.image_url}
+            alt={location.name}
+            className="aspect-video w-full object-cover transition-transform group-hover:scale-105"
+          />
+          <div className="absolute top-2 left-2">
+            <Badge>{location.category}</Badge>
+          </div>
+        </div>
+        
+        <CardContent className="p-4">
+          <div className="flex justify-between items-start mb-2">
+            <div>
+              <CardTitle className="text-lg font-semibold line-clamp-1 flex items-center gap-1">
+                {location.name}
+                {location.is_verified && (
+                  <Badge variant="secondary">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="w-3 h-3 mr-0.5"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    Verified
+                  </Badge>
+                )}
+              </CardTitle>
+              <CardDescription className="text-sm text-muted-foreground line-clamp-2">
+                {location.address}
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                <span>{location.average_rating.toFixed(1)}</span>
+                <span className="text-xs">({location.total_ratings})</span>
+              </div>
+              {communityData && communityData.count > 0 && (
+                <CommunityContributors
+                  contributors={communityData.contributors}
+                  count={communityData.count}
+                  onClick={() => navigate(`/location/${location.id}`, { state: { scrollTo: 'community-notes' } })}
+                />
+              )}
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground line-clamp-3">
+            {location.description}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  // If using recommendation props
+  const { recommendation, className = "", reviewCount, showDistanceUnderAddress } = props;
+  
   return (
-    <Card className="group relative overflow-hidden hover:shadow-md transition-shadow">
+    <Card className={`group relative overflow-hidden hover:shadow-md transition-shadow ${className}`}>
       <div className="relative">
         <img
-          src={location.image_url}
-          alt={location.name}
+          src={recommendation.image || recommendation.image_url}
+          alt={recommendation.name}
           className="aspect-video w-full object-cover transition-transform group-hover:scale-105"
         />
         <div className="absolute top-2 left-2">
-          <Badge>{location.category}</Badge>
+          <Badge>{recommendation.category}</Badge>
         </div>
       </div>
       
@@ -66,8 +162,8 @@ const LocationCard: React.FC<LocationCardProps> = ({ location }) => {
         <div className="flex justify-between items-start mb-2">
           <div>
             <CardTitle className="text-lg font-semibold line-clamp-1 flex items-center gap-1">
-              {location.name}
-              {location.is_verified && (
+              {recommendation.name}
+              {recommendation.is_verified && (
                 <Badge variant="secondary">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -86,26 +182,29 @@ const LocationCard: React.FC<LocationCardProps> = ({ location }) => {
               )}
             </CardTitle>
             <CardDescription className="text-sm text-muted-foreground line-clamp-2">
-              {location.address}
+              {recommendation.address}
+              {showDistanceUnderAddress && recommendation.distance && (
+                <span className="block text-xs mt-1">{recommendation.distance} away</span>
+              )}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-              <span>{location.average_rating.toFixed(1)}</span>
-              <span className="text-xs">({location.total_ratings})</span>
+              <span>{(recommendation.rating || 0).toFixed(1)}</span>
+              <span className="text-xs">({reviewCount || recommendation.review_count || recommendation.total_ratings || 0})</span>
             </div>
             {communityData && communityData.count > 0 && (
               <CommunityContributors
                 contributors={communityData.contributors}
                 count={communityData.count}
-                onClick={() => navigate(`/location/${location.id}`, { state: { scrollTo: 'community-notes' } })}
+                onClick={() => navigate(`/location/${recommendation.id}`, { state: { scrollTo: 'community-notes' } })}
               />
             )}
           </div>
         </div>
         <p className="text-sm text-muted-foreground line-clamp-3">
-          {location.description}
+          {recommendation.description}
         </p>
       </CardContent>
     </Card>

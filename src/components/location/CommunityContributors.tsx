@@ -3,7 +3,7 @@ import React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
-interface Contributor {
+export interface Contributor {
   user_display_name?: string;
   user_avatar_url?: string;
 }
