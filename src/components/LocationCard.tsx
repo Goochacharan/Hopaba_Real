@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -671,31 +670,44 @@ const LocationCard: React.FC<LocationCardProps> = ({
               </div>
             )}
           
-            {(hasAvailabilityInfo() || businessHours) && (
-              <DropdownMenu>
-                <DropdownMenuTrigger 
-                  onClick={e => e.stopPropagation()} 
-                  className="ml-2 inline-flex items-center text-xs font-medium transition-colors rounded text-slate-50 px-[12px] mx-[2px] bg-zinc-800 hover:bg-zinc-700"
-                >
-                  <Calendar className="h-3.5 w-3.5 mr-1" />
-                  <span className="underline text-sm px-0 mx-px">Hours</span>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
-                  {getAvailabilityDaysDisplay() && (
-                    <div className="mb-1">
-                      <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
-                      <div className="text-sm">{getAvailabilityDaysDisplay()}</div>
-                    </div>
-                  )}
-                  {getAvailabilityHoursDisplay() && (
-                    <div>
-                      <div className="text-xs font-medium text-muted-foreground mb-1">Hours:</div>
-                      <div className="text-sm">{getAvailabilityHoursDisplay()}</div>
-                    </div>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+            <div className="flex items-center gap-2">
+              {(hasAvailabilityInfo() || businessHours) && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger 
+                    onClick={e => e.stopPropagation()} 
+                    className="ml-2 inline-flex items-center text-xs font-medium transition-colors rounded text-slate-50 px-[12px] mx-[2px] bg-zinc-800 hover:bg-zinc-700"
+                  >
+                    <Calendar className="h-3.5 w-3.5 mr-1" />
+                    <span className="underline text-sm px-0 mx-px">Hours</span>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
+                    {getAvailabilityDaysDisplay() && (
+                      <div className="mb-1">
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
+                        <div className="text-sm">{getAvailabilityDaysDisplay()}</div>
+                      </div>
+                    )}
+                    {getAvailabilityHoursDisplay() && (
+                      <div>
+                        <div className="text-xs font-medium text-muted-foreground mb-1">Hours:</div>
+                        <div className="text-sm">{getAvailabilityHoursDisplay()}</div>
+                      </div>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+
+              {notesCount > 0 && (
+                <CommunityContributors
+                  contributors={contributors}
+                  total={notesCount}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleContributorsClick();
+                  }}
+                />
+              )}
+            </div>
           </div>
         </div>
 
