@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Award, Gem, Star } from 'lucide-react';
-import { Form, FormField, FormItem } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { supabase } from '@/integrations/supabase/client';
