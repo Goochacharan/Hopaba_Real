@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { MapPin, Star, Clock, Phone, Heart, Navigation2, MessageCircle, Share2, LogIn, IndianRupee, Film, ChevronDown, Sparkles, Award, Calendar } from 'lucide-react';
@@ -14,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import ImageViewer from '@/components/ImageViewer';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import CommunityContributors from './CommunityContributors';
 
 interface LocationCardProps {
   recommendation: Recommendation;
@@ -52,6 +52,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const showMustVisitBadge = recommendation.isMustVisit || mustVisitCount >= 20;
   const isSearchPage = window.location.pathname.includes('/search');
   const hideAvailabilityDropdown = recommendation.hideAvailabilityDropdown || false;
+  const [contributors, setContributors] = useState<any[]>([]);
+  const [notesCount, setNotesCount] = useState(0);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -79,6 +81,35 @@ const LocationCard: React.FC<LocationCardProps> = ({
       clearInterval(timer);
     };
   }, []);
+
+  const fetchCommunityNotes = async () => {
+    try {
+      const { data: notes, error, count } = await supabase
+        .from('community_notes')
+        .select('id, user_id', { count: 'exact' })
+        .eq('location_id', recommendation.id)
+        .limit(8);
+
+      if (error) throw error;
+      
+      if (notes) {
+        setContributors(notes);
+        setNotesCount(count || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching community notes:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (recommendation.id) {
+      fetchCommunityNotes();
+    }
+  }, [recommendation.id]);
+
+  const handleContributorsClick = () => {
+    navigate(`/location/${recommendation.id}#community-notes`);
+  };
 
   const calculateOpenStatus = (): boolean | undefined => {
     if (recommendation.openNow === true) return true;
@@ -567,6 +598,18 @@ const LocationCard: React.FC<LocationCardProps> = ({
           <span className="text-xs text-muted-foreground ml-1">
             ({reviewCount})
           </span>
+          {notesCount > 0 && (
+            <div className="ml-auto">
+              <CommunityContributors
+                contributors={contributors}
+                total={notesCount}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleContributorsClick();
+                }}
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col mb-3">
@@ -651,18 +694,4 @@ const LocationCard: React.FC<LocationCardProps> = ({
           <button onClick={handleWhatsApp} className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 rounded bg-green-500 hover:bg-green-400">
             <MessageCircle className="h-5 w-5" />
           </button>
-          <button onClick={handleDirections} className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 bg-amber-600 hover:bg-amber-500 rounded">
-            <Navigation2 className="h-5 w-5" />
-          </button>
-          <button onClick={handleShare} className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 bg-purple-600 hover:bg-purple-500 rounded">
-            <Share2 className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
-
-      {images.length > 0 && <ImageViewer images={images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
-    </div>
-  );
-};
-
-export default LocationCard;
+          <button onClick={handleDirections} className="flex-1 h-10
