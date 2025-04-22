@@ -89,6 +89,24 @@ const LocationsList: React.FC<LocationsListProps> = ({
         // Use user rating if available, otherwise use default rating
         const displayRating = userReviewsCount > 0 ? userAvgRating : recommendation.rating;
         
+        // Create location object compatible with LocationCard props
+        const locationData = {
+          id: recommendation.id,
+          name: recommendation.name,
+          category: recommendation.category,
+          rating: displayRating,
+          review_count: totalReviewCount,
+          image_url: recommendation.image_url || recommendation.image,
+          address: recommendation.address || (recommendation.area && recommendation.city ? `${recommendation.area}, ${recommendation.city}` : ''),
+          hours: recommendation.hours || '',
+          price_level: recommendation.price_level ? parseInt(recommendation.price_level.toString()) : undefined,
+          website: recommendation.website,
+          tags: recommendation.tags,
+          distance: recommendation.distance,
+          isHiddenGem: recommendation.isHiddenGem,
+          isMustVisit: recommendation.isMustVisit
+        };
+        
         return (
           <div 
             key={recommendation.id} 
@@ -96,19 +114,8 @@ const LocationsList: React.FC<LocationsListProps> = ({
             style={{ animationDelay: `${index * 50}ms` }}
           >
             <LocationCard
-              recommendation={{
-                ...recommendation,
-                rating: displayRating, // Override with user rating if available
-                address: recommendation.address || (recommendation.area && recommendation.city ? `${recommendation.area}, ${recommendation.city}` : recommendation.address || ''),
-                availability_days: availabilityDaysString,
-                // Ensure hours data is properly passed
-                hours: recommendation.hours || '',
-                availability: recommendation.availability || '',
-                availability_start_time: recommendation.availability_start_time || undefined,
-                availability_end_time: recommendation.availability_end_time || undefined,
-                hideAvailabilityDropdown: true // Add this flag to hide the availability dropdown
-              }}
-              showDistanceUnderAddress={true}
+              location={locationData}
+              showDistance={true}
               className="search-result-card h-full"
               reviewCount={totalReviewCount}
             />

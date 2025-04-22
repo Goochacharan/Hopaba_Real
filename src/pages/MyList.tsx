@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -146,11 +147,26 @@ const MyList = () => {
                 const locationItem = item as Recommendation & {
                   type: 'location';
                 };
+                // Convert Recommendation to Location for LocationCard
+                const locationData = {
+                  id: locationItem.id,
+                  name: locationItem.name,
+                  category: locationItem.category,
+                  rating: locationItem.rating,
+                  image_url: locationItem.image,
+                  address: locationItem.address,
+                  hours: locationItem.hours,
+                  price_level: locationItem.price_level ? parseInt(locationItem.price_level.toString()) : undefined,
+                  website: locationItem.website,
+                  tags: locationItem.tags,
+                };
+                
                 return <div key={item.id} className="relative group">
-                          <LocationCard recommendation={locationItem} className="search-result-card" />
-                          <button className="absolute top-2 right-2 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10 text-rose-500" onClick={e => handleHeartClick(e, item)}>
-                            <Heart className="h-4 w-4 fill-rose-500" />
-                          </button>
+                          <LocationCard 
+                            location={locationData} 
+                            className="search-result-card"
+                            handleHeartClick={(e) => handleHeartClick(e, item)}
+                          />
                         </div>;
               }
             })}

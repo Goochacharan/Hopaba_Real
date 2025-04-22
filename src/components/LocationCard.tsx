@@ -9,23 +9,45 @@ import { useToast } from '@/hooks/use-toast';
 import { useWishlist } from '@/contexts/WishlistContext';
 import RatingProgressBars from '@/components/RatingProgressBars';
 
+// Define a consistent location interface that works across all usages
+interface Location {
+  id: string;
+  name: string;
+  category?: string;
+  rating?: number;
+  review_count?: number;
+  image_url?: string;
+  address?: string;
+  hours?: string;
+  price_level?: number;
+  website?: string;
+  tags?: string[];
+  distance?: number;
+  isHiddenGem?: boolean;
+  isMustVisit?: boolean;
+}
+
 interface LocationCardProps {
-  location: any;
+  location: Location;
   showDistance?: boolean;
-  handleHeartClick?: (event: React.MouseEvent, recommendationId: string) => void;
+  className?: string;
+  handleHeartClick?: (event: React.MouseEvent, locationId: string) => void;
+  reviewCount?: number;
 }
 
 const LocationCard: React.FC<LocationCardProps> = ({ 
   location,
   showDistance = true,
+  className,
   handleHeartClick,
+  reviewCount,
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { pathname } = useLocation();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   
-  const isLocationInWishlist = isInWishlist(location.id);
+  const isLocationInWishlist = isInWishlist(location.id, 'location');
 
   const isBusinessPage = pathname.includes('business');
   
@@ -37,7 +59,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
     e.stopPropagation();
     
     if (isLocationInWishlist) {
-      removeFromWishlist(location.id);
+      removeFromWishlist(location.id, 'location');
       toast({
         title: "Removed from favorites",
         description: `${location.name} has been removed from your favorites.`,
@@ -47,10 +69,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
       addToWishlist({
         id: location.id,
         name: location.name,
-        category: location.category,
+        category: location.category || '',
         rating: location.rating || 0,
-        image_url: location.image_url,
-        address: location.address,
+        image: location.image_url,
+        address: location.address || '',
+        type: 'location',
       });
       toast({
         title: "Added to favorites",
@@ -75,9 +98,18 @@ const LocationCard: React.FC<LocationCardProps> = ({
     { name: 'Quality', rating: 8.9 }
   ];
 
+  // Handle the heart click with proper typing
+  const onHeartClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (handleHeartClick) {
+      handleHeartClick(e, location.id);
+    } else {
+      toggleWishlist(e);
+    }
+  };
+
   return (
     <Card 
-      className="group overflow-hidden relative hover:shadow-md transition-all duration-200 cursor-pointer"
+      className={`group overflow-hidden relative hover:shadow-md transition-all duration-200 cursor-pointer ${className || ''}`}
       onClick={handleClickLocation}
     >
       <div className="relative aspect-video w-full overflow-hidden">
@@ -115,7 +147,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         
         {/* Heart button */}
         <Button
-          onClick={handleHeartClick || toggleWishlist}
+          onClick={onHeartClick}
           size="icon"
           variant="secondary"
           className={`absolute top-2 left-2 w-8 h-8 rounded-full ${isLocationInWishlist ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-background/80 hover:bg-background'}`}
@@ -139,7 +171,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
             <Star className="h-4 w-4 fill-primary text-primary mr-1" />
             <span className="font-medium">{location.rating?.toFixed(1) || '0.0'}</span>
             <span className="text-muted-foreground text-sm ml-1">
-              ({location.review_count || 0} reviews)
+              ({reviewCount || location.review_count || 0} reviews)
             </span>
           </div>
           
