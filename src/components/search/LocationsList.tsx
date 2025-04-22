@@ -106,7 +106,7 @@ const LocationsList: React.FC<LocationsListProps> = ({
                 availability_start_time: recommendation.availability_start_time || undefined,
                 availability_end_time: recommendation.availability_end_time || undefined,
                 hideAvailabilityDropdown: true,
-                criteriaRatings: recommendation.criteriaRatings || {} // Add this line
+                criteriaRatings: recommendation.criteriaRatings || {}
               }}
               showDistanceUnderAddress={true}
               className="search-result-card h-full"

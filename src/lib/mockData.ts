@@ -36,6 +36,9 @@ export interface Recommendation {
   isMustVisit?: boolean;
   hideAvailabilityDropdown?: boolean;
   created_at?: string;
+  criteriaRatings?: {
+    [criterionId: string]: number;
+  };
 }
 
 export const mockRecommendations: Recommendation[] = [

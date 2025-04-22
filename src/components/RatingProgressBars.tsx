@@ -83,8 +83,7 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
             <Progress 
               value={normalizedRating} 
               className="h-2" 
-              indicatorClassName={`bg-[${color}]`}
-              style={{ '--progress-background': color } as any}
+              style={{ '--progress-color': color } as React.CSSProperties}
             />
           </div>
         );
