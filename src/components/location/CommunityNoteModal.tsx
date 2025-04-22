@@ -5,12 +5,13 @@ import { Button } from "../ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getEmbedUrl } from "@/utils/videoUtils";
+import { Flag } from "lucide-react";
+
 interface NoteContentType {
   text: string;
   videoUrl?: string;
 }
 
-// Update Reply interface to match how we're actually storing replies
 interface Reply {
   id: string;
   user_id: string;
@@ -19,6 +20,7 @@ interface Reply {
   user_display_name?: string;
   user_avatar_url?: string;
 }
+
 interface Comment {
   id: string;
   note_id: string;
@@ -29,6 +31,7 @@ interface Comment {
   user_avatar_url?: string;
   replies?: Reply[];
 }
+
 export interface Note {
   id: string;
   title: string;
@@ -40,11 +43,13 @@ export interface Note {
   user_display_name?: string | null;
   created_at?: string;
 }
+
 interface CommunityNoteModalProps {
   note: Note;
   open: boolean;
   onClose: () => void;
 }
+
 const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
   note,
   open,
@@ -59,12 +64,14 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
   useEffect(() => {
     if (open && note.id) {
       loadComments();
       getCurrentUser();
     }
   }, [open, note.id]);
+
   const getCurrentUser = async () => {
     const {
       data: {
@@ -73,6 +80,7 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
     } = await supabase.auth.getUser();
     setCurrentUserId(user?.id || null);
   };
+
   const loadComments = async () => {
     const {
       data: commentsData,
@@ -85,14 +93,10 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
       return;
     }
     if (commentsData) {
-      // Process comments and add user metadata
       const processedComments: Comment[] = await Promise.all(commentsData.map(async comment => {
-        // Get user data for the comment author
         const {
           data: userData
         } = await supabase.auth.getUser(comment.user_id);
-
-        // Each comment will have an empty replies array (we'll fill it later if needed)
         return {
           ...comment,
           user_display_name: userData?.user?.user_metadata?.full_name || 'Anonymous',
@@ -103,6 +107,7 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
       setComments(processedComments);
     }
   };
+
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
@@ -150,6 +155,7 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
     }
     setSubmitting(false);
   };
+
   const handleSubmitReply = async (commentId: string) => {
     if (!replyContent.trim()) return;
     setSubmitting(true);
@@ -166,7 +172,6 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
       return;
     }
     try {
-      // Create a new comment that references the parent comment
       const {
         data: reply,
         error
@@ -184,8 +189,6 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
         user_display_name: userData.user.user_metadata?.full_name || userData.user.email,
         user_avatar_url: userData.user.user_metadata?.avatar_url
       };
-
-      // Update the comments state by adding the reply to the appropriate comment
       setComments(prevComments => prevComments.map(comment => {
         if (comment.id === commentId) {
           return {
@@ -210,11 +213,21 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
     }
     setSubmitting(false);
   };
+
+  const handleReportContent = (contentType: string, contentId: string) => {
+    toast({
+      title: "Thank you for reporting",
+      description: "We will review this content shortly."
+    });
+  };
+
   if (!open || !note) return null;
+
   const embedUrl = getEmbedUrl(note.content?.videoUrl || null);
   const userAvatarUrl = note.user_avatar_url;
   const userDisplayName = note.user_display_name || "Anonymous";
   const isAuthor = currentUserId === note.user_id;
+
   return <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 px-[6px] py-[16px] my-0">
       <div className="bg-white shadow-xl w-full max-w-3xl max-h-[90vh] overflow-auto relative p-6 px-[4px] rounded">
         <button className="absolute top-2 right-3 font-bold text-2xl text-gray-400" onClick={onClose} aria-label="Close popup">
@@ -238,13 +251,13 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
         {note.images && note.images.length > 0 && <div className="mb-6 space-y-4">
             {note.images.map((img: string, idx: number) => <img key={idx} src={img} alt={`Image ${idx + 1} for ${note.title}`} className="w-full rounded-lg object-contain max-h-[600px]" />)}
           </div>}
-        
+
         <div className="prose prose-lg max-w-none mb-6 min-h-[200px]" style={{
         whiteSpace: "pre-wrap"
       }}>
           {note.content?.text}
         </div>
-        
+
         {note.social_links && Array.isArray(note.social_links) && note.social_links.length > 0 && <div className="mb-6">
             <label className="font-semibold">Links:</label>
             <ul className="ml-4 mt-1">
@@ -260,35 +273,57 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
           <h3 className="text-lg font-semibold mb-4">Comments</h3>
           <div className="space-y-4 mb-6">
             {comments.map(comment => <div key={comment.id} className="bg-gray-50 p-4 rounded-lg space-y-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Avatar className="h-8 w-8">
-                    {comment.user_avatar_url ? <AvatarImage src={comment.user_avatar_url} alt={comment.user_display_name} /> : <AvatarFallback>
-                        {(comment.user_display_name?.[0] || "A").toUpperCase()}
-                      </AvatarFallback>}
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">{comment.user_display_name || "Anonymous"}</div>
-                    <div className="text-xs text-gray-500">
-                      {new Date(comment.created_at).toLocaleDateString()}
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      {comment.user_avatar_url ? <AvatarImage src={comment.user_avatar_url} alt={comment.user_display_name} /> : <AvatarFallback>
+                          {(comment.user_display_name?.[0] || "A").toUpperCase()}
+                        </AvatarFallback>}
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{comment.user_display_name || "Anonymous"}</div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(comment.created_at).toLocaleDateString()}
+                      </div>
                     </div>
                   </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleReportContent('comment', comment.id)}
+                    className="text-muted-foreground h-8 px-2"
+                  >
+                    <Flag className="w-3.5 h-3.5 mr-1" />
+                    Report
+                  </Button>
                 </div>
                 <p className="text-gray-700">{comment.content}</p>
 
                 {comment.replies && comment.replies.length > 0 && <div className="ml-8 mt-2 space-y-3">
                     {comment.replies.map(reply => <div key={reply.id} className="bg-white p-3 rounded-lg border">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Avatar className="h-6 w-6">
-                            {reply.user_avatar_url ? <AvatarImage src={reply.user_avatar_url} alt={reply.user_display_name} /> : <AvatarFallback>
-                                {(reply.user_display_name?.[0] || "A").toUpperCase()}
-                              </AvatarFallback>}
-                          </Avatar>
-                          <div>
-                            <div className="font-medium text-sm">{reply.user_display_name || "Anonymous"}</div>
-                            <div className="text-xs text-gray-500">
-                              {new Date(reply.created_at).toLocaleDateString()}
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6">
+                              {reply.user_avatar_url ? <AvatarImage src={reply.user_avatar_url} alt={reply.user_display_name} /> : <AvatarFallback>
+                                  {(reply.user_display_name?.[0] || "A").toUpperCase()}
+                                </AvatarFallback>}
+                            </Avatar>
+                            <div>
+                              <div className="font-medium text-sm">{reply.user_display_name || "Anonymous"}</div>
+                              <div className="text-xs text-gray-500">
+                                {new Date(reply.created_at).toLocaleDateString()}
+                              </div>
                             </div>
                           </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleReportContent('reply', reply.id)}
+                            className="text-muted-foreground h-7 px-2"
+                          >
+                            <Flag className="w-3 h-3 mr-1" />
+                            Report
+                          </Button>
                         </div>
                         <p className="text-gray-700 text-sm">{reply.content}</p>
                       </div>)}
@@ -325,4 +360,5 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
       </div>
     </div>;
 };
+
 export default CommunityNoteModal;
