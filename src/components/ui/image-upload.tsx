@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -13,13 +12,15 @@ interface ImageUploadProps {
   onImagesChange: (images: string[]) => void;
   maxImages?: number;
   bucketName?: string;
+  renderButton?: (onClick: () => void) => React.ReactNode;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ 
   images, 
   onImagesChange, 
   maxImages = 10,
-  bucketName = 'optimized-images'
+  bucketName = 'optimized-images',
+  renderButton
 }) => {
   const [uploading, setUploading] = useState(false);
   const { user } = useAuth();
@@ -37,7 +38,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     let width = img.width;
     let height = img.height;
     
-    // Reduce image dimensions if needed
     const scale = Math.min(1, Math.sqrt((maxSizeKB * 1024) / file.size));
     width *= scale;
     height *= scale;
@@ -118,7 +118,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       });
     } finally {
       setUploading(false);
-      // Clear the input
       e.target.value = '';
     }
   };
@@ -126,7 +125,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const removeImage = async (index: number) => {
     const imageToRemove = images[index];
     
-    // Delete from storage if it's a Supabase URL
     if (imageToRemove.includes('/storage/v1/object/public/')) {
       const path = imageToRemove.split('public/')[1];
       
@@ -143,6 +141,19 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     newImages.splice(index, 1);
     onImagesChange(newImages);
   };
+
+  const handleClick = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = true;
+    input.onchange = (e) => handleFileChange(e as unknown as React.ChangeEvent<HTMLInputElement>);
+    input.click();
+  };
+
+  if (renderButton) {
+    return <>{renderButton(handleClick)}</>;
+  }
 
   return (
     <div className="space-y-4">
