@@ -17,35 +17,10 @@ const getStoredReviews = (locationId: string) => {
       avgRating = sum / count;
     }
     
-    // Also calculate criteria ratings
-    const criteriaRatings: { [key: string]: number } = {};
-    
-    reviews.forEach((review: any) => {
-      if (review.criteriaRatings) {
-        Object.entries(review.criteriaRatings).forEach(([criterionId, rating]) => {
-          if (!criteriaRatings[criterionId]) {
-            criteriaRatings[criterionId] = 0;
-          }
-          criteriaRatings[criterionId] += Number(rating);
-        });
-      }
-    });
-    
-    // Calculate average for each criterion
-    Object.keys(criteriaRatings).forEach(key => {
-      const reviewsWithThisCriterion = reviews.filter(
-        (r: any) => r.criteriaRatings && r.criteriaRatings[key]
-      ).length;
-      
-      if (reviewsWithThisCriterion > 0) {
-        criteriaRatings[key] = criteriaRatings[key] / reviewsWithThisCriterion;
-      }
-    });
-    
-    return { count, avgRating, criteriaRatings };
+    return { count, avgRating };
   } catch (error) {
     console.error('Error getting stored reviews:', error);
-    return { count: 0, avgRating: 0, criteriaRatings: {} };
+    return { count: 0, avgRating: 0 };
   }
 };
 
@@ -106,19 +81,13 @@ const LocationsList: React.FC<LocationsListProps> = ({
         const availabilityDaysString = availabilityDays.map(day => String(day));
         
         // Get user reviews from localStorage
-        const { count: userReviewsCount, avgRating: userAvgRating, criteriaRatings } = getStoredReviews(recommendation.id);
+        const { count: userReviewsCount, avgRating: userAvgRating } = getStoredReviews(recommendation.id);
         
         // Calculate the total review count
         const totalReviewCount = userReviewsCount + (recommendation.reviewCount || 0);
         
         // Use user rating if available, otherwise use default rating
         const displayRating = userReviewsCount > 0 ? userAvgRating : recommendation.rating;
-        
-        // Merge any existing criteriaRatings with the ones from reviews
-        const mergedCriteriaRatings = {
-          ...(recommendation.criteriaRatings || {}),
-          ...criteriaRatings
-        };
         
         return (
           <div 
@@ -137,7 +106,7 @@ const LocationsList: React.FC<LocationsListProps> = ({
                 availability_start_time: recommendation.availability_start_time || undefined,
                 availability_end_time: recommendation.availability_end_time || undefined,
                 hideAvailabilityDropdown: true,
-                criteriaRatings: mergedCriteriaRatings
+                criteriaRatings: recommendation.criteriaRatings || {}
               }}
               showDistanceUnderAddress={true}
               className="search-result-card h-full"

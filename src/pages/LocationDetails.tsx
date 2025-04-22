@@ -14,7 +14,6 @@ import LocationAbout from '@/components/location/LocationAbout';
 import ReviewsSection from '@/components/location/ReviewsSection';
 import CommunityNoteForm from '@/components/location/CommunityNoteForm';
 import CommunityNotesList from '@/components/location/CommunityNotesList';
-import RatingProgressBars from '@/components/RatingProgressBars';
 
 const getStoredReviews = (locationId: string): Review[] => {
   try {
@@ -239,31 +238,6 @@ const LocationDetails = () => {
   
   const displayRating = userReviews.length > 0 ? averageRating : (location?.rating || 4.5);
 
-  const criteriaRatings: {[criterionId: string]: number} = {};
-  
-  if (userReviews.length > 0) {
-    userReviews.forEach(review => {
-      if (review.criteriaRatings) {
-        Object.entries(review.criteriaRatings).forEach(([criterionId, rating]) => {
-          if (!criteriaRatings[criterionId]) {
-            criteriaRatings[criterionId] = 0;
-          }
-          criteriaRatings[criterionId] += Number(rating);
-        });
-      }
-    });
-    
-    Object.keys(criteriaRatings).forEach(criterionId => {
-      const reviewsWithThisCriterion = userReviews.filter(
-        review => review.criteriaRatings && review.criteriaRatings[criterionId]
-      ).length;
-      
-      if (reviewsWithThisCriterion > 0) {
-        criteriaRatings[criterionId] = criteriaRatings[criterionId] / reviewsWithThisCriterion;
-      }
-    });
-  }
-
   if (loading) {
     return (
       <MainLayout>
@@ -309,16 +283,6 @@ const LocationDetails = () => {
               description={location.description}
               tags={location.tags || []}
             />
-            
-            {Object.keys(criteriaRatings).length > 0 && (
-              <div className="bg-white shadow-sm border border-border overflow-hidden mb-6 rounded-lg p-6">
-                <h3 className="text-lg font-medium mb-4">Detailed Ratings</h3>
-                <RatingProgressBars 
-                  criteriaRatings={criteriaRatings}
-                  locationId={location.id}
-                />
-              </div>
-            )}
             
             <ReviewsSection
               reviews={allReviews}
