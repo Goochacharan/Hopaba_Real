@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useWishlist } from '@/contexts/WishlistContext';
 import RatingProgressBars from '@/components/RatingProgressBars';
+import { Recommendation } from '@/lib/mockData';
 
 // Define a consistent location interface that works across all usages
 interface Location {
@@ -31,7 +32,7 @@ interface LocationCardProps {
   location: Location;
   showDistance?: boolean;
   className?: string;
-  handleHeartClick?: (event: React.MouseEvent<HTMLButtonElement>, locationId: string) => void;
+  handleHeartClick?: (event: React.MouseEvent, locationId: string) => void;
   reviewCount?: number;
 }
 
@@ -71,7 +72,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         name: location.name,
         category: location.category || '',
         rating: location.rating || 0,
-        image: location.image_url, // Use image_url for the image property
+        image: location.image_url,
         address: location.address || '',
         type: 'location',
         tags: location.tags || [], // Add tags so it conforms to Recommendation

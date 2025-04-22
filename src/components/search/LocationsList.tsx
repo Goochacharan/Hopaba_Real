@@ -96,7 +96,7 @@ const LocationsList: React.FC<LocationsListProps> = ({
           category: recommendation.category,
           rating: displayRating,
           review_count: totalReviewCount,
-          image_url: recommendation.image || recommendation.image_url, // Use image as primary, fall back to image_url
+          image_url: recommendation.image_url || recommendation.image,
           address: recommendation.address || (recommendation.area && recommendation.city ? `${recommendation.area}, ${recommendation.city}` : ''),
           hours: recommendation.hours || '',
           price_level: recommendation.price_level ? parseInt(recommendation.price_level.toString()) : undefined,
