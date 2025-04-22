@@ -88,6 +88,9 @@ const LocationsList: React.FC<LocationsListProps> = ({
         
         // Use user rating if available, otherwise use default rating
         const displayRating = userReviewsCount > 0 ? userAvgRating : recommendation.rating;
+
+        // Ensure criteriaRatings is passed to LocationCard
+        const criteriaRatings = recommendation.criteriaRatings || {};
         
         return (
           <div 
@@ -106,7 +109,7 @@ const LocationsList: React.FC<LocationsListProps> = ({
                 availability_start_time: recommendation.availability_start_time || undefined,
                 availability_end_time: recommendation.availability_end_time || undefined,
                 hideAvailabilityDropdown: true,
-                criteriaRatings: recommendation.criteriaRatings || {}
+                criteriaRatings: criteriaRatings
               }}
               showDistanceUnderAddress={true}
               className="search-result-card h-full"
