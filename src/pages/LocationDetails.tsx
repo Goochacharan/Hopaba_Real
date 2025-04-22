@@ -179,38 +179,56 @@ const LocationDetails = () => {
       });
       return;
     }
-
-    const existingUserReview = userReviews.find(
-      review => review.userId === user.id
-    );
-
-    if (existingUserReview) {
-      toast({
-        title: "Review already submitted",
-        description: "You have already submitted a review for this location.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const reviewId = Math.random().toString(36).substring(2, 9);
+    
+    let updatedReviews = [...userReviews];
+    const userName = user.user_metadata?.full_name || user.email || user.id;
     const currentDate = "Just now";
     
-    const userName = user.user_metadata?.full_name || user.email || user.id;
+    if (values.reviewId) {
+      updatedReviews = updatedReviews.map(review => {
+        if (review.id === values.reviewId) {
+          return {
+            ...review,
+            rating: values.rating,
+            isMustVisit: values.isMustVisit,
+            isHiddenGem: values.isHiddenGem,
+            criteriaRatings: values.criteriaRatings,
+            date: currentDate
+          };
+        }
+        return review;
+      });
+    } else {
+      const existingUserReview = userReviews.find(
+        review => review.userId === user.id
+      );
+
+      if (existingUserReview) {
+        toast({
+          title: "Review already submitted",
+          description: "You have already submitted a review for this location.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const reviewId = Math.random().toString(36).substring(2, 9);
+      
+      const newReview: Review = {
+        id: reviewId,
+        name: userName,
+        date: currentDate,
+        rating: values.rating,
+        isMustVisit: values.isMustVisit,
+        isHiddenGem: values.isHiddenGem,
+        text: "",
+        userId: user.id,
+        criteriaRatings: values.criteriaRatings
+      };
+      
+      updatedReviews = [newReview, ...updatedReviews];
+    }
     
-    const newReview: Review = {
-      id: reviewId,
-      name: userName,
-      date: currentDate,
-      rating: values.rating,
-      isMustVisit: values.isMustVisit,
-      isHiddenGem: values.isHiddenGem,
-      text: "", // Removed review text
-      userId: user.id,
-      criteriaRatings: values.criteriaRatings
-    };
-    
-    const updatedReviews = [newReview, ...userReviews];
     setUserReviews(updatedReviews);
     
     const newAverageRating = calculateAverageRating(updatedReviews);
@@ -219,12 +237,6 @@ const LocationDetails = () => {
     if (id) {
       storeReviews(id, updatedReviews);
     }
-    
-    toast({
-      title: "Review submitted",
-      description: "Thank you for sharing your experience!",
-      duration: 3000
-    });
   };
 
   const refreshCommunityNotes = () => {
