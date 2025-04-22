@@ -25,57 +25,78 @@ interface ReviewFormProps {
   onCancel: () => void;
   locationName?: string;
   category?: string;
+  initialValues?: Partial<ReviewFormValues>;
 }
 
 const ReviewForm = ({
   onSubmit,
   onCancel,
   locationName,
-  category = ''
+  category = '',
+  initialValues
 }: ReviewFormProps) => {
-  const [selectedRating, setSelectedRating] = useState<number>(0);
+  const [selectedRating, setSelectedRating] = useState<number>(initialValues?.rating || 0);
   const [criteria, setCriteria] = useState<ReviewCriterion[]>([]);
-  const [criteriaRatings, setCriteriaRatings] = useState<CriteriaRatings>({});
+  const [criteriaRatings, setCriteriaRatings] = useState<CriteriaRatings>(initialValues?.criteriaRatings || {});
 
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(baseReviewSchema),
     defaultValues: {
-      rating: 0,
-      isMustVisit: false,
-      isHiddenGem: false,
-      criteriaRatings: {}
+      rating: initialValues?.rating ?? 0,
+      isMustVisit: initialValues?.isMustVisit ?? false,
+      isHiddenGem: initialValues?.isHiddenGem ?? false,
+      criteriaRatings: initialValues?.criteriaRatings ?? {}
     }
   });
 
   useEffect(() => {
     const fetchCriteria = async () => {
       if (!category) return;
-      
+
       try {
         const { data, error } = await supabase
           .from('review_criteria')
           .select('*')
           .eq('category', category)
           .order('name');
-          
+
         if (error) throw error;
-        
+
         setCriteria(data);
-        
-        const initialRatings: CriteriaRatings = {};
+
+        const initial = { ...criteriaRatings };
         data?.forEach(criterion => {
-          initialRatings[criterion.id] = 5;
+          if (!(criterion.id in initial)) {
+            initial[criterion.id] = 5;
+          }
         });
-        
-        setCriteriaRatings(initialRatings);
-        form.setValue('criteriaRatings', initialRatings);
+
+        setCriteriaRatings(initial);
+        form.setValue('criteriaRatings', initial);
       } catch (err) {
         console.error('Error fetching review criteria:', err);
       }
     };
 
     fetchCriteria();
-  }, [category, form]);
+    // Only run when category changes!
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category]);
+
+  useEffect(() => {
+    // Whenever initialValues changes (when entering edit mode), update form and state
+    if (initialValues) {
+      setSelectedRating(initialValues.rating || 0);
+      setCriteriaRatings(initialValues.criteriaRatings || {});
+      form.reset({
+        rating: initialValues.rating ?? 0,
+        isMustVisit: initialValues.isMustVisit ?? false,
+        isHiddenGem: initialValues.isHiddenGem ?? false,
+        criteriaRatings: initialValues.criteriaRatings ?? {}
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialValues]);
 
   const handleRatingSelect = (rating: number) => {
     setSelectedRating(rating);
@@ -93,20 +114,27 @@ const ReviewForm = ({
     onSubmit(values);
   };
 
-  return <div className="mb-6 p-4 bg-secondary/30 rounded-lg px-[9px]">
+  return (
+    <div className="mb-6 p-4 bg-secondary/30 rounded-lg px-[9px]">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
-          {locationName && <div className="text-sm font-medium text-muted-foreground mb-2">
+          {locationName && (
+            <div className="text-sm font-medium text-muted-foreground mb-2">
               Reviewing: {locationName} {category ? `(${category})` : ''}
-            </div>}
-          
+            </div>
+          )}
+
           <div className="space-y-2">
             <FormLabel>Overall rating</FormLabel>
             <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map(rating => <button key={rating} type="button" onClick={() => handleRatingSelect(rating)} className="focus:outline-none">
+              {[1, 2, 3, 4, 5].map(rating => (
+                <button key={rating} type="button" onClick={() => handleRatingSelect(rating)} className="focus:outline-none">
                   <Star className={`w-6 h-6 ${rating <= selectedRating ? "text-amber-500 fill-amber-500" : "text-gray-300"}`} />
-                </button>)}
-              {form.formState.errors.rating && <p className="text-destructive text-xs ml-2">Please select a rating</p>}
+                </button>
+              ))}
+              {form.formState.errors.rating && (
+                <p className="text-destructive text-xs ml-2">Please select a rating</p>
+              )}
             </div>
           </div>
 
@@ -125,23 +153,23 @@ const ReviewForm = ({
           )}
 
           <div className="flex gap-4 mt-4">
-            <FormField control={form.control} name="isMustVisit" render={({
-            field
-          }) => <FormItem className="flex-1">
-                  <Toggle pressed={field.value} onPressedChange={field.onChange} className={`w-full h-12 gap-2 ${field.value ? 'bg-green-500 text-white border-green-600 shadow-[0_4px_0px_0px_rgba(22,163,74,0.5)]' : ''}`}>
-                    <Award className={`h-5 w-5 ${field.value ? 'text-white' : ''}`} />
-                    <span className="font-medium">Must Visit</span>
-                  </Toggle>
-                </FormItem>} />
-            
-            <FormField control={form.control} name="isHiddenGem" render={({
-            field
-          }) => <FormItem className="flex-1">
-                  <Toggle pressed={field.value} onPressedChange={field.onChange} className={`w-full h-12 gap-2 ${field.value ? 'bg-purple-500 text-white border-purple-600 shadow-[0_4px_0px_0px_rgba(147,51,234,0.5)]' : ''}`}>
-                    <Gem className={`h-5 w-5 ${field.value ? 'text-white' : ''}`} />
-                    <span className="font-medium">Hidden Gem</span>
-                  </Toggle>
-                </FormItem>} />
+            <FormField control={form.control} name="isMustVisit" render={({ field }) => (
+              <FormItem className="flex-1">
+                <Toggle pressed={field.value} onPressedChange={field.onChange} className={`w-full h-12 gap-2 ${field.value ? 'bg-green-500 text-white border-green-600 shadow-[0_4px_0px_0px_rgba(22,163,74,0.5)]' : ''}`}>
+                  <Award className={`h-5 w-5 ${field.value ? 'text-white' : ''}`} />
+                  <span className="font-medium">Must Visit</span>
+                </Toggle>
+              </FormItem>
+            )} />
+
+            <FormField control={form.control} name="isHiddenGem" render={({ field }) => (
+              <FormItem className="flex-1">
+                <Toggle pressed={field.value} onPressedChange={field.onChange} className={`w-full h-12 gap-2 ${field.value ? 'bg-purple-500 text-white border-purple-600 shadow-[0_4px_0px_0px_rgba(147,51,234,0.5)]' : ''}`}>
+                  <Gem className={`h-5 w-5 ${field.value ? 'text-white' : ''}`} />
+                  <span className="font-medium">Hidden Gem</span>
+                </Toggle>
+              </FormItem>
+            )} />
           </div>
 
           <div className="flex justify-end gap-2">
@@ -149,12 +177,14 @@ const ReviewForm = ({
               Cancel
             </Button>
             <Button type="submit">
-              Submit review
+              {initialValues ? "Update review" : "Submit review"}
             </Button>
           </div>
         </form>
       </Form>
-    </div>;
+    </div>
+  );
 };
 
 export default ReviewForm;
+
