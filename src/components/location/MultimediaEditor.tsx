@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { ImageUpload } from "@/components/ui/image-upload";
@@ -67,14 +68,15 @@ export const MultimediaEditor: React.FC<MultimediaEditorProps> = ({ onChange, va
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-1 mb-4 flex-wrap">
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={addTextBlock}
+          className="h-8 px-2"
         >
-          <File className="w-4 h-4 mr-2" />
+          <File className="w-3.5 h-3.5 mr-1" />
           Text
         </Button>
         <Button
@@ -82,8 +84,9 @@ export const MultimediaEditor: React.FC<MultimediaEditorProps> = ({ onChange, va
           variant="outline"
           size="sm"
           onClick={() => setShowVideoInput(!showVideoInput)}
+          className="h-8 px-2"
         >
-          <Video className="w-4 h-4 mr-2" />
+          <Video className="w-3.5 h-3.5 mr-1" />
           Video
         </Button>
         <Button
@@ -91,8 +94,9 @@ export const MultimediaEditor: React.FC<MultimediaEditorProps> = ({ onChange, va
           variant="outline"
           size="sm"
           onClick={() => setShowLinkInput(!showLinkInput)}
+          className="h-8 px-2"
         >
-          <Link className="w-4 h-4 mr-2" />
+          <Link className="w-3.5 h-3.5 mr-1" />
           Link
         </Button>
         <ImageUpload
@@ -105,8 +109,9 @@ export const MultimediaEditor: React.FC<MultimediaEditorProps> = ({ onChange, va
               variant="outline"
               size="sm"
               onClick={onClick}
+              className="h-8 px-2"
             >
-              <Image className="w-4 h-4 mr-2" />
+              <Image className="w-3.5 h-3.5 mr-1" />
               Image
             </Button>
           )}
