@@ -76,7 +76,7 @@ export const MultimediaEditor: React.FC<MultimediaEditorProps> = ({ onChange, va
           onClick={addTextBlock}
         >
           <File className="w-4 h-4 mr-2" />
-          Add Text
+          Text
         </Button>
         <Button
           type="button"
@@ -85,7 +85,7 @@ export const MultimediaEditor: React.FC<MultimediaEditorProps> = ({ onChange, va
           onClick={() => setShowVideoInput(!showVideoInput)}
         >
           <Video className="w-4 h-4 mr-2" />
-          Add Video
+          Video
         </Button>
         <Button
           type="button"
@@ -94,7 +94,7 @@ export const MultimediaEditor: React.FC<MultimediaEditorProps> = ({ onChange, va
           onClick={() => setShowLinkInput(!showLinkInput)}
         >
           <Link className="w-4 h-4 mr-2" />
-          Add Link
+          Link
         </Button>
       </div>
 
