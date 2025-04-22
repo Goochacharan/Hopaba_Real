@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Card,
@@ -58,6 +59,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
     }
   };
 
+  // Sample criteria ratings for demonstration
   const criteriaRatings = [
     { name: 'Hygiene', rating: 8.5 },
     { name: 'Service', rating: 7.8 },
@@ -99,7 +101,10 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
             <span>{business.area}, {business.city}</span>
           </div>
         </div>
+        
+        {/* Add Rating Progress Bars here */}
         <RatingProgressBars ratings={criteriaRatings} />
+        
         <div className="flex items-center gap-2">
           <Phone className="h-4 w-4 text-muted-foreground" />
           <span>{business.contact_phone}</span>
