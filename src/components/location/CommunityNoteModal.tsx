@@ -215,7 +215,7 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
   const userAvatarUrl = note.user_avatar_url;
   const userDisplayName = note.user_display_name || "Anonymous";
   const isAuthor = currentUserId === note.user_id;
-  return <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+  return <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 px-[6px] py-[16px] my-0">
       <div className="bg-white shadow-xl w-full max-w-3xl max-h-[90vh] overflow-auto relative p-6 px-[4px] rounded">
         <button className="absolute top-2 right-3 font-bold text-2xl text-gray-400" onClick={onClose} aria-label="Close popup">
           &times;
