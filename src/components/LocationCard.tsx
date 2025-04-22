@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useWishlist } from '@/contexts/WishlistContext';
 import RatingProgressBars from '@/components/RatingProgressBars';
+import { Recommendation } from '@/lib/mockData';
 
 // Define a consistent location interface that works across all usages
 interface Location {
@@ -74,6 +75,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
         image: location.image_url,
         address: location.address || '',
         type: 'location',
+        tags: location.tags || [], // Add tags so it conforms to Recommendation
+        description: '',  // Add required description for Recommendation
       });
       toast({
         title: "Added to favorites",
@@ -128,7 +131,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         <div className="absolute top-2 right-2 flex flex-col gap-2">
           {showDistance && location.distance && (
             <Badge variant="secondary" className="bg-primary/80 text-primary-foreground">
-              {location.distance.toFixed(1)} km
+              {typeof location.distance === 'number' ? location.distance.toFixed(1) : location.distance} km
             </Badge>
           )}
           

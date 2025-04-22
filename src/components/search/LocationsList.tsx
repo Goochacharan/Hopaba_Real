@@ -102,7 +102,7 @@ const LocationsList: React.FC<LocationsListProps> = ({
           price_level: recommendation.price_level ? parseInt(recommendation.price_level.toString()) : undefined,
           website: recommendation.website,
           tags: recommendation.tags,
-          distance: recommendation.distance,
+          distance: recommendation.distance ? parseFloat(recommendation.distance.toString()) : undefined,
           isHiddenGem: recommendation.isHiddenGem,
           isMustVisit: recommendation.isMustVisit
         };

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -28,6 +27,7 @@ const MyList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const itemsPerPage = 6;
+  
   useEffect(() => {
     const checkUser = async () => {
       setLoading(true);
@@ -55,6 +55,7 @@ const MyList = () => {
       authListener?.subscription.unsubscribe();
     };
   }, [navigate]);
+  
   const filteredWishlist = wishlist.filter(item => {
     if (activeTab === 'locations' && item.type !== 'location') {
       return false;
@@ -66,35 +67,39 @@ const MyList = () => {
       return false;
     }
     if (!searchQuery.trim()) return true;
-    const lowercaseQuery = searchQuery.toLowerCase();
+    
     if (item.type === 'marketplace') {
       const marketplaceItem = item as MarketplaceListing & {
         type: 'marketplace';
       };
-      return marketplaceItem.title?.toLowerCase().includes(lowercaseQuery) || marketplaceItem.category?.toLowerCase().includes(lowercaseQuery) || marketplaceItem.description?.toLowerCase().includes(lowercaseQuery) || marketplaceItem.location?.toLowerCase().includes(lowercaseQuery) || marketplaceItem.condition?.toLowerCase().includes(lowercaseQuery);
+      return marketplaceItem.title?.toLowerCase().includes(searchQuery.toLowerCase()) || marketplaceItem.category?.toLowerCase().includes(searchQuery.toLowerCase()) || marketplaceItem.description?.toLowerCase().includes(searchQuery.toLowerCase()) || marketplaceItem.location?.toLowerCase().includes(searchQuery.toLowerCase()) || marketplaceItem.condition?.toLowerCase().includes(searchQuery.toLowerCase());
     } else if (item.type === 'event') {
       const eventItem = item as Event & {
         type: 'event';
       };
-      return eventItem.title?.toLowerCase().includes(lowercaseQuery) || eventItem.description?.toLowerCase().includes(lowercaseQuery) || eventItem.location?.toLowerCase().includes(lowercaseQuery) || eventItem.date?.toLowerCase().includes(lowercaseQuery);
+      return eventItem.title?.toLowerCase().includes(searchQuery.toLowerCase()) || eventItem.description?.toLowerCase().includes(searchQuery.toLowerCase()) || eventItem.location?.toLowerCase().includes(searchQuery.toLowerCase()) || eventItem.date?.toLowerCase().includes(searchQuery.toLowerCase());
     } else {
       const locationItem = item as Recommendation & {
         type: 'location';
       };
-      return locationItem.name?.toLowerCase().includes(lowercaseQuery) || locationItem.category?.toLowerCase().includes(lowercaseQuery) || locationItem.description?.toLowerCase().includes(lowercaseQuery) || locationItem.address?.toLowerCase().includes(lowercaseQuery);
+      return locationItem.name?.toLowerCase().includes(searchQuery.toLowerCase()) || locationItem.category?.toLowerCase().includes(searchQuery.toLowerCase()) || locationItem.description?.toLowerCase().includes(searchQuery.toLowerCase()) || locationItem.address?.toLowerCase().includes(searchQuery.toLowerCase());
     }
   });
+  
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredWishlist.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredWishlist.length / itemsPerPage);
+  
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, activeTab]);
+  
   const handleHeartClick = (e: React.MouseEvent, item: WishlistItem) => {
     e.stopPropagation();
     toggleWishlist(item);
   };
+  
   if (loading) {
     return <MainLayout>
         <div className="py-8 flex justify-center">
@@ -102,6 +107,7 @@ const MyList = () => {
         </div>
       </MainLayout>;
   }
+  
   return <MainLayout>
       <section className="py-8 px-[7px]">
         <h1 className="text-3xl font-medium mb-6">My Wishlist</h1>
@@ -147,12 +153,12 @@ const MyList = () => {
                 const locationItem = item as Recommendation & {
                   type: 'location';
                 };
-                // Convert Recommendation to Location for LocationCard
                 const locationData = {
                   id: locationItem.id,
                   name: locationItem.name,
                   category: locationItem.category,
                   rating: locationItem.rating,
+                  review_count: locationItem.reviewCount,
                   image_url: locationItem.image,
                   address: locationItem.address,
                   hours: locationItem.hours,
@@ -228,4 +234,5 @@ const MyList = () => {
       </section>
     </MainLayout>;
 };
+
 export default MyList;
