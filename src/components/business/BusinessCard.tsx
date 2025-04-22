@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import { Pencil, Trash2, IndianRupee, Clock, MapPin, Phone, Instagram, Film, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import RatingProgressBars from '../RatingProgressBars';
 
 interface Business {
   id: string;
@@ -59,14 +58,6 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
     }
   };
 
-  // Sample criteria ratings for demonstration
-  const criteriaRatings = [
-    { name: 'Hygiene', rating: 8.5 },
-    { name: 'Service', rating: 7.8 },
-    { name: 'Value', rating: 9.2 },
-    { name: 'Quality', rating: 8.9 }
-  ];
-
   return (
     <Card key={business.id} className="overflow-hidden">
       <CardHeader className="bg-muted/30">
@@ -101,10 +92,6 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ business, onEdit, onDelete 
             <span>{business.area}, {business.city}</span>
           </div>
         </div>
-        
-        {/* Add Rating Progress Bars here */}
-        <RatingProgressBars ratings={criteriaRatings} />
-        
         <div className="flex items-center gap-2">
           <Phone className="h-4 w-4 text-muted-foreground" />
           <span>{business.contact_phone}</span>

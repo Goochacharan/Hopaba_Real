@@ -27,7 +27,6 @@ const MyList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const itemsPerPage = 6;
-  
   useEffect(() => {
     const checkUser = async () => {
       setLoading(true);
@@ -55,7 +54,6 @@ const MyList = () => {
       authListener?.subscription.unsubscribe();
     };
   }, [navigate]);
-  
   const filteredWishlist = wishlist.filter(item => {
     if (activeTab === 'locations' && item.type !== 'location') {
       return false;
@@ -67,39 +65,35 @@ const MyList = () => {
       return false;
     }
     if (!searchQuery.trim()) return true;
-    
+    const lowercaseQuery = searchQuery.toLowerCase();
     if (item.type === 'marketplace') {
       const marketplaceItem = item as MarketplaceListing & {
         type: 'marketplace';
       };
-      return marketplaceItem.title?.toLowerCase().includes(searchQuery.toLowerCase()) || marketplaceItem.category?.toLowerCase().includes(searchQuery.toLowerCase()) || marketplaceItem.description?.toLowerCase().includes(searchQuery.toLowerCase()) || marketplaceItem.location?.toLowerCase().includes(searchQuery.toLowerCase()) || marketplaceItem.condition?.toLowerCase().includes(searchQuery.toLowerCase());
+      return marketplaceItem.title?.toLowerCase().includes(lowercaseQuery) || marketplaceItem.category?.toLowerCase().includes(lowercaseQuery) || marketplaceItem.description?.toLowerCase().includes(lowercaseQuery) || marketplaceItem.location?.toLowerCase().includes(lowercaseQuery) || marketplaceItem.condition?.toLowerCase().includes(lowercaseQuery);
     } else if (item.type === 'event') {
       const eventItem = item as Event & {
         type: 'event';
       };
-      return eventItem.title?.toLowerCase().includes(searchQuery.toLowerCase()) || eventItem.description?.toLowerCase().includes(searchQuery.toLowerCase()) || eventItem.location?.toLowerCase().includes(searchQuery.toLowerCase()) || eventItem.date?.toLowerCase().includes(searchQuery.toLowerCase());
+      return eventItem.title?.toLowerCase().includes(lowercaseQuery) || eventItem.description?.toLowerCase().includes(lowercaseQuery) || eventItem.location?.toLowerCase().includes(lowercaseQuery) || eventItem.date?.toLowerCase().includes(lowercaseQuery);
     } else {
       const locationItem = item as Recommendation & {
         type: 'location';
       };
-      return locationItem.name?.toLowerCase().includes(searchQuery.toLowerCase()) || locationItem.category?.toLowerCase().includes(searchQuery.toLowerCase()) || locationItem.description?.toLowerCase().includes(searchQuery.toLowerCase()) || locationItem.address?.toLowerCase().includes(searchQuery.toLowerCase());
+      return locationItem.name?.toLowerCase().includes(lowercaseQuery) || locationItem.category?.toLowerCase().includes(lowercaseQuery) || locationItem.description?.toLowerCase().includes(lowercaseQuery) || locationItem.address?.toLowerCase().includes(lowercaseQuery);
     }
   });
-  
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredWishlist.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredWishlist.length / itemsPerPage);
-  
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, activeTab]);
-  
   const handleHeartClick = (e: React.MouseEvent, item: WishlistItem) => {
     e.stopPropagation();
     toggleWishlist(item);
   };
-  
   if (loading) {
     return <MainLayout>
         <div className="py-8 flex justify-center">
@@ -107,7 +101,6 @@ const MyList = () => {
         </div>
       </MainLayout>;
   }
-  
   return <MainLayout>
       <section className="py-8 px-[7px]">
         <h1 className="text-3xl font-medium mb-6">My Wishlist</h1>
@@ -153,26 +146,11 @@ const MyList = () => {
                 const locationItem = item as Recommendation & {
                   type: 'location';
                 };
-                const locationData = {
-                  id: locationItem.id,
-                  name: locationItem.name,
-                  category: locationItem.category,
-                  rating: locationItem.rating,
-                  review_count: locationItem.reviewCount,
-                  image_url: locationItem.image,
-                  address: locationItem.address,
-                  hours: locationItem.hours,
-                  price_level: locationItem.price_level ? parseInt(locationItem.price_level.toString()) : undefined,
-                  website: locationItem.website,
-                  tags: locationItem.tags,
-                };
-                
                 return <div key={item.id} className="relative group">
-                          <LocationCard 
-                            location={locationData} 
-                            className="search-result-card"
-                            handleHeartClick={(e) => handleHeartClick(e, item)}
-                          />
+                          <LocationCard recommendation={locationItem} className="search-result-card" />
+                          <button className="absolute top-2 right-2 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10 text-rose-500" onClick={e => handleHeartClick(e, item)}>
+                            <Heart className="h-4 w-4 fill-rose-500" />
+                          </button>
                         </div>;
               }
             })}
@@ -234,5 +212,4 @@ const MyList = () => {
       </section>
     </MainLayout>;
 };
-
 export default MyList;
