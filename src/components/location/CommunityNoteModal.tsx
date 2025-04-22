@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getEmbedUrl } from "@/utils/videoUtils";
-import { Flag, Trash2 } from "lucide-react";
+import { Flag, Trash2, ThumbsUp } from "lucide-react";
 import DeleteConfirmDialog from "../business/DeleteConfirmDialog";
 
 interface NoteContentType {
@@ -43,6 +43,8 @@ export interface Note {
   user_avatar_url?: string | null;
   user_display_name?: string | null;
   created_at?: string;
+  thumbs_up: number;
+  thumbs_up_users: string[];
 }
 
 interface CommunityNoteModalProps {
@@ -50,13 +52,15 @@ interface CommunityNoteModalProps {
   open: boolean;
   onClose: () => void;
   onNoteDeleted?: () => void;
+  onNoteLiked?: (noteId: string, newLikeCount: number, newLikeUsers: string[]) => void;
 }
 
 const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
   note,
   open,
   onClose,
-  onNoteDeleted
+  onNoteDeleted,
+  onNoteLiked
 }) => {
   const { toast } = useToast();
   const [comments, setComments] = useState<Comment[]>([]);
@@ -301,6 +305,45 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
     setDeleteDialogOpen(true);
   };
 
+  const handleLikeNote = async () => {
+    if (!currentUserId) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to like notes",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const userLiked = note.thumbs_up_users?.includes(currentUserId);
+    const newLikeCount = userLiked ? (note.thumbs_up || 0) - 1 : (note.thumbs_up || 0) + 1;
+    const newLikeUsers = userLiked 
+      ? (note.thumbs_up_users || []).filter(id => id !== currentUserId)
+      : [...(note.thumbs_up_users || []), currentUserId];
+
+    const { error } = await supabase
+      .from('community_notes')
+      .update({
+        thumbs_up: newLikeCount,
+        thumbs_up_users: newLikeUsers
+      })
+      .eq('id', note.id);
+
+    if (error) {
+      console.error('Error updating likes:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update like status",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (onNoteLiked) {
+      onNoteLiked(note.id, newLikeCount, newLikeUsers);
+    }
+  };
+
   if (!open || !note) return null;
 
   const embedUrl = getEmbedUrl(note.content?.videoUrl || null);
@@ -329,16 +372,29 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
               <div className="text-sm text-gray-500">{userDisplayName}</div>
             </div>
           </div>
-          {isAuthor && (
-            <Button 
-              variant="ghost" 
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
               size="sm"
-              onClick={() => confirmDelete('note', note.id)}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={handleLikeNote}
+              className={`flex items-center gap-1 ${
+                note.thumbs_up_users?.includes(currentUserId || '') ? 'text-blue-600' : ''
+              }`}
             >
-              <Trash2 className="h-4 w-4" />
+              <ThumbsUp className="w-4 h-4" />
+              <span>{note.thumbs_up || 0}</span>
             </Button>
-          )}
+            {isAuthor && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => confirmDelete('note', note.id)}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
 
         {embedUrl && <div className="w-full aspect-video mb-6 rounded-lg overflow-hidden">

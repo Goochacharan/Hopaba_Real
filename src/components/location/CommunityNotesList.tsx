@@ -1,12 +1,12 @@
-
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText } from "lucide-react";
+import { FileText, ThumbsUp } from "lucide-react";
 import CommunityNoteModal from "./CommunityNoteModal";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Note } from "./CommunityNoteModal";
 import { Json } from "@/integrations/supabase/types";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "../ui/button";
 
 interface CommunityNotesListProps {
   locationId: string;
@@ -71,7 +71,6 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
         
         if (note.user_id) {
           try {
-            // Using getUser instead of admin.getUserById which might not be accessible
             const { data: userData } = await supabase.auth.getUser(note.user_id);
             
             if (userData && userData.user) {
@@ -137,6 +136,53 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
     });
   };
 
+  const handleLikeNote = async (note: Note, event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (!userId) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to like notes",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const userLiked = note.thumbs_up_users?.includes(userId);
+    const newLikeCount = userLiked ? (note.thumbs_up || 0) - 1 : (note.thumbs_up || 0) + 1;
+    const newLikeUsers = userLiked 
+      ? (note.thumbs_up_users || []).filter(id => id !== userId)
+      : [...(note.thumbs_up_users || []), userId];
+
+    const { error } = await supabase
+      .from('community_notes')
+      .update({
+        thumbs_up: newLikeCount,
+        thumbs_up_users: newLikeUsers
+      })
+      .eq('id', note.id);
+
+    if (error) {
+      console.error('Error updating likes:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update like status",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setNotes(prevNotes => prevNotes.map(n => {
+      if (n.id === note.id) {
+        return {
+          ...n,
+          thumbs_up: newLikeCount,
+          thumbs_up_users: newLikeUsers
+        };
+      }
+      return n;
+    }));
+  };
+
   if (loading) {
     return (
       <div className="py-8 text-center">
@@ -158,12 +204,11 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
             <div
               className="border p-3 rounded bg-white shadow-sm flex items-center justify-between cursor-pointer hover:shadow-md"
               key={note.id}
-              onClick={() => {
+            >
+              <div className="flex items-center gap-3" onClick={() => {
                 setSelectedNote(note);
                 setModalOpen(true);
-              }}
-            >
-              <div className="flex items-center gap-3">
+              }}>
                 <Avatar className="h-10 w-10">
                   {note.user_avatar_url ? (
                     <AvatarImage src={note.user_avatar_url} alt={note.user_display_name || "User avatar"} />
@@ -178,6 +223,19 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
                   </div>
                 </div>
               </div>
+              <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => handleLikeNote(note, e)}
+                  className={`flex items-center gap-1 ${
+                    note.thumbs_up_users?.includes(userId || '') ? 'text-blue-600' : ''
+                  }`}
+                >
+                  <ThumbsUp className="w-4 h-4" />
+                  <span>{note.thumbs_up || 0}</span>
+                </Button>
+              </div>
             </div>
           ))}
         </div>
@@ -188,6 +246,18 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onNoteDeleted={handleNoteDeleted}
+          onNoteLiked={(noteId, newLikeCount, newLikeUsers) => {
+            setNotes(prevNotes => prevNotes.map(n => {
+              if (n.id === noteId) {
+                return {
+                  ...n,
+                  thumbs_up: newLikeCount,
+                  thumbs_up_users: newLikeUsers
+                };
+              }
+              return n;
+            }));
+          }}
         />
       )}
     </div>
