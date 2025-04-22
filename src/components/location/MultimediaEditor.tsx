@@ -95,22 +95,6 @@ export const MultimediaEditor: React.FC<MultimediaEditorProps> = ({ onChange, va
           <Link className="w-4 h-4 mr-2" />
           Link
         </Button>
-        <ImageUpload
-          images={[]}
-          onImagesChange={(urls) => handleImageUpload(urls)}
-          maxImages={10}
-          renderButton={(onClick) => (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onClick}
-            >
-              <Image className="w-4 h-4 mr-2" />
-              Image
-            </Button>
-          )}
-        />
       </div>
 
       {showVideoInput && (
@@ -206,14 +190,6 @@ export const MultimediaEditor: React.FC<MultimediaEditorProps> = ({ onChange, va
             </Button>
           </div>
         ))}
-      </div>
-
-      <div className="mt-4">
-        <ImageUpload
-          images={[]}
-          onImagesChange={(urls) => handleImageUpload(urls)}
-          maxImages={10}
-        />
       </div>
     </div>
   );
