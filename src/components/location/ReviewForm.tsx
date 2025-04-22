@@ -18,7 +18,9 @@ const baseReviewSchema = z.object({
   criteriaRatings: z.record(z.number().min(1).max(10)).default({})
 });
 
-export type ReviewFormValues = z.infer<typeof baseReviewSchema>;
+export type ReviewFormValues = z.infer<typeof baseReviewSchema> & {
+  reviewId?: string;
+};
 
 interface ReviewFormProps {
   onSubmit: (values: ReviewFormValues) => void;
@@ -26,6 +28,7 @@ interface ReviewFormProps {
   locationName?: string;
   category?: string;
   initialValues?: Partial<ReviewFormValues>;
+  isEditMode?: boolean;
 }
 
 const ReviewForm = ({
@@ -33,7 +36,8 @@ const ReviewForm = ({
   onCancel,
   locationName,
   category = '',
-  initialValues
+  initialValues,
+  isEditMode = false
 }: ReviewFormProps) => {
   const [selectedRating, setSelectedRating] = useState<number>(initialValues?.rating || 0);
   const [criteria, setCriteria] = useState<ReviewCriterion[]>([]);
@@ -120,7 +124,8 @@ const ReviewForm = ({
         <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
           {locationName && (
             <div className="text-sm font-medium text-muted-foreground mb-2">
-              Reviewing: {locationName} {category ? `(${category})` : ''}
+              {isEditMode ? "Editing review for: " : "Reviewing: "} 
+              {locationName} {category ? `(${category})` : ''}
             </div>
           )}
 
@@ -177,7 +182,7 @@ const ReviewForm = ({
               Cancel
             </Button>
             <Button type="submit">
-              {initialValues ? "Update review" : "Submit review"}
+              {isEditMode ? "Update review" : "Submit review"}
             </Button>
           </div>
         </form>
@@ -187,4 +192,3 @@ const ReviewForm = ({
 };
 
 export default ReviewForm;
-

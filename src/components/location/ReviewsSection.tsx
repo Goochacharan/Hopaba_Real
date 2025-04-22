@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import ReviewForm, { ReviewFormValues } from './ReviewForm';
 import ReviewsList, { Review } from './ReviewsList';
+import { toast } from '@/hooks/use-toast';
 
 interface ReviewsSectionProps {
   reviews: Review[];
@@ -47,9 +48,23 @@ const ReviewsSection = ({
   };
 
   const handleSubmitReview = (values: ReviewFormValues) => {
-    onSubmitReview(values);
+    // Pass the review ID when in edit mode
+    const reviewData = editReviewData 
+      ? { ...values, reviewId: editReviewData.id } 
+      : values;
+      
+    onSubmitReview(reviewData);
     setReviewFormVisible(false);
     setEditReviewData(null);
+    
+    // Show success toast
+    toast({
+      title: editReviewData ? "Review updated" : "Review submitted",
+      description: editReviewData 
+        ? "Your review has been updated successfully." 
+        : "Thank you for sharing your experience!",
+      duration: 3000
+    });
   };
 
   return (
@@ -79,6 +94,7 @@ const ReviewsSection = ({
             isHiddenGem: editReviewData.isHiddenGem,
             criteriaRatings: editReviewData.criteriaRatings || {}
           } : undefined}
+          isEditMode={!!editReviewData}
         />
       )}
 
@@ -88,4 +104,3 @@ const ReviewsSection = ({
 };
 
 export default ReviewsSection;
-
