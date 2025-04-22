@@ -1,18 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Trash2, Save } from 'lucide-react';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-
-export interface ReviewCriterion {
-  id: string;
-  name: string;
-  category: string;
-}
+import { ReviewCriterion } from '@/types/reviewTypes';
 
 const CategoryReviewCriteria = () => {
   const { toast } = useToast();
@@ -100,11 +94,12 @@ const CategoryReviewCriteria = () => {
       const { data, error } = await supabase
         .from('review_criteria')
         .insert([{ name: newCriterion, category: selectedCategory }])
-        .select();
+        .select()
+        .single();
         
       if (error) throw error;
       
-      setCriteria([...criteria, data[0]]);
+      setCriteria([...criteria, data as ReviewCriterion]);
       setNewCriterion('');
       
       toast({

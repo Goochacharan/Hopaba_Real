@@ -1,16 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Award, Gem, Star } from 'lucide-react';
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { Form, FormField, FormItem } from "@/components/ui/form";
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { supabase } from '@/integrations/supabase/client';
 import RatingCriteriaSlider from './RatingCriteriaSlider';
+import { ReviewCriterion, CriteriaRatings } from '@/types/reviewTypes';
 
-// Define review schema with dynamic criteria
 const baseReviewSchema = z.object({
   rating: z.number().min(1).max(5),
   isMustVisit: z.boolean().default(false),
@@ -27,12 +26,6 @@ interface ReviewFormProps {
   category?: string;
 }
 
-interface ReviewCriterion {
-  id: string;
-  name: string;
-  category: string;
-}
-
 const ReviewForm = ({
   onSubmit,
   onCancel,
@@ -41,7 +34,7 @@ const ReviewForm = ({
 }: ReviewFormProps) => {
   const [selectedRating, setSelectedRating] = useState<number>(0);
   const [criteria, setCriteria] = useState<ReviewCriterion[]>([]);
-  const [criteriaRatings, setCriteriaRatings] = useState<Record<string, number>>({});
+  const [criteriaRatings, setCriteriaRatings] = useState<CriteriaRatings>({});
 
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(baseReviewSchema),
@@ -53,7 +46,6 @@ const ReviewForm = ({
     }
   });
 
-  // Fetch category-specific criteria
   useEffect(() => {
     const fetchCriteria = async () => {
       if (!category) return;
@@ -62,14 +54,14 @@ const ReviewForm = ({
         const { data, error } = await supabase
           .from('review_criteria')
           .select('*')
-          .eq('category', category);
+          .eq('category', category)
+          .order('name');
           
         if (error) throw error;
         
-        setCriteria(data || []);
+        setCriteria(data);
         
-        // Initialize ratings for each criterion to 5 (middle value)
-        const initialRatings: Record<string, number> = {};
+        const initialRatings: CriteriaRatings = {};
         data?.forEach(criterion => {
           initialRatings[criterion.id] = 5;
         });
@@ -96,7 +88,6 @@ const ReviewForm = ({
   };
 
   const handleFormSubmit = (values: ReviewFormValues) => {
-    // Ensure criteria ratings are included in submission
     values.criteriaRatings = criteriaRatings;
     onSubmit(values);
   };
