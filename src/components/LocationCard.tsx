@@ -619,18 +619,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
           <span className="text-xs text-muted-foreground ml-1">
             ({reviewCount})
           </span>
-          {notesCount > 0 && (
-            <div className="ml-auto">
-              <CommunityContributors
-                contributors={contributors}
-                total={notesCount}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleContributorsClick();
-                }}
-              />
-            </div>
-          )}
         </div>
 
         <div className="flex flex-col mb-3">
@@ -695,17 +683,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
-
-              {notesCount > 0 && (
-                <CommunityContributors
-                  contributors={contributors}
-                  total={notesCount}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleContributorsClick();
-                  }}
-                />
               )}
             </div>
           </div>
