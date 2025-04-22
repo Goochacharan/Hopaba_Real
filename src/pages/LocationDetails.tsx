@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -228,6 +227,7 @@ const LocationDetails = () => {
   };
 
   const refreshCommunityNotes = () => {
+    console.log("Refreshing community notes list");
     setCommunityNotesRefreshTrigger(prev => prev + 1);
   };
 

@@ -6,6 +6,7 @@ import CommunityNoteModal from "./CommunityNoteModal";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Note } from "./CommunityNoteModal";
 import { Json } from "@/integrations/supabase/types";
+import { useToast } from "@/hooks/use-toast";
 
 interface CommunityNotesListProps {
   locationId: string;
@@ -17,6 +18,7 @@ interface NoteContentType {
 }
 
 const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) => {
+  const { toast } = useToast();
   const [notes, setNotes] = useState<Note[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
@@ -126,8 +128,13 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
   }
 
   const handleNoteDeleted = () => {
+    console.log("Note deleted - refreshing notes");
     setRefreshTrigger(prev => prev + 1);
     setModalOpen(false);
+    toast({
+      title: "Note deleted",
+      description: "Your note has been successfully removed"
+    });
   };
 
   if (loading) {

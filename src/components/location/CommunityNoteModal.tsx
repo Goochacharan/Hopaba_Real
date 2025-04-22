@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Textarea } from "../ui/textarea";
@@ -231,17 +230,27 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
     
     try {
       let success = false;
+      console.log("Deleting item type:", deleteType, "with ID:", itemToDelete);
       
       switch (deleteType) {
         case 'note':
+          console.log("Attempting to delete note:", note.id, "by user:", currentUserId);
           const { error: noteError } = await supabase
             .from('community_notes')
             .delete()
             .eq('id', note.id)
             .eq('user_id', currentUserId);
-          success = !noteError;
+          
+          if (noteError) {
+            console.error("Error deleting note:", noteError);
+            throw noteError;
+          }
+          
+          success = true;
+          console.log("Note deletion successful");
           
           if (success && onNoteDeleted) {
+            console.log("Calling onNoteDeleted callback");
             onNoteDeleted();
           }
           break;
@@ -253,7 +262,13 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
             .delete()
             .eq('id', itemToDelete)
             .eq('user_id', currentUserId);
-          success = !commentError;
+          
+          if (commentError) {
+            console.error("Error deleting comment/reply:", commentError);
+            throw commentError;
+          }
+          
+          success = true;
           break;
       }
       
