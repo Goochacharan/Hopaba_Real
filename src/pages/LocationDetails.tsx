@@ -206,7 +206,8 @@ const LocationDetails = () => {
       isMustVisit: values.isMustVisit,
       isHiddenGem: values.isHiddenGem,
       text: "", // Removed review text
-      userId: user.id
+      userId: user.id,
+      criteriaRatings: values.criteriaRatings
     };
     
     const updatedReviews = [newReview, ...userReviews];
@@ -289,6 +290,7 @@ const LocationDetails = () => {
               locationRating={displayRating}
               locationId={location.id}
               locationName={location.name}
+              locationCategory={location.category}
               onSubmitReview={handleSubmitReview}
               currentUser={user}
               hasUserReviewed={userReviews.some(review => review.userId === (user?.id || null))}

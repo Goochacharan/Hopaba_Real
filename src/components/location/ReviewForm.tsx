@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -7,50 +7,109 @@ import { Award, Gem, Star } from 'lucide-react';
 import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
+import { supabase } from '@/integrations/supabase/client';
+import RatingCriteriaSlider from './RatingCriteriaSlider';
 
-const reviewSchema = z.object({
+// Define review schema with dynamic criteria
+const baseReviewSchema = z.object({
   rating: z.number().min(1).max(5),
   isMustVisit: z.boolean().default(false),
-  isHiddenGem: z.boolean().default(false)
+  isHiddenGem: z.boolean().default(false),
+  criteriaRatings: z.record(z.number().min(1).max(10)).default({})
 });
 
-export type ReviewFormValues = z.infer<typeof reviewSchema>;
+export type ReviewFormValues = z.infer<typeof baseReviewSchema>;
 
 interface ReviewFormProps {
   onSubmit: (values: ReviewFormValues) => void;
   onCancel: () => void;
   locationName?: string;
+  category?: string;
+}
+
+interface ReviewCriterion {
+  id: string;
+  name: string;
+  category: string;
 }
 
 const ReviewForm = ({
   onSubmit,
   onCancel,
-  locationName
+  locationName,
+  category = ''
 }: ReviewFormProps) => {
   const [selectedRating, setSelectedRating] = useState<number>(0);
+  const [criteria, setCriteria] = useState<ReviewCriterion[]>([]);
+  const [criteriaRatings, setCriteriaRatings] = useState<Record<string, number>>({});
+
   const form = useForm<ReviewFormValues>({
-    resolver: zodResolver(reviewSchema),
+    resolver: zodResolver(baseReviewSchema),
     defaultValues: {
       rating: 0,
       isMustVisit: false,
-      isHiddenGem: false
+      isHiddenGem: false,
+      criteriaRatings: {}
     }
   });
+
+  // Fetch category-specific criteria
+  useEffect(() => {
+    const fetchCriteria = async () => {
+      if (!category) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('review_criteria')
+          .select('*')
+          .eq('category', category);
+          
+        if (error) throw error;
+        
+        setCriteria(data || []);
+        
+        // Initialize ratings for each criterion to 5 (middle value)
+        const initialRatings: Record<string, number> = {};
+        data?.forEach(criterion => {
+          initialRatings[criterion.id] = 5;
+        });
+        
+        setCriteriaRatings(initialRatings);
+        form.setValue('criteriaRatings', initialRatings);
+      } catch (err) {
+        console.error('Error fetching review criteria:', err);
+      }
+    };
+
+    fetchCriteria();
+  }, [category, form]);
 
   const handleRatingSelect = (rating: number) => {
     setSelectedRating(rating);
     form.setValue("rating", rating);
   };
 
+  const handleCriterionRatingChange = (criterionId: string, value: number) => {
+    const newRatings = { ...criteriaRatings, [criterionId]: value };
+    setCriteriaRatings(newRatings);
+    form.setValue('criteriaRatings', newRatings);
+  };
+
+  const handleFormSubmit = (values: ReviewFormValues) => {
+    // Ensure criteria ratings are included in submission
+    values.criteriaRatings = criteriaRatings;
+    onSubmit(values);
+  };
+
   return <div className="mb-6 p-4 bg-secondary/30 rounded-lg px-[9px]">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
           {locationName && <div className="text-sm font-medium text-muted-foreground mb-2">
-              Reviewing: {locationName}
+              Reviewing: {locationName} {category ? `(${category})` : ''}
             </div>}
           
           <div className="space-y-2">
-            <FormLabel>Your rating</FormLabel>
+            <FormLabel>Overall rating</FormLabel>
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map(rating => <button key={rating} type="button" onClick={() => handleRatingSelect(rating)} className="focus:outline-none">
                   <Star className={`w-6 h-6 ${rating <= selectedRating ? "text-amber-500 fill-amber-500" : "text-gray-300"}`} />
@@ -58,6 +117,20 @@ const ReviewForm = ({
               {form.formState.errors.rating && <p className="text-destructive text-xs ml-2">Please select a rating</p>}
             </div>
           </div>
+
+          {criteria.length > 0 && (
+            <div className="py-4 border-t border-b">
+              <h3 className="text-sm font-medium mb-4">Rate specific aspects:</h3>
+              {criteria.map(criterion => (
+                <RatingCriteriaSlider
+                  key={criterion.id}
+                  criterionName={criterion.name}
+                  value={criteriaRatings[criterion.id] || 5}
+                  onChange={(value) => handleCriterionRatingChange(criterion.id, value)}
+                />
+              ))}
+            </div>
+          )}
 
           <div className="flex gap-4 mt-4">
             <FormField control={form.control} name="isMustVisit" render={({
@@ -93,4 +166,3 @@ const ReviewForm = ({
 };
 
 export default ReviewForm;
-

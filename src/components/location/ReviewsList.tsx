@@ -1,17 +1,18 @@
 
 import React from 'react';
-import { Star, Award, Gem } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Star } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 export interface Review {
   id: string;
   name: string;
   date: string;
   rating: number;
-  text: string;
+  text?: string;
   isMustVisit?: boolean;
   isHiddenGem?: boolean;
-  userId?: string | null; // Add userId for tracking who left the review
+  userId?: string | null;
+  criteriaRatings?: Record<string, number>;
 }
 
 interface ReviewsListProps {
@@ -20,62 +21,102 @@ interface ReviewsListProps {
   locationRating: number;
 }
 
-const ReviewsList = ({ reviews, totalReviews, locationRating }: ReviewsListProps) => {
-  // If there are no reviews, show a message
-  if (reviews.length === 0) {
-    return (
-      <div className="py-6 text-center text-muted-foreground">
-        <p>No reviews yet. Be the first to write a review!</p>
-      </div>
-    );
-  }
-
+const ReviewsList = ({
+  reviews,
+  totalReviews,
+  locationRating
+}: ReviewsListProps) => {
   return (
-    <div>
-      <div className="flex items-center mb-4">
-        <span className="font-medium">
-          {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
-        </span>
-        <div className="flex items-center ml-3 text-amber-500">
-          {[...Array(5)].map((_, i) => (
-            <Star key={i} size={16} className={i < Math.floor(locationRating) ? "fill-amber-500" : ""} />
+    <div className="space-y-6 mt-4">
+      <div className="flex items-center space-x-2">
+        <div className="flex items-center">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+              key={star}
+              className={`w-5 h-5 ${
+                star <= Math.round(locationRating)
+                  ? 'text-amber-500 fill-amber-500'
+                  : 'text-gray-300'
+              }`}
+            />
           ))}
         </div>
+        <span className="font-semibold">{locationRating.toFixed(1)}</span>
+        <span className="text-muted-foreground text-sm">({totalReviews} reviews)</span>
       </div>
-      <div className="space-y-4">
-        {reviews.map(review => (
-          <div key={review.id} className="border-b border-border/50 pb-4 last:border-0 last:pb-0">
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <div className="font-medium">{review.name}</div>
-                <div className="text-xs text-muted-foreground">{review.date}</div>
+      
+      {reviews.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          No reviews yet. Be the first to share your experience!
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {reviews.map((review) => (
+            <div key={review.id} className="border-t pt-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h4 className="font-semibold">{review.name}</h4>
+                  <div className="flex items-center mt-1 space-x-2">
+                    <div className="flex">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-4 h-4 ${
+                            star <= review.rating
+                              ? 'text-amber-500 fill-amber-500'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-muted-foreground text-xs">
+                      {review.date}
+                    </span>
+                  </div>
+                  
+                  {/* Badges for Must Visit and Hidden Gem */}
+                  {(review.isMustVisit || review.isHiddenGem) && (
+                    <div className="flex space-x-2 mt-2">
+                      {review.isMustVisit && (
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                          Must Visit
+                        </span>
+                      )}
+                      {review.isHiddenGem && (
+                        <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
+                          Hidden Gem
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center text-amber-500">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={14} className={i < review.rating ? "fill-amber-500" : ""} />
-                ))}
-              </div>
+              
+              {/* Display detailed criteria ratings if available */}
+              {review.criteriaRatings && Object.keys(review.criteriaRatings).length > 0 && (
+                <div className="mt-3 space-y-2">
+                  <p className="text-sm text-muted-foreground mb-1">Detailed ratings:</p>
+                  {Object.entries(review.criteriaRatings).map(([criterionId, rating]) => {
+                    // We need to fetch criterion name by ID
+                    // For now, just show "Criterion #" with the rating
+                    return (
+                      <div key={criterionId} className="flex items-center gap-2">
+                        <div className="text-xs w-24 truncate">Criterion {criterionId.substring(0, 4)}</div>
+                        <Progress value={rating * 10} className="h-2 flex-1" />
+                        <div className="text-xs font-medium">{rating}/10</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {review.text && (
+                <p className="mt-2 text-sm">{review.text}</p>
+              )}
             </div>
-            <p className="text-sm text-muted-foreground">{review.text}</p>
-            {(review.isMustVisit || review.isHiddenGem) && (
-              <div className="flex gap-2 mt-2">
-                {review.isMustVisit && (
-                  <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 gap-1.5">
-                    <Award className="h-3.5 w-3.5" />
-                    Must Visit
-                  </Badge>
-                )}
-                {review.isHiddenGem && (
-                  <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200 gap-1.5">
-                    <Gem className="h-3.5 w-3.5" />
-                    Hidden Gem
-                  </Badge>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
