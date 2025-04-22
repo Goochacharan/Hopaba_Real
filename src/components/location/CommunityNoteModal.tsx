@@ -5,7 +5,8 @@ import { Button } from "../ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getEmbedUrl } from "@/utils/videoUtils";
-import { Flag } from "lucide-react";
+import { Flag, Trash2 } from "lucide-react";
+import DeleteConfirmDialog from "../business/DeleteConfirmDialog";
 
 interface NoteContentType {
   text: string;
@@ -55,15 +56,16 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
   open,
   onClose
 }) => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteType, setDeleteType] = useState<'note' | 'comment' | 'reply'>("note");
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (open && note.id) {
@@ -221,6 +223,62 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
     });
   };
 
+  const handleDeleteClick = async () => {
+    if (!itemToDelete) return;
+    
+    try {
+      let success = false;
+      
+      switch (deleteType) {
+        case 'note':
+          const { error: noteError } = await supabase
+            .from('community_notes')
+            .delete()
+            .eq('id', note.id)
+            .eq('user_id', currentUserId);
+          success = !noteError;
+          break;
+          
+        case 'comment':
+        case 'reply':
+          const { error: commentError } = await supabase
+            .from('note_comments')
+            .delete()
+            .eq('id', itemToDelete)
+            .eq('user_id', currentUserId);
+          success = !commentError;
+          break;
+      }
+      
+      if (success) {
+        toast({
+          title: "Deleted successfully",
+          description: `The ${deleteType} has been deleted.`
+        });
+        
+        if (deleteType === 'note') {
+          onClose();
+        } else {
+          loadComments();
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete. Please try again.",
+        variant: "destructive"
+      });
+    }
+    setDeleteDialogOpen(false);
+  };
+
+  const confirmDelete = (type: 'note' | 'comment' | 'reply', id: string) => {
+    setDeleteType(type);
+    setItemToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
   if (!open || !note) return null;
 
   const embedUrl = getEmbedUrl(note.content?.videoUrl || null);
@@ -228,20 +286,37 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
   const userDisplayName = note.user_display_name || "Anonymous";
   const isAuthor = currentUserId === note.user_id;
 
-  return <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 px-[6px] py-[16px] my-0">
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 px-[6px] py-[16px] my-0">
       <div className="bg-white shadow-xl w-full max-w-3xl max-h-[90vh] overflow-auto relative p-6 px-[4px] rounded">
-        <button className="absolute top-2 right-3 font-bold text-2xl text-gray-400" onClick={onClose} aria-label="Close popup">
+        <button className="absolute top-2 right-3 font-bold text-2xl text-gray-400" onClick={onClose}>
           &times;
         </button>
 
-        <div className="flex items-center space-x-3 mb-4">
-          <Avatar className="h-10 w-10">
-            {userAvatarUrl ? <AvatarImage src={userAvatarUrl} alt={userDisplayName} /> : <AvatarFallback>{(userDisplayName[0] || "A").toUpperCase()}</AvatarFallback>}
-          </Avatar>
-          <div>
-            <h2 className="text-2xl font-bold">{note.title}</h2>
-            <div className="text-sm text-gray-500">{userDisplayName}</div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <Avatar className="h-10 w-10">
+              {userAvatarUrl ? (
+                <AvatarImage src={userAvatarUrl} alt={userDisplayName} />
+              ) : (
+                <AvatarFallback>{(userDisplayName[0] || "A").toUpperCase()}</AvatarFallback>
+              )}
+            </Avatar>
+            <div>
+              <h2 className="text-2xl font-bold">{note.title}</h2>
+              <div className="text-sm text-gray-500">{userDisplayName}</div>
+            </div>
           </div>
+          {isAuthor && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => confirmDelete('note', note.id)}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
 
         {embedUrl && <div className="w-full aspect-video mb-6 rounded-lg overflow-hidden">
@@ -272,13 +347,18 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
         <div className="mt-8">
           <h3 className="text-lg font-semibold mb-4">Comments</h3>
           <div className="space-y-4 mb-6">
-            {comments.map(comment => <div key={comment.id} className="bg-gray-50 p-4 rounded-lg space-y-3">
+            {comments.map(comment => (
+              <div key={comment.id} className="bg-gray-50 p-4 rounded-lg space-y-3">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
-                      {comment.user_avatar_url ? <AvatarImage src={comment.user_avatar_url} alt={comment.user_display_name} /> : <AvatarFallback>
+                      {comment.user_avatar_url ? (
+                        <AvatarImage src={comment.user_avatar_url} alt={comment.user_display_name} />
+                      ) : (
+                        <AvatarFallback>
                           {(comment.user_display_name?.[0] || "A").toUpperCase()}
-                        </AvatarFallback>}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                     <div>
                       <div className="font-medium">{comment.user_display_name || "Anonymous"}</div>
@@ -287,26 +367,44 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
                       </div>
                     </div>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => handleReportContent('comment', comment.id)}
-                    className="text-muted-foreground h-8 px-2"
-                  >
-                    <Flag className="w-3.5 h-3.5 mr-1" />
-                    Report
-                  </Button>
+                  <div className="flex gap-2">
+                    {comment.user_id === currentUserId && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => confirmDelete('comment', comment.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 px-2"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleReportContent('comment', comment.id)}
+                      className="text-muted-foreground h-8 px-2"
+                    >
+                      <Flag className="w-3.5 h-3.5 mr-1" />
+                      Report
+                    </Button>
+                  </div>
                 </div>
                 <p className="text-gray-700">{comment.content}</p>
 
-                {comment.replies && comment.replies.length > 0 && <div className="ml-8 mt-2 space-y-3">
-                    {comment.replies.map(reply => <div key={reply.id} className="bg-white p-3 rounded-lg border">
+                {comment.replies && comment.replies.length > 0 && (
+                  <div className="ml-8 mt-2 space-y-3">
+                    {comment.replies.map(reply => (
+                      <div key={reply.id} className="bg-white p-3 rounded-lg border">
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <div className="flex items-center gap-2">
                             <Avatar className="h-6 w-6">
-                              {reply.user_avatar_url ? <AvatarImage src={reply.user_avatar_url} alt={reply.user_display_name} /> : <AvatarFallback>
+                              {reply.user_avatar_url ? (
+                                <AvatarImage src={reply.user_avatar_url} alt={reply.user_display_name} />
+                              ) : (
+                                <AvatarFallback>
                                   {(reply.user_display_name?.[0] || "A").toUpperCase()}
-                                </AvatarFallback>}
+                                </AvatarFallback>
+                              )}
                             </Avatar>
                             <div>
                               <div className="font-medium text-sm">{reply.user_display_name || "Anonymous"}</div>
@@ -315,19 +413,33 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
                               </div>
                             </div>
                           </div>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleReportContent('reply', reply.id)}
-                            className="text-muted-foreground h-7 px-2"
-                          >
-                            <Flag className="w-3 h-3 mr-1" />
-                            Report
-                          </Button>
+                          <div className="flex gap-2">
+                            {reply.user_id === currentUserId && (
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => confirmDelete('reply', reply.id)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 px-2"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            )}
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleReportContent('reply', reply.id)}
+                              className="text-muted-foreground h-7 px-2"
+                            >
+                              <Flag className="w-3 h-3 mr-1" />
+                              Report
+                            </Button>
+                          </div>
                         </div>
                         <p className="text-gray-700 text-sm">{reply.content}</p>
-                      </div>)}
-                  </div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {isAuthor && <div className="mt-2">
                     {replyingTo === comment.id ? <div className="space-y-2">
@@ -347,7 +459,8 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
                         Reply
                       </Button>}
                   </div>}
-              </div>)}
+              </div>
+            ))}
           </div>
 
           <form onSubmit={handleSubmitComment} className="space-y-4">
@@ -358,7 +471,16 @@ const CommunityNoteModal: React.FC<CommunityNoteModalProps> = ({
           </form>
         </div>
       </div>
-    </div>;
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteClick}
+        title={`Delete ${deleteType}`}
+        description={`Are you sure you want to delete this ${deleteType}? This action cannot be undone.`}
+      />
+    </div>
+  );
 };
 
 export default CommunityNoteModal;
