@@ -14,7 +14,6 @@ import ImageViewer from '@/components/ImageViewer';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import CommunityContributors from './CommunityContributors';
-
 interface LocationCardProps {
   recommendation: Recommendation;
   className?: string;
@@ -22,7 +21,6 @@ interface LocationCardProps {
   reviewCount?: number;
   showDistanceUnderAddress?: boolean;
 }
-
 const LocationCard: React.FC<LocationCardProps> = ({
   recommendation,
   className,
@@ -54,7 +52,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
   const hideAvailabilityDropdown = recommendation.hideAvailabilityDropdown || false;
   const [contributors, setContributors] = useState<any[]>([]);
   const [notesCount, setNotesCount] = useState(0);
-
   useEffect(() => {
     const getCurrentUser = async () => {
       const {
@@ -72,7 +69,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       authListener?.subscription.unsubscribe();
     };
   }, []);
-
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -81,17 +77,16 @@ const LocationCard: React.FC<LocationCardProps> = ({
       clearInterval(timer);
     };
   }, []);
-
   const fetchCommunityNotes = async () => {
     try {
-      const { data: notes, error, count } = await supabase
-        .from('community_notes')
-        .select('id, user_id', { count: 'exact' })
-        .eq('location_id', recommendation.id)
-        .limit(8);
-
+      const {
+        data: notes,
+        error,
+        count
+      } = await supabase.from('community_notes').select('id, user_id', {
+        count: 'exact'
+      }).eq('location_id', recommendation.id).limit(8);
       if (error) throw error;
-      
       if (notes) {
         setContributors(notes);
         setNotesCount(count || 0);
@@ -100,17 +95,14 @@ const LocationCard: React.FC<LocationCardProps> = ({
       console.error('Error fetching community notes:', error);
     }
   };
-
   useEffect(() => {
     if (recommendation.id) {
       fetchCommunityNotes();
     }
   }, [recommendation.id]);
-
   const handleContributorsClick = () => {
     navigate(`/location/${recommendation.id}#community-notes`);
   };
-
   const calculateOpenStatus = (): boolean | undefined => {
     if (recommendation.openNow === true) return true;
     if (recommendation.openNow === false) return false;
@@ -167,7 +159,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return undefined;
   };
-
   const parseTimeString = (timeString: string): number => {
     try {
       if (!timeString) return 0;
@@ -209,12 +200,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return 0;
     }
   };
-
   const images = recommendation.images && recommendation.images.length > 0 ? recommendation.images : [recommendation.image];
   React.useEffect(() => {
     setImageLoaded(Array(images.length).fill(false));
   }, [images.length]);
-
   const handleImageLoad = (index: number) => {
     setImageLoaded(prev => {
       const newState = [...prev];
@@ -222,13 +211,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
       return newState;
     });
   };
-
   const handleImageClick = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedImageIndex(index);
     setImageViewerOpen(true);
   };
-
   const getMedalStyle = (rank: number) => {
     switch (rank) {
       case 1:
@@ -253,7 +240,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
         };
     }
   };
-
   const renderStarRating = (rating: number) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
@@ -271,7 +257,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
         {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => <Star key={`empty-${i}`} className="stroke-amber-500 w-3.5 h-3.5" />)}
       </div>;
   };
-
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast({
@@ -280,7 +265,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
-
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     const phoneNumber = recommendation.phone || '';
@@ -293,7 +277,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 3000
     });
   };
-
   const handleInstagramClick = (e: React.MouseEvent, instagram: string | undefined, businessName: string) => {
     e.stopPropagation();
     if (instagram) {
@@ -312,7 +295,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
-
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) {
@@ -333,7 +315,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
-
   const handleDirections = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (recommendation.map_link && recommendation.map_link.trim() !== '') {
@@ -359,7 +340,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
       duration: 2000
     });
   };
-
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (navigator.share) {
@@ -393,11 +373,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
       });
     }
   };
-
   const handleCardClick = () => {
     navigate(`/location/${recommendation.id}`);
   };
-
   const formatDistance = (distanceText: string | undefined) => {
     if (!distanceText) return '';
     const distanceMatch = distanceText.match(/(\d+(\.\d+)?)/);
@@ -409,7 +387,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     formattedDistance = formattedDistance.replace('away away', 'away');
     return formattedDistance;
   };
-
   const formatPrice = () => {
     if (recommendation.price_range_min && recommendation.price_range_max && recommendation.price_unit) {
       return `${recommendation.price_range_min}-${recommendation.price_range_max}/${recommendation.price_unit.replace('per ', '')}`;
@@ -420,7 +397,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return '';
   };
-
   const formatBusinessHours = (hours: string | undefined) => {
     if (!hours) {
       if (recommendation.availability_days && recommendation.availability_days.length > 0) {
@@ -445,22 +421,18 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return hours;
   };
-
   const hasAvailabilityInfo = () => {
     return recommendation.availability_days && Array.isArray(recommendation.availability_days) && recommendation.availability_days.length > 0;
   };
-
   const hasInstagram = () => {
     return recommendation.instagram && typeof recommendation.instagram === 'string' && recommendation.instagram.trim() !== '';
   };
-
   const formatAvailabilityDays = () => {
     if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
       return null;
     }
     return recommendation.availability_days.map(day => formatDayShort(day)).join(', ');
   };
-
   const formatDayRange = (days: string[]): string => {
     if (!days || days.length === 0) return '';
     const dayAbbreviations: Record<string, string> = {
@@ -505,7 +477,6 @@ const LocationCard: React.FC<LocationCardProps> = ({
     }
     return ranges.join(', ');
   };
-
   const formatDayShort = (day: string): string => {
     const dayMap: Record<string, string> = {
       'monday': 'Mon',
@@ -518,57 +489,41 @@ const LocationCard: React.FC<LocationCardProps> = ({
     };
     return dayMap[day.toLowerCase()] || day;
   };
-
   const formatTime = (time: string | undefined): string => {
     if (!time) return '';
     return time;
   };
-
   const getAvailabilityHoursDisplay = (): string => {
     if (recommendation.availability_start_time && recommendation.availability_end_time) {
       return `${formatTime(recommendation.availability_start_time)}-${formatTime(recommendation.availability_end_time)}`;
     }
     return businessHours || '';
   };
-
   const getAvailabilityDaysDisplay = (): React.ReactNode => {
     if (!recommendation.availability_days || recommendation.availability_days.length === 0) {
       return null;
     }
     return recommendation.availability_days.map(day => formatDayShort(day)).join(', ');
   };
-
   const businessHours = formatBusinessHours(recommendation.hours || recommendation.availability);
   const availabilityInfo = formatAvailabilityDays();
   const isSearchResultCard = className?.includes('search-result-card');
   const isLocationDetailsPage = window.location.pathname.includes('/location/');
   const shouldIncreaseHeight = isSearchResultCard || isLocationDetailsPage;
   const imageHeightClass = shouldIncreaseHeight ? "h-[400px]" : "h-72";
-
-  return (
-    <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
+  return <div onClick={handleCardClick} className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all-300 cursor-pointer", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", className)}>
       <div className={cn("relative w-full overflow-hidden", imageHeightClass)}>
         <Carousel className="w-full h-full">
           <CarouselContent className="h-full">
-            {images.map((img, index) => (
-              <CarouselItem key={index} className="h-full p-0">
+            {images.map((img, index) => <CarouselItem key={index} className="h-full p-0">
                 <div className={cn("absolute inset-0 bg-muted/30", imageLoaded[index] ? "opacity-0" : "opacity-100")} />
-                <img 
-                  src={img} 
-                  alt={`${recommendation.name} - image ${index + 1}`} 
-                  onLoad={() => handleImageLoad(index)} 
-                  onClick={e => handleImageClick(index, e)} 
-                  className={cn("w-full transition-all-500 cursor-pointer", imageHeightClass, shouldIncreaseHeight ? "object-cover" : "object-contain", imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm")} 
-                />
-              </CarouselItem>
-            ))}
+                <img src={img} alt={`${recommendation.name} - image ${index + 1}`} onLoad={() => handleImageLoad(index)} onClick={e => handleImageClick(index, e)} className={cn("w-full transition-all-500 cursor-pointer", imageHeightClass, shouldIncreaseHeight ? "object-cover" : "object-contain", imageLoaded[index] ? "opacity-100 blur-0" : "opacity-0 blur-sm")} />
+              </CarouselItem>)}
           </CarouselContent>
-          {images.length > 1 && (
-            <>
+          {images.length > 1 && <>
               <CarouselPrevious className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2" />
               <CarouselNext className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2" />
-            </>
-          )}
+            </>}
         </Carousel>
 
         <div className="absolute top-3 left-20 z-10">
@@ -578,26 +533,17 @@ const LocationCard: React.FC<LocationCardProps> = ({
         </div>
         
         <div className="absolute bottom-3 left-3 z-10 flex flex-col gap-2">
-          {showHiddenGemBadge && (
-            <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/90 backdrop-blur-sm text-white flex items-center">
+          {showHiddenGemBadge && <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/90 backdrop-blur-sm text-white flex items-center">
               <Sparkles className="h-3 w-3 mr-1" />
               Hidden Gem
-            </span>
-          )}
-          {showMustVisitBadge && (
-            <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/90 backdrop-blur-sm text-white flex items-center">
+            </span>}
+          {showMustVisitBadge && <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/90 backdrop-blur-sm text-white flex items-center">
               <Award className="h-3 w-3 mr-1" />
               Must Visit
-            </span>
-          )}
+            </span>}
         </div>
         
-        <button 
-          onClick={handleWishlistToggle} 
-          className={cn("absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10", 
-            user ? (inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500") : "text-muted-foreground"
-          )}
-        >
+        <button onClick={handleWishlistToggle} className={cn("absolute top-3 right-3 p-2 rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-all z-10", user ? inWishlist ? "text-rose-500" : "text-muted-foreground hover:text-rose-500" : "text-muted-foreground")}>
           {user ? <Heart className={cn("w-5 h-5", inWishlist && "fill-rose-500")} /> : <LogIn className="w-5 h-5" />}
         </button>
       </div>
@@ -605,11 +551,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
       <div className="p-4">
         <div className="flex justify-between items-start gap-2 mb-2">
           <div className="flex items-center gap-1.5">
-            {ranking !== undefined && ranking <= 10 && (
-              <div className={cn("flex items-center justify-center rounded-full border-2 flex-shrink-0", getMedalStyle(ranking).medalClass)}>
+            {ranking !== undefined && ranking <= 10 && <div className={cn("flex items-center justify-center rounded-full border-2 flex-shrink-0", getMedalStyle(ranking).medalClass)}>
                 {ranking}
-              </div>
-            )}
+              </div>}
             <h3 className="font-bold text-2xl">{recommendation.name}</h3>
           </div>
         </div>
@@ -627,128 +571,78 @@ const LocationCard: React.FC<LocationCardProps> = ({
               <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
               <span className="truncate">{recommendation.address}</span>
             </div>
-            {hasInstagram() && (
-              <button 
-                onClick={e => handleInstagramClick(e, recommendation.instagram, recommendation.name)} 
-                title="Watch video content" 
-                className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 hover:shadow-md transition-all ml-2 p-1.5 flex items-center rounded py-[4px] mx-[2px] px-[15px]"
-              >
+            {hasInstagram() && <button onClick={e => handleInstagramClick(e, recommendation.instagram, recommendation.name)} title="Watch video content" className="bg-gradient-to-tr from-purple-500 via-pink-500 to-yellow-500 hover:shadow-md transition-all ml-2 p-1.5 flex items-center rounded py-[4px] mx-[2px] px-[15px]">
                 <Film className="h-4 w-4 text-white mr-1" />
                 <span className="text-white text-xs font-medium">Video</span>
-              </button>
-            )}
+              </button>}
           </div>
         </div>
 
         <div className="flex flex-col text-sm mb-3">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              {(hasAvailabilityInfo() || businessHours) && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger 
-                    onClick={e => e.stopPropagation()} 
-                    className="ml-2 inline-flex items-center text-xs font-medium transition-colors rounded text-slate-50 px-[12px] mx-[2px] bg-zinc-800 hover:bg-zinc-700"
-                  >
+              {(hasAvailabilityInfo() || businessHours) && <DropdownMenu>
+                  <DropdownMenuTrigger onClick={e => e.stopPropagation()} className="ml-2 inline-flex items-center text-xs font-medium transition-colors rounded text-slate-50 px-[12px] mx-[2px] bg-green-700 hover:bg-green-600">
                     <Calendar className="h-3.5 w-3.5 mr-1" />
                     <span className="underline text-sm px-0 mx-px">Hours</span>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" sideOffset={5} className="bg-white w-48 p-2 shadow-md rounded-md border z-50">
-                    {getAvailabilityDaysDisplay() && (
-                      <div className="mb-1">
+                    {getAvailabilityDaysDisplay() && <div className="mb-1">
                         <div className="text-xs font-medium text-muted-foreground mb-1">Days:</div>
                         <div className="text-sm">{getAvailabilityDaysDisplay()}</div>
-                      </div>
-                    )}
-                    {getAvailabilityHoursDisplay() && (
-                      <div>
+                      </div>}
+                    {getAvailabilityHoursDisplay() && <div>
                         <div className="text-xs font-medium text-muted-foreground mb-1">Hours:</div>
                         <div className="text-sm">{getAvailabilityHoursDisplay()}</div>
-                      </div>
-                    )}
+                      </div>}
                   </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+                </DropdownMenu>}
 
-              {notesCount > 0 && (
-                <CommunityContributors
-                  contributors={contributors}
-                  total={notesCount}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleContributorsClick();
-                  }}
-                />
-              )}
+              {notesCount > 0 && <CommunityContributors contributors={contributors} total={notesCount} onClick={e => {
+              e.stopPropagation();
+              handleContributorsClick();
+            }} />}
             </div>
           </div>
         </div>
 
-        {isSearchPage ? (
-          <ScrollArea className="h-[120px] mb-4">
+        {isSearchPage ? <ScrollArea className="h-[120px] mb-4">
             <p className="font-normal text-slate-700 leading-normal text-sm line-clamp-6">
               {recommendation.description}
             </p>
-          </ScrollArea>
-        ) : (
-          <ScrollArea className="h-[120px] mb-4">
+          </ScrollArea> : <ScrollArea className="h-[120px] mb-4">
             <p className="font-normal text-slate-700 leading-normal text-sm line-clamp-6">
               {recommendation.description}
             </p>
-          </ScrollArea>
-        )}
+          </ScrollArea>}
 
         <div className="flex gap-2 mt-4 flex-wrap">
-          {formatPrice() && (
-            <Badge className="flex items-center gap-1 bg-[#c63e7b] px-[7px] py-[4px]">
+          {formatPrice() && <Badge className="flex items-center gap-1 bg-[#c63e7b] px-[7px] py-[4px]">
               <IndianRupee className="h-3.5 w-3.5" />
               {formatPrice()}
-            </Badge>
-          )}
-          {recommendation.tags && recommendation.tags.map((tag, index) => (
-            <Badge key={index} className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
+            </Badge>}
+          {recommendation.tags && recommendation.tags.map((tag, index) => <Badge key={index} className="bg-[#1EAEDB] text-white text-xs px-2 py-1 rounded-full">
               {tag}
-            </Badge>
-          ))}
+            </Badge>)}
         </div>
 
         <div className="flex gap-2 mt-4">
-          <button 
-            onClick={handleCall} 
-            className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 text-slate-50 rounded"
-          >
+          <button onClick={handleCall} className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 text-slate-50 rounded">
             <Phone className="h-5 w-5" />
           </button>
-          <button 
-            onClick={handleWhatsApp} 
-            className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 rounded bg-green-500 hover:bg-green-400"
-          >
+          <button onClick={handleWhatsApp} className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 rounded bg-green-500 hover:bg-green-400">
             <MessageCircle className="h-5 w-5" />
           </button>
-          <button 
-            onClick={handleDirections} 
-            className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 rounded bg-gray-700 hover:bg-gray-600"
-          >
+          <button onClick={handleDirections} className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 rounded bg-gray-700 hover:bg-gray-600">
             <Navigation2 className="h-5 w-5" />
           </button>
-          <button 
-            onClick={handleShare} 
-            className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 rounded bg-purple-600 hover:bg-purple-500"
-          >
+          <button onClick={handleShare} className="flex-1 h-10 border border-emerald-200 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(16,185,129,0.2)] hover:shadow-[0_3px_0px_0px_rgba(16,185,129,0.2)] active:shadow-none active:translate-y-[3px] text-slate-50 rounded bg-purple-600 hover:bg-purple-500">
             <Share2 className="h-5 w-5" />
           </button>
         </div>
       </div>
       
-      {imageViewerOpen && (
-        <ImageViewer
-          images={images}
-          initialIndex={selectedImageIndex}
-          open={imageViewerOpen}
-          onOpenChange={setImageViewerOpen}
-        />
-      )}
-    </div>
-  );
+      {imageViewerOpen && <ImageViewer images={images} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />}
+    </div>;
 };
-
 export default LocationCard;
