@@ -95,7 +95,7 @@ const LocationsList: React.FC<LocationsListProps> = ({
             className="animate-fade-in" 
             style={{ animationDelay: `${index * 50}ms` }}
           >
-            <LocationCard 
+            <LocationCard
               recommendation={{
                 ...recommendation,
                 rating: displayRating, // Override with user rating if available

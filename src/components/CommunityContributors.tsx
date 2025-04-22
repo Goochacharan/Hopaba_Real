@@ -3,7 +3,7 @@ import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User } from 'lucide-react';
 
-interface Contributor {
+export interface Contributor {
   id: string;
   user_id: string;
   avatar_url?: string;
@@ -14,7 +14,7 @@ interface CommunityContributorsProps {
   contributors: Contributor[];
   total: number;
   maxDisplayed?: number;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 const CommunityContributors: React.FC<CommunityContributorsProps> = ({
