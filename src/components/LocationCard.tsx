@@ -14,6 +14,7 @@ import ImageViewer from '@/components/ImageViewer';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import CommunityContributors from './CommunityContributors';
+import RatingProgressBars from '@/components/RatingProgressBars';
 
 interface LocationCardProps {
   recommendation: Recommendation;
@@ -641,15 +642,24 @@ const LocationCard: React.FC<LocationCardProps> = ({
           </div>
         </div>
 
-        {isSearchPage ? <ScrollArea className="h-[120px] mb-4">
+        <RatingProgressBars
+          criteriaRatings={recommendation.criteriaRatings || {}}
+          locationId={recommendation.id}
+        />
+
+        {isSearchPage ? (
+          <ScrollArea className="h-[120px] mb-4">
             <p className="font-normal text-slate-700 leading-normal text-sm line-clamp-6">
               {recommendation.description}
             </p>
-          </ScrollArea> : <ScrollArea className="h-[120px] mb-4">
+          </ScrollArea>
+        ) : (
+          <ScrollArea className="h-[120px] mb-4">
             <p className="font-normal text-slate-700 leading-normal text-sm line-clamp-6">
               {recommendation.description}
             </p>
-          </ScrollArea>}
+          </ScrollArea>
+        )}
 
         <div className="flex gap-2 mt-4 flex-wrap">
           {formatPrice() && <Badge className="flex items-center gap-1 bg-[#c63e7b] px-[7px] py-[4px]">

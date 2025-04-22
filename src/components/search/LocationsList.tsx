@@ -98,15 +98,15 @@ const LocationsList: React.FC<LocationsListProps> = ({
             <LocationCard
               recommendation={{
                 ...recommendation,
-                rating: displayRating, // Override with user rating if available
+                rating: displayRating,
                 address: recommendation.address || (recommendation.area && recommendation.city ? `${recommendation.area}, ${recommendation.city}` : recommendation.address || ''),
                 availability_days: availabilityDaysString,
-                // Ensure hours data is properly passed
                 hours: recommendation.hours || '',
                 availability: recommendation.availability || '',
                 availability_start_time: recommendation.availability_start_time || undefined,
                 availability_end_time: recommendation.availability_end_time || undefined,
-                hideAvailabilityDropdown: true // Add this flag to hide the availability dropdown
+                hideAvailabilityDropdown: true,
+                criteriaRatings: recommendation.criteriaRatings || {} // Add this line
               }}
               showDistanceUnderAddress={true}
               className="search-result-card h-full"
