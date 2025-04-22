@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -5,28 +6,29 @@ import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
 import { MultimediaEditor } from "./MultimediaEditor";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Flag } from "lucide-react";
+
 interface CommunityNoteFormProps {
   locationId: string;
   onNoteCreated: () => void;
 }
+
 interface ContentBlock {
   type: 'text' | 'image' | 'video' | 'link';
   content: string;
 }
+
 const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({
   locationId,
   onNoteCreated
 }) => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [blocks, setBlocks] = useState<ContentBlock[]>([{
     type: 'text',
     content: ''
   }]);
   const [adding, setAdding] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
@@ -97,7 +99,9 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({
       setAdding(false);
     }
   };
-  return <form onSubmit={handleSubmit} className="mb-6 bg-white border rounded-lg p-5 px-[13px]">
+
+  return (
+    <form onSubmit={handleSubmit} className="mb-6 bg-white border rounded-lg p-5 px-[13px]">
       <div className="mb-6">
         <div className="bg-muted/50 rounded-lg p-4 mb-4">
           <h4 className="font-semibold mb-2">Community Guidelines</h4>
@@ -114,25 +118,25 @@ const CommunityNoteForm: React.FC<CommunityNoteFormProps> = ({
       </div>
 
       <div className="mb-3">
-        <input className="w-full border rounded px-2 py-2 mb-1 text-lg font-medium" placeholder="Article title" value={title} onChange={e => setTitle(e.target.value)} maxLength={80} required />
+        <input 
+          className="w-full border rounded px-2 py-2 mb-1 text-lg font-medium" 
+          placeholder="Article title" 
+          value={title} 
+          onChange={e => setTitle(e.target.value)} 
+          maxLength={80} 
+          required 
+        />
       </div>
 
       <MultimediaEditor value={blocks} onChange={setBlocks} />
 
-      <div className="flex justify-between mt-4">
+      <div className="flex justify-end mt-4">
         <Button type="submit" disabled={adding}>
           {adding ? "Submitting..." : "Submit Note"}
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => {
-        toast({
-          title: "Thank you for reporting",
-          description: "We will review this content shortly."
-        });
-      }} className="text-muted-foreground">
-          <Flag className="w-4 h-4 mr-1" />
-          Report
-        </Button>
       </div>
-    </form>;
+    </form>
+  );
 };
+
 export default CommunityNoteForm;
