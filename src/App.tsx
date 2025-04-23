@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,12 +9,14 @@ import { AuthProvider } from "./hooks/useAuth";
 import React, { Suspense, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
-// Lazy load route components with chunks named for better debugging
+// Eagerly import MyList to ensure it's available
+import MyList from "./pages/MyList";
+
+// Lazy load other route components with chunks named for better debugging
 const SearchResults = React.lazy(() => import(/* webpackChunkName: "search-results" */ "./pages/SearchResults"));
 const LocationDetails = React.lazy(() => import(/* webpackChunkName: "location-details" */ "./pages/LocationDetails"));
 const NotFound = React.lazy(() => import(/* webpackChunkName: "not-found" */ "./pages/NotFound"));
 const Profile = React.lazy(() => import(/* webpackChunkName: "profile" */ "./pages/Profile"));
-const MyList = React.lazy(() => import(/* webpackChunkName: "my-list" */ "./pages/MyList"));
 const Events = React.lazy(() => import(/* webpackChunkName: "events" */ "./pages/Events"));
 const Map = React.lazy(() => import(/* webpackChunkName: "map" */ "./pages/Map"));
 const Login = React.lazy(() => import(/* webpackChunkName: "login" */ "./pages/Login"));
@@ -46,6 +49,24 @@ const PageLoader = () => (
   </div>
 );
 
+// Error boundary component for handling lazy load errors
+const ErrorFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background/50">
+    <div className="bg-white p-6 rounded-lg shadow-lg max-w-md text-center">
+      <h2 className="text-xl font-semibold text-destructive mb-2">Something went wrong</h2>
+      <p className="text-muted-foreground mb-4">
+        We encountered an error loading this page. Please try refreshing.
+      </p>
+      <button 
+        onClick={() => window.location.reload()}
+        className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 transition-colors"
+      >
+        Refresh Page
+      </button>
+    </div>
+  </div>
+);
+
 // Route prefetching component
 const RoutePrefetcher = () => {
   const location = useLocation();
@@ -59,6 +80,9 @@ const RoutePrefetcher = () => {
       } else if (location.pathname.startsWith('/marketplace')) {
         import("./pages/MarketplaceListingDetails");
         import("./pages/SellerDetails");
+      } else if (location.pathname === '/my-list') {
+        // Make sure MyList is always loaded when on this route
+        import("./pages/MyList"); 
       }
     };
 
@@ -67,6 +91,30 @@ const RoutePrefetcher = () => {
 
   return null;
 };
+
+// Custom ErrorBoundary for lazy-loaded components
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
+  constructor(props: {children: React.ReactNode}) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    console.error("Route loading error:", error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <ErrorFallback />;
+    }
+
+    return this.props.children;
+  }
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -77,25 +125,27 @@ const App = () => (
             <Toaster />
             <Sonner />
             <RoutePrefetcher />
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<SearchResults />} />
-                <Route path="/search" element={<SearchResults />} />
-                <Route path="/location/:id" element={<LocationDetails />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/my-list" element={<MyList />} />
-                <Route path="/events" element={<Events />} />
-                <Route path="/map" element={<Map />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/marketplace/:id" element={<MarketplaceListingDetails />} />
-                <Route path="/seller/:id" element={<SellerDetails />} />
-                <Route path="/admin" element={<AdminPanel />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<SearchResults />} />
+                  <Route path="/search" element={<SearchResults />} />
+                  <Route path="/location/:id" element={<LocationDetails />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/my-list" element={<MyList />} />
+                  <Route path="/events" element={<Events />} />
+                  <Route path="/map" element={<Map />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/marketplace" element={<Marketplace />} />
+                  <Route path="/marketplace/:id" element={<MarketplaceListingDetails />} />
+                  <Route path="/seller/:id" element={<SellerDetails />} />
+                  <Route path="/admin" element={<AdminPanel />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
           </TooltipProvider>
         </WishlistProvider>
       </AuthProvider>

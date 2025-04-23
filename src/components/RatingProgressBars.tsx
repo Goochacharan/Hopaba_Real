@@ -65,6 +65,7 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
 
   const [criterionNames, setCriterionNames] = useState<{[key: string]: string}>({});
   const [loading, setLoading] = useState<boolean>(true);
+  const [fetchError, setFetchError] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchCriterionNames = async () => {
@@ -76,7 +77,11 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
             .from('review_criteria')
             .select('id, name')
             .in('id', criterionIds);
-          if (error) throw error;
+          
+          if (error) {
+            throw error;
+          }
+          
           const namesMap: {[key: string]: string} = {};
           data?.forEach(criterion => {
             namesMap[criterion.id] = criterion.name;
@@ -85,10 +90,19 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
         }
       } catch (err) {
         console.error('Error fetching criterion names:', err);
+        setFetchError(true);
+        
+        // Fallback to using ID as the name if fetch fails
+        const fallbackNames: {[key: string]: string} = {};
+        Object.keys(mergedRatings).forEach(id => {
+          fallbackNames[id] = `Criterion ${id.slice(0, 4)}`;
+        });
+        setCriterionNames(fallbackNames);
       } finally {
         setLoading(false);
       }
     };
+    
     fetchCriterionNames();
   }, [mergedRatings]);
 
@@ -108,7 +122,7 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
   const getCenterPosition = () => {
     // Height of progress bars + gap between them
     const barHeight = 16; // h-4 is 16px
-    const gapSize = 4; // reducing gap size from 8px to 4px
+    const gapSize = 1; // reducing gap size to 1px
     const totalBars = Object.keys(mergedRatings).length;
     
     // If there's only one bar, center is at the middle of that bar
@@ -134,14 +148,14 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
             title="Overall rating"
             className="flex items-center justify-center border-4 font-bold"
             style={{
-              width: 60,
-              height: 60,
+              width: 70,
+              height: 70,
               borderRadius: '50%',
               color: overallColor,
               borderColor: overallColor,
-              fontSize: 28,
+              fontSize: 32,
               background: '#fff',
-              boxShadow: '0 0 4px 0 rgba(0,0,0,0.03)'
+              boxShadow: '0 0 4px 0 rgba(0,0,0,0.05)'
             }}
           >
             {overallRating100}
@@ -149,7 +163,7 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
         </div>
 
         {/* Progress bars container */}
-        <div className="w-full pr-[80px]">
+        <div className="w-full pr-[90px]">
           {Object.entries(mergedRatings).map(([criterionId, rating]) => {
             const normalizedRating = (rating / 10) * 100;
             const ratingColor = getOverallRatingColor(normalizedRating);
@@ -158,7 +172,7 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
 
             return (
               <div key={criterionId} className="flex items-center gap-1 mb-1 relative">
-                <div className="w-20 text-sm text-muted-foreground text-left pr-1">
+                <div className="w-16 text-sm text-muted-foreground text-left pr-1">
                   {displayName}
                 </div>
                 <div className="flex-1 relative">
