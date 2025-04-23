@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ const getStoredReviews = (locationId: string): Review[] => {
 const storeReviews = (locationId: string, reviews: Review[]) => {
   try {
     localStorage.setItem(`reviews_${locationId}`, JSON.stringify(reviews));
+    console.log('Stored reviews for location:', locationId, reviews);
   } catch (error) {
     console.error('Error storing reviews:', error);
   }
@@ -75,6 +77,7 @@ const LocationDetails = () => {
     }
     setLoading(true);
     
+    // Load saved reviews from localStorage for this location
     const savedReviews = getStoredReviews(id);
     setUserReviews(savedReviews);
     

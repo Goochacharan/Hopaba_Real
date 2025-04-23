@@ -54,8 +54,18 @@ const getOverallRatingColor = (ratingNum: number) => {
 };
 
 const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings, locationId }) => {
+  // Fetch stored ratings and merge with provided ratings, giving priority to stored ratings
   const storedRatings = getStoredCriteriaRatings(locationId);
-  const mergedRatings = { ...criteriaRatings, ...storedRatings };
+  // Create a deep copy of criteriaRatings to avoid mutation issues
+  const mergedRatings = { ...criteriaRatings };
+  
+  // If we have stored ratings for this location, they take precedence
+  if (Object.keys(storedRatings).length > 0) {
+    Object.keys(storedRatings).forEach(criterionId => {
+      mergedRatings[criterionId] = storedRatings[criterionId];
+    });
+  }
+  
   const [criterionNames, setCriterionNames] = useState<{[key: string]: string}>({});
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -88,7 +98,7 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
   // Calculate overall average as 0-100, based on average of all criteria (each out of 10) 
   let allRatings: number[] = [];
   Object.values(mergedRatings).forEach(val => {
-    if (!isNaN(val)) allRatings.push(Number(val));
+    if (!isNaN(Number(val))) allRatings.push(Number(val));
   });
   const averageRaw = allRatings.length
     ? allRatings.reduce((a, b) => a + b, 0) / allRatings.length
