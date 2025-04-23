@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
@@ -44,7 +43,6 @@ const getRatingLabel = (rating: number): string => {
   return 'Excellent';
 };
 
-// Map overall rating (0-100) to color
 const getOverallRatingColor = (ratingNum: number) => {
   if (ratingNum <= 30) return '#ea384c'; // dark red
   if (ratingNum <= 50) return '#F97316'; // orange
@@ -54,18 +52,15 @@ const getOverallRatingColor = (ratingNum: number) => {
 };
 
 const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings, locationId }) => {
-  // Fetch stored ratings and merge with provided ratings, giving priority to stored ratings
   const storedRatings = getStoredCriteriaRatings(locationId);
-  // Create a deep copy of criteriaRatings to avoid mutation issues
   const mergedRatings = { ...criteriaRatings };
-  
-  // If we have stored ratings for this location, they take precedence
+
   if (Object.keys(storedRatings).length > 0) {
     Object.keys(storedRatings).forEach(criterionId => {
       mergedRatings[criterionId] = storedRatings[criterionId];
     });
   }
-  
+
   const [criterionNames, setCriterionNames] = useState<{[key: string]: string}>({});
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -95,7 +90,6 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
     fetchCriterionNames();
   }, [mergedRatings]);
 
-  // Calculate overall average as 0-100, based on average of all criteria (each out of 10) 
   let allRatings: number[] = [];
   Object.values(mergedRatings).forEach(val => {
     if (!isNaN(Number(val))) allRatings.push(Number(val));
@@ -106,25 +100,23 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
   const overallRating100 = Math.round((averageRaw / 10) * 100);
   const overallColor = getOverallRatingColor(overallRating100);
 
-  // If no ratings, show nothing
   if (Object.keys(mergedRatings).length === 0) return null;
 
   return (
-    <div className="w-full space-y-3 mt-2 mb-4 flex flex-col gap-3">
+    <div className="w-full space-y-2 mt-2 mb-4 flex flex-col gap-2">
       {Object.entries(mergedRatings).map(([criterionId, rating], idx) => {
-        const normalizedRating = (rating / 10) * 100; // 1-10 to 0-100
+        const normalizedRating = (rating / 10) * 100;
         const ratingColor = getOverallRatingColor(normalizedRating);
         const ratingLabel = getRatingLabel(rating);
         const displayName = criterionNames[criterionId] || criterionId;
 
         return (
-          <div key={criterionId} className="flex items-center gap-3 relative">
-            <div className="w-32 text-sm text-muted-foreground text-left">
+          <div key={criterionId} className="flex items-center gap-2 relative">
+            <div className="w-28 text-sm text-muted-foreground text-left pr-2">
               {displayName}
             </div>
             <div className="flex-1 flex items-center gap-2 relative">
-              {/* Progress bar width shortened to fit indicator at right */}
-              <div className="w-[calc(100%-65px)] relative">
+              <div className="w-[calc(100%-70px)] relative">
                 <Progress
                   value={normalizedRating}
                   className="h-4"
@@ -136,27 +128,23 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
                   </span>
                 </div>
               </div>
-              {/* Only render overall rating indicator on first bar */}
               {idx === 0 && (
-                <div className="flex items-center ml-4">
+                <div className="flex items-center justify-center ml-2">
                   <div
                     title="Overall rating"
-                    className="flex items-center justify-center border-4"
+                    className="flex items-center justify-center border-4 font-bold"
                     style={{
-                      width: 40,
-                      height: 40,
+                      width: 50,
+                      height: 50,
                       borderRadius: '50%',
                       color: overallColor,
                       borderColor: overallColor,
-                      fontWeight: 700,
-                      fontSize: 21,
+                      fontSize: 24,
                       background: '#fff',
                       boxShadow: '0 0 4px 0 rgba(0,0,0,0.03)'
                     }}
                   >
-                    <span className="font-bold" style={{ color: overallColor }}>
-                      {overallRating100}
-                    </span>
+                    {overallRating100}
                   </div>
                 </div>
               )}
