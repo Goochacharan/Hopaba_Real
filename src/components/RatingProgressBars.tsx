@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
@@ -55,6 +56,7 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
   const storedRatings = getStoredCriteriaRatings(locationId);
   const mergedRatings = { ...criteriaRatings };
 
+  // Use stored ratings if they exist to ensure persistence after refresh
   if (Object.keys(storedRatings).length > 0) {
     Object.keys(storedRatings).forEach(criterionId => {
       mergedRatings[criterionId] = storedRatings[criterionId];
@@ -102,56 +104,80 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
 
   if (Object.keys(mergedRatings).length === 0) return null;
 
+  // Calculate center position for the rating circle
+  const getCenterPosition = () => {
+    // Height of progress bars + gap between them
+    const barHeight = 16; // h-4 is 16px
+    const gapSize = 8; // gap-2 is 8px
+    const totalBars = Object.keys(mergedRatings).length;
+    
+    // If there's only one bar, center is at the middle of that bar
+    if (totalBars === 1) return 8; // Half of barHeight
+    
+    // If multiple bars, position at the middle point between first and last bar
+    const totalHeight = (barHeight * totalBars) + (gapSize * (totalBars - 1));
+    return totalHeight / 2 - 25; // Subtract half the circle height (50px/2) for centering
+  };
+
   return (
     <div className="w-full space-y-2 mt-2 mb-4 flex flex-col gap-2">
-      {Object.entries(mergedRatings).map(([criterionId, rating], idx) => {
-        const normalizedRating = (rating / 10) * 100;
-        const ratingColor = getOverallRatingColor(normalizedRating);
-        const ratingLabel = getRatingLabel(rating);
-        const displayName = criterionNames[criterionId] || criterionId;
+      <div className="flex relative">
+        {/* Rating circle positioned absolutely to align with center of progress bars */}
+        <div 
+          className="absolute right-0"
+          style={{
+            top: `${getCenterPosition()}px`,
+            transform: 'translateY(-50%)'
+          }}
+        >
+          <div
+            title="Overall rating"
+            className="flex items-center justify-center border-4 font-bold"
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: '50%',
+              color: overallColor,
+              borderColor: overallColor,
+              fontSize: 24,
+              background: '#fff',
+              boxShadow: '0 0 4px 0 rgba(0,0,0,0.03)'
+            }}
+          >
+            {overallRating100}
+          </div>
+        </div>
 
-        return (
-          <div key={criterionId} className="flex items-center gap-2 relative">
-            <div className="w-28 text-sm text-muted-foreground text-left pr-2">
-              {displayName}
-            </div>
-            <div className="flex-1 flex items-center gap-2 relative">
-              <div className="w-[calc(100%-70px)] relative">
-                <Progress
-                  value={normalizedRating}
-                  className="h-4"
-                  style={{ '--progress-color': ratingColor } as React.CSSProperties}
-                />
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                  <span className="text-xs font-medium text-white text-shadow" style={{ textShadow: '0px 0px 2px rgba(0,0,0,0.7)' }}>
-                    {ratingLabel}
-                  </span>
+        {/* Progress bars container */}
+        <div className="w-full pr-[70px]">
+          {Object.entries(mergedRatings).map(([criterionId, rating]) => {
+            const normalizedRating = (rating / 10) * 100;
+            const ratingColor = getOverallRatingColor(normalizedRating);
+            const ratingLabel = getRatingLabel(rating);
+            const displayName = criterionNames[criterionId] || criterionId;
+
+            return (
+              <div key={criterionId} className="flex items-center gap-2 mb-2 relative">
+                <div className="w-24 text-sm text-muted-foreground text-left pr-1">
+                  {displayName}
                 </div>
-              </div>
-              {idx === 0 && (
-                <div className="flex items-center justify-center ml-2">
-                  <div
-                    title="Overall rating"
-                    className="flex items-center justify-center border-4 font-bold"
-                    style={{
-                      width: 50,
-                      height: 50,
-                      borderRadius: '50%',
-                      color: overallColor,
-                      borderColor: overallColor,
-                      fontSize: 24,
-                      background: '#fff',
-                      boxShadow: '0 0 4px 0 rgba(0,0,0,0.03)'
-                    }}
-                  >
-                    {overallRating100}
+                <div className="flex-1 relative">
+                  <Progress
+                    value={normalizedRating}
+                    className="h-4"
+                    style={{ '--progress-color': ratingColor } as React.CSSProperties}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                    <span className="text-xs font-medium text-white text-shadow" style={{ textShadow: '0px 0px 2px rgba(0,0,0,0.7)' }}>
+                      {ratingLabel}
+                    </span>
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
-        );
-      })}
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 };
