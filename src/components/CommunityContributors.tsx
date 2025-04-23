@@ -20,7 +20,7 @@ const CommunityContributors: React.FC<CommunityContributorsProps> = ({
   onClick
 }) => {
   const displayedContributors = contributors.slice(0, maxDisplayed);
-  return <button onClick={onClick} className="flex items-center gap-1 hover:opacity-90 transition-opacity px-[6px] mx-[52px] font-normal text-base">
+  return <button onClick={onClick} className="flex items-center gap-1 hover:opacity-90 transition-opacity px-[6px] mx-[52px] text-lg font-normal">
       <div className="flex -space-x-3">
         {displayedContributors.map((contributor, index) => <Avatar key={contributor.id} className="w-6 h-6 border-2 border-white rounded-full bg-muted">
             {contributor.avatar_url ? <AvatarImage src={contributor.avatar_url} alt={contributor.user_display_name || 'Contributor'} /> : <AvatarFallback>
