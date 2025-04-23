@@ -94,6 +94,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [authAttempts, toast]);
 
   useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state change event:", event, "User:", session?.user?.id);
+      
+      if (event === 'SIGNED_IN' && session?.user) {
+        setUser(session.user);
+        // Use setTimeout to prevent Supabase auth deadlock
+        setTimeout(() => {
+          checkAdminStatus(session.user.id);
+        }, 0);
+        
+        toast({
+          title: "Signed in",
+          description: "You have been signed in successfully."
+        });
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setIsAdmin(false);
+        
+        toast({
+          title: "Signed out",
+          description: "You have been signed out successfully."
+        });
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log("Auth token refreshed");
+        // Make sure user state is updated when token is refreshed
+        if (session?.user) {
+          setUser(session.user);
+        }
+      }
+    });
+
+    // THEN check for existing session (after setting up the listener)
     const getUser = async () => {
       try {
         const { data, error } = await supabase.auth.getSession();
@@ -118,35 +150,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     getUser();
 
-    const { data } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state change event:", event, "User:", session?.user?.id);
-      
-      if (event === 'SIGNED_IN' && session?.user) {
-        setUser(session.user);
-        // Use setTimeout to prevent Supabase auth deadlock
-        setTimeout(() => {
-          checkAdminStatus(session.user.id);
-        }, 0);
-        
-        toast({
-          title: "Signed in",
-          description: "You have been signed in successfully."
-        });
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setIsAdmin(false);
-        
-        toast({
-          title: "Signed out",
-          description: "You have been signed out successfully."
-        });
-      } else if (event === 'TOKEN_REFRESHED') {
-        console.log("Auth token refreshed");
-      }
-    });
-
     return () => {
-      data.subscription.unsubscribe();
+      authListener.subscription.unsubscribe();
     };
   }, [toast]);
 

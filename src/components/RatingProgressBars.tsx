@@ -108,7 +108,7 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
   const getCenterPosition = () => {
     // Height of progress bars + gap between them
     const barHeight = 16; // h-4 is 16px
-    const gapSize = 8; // gap-2 is 8px
+    const gapSize = 4; // reducing gap size from 8px to 4px
     const totalBars = Object.keys(mergedRatings).length;
     
     // If there's only one bar, center is at the middle of that bar
@@ -116,11 +116,11 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
     
     // If multiple bars, position at the middle point between first and last bar
     const totalHeight = (barHeight * totalBars) + (gapSize * (totalBars - 1));
-    return totalHeight / 2 - 25; // Subtract half the circle height (50px/2) for centering
+    return totalHeight / 2; // Center point for vertical alignment
   };
 
   return (
-    <div className="w-full space-y-2 mt-2 mb-4 flex flex-col gap-2">
+    <div className="w-full space-y-1 mt-2 mb-4 flex flex-col gap-1">
       <div className="flex relative">
         {/* Rating circle positioned absolutely to align with center of progress bars */}
         <div 
@@ -134,12 +134,12 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
             title="Overall rating"
             className="flex items-center justify-center border-4 font-bold"
             style={{
-              width: 50,
-              height: 50,
+              width: 60,
+              height: 60,
               borderRadius: '50%',
               color: overallColor,
               borderColor: overallColor,
-              fontSize: 24,
+              fontSize: 28,
               background: '#fff',
               boxShadow: '0 0 4px 0 rgba(0,0,0,0.03)'
             }}
@@ -149,7 +149,7 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
         </div>
 
         {/* Progress bars container */}
-        <div className="w-full pr-[70px]">
+        <div className="w-full pr-[80px]">
           {Object.entries(mergedRatings).map(([criterionId, rating]) => {
             const normalizedRating = (rating / 10) * 100;
             const ratingColor = getOverallRatingColor(normalizedRating);
@@ -157,8 +157,8 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
             const displayName = criterionNames[criterionId] || criterionId;
 
             return (
-              <div key={criterionId} className="flex items-center gap-2 mb-2 relative">
-                <div className="w-24 text-sm text-muted-foreground text-left pr-1">
+              <div key={criterionId} className="flex items-center gap-1 mb-1 relative">
+                <div className="w-20 text-sm text-muted-foreground text-left pr-1">
                   {displayName}
                 </div>
                 <div className="flex-1 relative">
