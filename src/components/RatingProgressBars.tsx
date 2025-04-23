@@ -14,9 +14,7 @@ const getStoredCriteriaRatings = (locationId: string) => {
   try {
     const storedReviews = localStorage.getItem(`reviews_${locationId}`);
     const reviews = storedReviews ? JSON.parse(storedReviews) : [];
-    
     const criteriaAggregates: { [key: string]: { total: number; count: number } } = {};
-    
     reviews.forEach((review: any) => {
       if (review.criteriaRatings) {
         Object.entries(review.criteriaRatings).forEach(([criterionId, rating]) => {
@@ -28,12 +26,10 @@ const getStoredCriteriaRatings = (locationId: string) => {
         });
       }
     });
-    
     const averageRatings: { [key: string]: number } = {};
     Object.entries(criteriaAggregates).forEach(([criterionId, { total, count }]) => {
       averageRatings[criterionId] = count > 0 ? total / count : 0;
     });
-    
     return averageRatings;
   } catch (error) {
     console.error('Error getting stored criteria ratings:', error);
@@ -48,6 +44,15 @@ const getRatingLabel = (rating: number): string => {
   return 'Excellent';
 };
 
+// Map overall rating (0-100) to color
+const getOverallRatingColor = (ratingNum: number) => {
+  if (ratingNum <= 30) return '#ea384c'; // dark red
+  if (ratingNum <= 50) return '#F97316'; // orange
+  if (ratingNum <= 70) return '#d9a404'; // dark yellow (custom, close to golden)
+  if (ratingNum <= 85) return '#A6D5A4'; // light green
+  return '#2d5a27'; // dark green
+};
+
 const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings, locationId }) => {
   const storedRatings = getStoredCriteriaRatings(locationId);
   const mergedRatings = { ...criteriaRatings, ...storedRatings };
@@ -58,24 +63,17 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
     const fetchCriterionNames = async () => {
       setLoading(true);
       try {
-        // Get all criterion IDs from the ratings
         const criterionIds = Object.keys(mergedRatings);
-        
         if (criterionIds.length > 0) {
-          // Fetch criteria names from the database
           const { data, error } = await supabase
             .from('review_criteria')
             .select('id, name')
             .in('id', criterionIds);
-            
           if (error) throw error;
-          
-          // Create a mapping of ID to name
           const namesMap: {[key: string]: string} = {};
           data?.forEach(criterion => {
             namesMap[criterion.id] = criterion.name;
           });
-          
           setCriterionNames(namesMap);
         }
       } catch (err) {
@@ -84,48 +82,74 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
         setLoading(false);
       }
     };
-
     fetchCriterionNames();
   }, [mergedRatings]);
 
-  const getColorForRating = (rating: number) => {
-    if (rating <= 2) return '#ea384c'; // Dark red for very bad
-    if (rating <= 5) return '#ff6b6b'; // Light red for bad
-    if (rating <= 8) return '#90be6d'; // Light green for good
-    return '#2d5a27'; // Dark green for excellent
-  };
+  // Calculate overall average as 0-100, based on average of all criteria (each out of 10) 
+  let allRatings: number[] = [];
+  Object.values(mergedRatings).forEach(val => {
+    if (!isNaN(val)) allRatings.push(Number(val));
+  });
+  const averageRaw = allRatings.length
+    ? allRatings.reduce((a, b) => a + b, 0) / allRatings.length
+    : 0;
+  const overallRating100 = Math.round((averageRaw / 10) * 100);
+  const overallColor = getOverallRatingColor(overallRating100);
 
-  // Only render if we have ratings to show
-  if (Object.keys(mergedRatings).length === 0) {
-    return null;
-  }
+  // If no ratings, show nothing
+  if (Object.keys(mergedRatings).length === 0) return null;
 
   return (
-    <div className="w-full space-y-3 mt-2 mb-4">
-      {Object.entries(mergedRatings).map(([criterionId, rating]) => {
-        const normalizedRating = (rating / 10) * 100; // Convert 1-10 rating to percentage
-        const color = getColorForRating(rating);
+    <div className="w-full space-y-3 mt-2 mb-4 flex flex-col gap-3">
+      {Object.entries(mergedRatings).map(([criterionId, rating], idx) => {
+        const normalizedRating = (rating / 10) * 100; // 1-10 to 0-100
+        const ratingColor = getOverallRatingColor(normalizedRating);
         const ratingLabel = getRatingLabel(rating);
-        
-        // Get the criterion name from the mapping, or fall back to the ID
         const displayName = criterionNames[criterionId] || criterionId;
 
         return (
-          <div key={criterionId} className="flex items-start gap-4">
+          <div key={criterionId} className="flex items-center gap-3 relative">
             <div className="w-32 text-sm text-muted-foreground text-left">
               {displayName}
             </div>
-            <div className="flex-1 space-y-1 relative">
-              <Progress 
-                value={normalizedRating} 
-                className="h-4" 
-                style={{ '--progress-color': color } as React.CSSProperties}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xs font-medium text-white text-shadow" style={{ textShadow: '0px 0px 2px rgba(0,0,0,0.7)' }}>
-                  {ratingLabel}
-                </span>
+            <div className="flex-1 flex items-center gap-2 relative">
+              {/* Progress bar width shortened to fit indicator at right */}
+              <div className="w-[calc(100%-65px)] relative">
+                <Progress
+                  value={normalizedRating}
+                  className="h-4"
+                  style={{ '--progress-color': ratingColor } as React.CSSProperties}
+                />
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                  <span className="text-xs font-medium text-white text-shadow" style={{ textShadow: '0px 0px 2px rgba(0,0,0,0.7)' }}>
+                    {ratingLabel}
+                  </span>
+                </div>
               </div>
+              {/* Only render overall rating indicator on first bar */}
+              {idx === 0 && (
+                <div className="flex items-center ml-4">
+                  <div
+                    title="Overall rating"
+                    className="flex items-center justify-center border-4"
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      color: overallColor,
+                      borderColor: overallColor,
+                      fontWeight: 700,
+                      fontSize: 21,
+                      background: '#fff',
+                      boxShadow: '0 0 4px 0 rgba(0,0,0,0.03)'
+                    }}
+                  >
+                    <span className="font-bold" style={{ color: overallColor }}>
+                      {overallRating100}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );
