@@ -150,10 +150,12 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     }
 
     setIsSubmitting(true);
+    console.log("Form data being submitted:", data);
 
     try {
       const categoryValue = data.category.toLowerCase().trim();
       console.log("Submitting listing with category:", categoryValue);
+      console.log("Shop images being saved:", data.shop_images);
 
       const coordinates = extractCoordinatesFromMapLink(data.map_link || null);
       
@@ -174,6 +176,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         images: data.images,
         damage_images: data.damage_images || [],
         inspection_certificates: data.inspection_certificates || [],
+        shop_images: data.shop_images || [],
         approval_status: 'pending',
         is_negotiable: data.is_negotiable || false,
         seller_role: data.seller_role,
@@ -185,24 +188,30 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
       };
 
       if (listing?.id) {
-        const { error } = await supabase
+        console.log("Updating existing listing with shop images:", listingData.shop_images);
+        const { data: updatedData, error } = await supabase
           .from('marketplace_listings')
           .update(listingData)
           .eq('id', listing.id)
-          .eq('seller_id', user.id);
+          .eq('seller_id', user.id)
+          .select();
 
         if (error) throw error;
+        console.log("Updated listing data response:", updatedData);
         
         toast({
           title: "Listing updated",
           description: "Your marketplace listing has been updated and will be reviewed by an admin.",
         });
       } else {
-        const { error } = await supabase
+        console.log("Creating new listing with shop images:", listingData.shop_images);
+        const { data: insertedData, error } = await supabase
           .from('marketplace_listings')
-          .insert(listingData);
+          .insert(listingData)
+          .select();
 
         if (error) throw error;
+        console.log("Inserted listing data response:", insertedData);
         
         toast({
           title: "Listing created",
@@ -625,7 +634,10 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                   <FormControl>
                     <ImageUpload 
                       images={field.value || []}
-                      onImagesChange={(images) => form.setValue('shop_images', images)}
+                      onImagesChange={(images) => {
+                        console.log("Shop images updated:", images);
+                        form.setValue('shop_images', images, { shouldValidate: true });
+                      }}
                       maxImages={5}
                     />
                   </FormControl>

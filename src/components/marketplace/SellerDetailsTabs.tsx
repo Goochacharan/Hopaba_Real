@@ -30,11 +30,14 @@ const SellerDetailsTabs: React.FC<SellerDetailsTabsProps> = ({
 }) => {
   // Collect all shop images from all listings to ensure we don't miss any
   const allShopImages = listings.reduce((images: string[], listing) => {
-    if (listing.shop_images && listing.shop_images.length > 0) {
+    // Make sure we handle nulls and undefined values
+    if (listing.shop_images && Array.isArray(listing.shop_images) && listing.shop_images.length > 0) {
       return [...images, ...listing.shop_images];
     }
     return images;
   }, []);
+
+  console.log("All collected shop images:", allShopImages);
 
   return (
     <Tabs defaultValue="listings" className="w-full">

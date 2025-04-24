@@ -10,6 +10,8 @@ const SellerShopImages: React.FC<SellerShopImagesProps> = ({ images }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
+  console.log("Shop images to display:", images);
+  
   if (!images || images.length === 0) {
     return (
       <div className="text-center py-12">

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -90,9 +91,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     if (!files || files.length === 0) return;
     
     setUploading(true);
+    console.log("Starting file upload process");
     
     try {
-      const newImages = [...images];
+      const newImages = [...(images || [])]; // Ensure images is an array
+      console.log("Current images:", newImages);
       
       for (let i = 0; i < files.length; i++) {
         if (newImages.length >= maxImages) break;
@@ -105,9 +108,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         
         if (publicUrl) {
           newImages.push(publicUrl);
+          console.log("Added new image URL:", publicUrl);
         }
       }
       
+      console.log("Final images array:", newImages);
       onImagesChange(newImages);
     } catch (error) {
       console.error('Error uploading images:', error);
@@ -158,7 +163,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-        {images.map((image, index) => (
+        {(images || []).map((image, index) => (
           <div key={index} className="relative group">
             <AspectRatio ratio={1} className="bg-muted rounded-md overflow-hidden border">
               <img 
@@ -178,7 +183,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           </div>
         ))}
         
-        {images.length < maxImages && (
+        {(images || []).length < maxImages && (
           <label className="cursor-pointer">
             <AspectRatio ratio={1} className="bg-muted rounded-md overflow-hidden border border-dashed border-muted-foreground/50 flex flex-col items-center justify-center">
               <div className="flex flex-col items-center justify-center p-2 text-muted-foreground">
@@ -201,7 +206,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       </div>
       
       <div className="text-sm text-muted-foreground">
-        {images.length > 0 ? (
+        {(images || []).length > 0 ? (
           <span>
             {images.length} of {maxImages} images uploaded
           </span>
