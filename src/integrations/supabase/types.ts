@@ -140,6 +140,7 @@ export type Database = {
           seller_rating: number | null
           seller_role: string
           seller_whatsapp: string | null
+          shop_images: string[] | null
           title: string
           updated_at: string
         }
@@ -171,6 +172,7 @@ export type Database = {
           seller_rating?: number | null
           seller_role?: string
           seller_whatsapp?: string | null
+          shop_images?: string[] | null
           title: string
           updated_at?: string
         }
@@ -202,6 +204,7 @@ export type Database = {
           seller_rating?: number | null
           seller_role?: string
           seller_whatsapp?: string | null
+          shop_images?: string[] | null
           title?: string
           updated_at?: string
         }

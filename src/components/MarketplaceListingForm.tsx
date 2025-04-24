@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card } from '@/components/ui/card';
-import { Loader2, Save, X, Film, Navigation2, Instagram, MapPin, Link2, Unlock, AlertTriangle, FileText } from 'lucide-react';
+import { Loader2, Save, X, Film, Navigation2, Instagram, MapPin, Link2, Unlock, AlertTriangle, FileText, Image } from 'lucide-react';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -59,6 +59,7 @@ const marketplaceListingSchema = z.object({
   is_negotiable: z.boolean().optional(),
   damage_images: z.array(z.string()).optional(),
   inspection_certificates: z.array(z.string()).optional(),
+  shop_images: z.array(z.string()).optional(),
   area: z.string().min(2, { message: "Area must be at least 2 characters" }),
   city: z.string().min(1, { message: "City is required" }),
   postal_code: z.string().regex(/^\d{6}$/, { message: "Postal code must be 6 digits" }),
@@ -99,7 +100,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     is_negotiable: listing?.is_negotiable || false,
     damage_images: listing?.damage_images || [],
     inspection_certificates: listing?.inspection_certificates || [],
-    seller_role: listing?.seller_role || 'owner',
+    shop_images: listing?.shop_images || [],
     area: listing?.area || '',
     city: listing?.city || '',
     postal_code: listing?.postal_code || '',
@@ -578,8 +579,8 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
               <h3 className="font-medium text-lg">Inspection Certificates</h3>
             </div>
             <p className="text-muted-foreground">
-              Please upload third-party inspection reports or certificates if you have them.
-              This helps establish the credibility of your listing.
+              You can upload third-party inspection reports or certificates if you have them.
+              This is optional but helps establish the credibility of your listing.
             </p>
             
             <FormField
@@ -597,6 +598,38 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                   </FormControl>
                   <FormDescription>
                     Upload up to 5 inspection certificates or reports (images or PDFs).
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Image className="h-5 w-5 text-purple-500" />
+              <h3 className="font-medium text-lg">Shop Images</h3>
+            </div>
+            <p className="text-muted-foreground">
+              Upload images of your shop's exterior and interior to help customers find and recognize your location.
+              This is optional but recommended for business owners.
+            </p>
+            
+            <FormField
+              control={form.control}
+              name="shop_images"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Shop Photos (Optional)</FormLabel>
+                  <FormControl>
+                    <ImageUpload 
+                      images={field.value || []}
+                      onImagesChange={(images) => form.setValue('shop_images', images)}
+                      maxImages={5}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Upload up to 5 images of your shop's exterior and interior.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
