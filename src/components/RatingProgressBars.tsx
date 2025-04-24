@@ -48,7 +48,7 @@ const getOverallRatingColor = (ratingNum: number) => {
   if (ratingNum <= 50) return '#F97316'; // orange
   if (ratingNum <= 70) return '#d9a404'; // dark yellow (custom, close to golden)
   if (ratingNum <= 85) return '#A6D5A4'; // light green
-  return '#00ff27'; // bright green as requested for highest rating
+  return '#00ee24'; // bright green as requested for highest rating
 };
 
 const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings, locationId }) => {
