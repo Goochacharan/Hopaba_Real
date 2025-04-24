@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -26,8 +25,8 @@ const MarketplaceListingDetails = () => {
   }>();
   const navigate = useNavigate();
   const {
-    listing,
-    loading,
+    data: listing,
+    isLoading: loading,
     error
   } = useMarketplaceListing(id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -84,7 +83,7 @@ const MarketplaceListingDetails = () => {
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error || "Failed to load listing details"}</AlertDescription>
+            <AlertDescription>{error instanceof Error ? error.message : "Failed to load listing details"}</AlertDescription>
           </Alert>
           
           <Button asChild>
@@ -210,7 +209,6 @@ const MarketplaceListingDetails = () => {
                     createdAt={listing?.created_at || ''}
                     mapLink={listing?.map_link || null}
                     reviewCount={listing?.review_count}
-                    // Remove the seller_avatar prop since it doesn't exist in the MarketplaceListing type
                     isNegotiable={listing?.is_negotiable}
                   />
                 )}

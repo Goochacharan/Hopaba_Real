@@ -54,8 +54,8 @@ const Marketplace = () => {
   }, [categoryParam]);
   
   const {
-    listings: allListings,
-    loading,
+    data: allListings,
+    isLoading: loading,
     error,
     refetch: refetchListings
   } = useMarketplaceListings({
@@ -75,13 +75,13 @@ const Marketplace = () => {
 
   const pendingListings = userListings.filter(listing => listing.approval_status === 'pending');
   
-  const listings = allListings.filter(listing => {
+  const listings = allListings ? allListings.filter(listing => {
     if (postalCodeFilter && listing.postal_code) {
       console.log(`Comparing listing postal code: ${listing.postal_code} with filter: ${postalCodeFilter}`);
       return listing.postal_code === postalCodeFilter;
     }
     return true;
-  });
+  }) : [];
   
   useEffect(() => {
     setCurrentPage(1);
@@ -172,7 +172,9 @@ const Marketplace = () => {
         case 'price-high-low':
           return b.price - a.price;
         case 'top-rated':
-          return b.seller_rating - a.seller_rating;
+          const ratingA = a.seller_rating || 0;
+          const ratingB = b.seller_rating || 0;
+          return ratingB - ratingA;
         default:
           return 0;
       }
@@ -511,7 +513,7 @@ const Marketplace = () => {
                 <Alert variant="destructive" className="mb-4">
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Error</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertDescription>{error.message || "Failed to load listings"}</AlertDescription>
                 </Alert>
               )}
   

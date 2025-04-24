@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -17,28 +18,105 @@ export interface MarketplaceListing {
   seller_whatsapp?: string;
   seller_instagram?: string;
   seller_role: 'owner' | 'dealer';
+  seller_rating?: number;
+  review_count?: number;
   images?: string[];
   created_at: string;
   approval_status: 'pending' | 'approved' | 'rejected';
   is_negotiable?: boolean;
   damage_images?: string[];
   inspection_certificates?: string[];
-  shop_images?: string[]; // Added the shop_images property
+  shop_images?: string[];
   area: string;
   city: string;
   postal_code: string;
 }
 
-export const useMarketplaceListings = () => {
-  return useQuery<MarketplaceListing[]>('marketplaceListings', async () => {
-    const { data, error } = await supabase
-      .from('marketplace_listings')
-      .select('*');
+interface MarketplaceListingsQueryOptions {
+  category?: string;
+  searchQuery?: string;
+  condition?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+  includeAllStatuses?: boolean;
+}
 
-    if (error) {
-      throw new Error(error.message);
+export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions = {}) => {
+  const {
+    category,
+    searchQuery,
+    condition,
+    minPrice,
+    maxPrice,
+    minRating,
+    includeAllStatuses = false
+  } = options;
+
+  return useQuery({
+    queryKey: ['marketplaceListings', { category, searchQuery, condition, minPrice, maxPrice, minRating }],
+    queryFn: async () => {
+      let query = supabase
+        .from('marketplace_listings')
+        .select('*');
+
+      if (!includeAllStatuses) {
+        query = query.eq('approval_status', 'approved');
+      }
+
+      if (category) {
+        query = query.eq('category', category);
+      }
+
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
+      }
+
+      if (condition) {
+        query = query.eq('condition', condition);
+      }
+
+      if (minPrice !== undefined) {
+        query = query.gte('price', minPrice);
+      }
+
+      if (maxPrice !== undefined) {
+        query = query.lte('price', maxPrice);
+      }
+
+      if (minRating !== undefined) {
+        query = query.gte('seller_rating', minRating);
+      }
+
+      query = query.order('created_at', { ascending: false });
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return data || [];
     }
+  });
+};
 
-    return data || [];
+export const useMarketplaceListing = (id: string) => {
+  return useQuery({
+    queryKey: ['marketplaceListing', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('marketplace_listings')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return data || null;
+    },
+    enabled: !!id
   });
 };

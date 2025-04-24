@@ -45,8 +45,8 @@ const SearchResults = () => {
   });
 
   const {
-    listings: marketplaceListings,
-    loading: marketplaceLoading,
+    data: marketplaceListings,
+    isLoading: marketplaceLoading,
     error: marketplaceError
   } = useMarketplaceListings({
     searchQuery: searchQuery,
@@ -92,11 +92,9 @@ const SearchResults = () => {
   console.log("User coordinates:", userCoordinates);
   console.log("Current category for filtering:", category);
 
-  // Update: match categories using the Add Business list (case-insensitive match)
   const handleCategorySelect = (selectedCategory: string) => {
     console.log("Category selected:", selectedCategory);
     
-    // Normalize the category for consistent comparison
     const normalizedCategory = selectedCategory === "All" ? "all" : selectedCategory;
     
     handleCategoryChange(normalizedCategory as any);

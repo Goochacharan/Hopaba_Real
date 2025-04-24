@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
@@ -68,7 +69,7 @@ export const useSellerDetails = (sellerId: string) => {
         const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
         sellerRating = totalRating / reviews.length;
       } else {
-        sellerRating = listings.length > 0 ? listings[0].seller_rating || 0 : 0;
+        sellerRating = listings.length > 0 && listings[0].seller_rating ? listings[0].seller_rating : 0;
       }
 
       if (reviews.length > 0) {
