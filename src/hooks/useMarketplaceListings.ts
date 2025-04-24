@@ -106,8 +106,8 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
         seller_rating: item.seller_rating || 0,
         // Make sure shop_images is an array
         shop_images: item.shop_images || [],
-        // Add review_count if it doesn't exist
-        review_count: item.review_count || 0
+        // Add review_count if it doesn't exist (default to 0)
+        review_count: 0
       })) as MarketplaceListing[];
     }
   });
@@ -138,8 +138,8 @@ export const useMarketplaceListing = (id: string) => {
         seller_rating: data.seller_rating || 0,
         // Make sure shop_images is an array
         shop_images: data.shop_images || [],
-        // Add review_count if it doesn't exist
-        review_count: data.review_count || 0
+        // Add review_count if it doesn't exist (default to 0)
+        review_count: 0
       } as MarketplaceListing;
     },
     enabled: !!id
