@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
@@ -27,7 +28,13 @@ const SellerDetailsTabs: React.FC<SellerDetailsTabsProps> = ({
   onDeleteReview,
   isSubmittingReview
 }) => {
-  const shopImages = listings.length > 0 ? listings[0].shop_images || [] : [];
+  // Collect all shop images from all listings to ensure we don't miss any
+  const allShopImages = listings.reduce((images: string[], listing) => {
+    if (listing.shop_images && listing.shop_images.length > 0) {
+      return [...images, ...listing.shop_images];
+    }
+    return images;
+  }, []);
 
   return (
     <Tabs defaultValue="listings" className="w-full">
@@ -39,7 +46,7 @@ const SellerDetailsTabs: React.FC<SellerDetailsTabsProps> = ({
           Reviews ({reviews.length})
         </TabsTrigger>
         <TabsTrigger value="shop" className="text-base px-6 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
-          Shop Images ({shopImages.length})
+          Shop Images ({allShopImages.length})
         </TabsTrigger>
       </TabsList>
       
@@ -70,7 +77,7 @@ const SellerDetailsTabs: React.FC<SellerDetailsTabsProps> = ({
       </TabsContent>
       
       <TabsContent value="shop" className="w-full">
-        <SellerShopImages images={shopImages} />
+        <SellerShopImages images={allShopImages} />
       </TabsContent>
     </Tabs>
   );

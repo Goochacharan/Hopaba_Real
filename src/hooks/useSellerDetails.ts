@@ -62,6 +62,8 @@ export const useSellerDetails = (sellerId: string) => {
         ...item,
         seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer',
         seller_rating: item.seller_rating || 0,
+        // Ensure shop_images is always an array
+        shop_images: Array.isArray(item.shop_images) ? item.shop_images : [],
         // Add review_count if it doesn't exist
         review_count: 0
       })) as MarketplaceListing[];
