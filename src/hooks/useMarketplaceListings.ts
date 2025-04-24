@@ -100,7 +100,8 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
       // Cast the result to ensure compliance with our interface
       return (data || []).map(item => ({
         ...item,
-        seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer'
+        seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer',
+        review_count: item.review_count || 0
       })) as MarketplaceListing[];
     }
   });
