@@ -101,7 +101,8 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
       return (data || []).map(item => ({
         ...item,
         seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer',
-        review_count: item.review_count || 0
+        seller_rating: item.seller_rating || 0,
+        review_count: typeof item.review_count === 'number' ? item.review_count : 0
       })) as MarketplaceListing[];
     }
   });
@@ -127,7 +128,8 @@ export const useMarketplaceListing = (id: string) => {
       return {
         ...data,
         seller_role: (data.seller_role as string || 'owner') as 'owner' | 'dealer',
-        review_count: data.review_count || 0
+        seller_rating: data.seller_rating || 0,
+        review_count: typeof data.review_count === 'number' ? data.review_count : 0
       } as MarketplaceListing;
     },
     enabled: !!id
