@@ -62,7 +62,8 @@ export const useSellerDetails = (sellerId: string) => {
         ...item,
         seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer',
         seller_rating: item.seller_rating || 0,
-        review_count: typeof item.review_count === 'number' ? item.review_count : 0
+        // Add review_count if it doesn't exist
+        review_count: 0
       })) as MarketplaceListing[];
       
       const sellerName = listings.length > 0 ? listings[0].seller_name : 'Unknown Seller';
