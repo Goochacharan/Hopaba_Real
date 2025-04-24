@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
@@ -49,14 +48,13 @@ const getOverallRatingColor = (ratingNum: number) => {
   if (ratingNum <= 50) return '#F97316'; // orange
   if (ratingNum <= 70) return '#d9a404'; // dark yellow (custom, close to golden)
   if (ratingNum <= 85) return '#A6D5A4'; // light green
-  return '#2d5a27'; // dark green
+  return '#00ff27'; // bright green as requested for highest rating
 };
 
 const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings, locationId }) => {
   const storedRatings = getStoredCriteriaRatings(locationId);
   const mergedRatings = { ...criteriaRatings };
 
-  // Use stored ratings if they exist to ensure persistence after refresh
   if (Object.keys(storedRatings).length > 0) {
     Object.keys(storedRatings).forEach(criterionId => {
       mergedRatings[criterionId] = storedRatings[criterionId];
@@ -92,7 +90,6 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
         console.error('Error fetching criterion names:', err);
         setFetchError(true);
         
-        // Fallback to using ID as the name if fetch fails
         const fallbackNames: {[key: string]: string} = {};
         Object.keys(mergedRatings).forEach(id => {
           fallbackNames[id] = `Criterion ${id.slice(0, 4)}`;
@@ -118,25 +115,20 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
 
   if (Object.keys(mergedRatings).length === 0) return null;
 
-  // Calculate center position for the rating circle
   const getCenterPosition = () => {
-    // Height of progress bars + gap between them
-    const barHeight = 16; // h-4 is 16px
-    const gapSize = 1; // reducing gap size to 1px
+    const barHeight = 16;
+    const gapSize = 1;
     const totalBars = Object.keys(mergedRatings).length;
     
-    // If there's only one bar, center is at the middle of that bar
-    if (totalBars === 1) return 8; // Half of barHeight
+    if (totalBars === 1) return 8;
     
-    // If multiple bars, position at the middle point between first and last bar
     const totalHeight = (barHeight * totalBars) + (gapSize * (totalBars - 1));
-    return totalHeight / 2; // Center point for vertical alignment
+    return totalHeight / 2;
   };
 
   return (
     <div className="w-full space-y-1 mt-2 mb-4 flex flex-col gap-1">
       <div className="flex relative">
-        {/* Rating circle positioned absolutely to align with center of progress bars */}
         <div 
           className="absolute right-0"
           style={{
@@ -162,7 +154,6 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
           </div>
         </div>
 
-        {/* Progress bars container */}
         <div className="w-full pr-[90px]">
           {Object.entries(mergedRatings).map(([criterionId, rating]) => {
             const normalizedRating = (rating / 10) * 100;
