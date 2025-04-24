@@ -4,6 +4,7 @@ import StarRating from './StarRating';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
+import SellerListingCount from './SellerListingCount';
 
 interface SellerInfoProps {
   sellerName: string;
@@ -29,12 +30,10 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
   const { toast } = useToast();
   const [actualRating, setActualRating] = useState<number>(sellerRating);
   const [actualReviewCount, setActualReviewCount] = useState<number>(reviewCount || 0);
-  const [listingCount, setListingCount] = useState<number>(0);
 
   useEffect(() => {
     if (sellerId) {
       fetchSellerRating(sellerId);
-      fetchListingCount(sellerId);
     }
   }, [sellerId]);
 
@@ -111,7 +110,7 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
     <div className="flex flex-col w-full">
       <div className="flex items-center justify-end w-full rounded bg-lime-300 py-[2px] mx-0 px-[5px]">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-700">{listingCount} Listings</span>
+          <SellerListingCount sellerId={sellerId} />
           <span className="text-xs mr-1 text-gray-950 px-0 mx-[5px]">seller</span>
           {sellerId ? (
             <Link
