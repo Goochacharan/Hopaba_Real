@@ -41,7 +41,7 @@ const SellerListingCount: React.FC<SellerListingCountProps> = ({ sellerId }) => 
     <Link
       to={`/seller/${sellerId}`}
       onClick={(e) => e.stopPropagation()}
-      className="text-xs text-gray-700 hover:text-primary transition-colors"
+      className="text-xs text-gray-700 hover:text-primary transition-colors mr-2"
     >
       {listingCount} Listings
     </Link>
