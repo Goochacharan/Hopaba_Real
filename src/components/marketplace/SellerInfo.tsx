@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import StarRating from './StarRating';
@@ -36,25 +37,6 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
       fetchSellerRating(sellerId);
     }
   }, [sellerId]);
-
-  const fetchListingCount = async (sellerIdValue: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('marketplace_listings')
-        .select('id')
-        .eq('seller_id', sellerIdValue)
-        .eq('approval_status', 'approved');
-
-      if (error) {
-        console.error('Error fetching listing count:', error);
-        return;
-      }
-
-      setListingCount(data?.length || 0);
-    } catch (err) {
-      console.error('Failed to fetch listing count:', err);
-    }
-  };
 
   const fetchSellerRating = async (sellerIdValue: string) => {
     try {
