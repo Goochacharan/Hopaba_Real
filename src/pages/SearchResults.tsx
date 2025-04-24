@@ -187,7 +187,7 @@ const SearchResults = () => {
               marketplace: 0
             }}
             loading={loading}
-            error={error}
+            error={error ? String(error) : null}
             className="search-header"
           />
           

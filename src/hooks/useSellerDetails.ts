@@ -57,7 +57,13 @@ export const useSellerDetails = (sellerId: string) => {
         // Continue even if reviews fail to load
       }
 
-      const listings = listingsData as MarketplaceListing[];
+      // Process listings to ensure they match our MarketplaceListing interface
+      const listings = (listingsData || []).map(item => ({
+        ...item,
+        seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer',
+        seller_rating: item.seller_rating || 0,
+        review_count: item.review_count || 0
+      })) as MarketplaceListing[];
       
       const sellerName = listings.length > 0 ? listings[0].seller_name : 'Unknown Seller';
       

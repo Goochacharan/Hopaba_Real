@@ -17,7 +17,7 @@ export interface MarketplaceListing {
   seller_phone?: string;
   seller_whatsapp?: string;
   seller_instagram?: string;
-  seller_role: 'owner' | 'dealer';
+  seller_role: 'owner' | 'dealer'; // Ensuring this is a union type, not just string
   seller_rating?: number;
   review_count?: number;
   images?: string[];
@@ -30,6 +30,7 @@ export interface MarketplaceListing {
   area: string;
   city: string;
   postal_code: string;
+  updated_at: string;
 }
 
 interface MarketplaceListingsQueryOptions {
@@ -96,7 +97,11 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
         throw new Error(error.message);
       }
 
-      return data || [];
+      // Cast the result to ensure compliance with our interface
+      return (data || []).map(item => ({
+        ...item,
+        seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer'
+      })) as MarketplaceListing[];
     }
   });
 };
@@ -115,7 +120,14 @@ export const useMarketplaceListing = (id: string) => {
         throw new Error(error.message);
       }
 
-      return data || null;
+      if (!data) return null;
+
+      // Cast the result to ensure compliance with our interface
+      return {
+        ...data,
+        seller_role: (data.seller_role as string || 'owner') as 'owner' | 'dealer',
+        review_count: data.review_count || 0
+      } as MarketplaceListing;
     },
     enabled: !!id
   });

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -57,6 +56,8 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   // Check if the listing has inspection certificates and log it for debugging
   const hasCertificates = listing.inspection_certificates && listing.inspection_certificates.length > 0;
   console.log(`Listing ${listing.id} has certificates:`, hasCertificates, listing.inspection_certificates);
+
+  const sellerRole = listing.seller_role || 'owner';
 
   return <div className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5", className)} onClick={handleCardClick}>
       {hasDamageImages ? <Tabs defaultValue="regular" className="mb-2">
@@ -134,7 +135,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
               reviewCount={listing.review_count} 
               sellerInstagram={listing.seller_instagram} 
               createdAt={listing.created_at} 
-              sellerRole={listing.seller_role}
+              sellerRole={sellerRole as 'owner' | 'dealer'}
             />
           </div>
         </div>
