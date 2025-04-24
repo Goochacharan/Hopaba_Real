@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,7 +48,7 @@ const getOverallRatingColor = (ratingNum: number) => {
   if (ratingNum <= 30) return '#ea384c'; // dark red
   if (ratingNum <= 50) return '#F97316'; // orange
   if (ratingNum <= 70) return '#d9a404'; // dark yellow (custom, close to golden)
-  if (ratingNum <= 85) return '#A6D5A4'; // light green
+  if (ratingNum <= 85) return '#68cd77'; // light green
   return '#00ee24'; // bright green as requested for highest rating
 };
 
