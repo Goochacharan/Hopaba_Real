@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import { SellerReview } from '@/hooks/useSellerDetails';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
 import SellerReviews from './SellerReviews';
+import SellerShopImages from './SellerShopImages';
 
 interface SellerDetailsTabsProps {
   sellerId: string;
@@ -27,6 +27,8 @@ const SellerDetailsTabs: React.FC<SellerDetailsTabsProps> = ({
   onDeleteReview,
   isSubmittingReview
 }) => {
+  const shopImages = listings.length > 0 ? listings[0].shop_images || [] : [];
+
   return (
     <Tabs defaultValue="listings" className="w-full">
       <TabsList className="w-full bg-background border-b mb-6">
@@ -35,6 +37,9 @@ const SellerDetailsTabs: React.FC<SellerDetailsTabsProps> = ({
         </TabsTrigger>
         <TabsTrigger value="reviews" className="text-base px-6 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
           Reviews ({reviews.length})
+        </TabsTrigger>
+        <TabsTrigger value="shop" className="text-base px-6 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+          Shop Images ({shopImages.length})
         </TabsTrigger>
       </TabsList>
       
@@ -62,6 +67,10 @@ const SellerDetailsTabs: React.FC<SellerDetailsTabsProps> = ({
           onDeleteReview={onDeleteReview}
           isSubmitting={isSubmittingReview}
         />
+      </TabsContent>
+      
+      <TabsContent value="shop" className="w-full">
+        <SellerShopImages images={shopImages} />
       </TabsContent>
     </Tabs>
   );
