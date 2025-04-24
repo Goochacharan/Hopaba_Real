@@ -101,6 +101,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     damage_images: listing?.damage_images || [],
     inspection_certificates: listing?.inspection_certificates || [],
     shop_images: listing?.shop_images || [],
+    seller_role: listing?.seller_role || 'owner',
     area: listing?.area || '',
     city: listing?.city || '',
     postal_code: listing?.postal_code || '',
