@@ -105,7 +105,7 @@ const Marketplace = () => {
   const categories = [
     {
       id: 'all',
-      name: 'All Categories'
+      name: 'All'  // Changed from 'All Categories' to 'All'
     },
     {
       id: 'cars',
