@@ -104,7 +104,7 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
           <div className="relative px-[2px] py-[3px]">
             <input ref={inputRef} value={searchValue} onChange={e => setSearchValue(e.target.value)} placeholder="Search by area or city..." className="w-full p-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary cursor-text" onFocus={() => setOpen(true)} onClick={handleInputClick} />
             {searchValue && <X className="absolute right-10 top-2.5 h-4 w-4 text-muted-foreground cursor-pointer" onClick={clearSearch} />}
-            <Button variant="default" size="icon" className="absolute right-2 top-1 p-1 h-7 w-7" onClick={handleInputClick}>
+            <Button variant="default" size="icon" onClick={handleInputClick} className="absolute right-2 top-1 p-1 h-7 w-7 py-0 my-[5px] px-[5px] mx-0">
               <Search className="h-4 w-4" />
             </Button>
           </div>
