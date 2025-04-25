@@ -118,7 +118,7 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
       </div>
 
       <div className="flex items-center justify-end w-full gap-2 px-[30px]">
-        <Badge variant="default" className="text-white font-bold text-xs capitalize py-0 my-[3px] bg-violet-500 px-[11px] mx-[23px]">
+        <Badge variant="default" className="text-white font-bold text-xs capitalize py-0 my-[3px] bg-violet-500 px-[18px] mx-[20px]">
           {sellerRole}
         </Badge>
         <StarRating rating={actualRating} showCount={true} count={actualReviewCount} size="small" />
