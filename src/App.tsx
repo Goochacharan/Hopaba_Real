@@ -9,6 +9,8 @@ import { AuthProvider } from "./hooks/useAuth";
 import React, { Suspense, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
+// Import Index component eagerly
+import Index from "./pages/Index";
 // Eagerly import MyList to ensure it's available
 import MyList from "./pages/MyList";
 
@@ -128,7 +130,7 @@ const App = () => (
             <ErrorBoundary>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
-                  <Route path="/" element={<SearchResults />} />
+                  <Route path="/" element={<Index />} />
                   <Route path="/search" element={<SearchResults />} />
                   <Route path="/location/:id" element={<LocationDetails />} />
                   <Route path="/profile" element={<Profile />} />
