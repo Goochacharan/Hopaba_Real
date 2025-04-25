@@ -265,6 +265,16 @@ const Marketplace = () => {
   const isConditionFilterActive = conditionFilter !== 'all';
   const isSortFilterActive = sortOption !== 'newest';
 
+  const categoryColors = {
+    'all': 'bg-white text-gray-800',
+    'cars': 'bg-blue-500 text-white',
+    'bikes': 'bg-green-500 text-white',
+    'mobiles': 'bg-purple-500 text-white',
+    'electronics': 'bg-orange-500 text-white',
+    'furniture': 'bg-pink-500 text-white',
+    'home_appliances': 'bg-teal-500 text-white'
+  };
+
   return (
     <MainLayout>
       <div className="animate-fade-in px-[7px]">
@@ -499,14 +509,24 @@ const Marketplace = () => {
         </ScrollArea>
         
         <Tabs defaultValue={currentCategory} value={currentCategory} onValueChange={handleCategoryChange} className="mb-6">
-          <TabsList className="mb-4 flex flex-nowrap overflow-auto pb-1 scrollbar-none py-0">
-            {categories.map(category => (
-              <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify font-semibold text-sm mx-[8px] px-[7px]">
-                {category.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          
+          <ScrollArea className="w-full" orientation="horizontal">
+            <TabsList className="inline-flex h-12 items-center justify-start gap-2 rounded-none bg-transparent p-1 mb-4">
+              {categories.map(category => (
+                <TabsTrigger 
+                  key={category.id} 
+                  value={category.id} 
+                  className={`${categoryColors[category.id as keyof typeof categoryColors]} 
+                    px-6 py-2 rounded-md shadow-sm font-medium transition-all
+                    hover:opacity-90 whitespace-nowrap min-w-[100px]
+                    data-[state=active]:ring-2 data-[state=active]:ring-white/20
+                    data-[state=active]:shadow-lg`}
+                >
+                  {category.name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </ScrollArea>
+
           {categories.map(category => (
             <TabsContent key={category.id} value={category.id}>
               {error && (
