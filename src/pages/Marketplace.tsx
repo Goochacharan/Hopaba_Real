@@ -516,7 +516,7 @@ const Marketplace = () => {
                   key={category.id} 
                   value={category.id} 
                   className={`${categoryColors[category.id as keyof typeof categoryColors]} 
-                    px-6 py-2 rounded-md shadow-sm font-medium transition-all
+                    px-6 py-2 rounded-md shadow-sm font-bold transition-all text-base
                     hover:opacity-90 whitespace-nowrap min-w-[100px]
                     data-[state=active]:ring-2 data-[state=active]:ring-white/20
                     data-[state=active]:shadow-lg`}
