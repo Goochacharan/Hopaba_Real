@@ -110,27 +110,27 @@ const SellerInfo: React.FC<SellerInfoProps> = ({
 
   return (
     <div className="flex flex-col w-full">
-      <div className="flex items-center gap-2 mb-1">
+      <div className="flex items-center justify-between w-full rounded bg-lime-300 py-[2px] mx-0 px-[5px]">
+        <div className="flex items-center">
+          <span className="text-xs mr-1 text-gray-950 px-0 mx-[5px]">seller</span>
+          {sellerId ? (
+            <Link to={`/seller/${sellerId}`} onClick={e => e.stopPropagation()} className="text-xs font-bold hover:text-primary hover">
+              {sellerName}
+            </Link>
+          ) : (
+            <span className="text-sm font-medium">{sellerName}</span>
+          )}
+        </div>
         <Button 
           variant="outline" 
           size="sm" 
-          className="text-xs py-0 h-6 px-2"
+          className="text-xs py-0 h-6 px-2 ml-2"
           asChild
         >
           <Link to={`/seller/${sellerId}`} onClick={(e) => e.stopPropagation()}>
             {totalListings} {totalListings === 1 ? 'listing' : 'listings'}
           </Link>
         </Button>
-      </div>
-      <div className="flex items-center justify-end w-full rounded bg-lime-300 py-[2px] mx-0 px-[5px]">
-        <span className="text-xs mr-1 text-gray-950 px-0 mx-[5px]">seller</span>
-        {sellerId ? (
-          <Link to={`/seller/${sellerId}`} onClick={e => e.stopPropagation()} className="text-xs font-bold hover:text-primary hover">
-            {sellerName}
-          </Link>
-        ) : (
-          <span className="text-sm font-medium">{sellerName}</span>
-        )}
       </div>
 
       <div className="flex items-center justify-end w-full gap-2">
