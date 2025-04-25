@@ -499,9 +499,21 @@ const Marketplace = () => {
         </ScrollArea>
         
         <Tabs defaultValue={currentCategory} value={currentCategory} onValueChange={handleCategoryChange} className="mb-6">
-          <TabsList className="mb-4 flex flex-nowrap overflow-auto pb-1 scrollbar-none py-0">
-            {categories.map(category => (
-              <TabsTrigger key={category.id} value={category.id} className="whitespace-nowrap text-justify font-semibold text-sm mx-[8px] px-[7px]">
+          <TabsList className="mb-4 flex flex-nowrap overflow-x-auto scrollbar-none py-1 px-1 bg-transparent border-0">
+            {categories.map((category, index) => (
+              <TabsTrigger 
+                key={category.id} 
+                value={category.id} 
+                className={cn(
+                  "whitespace-nowrap text-justify font-semibold text-sm",
+                  "px-6 py-2.5 mx-1 rounded-lg border border-border/10",
+                  "data-[state=active]:text-white",
+                  "transition-all duration-200",
+                  category.id === 'all' 
+                    ? "data-[state=active]:bg-blue-500 bg-white text-gray-700" 
+                    : `data-[state=active]:${getTabColor(index)}`
+                )}
+              >
                 {category.name}
               </TabsTrigger>
             ))}
@@ -576,6 +588,19 @@ const Marketplace = () => {
       </div>
     </MainLayout>
   );
+};
+
+const getTabColor = (index: number): string => {
+  const colors = [
+    'bg-pink-500',
+    'bg-purple-500',
+    'bg-indigo-500',
+    'bg-blue-500',
+    'bg-green-500',
+    'bg-yellow-500',
+    'bg-orange-500'
+  ];
+  return colors[index % colors.length];
 };
 
 export default Marketplace;
