@@ -28,28 +28,33 @@ const SellerDetailsTabs: React.FC<SellerDetailsTabsProps> = ({
   onDeleteReview,
   isSubmittingReview
 }) => {
-  // Collect all shop images from all listings to ensure we don't miss any
   const allShopImages = listings.reduce((images: string[], listing) => {
-    // Make sure we handle nulls and undefined values
     if (listing.shop_images && Array.isArray(listing.shop_images) && listing.shop_images.length > 0) {
       return [...images, ...listing.shop_images];
     }
     return images;
   }, []);
 
-  console.log("All collected shop images:", allShopImages);
-
   return (
     <Tabs defaultValue="listings" className="w-full">
-      <TabsList className="w-full bg-background border-b mb-6">
-        <TabsTrigger value="listings" className="text-base px-6 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+      <TabsList className="w-full bg-background border-b mb-6 flex h-9 overflow-x-auto no-scrollbar">
+        <TabsTrigger 
+          value="listings" 
+          className="flex-1 text-sm px-3 py-1.5 h-9 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none whitespace-nowrap"
+        >
           Listings ({listings.length})
         </TabsTrigger>
-        <TabsTrigger value="reviews" className="text-base px-6 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+        <TabsTrigger 
+          value="reviews" 
+          className="flex-1 text-sm px-3 py-1.5 h-9 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none whitespace-nowrap"
+        >
           Reviews ({reviews.length})
         </TabsTrigger>
-        <TabsTrigger value="shop" className="text-base px-6 py-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
-          Shop Images ({allShopImages.length})
+        <TabsTrigger 
+          value="shop" 
+          className="flex-1 text-sm px-3 py-1.5 h-9 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none whitespace-nowrap"
+        >
+          Shop ({allShopImages.length})
         </TabsTrigger>
       </TabsList>
       
@@ -87,3 +92,4 @@ const SellerDetailsTabs: React.FC<SellerDetailsTabsProps> = ({
 };
 
 export default SellerDetailsTabs;
+
