@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { getUserLocation } from '@/lib/locationUtils';
 import { useToast } from '@/hooks/use-toast';
+
 interface AreaSearchBarProps {
   onAreaSelect: (area: string) => void;
   selectedArea: string;
@@ -15,6 +16,7 @@ interface AreaSearchBarProps {
     lng: number;
   } | null) => void;
 }
+
 const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
   onAreaSelect,
   selectedArea,
@@ -28,6 +30,7 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
   const {
     toast
   } = useToast();
+
   useEffect(() => {
     const fetchAreas = async () => {
       const {
@@ -46,6 +49,7 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
     };
     fetchAreas();
   }, []);
+
   useEffect(() => {
     if (searchValue) {
       let filtered: string[];
@@ -59,6 +63,7 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
       setSuggestions([]);
     }
   }, [searchValue, areas]);
+
   const handleSelect = async (value: string) => {
     if (value === 'Near me (Use my current location)') {
       const userLocation = await getUserLocation();
@@ -87,18 +92,20 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
     setSearchValue(value);
     setOpen(false);
   };
+
   const clearSearch = () => {
     setSearchValue('');
     inputRef.current?.focus();
   };
+
   const handleInputClick = () => {
     setOpen(true);
-    // Ensure the input gets focus
     if (inputRef.current) {
       inputRef.current.focus();
     }
   };
-  return <div className="w-full bg-white rounded-xl border border-border p-3 mb-4 py-0 px-0">
+
+  return <div className="w-full px-0 py-0 mb-4">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <div className="relative px-[2px] py-[3px]">
@@ -125,4 +132,5 @@ const AreaSearchBar: React.FC<AreaSearchBarProps> = ({
       </Popover>
     </div>;
 };
+
 export default AreaSearchBar;
