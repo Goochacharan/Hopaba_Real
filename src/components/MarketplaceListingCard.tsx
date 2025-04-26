@@ -14,33 +14,30 @@ import SellerInfo from './marketplace/SellerInfo';
 import ListingActionButtons from './marketplace/ListingActionButtons';
 import CertificateBadge from './marketplace/CertificateBadge';
 import BillImageViewer from './marketplace/BillImageViewer';
-
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
   className?: string;
 }
-
 const formatPrice = (price: number): string => {
   return price.toLocaleString('en-IN');
 };
-
 const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   listing,
   className
 }) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [imageViewerOpen, setImageViewerOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   const [currentImageType, setCurrentImageType] = React.useState<'regular' | 'damage'>('regular');
   const [billViewerOpen, setBillViewerOpen] = React.useState(false);
-  
   const handleImageClick = (index: number, type: 'regular' | 'damage' = 'regular') => {
     setSelectedImageIndex(index);
     setCurrentImageType(type);
     setImageViewerOpen(true);
   };
-  
   const handleCardClick = (e: React.MouseEvent) => {
     if (imageViewerOpen) return;
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) {
@@ -49,18 +46,13 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
     console.log("Navigating to marketplace listing:", listing.id);
     navigate(`/marketplace/${listing.id}`);
   };
-  
   const isSearchPage = window.location.pathname.includes('/search');
   const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
-  
   const hasCertificates = listing.inspection_certificates && listing.inspection_certificates.length > 0;
   console.log(`Listing ${listing.id} has certificates:`, hasCertificates, listing.inspection_certificates);
-
   const sellerRole = listing.seller_role || 'owner';
-
   const hasBills = listing.bill_images && listing.bill_images.length > 0;
   console.log(`Listing ${listing.id} has bills:`, hasBills, listing.bill_images);
-
   return <div className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5", className)} onClick={handleCardClick}>
       {hasDamageImages ? <Tabs defaultValue="regular" className="mb-2">
           <TabsList className="w-full mb-0 p-1 h-auto bg-transparent">
@@ -114,25 +106,17 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
                   <span className="pr-0.5">Fixed</span>
                 </Badge>)}
               
-              {hasCertificates && (
-                <span onClick={e => e.stopPropagation()}>
+              {hasCertificates && <span onClick={e => e.stopPropagation()}>
                   <CertificateBadge certificates={listing.inspection_certificates || []} />
-                </span>
-              )}
+                </span>}
 
-              {hasBills && (
-                <Badge 
-                  variant="default" 
-                  className="inline-flex items-center gap-1 pr-1.5 cursor-pointer bg-blue-600 hover:bg-blue-500 text-white"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setBillViewerOpen(true);
-                  }}
-                >
+              {hasBills && <Badge variant="default" onClick={e => {
+              e.stopPropagation();
+              setBillViewerOpen(true);
+            }} className="inline-flex items-center gap-1 pr-1.5 cursor-pointer text-white rounded bg-[#8d8522]">
                   <FileText className="h-3 w-3" />
                   <span className="pr-0.5">Original Bill</span>
-                </Badge>
-              )}
+                </Badge>}
             </div>
           </div>
         </div>
@@ -143,15 +127,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
 
         <div className="flex justify-end items-center mb-4 px-0 mx-0 py-0 my-[11px]">
           <div className="flex flex-col items-end py-0">
-            <SellerInfo 
-              sellerName={listing.seller_name} 
-              sellerRating={listing.seller_rating} 
-              sellerId={listing.seller_id} 
-              reviewCount={listing.review_count} 
-              sellerInstagram={listing.seller_instagram} 
-              createdAt={listing.created_at} 
-              sellerRole={sellerRole as 'owner' | 'dealer'}
-            />
+            <SellerInfo sellerName={listing.seller_name} sellerRating={listing.seller_rating} sellerId={listing.seller_id} reviewCount={listing.review_count} sellerInstagram={listing.seller_instagram} createdAt={listing.created_at} sellerRole={sellerRole as 'owner' | 'dealer'} />
           </div>
         </div>
         
@@ -165,33 +141,12 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
             </p>
           </ScrollArea>}
 
-        <ListingActionButtons 
-          listingId={listing.id} 
-          title={listing.title} 
-          price={listing.price} 
-          sellerPhone={listing.seller_phone} 
-          sellerWhatsapp={listing.seller_whatsapp} 
-          sellerInstagram={listing.seller_instagram} 
-          location={listing.location} 
-          mapLink={listing.map_link} 
-        />
+        <ListingActionButtons listingId={listing.id} title={listing.title} price={listing.price} sellerPhone={listing.seller_phone} sellerWhatsapp={listing.seller_whatsapp} sellerInstagram={listing.seller_instagram} location={listing.location} mapLink={listing.map_link} />
       </div>
 
-      <ImageViewer 
-        images={currentImageType === 'regular' ? listing.images : listing.damage_images || []} 
-        initialIndex={selectedImageIndex} 
-        open={imageViewerOpen} 
-        onOpenChange={setImageViewerOpen}
-      />
+      <ImageViewer images={currentImageType === 'regular' ? listing.images : listing.damage_images || []} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={setImageViewerOpen} />
 
-      {hasBills && (
-        <BillImageViewer
-          images={listing.bill_images || []}
-          open={billViewerOpen}
-          onOpenChange={setBillViewerOpen}
-        />
-      )}
+      {hasBills && <BillImageViewer images={listing.bill_images || []} open={billViewerOpen} onOpenChange={setBillViewerOpen} />}
     </div>;
 };
-
 export default MarketplaceListingCard;
