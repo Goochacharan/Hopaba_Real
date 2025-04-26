@@ -199,10 +199,10 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
           variant="outline"
           size="sm"
           onClick={handleRateClick}
-          className="text-xs px-2 py-1"
+          className="text-xs px-2 py-1 flex items-center"
         >
           <Star className="w-3 h-3 mr-1" />
-          Rate
+          Rate this Place
         </Button>
       </div>
     </div>
