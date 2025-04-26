@@ -9,13 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Lock, Unlock, Image, FileWarning } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
-// Import our components
-import ListingImageCarousel from './marketplace/ListingImageCarousel';
-import ListingMetadata from './marketplace/ListingMetadata';
-import SellerInfo from './marketplace/SellerInfo';
-import ListingActionButtons from './marketplace/ListingActionButtons';
-import CertificateBadge from './marketplace/CertificateBadge';
-
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
   className?: string;
@@ -53,7 +46,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   const isSearchPage = window.location.pathname.includes('/search');
   const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
   
-  // Check if the listing has inspection certificates and log it for debugging
   const hasCertificates = listing.inspection_certificates && listing.inspection_certificates.length > 0;
   console.log(`Listing ${listing.id} has certificates:`, hasCertificates, listing.inspection_certificates);
 
@@ -112,7 +104,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
                   <span className="pr-0.5">Fixed</span>
                 </Badge>)}
               
-              {/* Always check hasCertificates to prevent empty badge */}
               {hasCertificates && (
                 <span onClick={e => e.stopPropagation()}>
                   <CertificateBadge certificates={listing.inspection_certificates || []} />
@@ -150,7 +141,17 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
             </p>
           </ScrollArea>}
 
-        <ListingActionButtons listingId={listing.id} title={listing.title} price={listing.price} sellerPhone={listing.seller_phone} sellerWhatsapp={listing.seller_whatsapp} sellerInstagram={listing.seller_instagram} location={listing.location} mapLink={listing.map_link} />
+        <ListingActionButtons 
+          listingId={listing.id} 
+          title={listing.title} 
+          price={listing.price} 
+          sellerPhone={listing.seller_phone} 
+          sellerWhatsapp={listing.seller_whatsapp} 
+          sellerInstagram={listing.seller_instagram} 
+          location={listing.location} 
+          mapLink={listing.map_link}
+          bill_images={listing.bill_images}
+        />
       </div>
 
       <ImageViewer images={currentImageType === 'regular' ? listing.images : listing.damage_images || []} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={open => {
