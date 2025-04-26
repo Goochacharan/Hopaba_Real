@@ -266,7 +266,7 @@ const Marketplace = () => {
   const isSortFilterActive = sortOption !== 'newest';
 
   const categoryColors = {
-    'all': 'bg-white text-gray-800 border border-gray-200',
+    'all': 'bg-white text-gray-800 border border-gray-200 hover:bg-gray-50',
     'cars': 'bg-blue-500 text-white',
     'bikes': 'bg-green-500 text-white',
     'mobiles': 'bg-purple-500 text-white',
