@@ -37,6 +37,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
       console.log("First listing damage images:", listings[0].damage_images);
       console.log("First listing certificates:", listings[0].inspection_certificates);
       console.log("First listing seller role:", listings[0].seller_role);
+      console.log("First listing bill images:", listings[0].bill_images);
     }
   }, [listings]);
 
@@ -88,6 +89,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
             `with postal_code:`, listing.postal_code,
             `with damage_images:`, listing.damage_images?.length || 0,
             `seller role:`, listing.seller_role,
+            `with bill_images:`, listing.bill_images?.length || 0,
             `and certificates:`, listing.inspection_certificates?.length || 0);
             
           // Make sure all the necessary properties are present
@@ -96,6 +98,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
             location: listing.location || "Not specified",
             damage_images: listing.damage_images || [],
             inspection_certificates: listing.inspection_certificates || [],
+            bill_images: listing.bill_images || [],
             is_negotiable: listing.is_negotiable !== undefined ? listing.is_negotiable : false
           };
             
@@ -114,7 +117,7 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
                 listing={enhancedListing}
                 className={cn(
                   "h-full flex flex-col",
-                  "search-result-card", // This class will be used to identify search result cards
+                  "search-result-card", 
                   listing.approval_status === 'pending' ? "opacity-75" : ""
                 )}
               />

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Phone, MessageSquare, MapPin, Share2, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -24,7 +25,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
   sellerInstagram,
   location,
   mapLink,
-  bill_images
+  bill_images = []
 }) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -153,6 +154,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
 
   const handleViewBill = (e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log("View bill clicked, bill_images:", bill_images);
     if (bill_images && bill_images.length > 0) {
       // Create a temporary link element and open the bill image in a new tab
       const link = document.createElement('a');

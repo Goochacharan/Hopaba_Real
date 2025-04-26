@@ -69,27 +69,35 @@ const MarketplaceItemsList: React.FC<MarketplaceItemsListProps> = ({
         )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {listings.map((listing, index) => (
-            <div 
-              key={listing.id} 
-              className="animate-fade-in relative" 
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              {user && listing.seller_id === user.id && listing.approval_status === 'pending' && (
-                <Badge variant="outline" className="absolute top-2 right-2 z-10 bg-yellow-100 text-yellow-800 border-yellow-300">
-                  Pending Approval
-                </Badge>
-              )}
-              <MarketplaceListingCard 
-                listing={listing}
-                className={cn(
-                  "h-full flex flex-col",
-                  "search-result-card",
-                  listing.approval_status === 'pending' ? "opacity-75" : ""
+          {listings.map((listing, index) => {
+            // Ensure bill_images is defined before passing it to the component
+            const enhancedListing = {
+              ...listing,
+              bill_images: listing.bill_images || []
+            };
+            
+            return (
+              <div 
+                key={listing.id} 
+                className="animate-fade-in relative" 
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                {user && listing.seller_id === user.id && listing.approval_status === 'pending' && (
+                  <Badge variant="outline" className="absolute top-2 right-2 z-10 bg-yellow-100 text-yellow-800 border-yellow-300">
+                    Pending Approval
+                  </Badge>
                 )}
-              />
-            </div>
-          ))}
+                <MarketplaceListingCard 
+                  listing={enhancedListing}
+                  className={cn(
+                    "h-full flex flex-col",
+                    "search-result-card",
+                    listing.approval_status === 'pending' ? "opacity-75" : ""
+                  )}
+                />
+              </div>
+            );
+          })}
         </div>
 
         {(loading || hasMore) && (
