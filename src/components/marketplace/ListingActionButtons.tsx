@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Phone, MessageSquare, MapPin, Share2, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -155,15 +154,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
   const handleViewBill = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (bill_images && bill_images.length > 0) {
-      // Create a temporary link element and open the bill image in a new tab
-      const link = document.createElement('a');
-      link.href = bill_images[0];
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
+      window.open(bill_images[0], '_blank');
       toast({
         title: "Opening Bill",
         description: "Viewing original bill in new tab",

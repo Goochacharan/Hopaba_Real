@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -154,7 +153,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
 
     setIsSubmitting(true);
     console.log("Form data being submitted:", data);
-    console.log("Bill images being submitted:", data.bill_images);
 
     try {
       const categoryValue = data.category.toLowerCase().trim();
@@ -181,7 +179,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         damage_images: data.damage_images || [],
         inspection_certificates: data.inspection_certificates || [],
         shop_images: data.shop_images || [],
-        bill_images: data.bill_images || [], // Ensure bill_images are included
         approval_status: 'pending',
         is_negotiable: data.is_negotiable || false,
         seller_role: data.seller_role,
@@ -193,7 +190,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
       };
 
       if (listing?.id) {
-        console.log("Updating existing listing with bill images:", listingData.bill_images);
+        console.log("Updating existing listing with shop images:", listingData.shop_images);
         const { data: updatedData, error } = await supabase
           .from('marketplace_listings')
           .update(listingData)
@@ -209,7 +206,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
           description: "Your marketplace listing has been updated and will be reviewed by an admin.",
         });
       } else {
-        console.log("Creating new listing with bill images:", listingData.bill_images);
+        console.log("Creating new listing with shop images:", listingData.shop_images);
         const { data: insertedData, error } = await supabase
           .from('marketplace_listings')
           .insert(listingData)
@@ -607,10 +604,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                   <FormControl>
                     <ImageUpload 
                       images={field.value || []}
-                      onImagesChange={(images) => {
-                        console.log("Bill images updated:", images);
-                        form.setValue('bill_images', images, { shouldValidate: true });
-                      }}
+                      onImagesChange={(images) => form.setValue('bill_images', images)}
                       maxImages={5}
                     />
                   </FormControl>
