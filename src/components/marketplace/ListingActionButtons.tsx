@@ -1,8 +1,7 @@
 import React from 'react';
-import { Phone, MessageSquare, MapPin, Share2, FileText } from 'lucide-react';
+import { Phone, MessageSquare, MapPin, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-
 interface ListingActionButtonsProps {
   listingId: string;
   title: string;
@@ -12,9 +11,7 @@ interface ListingActionButtonsProps {
   sellerInstagram: string | null;
   location: string;
   mapLink?: string | null;
-  bill_images?: string[];
 }
-
 const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
   listingId,
   title,
@@ -23,16 +20,15 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
   sellerWhatsapp,
   sellerInstagram,
   location,
-  mapLink,
-  bill_images
+  mapLink
 }) => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const isMobile = useIsMobile();
-
   const formatPrice = (price: number): string => {
     return '₹' + price.toLocaleString('en-IN');
   };
-
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -54,7 +50,6 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
       });
     });
   };
-
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerPhone) {
@@ -81,7 +76,6 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
       });
     }
   };
-
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerWhatsapp) {
@@ -110,7 +104,6 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
       });
     }
   };
-
   const handleLocation = (e: React.MouseEvent) => {
     e.stopPropagation();
     let mapsUrl;
@@ -150,26 +143,6 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
       duration: 2000
     });
   };
-
-  const handleViewBill = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (bill_images && bill_images.length > 0) {
-      window.open(bill_images[0], '_blank');
-      toast({
-        title: "Opening Bill",
-        description: "Viewing original bill in new tab",
-        duration: 2000
-      });
-    } else {
-      toast({
-        title: "Bill not available",
-        description: "No bill images provided for this listing",
-        variant: "destructive",
-        duration: 3000
-      });
-    }
-  };
-
   return <div className="flex justify-between items-center gap-2 mt-4">
       <button onClick={handleCall} title="Call Seller" aria-label="Call seller" className="flex-1 h-12 text-white transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(24,128,163,0.8)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 rounded">
         <Phone className="h-5 w-5" />
@@ -186,11 +159,6 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
       <button onClick={handleShare} title="Share" aria-label="Share listing" className="flex-1 h-12 border border-[#1EAEDB]/20 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px] bg-violet-600 hover:bg-violet-500 rounded text-slate-50">
         <Share2 className="h-5 w-5" />
       </button>
-
-      <button onClick={handleViewBill} title="View Bill" aria-label="View original bill" className="flex-1 h-12 border border-[#1EAEDB]/20 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 rounded text-slate-50">
-        <FileText className="h-5 w-5" />
-      </button>
     </div>;
 };
-
 export default ListingActionButtons;
