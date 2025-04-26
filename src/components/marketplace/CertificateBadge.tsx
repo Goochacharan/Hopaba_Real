@@ -31,7 +31,7 @@ const CertificateBadge: React.FC<CertificateBadgeProps> = ({
   return <>
       <Badge variant="success" onClick={() => setOpen(true)} className="flex items-center gap-1 cursor-pointer text-green-800 bg-blue-500 rounded px-[5px] mx-0">
         <CircleCheck className="h-3.5 w-3.5 text-green-600 fill-green-50" />
-        <span className="text-slate-50">Inspection report</span>
+        <span className="text-slate-50">Insp. report</span>
       </Badge>
       
       <Dialog open={open} onOpenChange={setOpen}>
