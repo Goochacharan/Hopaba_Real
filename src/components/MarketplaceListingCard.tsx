@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import ImageViewer from '@/components/ImageViewer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Lock, Unlock, Image, FileWarning } from 'lucide-react';
+import { Lock, Unlock, Image, FileWarning, FileText } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 // Import our components
@@ -58,6 +58,10 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   console.log(`Listing ${listing.id} has certificates:`, hasCertificates, listing.inspection_certificates);
 
   const sellerRole = listing.seller_role || 'owner';
+
+  // Check if the listing has bills and log it for debugging
+  const hasBills = listing.bill_images && listing.bill_images.length > 0;
+  console.log(`Listing ${listing.id} has bills:`, hasBills, listing.bill_images);
 
   return <div className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5", className)} onClick={handleCardClick}>
       {hasDamageImages ? <Tabs defaultValue="regular" className="mb-2">
@@ -118,6 +122,23 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
                   <CertificateBadge certificates={listing.inspection_certificates || []} />
                 </span>
               )}
+
+              {/* Add bill badge */}
+              {hasBills && (
+                <Badge 
+                  variant="default" 
+                  className="inline-flex items-center gap-1 pr-1.5 cursor-pointer bg-blue-600 hover:bg-blue-500 text-white"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (listing.bill_images && listing.bill_images.length > 0) {
+                      window.open(listing.bill_images[0], '_blank');
+                    }
+                  }}
+                >
+                  <FileText className="h-3 w-3" />
+                  <span className="pr-0.5">Original Bill</span>
+                </Badge>
+              )}
             </div>
           </div>
         </div>
@@ -150,12 +171,26 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
             </p>
           </ScrollArea>}
 
-        <ListingActionButtons listingId={listing.id} title={listing.title} price={listing.price} sellerPhone={listing.seller_phone} sellerWhatsapp={listing.seller_whatsapp} sellerInstagram={listing.seller_instagram} location={listing.location} mapLink={listing.map_link} />
+        <ListingActionButtons 
+          listingId={listing.id} 
+          title={listing.title} 
+          price={listing.price} 
+          sellerPhone={listing.seller_phone} 
+          sellerWhatsapp={listing.seller_whatsapp} 
+          sellerInstagram={listing.seller_instagram} 
+          location={listing.location} 
+          mapLink={listing.map_link} 
+        />
       </div>
 
-      <ImageViewer images={currentImageType === 'regular' ? listing.images : listing.damage_images || []} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={open => {
-      setImageViewerOpen(open);
-    }} />
+      <ImageViewer 
+        images={currentImageType === 'regular' ? listing.images : listing.damage_images || []} 
+        initialIndex={selectedImageIndex} 
+        open={imageViewerOpen} 
+        onOpenChange={open => {
+          setImageViewerOpen(open);
+        }} 
+      />
     </div>;
 };
 
