@@ -23,7 +23,6 @@ interface ListingPriceCardProps {
   mapLink?: string | null;
   isNegotiable?: boolean;
   inspectionCertificates?: string[];
-  bill_images?: string[];
 }
 
 const formatPrice = (price: number): string => {
@@ -45,8 +44,7 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   condition,
   mapLink,
   isNegotiable = false,
-  inspectionCertificates = [],
-  bill_images = []
+  inspectionCertificates = []
 }) => {
   return (
     <div className="sticky top-24 space-y-6">
@@ -98,8 +96,7 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
           sellerWhatsapp={sellerWhatsapp} 
           sellerInstagram={sellerInstagram} 
           location={location} 
-          mapLink={mapLink}
-          bill_images={bill_images}
+          mapLink={mapLink} 
         />
       </div>
       

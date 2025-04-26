@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import ImageViewer from '@/components/ImageViewer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Lock, Unlock, Image, FileWarning, FileText } from 'lucide-react';
+import { Lock, Unlock, Image, FileWarning } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import ListingImageCarousel from '@/components/marketplace/ListingImageCarousel';
 import CertificateBadge from '@/components/marketplace/CertificateBadge';
@@ -55,26 +55,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   console.log(`Listing ${listing.id} has certificates:`, hasCertificates, listing.inspection_certificates);
 
   const sellerRole = listing.seller_role || 'owner';
-
-  const handleViewBill = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (listing.bill_images && listing.bill_images.length > 0) {
-      const link = document.createElement('a');
-      link.href = listing.bill_images[0];
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      toast({
-        title: "Bill not available",
-        description: "No bill images provided for this listing",
-        variant: "destructive",
-        duration: 3000
-      });
-    }
-  };
 
   return <div className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5", className)} onClick={handleCardClick}>
       {hasDamageImages ? <Tabs defaultValue="regular" className="mb-2">
@@ -128,7 +108,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
                   <Lock className="h-3 w-3" />
                   <span className="pr-0.5">Fixed</span>
                 </Badge>)}
-            
+              
               {hasCertificates && (
                 <span onClick={e => e.stopPropagation()}>
                   <CertificateBadge certificates={listing.inspection_certificates || []} />
@@ -164,7 +144,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
             <p className="whitespace-pre-line text-gray-950 text-sm py-0 my-0">
               {listing.description}
             </p>
-          ></ScrollArea>}
+          </ScrollArea>}
 
         <ListingActionButtons 
           listingId={listing.id} 
