@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
@@ -193,15 +194,17 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
         </div>
       </div>
       
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleRateClick}
-        className="mt-4 w-full"
-      >
-        <Star className="w-4 h-4 mr-2" />
-        Rate this place
-      </Button>
+      <div className="flex items-center">
+        <Button
+          variant="outline"
+          size="xs"
+          onClick={handleRateClick}
+          className="text-xs px-2 py-1"
+        >
+          <Star className="w-3 h-3 mr-1" />
+          Rate
+        </Button>
+      </div>
     </div>
   );
 };
