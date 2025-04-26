@@ -8,13 +8,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Lock, Unlock, Image, FileWarning, FileText } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-
-// Import our components
 import ListingImageCarousel from './marketplace/ListingImageCarousel';
 import ListingMetadata from './marketplace/ListingMetadata';
 import SellerInfo from './marketplace/SellerInfo';
 import ListingActionButtons from './marketplace/ListingActionButtons';
 import CertificateBadge from './marketplace/CertificateBadge';
+import BillImageViewer from './marketplace/BillImageViewer';
 
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
@@ -34,6 +33,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   const [imageViewerOpen, setImageViewerOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   const [currentImageType, setCurrentImageType] = React.useState<'regular' | 'damage'>('regular');
+  const [billViewerOpen, setBillViewerOpen] = React.useState(false);
   
   const handleImageClick = (index: number, type: 'regular' | 'damage' = 'regular') => {
     setSelectedImageIndex(index);
@@ -53,13 +53,11 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   const isSearchPage = window.location.pathname.includes('/search');
   const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
   
-  // Check if the listing has inspection certificates and log it for debugging
   const hasCertificates = listing.inspection_certificates && listing.inspection_certificates.length > 0;
   console.log(`Listing ${listing.id} has certificates:`, hasCertificates, listing.inspection_certificates);
 
   const sellerRole = listing.seller_role || 'owner';
 
-  // Check if the listing has bills and log it for debugging
   const hasBills = listing.bill_images && listing.bill_images.length > 0;
   console.log(`Listing ${listing.id} has bills:`, hasBills, listing.bill_images);
 
@@ -116,23 +114,19 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
                   <span className="pr-0.5">Fixed</span>
                 </Badge>)}
               
-              {/* Always check hasCertificates to prevent empty badge */}
               {hasCertificates && (
                 <span onClick={e => e.stopPropagation()}>
                   <CertificateBadge certificates={listing.inspection_certificates || []} />
                 </span>
               )}
 
-              {/* Add bill badge */}
               {hasBills && (
                 <Badge 
                   variant="default" 
                   className="inline-flex items-center gap-1 pr-1.5 cursor-pointer bg-blue-600 hover:bg-blue-500 text-white"
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (listing.bill_images && listing.bill_images.length > 0) {
-                      window.open(listing.bill_images[0], '_blank');
-                    }
+                    setBillViewerOpen(true);
                   }}
                 >
                   <FileText className="h-3 w-3" />
@@ -187,10 +181,16 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         images={currentImageType === 'regular' ? listing.images : listing.damage_images || []} 
         initialIndex={selectedImageIndex} 
         open={imageViewerOpen} 
-        onOpenChange={open => {
-          setImageViewerOpen(open);
-        }} 
+        onOpenChange={setImageViewerOpen}
       />
+
+      {hasBills && (
+        <BillImageViewer
+          images={listing.bill_images || []}
+          open={billViewerOpen}
+          onOpenChange={setBillViewerOpen}
+        />
+      )}
     </div>;
 };
 
