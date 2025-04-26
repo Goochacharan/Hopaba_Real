@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -6,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import ImageViewer from '@/components/ImageViewer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Lock, Unlock, Image, FileWarning } from 'lucide-react';
+import { Lock, Unlock, Image, FileWarning, Share2 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import ListingImageCarousel from '@/components/marketplace/ListingImageCarousel';
 import CertificateBadge from '@/components/marketplace/CertificateBadge';
@@ -159,9 +160,14 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         />
       </div>
 
-      <ImageViewer images={currentImageType === 'regular' ? listing.images : listing.damage_images || []} initialIndex={selectedImageIndex} open={imageViewerOpen} onOpenChange={open => {
-      setImageViewerOpen(open);
-    }} />
+      <ImageViewer 
+        images={currentImageType === 'regular' ? listing.images : listing.damage_images || []} 
+        initialIndex={selectedImageIndex} 
+        open={imageViewerOpen} 
+        onOpenChange={open => {
+          setImageViewerOpen(open);
+        }} 
+      />
     </div>;
 };
 
