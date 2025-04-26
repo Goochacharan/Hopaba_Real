@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -6,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { ChevronDown, IndianRupee, Calendar, Star, Layers } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 interface MarketplaceFiltersProps {
   priceRange: [number, number];
@@ -36,6 +37,9 @@ const MarketplaceFilters: React.FC<MarketplaceFiltersProps> = ({
   sortOption,
   onSortChange
 }) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
   const isPriceFilterActive = priceRange[0] > 0 || priceRange[1] < 10000000;
   const isYearFilterActive = yearRange[0] > 2010 || yearRange[1] < new Date().getFullYear();
   const isRatingFilterActive = ratingFilter > 0;
@@ -251,6 +255,17 @@ const MarketplaceFilters: React.FC<MarketplaceFiltersProps> = ({
           </div>
         </PopoverContent>
       </Popover>
+
+      {user && (
+        <Button
+          onClick={() => navigate('/profile')}
+          variant="outline"
+          size="sm"
+          className="rounded-full border border-border/60 flex items-center justify-center bg-primary text-white hover:bg-primary/90 whitespace-nowrap px-4"
+        >
+          Sell your item
+        </Button>
+      )}
     </div>
   );
 };

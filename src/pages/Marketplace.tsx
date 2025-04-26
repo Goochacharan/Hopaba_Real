@@ -1,10 +1,8 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import MainLayout from '@/components/MainLayout';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import PostalCodeSearch from '@/components/search/PostalCodeSearch';
@@ -166,17 +164,6 @@ const Marketplace = () => {
   return (
     <MainLayout>
       <div className="animate-fade-in px-[7px]">
-        {user && (
-          <div className="mb-4">
-            <Button 
-              onClick={() => navigate('/profile')} 
-              className="w-full bg-primary text-white hover:bg-primary/90"
-            >
-              Sell your item
-            </Button>
-          </div>
-        )}
-        
         <PostalCodeSearch 
           onSearch={handlePostalCodeSearch} 
           initialValue={postalCodeFilter}
