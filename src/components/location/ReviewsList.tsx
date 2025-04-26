@@ -97,11 +97,11 @@ const ReviewsList = ({
                 <div className="mt-3 space-y-2">
                   <p className="text-sm text-muted-foreground mb-1">Detailed ratings:</p>
                   {Object.entries(review.criteriaRatings).map(([criterionId, rating]) => {
-                    // We need to fetch criterion name by ID
-                    // For now, just show "Criterion #" with the rating
+                    // Use the criterion ID's first characters as a placeholder, will be updated by RatingProgressBars
+                    const criterionName = `Rating ${criterionId.substring(0, 4)}`;
                     return (
                       <div key={criterionId} className="flex items-center gap-2">
-                        <div className="text-xs w-24 truncate">Criterion {criterionId.substring(0, 4)}</div>
+                        <div className="text-xs w-24 truncate">{criterionName}</div>
                         <Progress value={rating * 10} className="h-2 flex-1" />
                         <div className="text-xs font-medium">{rating}/10</div>
                       </div>

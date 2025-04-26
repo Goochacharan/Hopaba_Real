@@ -91,9 +91,11 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
         console.error('Error fetching criterion names:', err);
         setFetchError(true);
         
+        // Create more meaningful fallback names based on criterion IDs
         const fallbackNames: {[key: string]: string} = {};
         Object.keys(mergedRatings).forEach(id => {
-          fallbackNames[id] = `Criterion ${id.slice(0, 4)}`;
+          // Use a more descriptive fallback naming convention
+          fallbackNames[id] = `Rating ${id.slice(0, 4)}`;
         });
         setCriterionNames(fallbackNames);
       } finally {
@@ -160,11 +162,12 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
             const normalizedRating = (rating / 10) * 100;
             const ratingColor = getOverallRatingColor(normalizedRating);
             const ratingLabel = getRatingLabel(rating);
-            const displayName = criterionNames[criterionId] || criterionId;
+            // Use the fetched criterion name or a fixed width placeholder while loading
+            const displayName = criterionNames[criterionId] || "Loading...";
 
             return (
               <div key={criterionId} className="flex items-center gap-1 mb-1 relative">
-                <div className="w-16 text-sm text-muted-foreground text-left pr-1">
+                <div className="w-20 text-sm text-muted-foreground text-left pr-1 truncate">
                   {displayName}
                 </div>
                 <div className="flex-1 relative">
