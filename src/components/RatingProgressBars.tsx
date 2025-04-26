@@ -197,7 +197,7 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
       <div className="flex items-center">
         <Button
           variant="outline"
-          size="xs"
+          size="sm"
           onClick={handleRateClick}
           className="text-xs px-2 py-1"
         >
