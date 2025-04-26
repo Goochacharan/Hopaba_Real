@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -68,7 +67,7 @@ const ReviewsSection = ({
   };
 
   return (
-    <div className="bg-white shadow-sm border border-border overflow-hidden mb-6 p-6 px-[30px] rounded-lg py-[11px]">
+    <div className="bg-white shadow-sm border border-border overflow-hidden mb-6 p-6 px-[30px] rounded-lg py-[11px] reviews-section">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Reviews</h2>
         {userReview ? (
