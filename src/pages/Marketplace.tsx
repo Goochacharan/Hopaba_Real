@@ -169,7 +169,7 @@ const Marketplace = () => {
         {user && (
           <div className="mb-4">
             <Button 
-              onClick={() => navigate('/marketplace/new')} 
+              onClick={() => navigate('/profile')} 
               className="w-full bg-primary text-white hover:bg-primary/90"
             >
               Sell your item
