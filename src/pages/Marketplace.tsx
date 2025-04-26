@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import MainLayout from '@/components/MainLayout';
 import MarketplaceListingCard from '@/components/MarketplaceListingCard';
@@ -278,6 +279,17 @@ const Marketplace = () => {
   return (
     <MainLayout>
       <div className="animate-fade-in px-[7px]">
+        {user && (
+          <div className="mb-4">
+            <Button 
+              onClick={() => navigate('/marketplace/new')} 
+              className="w-full bg-primary text-white hover:bg-primary/90"
+            >
+              Sell your item
+            </Button>
+          </div>
+        )}
+        
         <PostalCodeSearch 
           onSearch={handlePostalCodeSearch} 
           initialValue={postalCodeFilter}
