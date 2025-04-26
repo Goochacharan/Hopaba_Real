@@ -1,8 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Star } from 'lucide-react';
 
 interface RatingProgressBarsProps {
   criteriaRatings: {
@@ -92,8 +91,10 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
         console.error('Error fetching criterion names:', err);
         setFetchError(true);
         
+        // Create more meaningful fallback names based on criterion IDs
         const fallbackNames: {[key: string]: string} = {};
         Object.keys(mergedRatings).forEach(id => {
+          // Use a more descriptive fallback naming convention
           fallbackNames[id] = `Rating ${id.slice(0, 4)}`;
         });
         setCriterionNames(fallbackNames);
@@ -126,13 +127,6 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
     
     const totalHeight = (barHeight * totalBars) + (gapSize * (totalBars - 1));
     return totalHeight / 2;
-  };
-
-  const handleRateClick = () => {
-    const reviewsSection = document.querySelector('.reviews-section');
-    if (reviewsSection) {
-      reviewsSection.scrollIntoView({ behavior: 'smooth' });
-    }
   };
 
   return (
@@ -168,6 +162,7 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
             const normalizedRating = (rating / 10) * 100;
             const ratingColor = getOverallRatingColor(normalizedRating);
             const ratingLabel = getRatingLabel(rating);
+            // Use the fetched criterion name or a fixed width placeholder while loading
             const displayName = criterionNames[criterionId] || "Loading...";
 
             return (
@@ -191,18 +186,6 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
             );
           })}
         </div>
-      </div>
-      
-      <div className="flex items-center">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRateClick}
-          className="text-xs px-2 py-1 flex items-center"
-        >
-          <Star className="w-3 h-3 mr-1" />
-          Rate this Place
-        </Button>
       </div>
     </div>
   );
