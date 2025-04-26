@@ -63,6 +63,7 @@ const marketplaceListingSchema = z.object({
   area: z.string().min(2, { message: "Area must be at least 2 characters" }),
   city: z.string().min(1, { message: "City is required" }),
   postal_code: z.string().regex(/^\d{6}$/, { message: "Postal code must be 6 digits" }),
+  bill_images: z.array(z.string()).optional(),
 });
 
 type MarketplaceListingFormData = z.infer<typeof marketplaceListingSchema>;
@@ -105,6 +106,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     area: listing?.area || '',
     city: listing?.city || '',
     postal_code: listing?.postal_code || '',
+    bill_images: listing?.bill_images || [],
   };
 
   const form = useForm<MarketplaceListingFormData>({
@@ -574,6 +576,40 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                   </FormControl>
                   <FormDescription>
                     Upload up to 10 images showing any damage or scratches on your item.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <Separator className="my-6" />
+          
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-green-500" />
+              <h3 className="font-medium text-lg">Original Bill Images</h3>
+            </div>
+            <p className="text-muted-foreground">
+              You can upload images of the original bill or invoice of your item.
+              This helps establish authenticity and builds trust with potential buyers.
+            </p>
+            
+            <FormField
+              control={form.control}
+              name="bill_images"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bill/Invoice Images (Optional)</FormLabel>
+                  <FormControl>
+                    <ImageUpload 
+                      images={field.value || []}
+                      onImagesChange={(images) => form.setValue('bill_images', images)}
+                      maxImages={5}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Upload up to 5 images of the original bill or invoice.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

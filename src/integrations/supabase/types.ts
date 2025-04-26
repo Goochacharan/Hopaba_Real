@@ -115,6 +115,7 @@ export type Database = {
         Row: {
           approval_status: string
           area: string
+          bill_images: string[] | null
           category: string
           city: string
           condition: string
@@ -147,6 +148,7 @@ export type Database = {
         Insert: {
           approval_status?: string
           area: string
+          bill_images?: string[] | null
           category: string
           city: string
           condition: string
@@ -179,6 +181,7 @@ export type Database = {
         Update: {
           approval_status?: string
           area?: string
+          bill_images?: string[] | null
           category?: string
           city?: string
           condition?: string
