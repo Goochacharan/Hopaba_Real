@@ -128,22 +128,11 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
                   <Lock className="h-3 w-3" />
                   <span className="pr-0.5">Fixed</span>
                 </Badge>)}
-              
+            
               {hasCertificates && (
                 <span onClick={e => e.stopPropagation()}>
                   <CertificateBadge certificates={listing.inspection_certificates || []} />
                 </span>
-              )}
-
-              {listing.bill_images && listing.bill_images.length > 0 && (
-                <Badge 
-                  variant="default" 
-                  onClick={handleViewBill} 
-                  className="flex items-center gap-1 bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
-                >
-                  <FileText className="h-3 w-3" />
-                  <span>Original Bill</span>
-                </Badge>
               )}
             </div>
           </div>
@@ -175,7 +164,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
             <p className="whitespace-pre-line text-gray-950 text-sm py-0 my-0">
               {listing.description}
             </p>
-          </ScrollArea>}
+          ></ScrollArea>}
 
         <ListingActionButtons 
           listingId={listing.id} 
