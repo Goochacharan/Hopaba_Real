@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -31,6 +30,7 @@ export interface MarketplaceListing {
   city: string;
   postal_code: string;
   updated_at: string;
+  bill_images?: string[]; // Add the new bill_images property
 }
 
 interface MarketplaceListingsQueryOptions {
@@ -138,6 +138,8 @@ export const useMarketplaceListing = (id: string) => {
         seller_rating: data.seller_rating || 0,
         // Make sure shop_images is an array
         shop_images: data.shop_images || [],
+        // Make sure bill_images is an array
+        bill_images: data.bill_images || [],
         // Add review_count if it doesn't exist (default to 0)
         review_count: 0
       } as MarketplaceListing;
