@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, MessageSquare, MapPin, Share2, FileText, FileInvoice } from 'lucide-react';
+import { Phone, MessageSquare, MapPin, Share2, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -196,7 +196,7 @@ const ListingActionButtons: React.FC<ListingActionButtonsProps> = ({
       </button>
 
       <button onClick={handleViewBill} title="View Bill" aria-label="View original bill" className="flex-1 h-12 border border-[#1EAEDB]/20 transition-all flex items-center justify-center shadow-[0_5px_0px_0px_0px_rgba(30,174,219,0.15)] hover:shadow-[0_3px_0px_0px_0px_rgba(30,174,219,0.15)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 rounded text-slate-50">
-        <FileInvoice className="h-5 w-5" />
+        <FileText className="h-5 w-5" />
       </button>
     </div>;
 };
