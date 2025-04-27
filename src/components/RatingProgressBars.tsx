@@ -37,6 +37,17 @@ const getStoredCriteriaRatings = (locationId: string) => {
   }
 };
 
+// Predefined fallback names for common criteria types
+const getFallbackName = (criterionId: string): string => {
+  const id = criterionId.toLowerCase();
+  if (id.includes('amb')) return 'Ambience';
+  if (id.includes('tast') || id.includes('food')) return 'Taste';
+  if (id.includes('price') || id.includes('val')) return 'Price';
+  if (id.includes('hyg') || id.includes('clean')) return 'Hygiene';
+  if (id.includes('serv')) return 'Service';
+  return 'Rating';
+};
+
 const getRatingLabel = (rating: number): string => {
   if (rating <= 2) return 'Worst';
   if (rating <= 5) return 'Bad';
@@ -63,13 +74,10 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
   }
 
   const [criterionNames, setCriterionNames] = useState<{[key: string]: string}>({});
-  const [loading, setLoading] = useState<boolean>(true);
-  const [fetchError, setFetchError] = useState<boolean>(false);
 
-  // Fetch criterion names immediately when component mounts
+  // Fetch criterion names on component mount
   useEffect(() => {
     const fetchCriterionNames = async () => {
-      setLoading(true);
       try {
         const criterionIds = Object.keys(mergedRatings);
         if (criterionIds.length > 0) {
@@ -82,29 +90,30 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
             throw error;
           }
           
+          // Create a map of criterion ID to name
           const namesMap: {[key: string]: string} = {};
           data?.forEach(criterion => {
             namesMap[criterion.id] = criterion.name;
           });
+          
+          // For any criteria without names in the database, use fallback names
+          criterionIds.forEach(id => {
+            if (!namesMap[id]) {
+              namesMap[id] = getFallbackName(id);
+            }
+          });
+          
           setCriterionNames(namesMap);
         }
       } catch (err) {
         console.error('Error fetching criterion names:', err);
-        setFetchError(true);
         
-        // Create more meaningful fallback names for common criteria
+        // If fetching fails, set fallback names for all criteria
         const fallbackNames: {[key: string]: string} = {};
         Object.keys(mergedRatings).forEach(id => {
-          if (id.includes('amb')) fallbackNames[id] = 'Ambience';
-          else if (id.includes('tast') || id.includes('food')) fallbackNames[id] = 'Taste';
-          else if (id.includes('price') || id.includes('val')) fallbackNames[id] = 'Price';
-          else if (id.includes('hyg') || id.includes('clean')) fallbackNames[id] = 'Hygiene';
-          else if (id.includes('serv')) fallbackNames[id] = 'Service';
-          else fallbackNames[id] = `Criterion ${id.slice(0, 4)}`;
+          fallbackNames[id] = getFallbackName(id);
         });
         setCriterionNames(fallbackNames);
-      } finally {
-        setLoading(false);
       }
     };
     
@@ -168,9 +177,8 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
             const ratingColor = getOverallRatingColor(normalizedRating);
             const ratingLabel = getRatingLabel(rating);
             
-            // Fix: Display the actual name or fallback, don't show "Loading..." when data is ready
-            const displayName = criterionNames[criterionId] || 
-              (loading ? "Loading..." : `Rating ${criterionId.slice(0, 4)}`);
+            // Always display a name, either from database or fallback
+            const displayName = criterionNames[criterionId] || getFallbackName(criterionId);
 
             return (
               <div key={criterionId} className="flex items-center gap-1 mb-1 relative">
