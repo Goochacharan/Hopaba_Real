@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
 import { useMarketplaceListing } from '@/hooks/useMarketplaceListings';
@@ -16,23 +17,51 @@ import SellerDetailsCard from '@/components/marketplace/SellerDetailsCard';
 import CertificateBadge from '@/components/marketplace/CertificateBadge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import InspectionCertificatesCard from '@/components/marketplace/InspectionCertificatesCard';
+import { useQueryClient } from '@tanstack/react-query';
 
 const MarketplaceListingDetails = () => {
-  const {
-    id = ''
-  } = useParams<{
-    id: string;
-  }>();
+  const { id = '' } = useParams<{ id: string; }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const {
     data: listing,
     isLoading: loading,
-    error
+    error,
+    refetch
   } = useMarketplaceListing(id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [damageImageIndex, setDamageImageIndex] = useState(0);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [currentImageType, setCurrentImageType] = useState<'regular' | 'damage'>('regular');
+  
+  // Set up a listener to refetch the listing when updates happen
+  useEffect(() => {
+    // Subscribe to events that might indicate listing updates
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refetch();
+      }
+    };
+
+    // Set up event listeners
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', refetch);
+
+    // Refresh the listing data when component mounts
+    refetch();
+
+    // Clean up listeners
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', refetch);
+    };
+  }, [refetch, id]);
+  
+  // Function to invalidate query cache and force refetch
+  const refreshListingData = () => {
+    queryClient.invalidateQueries({ queryKey: ['marketplaceListing', id] });
+    refetch();
+  };
   
   const openImageViewer = (index: number, type: 'regular' | 'damage') => {
     if (type === 'regular') {

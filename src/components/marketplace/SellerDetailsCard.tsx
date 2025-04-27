@@ -1,14 +1,16 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Phone, MessageSquare, MapPin, Share2 } from 'lucide-react';
+import { Phone, MessageSquare, MapPin, Share2, Edit2, Check, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
 import { format } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useMarketplaceListingUpdate } from '@/hooks/useMarketplaceListingUpdate';
+import { useAuth } from '@/hooks/useAuth';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface SellerDetailsCardProps {
   id: string;
@@ -48,10 +50,13 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
   inspectionCertificates,
   ownershipNumber // Include in props destructuring
 }) => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  const { updateListing, isUpdating } = useMarketplaceListingUpdate();
+  const [isEditingOwnership, setIsEditingOwnership] = useState(false);
+  const [tempOwnershipValue, setTempOwnershipValue] = useState(ownershipNumber || "1st");
+  const isCurrentUserSeller = user && user.id === sellerId;
   
   const formatPrice = (price: number): string => {
     return '₹' + price.toLocaleString('en-IN');
@@ -161,12 +166,83 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
     });
   };
 
+  const handleEditOwnership = () => {
+    setIsEditingOwnership(true);
+  };
+  
+  const handleSaveOwnership = async () => {
+    const success = await updateListing(id, { ownershipNumber: tempOwnershipValue });
+    if (success) {
+      setIsEditingOwnership(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setTempOwnershipValue(ownershipNumber || "1st");
+    setIsEditingOwnership(false);
+  };
+
   return <Card className="bg-white shadow-sm border rounded-xl overflow-hidden">
       <CardHeader className="pb-3">
-        <CardTitle className="font-semibold text-sm">Seller Information</CardTitle>
+        <CardTitle className="font-semibold text-sm flex justify-between items-center">
+          <span>Seller Information</span>
+          {isCurrentUserSeller && ownershipNumber !== undefined && !isEditingOwnership && (
+            <Button 
+              onClick={handleEditOwnership}
+              variant="ghost" 
+              size="sm" 
+              className="h-8 px-2"
+            >
+              <Edit2 className="h-3.5 w-3.5 mr-1" />
+              <span className="text-xs">Edit Owner</span>
+            </Button>
+          )}
+        </CardTitle>
       </CardHeader>
       
       <CardContent className="space-y-4">
+        {isCurrentUserSeller && isEditingOwnership ? (
+          <div className="flex items-center gap-2 mb-2 bg-gray-50 p-3 rounded-lg border">
+            <div className="flex-1">
+              <label className="text-xs text-gray-500 block mb-1">Ownership Status</label>
+              <Select 
+                value={tempOwnershipValue} 
+                onValueChange={setTempOwnershipValue}
+              >
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue placeholder="Select ownership" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1st">1st Owner</SelectItem>
+                  <SelectItem value="2nd">2nd Owner</SelectItem>
+                  <SelectItem value="3rd">3rd Owner</SelectItem>
+                  <SelectItem value="4th">4th Owner</SelectItem>
+                  <SelectItem value="5th+">5th+ Owner</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-1">
+              <Button 
+                onClick={handleSaveOwnership} 
+                disabled={isUpdating} 
+                variant="outline" 
+                size="sm" 
+                className="h-8 w-8 p-0"
+              >
+                <Check className="h-3.5 w-3.5 text-green-500" />
+              </Button>
+              <Button 
+                onClick={handleCancelEdit} 
+                variant="outline" 
+                size="sm" 
+                className="h-8 w-8 p-0"
+              >
+                <X className="h-3.5 w-3.5 text-red-500" />
+              </Button>
+            </div>
+          </div>
+        ) : null}
+
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12 border border-border">
             {avatarUrl ? (
