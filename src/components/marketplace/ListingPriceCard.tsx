@@ -23,6 +23,8 @@ interface ListingPriceCardProps {
   mapLink?: string | null;
   isNegotiable?: boolean;
   inspectionCertificates?: string[];
+  ownershipNumber?: string;
+  modelYear?: string;
 }
 
 const formatPrice = (price: number): string => {
@@ -44,7 +46,9 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   condition,
   mapLink,
   isNegotiable = false,
-  inspectionCertificates = []
+  inspectionCertificates = [],
+  ownershipNumber,
+  modelYear
 }) => {
   return (
     <div className="sticky top-24 space-y-6">
@@ -57,6 +61,22 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
             sellerInstagram={sellerInstagram} 
             sellerName={sellerName} 
           />
+          
+          {/* Model Year and Ownership information */}
+          {(modelYear || ownershipNumber) && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {modelYear && (
+                <Badge variant="condition" className="bg-slate-200">
+                  {modelYear} Model
+                </Badge>
+              )}
+              {ownershipNumber && (
+                <Badge variant="condition" className="bg-white">
+                  {ownershipNumber} Owner
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
         
         <div className="flex justify-between items-center mb-8">
