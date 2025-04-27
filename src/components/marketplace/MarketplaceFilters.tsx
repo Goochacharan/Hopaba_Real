@@ -83,7 +83,7 @@ const MarketplaceFilters: React.FC<MarketplaceFiltersProps> = ({
             onClick={() => navigate('/profile')}
             variant="outline"
             size="sm"
-            className="rounded-full border border-border/60 flex items-center justify-center bg-primary text-white hover:bg-primary/90 whitespace-nowrap px-4"
+            className="rounded-full border border-border/60 flex items-center justify-center bg-orange-500 text-white hover:bg-orange-600 whitespace-nowrap px-4"
           >
             Sell your item
           </Button>
