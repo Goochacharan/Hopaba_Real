@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -120,7 +119,11 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
                   <Lock className="h-3 w-3" />
                   <span className="pr-0.5">Fixed</span>
                 </Badge>)}
-              
+            
+              {listing.ownership_number && <Badge variant="condition" className="text-xs bg-white">
+                {listing.ownership_number} Owner
+              </Badge>}
+            
               {hasCertificates && <span onClick={e => e.stopPropagation()}>
                   <CertificateBadge certificates={listing.inspection_certificates || []} />
                 </span>}
