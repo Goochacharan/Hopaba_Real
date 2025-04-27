@@ -167,10 +167,10 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
             const normalizedRating = (rating / 10) * 100;
             const ratingColor = getOverallRatingColor(normalizedRating);
             const ratingLabel = getRatingLabel(rating);
-            // Use the fetched criterion name or a clear placeholder while loading
-            const displayName = loading
-              ? "Loading..."
-              : (criterionNames[criterionId] || `Rating ${criterionId.slice(0, 4)}`);
+            
+            // Fix: Display the actual name or fallback, don't show "Loading..." when data is ready
+            const displayName = criterionNames[criterionId] || 
+              (loading ? "Loading..." : `Rating ${criterionId.slice(0, 4)}`);
 
             return (
               <div key={criterionId} className="flex items-center gap-1 mb-1 relative">
