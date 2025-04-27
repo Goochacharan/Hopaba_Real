@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -99,14 +100,9 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
           <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
             <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
             <div className="flex items-center gap-2 mx-[28px]">
-              {listing.model_year && <Badge variant="condition" className="text-xs bg-white-500 bg-slate-200">
+              {listing.model_year && <Badge variant="condition" className="text-xs bg-slate-200">
                 {listing.model_year} Model
               </Badge>}
-              {listing.ownership_number && (
-                <Badge variant="condition" className="text-xs bg-white">
-                  {listing.ownership_number} Owner
-                </Badge>
-              )}
             </div>
           </p>
           

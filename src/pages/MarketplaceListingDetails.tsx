@@ -210,6 +210,7 @@ const MarketplaceListingDetails = () => {
                     mapLink={listing?.map_link || null}
                     reviewCount={listing?.review_count}
                     isNegotiable={listing?.is_negotiable}
+                    ownershipNumber={listing?.ownership_number}
                   />
                 )}
                 
