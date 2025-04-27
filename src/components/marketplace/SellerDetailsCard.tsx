@@ -27,6 +27,7 @@ interface SellerDetailsCardProps {
   avatarUrl?: string | null;
   inspectionCertificates?: string[] | null;
   isNegotiable?: boolean;
+  ownershipNumber?: string; // Added ownershipNumber prop
 }
 
 const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
@@ -44,7 +45,8 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
   mapLink,
   reviewCount = 0,
   avatarUrl,
-  inspectionCertificates
+  inspectionCertificates,
+  ownershipNumber // Include in props destructuring
 }) => {
   const {
     toast
