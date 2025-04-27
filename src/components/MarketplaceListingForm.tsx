@@ -64,6 +64,7 @@ const marketplaceListingSchema = z.object({
   city: z.string().min(1, { message: "City is required" }),
   postal_code: z.string().regex(/^\d{6}$/, { message: "Postal code must be 6 digits" }),
   bill_images: z.array(z.string()).optional(),
+  ownership_number: z.string().min(1, { message: "Please select ownership details" }),
 });
 
 type MarketplaceListingFormData = z.infer<typeof marketplaceListingSchema>;
@@ -103,6 +104,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     inspection_certificates: listing?.inspection_certificates || [],
     shop_images: listing?.shop_images || [],
     seller_role: listing?.seller_role || 'owner',
+    ownership_number: listing?.ownership_number || '1st',
     area: listing?.area || '',
     city: listing?.city || '',
     postal_code: listing?.postal_code || '',
@@ -452,6 +454,41 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                         <SelectItem value="dealer">Dealer</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="ownership_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ownership Details*</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select ownership details" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Array.from({ length: 10 }, (_, i) => {
+                          const num = i + 1;
+                          const suffix = num === 1 ? 'st' : num === 2 ? 'nd' : num === 3 ? 'rd' : 'th';
+                          return (
+                            <SelectItem key={num} value={`${num}${suffix}`}>
+                              {`${num}${suffix} Owner`}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Specify which owner you are of this item
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
