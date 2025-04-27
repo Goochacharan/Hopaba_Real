@@ -66,6 +66,7 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
   const [loading, setLoading] = useState<boolean>(true);
   const [fetchError, setFetchError] = useState<boolean>(false);
 
+  // Fetch criterion names immediately when component mounts
   useEffect(() => {
     const fetchCriterionNames = async () => {
       setLoading(true);
@@ -91,11 +92,15 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
         console.error('Error fetching criterion names:', err);
         setFetchError(true);
         
-        // Create more meaningful fallback names based on criterion IDs
+        // Create more meaningful fallback names for common criteria
         const fallbackNames: {[key: string]: string} = {};
         Object.keys(mergedRatings).forEach(id => {
-          // Use a more descriptive fallback naming convention
-          fallbackNames[id] = `Rating ${id.slice(0, 4)}`;
+          if (id.includes('amb')) fallbackNames[id] = 'Ambience';
+          else if (id.includes('tast') || id.includes('food')) fallbackNames[id] = 'Taste';
+          else if (id.includes('price') || id.includes('val')) fallbackNames[id] = 'Price';
+          else if (id.includes('hyg') || id.includes('clean')) fallbackNames[id] = 'Hygiene';
+          else if (id.includes('serv')) fallbackNames[id] = 'Service';
+          else fallbackNames[id] = `Criterion ${id.slice(0, 4)}`;
         });
         setCriterionNames(fallbackNames);
       } finally {
@@ -162,8 +167,10 @@ const RatingProgressBars: React.FC<RatingProgressBarsProps> = ({ criteriaRatings
             const normalizedRating = (rating / 10) * 100;
             const ratingColor = getOverallRatingColor(normalizedRating);
             const ratingLabel = getRatingLabel(rating);
-            // Use the fetched criterion name or a fixed width placeholder while loading
-            const displayName = criterionNames[criterionId] || "Loading...";
+            // Use the fetched criterion name or a clear placeholder while loading
+            const displayName = loading
+              ? "Loading..."
+              : (criterionNames[criterionId] || `Rating ${criterionId.slice(0, 4)}`);
 
             return (
               <div key={criterionId} className="flex items-center gap-1 mb-1 relative">
