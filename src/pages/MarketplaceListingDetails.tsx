@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -96,9 +95,6 @@ const MarketplaceListingDetails = () => {
   
   const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
   
-  // Debug log to check ownership_number value
-  console.log(`Listing detail page for ${listing.id} ownership_number:`, listing.ownership_number);
-  
   return <MainLayout>
       <div className="w-full py-8 overflow-y-auto pb-32 px-[11px]">
         <div className="max-w-[1400px] mx-auto">
@@ -118,16 +114,6 @@ const MarketplaceListingDetails = () => {
                 <h1 className="text-2xl sm:text-3xl font-bold mb-0">{listing?.title}</h1>
                 <div className="flex flex-wrap items-center gap-2 mt-1">
                   <ListingMetadata location={listing?.location || ''} createdAt={listing?.created_at || ''} condition={listing?.condition || ''} />
-                  {listing.model_year && (
-                    <Badge variant="condition" className="bg-slate-200">
-                      {listing.model_year} Model
-                    </Badge>
-                  )}
-                  {listing.ownership_number && (
-                    <Badge variant="condition" className="bg-white">
-                      {listing.ownership_number} Owner
-                    </Badge>
-                  )}
                 </div>
               </div>
               
@@ -224,8 +210,6 @@ const MarketplaceListingDetails = () => {
                     mapLink={listing?.map_link || null}
                     reviewCount={listing?.review_count}
                     isNegotiable={listing?.is_negotiable}
-                    ownershipNumber={listing?.ownership_number}
-                    modelYear={listing?.model_year}
                   />
                 )}
                 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -60,9 +59,6 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   const sellerRole = listing.seller_role || 'owner';
   const hasBills = listing.bill_images && listing.bill_images.length > 0;
   console.log(`Listing ${listing.id} has bills:`, hasBills, listing.bill_images);
-  
-  // Debug log to check ownership_number value
-  console.log(`Listing ${listing.id} ownership_number:`, listing.ownership_number);
 
   return <div className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5", className)} onClick={handleCardClick}>
       {hasDamageImages ? <Tabs defaultValue="regular" className="mb-2">
