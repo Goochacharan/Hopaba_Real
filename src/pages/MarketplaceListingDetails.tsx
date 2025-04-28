@@ -1,52 +1,38 @@
-
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
-import { ArrowLeft } from 'lucide-react';
+import { useMarketplaceListing } from '@/hooks/useMarketplaceListings';
+import { ArrowLeft, AlertCircle, Image, FileWarning } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import ListingImageCarousel from '@/components/marketplace/ListingImageCarousel';
 import ListingThumbnails from '@/components/marketplace/ListingThumbnails';
 import ListingDescription from '@/components/marketplace/ListingDescription';
+import ListingMetadata from '@/components/marketplace/ListingMetadata';
 import ImageViewer from '@/components/ImageViewer';
 import SafeTradingTips from '@/components/marketplace/SafeTradingTips';
 import SellerDetailsCard from '@/components/marketplace/SellerDetailsCard';
+import CertificateBadge from '@/components/marketplace/CertificateBadge';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import InspectionCertificatesCard from '@/components/marketplace/InspectionCertificatesCard';
-import ListingDetailsLoading from '@/components/marketplace/ListingDetailsLoading';
-import ListingDetailsError from '@/components/marketplace/ListingDetailsError';
-import ListingDetailsHeader from '@/components/marketplace/ListingDetailsHeader';
-import { useListingDetails } from '@/hooks/useListingDetails';
-import { Image, FileWarning } from 'lucide-react';
 
 const MarketplaceListingDetails = () => {
+  const {
+    id = ''
+  } = useParams<{
+    id: string;
+  }>();
   const navigate = useNavigate();
-  const { listing, isLoading, error } = useListingDetails();
+  const {
+    data: listing,
+    isLoading: loading,
+    error
+  } = useMarketplaceListing(id);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [damageImageIndex, setDamageImageIndex] = useState(0);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [currentImageType, setCurrentImageType] = useState<'regular' | 'damage'>('regular');
-  
-  const handleBackToMarketplace = () => {
-    if (listing) {
-      navigate(`/marketplace?highlight=${listing.id}&category=${listing.category}`);
-    } else {
-      navigate('/marketplace');
-    }
-  };
-
-  if (isLoading) {
-    return <MainLayout><ListingDetailsLoading /></MainLayout>;
-  }
-  
-  if (error || !listing) {
-    return (
-      <MainLayout>
-        <ListingDetailsError error={error} onBack={handleBackToMarketplace} />
-      </MainLayout>
-    );
-  }
-  
-  const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
   
   const openImageViewer = (index: number, type: 'regular' | 'damage') => {
     if (type === 'regular') {
@@ -57,9 +43,59 @@ const MarketplaceListingDetails = () => {
     setCurrentImageType(type);
     setImageViewerOpen(true);
   };
-
-  return (
-    <MainLayout>
+  
+  const handleBackToMarketplace = () => {
+    if (listing) {
+      navigate(`/marketplace?highlight=${id}&category=${listing.category}`);
+    } else {
+      navigate('/marketplace');
+    }
+  };
+  
+  if (loading) {
+    return <MainLayout>
+        <div className="container mx-auto py-8 px-4 max-w-6xl animate-pulse">
+          <div className="mb-8 h-6 bg-gray-200 rounded w-1/4"></div>
+          <div className="grid grid-cols-1 gap-8">
+            <div>
+              <div className="h-[450px] bg-gray-200 rounded-xl mb-4"></div>
+              <div className="grid grid-cols-4 gap-3">
+                {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-gray-200 rounded-xl"></div>)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </MainLayout>;
+  }
+  
+  if (error || !listing) {
+    return <MainLayout>
+        <div className="container mx-auto py-8 px-4 max-w-6xl">
+          <Button 
+            onClick={handleBackToMarketplace}
+            variant="ghost" 
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Marketplace</span>
+          </Button>
+          
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error instanceof Error ? error.message : "Failed to load listing details"}</AlertDescription>
+          </Alert>
+          
+          <Button asChild>
+            <Link to="/marketplace">Browse other listings</Link>
+          </Button>
+        </div>
+      </MainLayout>;
+  }
+  
+  const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
+  
+  return <MainLayout>
       <div className="w-full py-8 overflow-y-auto pb-32 px-[11px]">
         <div className="max-w-[1400px] mx-auto">
           <Button 
@@ -73,7 +109,13 @@ const MarketplaceListingDetails = () => {
           
           <div className="grid grid-cols-1 gap-8">
             <div>
-              <ListingDetailsHeader listing={listing} />
+              <div className="mb-3">
+                <Badge className="mb-2">{listing?.category}</Badge>
+                <h1 className="text-2xl sm:text-3xl font-bold mb-0">{listing?.title}</h1>
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                  <ListingMetadata location={listing?.location || ''} createdAt={listing?.created_at || ''} condition={listing?.condition || ''} />
+                </div>
+              </div>
               
               <Tabs defaultValue="regular" className="mb-6">
                 <TabsList className="mb-4">
@@ -142,36 +184,36 @@ const MarketplaceListingDetails = () => {
               />}
               
               <ListingDescription 
-                description={listing.description} 
-                category={listing.category} 
-                condition={listing.condition} 
-                location={listing.location} 
-                createdAt={listing.created_at} 
-                instagram={listing.seller_instagram || ''}
+                description={listing?.description || ''} 
+                category={listing?.category || ''} 
+                condition={listing?.condition || ''} 
+                location={listing?.location || ''} 
+                createdAt={listing?.created_at || ''} 
+                instagram={listing?.seller_instagram || ''}
                 showMetadata={false} 
               />
               
               <div className="mt-6">
-                <SellerDetailsCard
-                  id={listing.id}
-                  title={listing.title}
-                  price={listing.price}
-                  sellerId={listing.seller_id || ''}
-                  sellerName={listing.seller_name}
-                  sellerRating={listing.seller_rating || 0}
-                  sellerPhone={listing.seller_phone}
-                  sellerWhatsapp={listing.seller_whatsapp}
-                  sellerInstagram={listing.seller_instagram}
-                  location={listing.location}
-                  createdAt={listing.created_at}
-                  mapLink={listing.map_link}
-                  reviewCount={listing.review_count}
-                  isNegotiable={listing.is_negotiable}
-                  ownershipNumber={listing.ownership_number}
-                  inspectionCertificates={listing.inspection_certificates}
-                />
+                {listing && (
+                  <SellerDetailsCard
+                    id={id || ''}
+                    title={listing?.title || ''}
+                    price={listing?.price || 0}
+                    sellerId={listing?.seller_id || ''}
+                    sellerName={listing?.seller_name || ''}
+                    sellerRating={listing?.seller_rating || 0}
+                    sellerPhone={listing?.seller_phone || null}
+                    sellerWhatsapp={listing?.seller_whatsapp || null}
+                    sellerInstagram={listing?.seller_instagram || null}
+                    location={listing?.location || ''}
+                    createdAt={listing?.created_at || ''}
+                    mapLink={listing?.map_link || null}
+                    reviewCount={listing?.review_count}
+                    isNegotiable={listing?.is_negotiable}
+                  />
+                )}
                 
-                {listing.inspection_certificates && listing.inspection_certificates.length > 0 && (
+                {listing?.inspection_certificates && listing.inspection_certificates.length > 0 && (
                   <InspectionCertificatesCard
                     certificates={listing.inspection_certificates}
                   />
@@ -185,8 +227,7 @@ const MarketplaceListingDetails = () => {
           </div>
         </div>
       </div>
-    </MainLayout>
-  );
+    </MainLayout>;
 };
 
 export default MarketplaceListingDetails;

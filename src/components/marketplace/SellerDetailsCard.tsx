@@ -9,9 +9,6 @@ import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
 import { format } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useOwnershipManagement } from '@/hooks/useOwnershipManagement';
-import PriceDisplay from './PriceDisplay';
-import OwnershipEditor from './OwnershipEditor';
 
 interface SellerDetailsCardProps {
   id: string;
@@ -28,9 +25,8 @@ interface SellerDetailsCardProps {
   mapLink?: string | null;
   reviewCount?: number;
   avatarUrl?: string | null;
-  inspectionCertificates?: string[];
+  inspectionCertificates?: string[] | null;
   isNegotiable?: boolean;
-  ownershipNumber?: string;
 }
 
 const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
@@ -48,22 +44,16 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
   mapLink,
   reviewCount = 0,
   avatarUrl,
-  inspectionCertificates = [],
-  isNegotiable = false,
-  ownershipNumber = "1st"
+  inspectionCertificates
 }) => {
-  const { toast } = useToast();
-  const isMobile = useIsMobile();
   const {
-    isEditingOwnership,
-    tempOwnershipValue,
-    setTempOwnershipValue,
-    isCurrentUserSeller,
-    isUpdating,
-    handleEditOwnership,
-    handleSaveOwnership,
-    handleCancelEdit
-  } = useOwnershipManagement(id, sellerId, ownershipNumber);
+    toast
+  } = useToast();
+  const isMobile = useIsMobile();
+  
+  const formatPrice = (price: number): string => {
+    return '₹' + price.toLocaleString('en-IN');
+  };
 
   const getInitials = (name: string) => {
     return name.split(' ').map(part => part[0]).join('').toUpperCase().substring(0, 2);
@@ -97,9 +87,15 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerWhatsapp) {
-      const message = `Hi, I'm interested in your listing "${title}" for ₹${price}. Is it still available?`;
+      const message = `Hi, I'm interested in your listing "${title}" for ${formatPrice(price)}. Is it still available?`;
       const whatsappUrl = `https://wa.me/${sellerWhatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
+      const link = document.createElement('a');
+      link.href = whatsappUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       toast({
         title: "Opening WhatsApp",
         description: "Starting WhatsApp conversation...",
@@ -124,11 +120,19 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
       mapsUrl = location;
     } else {
       const destination = encodeURIComponent(location || '');
-      mapsUrl = isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)
-        ? `maps://maps.apple.com/?q=${destination}`
-        : `https://www.google.com/maps/search/?api=1&query=${destination}`;
+      if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        mapsUrl = `maps://maps.apple.com/?q=${destination}`;
+      } else {
+        mapsUrl = `https://www.google.com/maps/search/?api=1&query=${destination}`;
+      }
     }
-    window.open(mapsUrl, '_blank');
+    const link = document.createElement('a');
+    link.href = mapsUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     toast({
       title: "Opening Directions",
       description: `Getting directions to location...`,
@@ -144,7 +148,8 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
         description: "You can now share this listing with others",
         duration: 3000
       });
-    }).catch(() => {
+    }).catch(error => {
+      console.error('Failed to copy:', error);
       toast({
         title: "Unable to copy link",
         description: "Please try again later",
@@ -154,40 +159,12 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
     });
   };
 
-  return (
-    <Card className="bg-white shadow-sm border rounded-xl overflow-hidden">
+  return <Card className="bg-white shadow-sm border rounded-xl overflow-hidden">
       <CardHeader className="pb-3">
-        <CardTitle className="font-semibold text-sm flex justify-between items-center">
-          <span>Seller Information</span>
-          {isCurrentUserSeller && ownershipNumber !== undefined && !isEditingOwnership && (
-            <OwnershipEditor
-              isEditing={isEditingOwnership}
-              value={tempOwnershipValue}
-              isCurrentUserSeller={isCurrentUserSeller}
-              onEdit={handleEditOwnership}
-              onSave={handleSaveOwnership}
-              onCancel={handleCancelEdit}
-              onChange={setTempOwnershipValue}
-              isUpdating={isUpdating}
-            />
-          )}
-        </CardTitle>
+        <CardTitle className="font-semibold text-sm">Seller Information</CardTitle>
       </CardHeader>
       
       <CardContent className="space-y-4">
-        {isEditingOwnership && (
-          <OwnershipEditor
-            isEditing={isEditingOwnership}
-            value={tempOwnershipValue}
-            isCurrentUserSeller={isCurrentUserSeller}
-            onEdit={handleEditOwnership}
-            onSave={handleSaveOwnership}
-            onCancel={handleCancelEdit}
-            onChange={setTempOwnershipValue}
-            isUpdating={isUpdating}
-          />
-        )}
-
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12 border border-border">
             {avatarUrl ? (
@@ -215,13 +192,6 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
             </div>
           </div>
         </div>
-
-        <PriceDisplay
-          price={price}
-          isNegotiable={isNegotiable}
-          ownershipNumber={ownershipNumber}
-          inspectionCertificates={inspectionCertificates}
-        />
         
         <div className="flex justify-between items-center gap-2 mt-4">
           <Button onClick={handleCall} title="Call Seller" className="flex-1 h-12 text-white transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(24,128,163,0.8)] hover:shadow-[0_3px_0px_0px_rgba(24,128,163,0.8)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 rounded">
@@ -241,8 +211,7 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
           </Button>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
 
 export default SellerDetailsCard;
