@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -34,6 +33,12 @@ const MarketplaceListingDetails = () => {
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [currentImageType, setCurrentImageType] = useState<'regular' | 'damage'>('regular');
   
+  // Function to invalidate query cache and force refetch
+  const refreshListingData = () => {
+    queryClient.invalidateQueries({ queryKey: ['marketplaceListing', id] });
+    refetch();
+  };
+  
   // Set up a listener to refetch the listing when updates happen
   useEffect(() => {
     // Subscribe to events that might indicate listing updates
@@ -61,12 +66,6 @@ const MarketplaceListingDetails = () => {
       window.removeEventListener('focus', handleFocusRefetch);
     };
   }, [refetch, id]);
-  
-  // Function to invalidate query cache and force refetch
-  const refreshListingData = () => {
-    queryClient.invalidateQueries({ queryKey: ['marketplaceListing', id] });
-    refetch();
-  };
   
   const openImageViewer = (index: number, type: 'regular' | 'damage') => {
     if (type === 'regular') {

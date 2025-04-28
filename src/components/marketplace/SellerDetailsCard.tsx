@@ -11,6 +11,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useMarketplaceListingUpdate } from '@/hooks/useMarketplaceListingUpdate';
 import { useAuth } from '@/hooks/useAuth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface SellerDetailsCardProps {
   id: string;
@@ -57,6 +58,7 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
   const [isEditingOwnership, setIsEditingOwnership] = useState(false);
   const [tempOwnershipValue, setTempOwnershipValue] = useState(ownershipNumber || "1st");
   const isCurrentUserSeller = user && user.id === sellerId;
+  const queryClient = useQueryClient();
   
   const formatPrice = (price: number): string => {
     return '₹' + price.toLocaleString('en-IN');
@@ -174,6 +176,8 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
     const success = await updateListing(id, { ownershipNumber: tempOwnershipValue });
     if (success) {
       setIsEditingOwnership(false);
+      // Function to invalidate query cache and force refetch
+      queryClient.invalidateQueries({ queryKey: ['marketplaceListing', id] });
     }
   };
 
