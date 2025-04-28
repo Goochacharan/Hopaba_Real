@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Phone, MessageSquare, MapPin, Share2, Edit2, Check, X } from 'lucide-react';
+import { Phone, MessageSquare, MapPin, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
 import { format } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useMarketplaceListingUpdate } from '@/hooks/useMarketplaceListingUpdate';
-import { useAuth } from '@/hooks/useAuth';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useQueryClient } from '@tanstack/react-query';
+import { useOwnershipManagement } from '@/hooks/useOwnershipManagement';
+import PriceDisplay from './PriceDisplay';
+import OwnershipEditor from './OwnershipEditor';
 
 interface SellerDetailsCardProps {
   id: string;
@@ -28,9 +28,9 @@ interface SellerDetailsCardProps {
   mapLink?: string | null;
   reviewCount?: number;
   avatarUrl?: string | null;
-  inspectionCertificates?: string[] | null;
+  inspectionCertificates?: string[];
   isNegotiable?: boolean;
-  ownershipNumber?: string; // Added ownershipNumber prop
+  ownershipNumber?: string;
 }
 
 const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
@@ -48,21 +48,22 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
   mapLink,
   reviewCount = 0,
   avatarUrl,
-  inspectionCertificates,
-  ownershipNumber // Include in props destructuring
+  inspectionCertificates = [],
+  isNegotiable = false,
+  ownershipNumber = "1st"
 }) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const { user } = useAuth();
-  const { updateListing, isUpdating } = useMarketplaceListingUpdate();
-  const [isEditingOwnership, setIsEditingOwnership] = useState(false);
-  const [tempOwnershipValue, setTempOwnershipValue] = useState(ownershipNumber || "1st");
-  const isCurrentUserSeller = user && user.id === sellerId;
-  const queryClient = useQueryClient();
-  
-  const formatPrice = (price: number): string => {
-    return '₹' + price.toLocaleString('en-IN');
-  };
+  const {
+    isEditingOwnership,
+    tempOwnershipValue,
+    setTempOwnershipValue,
+    isCurrentUserSeller,
+    isUpdating,
+    handleEditOwnership,
+    handleSaveOwnership,
+    handleCancelEdit
+  } = useOwnershipManagement(id, sellerId, ownershipNumber);
 
   const getInitials = (name: string) => {
     return name.split(' ').map(part => part[0]).join('').toUpperCase().substring(0, 2);
@@ -96,15 +97,9 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sellerWhatsapp) {
-      const message = `Hi, I'm interested in your listing "${title}" for ${formatPrice(price)}. Is it still available?`;
+      const message = `Hi, I'm interested in your listing "${title}" for ₹${price}. Is it still available?`;
       const whatsappUrl = `https://wa.me/${sellerWhatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
-      const link = document.createElement('a');
-      link.href = whatsappUrl;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      window.open(whatsappUrl, '_blank');
       toast({
         title: "Opening WhatsApp",
         description: "Starting WhatsApp conversation...",
@@ -129,19 +124,11 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
       mapsUrl = location;
     } else {
       const destination = encodeURIComponent(location || '');
-      if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        mapsUrl = `maps://maps.apple.com/?q=${destination}`;
-      } else {
-        mapsUrl = `https://www.google.com/maps/search/?api=1&query=${destination}`;
-      }
+      mapsUrl = isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)
+        ? `maps://maps.apple.com/?q=${destination}`
+        : `https://www.google.com/maps/search/?api=1&query=${destination}`;
     }
-    const link = document.createElement('a');
-    link.href = mapsUrl;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    window.open(mapsUrl, '_blank');
     toast({
       title: "Opening Directions",
       description: `Getting directions to location...`,
@@ -157,8 +144,7 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
         description: "You can now share this listing with others",
         duration: 3000
       });
-    }).catch(error => {
-      console.error('Failed to copy:', error);
+    }).catch(() => {
       toast({
         title: "Unable to copy link",
         description: "Please try again later",
@@ -168,84 +154,39 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
     });
   };
 
-  const handleEditOwnership = () => {
-    setIsEditingOwnership(true);
-  };
-  
-  const handleSaveOwnership = async () => {
-    const success = await updateListing(id, { ownershipNumber: tempOwnershipValue });
-    if (success) {
-      setIsEditingOwnership(false);
-      // Function to invalidate query cache and force refetch
-      queryClient.invalidateQueries({ queryKey: ['marketplaceListing', id] });
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setTempOwnershipValue(ownershipNumber || "1st");
-    setIsEditingOwnership(false);
-  };
-
-  return <Card className="bg-white shadow-sm border rounded-xl overflow-hidden">
+  return (
+    <Card className="bg-white shadow-sm border rounded-xl overflow-hidden">
       <CardHeader className="pb-3">
         <CardTitle className="font-semibold text-sm flex justify-between items-center">
           <span>Seller Information</span>
           {isCurrentUserSeller && ownershipNumber !== undefined && !isEditingOwnership && (
-            <Button 
-              onClick={handleEditOwnership}
-              variant="ghost" 
-              size="sm" 
-              className="h-8 px-2"
-            >
-              <Edit2 className="h-3.5 w-3.5 mr-1" />
-              <span className="text-xs">Edit Owner</span>
-            </Button>
+            <OwnershipEditor
+              isEditing={isEditingOwnership}
+              value={tempOwnershipValue}
+              isCurrentUserSeller={isCurrentUserSeller}
+              onEdit={handleEditOwnership}
+              onSave={handleSaveOwnership}
+              onCancel={handleCancelEdit}
+              onChange={setTempOwnershipValue}
+              isUpdating={isUpdating}
+            />
           )}
         </CardTitle>
       </CardHeader>
       
       <CardContent className="space-y-4">
-        {isCurrentUserSeller && isEditingOwnership ? (
-          <div className="flex items-center gap-2 mb-2 bg-gray-50 p-3 rounded-lg border">
-            <div className="flex-1">
-              <label className="text-xs text-gray-500 block mb-1">Ownership Status</label>
-              <Select 
-                value={tempOwnershipValue} 
-                onValueChange={setTempOwnershipValue}
-              >
-                <SelectTrigger className="h-8 text-sm">
-                  <SelectValue placeholder="Select ownership" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1st">1st Owner</SelectItem>
-                  <SelectItem value="2nd">2nd Owner</SelectItem>
-                  <SelectItem value="3rd">3rd Owner</SelectItem>
-                  <SelectItem value="4th">4th Owner</SelectItem>
-                  <SelectItem value="5th+">5th+ Owner</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex gap-1">
-              <Button 
-                onClick={handleSaveOwnership} 
-                disabled={isUpdating} 
-                variant="outline" 
-                size="sm" 
-                className="h-8 w-8 p-0"
-              >
-                <Check className="h-3.5 w-3.5 text-green-500" />
-              </Button>
-              <Button 
-                onClick={handleCancelEdit} 
-                variant="outline" 
-                size="sm" 
-                className="h-8 w-8 p-0"
-              >
-                <X className="h-3.5 w-3.5 text-red-500" />
-              </Button>
-            </div>
-          </div>
-        ) : null}
+        {isEditingOwnership && (
+          <OwnershipEditor
+            isEditing={isEditingOwnership}
+            value={tempOwnershipValue}
+            isCurrentUserSeller={isCurrentUserSeller}
+            onEdit={handleEditOwnership}
+            onSave={handleSaveOwnership}
+            onCancel={handleCancelEdit}
+            onChange={setTempOwnershipValue}
+            isUpdating={isUpdating}
+          />
+        )}
 
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12 border border-border">
@@ -274,6 +215,13 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
             </div>
           </div>
         </div>
+
+        <PriceDisplay
+          price={price}
+          isNegotiable={isNegotiable}
+          ownershipNumber={ownershipNumber}
+          inspectionCertificates={inspectionCertificates}
+        />
         
         <div className="flex justify-between items-center gap-2 mt-4">
           <Button onClick={handleCall} title="Call Seller" className="flex-1 h-12 text-white transition-all flex items-center justify-center shadow-[0_5px_0px_0px_rgba(24,128,163,0.8)] hover:shadow-[0_3px_0px_0px_rgba(24,128,163,0.8)] active:shadow-none active:translate-y-[3px] bg-blue-600 hover:bg-blue-500 rounded">
@@ -293,7 +241,8 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
           </Button>
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
 
 export default SellerDetailsCard;
