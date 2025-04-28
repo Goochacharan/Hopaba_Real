@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMarketplaceListingUpdate } from './useMarketplaceListingUpdate';
 import { useAuth } from './useAuth';
@@ -11,6 +11,11 @@ export const useOwnershipManagement = (listingId: string, sellerId: string, init
   const { updateListing, isUpdating } = useMarketplaceListingUpdate();
   const queryClient = useQueryClient();
   
+  // Reset tempOwnershipValue when initialOwnership changes
+  useEffect(() => {
+    setTempOwnershipValue(initialOwnership);
+  }, [initialOwnership]);
+  
   const isCurrentUserSeller = user && user.id === sellerId;
 
   const handleEditOwnership = () => {
@@ -21,6 +26,7 @@ export const useOwnershipManagement = (listingId: string, sellerId: string, init
     const success = await updateListing(listingId, { ownershipNumber: tempOwnershipValue });
     if (success) {
       setIsEditingOwnership(false);
+      // Force refetch the listing data to get the updated ownership value
       queryClient.invalidateQueries({ queryKey: ['marketplaceListing', listingId] });
     }
   };
