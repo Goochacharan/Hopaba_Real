@@ -43,9 +43,14 @@ const MarketplaceListingDetails = () => {
       }
     };
 
+    // Create a wrapper function for the refetch to use in event listeners
+    const handleFocusRefetch = () => {
+      refetch();
+    };
+
     // Set up event listeners
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', refetch);
+    window.addEventListener('focus', handleFocusRefetch);
 
     // Refresh the listing data when component mounts
     refetch();
@@ -53,7 +58,7 @@ const MarketplaceListingDetails = () => {
     // Clean up listeners
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', refetch);
+      window.removeEventListener('focus', handleFocusRefetch);
     };
   }, [refetch, id]);
   
