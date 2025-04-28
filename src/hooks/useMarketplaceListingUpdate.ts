@@ -38,10 +38,13 @@ export const useMarketplaceListingUpdate = () => {
         return false;
       }
       
-      const { error } = await supabase
+      console.log('Updating listing with data:', updateData);
+      
+      const { error, data } = await supabase
         .from('marketplace_listings')
         .update(updateData)
-        .eq('id', listingId);
+        .eq('id', listingId)
+        .select();
       
       if (error) {
         console.error('Error updating listing:', error);
@@ -53,6 +56,8 @@ export const useMarketplaceListingUpdate = () => {
         });
         return false;
       }
+      
+      console.log('Update successful, response:', data);
       
       toast({
         title: "Listing updated",

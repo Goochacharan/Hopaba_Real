@@ -13,7 +13,9 @@ export const useOwnershipManagement = (listingId: string, sellerId: string, init
   
   // Reset tempOwnershipValue when initialOwnership changes
   useEffect(() => {
-    setTempOwnershipValue(initialOwnership);
+    if (initialOwnership) {
+      setTempOwnershipValue(initialOwnership);
+    }
   }, [initialOwnership]);
   
   const isCurrentUserSeller = user && user.id === sellerId;
@@ -23,11 +25,23 @@ export const useOwnershipManagement = (listingId: string, sellerId: string, init
   };
   
   const handleSaveOwnership = async () => {
+    console.log('Saving ownership:', tempOwnershipValue);
+    
     const success = await updateListing(listingId, { ownershipNumber: tempOwnershipValue });
+    
     if (success) {
+      console.log('Update successful, setting editing to false');
       setIsEditingOwnership(false);
+      
       // Force refetch the listing data to get the updated ownership value
       queryClient.invalidateQueries({ queryKey: ['marketplaceListing', listingId] });
+      
+      // Wait a moment and invalidate again to ensure we have fresh data
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['marketplaceListing', listingId] });
+      }, 500);
+    } else {
+      console.log('Update failed');
     }
   };
 

@@ -29,6 +29,7 @@ export const useListingDetails = () => {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocusRefetch);
     
+    // Ensure data is fresh
     refetch();
 
     return () => {
