@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -15,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import BusinessFormSimple from '@/components/business/BusinessFormSimple';
 import BusinessListSimple from '@/components/business/BusinessListSimple';
 import { Business } from '@/components/business/BusinessFormSimple';
+import { supabase } from '@/integrations/supabase/client';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -31,6 +31,28 @@ const Profile = () => {
       navigate('/login');
     }
   }, [user, navigate]);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    // Add debugging for any marketplace listing updates
+    const channel = supabase
+      .channel('profile-debug')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'marketplace_listings',
+        filter: `seller_id=eq.${user.id}`
+      }, (payload) => {
+        console.log('Listing was updated from Profile page:', payload.new);
+        console.log('Updated ownership number:', payload.new.ownership_number);
+      })
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   const handleAddBusiness = () => {
     setEditingBusiness(null);

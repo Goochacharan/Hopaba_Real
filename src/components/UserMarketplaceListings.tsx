@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserMarketplaceListings } from '@/hooks/useUserMarketplaceListings';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -89,6 +89,19 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
         );
     }
   };
+
+  useEffect(() => {
+    // Add a focus event listener to refetch data when the user returns to the tab/window
+    const handleFocus = () => {
+      refetch();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [refetch]);
 
   if (showAddForm) {
     return (

@@ -160,6 +160,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
       const categoryValue = data.category.toLowerCase().trim();
       console.log("Submitting listing with category:", categoryValue);
       console.log("Shop images being saved:", data.shop_images);
+      console.log("Ownership number being saved:", data.ownership_number);
 
       const coordinates = extractCoordinatesFromMapLink(data.map_link || null);
       
@@ -189,10 +190,12 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         postal_code: data.postal_code,
         latitude: coordinates ? coordinates.lat : null,
         longitude: coordinates ? coordinates.lng : null,
+        ownership_number: data.ownership_number, // Ensure ownership_number is explicitly included
+        bill_images: data.bill_images || [],
       };
 
       if (listing?.id) {
-        console.log("Updating existing listing with shop images:", listingData.shop_images);
+        console.log("Updating existing listing with ownership:", listingData.ownership_number);
         const { data: updatedData, error } = await supabase
           .from('marketplace_listings')
           .update(listingData)
@@ -208,7 +211,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
           description: "Your marketplace listing has been updated and will be reviewed by an admin.",
         });
       } else {
-        console.log("Creating new listing with shop images:", listingData.shop_images);
+        console.log("Creating new listing with ownership:", listingData.ownership_number);
         const { data: insertedData, error } = await supabase
           .from('marketplace_listings')
           .insert(listingData)
