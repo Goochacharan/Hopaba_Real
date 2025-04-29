@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -25,6 +26,7 @@ const Profile = () => {
   const [editingBusiness, setEditingBusiness] = useState<Business | null>(null);
   const [showAddBusinessForm, setShowAddBusinessForm] = useState(false);
   const [activeTab, setActiveTab] = useState("listings");
+  const [listingsUpdated, setListingsUpdated] = useState(false);
   
   useEffect(() => {
     if (!user) {
@@ -46,6 +48,7 @@ const Profile = () => {
       }, (payload) => {
         console.log('Listing was updated from Profile page:', payload.new);
         console.log('Updated ownership number:', payload.new.ownership_number);
+        setListingsUpdated(prev => !prev); // Toggle to force refresh
       })
       .subscribe();
       
@@ -141,7 +144,7 @@ const Profile = () => {
             </TabsList>
             
             <TabsContent value="listings">
-              <UserMarketplaceListings />
+              <UserMarketplaceListings key={`listings-${listingsUpdated}`} />
             </TabsContent>
             
             <TabsContent value="events">

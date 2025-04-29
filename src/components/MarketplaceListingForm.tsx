@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,6 +18,7 @@ import { ImageUpload } from '@/components/ui/image-upload';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
+import { useMarketplaceListingDebug } from '@/hooks/useMarketplaceListingDebug';
 
 const INDIAN_CITIES = [
   "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai", 
@@ -143,6 +144,8 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     }
   };
 
+  const { logFormState } = useMarketplaceListingDebug(listing?.id);
+
   const onSubmit = async (data: MarketplaceListingFormData) => {
     if (!user) {
       toast({
@@ -155,6 +158,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
 
     setIsSubmitting(true);
     console.log("Form data being submitted:", data);
+    logFormState(data);
 
     try {
       const categoryValue = data.category.toLowerCase().trim();
@@ -190,12 +194,23 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         postal_code: data.postal_code,
         latitude: coordinates ? coordinates.lat : null,
         longitude: coordinates ? coordinates.lng : null,
-        ownership_number: data.ownership_number, // Ensure ownership_number is explicitly included
+        ownership_number: data.ownership_number, // Make sure ownership_number is explicitly included
         bill_images: data.bill_images || [],
       };
 
       if (listing?.id) {
         console.log("Updating existing listing with ownership:", listingData.ownership_number);
+        
+        // First try to verify the ownership_number is being sent properly
+        const testUpdate = await supabase
+          .from('marketplace_listings')
+          .update({ ownership_number: listingData.ownership_number })
+          .eq('id', listing.id)
+          .select();
+          
+        console.log("Ownership number update test result:", testUpdate);
+        
+        // Now do the full update
         const { data: updatedData, error } = await supabase
           .from('marketplace_listings')
           .update(listingData)

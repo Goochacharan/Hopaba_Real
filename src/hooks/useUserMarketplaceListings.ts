@@ -88,6 +88,7 @@ export const useUserMarketplaceListings = () => {
     }
 
     try {
+      console.log("Fetching user listings for user:", user.id);
       const { data, error } = await supabase
         .from('marketplace_listings')
         .select('*')
@@ -101,9 +102,11 @@ export const useUserMarketplaceListings = () => {
       // Ensure the data conforms to the MarketplaceListing type
       const typedData = data?.map(item => ({
         ...item,
-        approval_status: item.approval_status as 'approved' | 'pending' | 'rejected'
+        approval_status: item.approval_status as 'approved' | 'pending' | 'rejected',
+        ownership_number: item.ownership_number || '1st' // Ensure ownership_number has a default
       })) as MarketplaceListing[];
 
+      console.log("Received listings data:", typedData);
       setListings(typedData || []);
       
       // Fetch updated listing status after getting listings
@@ -113,6 +116,58 @@ export const useUserMarketplaceListings = () => {
       setError('Failed to fetch your listings. Please try again later.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateOwnershipNumber = async (listingId: string, ownershipNumber: string) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to update listings.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    try {
+      console.log(`Updating ownership number for listing ${listingId} to ${ownershipNumber}`);
+      
+      const { data, error } = await supabase
+        .from('marketplace_listings')
+        .update({ ownership_number: ownershipNumber })
+        .eq('id', listingId)
+        .eq('seller_id', user.id)
+        .select();
+
+      if (error) {
+        throw error;
+      }
+      
+      console.log("Ownership number update response:", data);
+      
+      // Update the local listings state
+      setListings(prev => 
+        prev.map(listing => 
+          listing.id === listingId 
+            ? { ...listing, ownership_number: ownershipNumber } 
+            : listing
+        )
+      );
+      
+      toast({
+        title: "Ownership updated",
+        description: "Ownership details have been successfully updated.",
+      });
+      
+      return true;
+    } catch (err: any) {
+      console.error('Error updating ownership number:', err);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to update ownership details. Please try again.",
+        variant: "destructive",
+      });
+      return false;
     }
   };
 
@@ -147,6 +202,18 @@ export const useUserMarketplaceListings = () => {
 
   useEffect(() => {
     fetchUserListings();
+    
+    // Add window focus event listener to refresh data
+    const handleFocus = () => {
+      console.log("Window focused, refreshing user listings");
+      fetchUserListings();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [user]);
 
   return { 
@@ -155,6 +222,7 @@ export const useUserMarketplaceListings = () => {
     error, 
     refetch: fetchUserListings,
     deleteListing,
+    updateOwnershipNumber,
     listingStatus
   };
 };

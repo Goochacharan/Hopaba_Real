@@ -42,6 +42,7 @@ export const useMarketplaceListingDebug = (listingId?: string) => {
       }, (payload) => {
         console.log('Listing updated in database:', payload.new);
         console.log('New ownership number:', payload.new.ownership_number);
+        console.log('Full update payload:', payload);
       })
       .subscribe();
       
@@ -54,6 +55,30 @@ export const useMarketplaceListingDebug = (listingId?: string) => {
     logFormState: (formData: any) => {
       console.log('Debug: Current form state before submission:', formData);
       console.log('Debug: Ownership number in form:', formData.ownership_number);
+    },
+    testUpdate: async (listingId: string, ownershipNumber: string) => {
+      if (!listingId) return;
+      
+      console.log('Testing direct update of ownership_number to:', ownershipNumber);
+      
+      try {
+        const { data, error } = await supabase
+          .from('marketplace_listings')
+          .update({ ownership_number: ownershipNumber })
+          .eq('id', listingId)
+          .select();
+          
+        if (error) {
+          console.error('Test update error:', error);
+          return false;
+        }
+        
+        console.log('Test update successful:', data);
+        return true;
+      } catch (err) {
+        console.error('Test update exception:', err);
+        return false;
+      }
     }
   };
 };
