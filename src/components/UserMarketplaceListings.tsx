@@ -55,7 +55,6 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
   };
 
   const handleEdit = (listing: MarketplaceListing) => {
-    console.log("Editing listing with ownership:", listing.ownership_number);
     if (onEdit) {
       onEdit(listing);
     } else {
@@ -198,15 +197,10 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
                   <Badge variant="outline" className="mb-2">
                     {listing.category.charAt(0).toUpperCase() + listing.category.slice(1)}
                   </Badge>
-                  <div className="flex gap-2">
+                  <div>
                     <Badge variant="secondary">
                       {listing.condition.charAt(0).toUpperCase() + listing.condition.slice(1)}
                     </Badge>
-                    {listing.ownership_number && (
-                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                        {listing.ownership_number} Owner
-                      </Badge>
-                    )}
                   </div>
                 </div>
                 <CardTitle className="line-clamp-1">{listing.title}</CardTitle>

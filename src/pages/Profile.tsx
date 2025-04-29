@@ -26,36 +26,12 @@ const Profile = () => {
   const [editingBusiness, setEditingBusiness] = useState<Business | null>(null);
   const [showAddBusinessForm, setShowAddBusinessForm] = useState(false);
   const [activeTab, setActiveTab] = useState("listings");
-  const [listingsUpdated, setListingsUpdated] = useState(false);
   
   useEffect(() => {
     if (!user) {
       navigate('/login');
     }
   }, [user, navigate]);
-
-  useEffect(() => {
-    if (!user) return;
-    
-    // Add debugging for any marketplace listing updates
-    const channel = supabase
-      .channel('profile-debug')
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'marketplace_listings',
-        filter: `seller_id=eq.${user.id}`
-      }, (payload) => {
-        console.log('Listing was updated from Profile page:', payload.new);
-        console.log('Updated ownership number:', payload.new.ownership_number);
-        setListingsUpdated(prev => !prev); // Toggle to force refresh
-      })
-      .subscribe();
-      
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user]);
 
   const handleAddBusiness = () => {
     setEditingBusiness(null);
@@ -144,7 +120,7 @@ const Profile = () => {
             </TabsList>
             
             <TabsContent value="listings">
-              <UserMarketplaceListings key={`listings-${listingsUpdated}`} />
+              <UserMarketplaceListings />
             </TabsContent>
             
             <TabsContent value="events">

@@ -23,7 +23,6 @@ export const useMarketplaceListingDebug = (listingId?: string) => {
         }
         
         console.log('Current listing in database:', data);
-        console.log('Ownership number in database:', data.ownership_number);
       } catch (err) {
         console.error('Debug fetch error:', err);
       }
@@ -41,7 +40,6 @@ export const useMarketplaceListingDebug = (listingId?: string) => {
         filter: `id=eq.${listingId}`
       }, (payload) => {
         console.log('Listing updated in database:', payload.new);
-        console.log('New ownership number:', payload.new.ownership_number);
         console.log('Full update payload:', payload);
       })
       .subscribe();
@@ -54,17 +52,15 @@ export const useMarketplaceListingDebug = (listingId?: string) => {
   return {
     logFormState: (formData: any) => {
       console.log('Debug: Current form state before submission:', formData);
-      console.log('Debug: Ownership number in form:', formData.ownership_number);
     },
-    testUpdate: async (listingId: string, ownershipNumber: string) => {
+    testUpdate: async (listingId: string) => {
       if (!listingId) return;
       
-      console.log('Testing direct update of ownership_number to:', ownershipNumber);
-      
       try {
+        // Simple test update to verify connection
         const { data, error } = await supabase
           .from('marketplace_listings')
-          .update({ ownership_number: ownershipNumber })
+          .update({ updated_at: new Date().toISOString() })
           .eq('id', listingId)
           .select();
           
