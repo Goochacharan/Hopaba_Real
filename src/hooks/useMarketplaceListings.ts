@@ -31,7 +31,7 @@ export interface MarketplaceListing {
   postal_code: string;
   updated_at: string;
   bill_images?: string[];
-  ownership_number?: string; // Add the new ownership_number property
+  ownership_number?: string; // Ensure this field is properly defined
 }
 
 interface MarketplaceListingsQueryOptions {
@@ -142,9 +142,13 @@ export const useMarketplaceListing = (id: string) => {
         // Make sure bill_images is an array
         bill_images: data.bill_images || [],
         // Add review_count if it doesn't exist (default to 0)
-        review_count: 0
+        review_count: 0,
+        // Ensure ownership_number is a string
+        ownership_number: data.ownership_number || '1st'
       } as MarketplaceListing;
     },
-    enabled: !!id
+    enabled: !!id,
+    staleTime: 30000, // Reduce stale time to 30 seconds to ensure updates are fetched
+    refetchOnWindowFocus: true // Ensure we refetch when the window regains focus
   });
 };

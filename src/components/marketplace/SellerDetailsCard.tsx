@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
 import { format } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Badge } from '@/components/ui/badge'; // Added Badge import
 
 interface SellerDetailsCardProps {
   id: string;
@@ -27,6 +28,7 @@ interface SellerDetailsCardProps {
   avatarUrl?: string | null;
   inspectionCertificates?: string[] | null;
   isNegotiable?: boolean;
+  ownershipNumber?: string; // Added ownershipNumber prop
 }
 
 const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
@@ -44,7 +46,8 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
   mapLink,
   reviewCount = 0,
   avatarUrl,
-  inspectionCertificates
+  inspectionCertificates,
+  ownershipNumber // Added ownershipNumber to destructuring
 }) => {
   const {
     toast
@@ -161,7 +164,14 @@ const SellerDetailsCard: React.FC<SellerDetailsCardProps> = ({
 
   return <Card className="bg-white shadow-sm border rounded-xl overflow-hidden">
       <CardHeader className="pb-3">
-        <CardTitle className="font-semibold text-sm">Seller Information</CardTitle>
+        <CardTitle className="font-semibold text-sm">
+          Seller Information
+          {ownershipNumber && (
+            <Badge variant="condition" className="ml-2 text-xs">
+              {ownershipNumber} Owner
+            </Badge>
+          )}
+        </CardTitle>
       </CardHeader>
       
       <CardContent className="space-y-4">
