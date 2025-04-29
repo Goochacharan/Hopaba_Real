@@ -9,7 +9,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { MapPin, Navigation2, Instagram } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
-import { WhatsAppButton } from './WhatsAppButton';
+import { WhatsAppButton } from '@/components/marketplace/WhatsAppButton';
 
 interface SellerDetailsCardProps {
   id: string;
