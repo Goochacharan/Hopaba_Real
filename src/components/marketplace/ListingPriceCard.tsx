@@ -23,7 +23,6 @@ interface ListingPriceCardProps {
   mapLink?: string | null;
   isNegotiable?: boolean;
   inspectionCertificates?: string[];
-  ownershipNumber?: string; // Add ownershipNumber prop
 }
 
 const formatPrice = (price: number): string => {
@@ -45,8 +44,7 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   condition,
   mapLink,
   isNegotiable = false,
-  inspectionCertificates = [],
-  ownershipNumber // Add ownershipNumber to destructuring
+  inspectionCertificates = []
 }) => {
   return (
     <div className="sticky top-24 space-y-6">
@@ -76,11 +74,6 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
                 <Badge variant="default" className="flex items-center gap-1">
                   <Lock className="h-3 w-3" />
                   <span>Fixed Price</span>
-                </Badge>
-              )}
-              {ownershipNumber && (
-                <Badge variant="condition" className="text-xs">
-                  {ownershipNumber} Owner
                 </Badge>
               )}
               {inspectionCertificates && inspectionCertificates.length > 0 && (

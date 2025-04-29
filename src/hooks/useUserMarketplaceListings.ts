@@ -88,7 +88,6 @@ export const useUserMarketplaceListings = () => {
     }
 
     try {
-      console.log("Fetching user listings for user:", user.id);
       const { data, error } = await supabase
         .from('marketplace_listings')
         .select('*')
@@ -105,7 +104,6 @@ export const useUserMarketplaceListings = () => {
         approval_status: item.approval_status as 'approved' | 'pending' | 'rejected'
       })) as MarketplaceListing[];
 
-      console.log("Received listings data:", typedData);
       setListings(typedData || []);
       
       // Fetch updated listing status after getting listings
@@ -149,18 +147,6 @@ export const useUserMarketplaceListings = () => {
 
   useEffect(() => {
     fetchUserListings();
-    
-    // Add window focus event listener to refresh data
-    const handleFocus = () => {
-      console.log("Window focused, refreshing user listings");
-      fetchUserListings();
-    };
-    
-    window.addEventListener('focus', handleFocus);
-    
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-    };
   }, [user]);
 
   return { 

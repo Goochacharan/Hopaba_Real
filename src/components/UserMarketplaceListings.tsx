@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserMarketplaceListings } from '@/hooks/useUserMarketplaceListings';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +19,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { MarketplaceListing } from '@/hooks/useMarketplaceListings';
 import MarketplaceListingForm from './MarketplaceListingForm';
-import { useMarketplaceListingDebug } from '@/hooks/useMarketplaceListingDebug';
 
 interface UserMarketplaceListingsProps {
   onEdit?: (listing: MarketplaceListing) => void;
@@ -36,7 +34,6 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
   const [listingToDelete, setListingToDelete] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [listingToEdit, setListingToEdit] = useState<MarketplaceListing | null>(null);
-  const { testUpdate } = useMarketplaceListingDebug();
 
   // Format price to Indian Rupees
   const formatPrice = (price: number) => {
@@ -66,7 +63,6 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
   const handleListingSaved = () => {
     setShowAddForm(false);
     setListingToEdit(null);
-    console.log("Listing saved, refreshing data");
     refetch();
   };
 
@@ -93,31 +89,6 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
         );
     }
   };
-
-  useEffect(() => {
-    // Add a focus event listener to refetch data when the user returns to the tab/window
-    const handleFocus = () => {
-      console.log("Window focused, refreshing listings data");
-      refetch();
-    };
-
-    window.addEventListener('focus', handleFocus);
-    
-    // Initial fetch
-    refetch();
-    
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [refetch]);
-
-  // If the refresh prop changes, refetch the data
-  useEffect(() => {
-    if (refresh !== undefined) {
-      console.log("Refresh prop changed, refetching listings");
-      refetch();
-    }
-  }, [refresh, refetch]);
 
   if (showAddForm) {
     return (
@@ -197,11 +168,9 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
                   <Badge variant="outline" className="mb-2">
                     {listing.category.charAt(0).toUpperCase() + listing.category.slice(1)}
                   </Badge>
-                  <div>
-                    <Badge variant="secondary">
-                      {listing.condition.charAt(0).toUpperCase() + listing.condition.slice(1)}
-                    </Badge>
-                  </div>
+                  <Badge variant="secondary">
+                    {listing.condition.charAt(0).toUpperCase() + listing.condition.slice(1)}
+                  </Badge>
                 </div>
                 <CardTitle className="line-clamp-1">{listing.title}</CardTitle>
                 <CardDescription className="text-lg font-semibold text-primary">
@@ -221,20 +190,12 @@ const UserMarketplaceListings: React.FC<UserMarketplaceListingsProps> = ({
                   <Eye className="h-4 w-4 mr-1" /> View
                 </Button>
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => handleEdit(listing)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => handleEdit(listing)}>
                     <Edit2 className="h-4 w-4" />
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="destructive" 
-                        size="sm" 
-                        onClick={() => setListingToDelete(listing.id)}
-                      >
+                      <Button variant="destructive" size="sm" onClick={() => setListingToDelete(listing.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </AlertDialogTrigger>

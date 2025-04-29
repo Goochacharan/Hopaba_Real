@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/MainLayout';
@@ -211,7 +210,6 @@ const MarketplaceListingDetails = () => {
                     mapLink={listing?.map_link || null}
                     reviewCount={listing?.review_count}
                     isNegotiable={listing?.is_negotiable}
-                    ownershipNumber={listing?.ownership_number} // Pass ownership_number to component
                   />
                 )}
                 

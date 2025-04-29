@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,7 +18,6 @@ import { ImageUpload } from '@/components/ui/image-upload';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
-import { useMarketplaceListingDebug } from '@/hooks/useMarketplaceListingDebug';
 
 const INDIAN_CITIES = [
   "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai", 
@@ -65,7 +64,6 @@ const marketplaceListingSchema = z.object({
   city: z.string().min(1, { message: "City is required" }),
   postal_code: z.string().regex(/^\d{6}$/, { message: "Postal code must be 6 digits" }),
   bill_images: z.array(z.string()).optional(),
-  ownership_number: z.string().min(1, { message: "Please select ownership details" }),
 });
 
 type MarketplaceListingFormData = z.infer<typeof marketplaceListingSchema>;
@@ -105,7 +103,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     inspection_certificates: listing?.inspection_certificates || [],
     shop_images: listing?.shop_images || [],
     seller_role: listing?.seller_role || 'owner',
-    ownership_number: listing?.ownership_number || '1st',
     area: listing?.area || '',
     city: listing?.city || '',
     postal_code: listing?.postal_code || '',
@@ -144,8 +141,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     }
   };
 
-  const { logFormState } = useMarketplaceListingDebug(listing?.id);
-
   const onSubmit = async (data: MarketplaceListingFormData) => {
     if (!user) {
       toast({
@@ -158,13 +153,11 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
 
     setIsSubmitting(true);
     console.log("Form data being submitted:", data);
-    logFormState(data);
 
     try {
       const categoryValue = data.category.toLowerCase().trim();
       console.log("Submitting listing with category:", categoryValue);
       console.log("Shop images being saved:", data.shop_images);
-      console.log("Ownership number being saved:", data.ownership_number);
 
       const coordinates = extractCoordinatesFromMapLink(data.map_link || null);
       
@@ -194,23 +187,10 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         postal_code: data.postal_code,
         latitude: coordinates ? coordinates.lat : null,
         longitude: coordinates ? coordinates.lng : null,
-        ownership_number: data.ownership_number, // Make sure ownership_number is explicitly included
-        bill_images: data.bill_images || [],
       };
 
       if (listing?.id) {
-        console.log("Updating existing listing with ownership:", listingData.ownership_number);
-        
-        // First try to verify the ownership_number is being sent properly
-        const testUpdate = await supabase
-          .from('marketplace_listings')
-          .update({ ownership_number: listingData.ownership_number })
-          .eq('id', listing.id)
-          .select();
-          
-        console.log("Ownership number update test result:", testUpdate);
-        
-        // Now do the full update
+        console.log("Updating existing listing with shop images:", listingData.shop_images);
         const { data: updatedData, error } = await supabase
           .from('marketplace_listings')
           .update(listingData)
@@ -226,7 +206,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
           description: "Your marketplace listing has been updated and will be reviewed by an admin.",
         });
       } else {
-        console.log("Creating new listing with ownership:", listingData.ownership_number);
+        console.log("Creating new listing with shop images:", listingData.shop_images);
         const { data: insertedData, error } = await supabase
           .from('marketplace_listings')
           .insert(listingData)
@@ -472,41 +452,6 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                         <SelectItem value="dealer">Dealer</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="ownership_number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ownership Details*</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select ownership details" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {Array.from({ length: 10 }, (_, i) => {
-                          const num = i + 1;
-                          const suffix = num === 1 ? 'st' : num === 2 ? 'nd' : num === 3 ? 'rd' : 'th';
-                          return (
-                            <SelectItem key={num} value={`${num}${suffix}`}>
-                              {`${num}${suffix} Owner`}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Specify which owner you are of this item
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
