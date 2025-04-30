@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -31,7 +32,9 @@ export interface MarketplaceListing {
   postal_code: string;
   updated_at: string;
   bill_images?: string[];
-  ownership_number?: string; // Add the ownership_number property
+  ownership_number?: string; // The ownership_number property
+  latitude?: number; // Added latitude property
+  longitude?: number; // Added longitude property
 }
 
 interface MarketplaceListingsQueryOptions {
@@ -56,7 +59,7 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
   } = options;
 
   return useQuery({
-    queryKey: ['marketplaceListings', { category, searchQuery, condition, minPrice, maxPrice, minRating }],
+    queryKey: ['marketplaceListings', { category, searchQuery, condition, minPrice, maxPrice, minRating, includeAllStatuses }],
     queryFn: async () => {
       let query = supabase
         .from('marketplace_listings')
@@ -107,8 +110,11 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
         seller_rating: item.seller_rating || 0,
         // Make sure shop_images is an array
         shop_images: item.shop_images || [],
+        // Convert latitude and longitude to numbers if they exist
+        latitude: item.latitude ? Number(item.latitude) : undefined,
+        longitude: item.longitude ? Number(item.longitude) : undefined,
         // Add review_count if it doesn't exist (default to 0)
-        review_count: 0
+        review_count: item.review_count || 0
       })) as MarketplaceListing[];
     }
   });
@@ -141,8 +147,11 @@ export const useMarketplaceListing = (id: string) => {
         shop_images: data.shop_images || [],
         // Make sure bill_images is an array
         bill_images: data.bill_images || [],
+        // Convert latitude and longitude to numbers if they exist
+        latitude: data.latitude ? Number(data.latitude) : undefined,
+        longitude: data.longitude ? Number(data.longitude) : undefined,
         // Add review_count if it doesn't exist (default to 0)
-        review_count: 0
+        review_count: data.review_count || 0
       } as MarketplaceListing;
     },
     enabled: !!id

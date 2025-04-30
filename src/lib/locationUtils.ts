@@ -94,19 +94,94 @@ export function formatDistance(distance: number, unit: 'km' | 'mi' = 'km'): stri
 export function extractCoordinatesFromMapLink(mapLink: string | null): { lat: number, lng: number } | null {
   if (!mapLink) return null;
   
+  console.log('Attempting to extract coordinates from map link:', mapLink);
+  
   try {
-    // Match patterns like @12.9716,77.5946 or ?q=12.9716,77.5946
-    const coordinatesRegex = /@(-?\d+\.\d+),(-?\d+\.\d+)|q=(-?\d+\.\d+),(-?\d+\.\d+)/;
-    const match = mapLink.match(coordinatesRegex);
+    // Regular pattern with @ symbol (most common format)
+    // Example: https://www.google.com/maps/place/Bengaluru/@12.9715987,77.5945627,12z/
+    const atSymbolRegex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+    let match = mapLink.match(atSymbolRegex);
     
-    if (match) {
-      // Check which pattern matched (@lat,lng or q=lat,lng)
-      const lat = parseFloat(match[1] || match[3]);
-      const lng = parseFloat(match[2] || match[4]);
+    if (match && match.length >= 3) {
+      const lat = parseFloat(match[1]);
+      const lng = parseFloat(match[2]);
       
       if (!isNaN(lat) && !isNaN(lng)) {
+        console.log('Extracted coordinates from @ pattern:', { lat, lng });
         return { lat, lng };
       }
+    }
+    
+    // Query parameter pattern
+    // Example: https://www.google.com/maps?q=12.9715987,77.5945627
+    const qParamRegex = /[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+    match = mapLink.match(qParamRegex);
+    
+    if (match && match.length >= 3) {
+      const lat = parseFloat(match[1]);
+      const lng = parseFloat(match[2]);
+      
+      if (!isNaN(lat) && !isNaN(lng)) {
+        console.log('Extracted coordinates from q= pattern:', { lat, lng });
+        return { lat, lng };
+      }
+    }
+    
+    // Coordinate only pattern
+    // Example: https://maps.google.com/maps?ll=12.9715987,77.5945627&z=14
+    const llParamRegex = /[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/;
+    match = mapLink.match(llParamRegex);
+    
+    if (match && match.length >= 3) {
+      const lat = parseFloat(match[1]);
+      const lng = parseFloat(match[2]);
+      
+      if (!isNaN(lat) && !isNaN(lng)) {
+        console.log('Extracted coordinates from ll= pattern:', { lat, lng });
+        return { lat, lng };
+      }
+    }
+    
+    // Directions pattern
+    // Example: https://www.google.com/maps/dir//12.9715987,77.5945627/
+    const dirRegex = /\/dir\/\/(-?\d+\.\d+),(-?\d+\.\d+)/;
+    match = mapLink.match(dirRegex);
+    
+    if (match && match.length >= 3) {
+      const lat = parseFloat(match[1]);
+      const lng = parseFloat(match[2]);
+      
+      if (!isNaN(lat) && !isNaN(lng)) {
+        console.log('Extracted coordinates from directions pattern:', { lat, lng });
+        return { lat, lng };
+      }
+    }
+    
+    // Shortened URLs with place data
+    // Look for place ID patterns in complex URLs
+    if (mapLink.includes('place/')) {
+      // Sometimes coordinates appear after the place name
+      // Example: .../place/Bengaluru/@12.9715987,77.5945627,12z/...
+      const placePatternRegex = /place\/[^@]*@(-?\d+\.\d+),(-?\d+\.\d+)/;
+      match = mapLink.match(placePatternRegex);
+      
+      if (match && match.length >= 3) {
+        const lat = parseFloat(match[1]);
+        const lng = parseFloat(match[2]);
+        
+        if (!isNaN(lat) && !isNaN(lng)) {
+          console.log('Extracted coordinates from place pattern:', { lat, lng });
+          return { lat, lng };
+        }
+      }
+    }
+    
+    // Shared URLs from mobile
+    // Example: https://goo.gl/maps/abcdefg or https://maps.app.goo.gl/abcdefg
+    if (mapLink.includes('goo.gl/maps/') || mapLink.includes('maps.app.goo.gl/')) {
+      console.log('Detected shortened URL, but direct extraction not possible');
+      // For shortened URLs, we can't extract coordinates directly
+      // In a real app, you'd need to follow the redirect or use a geocoding API
     }
     
     console.log('Could not extract coordinates from map link:', mapLink);

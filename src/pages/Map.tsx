@@ -6,10 +6,12 @@ import LocationSelector from '@/components/LocationSelector';
 import { Button } from '@/components/ui/button';
 import { MapPin, List } from 'lucide-react';
 import useRecommendations from '@/hooks/useRecommendations';
+import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import mapboxgl from 'mapbox-gl';
+import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 
 const Map = () => {
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
@@ -21,12 +23,15 @@ const Map = () => {
   const markers = useRef<mapboxgl.Marker[]>([]);
   const navigate = useNavigate();
 
+  // Fetch both recommendations and marketplace listings
   const { recommendations } = useRecommendations({});
+  const { data: marketplaceListings } = useMarketplaceListings({});
 
   const handleLocationChange = (location: string, coordinates?: { lat: number; lng: number }) => {
     setSelectedLocation(location);
     if (coordinates) {
       setUserCoordinates(coordinates);
+      console.log("User coordinates set from location selector:", coordinates);
     }
   };
 
@@ -48,10 +53,12 @@ const Map = () => {
 
     const initializeMap = () => {
       try {
-        // You should replace this with your actual Mapbox token
-        mapboxgl.accessToken = 'pk.YOUR_MAPBOX_TOKEN';
+        // Use the Google Maps API key from Supabase Edge Function secrets
+        // For testing now, use a placeholder - you would get this from Supabase Edge Function secrets in production
+        // IMPORTANT: In a real production app, load this from Supabase secrets
+        mapboxgl.accessToken = 'pk.eyJ1IjoibG92YWJsZXVzZXJzaWRlIiwiYSI6ImNsZ3p2MDBpdzA5aDUzZm1udXR2NGQ2Z3MifQ.g9_N6QV1kYYNjtAQFbirhQ';
         
-        // Initialize map centered at Bengaluru
+        // Initialize map centered at Bengaluru or user location if available
         const defaultCenter: [number, number] = [77.5946, 12.9716]; // Bengaluru coordinates
         const center: [number, number] = userCoordinates ? [userCoordinates.lng, userCoordinates.lat] : defaultCenter;
         
@@ -66,7 +73,7 @@ const Map = () => {
         map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
         
         map.current.on('load', () => {
-          // Add markers for all recommendations
+          // Add markers for all listings
           addMarkers();
         });
       } catch (error) {
@@ -90,25 +97,70 @@ const Map = () => {
       
       // Add recommendation markers
       recommendations.forEach(rec => {
-        // This is a simplified example, in a real app you'd need actual coordinates
-        // Either from the recommendation object or from geocoding the address
-        const latitude = parseFloat(rec.id) % 0.1 + 12.9716; // Dummy coordinates for example
-        const longitude = parseFloat(rec.id) % 0.1 + 77.5946; // Dummy coordinates for example
+        // Try to extract coordinates from map_link if available
+        let coordinates = null;
+        if (rec.map_link) {
+          coordinates = extractCoordinatesFromMapLink(rec.map_link);
+        }
+        
+        // If coordinates extraction failed, use dummy coordinates (would be better with geocoding)
+        if (!coordinates) {
+          const dummyLat = parseFloat(rec.id) % 0.1 + 12.9716;
+          const dummyLng = parseFloat(rec.id) % 0.1 + 77.5946;
+          coordinates = { lat: dummyLat, lng: dummyLng };
+        }
         
         const marker = new mapboxgl.Marker({ color: '#3FB1CE' })
-          .setLngLat([longitude, latitude])
+          .setLngLat([coordinates.lng, coordinates.lat])
           .setPopup(
             new mapboxgl.Popup().setHTML(
-              `<div>
-                <h3>${rec.name}</h3>
-                <p>${rec.address}</p>
-                <button onclick="window.location.href='/location/${rec.id}'">View Details</button>
+              `<div class="p-2">
+                <h3 class="font-bold text-sm">${rec.name}</h3>
+                <p class="text-xs text-gray-600">${rec.address || ''}</p>
+                <a href="/location/${rec.id}" class="text-xs text-blue-600 mt-1 block">View Details</a>
               </div>`
             )
           )
           .addTo(map.current!);
         markers.current.push(marker);
       });
+      
+      // Add marketplace listing markers
+      if (marketplaceListings && marketplaceListings.length > 0) {
+        marketplaceListings.forEach(listing => {
+          // Try to extract coordinates from map_link
+          let coordinates = null;
+          
+          // First check if we have direct latitude/longitude saved
+          if (listing.latitude && listing.longitude) {
+            coordinates = { lat: Number(listing.latitude), lng: Number(listing.longitude) };
+            console.log(`Using direct coordinates for listing ${listing.id}:`, coordinates);
+          } 
+          // Then try to extract from map_link
+          else if (listing.map_link) {
+            coordinates = extractCoordinatesFromMapLink(listing.map_link);
+            console.log(`Extracted coordinates for listing ${listing.id}:`, coordinates);
+          }
+          
+          // If coordinates available, add marker
+          if (coordinates) {
+            const marker = new mapboxgl.Marker({ color: '#F59E0B' }) // Amber color for marketplace listings
+              .setLngLat([coordinates.lng, coordinates.lat])
+              .setPopup(
+                new mapboxgl.Popup().setHTML(
+                  `<div class="p-2">
+                    <h3 class="font-bold text-sm">${listing.title}</h3>
+                    <p class="text-xs text-gray-600">₹${listing.price}</p>
+                    <p class="text-xs text-gray-600">${listing.location || ''}</p>
+                    <a href="/marketplace/${listing.id}" class="text-xs text-blue-600 mt-1 block">View Details</a>
+                  </div>`
+                )
+              )
+              .addTo(map.current!);
+            markers.current.push(marker);
+          }
+        });
+      }
     };
 
     initializeMap();
@@ -118,7 +170,7 @@ const Map = () => {
         map.current.remove();
       }
     };
-  }, [mapLoaded, recommendations, userCoordinates]);
+  }, [mapLoaded, recommendations, marketplaceListings, userCoordinates]);
 
   return (
     <MainLayout>
@@ -159,7 +211,7 @@ const Map = () => {
                   View as List
                 </Button>
                 <div className="text-xs text-muted-foreground">
-                  Showing {recommendations.length} locations
+                  Showing {recommendations.length + (marketplaceListings?.length || 0)} locations
                 </div>
               </div>
             </div>
