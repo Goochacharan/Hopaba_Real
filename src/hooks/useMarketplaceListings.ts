@@ -19,7 +19,7 @@ export interface MarketplaceListing {
   seller_instagram?: string;
   seller_role: 'owner' | 'dealer'; // Ensuring this is a union type, not just string
   seller_rating?: number;
-  review_count?: number;
+  review_count?: number; // Explicitly adding review_count to the interface
   images?: string[];
   created_at: string;
   approval_status: 'pending' | 'approved' | 'rejected';
@@ -32,9 +32,9 @@ export interface MarketplaceListing {
   postal_code: string;
   updated_at: string;
   bill_images?: string[];
-  ownership_number?: string; // The ownership_number property
-  latitude?: number; // Added latitude property
-  longitude?: number; // Added longitude property
+  ownership_number?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 interface MarketplaceListingsQueryOptions {
@@ -102,20 +102,25 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
       }
 
       // Cast the result to ensure compliance with our interface
-      return (data || []).map(item => ({
-        ...item,
-        // Ensure seller_role is either 'owner' or 'dealer'
-        seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer',
-        // Ensure seller_rating is a number
-        seller_rating: item.seller_rating || 0,
-        // Make sure shop_images is an array
-        shop_images: item.shop_images || [],
-        // Convert latitude and longitude to numbers if they exist
-        latitude: item.latitude ? Number(item.latitude) : undefined,
-        longitude: item.longitude ? Number(item.longitude) : undefined,
-        // Add review_count if it doesn't exist (default to 0)
-        review_count: item.review_count || 0
-      })) as MarketplaceListing[];
+      return (data || []).map(item => {
+        // First, create a base object with all the fields from the database
+        const listing = {
+          ...item,
+          // Ensure seller_role is either 'owner' or 'dealer'
+          seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer',
+          // Ensure seller_rating is a number
+          seller_rating: item.seller_rating || 0,
+          // Make sure shop_images is an array
+          shop_images: item.shop_images || [],
+          // Add review_count with a default value of 0
+          review_count: 0,
+          // Convert latitude and longitude to numbers if they exist
+          latitude: item.latitude ? Number(item.latitude) : undefined,
+          longitude: item.longitude ? Number(item.longitude) : undefined
+        };
+
+        return listing;
+      }) as MarketplaceListing[];
     }
   });
 };
@@ -137,7 +142,7 @@ export const useMarketplaceListing = (id: string) => {
       if (!data) return null;
 
       // Cast the result to ensure compliance with our interface
-      return {
+      const listing = {
         ...data,
         // Ensure seller_role is either 'owner' or 'dealer'
         seller_role: (data.seller_role as string || 'owner') as 'owner' | 'dealer',
@@ -147,12 +152,14 @@ export const useMarketplaceListing = (id: string) => {
         shop_images: data.shop_images || [],
         // Make sure bill_images is an array
         bill_images: data.bill_images || [],
+        // Add review_count with a default value of 0
+        review_count: 0,
         // Convert latitude and longitude to numbers if they exist
         latitude: data.latitude ? Number(data.latitude) : undefined,
-        longitude: data.longitude ? Number(data.longitude) : undefined,
-        // Add review_count if it doesn't exist (default to 0)
-        review_count: data.review_count || 0
-      } as MarketplaceListing;
+        longitude: data.longitude ? Number(data.longitude) : undefined
+      };
+
+      return listing as MarketplaceListing;
     },
     enabled: !!id
   });
