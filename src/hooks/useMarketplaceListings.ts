@@ -30,7 +30,8 @@ export interface MarketplaceListing {
   city: string;
   postal_code: string;
   updated_at: string;
-  bill_images?: string[]; // Add the new bill_images property
+  bill_images?: string[];
+  ownership_number?: string; // Add the ownership_number property
 }
 
 interface MarketplaceListingsQueryOptions {

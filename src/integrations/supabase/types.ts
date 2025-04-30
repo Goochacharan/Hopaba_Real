@@ -131,6 +131,7 @@ export type Database = {
           longitude: number | null
           map_link: string | null
           model_year: string | null
+          ownership_number: string | null
           postal_code: string
           price: number
           seller_id: string | null
@@ -164,6 +165,7 @@ export type Database = {
           longitude?: number | null
           map_link?: string | null
           model_year?: string | null
+          ownership_number?: string | null
           postal_code: string
           price: number
           seller_id?: string | null
@@ -197,6 +199,7 @@ export type Database = {
           longitude?: number | null
           map_link?: string | null
           model_year?: string | null
+          ownership_number?: string | null
           postal_code?: string
           price?: number
           seller_id?: string | null

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Shield, Lock, Unlock } from 'lucide-react';
+import { Shield, Lock, Unlock, BadgeCheck } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import SellerInfo from './SellerInfo';
 import ListingActionButtons from './ListingActionButtons';
@@ -23,6 +23,7 @@ interface ListingPriceCardProps {
   mapLink?: string | null;
   isNegotiable?: boolean;
   inspectionCertificates?: string[];
+  ownership_number?: string;
 }
 
 const formatPrice = (price: number): string => {
@@ -44,7 +45,8 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
   condition,
   mapLink,
   isNegotiable = false,
-  inspectionCertificates = []
+  inspectionCertificates = [],
+  ownership_number
 }) => {
   return (
     <div className="sticky top-24 space-y-6">
@@ -74,6 +76,12 @@ const ListingPriceCard: React.FC<ListingPriceCardProps> = ({
                 <Badge variant="default" className="flex items-center gap-1">
                   <Lock className="h-3 w-3" />
                   <span>Fixed Price</span>
+                </Badge>
+              )}
+              {ownership_number && (
+                <Badge variant="default" className="flex items-center gap-1 text-white bg-amber-800">
+                  <BadgeCheck className="h-3 w-3" />
+                  <span>{ownership_number} Owner</span>
                 </Badge>
               )}
               {inspectionCertificates && inspectionCertificates.length > 0 && (

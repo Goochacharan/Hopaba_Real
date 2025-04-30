@@ -64,6 +64,7 @@ const marketplaceListingSchema = z.object({
   city: z.string().min(1, { message: "City is required" }),
   postal_code: z.string().regex(/^\d{6}$/, { message: "Postal code must be 6 digits" }),
   bill_images: z.array(z.string()).optional(),
+  ownership_number: z.string().min(1, { message: "Ownership information is required" }),
 });
 
 type MarketplaceListingFormData = z.infer<typeof marketplaceListingSchema>;
@@ -107,6 +108,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
     city: listing?.city || '',
     postal_code: listing?.postal_code || '',
     bill_images: listing?.bill_images || [],
+    ownership_number: listing?.ownership_number || '1st',
   };
 
   const form = useForm<MarketplaceListingFormData>({
@@ -187,10 +189,11 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
         postal_code: data.postal_code,
         latitude: coordinates ? coordinates.lat : null,
         longitude: coordinates ? coordinates.lng : null,
+        ownership_number: data.ownership_number,
       };
 
       if (listing?.id) {
-        console.log("Updating existing listing with shop images:", listingData.shop_images);
+        console.log("Updating existing listing with ownership:", listingData.ownership_number);
         const { data: updatedData, error } = await supabase
           .from('marketplace_listings')
           .update(listingData)
@@ -206,7 +209,7 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
           description: "Your marketplace listing has been updated and will be reviewed by an admin.",
         });
       } else {
-        console.log("Creating new listing with shop images:", listingData.shop_images);
+        console.log("Creating new listing with ownership:", listingData.ownership_number);
         const { data: insertedData, error } = await supabase
           .from('marketplace_listings')
           .insert(listingData)
@@ -346,6 +349,34 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
                               {year}
                             </SelectItem>
                           ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="ownership_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ownership*</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select ownership" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="1st">1st Owner</SelectItem>
+                          <SelectItem value="2nd">2nd Owner</SelectItem>
+                          <SelectItem value="3rd">3rd Owner</SelectItem>
+                          <SelectItem value="4th">4th Owner</SelectItem>
+                          <SelectItem value="5th+">5th+ Owner</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

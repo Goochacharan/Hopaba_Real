@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -6,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import ImageViewer from '@/components/ImageViewer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Lock, Unlock, Image, FileWarning, FileText } from 'lucide-react';
+import { Lock, Unlock, Image, FileWarning, FileText, BadgeCheck } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import ListingImageCarousel from './marketplace/ListingImageCarousel';
 import ListingMetadata from './marketplace/ListingMetadata';
@@ -14,30 +15,33 @@ import SellerInfo from './marketplace/SellerInfo';
 import ListingActionButtons from './marketplace/ListingActionButtons';
 import CertificateBadge from './marketplace/CertificateBadge';
 import BillImageViewer from './marketplace/BillImageViewer';
+
 interface MarketplaceListingCardProps {
   listing: MarketplaceListing;
   className?: string;
 }
+
 const formatPrice = (price: number): string => {
   return price.toLocaleString('en-IN');
 };
+
 const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   listing,
   className
 }) => {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [imageViewerOpen, setImageViewerOpen] = React.useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   const [currentImageType, setCurrentImageType] = React.useState<'regular' | 'damage'>('regular');
   const [billViewerOpen, setBillViewerOpen] = React.useState(false);
+
   const handleImageClick = (index: number, type: 'regular' | 'damage' = 'regular') => {
     setSelectedImageIndex(index);
     setCurrentImageType(type);
     setImageViewerOpen(true);
   };
+
   const handleCardClick = (e: React.MouseEvent) => {
     if (imageViewerOpen) return;
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) {
@@ -46,6 +50,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
     console.log("Navigating to marketplace listing:", listing.id);
     navigate(`/marketplace/${listing.id}`);
   };
+
   const isSearchPage = window.location.pathname.includes('/search');
   const hasDamageImages = listing.damage_images && listing.damage_images.length > 0;
   const hasCertificates = listing.inspection_certificates && listing.inspection_certificates.length > 0;
@@ -53,6 +58,7 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
   const sellerRole = listing.seller_role || 'owner';
   const hasBills = listing.bill_images && listing.bill_images.length > 0;
   console.log(`Listing ${listing.id} has bills:`, hasBills, listing.bill_images);
+
   return <div className={cn("group bg-white rounded-xl border border-border/50 overflow-hidden transition-all", "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]", "pb-5", className)} onClick={handleCardClick}>
       {hasDamageImages ? <Tabs defaultValue="regular" className="mb-2">
           <TabsList className="w-full mb-0 p-1 h-auto bg-transparent">
@@ -91,9 +97,17 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
         <div className="flex flex-col">
           <p className="text-gray-800 px-0 py-0 font-bold mb-0 text-xl md:text-xl flex items-center">
             <span className="text-xl md:text-xl mr-1">₹</span>{formatPrice(listing.price)}
-            {listing.model_year && <Badge variant="condition" className="text-xs ml-2 bg-white-500 bg-slate-200 mx-[28px]">
-                {listing.model_year} Model
-              </Badge>}
+            <span className="flex gap-2 ml-2">
+              {listing.model_year && <Badge variant="condition" className="text-xs bg-white-500 bg-slate-200">
+                  {listing.model_year} Model
+                </Badge>}
+              
+              {listing.ownership_number && (
+                <Badge variant="default" className="text-xs text-white bg-amber-800">
+                  <BadgeCheck className="h-3 w-3 mr-1" />{listing.ownership_number} Owner
+                </Badge>
+              )}
+            </span>
           </p>
           
           <div className="mt-1 mb-2 flex flex-wrap gap-2 items-center">
@@ -149,4 +163,5 @@ const MarketplaceListingCard: React.FC<MarketplaceListingCardProps> = ({
       {hasBills && <BillImageViewer images={listing.bill_images || []} open={billViewerOpen} onOpenChange={setBillViewerOpen} />}
     </div>;
 };
+
 export default MarketplaceListingCard;
