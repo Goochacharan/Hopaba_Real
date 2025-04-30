@@ -9,8 +9,6 @@ import useRecommendations from '@/hooks/useRecommendations';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import mapboxgl from 'mapbox-gl';
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 
 const Map = () => {
@@ -19,8 +17,8 @@ const Map = () => {
   const [loading, setLoading] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markers = useRef<mapboxgl.Marker[]>([]);
+  const googleMapRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
   const navigate = useNavigate();
 
   // Fetch both recommendations and marketplace listings
@@ -32,10 +30,16 @@ const Map = () => {
     if (coordinates) {
       setUserCoordinates(coordinates);
       console.log("User coordinates set from location selector:", coordinates);
+      
+      // If map is already loaded, center it at the new coordinates
+      if (googleMapRef.current && coordinates) {
+        googleMapRef.current.setCenter({ lat: coordinates.lat, lng: coordinates.lng });
+        googleMapRef.current.setZoom(14);
+      }
     }
   };
 
-  // Load the Mapbox script
+  // Load Google Maps
   useEffect(() => {
     const checkUser = async () => {
       setLoading(true);
@@ -44,8 +48,37 @@ const Map = () => {
     };
     checkUser();
 
-    // Set mapLoaded to true since we're now importing mapboxgl directly
-    setMapLoaded(true);
+    // Check if Google Maps API is already loaded
+    if (window.google && window.google.maps) {
+      setMapLoaded(true);
+      return;
+    }
+
+    // Load Google Maps API
+    const apiKey = 'AIzaSyA55iKF0c_h2I03VpCLg4TXDAZ3EFDd-hI'; // Replace with your Google Maps API key
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    
+    script.onload = () => {
+      console.log('Google Maps API loaded');
+      setMapLoaded(true);
+    };
+    
+    script.onerror = () => {
+      console.error('Failed to load Google Maps API');
+    };
+    
+    document.head.appendChild(script);
+    
+    return () => {
+      // Clean up markers
+      if (markersRef.current.length > 0) {
+        markersRef.current.forEach(marker => marker.setMap(null));
+        markersRef.current = [];
+      }
+    };
   }, [navigate]);
 
   useEffect(() => {
@@ -53,27 +86,21 @@ const Map = () => {
 
     const initializeMap = () => {
       try {
-        // Use the Google Maps API key from Supabase Edge Function secrets
-        // For testing now, use a placeholder - you would get this from Supabase Edge Function secrets in production
-        // IMPORTANT: In a real production app, load this from Supabase secrets
-        mapboxgl.accessToken = 'pk.eyJ1IjoibG92YWJsZXVzZXJzaWRlIiwiYSI6ImNsZ3p2MDBpdzA5aDUzZm1udXR2NGQ2Z3MifQ.g9_N6QV1kYYNjtAQFbirhQ';
+        // Default center is Bengaluru
+        const defaultCenter = { lat: 12.9716, lng: 77.5946 };
+        const center = userCoordinates || defaultCenter;
         
-        // Initialize map centered at Bengaluru or user location if available
-        const defaultCenter: [number, number] = [77.5946, 12.9716]; // Bengaluru coordinates
-        const center: [number, number] = userCoordinates ? [userCoordinates.lng, userCoordinates.lat] : defaultCenter;
-        
-        map.current = new mapboxgl.Map({
-          container: mapContainer.current,
-          style: 'mapbox://styles/mapbox/streets-v12',
+        // Initialize the map
+        googleMapRef.current = new window.google.maps.Map(mapContainer.current, {
           center: center,
-          zoom: 12
+          zoom: 12,
+          mapTypeControl: true,
+          fullscreenControl: true,
+          streetViewControl: true,
         });
 
-        // Add navigation controls
-        map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-        
-        map.current.on('load', () => {
-          // Add markers for all listings
+        // Add markers after map is loaded
+        googleMapRef.current.addListener('tilesloaded', () => {
           addMarkers();
         });
       } catch (error) {
@@ -83,16 +110,34 @@ const Map = () => {
 
     const addMarkers = () => {
       // Clear existing markers
-      markers.current.forEach(marker => marker.remove());
-      markers.current = [];
+      markersRef.current.forEach(marker => marker.setMap(null));
+      markersRef.current = [];
       
       // Add user location marker if available
       if (userCoordinates) {
-        const userMarker = new mapboxgl.Marker({ color: '#FF0000' })
-          .setLngLat([userCoordinates.lng, userCoordinates.lat])
-          .setPopup(new mapboxgl.Popup().setHTML('<p>Your location</p>'))
-          .addTo(map.current!);
-        markers.current.push(userMarker);
+        const userMarker = new window.google.maps.Marker({
+          position: { lat: userCoordinates.lat, lng: userCoordinates.lng },
+          map: googleMapRef.current,
+          icon: {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            fillColor: '#4285F4',
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 2,
+            scale: 8,
+          },
+          title: 'Your location'
+        });
+        
+        const infoWindow = new window.google.maps.InfoWindow({
+          content: '<div style="font-weight: bold;">Your location</div>'
+        });
+        
+        userMarker.addListener('click', () => {
+          infoWindow.open(googleMapRef.current, userMarker);
+        });
+        
+        markersRef.current.push(userMarker);
       }
       
       // Add recommendation markers
@@ -110,54 +155,96 @@ const Map = () => {
           coordinates = { lat: dummyLat, lng: dummyLng };
         }
         
-        const marker = new mapboxgl.Marker({ color: '#3FB1CE' })
-          .setLngLat([coordinates.lng, coordinates.lat])
-          .setPopup(
-            new mapboxgl.Popup().setHTML(
-              `<div class="p-2">
-                <h3 class="font-bold text-sm">${rec.name}</h3>
-                <p class="text-xs text-gray-600">${rec.address || ''}</p>
-                <a href="/location/${rec.id}" class="text-xs text-blue-600 mt-1 block">View Details</a>
-              </div>`
-            )
-          )
-          .addTo(map.current!);
-        markers.current.push(marker);
+        const marker = new window.google.maps.Marker({
+          position: { lat: coordinates.lat, lng: coordinates.lng },
+          map: googleMapRef.current,
+          icon: {
+            url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+          },
+          title: rec.name
+        });
+        
+        const infoWindow = new window.google.maps.InfoWindow({
+          content: `
+            <div style="max-width: 200px;">
+              <h3 style="font-weight: bold; margin-bottom: 4px;">${rec.name}</h3>
+              <p style="font-size: 12px; color: #666;">${rec.address || ''}</p>
+              <a href="/location/${rec.id}" style="color: blue; font-size: 12px; display: block; margin-top: 4px;">View Details</a>
+            </div>
+          `
+        });
+        
+        marker.addListener('click', () => {
+          infoWindow.open(googleMapRef.current, marker);
+        });
+        
+        markersRef.current.push(marker);
       });
       
       // Add marketplace listing markers
       if (marketplaceListings && marketplaceListings.length > 0) {
         marketplaceListings.forEach(listing => {
-          // Try to extract coordinates from map_link
-          let coordinates = null;
-          
-          // First check if we have direct latitude/longitude saved
+          // Try to use direct latitude/longitude if available
           if (listing.latitude && listing.longitude) {
-            coordinates = { lat: Number(listing.latitude), lng: Number(listing.longitude) };
-            console.log(`Using direct coordinates for listing ${listing.id}:`, coordinates);
+            const lat = Number(listing.latitude);
+            const lng = Number(listing.longitude);
+            
+            const marker = new window.google.maps.Marker({
+              position: { lat, lng },
+              map: googleMapRef.current,
+              icon: {
+                url: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+              },
+              title: listing.title
+            });
+            
+            const infoWindow = new window.google.maps.InfoWindow({
+              content: `
+                <div style="max-width: 200px;">
+                  <h3 style="font-weight: bold; margin-bottom: 4px;">${listing.title}</h3>
+                  <p style="font-size: 12px; color: #666;">₹${listing.price}</p>
+                  <p style="font-size: 12px; color: #666;">${listing.location || ''}</p>
+                  <a href="/marketplace/${listing.id}" style="color: blue; font-size: 12px; display: block; margin-top: 4px;">View Details</a>
+                </div>
+              `
+            });
+            
+            marker.addListener('click', () => {
+              infoWindow.open(googleMapRef.current, marker);
+            });
+            
+            markersRef.current.push(marker);
           } 
-          // Then try to extract from map_link
+          // Try to extract from map_link if direct coordinates aren't available
           else if (listing.map_link) {
-            coordinates = extractCoordinatesFromMapLink(listing.map_link);
-            console.log(`Extracted coordinates for listing ${listing.id}:`, coordinates);
-          }
-          
-          // If coordinates available, add marker
-          if (coordinates) {
-            const marker = new mapboxgl.Marker({ color: '#F59E0B' }) // Amber color for marketplace listings
-              .setLngLat([coordinates.lng, coordinates.lat])
-              .setPopup(
-                new mapboxgl.Popup().setHTML(
-                  `<div class="p-2">
-                    <h3 class="font-bold text-sm">${listing.title}</h3>
-                    <p class="text-xs text-gray-600">₹${listing.price}</p>
-                    <p class="text-xs text-gray-600">${listing.location || ''}</p>
-                    <a href="/marketplace/${listing.id}" class="text-xs text-blue-600 mt-1 block">View Details</a>
-                  </div>`
-                )
-              )
-              .addTo(map.current!);
-            markers.current.push(marker);
+            const coordinates = extractCoordinatesFromMapLink(listing.map_link);
+            if (coordinates) {
+              const marker = new window.google.maps.Marker({
+                position: { lat: coordinates.lat, lng: coordinates.lng },
+                map: googleMapRef.current,
+                icon: {
+                  url: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+                },
+                title: listing.title
+              });
+              
+              const infoWindow = new window.google.maps.InfoWindow({
+                content: `
+                  <div style="max-width: 200px;">
+                    <h3 style="font-weight: bold; margin-bottom: 4px;">${listing.title}</h3>
+                    <p style="font-size: 12px; color: #666;">₹${listing.price}</p>
+                    <p style="font-size: 12px; color: #666;">${listing.location || ''}</p>
+                    <a href="/marketplace/${listing.id}" style="color: blue; font-size: 12px; display: block; margin-top: 4px;">View Details</a>
+                  </div>
+                `
+              });
+              
+              marker.addListener('click', () => {
+                infoWindow.open(googleMapRef.current, marker);
+              });
+              
+              markersRef.current.push(marker);
+            }
           }
         });
       }
@@ -166,8 +253,10 @@ const Map = () => {
     initializeMap();
 
     return () => {
-      if (map.current) {
-        map.current.remove();
+      // Clean up markers when component unmounts
+      if (markersRef.current.length > 0) {
+        markersRef.current.forEach(marker => marker.setMap(null));
+        markersRef.current = [];
       }
     };
   }, [mapLoaded, recommendations, marketplaceListings, userCoordinates]);
