@@ -66,6 +66,11 @@ declare namespace google {
       geocode(request: GeocoderRequest, callback: (results: GeocoderResult[], status: GeocoderStatus) => void): void;
     }
 
+    interface MapMouseEvent {
+      latLng: LatLng;
+      stop(): void;
+    }
+
     interface MVCObject {
       addListener(eventName: string, handler: (...args: any[]) => void): MapsEventListener;
     }
