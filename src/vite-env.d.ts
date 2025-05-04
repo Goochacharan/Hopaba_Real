@@ -1,6 +1,5 @@
 
 /// <reference types="vite/client" />
-/// <reference path="./types/google-maps.d.ts" />
 
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
@@ -67,4 +66,3 @@ interface Window {
   webkitSpeechRecognition?: typeof SpeechRecognition;
   mapboxgl?: any;
 }
-

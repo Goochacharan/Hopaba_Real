@@ -18,7 +18,6 @@ import { ImageUpload } from '@/components/ui/image-upload';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
-import MarketplaceLocationSection from './map/MarketplaceLocationSection';
 
 const INDIAN_CITIES = [
   "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai", 
@@ -718,8 +717,89 @@ const MarketplaceListingForm: React.FC<MarketplaceListingFormProps> = ({
             />
           </div>
 
-          <MarketplaceLocationSection formName="marketplace" />
-          
+          <FormField
+            control={form.control}
+            name="area"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Area*</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter your area" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="city"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>City*</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select city" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {INDIAN_CITIES.map(city => (
+                      <SelectItem key={city} value={city}>
+                        {city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="postal_code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Postal Code*</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Enter 6-digit postal code" 
+                    {...field} 
+                    maxLength={6}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Enter a valid 6-digit Indian postal code
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="map_link"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Google Maps Link (Optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Paste your Google Maps link here"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  This link helps buyers find the exact location of your item.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <div className="flex justify-end gap-2 pt-4">
             {onCancel && (
               <Button type="button" variant="outline" onClick={onCancel}>

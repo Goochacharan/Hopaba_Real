@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -19,7 +18,7 @@ export interface MarketplaceListing {
   seller_instagram?: string;
   seller_role: 'owner' | 'dealer'; // Ensuring this is a union type, not just string
   seller_rating?: number;
-  review_count?: number; // Explicitly adding review_count to the interface
+  review_count?: number;
   images?: string[];
   created_at: string;
   approval_status: 'pending' | 'approved' | 'rejected';
@@ -32,9 +31,7 @@ export interface MarketplaceListing {
   postal_code: string;
   updated_at: string;
   bill_images?: string[];
-  ownership_number?: string;
-  latitude?: number;
-  longitude?: number;
+  ownership_number?: string; // Add the ownership_number property
 }
 
 interface MarketplaceListingsQueryOptions {
@@ -59,7 +56,7 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
   } = options;
 
   return useQuery({
-    queryKey: ['marketplaceListings', { category, searchQuery, condition, minPrice, maxPrice, minRating, includeAllStatuses }],
+    queryKey: ['marketplaceListings', { category, searchQuery, condition, minPrice, maxPrice, minRating }],
     queryFn: async () => {
       let query = supabase
         .from('marketplace_listings')
@@ -102,25 +99,17 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
       }
 
       // Cast the result to ensure compliance with our interface
-      return (data || []).map(item => {
-        // First, create a base object with all the fields from the database
-        const listing = {
-          ...item,
-          // Ensure seller_role is either 'owner' or 'dealer'
-          seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer',
-          // Ensure seller_rating is a number
-          seller_rating: item.seller_rating || 0,
-          // Make sure shop_images is an array
-          shop_images: item.shop_images || [],
-          // Add review_count with a default value of 0
-          review_count: 0,
-          // Convert latitude and longitude to numbers if they exist
-          latitude: item.latitude ? Number(item.latitude) : undefined,
-          longitude: item.longitude ? Number(item.longitude) : undefined
-        };
-
-        return listing;
-      }) as MarketplaceListing[];
+      return (data || []).map(item => ({
+        ...item,
+        // Ensure seller_role is either 'owner' or 'dealer'
+        seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer',
+        // Ensure seller_rating is a number
+        seller_rating: item.seller_rating || 0,
+        // Make sure shop_images is an array
+        shop_images: item.shop_images || [],
+        // Add review_count if it doesn't exist (default to 0)
+        review_count: 0
+      })) as MarketplaceListing[];
     }
   });
 };
@@ -142,7 +131,7 @@ export const useMarketplaceListing = (id: string) => {
       if (!data) return null;
 
       // Cast the result to ensure compliance with our interface
-      const listing = {
+      return {
         ...data,
         // Ensure seller_role is either 'owner' or 'dealer'
         seller_role: (data.seller_role as string || 'owner') as 'owner' | 'dealer',
@@ -152,14 +141,9 @@ export const useMarketplaceListing = (id: string) => {
         shop_images: data.shop_images || [],
         // Make sure bill_images is an array
         bill_images: data.bill_images || [],
-        // Add review_count with a default value of 0
-        review_count: 0,
-        // Convert latitude and longitude to numbers if they exist
-        latitude: data.latitude ? Number(data.latitude) : undefined,
-        longitude: data.longitude ? Number(data.longitude) : undefined
-      };
-
-      return listing as MarketplaceListing;
+        // Add review_count if it doesn't exist (default to 0)
+        review_count: 0
+      } as MarketplaceListing;
     },
     enabled: !!id
   });
