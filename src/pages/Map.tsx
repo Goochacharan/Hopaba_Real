@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import MainLayout from '@/components/MainLayout';
 import { useNavigate } from 'react-router-dom';
@@ -53,9 +54,9 @@ const Map = () => {
       return;
     }
 
-    // Load Google Maps API with unrestricted key
+    // Load Google Maps API with updated API key
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDk4C4EBWgjuL1eBnJlu1J80WytEtSIags&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDNcOs1gMb2kevWEZXWdfSykt1NBXIEqjE&libraries=places`;
     script.async = true;
     script.defer = true;
     

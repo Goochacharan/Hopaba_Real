@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -60,7 +59,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
       return;
     }
     
-    const apiKey = 'AIzaSyDk4C4EBWgjuL1eBnJlu1J80WytEtSIags'; // Updated API key
+    const apiKey = 'AIzaSyDNcOs1gMb2kevWEZXWdfSykt1NBXIEqjE'; // Updated API key
     setIsLoading(true);
     
     // Load Google Maps API script
