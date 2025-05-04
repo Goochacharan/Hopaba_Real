@@ -8,6 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistance } from "date-fns";
 import { ScrollArea } from "../ui/scroll-area";
+import { getEmbedUrl } from "@/utils/videoUtils";
 
 interface CommunityNote {
   id: string;
@@ -22,6 +23,7 @@ interface CommunityNote {
   user_id: string;
   user_avatar_url: string | null;
   user_display_name: string;
+  images?: string[];
 }
 
 interface CommunityNotesPopupProps {
@@ -63,6 +65,7 @@ const CommunityNotesPopup: React.FC<CommunityNotesPopupProps> = ({
         user_id,
         thumbs_up_users,
         content,
+        images,
         created_at
       `)
       .eq("location_id", locationId)
@@ -200,6 +203,10 @@ const CommunityNotesPopup: React.FC<CommunityNotesPopupProps> = ({
   const formattedDate = currentNote?.created_at 
     ? formatDistance(new Date(currentNote.created_at), new Date(), { addSuffix: true })
     : '';
+  
+  const embedUrl = currentNote?.content?.videoUrl 
+    ? getEmbedUrl(currentNote.content.videoUrl) 
+    : null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -241,19 +248,37 @@ const CommunityNotesPopup: React.FC<CommunityNotesPopupProps> = ({
                 </div>
                 
                 <h3 className="text-xl font-bold mb-2">{currentNote.title}</h3>
+                
+                {/* Video embed */}
+                {embedUrl && (
+                  <div className="mb-6 w-full aspect-video rounded overflow-hidden">
+                    <iframe 
+                      src={embedUrl} 
+                      title="Embedded video"
+                      className="w-full h-full"
+                      allowFullScreen
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
+                  </div>
+                )}
+                
+                {/* Images */}
+                {currentNote.images && currentNote.images.length > 0 && (
+                  <div className="mb-6 space-y-4">
+                    {currentNote.images.map((img, idx) => (
+                      <img 
+                        key={idx} 
+                        src={img} 
+                        alt={`Image ${idx + 1} for ${currentNote.title}`} 
+                        className="w-full rounded-lg object-contain max-h-[600px]" 
+                      />
+                    ))}
+                  </div>
+                )}
+                
                 <div className="prose max-w-none mb-6">
                   <p>{currentNote.content.text}</p>
-                  
-                  {currentNote.content.videoUrl && (
-                    <div className="mt-4">
-                      <iframe 
-                        src={currentNote.content.videoUrl} 
-                        title="Embedded video"
-                        className="w-full aspect-video rounded"
-                        allowFullScreen
-                      />
-                    </div>
-                  )}
                 </div>
               </div>
             </ScrollArea>
