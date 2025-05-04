@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertCircle, MapPin, Check } from "lucide-react";
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
+import { loadGoogleMapsApi } from '@/lib/googleMaps';
 
 interface MapLocationPickerProps {
   open: boolean;
@@ -53,31 +54,18 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
   useEffect(() => {
     if (!open || !mapRef.current) return;
     
-    // Check if Google Maps API is already loaded
-    if (window.google && window.google.maps) {
-      initMap();
-      return;
-    }
-    
-    const apiKey = 'AIzaSyDNcOs1gMb2kevWEZXWdfSykt1NBXIEqjE'; // Updated API key
     setIsLoading(true);
-    
-    // Load Google Maps API script
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      initMap();
-      setIsLoading(false);
-    };
-    script.onerror = (e) => {
-      console.error('Failed to load Google Maps', e);
-      setLoadError('Failed to load Google Maps. Please try again later.');
-      setIsLoading(false);
-    };
-    
-    document.head.appendChild(script);
+    loadGoogleMapsApi()
+      .then(() => {
+        console.log('Google Maps API loaded successfully in MapLocationPicker');
+        initMap();
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error('Failed to load Google Maps', error);
+        setLoadError('Failed to load Google Maps. Please try again later.');
+        setIsLoading(false);
+      });
     
     return () => {
       if (googleMapRef.current) {

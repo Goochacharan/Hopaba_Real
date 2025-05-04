@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import MainLayout from '@/components/MainLayout';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +9,7 @@ import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
+import { loadGoogleMapsApi } from '@/lib/googleMaps';
 
 const Map = () => {
   const [selectedLocation, setSelectedLocation] = useState<string>("Bengaluru, Karnataka");
@@ -48,31 +48,18 @@ const Map = () => {
     };
     checkUser();
 
-    // Check if Google Maps API is already loaded
-    if (window.google && window.google.maps) {
-      setMapLoaded(true);
-      return;
-    }
-
-    // Load Google Maps API with updated API key
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDNcOs1gMb2kevWEZXWdfSykt1NBXIEqjE&libraries=places`;
-    script.async = true;
-    script.defer = true;
-    
-    script.onload = () => {
-      console.log('Google Maps API loaded');
-      setMapLoaded(true);
-    };
-    
-    script.onerror = (e) => {
-      console.error('Failed to load Google Maps API', e);
-    };
-    
-    document.head.appendChild(script);
+    // Load Google Maps API using the utility function
+    loadGoogleMapsApi()
+      .then(() => {
+        console.log('Google Maps API loaded successfully in Map component');
+        setMapLoaded(true);
+      })
+      .catch((error) => {
+        console.error('Error loading Google Maps API:', error);
+      });
     
     return () => {
-      // Clean up markers
+      // Clean up markers when component unmounts
       if (markersRef.current.length > 0) {
         markersRef.current.forEach(marker => marker.setMap(null));
         markersRef.current = [];
@@ -81,7 +68,7 @@ const Map = () => {
   }, [navigate]);
 
   useEffect(() => {
-    if (!mapLoaded || !mapContainer.current) return;
+    if (!mapLoaded || !mapContainer.current || !window.google || !window.google.maps) return;
 
     const initializeMap = () => {
       try {

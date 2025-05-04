@@ -13,6 +13,7 @@ interface Window {
     ready: (callback: () => void) => void;
   };
   onloadCallback?: () => void;
+  googleMapsCallback?: () => void;
   google?: {
     maps: {
       Map: new (container: HTMLElement, options?: google.maps.MapOptions) => google.maps.Map;
@@ -37,4 +38,3 @@ interface Window {
     };
   };
 }
-
