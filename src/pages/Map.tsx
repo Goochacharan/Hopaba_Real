@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import MainLayout from '@/components/MainLayout';
 import { useNavigate } from 'react-router-dom';
@@ -54,10 +53,9 @@ const Map = () => {
       return;
     }
 
-    // Load Google Maps API
-    const apiKey = 'AIzaSyA55iKF0c_h2I03VpCLg4TXDAZ3EFDd-hI'; // Replace with your Google Maps API key
+    // Load Google Maps API with unrestricted key
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDk4C4EBWgjuL1eBnJlu1J80WytEtSIags&libraries=places`;
     script.async = true;
     script.defer = true;
     
@@ -66,8 +64,8 @@ const Map = () => {
       setMapLoaded(true);
     };
     
-    script.onerror = () => {
-      console.error('Failed to load Google Maps API');
+    script.onerror = (e) => {
+      console.error('Failed to load Google Maps API', e);
     };
     
     document.head.appendChild(script);

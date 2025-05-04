@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -59,7 +60,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
       return;
     }
     
-    const apiKey = 'AIzaSyA55iKF0c_h2I03VpCLg4TXDAZ3EFDd-hI'; // Replace with your Google Maps API key
+    const apiKey = 'AIzaSyDk4C4EBWgjuL1eBnJlu1J80WytEtSIags'; // Updated API key
     setIsLoading(true);
     
     // Load Google Maps API script
@@ -71,7 +72,8 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
       initMap();
       setIsLoading(false);
     };
-    script.onerror = () => {
+    script.onerror = (e) => {
+      console.error('Failed to load Google Maps', e);
       setLoadError('Failed to load Google Maps. Please try again later.');
       setIsLoading(false);
     };
