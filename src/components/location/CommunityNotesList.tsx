@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, ThumbsUp } from "lucide-react";
@@ -7,6 +8,7 @@ import { Note } from "./CommunityNoteModal";
 import { Json } from "@/integrations/supabase/types";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "../ui/button";
+import CommunityNotesPopup from "./CommunityNotesPopup";
 
 interface CommunityNotesListProps {
   locationId: string;
@@ -25,6 +27,7 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [popupOpen, setPopupOpen] = useState(false);
 
   useEffect(() => {
     fetchNotes();
@@ -183,6 +186,11 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
     }));
   };
 
+  const handleCommunityContributorsClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    setPopupOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="py-8 text-center">
@@ -260,6 +268,13 @@ const CommunityNotesList: React.FC<CommunityNotesListProps> = ({ locationId }) =
           }}
         />
       )}
+
+      {/* Add the community notes popup */}
+      <CommunityNotesPopup 
+        locationId={locationId}
+        isOpen={popupOpen}
+        onClose={() => setPopupOpen(false)}
+      />
     </div>
   );
 };

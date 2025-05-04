@@ -13,4 +13,5 @@ interface Window {
     ready: (callback: () => void) => void;
   };
   onloadCallback?: () => void;
+  gm_authFailure?: () => void;
 }

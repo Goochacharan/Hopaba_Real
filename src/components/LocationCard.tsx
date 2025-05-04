@@ -101,8 +101,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
       fetchCommunityNotes();
     }
   }, [recommendation.id]);
-  const handleContributorsClick = () => {
-    navigate(`/location/${recommendation.id}#community-notes`);
+  const handleContributorsClick = (e) => {
+    e.stopPropagation();
+    // We'll now handle this in the CommunityContributors component
   };
   const calculateOpenStatus = (): boolean | undefined => {
     if (recommendation.openNow === true) return true;
@@ -599,10 +600,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
                   </DropdownMenuContent>
                 </DropdownMenu>}
 
-              {notesCount > 0 && <CommunityContributors contributors={contributors} total={notesCount} onClick={e => {
-              e.stopPropagation();
-              handleContributorsClick();
-            }} />}
+              {notesCount > 0 && <CommunityContributors 
+                contributors={contributors} 
+                total={notesCount} 
+                locationId={recommendation.id} 
+              />}
             </div>
           </div>
         </div>
