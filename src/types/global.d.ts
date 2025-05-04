@@ -14,6 +14,7 @@ interface Window {
   };
   onloadCallback?: () => void;
   googleMapsCallback?: () => void;
+  gm_authFailure?: () => void;
   google?: {
     maps: {
       Map: new (container: HTMLElement, options?: google.maps.MapOptions) => google.maps.Map;

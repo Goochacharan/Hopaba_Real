@@ -1,9 +1,10 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import MainLayout from '@/components/MainLayout';
 import { useNavigate } from 'react-router-dom';
 import LocationSelector from '@/components/LocationSelector';
 import { Button } from '@/components/ui/button';
-import { MapPin, List } from 'lucide-react';
+import { MapPin, List, AlertCircle } from 'lucide-react';
 import useRecommendations from '@/hooks/useRecommendations';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +17,7 @@ const Map = () => {
   const [userCoordinates, setUserCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
   const mapContainer = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
@@ -53,9 +55,12 @@ const Map = () => {
       .then(() => {
         console.log('Google Maps API loaded successfully in Map component');
         setMapLoaded(true);
+        setMapError(null);
       })
       .catch((error) => {
         console.error('Error loading Google Maps API:', error);
+        setMapError(error.message || 'Failed to load Google Maps');
+        setMapLoaded(false);
       });
     
     return () => {
@@ -267,11 +272,31 @@ const Map = () => {
           ) : (
             <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
               <div className="h-[600px] w-full relative" ref={mapContainer}>
-                {!mapLoaded && (
+                {!mapLoaded && !mapError && (
                   <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
                     <div className="text-center">
                       <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
                       <p className="text-muted-foreground">Loading map...</p>
+                    </div>
+                  </div>
+                )}
+                
+                {mapError && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                    <div className="text-center max-w-xl px-6">
+                      <div className="mx-auto bg-amber-50 border border-amber-200 rounded-full w-16 h-16 flex items-center justify-center mb-4">
+                        <AlertCircle className="h-8 w-8 text-amber-500" />
+                      </div>
+                      <h3 className="text-xl font-medium mb-2">Map Loading Error</h3>
+                      <p className="text-muted-foreground mb-4">{mapError}</p>
+                      <div className="text-sm text-muted-foreground bg-gray-50 p-4 rounded-md border border-border">
+                        <p className="font-medium mb-2">Possible solutions:</p>
+                        <ol className="list-decimal pl-5 space-y-1">
+                          <li>Check that the Google Maps API key has been configured with proper domain restrictions</li>
+                          <li>Ensure the Google Maps JavaScript API and Places API services are enabled</li>
+                          <li>Try clearing your browser cache and refreshing the page</li>
+                        </ol>
+                      </div>
                     </div>
                   </div>
                 )}
