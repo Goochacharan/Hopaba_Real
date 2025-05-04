@@ -30,20 +30,27 @@ export const loadGoogleMapsApi = (): Promise<boolean> => {
       return;
     }
     
+    // Create a unique callback name to avoid conflicts
+    const callbackName = 'googleMapsCallback';
+    
     const apiKey = 'AIzaSyDNcOs1gMb2kevWEZXWdfSykt1NBXIEqjE';
     
     // Create script element
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=googleMapsCallback`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=${callbackName}`;
     script.async = true;
     script.defer = true;
     
     // Define callback function in global scope
-    window.googleMapsCallback = () => {
+    window[callbackName] = function() {
       isGoogleMapsLoaded = true;
       isGoogleMapsLoading = false;
       console.log('Google Maps API loaded successfully');
       resolve(true);
+      
+      // Clean up the callback
+      // We don't delete it because it's declared in types, but we can make it a no-op
+      window[callbackName] = function() {};
     };
     
     // Error handling
@@ -60,9 +67,4 @@ export const loadGoogleMapsApi = (): Promise<boolean> => {
   return loadPromise;
 };
 
-// Add the callback to window object
-declare global {
-  interface Window {
-    googleMapsCallback: () => void;
-  }
-}
+// No need to redeclare the callback type since it's in global.d.ts
