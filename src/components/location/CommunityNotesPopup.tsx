@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, ThumbsUp } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistance } from "date-fns";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface CommunityNote {
   id: string;
@@ -127,7 +128,8 @@ const CommunityNotesPopup: React.FC<CommunityNotesPopupProps> = ({
     setLoading(false);
   }
 
-  const handleLikeNote = async (note: CommunityNote) => {
+  const handleLikeNote = async (note: CommunityNote, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!userId) {
       toast({
         title: "Authentication required",
@@ -178,13 +180,17 @@ const CommunityNotesPopup: React.FC<CommunityNotesPopupProps> = ({
     });
   };
 
-  const goToNextNote = () => {
+  const goToNextNote = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (currentNoteIndex < notes.length - 1) {
       setCurrentNoteIndex(prev => prev + 1);
     }
   };
 
-  const goToPreviousNote = () => {
+  const goToPreviousNote = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (currentNoteIndex > 0) {
       setCurrentNoteIndex(prev => prev - 1);
     }
@@ -197,7 +203,7 @@ const CommunityNotesPopup: React.FC<CommunityNotesPopupProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-[95vw] sm:max-w-[90vw] lg:max-w-[80vw] p-0 overflow-hidden">
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-[90vw] lg:max-w-[80vw] max-h-[90vh] p-0 overflow-hidden">
         {loading ? (
           <div className="p-8 flex justify-center items-center">
             <p>Loading community notes...</p>
@@ -208,7 +214,7 @@ const CommunityNotesPopup: React.FC<CommunityNotesPopupProps> = ({
             <Button onClick={onClose} className="mt-4">Close</Button>
           </div>
         ) : (
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-[80vh]">
             {/* Header */}
             <div className="p-4 border-b flex items-center justify-between bg-muted/30">
               <h2 className="text-xl font-bold">Community Notes</h2>
@@ -218,44 +224,46 @@ const CommunityNotesPopup: React.FC<CommunityNotesPopupProps> = ({
             </div>
             
             {/* Content */}
-            <div className="p-6 flex-1 overflow-y-auto">
-              <div className="flex items-start gap-4 mb-4">
-                <Avatar className="h-10 w-10">
-                  {currentNote.user_avatar_url ? (
-                    <AvatarImage src={currentNote.user_avatar_url} alt={currentNote.user_display_name || "User avatar"} />
-                  ) : (
-                    <AvatarFallback>{(currentNote.user_display_name?.[0] || "A").toUpperCase()}</AvatarFallback>
+            <ScrollArea className="flex-1 overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-start gap-4 mb-4">
+                  <Avatar className="h-10 w-10">
+                    {currentNote.user_avatar_url ? (
+                      <AvatarImage src={currentNote.user_avatar_url} alt={currentNote.user_display_name || "User avatar"} />
+                    ) : (
+                      <AvatarFallback>{(currentNote.user_display_name?.[0] || "A").toUpperCase()}</AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div>
+                    <div className="font-semibold">{currentNote.user_display_name}</div>
+                    <div className="text-sm text-muted-foreground">{formattedDate}</div>
+                  </div>
+                </div>
+                
+                <h3 className="text-xl font-bold mb-2">{currentNote.title}</h3>
+                <div className="prose max-w-none mb-6">
+                  <p>{currentNote.content.text}</p>
+                  
+                  {currentNote.content.videoUrl && (
+                    <div className="mt-4">
+                      <iframe 
+                        src={currentNote.content.videoUrl} 
+                        title="Embedded video"
+                        className="w-full aspect-video rounded"
+                        allowFullScreen
+                      />
+                    </div>
                   )}
-                </Avatar>
-                <div>
-                  <div className="font-semibold">{currentNote.user_display_name}</div>
-                  <div className="text-sm text-muted-foreground">{formattedDate}</div>
                 </div>
               </div>
-              
-              <h3 className="text-xl font-bold mb-2">{currentNote.title}</h3>
-              <div className="prose max-w-none mb-6">
-                <p>{currentNote.content.text}</p>
-                
-                {currentNote.content.videoUrl && (
-                  <div className="mt-4">
-                    <iframe 
-                      src={currentNote.content.videoUrl} 
-                      title="Embedded video"
-                      className="w-full aspect-video rounded"
-                      allowFullScreen
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
+            </ScrollArea>
             
             {/* Footer */}
             <div className="p-4 border-t flex justify-between items-center bg-muted/10">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleLikeNote(currentNote)}
+                onClick={(e) => handleLikeNote(currentNote, e)}
                 className={`flex items-center gap-1 ${
                   currentNote.thumbs_up_users?.includes(userId || '') ? 'text-blue-600' : ''
                 }`}
@@ -282,7 +290,7 @@ const CommunityNotesPopup: React.FC<CommunityNotesPopupProps> = ({
                   Next <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
                 <Button 
-                  onClick={onClose}
+                  onClick={(e) => { e.stopPropagation(); onClose(); }}
                   variant="default"
                   size="sm"
                   className="ml-2"
