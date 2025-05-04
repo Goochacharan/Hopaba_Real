@@ -29,7 +29,8 @@ import {
   hasAvailabilityInfo,
   hasInstagram,
   getAvailabilityDaysDisplay,
-  getAvailabilityHoursDisplay
+  getAvailabilityHoursDisplay,
+  formatDistanceText
 } from '@/utils/locationCardUtils';
 
 interface LocationCardProps {

@@ -1,4 +1,3 @@
-
 import { formatDistance } from 'date-fns';
 
 export const parseTimeString = (timeString: string): number => {
@@ -117,7 +116,8 @@ export const calculateOpenStatus = (recommendation: any): boolean | undefined =>
   return undefined;
 };
 
-export const formatDistance = (distanceText: string | undefined) => {
+// Rename the local formatDistance function to formatDistanceText
+export const formatDistanceText = (distanceText: string | undefined) => {
   if (!distanceText) return '';
   const distanceMatch = distanceText.match(/(\d+(\.\d+)?)/);
   if (distanceMatch) {
@@ -237,4 +237,3 @@ export const getMedalStyle = (rank: number) => {
       };
   }
 };
-
