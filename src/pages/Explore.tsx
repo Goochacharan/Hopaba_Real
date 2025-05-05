@@ -7,9 +7,74 @@ import SortButton, { SortOption } from '@/components/SortButton';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { useSearchEnhancement } from '@/hooks/useSearchEnhancement';
 import { addDistanceToRecommendations, sortRecommendations, enhanceRecommendations } from '@/utils/searchUtils';
-import BusinessesList from '@/components/BusinessesList'; // Fixed: Changed from named import to default import
+import BusinessesList from '@/components/BusinessesList';
 import PostalCodeSearch from '@/components/search/PostalCodeSearch';
 import { Loader2 } from 'lucide-react';
+
+// Create our own simplified BusinessItem component for the Explore page
+// This will help us display business data from search results
+const ExploreBusinessesList = ({ businesses }: { businesses: any[] }) => {
+  if (!businesses || businesses.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p>No businesses found. Try adjusting your filters or search.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {businesses.map((business, index) => (
+        <div key={business.id || index} className="border rounded-lg overflow-hidden shadow-sm">
+          <div className="p-4">
+            <h3 className="text-lg font-semibold">{business.name}</h3>
+            <p className="text-sm text-muted-foreground mb-2">{business.category}</p>
+            
+            {business.rating && (
+              <div className="flex items-center gap-1">
+                <span className="text-amber-500">★</span>
+                <span>{business.rating.toFixed(1)}</span>
+              </div>
+            )}
+            
+            <p className="mt-2 line-clamp-2">{business.description}</p>
+            
+            {business.distance && (
+              <div className="mt-2 text-sm text-muted-foreground">
+                {business.distance.toFixed(2)} km away
+              </div>
+            )}
+            
+            {business.price_range_min && (
+              <div className="mt-2 text-sm">
+                Price range: ₹{business.price_range_min} - ₹{business.price_range_max || business.price_range_min}
+              </div>
+            )}
+            
+            {business.area && (
+              <div className="mt-2 text-sm text-muted-foreground">
+                {business.area}, {business.city}
+              </div>
+            )}
+            
+            <div className="mt-3 flex flex-wrap gap-2">
+              {business.isHiddenGem && (
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800">
+                  Hidden Gem
+                </span>
+              )}
+              {business.isMustVisit && (
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-orange-100 text-orange-800">
+                  Must Visit
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const Explore = () => {
   const [searchParams] = useSearchParams();
@@ -170,7 +235,7 @@ const Explore = () => {
             <p>No businesses found. Try adjusting your filters or search.</p>
           </div>
         ) : (
-          <BusinessesList businesses={filteredBusinesses} />
+          <ExploreBusinessesList businesses={filteredBusinesses} />
         )}
       </div>
     </MainLayout>
