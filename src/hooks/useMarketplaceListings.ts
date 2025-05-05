@@ -32,7 +32,7 @@ export interface MarketplaceListing {
   postal_code: string;
   updated_at: string;
   bill_images?: string[];
-  ownership_number?: string; // Add the ownership_number property
+  ownership_number?: string;
   search_rank?: number;
 }
 
@@ -110,18 +110,18 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
               return filteredListings.map(item => ({
                 ...item,
                 // Ensure required fields exist
-                seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer',
+                seller_role: ((item as any).seller_role || 'owner') as 'owner' | 'dealer',
                 seller_rating: item.seller_rating || 0,
                 images: item.images || [],
-                shop_images: item.shop_images || [],
-                damage_images: item.damage_images || [],
-                inspection_certificates: item.inspection_certificates || [],
-                bill_images: item.bill_images || [],
+                shop_images: (item as any).shop_images || [],
+                damage_images: (item as any).damage_images || [],
+                inspection_certificates: (item as any).inspection_certificates || [],
+                bill_images: (item as any).bill_images || [],
                 review_count: item.review_count || 0,
-                area: item.area || '',
-                city: item.city || '',
-                postal_code: item.postal_code || '',
-                updated_at: item.updated_at || item.created_at,
+                area: (item as any).area || '',
+                city: (item as any).city || '',
+                postal_code: (item as any).postal_code || '',
+                updated_at: (item as any).updated_at || item.created_at,
                 search_rank: item.search_rank || 0
               })) as MarketplaceListing[];
             }
@@ -205,7 +205,7 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
           inspection_certificates: item.inspection_certificates || [],
           bill_images: item.bill_images || [],
           review_count: item.review_count || 0,
-          search_rank: item.search_rank || 0
+          search_rank: 0 // Add a default search_rank for regular listings
         })) as MarketplaceListing[];
       } catch (error) {
         console.error("Error in useMarketplaceListings:", error);
@@ -242,7 +242,7 @@ export const useMarketplaceListing = (id: string) => {
         damage_images: data.damage_images || [],
         inspection_certificates: data.inspection_certificates || [],
         review_count: data.review_count || 0,
-        search_rank: data.search_rank || 0
+        search_rank: 0 // Add a default search_rank for regular listings
       } as MarketplaceListing;
     },
     enabled: !!id
