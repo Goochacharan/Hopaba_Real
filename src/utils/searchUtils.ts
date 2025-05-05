@@ -1,6 +1,6 @@
 
 import { calculateDistance, extractCoordinatesFromMapLink } from '@/lib/locationUtils';
-import { Recommendation } from '@/lib/mockData';
+import { Recommendation } from '@/hooks/types/recommendationTypes';
 
 export const addDistanceToRecommendations = (recs: Recommendation[], userCoordinates: {lat: number, lng: number} | null) => {
   if (!userCoordinates) return recs;
@@ -43,8 +43,8 @@ export const addDistanceToRecommendations = (recs: Recommendation[], userCoordin
 export const sortRecommendations = (recommendations: Recommendation[], sortBy: string) => {
   return [...recommendations].sort((a, b) => {
     // First prioritize tag matches if available
-    if (a.isTagMatch && !b.isTagMatch) return -1;
-    if (!a.isTagMatch && b.isTagMatch) return 1;
+    if ((a.isTagMatch === true) && (b.isTagMatch !== true)) return -1;
+    if ((a.isTagMatch !== true) && (b.isTagMatch === true)) return 1;
     
     // Then proceed with normal sorting
     switch (sortBy) {

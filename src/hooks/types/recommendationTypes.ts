@@ -1,3 +1,4 @@
+
 import { CategoryType } from '@/components/CategoryFilter';
 
 export interface Event {
@@ -52,6 +53,7 @@ export interface Recommendation {
   search_rank?: number;
   latitude?: number | null;
   longitude?: number | null;
+  reviewCount?: number; // Added to match sortRecommendations function
 }
 
 export interface UseRecommendationsProps {
