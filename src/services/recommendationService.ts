@@ -4,6 +4,7 @@ import { Event, SupabaseEvent } from '@/hooks/types/recommendationTypes';
 import { toast } from '@/components/ui/use-toast';
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 import { extractTagsFromQuery } from '@/utils/queryUtils';
+import { matchWordOrPhrase } from '@/utils/searchUtils';
 
 export const fetchServiceProviders = async (searchTerm: string, categoryFilter: string) => {
   try {
@@ -59,13 +60,34 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
         const providersWithTagInfo = filteredProviders.map(item => {
           // Check if any of the potential tags match any of the provider's tags
           const tags = item.tags || [];
-          const tagMatches = potentialTags.filter(tag => 
-            tags.some(providerTag => 
-              providerTag.toLowerCase().includes(tag) || tag.includes(providerTag.toLowerCase())
-            )
-          );
           
-          const hasTagMatch = tagMatches.length > 0;
+          // Improved tag matching logic
+          const tagMatches: string[] = [];
+          let hasTagMatch = false;
+          
+          // Check each potential tag against provider tags
+          for (const potentialTag of potentialTags) {
+            // Direct tag matching
+            const directMatch = tags.some(providerTag => 
+              matchWordOrPhrase(providerTag, potentialTag)
+            );
+            
+            // Check against name and description too for better semantic matches
+            const nameMatch = matchWordOrPhrase(item.name, potentialTag);
+            const descMatch = item.description ? matchWordOrPhrase(item.description, potentialTag) : false;
+            
+            if (directMatch || nameMatch || descMatch) {
+              hasTagMatch = true;
+              if (!tagMatches.includes(potentialTag)) {
+                tagMatches.push(potentialTag);
+              }
+            }
+          }
+          
+          // Log tag matching results for debugging
+          if (hasTagMatch) {
+            console.log(`Provider "${item.name}" matched tags: ${tagMatches.join(', ')}`);
+          }
           
           // Extract coordinates from map_link if available
           const coordinates = extractCoordinatesFromMapLink(item.map_link);
@@ -75,7 +97,7 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
             name: item.name,
             category: item.category,
             tags: item.tags || [],
-            tagMatches: hasTagMatch ? tagMatches : [],
+            tagMatches: tagMatches,
             rating: 4.5,
             address: `${item.area}, ${item.city}`,
             distance: "0.5 miles away", // This will be calculated based on user location later

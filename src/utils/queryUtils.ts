@@ -55,19 +55,51 @@ export const processNaturalLanguageQuery = (
   return { processedQuery, inferredCategory };
 };
 
-// Utility function to extract potential tags from a search query
+// Improved utility function to extract potential tags from a search query
 export const extractTagsFromQuery = (query: string): string[] => {
-  if (!query) return [];
+  if (!query || query.trim() === '') return [];
   
-  // Split the query into words
-  const words = query.toLowerCase().split(/\s+/);
+  console.log("Extracting tags from query:", query);
   
-  // If we have multiple words, consider the full query as a potential tag too
-  const potentialTags = [...words];
-  if (words.length > 1) {
-    potentialTags.push(query.toLowerCase());
+  // Normalize the query - convert to lowercase and trim
+  const normalizedQuery = query.toLowerCase().trim();
+  
+  // Split the query into individual words
+  const words = normalizedQuery.split(/\s+/);
+  console.log("Individual words:", words);
+  
+  // Create potential tags with different levels of granularity
+  const potentialTags: string[] = [];
+  
+  // Add the full query as a potential tag
+  potentialTags.push(normalizedQuery);
+  
+  // Add individual words as potential tags (if longer than 2 characters)
+  words.forEach(word => {
+    if (word.length > 2) {
+      potentialTags.push(word);
+    }
+  });
+  
+  // Add potential bigrams (pairs of adjacent words)
+  for (let i = 0; i < words.length - 1; i++) {
+    const bigram = `${words[i]} ${words[i + 1]}`.trim();
+    if (bigram.length > 3) {
+      potentialTags.push(bigram);
+    }
   }
   
-  return potentialTags;
+  // For queries with 3+ words, try trimming from either end
+  if (words.length >= 3) {
+    // Remove first word
+    potentialTags.push(words.slice(1).join(' '));
+    // Remove last word
+    potentialTags.push(words.slice(0, -1).join(' '));
+  }
+  
+  // Remove duplicates
+  const uniqueTags = [...new Set(potentialTags)];
+  
+  console.log("Extracted potential tags:", uniqueTags);
+  return uniqueTags;
 };
-
