@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Event, SupabaseEvent } from '@/hooks/types/recommendationTypes';
 import { toast } from '@/components/ui/use-toast';
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
+import { containsWordOrPhrase, extractTagsFromQuery } from '@/utils/queryUtils';
 
 export const fetchServiceProviders = async (searchTerm: string, categoryFilter: string) => {
   try {
@@ -10,6 +11,10 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
     
     if (searchTerm && searchTerm.trim() !== '') {
       try {
+        // Extract potential tags from the search query
+        const searchTermTags = extractTagsFromQuery(searchTerm);
+        console.log('Extracted potential tags from search term:', searchTermTags);
+        
         const { data: enhancedProviders, error } = await supabase.rpc(
           'search_enhanced_providers', 
           { search_query: searchTerm }
@@ -23,11 +28,51 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
         console.log(`Fetched ${enhancedProviders?.length || 0} enhanced service providers`);
         
         let filteredProviders = enhancedProviders || [];
+        
+        // Add additional tag matching logic
+        if (searchTermTags.length > 0 && filteredProviders.length === 0) {
+          console.log('No results from direct query, trying tag matching...');
+          
+          // Try to fetch more results with a broader query
+          const { data: allProviders } = await supabase
+            .from('service_providers')
+            .select('*')
+            .eq('approval_status', 'approved');
+            
+          if (allProviders && allProviders.length > 0) {
+            filteredProviders = allProviders.filter(provider => {
+              // Check if any tag matches any of the extracted tag phrases
+              if (provider.tags && Array.isArray(provider.tags)) {
+                for (const tag of provider.tags) {
+                  for (const searchTag of searchTermTags) {
+                    if (containsWordOrPhrase(tag, searchTag) || containsWordOrPhrase(searchTag, tag)) {
+                      console.log(`Tag match found: "${tag}" matches with "${searchTag}" for ${provider.name}`);
+                      return true;
+                    }
+                  }
+                }
+              }
+              
+              // Check name and description for tag matches
+              for (const searchTag of searchTermTags) {
+                if (containsWordOrPhrase(provider.name, searchTag) || 
+                    (provider.description && containsWordOrPhrase(provider.description, searchTag))) {
+                  console.log(`Name/description match found with tag "${searchTag}" for ${provider.name}`);
+                  return true;
+                }
+              }
+              
+              return false;
+            });
+          }
+        }
+        
         if (categoryFilter !== 'all') {
           const dbCategory = categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1);
           filteredProviders = filteredProviders.filter(provider => 
             provider.category.toLowerCase() === dbCategory.toLowerCase()
           );
+          console.log(`Filtered to ${filteredProviders.length} providers after category filter: ${dbCategory}`);
         }
         
         return filteredProviders.map(item => {
@@ -70,6 +115,7 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
       }
     }
     
+    // If there's no search term, or the previous search failed, fallback to regular search
     let query = supabase
       .from('service_providers')
       .select('*')
@@ -81,7 +127,19 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
     }
     
     if (searchTerm && searchTerm.trim() !== '') {
-      query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+      const words = searchTerm.trim().toLowerCase().split(/\s+/);
+      
+      if (words.length > 1) {
+        // For multi-word queries, try to match individual words
+        for (const word of words) {
+          if (word.length > 2) { // Skip very short words
+            query = query.or(`name.ilike.%${word}%,description.ilike.%${word}%,tags.cs.{${word}}`);
+          }
+        }
+      } else {
+        // For single word queries, use the full query
+        query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+      }
     }
     
     const { data, error } = await query.order('created_at', { ascending: false });
@@ -146,7 +204,19 @@ export const fetchEvents = async (searchTerm: string): Promise<Event[]> => {
       .eq('approval_status', 'approved');
     
     if (searchTerm && searchTerm.trim() !== '') {
-      query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`);
+      const words = searchTerm.trim().toLowerCase().split(/\s+/);
+      
+      if (words.length > 1) {
+        // For multi-word queries, try to match individual words
+        for (const word of words) {
+          if (word.length > 2) { // Skip very short words
+            query = query.or(`title.ilike.%${word}%,description.ilike.%${word}%,location.ilike.%${word}%`);
+          }
+        }
+      } else {
+        // For single word queries, use the full query
+        query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`);
+      }
     }
     
     const { data, error } = await query.order('created_at', { ascending: false });

@@ -5,6 +5,7 @@ import { UseRecommendationsProps, FilterOptions, Event } from './types/recommend
 import { fetchServiceProviders, fetchEvents } from '@/services/recommendationService';
 import { processNaturalLanguageQuery } from '@/utils/queryUtils';
 import { Recommendation } from '@/lib/mockData';
+import { filterRecommendationsByQuery } from '@/utils/searchUtils';
 
 const useRecommendations = ({ 
   initialQuery = '', 
@@ -24,7 +25,11 @@ const useRecommendations = ({
   ): Recommendation[] => {
     const { distanceUnit = 'mi' } = filterOptions;
     
-    return recs.filter(rec => {
+    // First apply query filtering if there is a query
+    let filtered = query ? filterRecommendationsByQuery(recs, query) : recs;
+    
+    // Then apply the other filters
+    return filtered.filter(rec => {
       if (rec.rating < filterOptions.minRating) return false;
       if (filterOptions.openNow && !rec.openNow) return false;
       if (filterOptions.hiddenGem && !rec.isHiddenGem) return false;
@@ -62,16 +67,25 @@ const useRecommendations = ({
       
       try {
         if (query) {
+          console.log(`Searching for "${query}" in category "${category}"`);
           const { processedQuery, inferredCategory } = processNaturalLanguageQuery(query.toLowerCase(), category);
           const effectiveCategory = inferredCategory;
+          
+          console.log(`Processed query: "${processedQuery}", Effective category: "${effectiveCategory}"`);
+          
           const serviceProviders = await fetchServiceProviders(processedQuery, effectiveCategory);
+          console.log(`Fetched ${serviceProviders.length} service providers`);
           setRecommendations(serviceProviders);
+          
           const eventsData = await fetchEvents(processedQuery);
+          console.log(`Fetched ${eventsData.length} events`);
           setEvents(eventsData);
         } 
         else if (loadDefaultResults) {
+          console.log(`Loading default results for category "${category}"`);
           const serviceProviders = await fetchServiceProviders('', category);
           setRecommendations(serviceProviders);
+          
           const eventsData = await fetchEvents('');
           setEvents(eventsData);
         }

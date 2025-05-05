@@ -49,3 +49,35 @@ export interface SupabaseEvent {
   title: string;
   price_per_person?: number;
 }
+
+// Add this interface to match the Recommendation type from lib/mockData
+export interface Recommendation {
+  id: string;
+  name: string;
+  category: string;
+  tags: string[];
+  rating: number;
+  address: string;
+  distance?: string;
+  image: string;
+  images?: string[];
+  description?: string;
+  phone?: string;
+  openNow?: boolean;
+  hours?: string;
+  availability?: string;
+  priceLevel?: string;
+  price_range_min?: number;
+  price_range_max?: number;
+  price_unit?: string;
+  map_link?: string;
+  instagram?: string;
+  availability_days?: string[];
+  availability_start_time?: string;
+  availability_end_time?: string;
+  calculatedDistance?: number;
+  created_at?: string;
+  isHiddenGem?: boolean;
+  isMustVisit?: boolean;
+  reviewCount?: number;
+}
