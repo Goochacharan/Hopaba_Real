@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { CategoryType } from '@/components/CategoryFilter';
 import { UseRecommendationsProps, FilterOptions, Event } from './types/recommendationTypes';
 import { fetchServiceProviders, fetchEvents } from '@/services/recommendationService';
-import { processNaturalLanguageQuery } from '@/utils/queryUtils';
+import { processNaturalLanguageQuery, extractTagsFromQuery } from '@/utils/queryUtils';
 import { Recommendation } from '@/lib/mockData';
 
 const useRecommendations = ({ 
@@ -62,9 +62,25 @@ const useRecommendations = ({
       
       try {
         if (query) {
+          console.log(`useRecommendations - Processing search query "${query}" with category "${category}"`);
           const { processedQuery, inferredCategory } = processNaturalLanguageQuery(query.toLowerCase(), category);
           const effectiveCategory = inferredCategory;
+          
+          // Extract potential tags for logging
+          const potentialTags = extractTagsFromQuery(query.toLowerCase());
+          console.log(`Potential tags from query: ${potentialTags.join(', ')}`);
+          
           const serviceProviders = await fetchServiceProviders(processedQuery, effectiveCategory);
+          
+          // Log tag match results
+          const tagMatchedProviders = serviceProviders.filter(p => p.isTagMatch);
+          console.log(`Found ${tagMatchedProviders.length} providers with tag matches`);
+          if (tagMatchedProviders.length > 0) {
+            tagMatchedProviders.forEach(p => {
+              console.log(`Provider ${p.name} matched tags: ${p.tagMatches?.join(', ') || 'none'}`);
+            });
+          }
+          
           setRecommendations(serviceProviders);
           const eventsData = await fetchEvents(processedQuery);
           setEvents(eventsData);

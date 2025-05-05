@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Event, SupabaseEvent } from '@/hooks/types/recommendationTypes';
 import { toast } from '@/components/ui/use-toast';
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
+import { extractTagsFromQuery } from '@/utils/queryUtils';
 
 export const fetchServiceProviders = async (searchTerm: string, categoryFilter: string) => {
   try {
@@ -10,6 +11,30 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
     
     if (searchTerm && searchTerm.trim() !== '') {
       try {
+        // First try to use the enhanced location-based search function if available
+        try {
+          const { data: locationSearchResult } = await supabase.functions.invoke(
+            'enhanced-search-with-location', 
+            {
+              body: {
+                searchQuery: searchTerm,
+                categoryFilter
+              }
+            }
+          );
+          
+          if (locationSearchResult?.providers && locationSearchResult.providers.length > 0) {
+            console.log(`Fetched ${locationSearchResult.providers.length} providers from location-based search`);
+            return locationSearchResult.providers;
+          }
+        } catch (locErr) {
+          console.log('Location-based search failed, falling back to RPC function:', locErr);
+        }
+        
+        // Extract potential tags from the search query for better matching
+        const potentialTags = extractTagsFromQuery(searchTerm);
+        console.log('Potential tags extracted from query:', potentialTags);
+        
         const { data: enhancedProviders, error } = await supabase.rpc(
           'search_enhanced_providers', 
           { search_query: searchTerm }
@@ -30,7 +55,18 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
           );
         }
         
-        return filteredProviders.map(item => {
+        // Enhance the results by adding tag match information and adjusting ranks
+        const providersWithTagInfo = filteredProviders.map(item => {
+          // Check if any of the potential tags match any of the provider's tags
+          const tags = item.tags || [];
+          const tagMatches = potentialTags.filter(tag => 
+            tags.some(providerTag => 
+              providerTag.toLowerCase().includes(tag) || tag.includes(providerTag.toLowerCase())
+            )
+          );
+          
+          const hasTagMatch = tagMatches.length > 0;
+          
           // Extract coordinates from map_link if available
           const coordinates = extractCoordinatesFromMapLink(item.map_link);
           
@@ -39,6 +75,7 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
             name: item.name,
             category: item.category,
             tags: item.tags || [],
+            tagMatches: hasTagMatch ? tagMatches : [],
             rating: 4.5,
             address: `${item.area}, ${item.city}`,
             distance: "0.5 miles away", // This will be calculated based on user location later
@@ -59,11 +96,24 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
             availability_start_time: item.availability_start_time || '',
             availability_end_time: item.availability_end_time || '',
             created_at: item.created_at || new Date().toISOString(),
-            search_rank: item.search_rank || 0,
+            search_rank: hasTagMatch ? (item.search_rank || 0) + 5 : (item.search_rank || 0), // Boost rank for tag matches
             latitude: coordinates ? coordinates.lat : null,
-            longitude: coordinates ? coordinates.lng : null
+            longitude: coordinates ? coordinates.lng : null,
+            isTagMatch: hasTagMatch
           };
         });
+        
+        // Sort with tag matches first, then by search rank
+        providersWithTagInfo.sort((a, b) => {
+          // Tag matches get first priority
+          if (a.isTagMatch && !b.isTagMatch) return -1;
+          if (!a.isTagMatch && b.isTagMatch) return 1;
+          
+          // Then sort by search rank
+          return (b.search_rank || 0) - (a.search_rank || 0);
+        });
+        
+        return providersWithTagInfo;
       } catch (err) {
         console.error("Failed to use enhanced providers search:", err);
         return [];
@@ -81,6 +131,11 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
     }
     
     if (searchTerm && searchTerm.trim() !== '') {
+      // Extract potential tags from the search query
+      const potentialTags = extractTagsFromQuery(searchTerm);
+      console.log('Potential tags for fallback search:', potentialTags);
+      
+      // Try to match against tags as well
       query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
     }
     

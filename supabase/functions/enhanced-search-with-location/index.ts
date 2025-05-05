@@ -60,6 +60,22 @@ function extractCoordinatesFromMapLink(mapLink: string | null): { lat: number, l
   }
 }
 
+// Extract potential tags from a search query
+function extractTagsFromQuery(query: string): string[] {
+  if (!query) return [];
+  
+  // Split the query into words
+  const words = query.toLowerCase().split(/\s+/);
+  
+  // If we have multiple words, consider the full query as a potential tag too
+  const potentialTags = [...words];
+  if (words.length > 1) {
+    potentialTags.push(query.toLowerCase());
+  }
+  
+  return potentialTags;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -73,6 +89,12 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     const { searchQuery, categoryFilter, userLat, userLng } = await req.json();
+    
+    console.log(`Processing search query: "${searchQuery}", category: "${categoryFilter}"`);
+    
+    // Extract potential tags from the search query for better matching
+    const potentialTags = extractTagsFromQuery(searchQuery);
+    console.log('Potential tags extracted from query:', potentialTags);
     
     // First attempt to use the RPC function for enhanced search
     const { data: enhancedProviders, error } = await supabase.rpc(
@@ -92,7 +114,52 @@ serve(async (req) => {
       filteredProviders = filteredProviders.filter((provider: any) => 
         provider.category.toLowerCase() === dbCategory.toLowerCase()
       );
+      console.log(`Filtered to ${filteredProviders.length} providers in category ${dbCategory}`);
     }
+    
+    // Enhance tag matching
+    filteredProviders = filteredProviders.map((provider: any) => {
+      const tags = provider.tags || [];
+      let hasTagMatch = false;
+      let matchedTags: string[] = [];
+      
+      // Check if any potential tags match any provider tags
+      for (const potentialTag of potentialTags) {
+        for (const tag of tags) {
+          const tagLower = tag.toLowerCase();
+          const potentialTagLower = potentialTag.toLowerCase();
+          
+          if (tagLower.includes(potentialTagLower) || potentialTagLower.includes(tagLower)) {
+            hasTagMatch = true;
+            if (!matchedTags.includes(tag)) {
+              matchedTags.push(tag);
+            }
+          }
+        }
+      }
+      
+      // Boost search rank for tag matches
+      const boostAmount = hasTagMatch ? 5 : 0;
+      
+      return {
+        ...provider,
+        search_rank: (provider.search_rank || 0) + boostAmount,
+        matchedTags: matchedTags,
+        hasTagMatch: hasTagMatch
+      };
+    });
+    
+    console.log(`Found ${filteredProviders.filter((p: any) => p.hasTagMatch).length} providers with tag matches`);
+    
+    // Sort providers with tag matches first, then by search rank
+    filteredProviders.sort((a: any, b: any) => {
+      // Tag matches get first priority
+      if (a.hasTagMatch && !b.hasTagMatch) return -1;
+      if (!a.hasTagMatch && b.hasTagMatch) return 1;
+      
+      // Then sort by search rank
+      return b.search_rank - a.search_rank;
+    });
     
     // If user location is provided, calculate distances and sort
     if (userLat && userLng) {
@@ -117,16 +184,29 @@ serve(async (req) => {
         };
       });
       
-      // Sort providers by distance if available, otherwise keep original ranking
+      // Sort providers respecting tag matches first
       filteredProviders.sort((a: any, b: any) => {
-        // If both have distances, sort by distance
+        // Tag matches still get priority
+        if (a.hasTagMatch && !b.hasTagMatch) return -1;
+        if (!a.hasTagMatch && b.hasTagMatch) return 1;
+        
+        // Among tag matches, sort by distance if available
+        if (a.hasTagMatch && b.hasTagMatch) {
+          if (a.calculatedDistance !== null && b.calculatedDistance !== null) {
+            return a.calculatedDistance - b.calculatedDistance;
+          }
+        }
+        
+        // For non-tag matches, default to distance
         if (a.calculatedDistance !== null && b.calculatedDistance !== null) {
           return a.calculatedDistance - b.calculatedDistance;
         }
+        
         // If only one has distance, prioritize the one with distance
         if (a.calculatedDistance !== null) return -1;
         if (b.calculatedDistance !== null) return 1;
-        // Otherwise sort by search rank (from the original query)
+        
+        // Otherwise sort by search rank
         return b.search_rank - a.search_rank;
       });
     }
