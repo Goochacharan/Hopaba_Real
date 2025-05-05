@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Event, SupabaseEvent } from '@/hooks/types/recommendationTypes';
+import { Event, SupabaseEvent, SupabaseServiceProvider } from '@/hooks/types/recommendationTypes';
 import { toast } from '@/components/ui/use-toast';
 import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 import { containsWordOrPhrase, extractTagsFromQuery } from '@/utils/queryUtils';
@@ -186,7 +186,7 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
           contact_email: item.contact_email,
           website: item.website,
           openNow: false,
-          hours: "Until 8:00 PM",
+          hours: item.hours || "Until 8:00 PM",
           availability: item.availability || null,
           priceLevel: "$$",
           price_range_min: item.price_range_min || null,
@@ -200,7 +200,8 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
           created_at: item.created_at || new Date().toISOString(),
           search_rank: 0, // Default search rank for non-enhanced search
           latitude: coordinates ? coordinates.lat : null,
-          longitude: coordinates ? coordinates.lng : null
+          longitude: coordinates ? coordinates.lng : null,
+          approval_status: item.approval_status
         };
       });
     }
