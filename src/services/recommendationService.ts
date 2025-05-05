@@ -88,7 +88,7 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
             category: item.category,
             tags: item.tags || [],
             rating: 4.5,
-            address: address,
+            address: address, // Explicitly set the address
             area: item.area,
             city: item.city,
             distance: "0.5 miles away", // This will be calculated based on user location later
@@ -112,7 +112,7 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
             availability_start_time: item.availability_start_time || '',
             availability_end_time: item.availability_end_time || '',
             created_at: item.created_at || new Date().toISOString(),
-            search_rank: item.search_rank || 0,
+            search_rank: item.search_rank || 0, // Include search_rank from enhanced providers
             latitude: coordinates ? coordinates.lat : null,
             longitude: coordinates ? coordinates.lng : null,
             approval_status: item.approval_status
@@ -174,7 +174,7 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
           category: item.category,
           tags: item.tags || [],
           rating: 4.5,
-          address: address,
+          address: address, // Explicitly set the address
           area: item.area,
           city: item.city,
           distance: "0.5 miles away", // This will be calculated based on user location later
