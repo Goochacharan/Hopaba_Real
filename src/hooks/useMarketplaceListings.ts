@@ -117,7 +117,7 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
                 damage_images: (item as any).damage_images || [],
                 inspection_certificates: (item as any).inspection_certificates || [],
                 bill_images: (item as any).bill_images || [],
-                review_count: item.review_count || 0,
+                review_count: (item as any).review_count || 0,
                 area: (item as any).area || '',
                 city: (item as any).city || '',
                 postal_code: (item as any).postal_code || '',
@@ -204,7 +204,7 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
           damage_images: item.damage_images || [],
           inspection_certificates: item.inspection_certificates || [],
           bill_images: item.bill_images || [],
-          review_count: item.review_count || 0,
+          review_count: 0, // Fixed: Default to 0 for review_count
           search_rank: 0 // Add a default search_rank for regular listings
         })) as MarketplaceListing[];
       } catch (error) {
@@ -241,7 +241,7 @@ export const useMarketplaceListing = (id: string) => {
         bill_images: data.bill_images || [],
         damage_images: data.damage_images || [],
         inspection_certificates: data.inspection_certificates || [],
-        review_count: data.review_count || 0,
+        review_count: 0, // Fixed: Default to 0 for review_count
         search_rank: 0 // Add a default search_rank for regular listings
       } as MarketplaceListing;
     },
