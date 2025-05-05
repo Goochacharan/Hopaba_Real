@@ -73,9 +73,9 @@ serve(async (req) => {
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    const { searchQuery, categoryFilter, userLat, userLng } = await req.json();
+    const { searchQuery, categoryFilter, userLat, userLng, postalCode } = await req.json();
     
-    console.log(`Processing search query: "${searchQuery}", category: "${categoryFilter}"`);
+    console.log(`Processing search query: "${searchQuery}", category: "${categoryFilter}", postalCode: "${postalCode}"`);
     
     // First attempt to use the RPC function for enhanced search
     let enhancedProviders = [];
@@ -113,6 +113,11 @@ serve(async (req) => {
         query = query.eq('category', dbCategory);
       }
       
+      // Add postal code filter if provided
+      if (postalCode) {
+        query = query.eq('postal_code', postalCode);
+      }
+      
       const { data, error } = await query.order('created_at', { ascending: false });
       
       if (error) {
@@ -144,6 +149,7 @@ serve(async (req) => {
           experience: item.experience,
           created_at: item.created_at,
           approval_status: item.approval_status,
+          postal_code: item.postal_code,
           search_rank: 1.0 // Default search rank for direct query results
         }));
         console.log(`Direct query returned ${enhancedProviders.length} results`);
@@ -158,6 +164,14 @@ serve(async (req) => {
         provider.category.toLowerCase() === dbCategory.toLowerCase()
       );
       console.log(`After category filtering: ${filteredProviders.length} results`);
+    }
+    
+    // Filter by postal code if provided
+    if (postalCode) {
+      filteredProviders = filteredProviders.filter((provider: any) => 
+        provider.postal_code === postalCode
+      );
+      console.log(`After postal code filtering: ${filteredProviders.length} results`);
     }
     
     // If user location is provided, calculate distances and sort
@@ -196,6 +210,13 @@ serve(async (req) => {
         return b.search_rank - a.search_rank;
       });
     }
+    
+    // Add random properties for enhanced UI display
+    filteredProviders = filteredProviders.map((provider: any, index: number) => ({
+      ...provider,
+      isHiddenGem: provider.isHiddenGem || index % 3 === 0,
+      isMustVisit: provider.isMustVisit || index % 5 === 0
+    }));
     
     console.log(`Returning ${filteredProviders.length} final results`);
     

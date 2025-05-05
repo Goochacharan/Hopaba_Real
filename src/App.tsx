@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -26,6 +25,7 @@ const MarketplaceListingDetails = React.lazy(() => import(/* webpackChunkName: "
 const SellerDetails = React.lazy(() => import(/* webpackChunkName: "seller-details" */ "./pages/SellerDetails"));
 const AdminPanel = React.lazy(() => import(/* webpackChunkName: "admin-panel" */ "./pages/AdminPanel"));
 const Settings = React.lazy(() => import(/* webpackChunkName: "settings" */ "./pages/Settings"));
+const Explore = React.lazy(() => import(/* webpackChunkName: "explore" */ "./pages/Explore"));
 
 // Configure Query Client with performance optimizations
 const queryClient = new QueryClient({
@@ -77,6 +77,10 @@ const RoutePrefetcher = () => {
       if (location.pathname === '/') {
         import("./pages/SearchResults");
         import("./pages/Marketplace");
+        import("./pages/Explore");
+      } else if (location.pathname === '/explore') {
+        import("./pages/SearchResults");
+        import("./pages/LocationDetails");
       } else if (location.pathname.startsWith('/marketplace')) {
         import("./pages/MarketplaceListingDetails");
         import("./pages/SellerDetails");
@@ -142,6 +146,7 @@ const App = () => (
                   <Route path="/marketplace/:id" element={<MarketplaceListingDetails />} />
                   <Route path="/seller/:id" element={<SellerDetails />} />
                   <Route path="/admin" element={<AdminPanel />} />
+                  <Route path="/explore" element={<Explore />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>

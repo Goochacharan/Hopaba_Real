@@ -51,7 +51,8 @@ export const useSearchEnhancement = () => {
   
   const searchWithLocation = async (
     query: string, 
-    categoryFilter: string = 'all'
+    categoryFilter: string = 'all',
+    postalCode: string = ''
   ) => {
     setEnhancing(true);
     setError(null);
@@ -60,14 +61,15 @@ export const useSearchEnhancement = () => {
       // First try to get user's location
       const userCoordinates = await getUserLocation();
       
-      console.log('Performing location-based search with query:', query, 'category:', categoryFilter);
+      console.log('Performing location-based search with query:', query, 'category:', categoryFilter, 'postalCode:', postalCode);
       
       const { data, error } = await supabase.functions.invoke('enhanced-search-with-location', {
         body: {
           searchQuery: query,
           categoryFilter,
           userLat: userCoordinates?.lat,
-          userLng: userCoordinates?.lng
+          userLng: userCoordinates?.lng,
+          postalCode: postalCode
         }
       });
       

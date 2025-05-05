@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AnimatedLogo from './AnimatedLogo';
 import { cn } from '@/lib/utils';
-import { Home, User, ListChecks, Calendar, ShoppingCart, LogIn } from 'lucide-react';
+import { Home, User, ListChecks, Calendar, ShoppingCart, LogIn, Compass } from 'lucide-react';
 import SearchBar from './SearchBar';
 import { Button } from './ui/button';
 import { useAuth } from '@/hooks/useAuth';
+
 interface MainLayoutProps {
   children: React.ReactNode;
   className?: string;
 }
+
 const MainLayout: React.FC<MainLayoutProps> = ({
   children,
   className
@@ -37,6 +39,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         }
       } else if (location.pathname === '/events') {
         navigate(`/events?q=${encodeURIComponent(query)}`);
+      } else if (location.pathname === '/explore') {
+        navigate(`/explore?q=${encodeURIComponent(query)}`);
       } else {
         navigate(`/search?q=${encodeURIComponent(query)}`);
       }
@@ -55,6 +59,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       return "Search for events...";
     } else if (location.pathname === '/marketplace' || location.pathname.startsWith('/marketplace')) {
       return "Search marketplace listings...";
+    } else if (location.pathname === '/explore') {
+      return "Discover businesses and services...";
     } else {
       return "What are you looking for today?";
     }
@@ -99,6 +105,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         <div className="max-w-5xl mx-auto flex justify-around">
           <NavButton to="/" icon={<Home className="h-5 w-5" />} label="Home" isActive={location.pathname === '/'} />
           
+          <NavButton to="/explore" icon={<Compass className="h-5 w-5" />} label="Explore" isActive={location.pathname === '/explore'} />
+          
           <NavButton to="/marketplace" icon={<ShoppingCart className="h-5 w-5" />} label="Market" isActive={location.pathname.startsWith('/marketplace')} />
           
           <NavButton to="/events" icon={<Calendar className="h-5 w-5" />} label="Events" isActive={location.pathname === '/events'} />
@@ -110,12 +118,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       </div>
     </div>;
 };
+
 interface NavButtonProps {
   to: string;
   icon: React.ReactNode;
   label: string;
   isActive: boolean;
 }
+
 const NavButton: React.FC<NavButtonProps> = ({
   to,
   icon,
@@ -127,4 +137,5 @@ const NavButton: React.FC<NavButtonProps> = ({
       <span className="text-xs font-medium">{label}</span>
     </Link>;
 };
+
 export default MainLayout;
