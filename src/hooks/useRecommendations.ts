@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { CategoryType } from '@/components/CategoryFilter';
 import { UseRecommendationsProps, FilterOptions, Event } from './types/recommendationTypes';
@@ -50,10 +51,12 @@ const useRecommendations = ({
     // Normalize input query to handle multi-line input and extra whitespace
     const normalizedQuery = searchQuery.replace(/\s+/g, ' ').trim();
     setQuery(normalizedQuery);
+    console.log("useRecommendations - handleSearch called with:", normalizedQuery);
   };
 
   const handleCategoryChange = (newCategory: CategoryType) => {
     setCategory(newCategory);
+    console.log("useRecommendations - handleCategoryChange called with:", newCategory);
   };
 
   useEffect(() => {
@@ -63,6 +66,7 @@ const useRecommendations = ({
       
       try {
         if (query) {
+          console.log("useRecommendations - Fetching with query:", query);
           const { processedQuery, inferredCategory } = processNaturalLanguageQuery(query.toLowerCase(), category);
           const effectiveCategory = inferredCategory;
           const serviceProviders = await fetchServiceProviders(processedQuery, effectiveCategory);
@@ -71,6 +75,7 @@ const useRecommendations = ({
           setEvents(eventsData);
         } 
         else if (loadDefaultResults) {
+          console.log("useRecommendations - Loading default results for category:", category);
           const serviceProviders = await fetchServiceProviders('', category);
           setRecommendations(serviceProviders);
           const eventsData = await fetchEvents('');

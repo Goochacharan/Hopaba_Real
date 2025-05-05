@@ -7,7 +7,7 @@ export const useSearchEnhancement = () => {
   const [enhancing, setEnhancing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const enhanceQuery = async (query: string, includeNearMe: boolean = false): Promise<string> => {
+  const enhanceQuery = async (query: string, includeNearMe: boolean = true): Promise<string> => {
     if (!query) return '';
     
     setEnhancing(true);
