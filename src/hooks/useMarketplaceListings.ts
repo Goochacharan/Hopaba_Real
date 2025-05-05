@@ -33,6 +33,7 @@ export interface MarketplaceListing {
   updated_at: string;
   bill_images?: string[];
   ownership_number?: string; // Add the ownership_number property
+  search_rank?: number;
 }
 
 interface MarketplaceListingsQueryOptions {
@@ -108,23 +109,20 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
               
               return filteredListings.map(item => ({
                 ...item,
-                // Ensure seller_role is either 'owner' or 'dealer'
+                // Ensure required fields exist
                 seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer',
-                // Ensure seller_rating is a number
                 seller_rating: item.seller_rating || 0,
-                // Make sure arrays are defined
                 images: item.images || [],
                 shop_images: item.shop_images || [],
                 damage_images: item.damage_images || [],
                 inspection_certificates: item.inspection_certificates || [],
                 bill_images: item.bill_images || [],
-                // Add review_count if it doesn't exist (default to 0)
                 review_count: item.review_count || 0,
-                // Ensure these fields exist
                 area: item.area || '',
                 city: item.city || '',
                 postal_code: item.postal_code || '',
-                updated_at: item.updated_at || item.created_at
+                updated_at: item.updated_at || item.created_at,
+                search_rank: item.search_rank || 0
               })) as MarketplaceListing[];
             }
           } catch (err) {
@@ -199,17 +197,15 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
         // Cast the result to ensure compliance with our interface
         return (data || []).map(item => ({
           ...item,
-          // Ensure seller_role is either 'owner' or 'dealer'
+          // Ensure required fields exist
           seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer',
-          // Ensure seller_rating is a number
           seller_rating: item.seller_rating || 0,
-          // Make sure shop_images is an array
           shop_images: item.shop_images || [],
           damage_images: item.damage_images || [],
           inspection_certificates: item.inspection_certificates || [],
           bill_images: item.bill_images || [],
-          // Add review_count if it doesn't exist (default to 0)
-          review_count: 0
+          review_count: item.review_count || 0,
+          search_rank: item.search_rank || 0
         })) as MarketplaceListing[];
       } catch (error) {
         console.error("Error in useMarketplaceListings:", error);
@@ -238,17 +234,15 @@ export const useMarketplaceListing = (id: string) => {
       // Cast the result to ensure compliance with our interface
       return {
         ...data,
-        // Ensure seller_role is either 'owner' or 'dealer'
+        // Ensure required fields exist
         seller_role: (data.seller_role as string || 'owner') as 'owner' | 'dealer',
-        // Ensure seller_rating is a number
         seller_rating: data.seller_rating || 0,
-        // Make sure arrays are defined
         shop_images: data.shop_images || [],
         bill_images: data.bill_images || [],
         damage_images: data.damage_images || [],
         inspection_certificates: data.inspection_certificates || [],
-        // Add review_count if it doesn't exist (default to 0)
-        review_count: 0
+        review_count: data.review_count || 0,
+        search_rank: data.search_rank || 0
       } as MarketplaceListing;
     },
     enabled: !!id

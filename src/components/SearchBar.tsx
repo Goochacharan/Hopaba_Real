@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/use-toast";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 import { useSearchEnhancement } from "@/hooks/useSearchEnhancement";
@@ -37,6 +37,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   currentRoute,
 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const currentPath = location.pathname;
 
@@ -53,10 +54,43 @@ const SearchBar: React.FC<SearchBarProps> = ({
     onTranscript: (transcript) => {
       setQuery(transcript);
       setTimeout(() => {
-        onSearch(transcript);
+        if (shouldNavigateOnSearch()) {
+          navigateToSearch(transcript);
+        } else {
+          onSearch(transcript);
+        }
       }, 500);
     },
   });
+
+  // Helper function to determine if we should navigate on search
+  const shouldNavigateOnSearch = () => {
+    // Only stay on the same page for search results page and marketplace
+    if (currentPath === "/search" || 
+        currentPath === "/marketplace" || 
+        currentPath.startsWith("/marketplace/")) {
+      return false;
+    }
+    return true;
+  };
+
+  // Helper function to navigate to search page
+  const navigateToSearch = (searchQuery: string) => {
+    if (!searchQuery.trim()) return;
+    
+    const searchParams = new URLSearchParams();
+    searchParams.set('q', searchQuery);
+    
+    // If we're on a category page, include the category
+    if (currentPath.includes('/category/')) {
+      const category = currentPath.split('/category/')[1];
+      if (category) {
+        searchParams.set('category', category);
+      }
+    }
+    
+    navigate(`/search?${searchParams.toString()}`);
+  };
 
   const getPlaceholder = () => {
     if (currentPath === "/events" || currentPath.startsWith("/events")) {
@@ -99,7 +133,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
       if (enhancedQuery !== query) {
         setQuery(enhancedQuery);
       }
-      onSearch(enhancedQuery);
+      
+      if (shouldNavigateOnSearch()) {
+        navigateToSearch(enhancedQuery);
+      } else {
+        onSearch(enhancedQuery);
+      }
 
       if (
         query.trim().length < 8 &&
@@ -149,7 +188,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
       if (enhancedQuery !== query) {
         setQuery(enhancedQuery);
       }
-      onSearch(enhancedQuery);
+      
+      if (shouldNavigateOnSearch()) {
+        navigateToSearch(enhancedQuery);
+      } else {
+        onSearch(enhancedQuery);
+      }
     }
   };
 
