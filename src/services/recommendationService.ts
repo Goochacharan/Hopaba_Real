@@ -79,18 +79,26 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
           // Extract coordinates from map_link if available
           const coordinates = extractCoordinatesFromMapLink(item.map_link);
           
+          // Make sure to create an address field by combining area and city
+          const address = `${item.area || ''}, ${item.city || ''}`.trim();
+          
           return {
             id: item.id,
             name: item.name,
             category: item.category,
             tags: item.tags || [],
             rating: 4.5,
-            address: `${item.area}, ${item.city}`,
+            address: address,
+            area: item.area,
+            city: item.city,
             distance: "0.5 miles away", // This will be calculated based on user location later
             image: item.images && item.images.length > 0 ? item.images[0] : "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
             images: item.images || [],
             description: item.description || "",
             phone: item.contact_phone,
+            contact_phone: item.contact_phone,
+            contact_email: item.contact_email,
+            website: item.website,
             openNow: false,
             hours: item.hours || "Until 8:00 PM",
             availability: item.availability || null,
@@ -106,7 +114,8 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
             created_at: item.created_at || new Date().toISOString(),
             search_rank: item.search_rank || 0,
             latitude: coordinates ? coordinates.lat : null,
-            longitude: coordinates ? coordinates.lng : null
+            longitude: coordinates ? coordinates.lng : null,
+            approval_status: item.approval_status
           };
         });
       } catch (err) {
@@ -156,18 +165,26 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
         // Extract coordinates from map_link if available
         const coordinates = extractCoordinatesFromMapLink(item.map_link);
         
+        // Create address from area and city
+        const address = `${item.area || ''}, ${item.city || ''}`.trim();
+        
         return {
           id: item.id,
           name: item.name,
           category: item.category,
           tags: item.tags || [],
           rating: 4.5,
-          address: `${item.area}, ${item.city}`,
+          address: address,
+          area: item.area,
+          city: item.city,
           distance: "0.5 miles away", // This will be calculated based on user location later
           image: item.images && item.images.length > 0 ? item.images[0] : "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
           images: item.images || [],
           description: item.description || "",
           phone: item.contact_phone,
+          contact_phone: item.contact_phone,
+          contact_email: item.contact_email,
+          website: item.website,
           openNow: false,
           hours: "Until 8:00 PM",
           availability: item.availability || null,
@@ -181,6 +198,7 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
           availability_start_time: item.availability_start_time || '',
           availability_end_time: item.availability_end_time || '',
           created_at: item.created_at || new Date().toISOString(),
+          search_rank: 0, // Default search rank for non-enhanced search
           latitude: coordinates ? coordinates.lat : null,
           longitude: coordinates ? coordinates.lng : null
         };
