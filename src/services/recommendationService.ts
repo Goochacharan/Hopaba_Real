@@ -68,7 +68,7 @@ export const fetchServiceProviders = async (query: string, category: string = 'a
       // Fallback to mock data if no results from Supabase
       console.log('Falling back to mock data for service providers');
       
-      // Filter mock data
+      // Enhanced tag search in mock data
       return mockRecommendations.filter(rec => {
         // If category filter is active and doesn't match, exclude
         if (category !== 'all' && rec.category !== category) {
@@ -78,13 +78,25 @@ export const fetchServiceProviders = async (query: string, category: string = 'a
         // If no search query, include all that match the category
         if (!query) return true;
         
-        // Search in name, description
-        const nameMatch = rec.name.toLowerCase().includes(query.toLowerCase());
-        const descMatch = rec.description.toLowerCase().includes(query.toLowerCase());
+        // Convert query to lowercase for case-insensitive comparison
+        const queryLower = query.toLowerCase();
         
-        // Search in tags (if available)
-        const tagMatch = Array.isArray(rec.tags) && 
-          rec.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()));
+        // Search in name, description
+        const nameMatch = rec.name.toLowerCase().includes(queryLower);
+        const descMatch = rec.description.toLowerCase().includes(queryLower);
+        
+        // Improved tag search - split query into words and check if any tag contains any word
+        let tagMatch = false;
+        if (Array.isArray(rec.tags) && rec.tags.length > 0) {
+          const queryTerms = queryLower.split(' ');
+          
+          // Check if any tag contains any of the query terms
+          tagMatch = rec.tags.some(tag => {
+            if (!tag) return false;
+            const tagLower = tag.toLowerCase();
+            return queryTerms.some(term => tagLower.includes(term));
+          });
+        }
         
         return nameMatch || descMatch || tagMatch;
       });
@@ -92,11 +104,20 @@ export const fetchServiceProviders = async (query: string, category: string = 'a
     
     // Process Supabase results to match the format expected by the app
     const enhancedProviders = serviceProviders.map(provider => {
-      // Add tag search score
-      const tagMatch = Array.isArray(provider.tags) && 
-        provider.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()));
+      // Improved tag search in Supabase results
+      let tagMatch = false;
       
-      // Convert provider to Recommendation type with required fields
+      if (Array.isArray(provider.tags) && provider.tags.length > 0 && query) {
+        const queryTerms = query.toLowerCase().split(' ');
+        
+        // Check if any tag contains any of the query terms
+        tagMatch = provider.tags.some(tag => {
+          if (!tag) return false;
+          const tagLower = tag.toLowerCase();
+          return queryTerms.some(term => tagLower.includes(term));
+        });
+      }
+      
       // Create the address from area and city if not directly available
       const address = provider.area && provider.city 
         ? `${provider.area}, ${provider.city}` 
@@ -120,17 +141,27 @@ export const fetchServiceProviders = async (query: string, category: string = 'a
     
   } catch (error) {
     console.error('Error fetching service providers:', error);
-    // Fall back to mock data
+    // Fall back to mock data with improved tag search
     return mockRecommendations.filter(rec => {
       if (category !== 'all' && rec.category !== category) {
         return false;
       }
       if (!query) return true;
       
-      const nameMatch = rec.name.toLowerCase().includes(query.toLowerCase());
-      const descMatch = rec.description.toLowerCase().includes(query.toLowerCase());
-      const tagMatch = Array.isArray(rec.tags) && 
-        rec.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()));
+      const queryLower = query.toLowerCase();
+      const nameMatch = rec.name.toLowerCase().includes(queryLower);
+      const descMatch = rec.description.toLowerCase().includes(queryLower);
+      
+      // Improved tag search logic
+      let tagMatch = false;
+      if (Array.isArray(rec.tags) && rec.tags.length > 0) {
+        const queryTerms = queryLower.split(' ');
+        tagMatch = rec.tags.some(tag => {
+          if (!tag) return false;
+          const tagLower = tag.toLowerCase();
+          return queryTerms.some(term => tagLower.includes(term));
+        });
+      }
       
       return nameMatch || descMatch || tagMatch;
     });

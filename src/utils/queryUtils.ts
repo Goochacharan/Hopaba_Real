@@ -1,39 +1,44 @@
+// Function to process natural language queries and extract intent
+// This helps with understanding what the user is looking for
 
-import { CategoryType } from '@/components/CategoryFilter';
-
-export const processNaturalLanguageQuery = (
-  lowercaseQuery: string,
-  category: CategoryType
-): { processedQuery: string; inferredCategory: CategoryType } => {
-  let processedQuery = lowercaseQuery;
-  let inferredCategory: CategoryType = category === 'all' ? 'all' : category;
+export const processNaturalLanguageQuery = (query: string, currentCategory: string) => {
+  let processedQuery = query.trim();
+  let inferredCategory = currentCategory;
   
-  console.log('Original query:', `"${lowercaseQuery}"`);
+  // Check for specific food items that might be in tags
+  const foodItems = [
+    { term: 'masala puri', category: 'bakery & chats' },
+    { term: 'badam milk', category: 'bakery & chats' },
+    { term: 'sweets', category: 'bakery & chats' },
+    { term: 'ice cream', category: 'ice cream shop' },
+  ];
   
-  if (inferredCategory !== 'all') {
-    console.log(`Using provided category: ${inferredCategory}`);
-  } 
-  else {
-    if (lowercaseQuery.includes('yoga')) {
-      inferredCategory = 'fitness';
-    } else if (lowercaseQuery.includes('restaurant')) {
-      inferredCategory = 'restaurants';
-    } else if (lowercaseQuery.includes('café') || lowercaseQuery.includes('cafe') || lowercaseQuery.includes('coffee')) {
-      inferredCategory = 'cafes';
-    } else if (lowercaseQuery.includes('salon') || lowercaseQuery.includes('haircut')) {
-      inferredCategory = 'salons';
-    } else if (lowercaseQuery.includes('plumber')) {
-      inferredCategory = 'services';
-    } else if (lowercaseQuery.includes('fitness') || lowercaseQuery.includes('gym')) {
-      inferredCategory = 'fitness';
-    } else if (lowercaseQuery.includes('biryani') || 
-               lowercaseQuery.includes('food') || 
-               lowercaseQuery.includes('dinner') || 
-               lowercaseQuery.includes('lunch') ||
-               lowercaseQuery.includes('breakfast')) {
-      inferredCategory = 'restaurants';
+  // Check if the query contains any of the food items
+  for (const item of foodItems) {
+    if (query.toLowerCase().includes(item.term.toLowerCase())) {
+      inferredCategory = item.category;
+      // Don't modify the query - we want to search the item in tags
+      break;
     }
   }
   
-  return { processedQuery, inferredCategory };
+  // Remove location queries but keep food item names for tag matching
+  const locationKeywords = ['near', 'around', 'nearby', 'close to', 'vicinity', 'in'];
+  const queryParts = processedQuery.split(' ');
+  
+  for (let i = 0; i < queryParts.length; i++) {
+    const word = queryParts[i].toLowerCase();
+    if (locationKeywords.includes(word)) {
+      // Remove the location keyword and the following word (location name)
+      queryParts.splice(i, 2);
+      i--; // Adjust the index since we removed elements
+    }
+  }
+  
+  processedQuery = queryParts.join(' ').trim();
+  
+  return {
+    processedQuery,
+    inferredCategory
+  };
 };
