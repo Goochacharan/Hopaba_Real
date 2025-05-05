@@ -65,13 +65,26 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   // Helper function to determine if we should navigate on search
   const shouldNavigateOnSearch = () => {
-    // Only stay on the same page for search results page and marketplace
-    // All other pages should navigate to the search page
-    if (currentPath === "/search" || 
-        currentPath === "/marketplace" || 
-        currentPath.startsWith("/marketplace/")) {
+    // Always stay on search page
+    if (currentPath === "/search") {
       return false;
     }
+    
+    // Stay on marketplace pages
+    if (currentPath === "/marketplace" || currentPath.startsWith("/marketplace/")) {
+      return false;
+    }
+    
+    // For home page, always navigate to search
+    if (currentPath === "/") {
+      return true;
+    }
+    
+    // For location details pages, always navigate to search
+    if (currentPath.startsWith("/location/")) {
+      return true;
+    }
+    
     return true;
   };
 
@@ -90,8 +103,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       }
     }
     
-    // Always navigate to /search for service/business searches
-    // This ensures all searches from business and service pages go to the search page
+    console.log(`Navigating to search page with query: ${searchQuery}`);
     navigate(`/search?${searchParams.toString()}`);
   };
 
@@ -137,10 +149,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
         setQuery(enhancedQuery);
       }
       
-      // Always navigate to search page for business/service searches
+      // Always navigate to search page for business/service searches based on current path
       if (shouldNavigateOnSearch()) {
+        console.log("Navigating to search page with query from handleSubmit");
         navigateToSearch(enhancedQuery);
       } else {
+        console.log("Using onSearch callback for query:", enhancedQuery);
         onSearch(enhancedQuery);
       }
 
@@ -193,10 +207,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
         setQuery(enhancedQuery);
       }
       
-      // Always navigate to search page for business/service searches
+      // Check if we should navigate or use the onSearch callback
       if (shouldNavigateOnSearch()) {
+        console.log("Navigating to search page with query from button click");
         navigateToSearch(enhancedQuery);
       } else {
+        console.log("Using onSearch callback for query from button click:", enhancedQuery);
         onSearch(enhancedQuery);
       }
     }

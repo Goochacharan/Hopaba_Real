@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +12,7 @@ import SearchTabs from '@/components/search/SearchTabs';
 import SearchControls from '@/components/search/SearchControls';
 import AreaSearchBar from '@/components/search/AreaSearchBar';
 import CategoryScrollBar from '@/components/business/CategoryScrollBar';
+import { useSearchEnhancement } from '@/hooks/useSearchEnhancement';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -27,6 +29,9 @@ const SearchResults = () => {
   });
   
   const { filters, setters } = useSearchFilters();
+  const { searchWithLocation } = useSearchEnhancement();
+  const [directSearchResults, setDirectSearchResults] = useState<any[]>([]);
+  const [directSearchLoading, setDirectSearchLoading] = useState(false);
   
   const {
     recommendations,
@@ -53,12 +58,20 @@ const SearchResults = () => {
     minRating: filters.minRating[0] > 3 ? filters.minRating[0] : undefined
   });
 
-  const loading = recommendationsLoading || marketplaceLoading;
+  const loading = recommendationsLoading || marketplaceLoading || directSearchLoading;
   const error = recommendationsError || marketplaceError;
 
   console.log("Original recommendations:", recommendations);
+  console.log("Direct search results:", directSearchResults);
 
-  const enhancedRecommendations = recommendations.map((rec, index) => ({
+  // Combine recommendations from both sources
+  const combinedRecommendations = [...recommendations, ...directSearchResults];
+  // Remove duplicates by id
+  const uniqueRecommendations = Array.from(
+    new Map(combinedRecommendations.map(item => [item.id, item])).values()
+  );
+
+  const enhancedRecommendations = uniqueRecommendations.map((rec, index) => ({
     ...rec,
     isHiddenGem: rec.isHiddenGem || index % 3 === 0,
     isMustVisit: rec.isMustVisit || index % 5 === 0,
@@ -108,8 +121,24 @@ const SearchResults = () => {
     if (searchQuery && searchQuery !== query) {
       console.log("SearchResults - Processing search query:", searchQuery);
       handleSearch(searchQuery);
+      
+      // Also perform a direct location-based search to get more results
+      const fetchLocationResults = async () => {
+        setDirectSearchLoading(true);
+        try {
+          const { providers } = await searchWithLocation(searchQuery, categoryParam);
+          console.log("Direct location search returned:", providers?.length || 0, "results");
+          setDirectSearchResults(providers || []);
+        } catch (err) {
+          console.error("Error in direct location search:", err);
+        } finally {
+          setDirectSearchLoading(false);
+        }
+      };
+      
+      fetchLocationResults();
     }
-  }, [searchQuery, query, handleSearch]);
+  }, [searchQuery, query, handleSearch, categoryParam, searchWithLocation]);
 
   useEffect(() => {
     if (categoryParam !== 'all' && categoryParam !== category) {

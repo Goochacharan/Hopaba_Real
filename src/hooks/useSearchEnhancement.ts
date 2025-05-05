@@ -60,6 +60,8 @@ export const useSearchEnhancement = () => {
       // First try to get user's location
       const userCoordinates = await getUserLocation();
       
+      console.log('Performing location-based search with query:', query, 'category:', categoryFilter);
+      
       const { data, error } = await supabase.functions.invoke('enhanced-search-with-location', {
         body: {
           searchQuery: query,
@@ -74,6 +76,8 @@ export const useSearchEnhancement = () => {
         setError('Failed to perform location-based search');
         return { providers: [], userLocation: null };
       }
+      
+      console.log('Search results:', data?.providers?.length || 0, 'results found');
       
       return {
         providers: data.providers || [],

@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
@@ -74,24 +75,89 @@ serve(async (req) => {
 
     const { searchQuery, categoryFilter, userLat, userLng } = await req.json();
     
+    console.log(`Processing search query: "${searchQuery}", category: "${categoryFilter}"`);
+    
     // First attempt to use the RPC function for enhanced search
-    const { data: enhancedProviders, error } = await supabase.rpc(
-      'search_enhanced_providers',
-      { search_query: searchQuery }
-    );
+    let enhancedProviders = [];
+    try {
+      const { data, error } = await supabase.rpc(
+        'search_enhanced_providers',
+        { search_query: searchQuery }
+      );
 
-    if (error) {
-      console.error("Error using enhanced providers search:", error);
-      throw error;
+      if (error) {
+        console.error("Error using enhanced providers search:", error);
+      } else {
+        enhancedProviders = data || [];
+        console.log(`Enhanced search returned ${enhancedProviders.length} results`);
+      }
+    } catch (err) {
+      console.error("Failed to use enhanced providers search:", err);
+    }
+    
+    // If enhanced search failed or returned no results, fall back to direct query
+    if (enhancedProviders.length === 0) {
+      console.log("Enhanced search returned no results, falling back to direct query");
+      
+      let query = supabase
+        .from('service_providers')
+        .select('*')
+        .eq('approval_status', 'approved');
+      
+      if (searchQuery) {
+        query = query.or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,area.ilike.%${searchQuery}%,city.ilike.%${searchQuery}%`);
+      }
+      
+      if (categoryFilter && categoryFilter !== 'all') {
+        const dbCategory = categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1);
+        query = query.eq('category', dbCategory);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error("Direct query error:", error);
+      } else if (data) {
+        enhancedProviders = data.map(item => ({
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          description: item.description,
+          area: item.area,
+          city: item.city,
+          contact_phone: item.contact_phone,
+          contact_email: item.contact_email,
+          website: item.website,
+          instagram: item.instagram,
+          map_link: item.map_link,
+          price_range_min: item.price_range_min,
+          price_range_max: item.price_range_max,
+          price_unit: item.price_unit,
+          availability: item.availability,
+          availability_days: item.availability_days,
+          availability_start_time: item.availability_start_time,
+          availability_end_time: item.availability_end_time,
+          tags: item.tags,
+          images: item.images,
+          hours: item.hours,
+          languages: item.languages,
+          experience: item.experience,
+          created_at: item.created_at,
+          approval_status: item.approval_status,
+          search_rank: 1.0 // Default search rank for direct query results
+        }));
+        console.log(`Direct query returned ${enhancedProviders.length} results`);
+      }
     }
 
     // Filter by category if needed
-    let filteredProviders = enhancedProviders || [];
+    let filteredProviders = enhancedProviders;
     if (categoryFilter && categoryFilter !== 'all') {
       const dbCategory = categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1);
       filteredProviders = filteredProviders.filter((provider: any) => 
         provider.category.toLowerCase() === dbCategory.toLowerCase()
       );
+      console.log(`After category filtering: ${filteredProviders.length} results`);
     }
     
     // If user location is provided, calculate distances and sort
@@ -130,6 +196,8 @@ serve(async (req) => {
         return b.search_rank - a.search_rank;
       });
     }
+    
+    console.log(`Returning ${filteredProviders.length} final results`);
     
     return new Response(
       JSON.stringify({ 
