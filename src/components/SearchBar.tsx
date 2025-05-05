@@ -66,6 +66,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   // Helper function to determine if we should navigate on search
   const shouldNavigateOnSearch = () => {
     // Only stay on the same page for search results page and marketplace
+    // All other pages should navigate to the search page
     if (currentPath === "/search" || 
         currentPath === "/marketplace" || 
         currentPath.startsWith("/marketplace/")) {
@@ -89,6 +90,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
       }
     }
     
+    // Always navigate to /search for service/business searches
+    // This ensures all searches from business and service pages go to the search page
     navigate(`/search?${searchParams.toString()}`);
   };
 
@@ -134,6 +137,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         setQuery(enhancedQuery);
       }
       
+      // Always navigate to search page for business/service searches
       if (shouldNavigateOnSearch()) {
         navigateToSearch(enhancedQuery);
       } else {
@@ -189,6 +193,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         setQuery(enhancedQuery);
       }
       
+      // Always navigate to search page for business/service searches
       if (shouldNavigateOnSearch()) {
         navigateToSearch(enhancedQuery);
       } else {
