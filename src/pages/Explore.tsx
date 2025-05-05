@@ -7,7 +7,7 @@ import SortButton, { SortOption } from '@/components/SortButton';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { useSearchEnhancement } from '@/hooks/useSearchEnhancement';
 import { addDistanceToRecommendations, sortRecommendations, enhanceRecommendations } from '@/utils/searchUtils';
-import { BusinessesList } from '@/components/BusinessesList';
+import BusinessesList from '@/components/BusinessesList'; // Fixed: Changed from named import to default import
 import PostalCodeSearch from '@/components/search/PostalCodeSearch';
 import { Loader2 } from 'lucide-react';
 
