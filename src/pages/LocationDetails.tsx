@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/MainLayout';
-import { ArrowLeft, Search } from 'lucide-react';
+import { ArrowLeft, Search, Loader } from 'lucide-react';
 import { getRecommendationById, mockRecommendations } from '@/lib/mockData';
 import { supabase } from '@/integrations/supabase/client';
 import ImageViewer from '@/components/ImageViewer';
@@ -385,7 +385,7 @@ const LocationDetails = () => {
               className="flex-1"
             />
             <Button onClick={handleSearch} disabled={searchLoading}>
-              {searchLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+              {searchLoading ? <Loader className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
               Search
             </Button>
           </div>
