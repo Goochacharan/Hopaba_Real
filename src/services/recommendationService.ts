@@ -97,6 +97,11 @@ export const fetchServiceProviders = async (query: string, category: string = 'a
         provider.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()));
       
       // Convert provider to Recommendation type with required fields
+      // Create the address from area and city if not directly available
+      const address = provider.area && provider.city 
+        ? `${provider.area}, ${provider.city}` 
+        : provider.area || provider.city || '';
+      
       return {
         ...provider,
         id: provider.id,
@@ -104,8 +109,8 @@ export const fetchServiceProviders = async (query: string, category: string = 'a
         category: provider.category,
         description: provider.description,
         image: provider.images?.[0] || 'https://images.unsplash.com/photo-1579954115545-a95591f28bfc',
-        rating: provider.rating || 4.5,
-        address: provider.address || '',
+        rating: 4.5, // Default rating since service_providers doesn't have this field
+        address: address, // Constructed address from available fields
         tags: provider.tags || [],
         searchScore: tagMatch ? 10 : 0
       } as Recommendation;
