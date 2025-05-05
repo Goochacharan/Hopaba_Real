@@ -8,11 +8,14 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
   try {
     console.log(`Fetching service providers with search term: "${searchTerm}" and category: "${categoryFilter}"`);
     
-    if (searchTerm && searchTerm.trim() !== '') {
+    // Normalize the search term to handle multi-line input
+    const normalizedSearchTerm = searchTerm.replace(/\s+/g, ' ').trim();
+    
+    if (normalizedSearchTerm && normalizedSearchTerm.trim() !== '') {
       try {
         const { data: enhancedProviders, error } = await supabase.rpc(
           'search_enhanced_providers', 
-          { search_query: searchTerm }
+          { search_query: normalizedSearchTerm }
         );
 
         if (error) {
@@ -61,7 +64,9 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
             created_at: item.created_at || new Date().toISOString(),
             search_rank: item.search_rank || 0,
             latitude: coordinates ? coordinates.lat : null,
-            longitude: coordinates ? coordinates.lng : null
+            longitude: coordinates ? coordinates.lng : null,
+            area: item.area || '',
+            city: item.city || ''
           };
         });
       } catch (err) {
@@ -80,8 +85,8 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
       query = query.eq('category', dbCategory);
     }
     
-    if (searchTerm && searchTerm.trim() !== '') {
-      query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+    if (normalizedSearchTerm && normalizedSearchTerm.trim() !== '') {
+      query = query.or(`name.ilike.%${normalizedSearchTerm}%,description.ilike.%${normalizedSearchTerm}%`);
     }
     
     const { data, error } = await query.order('created_at', { ascending: false });
@@ -123,8 +128,11 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
           availability_start_time: item.availability_start_time || '',
           availability_end_time: item.availability_end_time || '',
           created_at: item.created_at || new Date().toISOString(),
+          search_rank: 0, // Default search rank for non-enhanced search
           latitude: coordinates ? coordinates.lat : null,
-          longitude: coordinates ? coordinates.lng : null
+          longitude: coordinates ? coordinates.lng : null,
+          area: item.area || '',
+          city: item.city || ''
         };
       });
     }
@@ -138,15 +146,17 @@ export const fetchServiceProviders = async (searchTerm: string, categoryFilter: 
 
 export const fetchEvents = async (searchTerm: string): Promise<Event[]> => {
   try {
-    console.log(`Fetching events with search term: "${searchTerm}"`);
+    // Normalize the search term to handle multi-line input
+    const normalizedSearchTerm = searchTerm.replace(/\s+/g, ' ').trim();
+    console.log(`Fetching events with search term: "${normalizedSearchTerm}"`);
     
     let query = supabase
       .from('events')
       .select('*')
       .eq('approval_status', 'approved');
     
-    if (searchTerm && searchTerm.trim() !== '') {
-      query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`);
+    if (normalizedSearchTerm && normalizedSearchTerm.trim() !== '') {
+      query = query.or(`title.ilike.%${normalizedSearchTerm}%,description.ilike.%${normalizedSearchTerm}%,location.ilike.%${normalizedSearchTerm}%`);
     }
     
     const { data, error } = await query.order('created_at', { ascending: false });

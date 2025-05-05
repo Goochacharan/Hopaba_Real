@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -58,58 +59,162 @@ export const useMarketplaceListings = (options: MarketplaceListingsQueryOptions 
   return useQuery({
     queryKey: ['marketplaceListings', { category, searchQuery, condition, minPrice, maxPrice, minRating }],
     queryFn: async () => {
-      let query = supabase
-        .from('marketplace_listings')
-        .select('*');
-
-      if (!includeAllStatuses) {
-        query = query.eq('approval_status', 'approved');
+      try {
+        // For natural language search with detailed models and years
+        if (searchQuery && searchQuery.trim() !== '') {
+          try {
+            // Normalize search query to handle multi-line input
+            const normalizedQuery = searchQuery.replace(/\s+/g, ' ').trim();
+            console.log(`Using enhanced search for marketplace with query: "${normalizedQuery}"`);
+            
+            const { data: enhancedListings, error } = await supabase.rpc(
+              'search_enhanced_listings', 
+              { search_query: normalizedQuery }
+            );
+  
+            if (error) {
+              console.error("Error using enhanced listings search:", error);
+              // Fall back to regular search if RPC fails
+            } else if (enhancedListings && enhancedListings.length > 0) {
+              console.log(`Found ${enhancedListings.length} items through enhanced search`);
+              
+              let filteredListings = enhancedListings;
+              
+              // Apply category filter if provided
+              if (category) {
+                filteredListings = filteredListings.filter(listing => listing.category === category);
+              }
+              
+              // Apply other filters
+              if (condition) {
+                filteredListings = filteredListings.filter(listing => listing.condition === condition);
+              }
+              
+              if (minPrice !== undefined) {
+                filteredListings = filteredListings.filter(listing => listing.price >= minPrice);
+              }
+              
+              if (maxPrice !== undefined) {
+                filteredListings = filteredListings.filter(listing => listing.price <= maxPrice);
+              }
+              
+              if (minRating !== undefined) {
+                filteredListings = filteredListings.filter(listing => (listing.seller_rating || 0) >= minRating);
+              }
+              
+              if (!includeAllStatuses) {
+                filteredListings = filteredListings.filter(listing => listing.approval_status === 'approved');
+              }
+              
+              return filteredListings.map(item => ({
+                ...item,
+                // Ensure seller_role is either 'owner' or 'dealer'
+                seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer',
+                // Ensure seller_rating is a number
+                seller_rating: item.seller_rating || 0,
+                // Make sure arrays are defined
+                images: item.images || [],
+                shop_images: item.shop_images || [],
+                damage_images: item.damage_images || [],
+                inspection_certificates: item.inspection_certificates || [],
+                bill_images: item.bill_images || [],
+                // Add review_count if it doesn't exist (default to 0)
+                review_count: item.review_count || 0,
+                // Ensure these fields exist
+                area: item.area || '',
+                city: item.city || '',
+                postal_code: item.postal_code || '',
+                updated_at: item.updated_at || item.created_at
+              })) as MarketplaceListing[];
+            }
+          } catch (err) {
+            console.error("Failed to use enhanced listings search:", err);
+            // Fall back to regular search below
+          }
+        }
+  
+        // Regular query using table search
+        let query = supabase
+          .from('marketplace_listings')
+          .select('*');
+  
+        if (!includeAllStatuses) {
+          query = query.eq('approval_status', 'approved');
+        }
+  
+        if (category) {
+          query = query.eq('category', category);
+        }
+  
+        if (searchQuery) {
+          // Normalize and split search into terms for better matching
+          const normalizedQuery = searchQuery.replace(/\s+/g, ' ').trim();
+          const terms = normalizedQuery.split(' ').filter(term => term.length > 1);
+          
+          if (terms.length > 0) {
+            let searchCondition = '';
+            
+            // Build OR condition for each term
+            terms.forEach((term, index) => {
+              if (index > 0) searchCondition += ',';
+              searchCondition += `title.ilike.%${term}%,description.ilike.%${term}%`;
+              
+              // Check for year pattern
+              if (/^(19|20)\d{2}$/.test(term)) {
+                searchCondition += `,model_year.ilike.%${term}%`;
+              }
+            });
+            
+            query = query.or(searchCondition);
+          } else {
+            // Fallback to simple search if normalized terms are too short
+            query = query.or(`title.ilike.%${normalizedQuery}%,description.ilike.%${normalizedQuery}%`);
+          }
+        }
+  
+        if (condition) {
+          query = query.eq('condition', condition);
+        }
+  
+        if (minPrice !== undefined) {
+          query = query.gte('price', minPrice);
+        }
+  
+        if (maxPrice !== undefined) {
+          query = query.lte('price', maxPrice);
+        }
+  
+        if (minRating !== undefined) {
+          query = query.gte('seller_rating', minRating);
+        }
+  
+        query = query.order('created_at', { ascending: false });
+  
+        const { data, error } = await query;
+  
+        if (error) {
+          throw new Error(error.message);
+        }
+  
+        // Cast the result to ensure compliance with our interface
+        return (data || []).map(item => ({
+          ...item,
+          // Ensure seller_role is either 'owner' or 'dealer'
+          seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer',
+          // Ensure seller_rating is a number
+          seller_rating: item.seller_rating || 0,
+          // Make sure shop_images is an array
+          shop_images: item.shop_images || [],
+          damage_images: item.damage_images || [],
+          inspection_certificates: item.inspection_certificates || [],
+          bill_images: item.bill_images || [],
+          // Add review_count if it doesn't exist (default to 0)
+          review_count: 0
+        })) as MarketplaceListing[];
+      } catch (error) {
+        console.error("Error in useMarketplaceListings:", error);
+        throw error;
       }
-
-      if (category) {
-        query = query.eq('category', category);
-      }
-
-      if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
-      }
-
-      if (condition) {
-        query = query.eq('condition', condition);
-      }
-
-      if (minPrice !== undefined) {
-        query = query.gte('price', minPrice);
-      }
-
-      if (maxPrice !== undefined) {
-        query = query.lte('price', maxPrice);
-      }
-
-      if (minRating !== undefined) {
-        query = query.gte('seller_rating', minRating);
-      }
-
-      query = query.order('created_at', { ascending: false });
-
-      const { data, error } = await query;
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      // Cast the result to ensure compliance with our interface
-      return (data || []).map(item => ({
-        ...item,
-        // Ensure seller_role is either 'owner' or 'dealer'
-        seller_role: (item.seller_role as string || 'owner') as 'owner' | 'dealer',
-        // Ensure seller_rating is a number
-        seller_rating: item.seller_rating || 0,
-        // Make sure shop_images is an array
-        shop_images: item.shop_images || [],
-        // Add review_count if it doesn't exist (default to 0)
-        review_count: 0
-      })) as MarketplaceListing[];
     }
   });
 };
@@ -137,10 +242,11 @@ export const useMarketplaceListing = (id: string) => {
         seller_role: (data.seller_role as string || 'owner') as 'owner' | 'dealer',
         // Ensure seller_rating is a number
         seller_rating: data.seller_rating || 0,
-        // Make sure shop_images is an array
+        // Make sure arrays are defined
         shop_images: data.shop_images || [],
-        // Make sure bill_images is an array
         bill_images: data.bill_images || [],
+        damage_images: data.damage_images || [],
+        inspection_certificates: data.inspection_certificates || [],
         // Add review_count if it doesn't exist (default to 0)
         review_count: 0
       } as MarketplaceListing;

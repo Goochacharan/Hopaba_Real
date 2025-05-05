@@ -24,6 +24,9 @@ const suggestionExamples = [
   "places to visit in Nagarbhavi",
   "best unisex salon near me",
   "plumbers available right now",
+  "Honda WRV 2018",  // added marketplace examples
+  "used iPhone 13 Pro Max",
+  "second hand furniture in HSR Layout"
 ];
 
 const SearchBar: React.FC<SearchBarProps> = ({
@@ -80,11 +83,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
       console.log("Original search query:", query);
       let enhancedQuery = query;
 
-      if (
-        currentPath !== "/events" &&
-        currentPath !== "/marketplace" &&
-        !currentPath.startsWith("/marketplace")
-      ) {
+      // On marketplace, we'll use our improved natural language processing
+      if (currentPath === "/marketplace" || currentPath.startsWith("/marketplace")) {
+        console.log("Marketplace search: Normalizing query without enhancement");
+        // Just normalize the query to handle multi-line input
+        enhancedQuery = query.replace(/\s+/g, ' ').trim();
+      }
+      // For regular searches, use the enhancement service
+      else if (currentPath !== "/events") {
         console.log("Not a marketplace or events page, enhancing query");
         enhancedQuery = await enhanceQuery(query, currentPath !== "/");
       }
@@ -129,11 +135,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
     if (query.trim()) {
       let enhancedQuery = query;
 
-      if (
-        currentPath !== "/events" &&
-        currentPath !== "/marketplace" &&
-        !currentPath.startsWith("/marketplace")
-      ) {
+      // On marketplace, we'll use our improved natural language processing
+      if (currentPath === "/marketplace" || currentPath.startsWith("/marketplace")) {
+        console.log("Marketplace search: Normalizing query without enhancement");
+        // Just normalize the query to handle multi-line input
+        enhancedQuery = query.replace(/\s+/g, ' ').trim();
+      }
+      // For regular searches, use the enhancement service
+      else if (currentPath !== "/events") {
         enhancedQuery = await enhanceQuery(query, currentPath !== "/");
       }
 

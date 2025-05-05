@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { CategoryType } from '@/components/CategoryFilter';
 import { UseRecommendationsProps, FilterOptions, Event } from './types/recommendationTypes';
@@ -48,7 +47,9 @@ const useRecommendations = ({
   };
 
   const handleSearch = (searchQuery: string) => {
-    setQuery(searchQuery);
+    // Normalize input query to handle multi-line input and extra whitespace
+    const normalizedQuery = searchQuery.replace(/\s+/g, ' ').trim();
+    setQuery(normalizedQuery);
   };
 
   const handleCategoryChange = (newCategory: CategoryType) => {
