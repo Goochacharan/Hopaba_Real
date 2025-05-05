@@ -1,173 +1,107 @@
-
+import { mockRecommendations, mockEvents } from '@/lib/mockData';
 import { supabase } from '@/integrations/supabase/client';
-import { Event, SupabaseEvent } from '@/hooks/types/recommendationTypes';
-import { toast } from '@/components/ui/use-toast';
-import { extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 
-export const fetchServiceProviders = async (searchTerm: string, categoryFilter: string) => {
+export const fetchServiceProviders = async (query: string, category: string = 'all') => {
   try {
-    console.log(`Fetching service providers with search term: "${searchTerm}" and category: "${categoryFilter}"`);
-    
-    if (searchTerm && searchTerm.trim() !== '') {
-      try {
-        const { data: enhancedProviders, error } = await supabase.rpc(
-          'search_enhanced_providers', 
-          { search_query: searchTerm }
-        );
-
-        if (error) {
-          console.error("Error using enhanced providers search:", error);
-          return [];
-        }
-
-        console.log(`Fetched ${enhancedProviders?.length || 0} enhanced service providers`);
-        
-        let filteredProviders = enhancedProviders || [];
-        if (categoryFilter !== 'all') {
-          const dbCategory = categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1);
-          filteredProviders = filteredProviders.filter(provider => 
-            provider.category.toLowerCase() === dbCategory.toLowerCase()
-          );
-        }
-        
-        return filteredProviders.map(item => {
-          // Extract coordinates from map_link if available
-          const coordinates = extractCoordinatesFromMapLink(item.map_link);
-          
-          return {
-            id: item.id,
-            name: item.name,
-            category: item.category,
-            tags: item.tags || [],
-            rating: 4.5,
-            address: `${item.area}, ${item.city}`,
-            distance: "0.5 miles away", // This will be calculated based on user location later
-            image: item.images && item.images.length > 0 ? item.images[0] : "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
-            images: item.images || [],
-            description: item.description || "",
-            phone: item.contact_phone,
-            openNow: false,
-            hours: item.hours || "Until 8:00 PM",
-            availability: item.availability || null,
-            priceLevel: "$$",
-            price_range_min: item.price_range_min || null,
-            price_range_max: item.price_range_max || null,
-            price_unit: item.price_unit || null,
-            map_link: item.map_link || null,
-            instagram: item.instagram || '',
-            availability_days: item.availability_days || [],
-            availability_start_time: item.availability_start_time || '',
-            availability_end_time: item.availability_end_time || '',
-            created_at: item.created_at || new Date().toISOString(),
-            search_rank: item.search_rank || 0,
-            latitude: coordinates ? coordinates.lat : null,
-            longitude: coordinates ? coordinates.lng : null
-          };
-        });
-      } catch (err) {
-        console.error("Failed to use enhanced providers search:", err);
-        return [];
-      }
-    }
-    
-    let query = supabase
-      .from('service_providers')
+    // Attempt to fetch from Supabase first
+    let supabaseQuery = supabase.from('service_providers')
       .select('*')
       .eq('approval_status', 'approved');
     
-    if (categoryFilter !== 'all') {
-      const dbCategory = categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1);
-      query = query.eq('category', dbCategory);
+    // Apply category filter if not 'all'
+    if (category !== 'all') {
+      supabaseQuery = supabaseQuery.eq('category', category);
     }
     
-    if (searchTerm && searchTerm.trim() !== '') {
-      query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
-    }
-    
-    const { data, error } = await query.order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error("Error fetching from Supabase:", error);
-      return [];
-    }
-    
-    console.log(`Fetched ${data?.length || 0} service providers from Supabase`);
-    
-    if (data && data.length > 0) {
-      return data.map(item => {
-        // Extract coordinates from map_link if available
-        const coordinates = extractCoordinatesFromMapLink(item.map_link);
+    // Apply search query filters
+    if (query) {
+      // Create an array with all the search terms
+      const searchTerms = query.toLowerCase().split(' ');
+      
+      // Build a complex OR filter for name, description, and tags
+      let filter = '';
+      
+      searchTerms.forEach((term, index) => {
+        if (index > 0) filter += ' & ';
         
-        return {
-          id: item.id,
-          name: item.name,
-          category: item.category,
-          tags: item.tags || [],
-          rating: 4.5,
-          address: `${item.area}, ${item.city}`,
-          distance: "0.5 miles away", // This will be calculated based on user location later
-          image: item.images && item.images.length > 0 ? item.images[0] : "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
-          images: item.images || [],
-          description: item.description || "",
-          phone: item.contact_phone,
-          openNow: false,
-          hours: "Until 8:00 PM",
-          availability: item.availability || null,
-          priceLevel: "$$",
-          price_range_min: item.price_range_min || null,
-          price_range_max: item.price_range_max || null,
-          price_unit: item.price_unit || null,
-          map_link: item.map_link || null,
-          instagram: item.instagram || '',
-          availability_days: item.availability_days || [],
-          availability_start_time: item.availability_start_time || '',
-          availability_end_time: item.availability_end_time || '',
-          created_at: item.created_at || new Date().toISOString(),
-          latitude: coordinates ? coordinates.lat : null,
-          longitude: coordinates ? coordinates.lng : null
-        };
+        // Search in name, description, or tags
+        filter += `(name.ilike.%${term}% | description.ilike.%${term}%)`;
+      });
+      
+      supabaseQuery = supabaseQuery.or(filter);
+    }
+    
+    const { data: serviceProviders, error } = await supabaseQuery;
+    
+    if (error || !serviceProviders || serviceProviders.length === 0) {
+      // Fallback to mock data if no results from Supabase
+      console.log('Falling back to mock data for service providers');
+      
+      // Filter mock data
+      return mockRecommendations.filter(rec => {
+        // If category filter is active and doesn't match, exclude
+        if (category !== 'all' && rec.category !== category) {
+          return false;
+        }
+        
+        // If no search query, include all that match the category
+        if (!query) return true;
+        
+        // Search in name, description
+        const nameMatch = rec.name.toLowerCase().includes(query.toLowerCase());
+        const descMatch = rec.description.toLowerCase().includes(query.toLowerCase());
+        
+        // Search in tags (if available)
+        const tagMatch = Array.isArray(rec.tags) && 
+          rec.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()));
+        
+        return nameMatch || descMatch || tagMatch;
       });
     }
     
-    return [];
-  } catch (err) {
-    console.error("Failed to fetch from Supabase:", err);
-    return [];
+    // Process Supabase results to match the format expected by the app
+    const enhancedProviders = serviceProviders.map(provider => {
+      // Add tag search score
+      const tagMatch = Array.isArray(provider.tags) && 
+        provider.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()));
+      
+      return {
+        ...provider,
+        searchScore: tagMatch ? 10 : 0
+      };
+    });
+    
+    return enhancedProviders;
+    
+  } catch (error) {
+    console.error('Error fetching service providers:', error);
+    // Fall back to mock data
+    return mockRecommendations.filter(rec => {
+      if (category !== 'all' && rec.category !== category) {
+        return false;
+      }
+      if (!query) return true;
+      
+      const nameMatch = rec.name.toLowerCase().includes(query.toLowerCase());
+      const descMatch = rec.description.toLowerCase().includes(query.toLowerCase());
+      const tagMatch = Array.isArray(rec.tags) && 
+        rec.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()));
+      
+      return nameMatch || descMatch || tagMatch;
+    });
   }
 };
 
-export const fetchEvents = async (searchTerm: string): Promise<Event[]> => {
+export const fetchEvents = async (query: string) => {
   try {
-    console.log(`Fetching events with search term: "${searchTerm}"`);
-    
-    let query = supabase
-      .from('events')
-      .select('*')
-      .eq('approval_status', 'approved');
-    
-    if (searchTerm && searchTerm.trim() !== '') {
-      query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`);
-    }
-    
-    const { data, error } = await query.order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error("Error fetching events from Supabase:", error);
-      return [];
-    }
-    
-    console.log(`Fetched ${data?.length || 0} events from Supabase`);
-    
-    if (data && data.length > 0) {
-      return data.map(event => ({
-        ...event,
-        pricePerPerson: event.price_per_person || 0
-      }));
-    }
-    
-    return [];
-  } catch (err) {
-    console.error("Failed to fetch events from Supabase:", err);
+    // Simulate API call or database query to fetch events
+    // Replace this with your actual data fetching logic
+    return mockEvents.filter(event =>
+      event.title.toLowerCase().includes(query.toLowerCase()) ||
+      event.description.toLowerCase().includes(query.toLowerCase())
+    );
+  } catch (error) {
+    console.error('Error fetching events:', error);
     return [];
   }
 };

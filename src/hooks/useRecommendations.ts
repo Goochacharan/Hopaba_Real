@@ -65,7 +65,27 @@ const useRecommendations = ({
           const { processedQuery, inferredCategory } = processNaturalLanguageQuery(query.toLowerCase(), category);
           const effectiveCategory = inferredCategory;
           const serviceProviders = await fetchServiceProviders(processedQuery, effectiveCategory);
-          setRecommendations(serviceProviders);
+          
+          // Enhanced tag search: Filter results to include businesses with matching tags
+          const enhancedResults = serviceProviders.map(provider => {
+            // Add a searchScore property to each provider based on tag matches
+            const tagMatches = Array.isArray(provider.tags) && 
+              provider.tags.some(tag => 
+                tag.toLowerCase().includes(processedQuery.toLowerCase())
+              );
+            
+            return {
+              ...provider,
+              searchScore: tagMatches ? 10 : 0 // Give a high score for tag matches
+            };
+          });
+          
+          // Sort results by search score (tag matches first)
+          const sortedResults = [...enhancedResults].sort((a, b) => 
+            (b.searchScore || 0) - (a.searchScore || 0)
+          );
+          
+          setRecommendations(sortedResults);
           const eventsData = await fetchEvents(processedQuery);
           setEvents(eventsData);
         } 
