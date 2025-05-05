@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -7,7 +6,6 @@ import useRecommendations from '@/hooks/useRecommendations';
 import { useMarketplaceListings } from '@/hooks/useMarketplaceListings';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { addDistanceToRecommendations, sortRecommendations, enhanceRecommendations } from '@/utils/searchUtils';
-import SearchBar from '@/components/SearchBar';
 import SearchHeader from '@/components/search/SearchHeader';
 import SearchTabs from '@/components/search/SearchTabs';
 import SearchControls from '@/components/search/SearchControls';
@@ -126,6 +124,14 @@ const SearchResults = () => {
     }
   }, [searchQuery, navigate]);
 
+  const handleRSVP = (eventTitle: string) => {
+    toast({
+      title: "RSVP Successful",
+      description: `You've RSVP'd to ${eventTitle}. We'll send you a reminder closer to the date.`,
+      duration: 3000
+    });
+  };
+
   const handleAreaSelect = (area: string) => {
     setSelectedArea(area);
     console.log("Area selected:", area);
@@ -138,28 +144,9 @@ const SearchResults = () => {
     }
   };
 
-  // Handler for new searches from the search bar
-  const handleNewSearch = (newQuery: string) => {
-    if (newQuery) {
-      const newSearchParams = new URLSearchParams();
-      newSearchParams.set('q', newQuery);
-      newSearchParams.set('category', category);
-      navigate(`/search?${newSearchParams.toString()}`);
-    }
-  };
-
   return (
     <MainLayout>
       <div className="w-full animate-fade-in mx-0 px-[2px] search-results-container">
-        {/* Persistent search bar at the top */}
-        <div className="mb-4">
-          <SearchBar 
-            onSearch={handleNewSearch} 
-            initialValue={searchQuery}
-            placeholder="Search for businesses, services, tags..."
-          />
-        </div>
-        
         <AreaSearchBar
           selectedArea={selectedArea}
           onAreaSelect={handleAreaSelect}
