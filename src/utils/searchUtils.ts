@@ -1,7 +1,6 @@
 
 import { calculateDistance, extractCoordinatesFromMapLink } from '@/lib/locationUtils';
 import { Recommendation } from '@/lib/mockData';
-import { containsWordOrPhrase } from '@/utils/queryUtils';
 
 export const addDistanceToRecommendations = (recs: Recommendation[], userCoordinates: {lat: number, lng: number} | null) => {
   if (!userCoordinates) return recs;
@@ -92,70 +91,5 @@ export const enhanceRecommendations = (recommendations: Recommendation[]) => {
       isHiddenGem: rec.isHiddenGem,
       isMustVisit: rec.isMustVisit
     };
-  });
-};
-
-/**
- * Filter recommendations by query to match tags, name, description, etc.
- */
-export const filterRecommendationsByQuery = (recommendations: Recommendation[], query: string): Recommendation[] => {
-  if (!query || query.trim() === '') {
-    return recommendations;
-  }
-  
-  const lowerQuery = query.toLowerCase();
-  const words = lowerQuery.split(/\s+/);
-  
-  console.log(`Filtering ${recommendations.length} recommendations by query: "${lowerQuery}"`);
-  console.log('Query words:', words);
-  
-  return recommendations.filter(rec => {
-    // Check each field for matches with the query
-    const name = rec.name?.toLowerCase() || '';
-    const description = rec.description?.toLowerCase() || '';
-    const category = rec.category?.toLowerCase() || '';
-    const tags = rec.tags || [];
-    const address = rec.address?.toLowerCase() || '';
-    
-    // Check for direct matches
-    if (name.includes(lowerQuery) || description.includes(lowerQuery) || 
-        category.includes(lowerQuery) || address.includes(lowerQuery)) {
-      console.log(`Match found in name/description/category/address for: ${rec.name}`);
-      return true;
-    }
-    
-    // Check individual words
-    for (const word of words) {
-      if (word.length < 3) continue; // Skip very short words
-      
-      if (name.includes(word) || description.includes(word) || 
-          category.includes(word) || address.includes(word)) {
-        console.log(`Word "${word}" matched in name/description/category/address for: ${rec.name}`);
-        return true;
-      }
-    }
-    
-    // Check tags (both exact matches and partial matches)
-    for (const tag of tags) {
-      const lowerTag = tag.toLowerCase();
-      
-      // Direct match with full query
-      if (lowerTag.includes(lowerQuery) || containsWordOrPhrase(lowerTag, lowerQuery)) {
-        console.log(`Tag "${lowerTag}" matches query "${lowerQuery}" for: ${rec.name}`);
-        return true;
-      }
-      
-      // Check if tag contains any of the words from the query
-      for (const word of words) {
-        if (word.length < 3) continue; // Skip very short words
-        
-        if (lowerTag.includes(word)) {
-          console.log(`Tag "${lowerTag}" contains word "${word}" for: ${rec.name}`);
-          return true;
-        }
-      }
-    }
-    
-    return false;
   });
 };
