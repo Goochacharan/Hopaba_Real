@@ -20,45 +20,9 @@ export interface Event {
   isMustVisit?: boolean;
 }
 
-export interface Recommendation {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  address: string;
-  rating: number;
-  image: string;
-  images?: string[];
-  openNow?: boolean;
-  hours?: string;
-  priceLevel?: string;
-  phone?: string;
-  distance?: string;
-  calculatedDistance?: number;
-  tags: string[]; // Changed from optional to required
-  tagMatches?: string[];  // Added for tag matching
-  isTagMatch?: boolean;   // Added to indicate if this is a tag match
-  price_range_min?: number;
-  price_range_max?: number;
-  price_unit?: string;
-  availability?: string;
-  availability_days?: string[];
-  availability_start_time?: string;
-  availability_end_time?: string;
-  instagram?: string;
-  map_link?: string;
-  created_at?: string;
-  isHiddenGem?: boolean;
-  isMustVisit?: boolean;
-  search_rank?: number;
-  latitude?: number | null;
-  longitude?: number | null;
-  reviewCount?: number; // Added to match sortRecommendations function
-}
-
 export interface UseRecommendationsProps {
   initialQuery?: string;
-  initialCategory?: string;
+  initialCategory?: CategoryType;
   loadDefaultResults?: boolean;
 }
 

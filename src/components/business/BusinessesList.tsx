@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import BusinessCard from '@/components/BusinessCard'; // Using the BusinessCard from components
+import BusinessCard from './BusinessCard';
 import { Loader2 } from 'lucide-react';
 import { BusinessFormValues } from '@/components/business/BusinessForm';
 import {
@@ -112,6 +111,25 @@ const BusinessesList = ({ onEdit, refresh }: BusinessesListProps) => {
   const confirmDelete = (id: string) => {
     setBusinessToDelete(id);
     setIsDeleteDialogOpen(true);
+  };
+  
+  const handleInstagramClick = (e: React.MouseEvent, instagram: string, businessName: string) => {
+    e.stopPropagation();
+    if (instagram) {
+      window.open(instagram);
+      toast({
+        title: "Opening video content",
+        description: `Visiting ${businessName}'s video content`,
+        duration: 2000
+      });
+    } else {
+      toast({
+        title: "Video content not available",
+        description: "This business has not provided any video links",
+        variant: "destructive",
+        duration: 2000
+      });
+    }
   };
 
   if (loading && businesses.length === 0) {

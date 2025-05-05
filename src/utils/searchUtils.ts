@@ -1,6 +1,6 @@
 
 import { calculateDistance, extractCoordinatesFromMapLink } from '@/lib/locationUtils';
-import { Recommendation } from '@/hooks/types/recommendationTypes';
+import { Recommendation } from '@/lib/mockData';
 
 export const addDistanceToRecommendations = (recs: Recommendation[], userCoordinates: {lat: number, lng: number} | null) => {
   if (!userCoordinates) return recs;
@@ -42,11 +42,6 @@ export const addDistanceToRecommendations = (recs: Recommendation[], userCoordin
 
 export const sortRecommendations = (recommendations: Recommendation[], sortBy: string) => {
   return [...recommendations].sort((a, b) => {
-    // First prioritize tag matches if available
-    if ((a.isTagMatch === true) && (b.isTagMatch !== true)) return -1;
-    if ((a.isTagMatch !== true) && (b.isTagMatch === true)) return 1;
-    
-    // Then proceed with normal sorting
     switch (sortBy) {
       case 'rating':
         return b.rating - a.rating;
@@ -71,13 +66,15 @@ export const sortRecommendations = (recommendations: Recommendation[], sortBy: s
 
 export const enhanceRecommendations = (recommendations: Recommendation[]) => {
   return recommendations.map(rec => {
-    // Add tag matching debugging info
-    const tagMatches = rec.tagMatches || [];
-    const isTagMatch = rec.isTagMatch || false;
-    
-    if (isTagMatch) {
-      console.log(`Enhanced recommendation "${rec.name}" has tag matches: ${tagMatches.join(', ')}`);
-    }
+    console.log("SearchResults - Processing recommendation:", rec.id, {
+      instagram: rec.instagram || '',
+      availability_days: rec.availability_days || [],
+      availability_start_time: rec.availability_start_time || '',
+      availability_end_time: rec.availability_end_time || '',
+      isHiddenGem: rec.isHiddenGem,
+      isMustVisit: rec.isMustVisit,
+      map_link: rec.map_link || ''
+    });
     
     return {
       ...rec,
@@ -92,48 +89,7 @@ export const enhanceRecommendations = (recommendations: Recommendation[]) => {
       instagram: rec.instagram || '',
       map_link: rec.map_link,
       isHiddenGem: rec.isHiddenGem,
-      isMustVisit: rec.isMustVisit,
-      tagMatches: tagMatches,
-      isTagMatch: isTagMatch
+      isMustVisit: rec.isMustVisit
     };
   });
-};
-
-// New function to highlight tag matches in search results
-export const highlightTagMatches = (text: string, tags: string[]): string => {
-  if (!tags || tags.length === 0) return text;
-  
-  let result = text;
-  tags.forEach(tag => {
-    const tagRegex = new RegExp(tag, 'gi');
-    result = result.replace(tagRegex, match => `<mark>${match}</mark>`);
-  });
-  
-  return result;
-};
-
-// Function to check if a word, partial word or phrase matches 
-export const matchWordOrPhrase = (source: string, target: string): boolean => {
-  if (!source || !target) return false;
-  
-  const sourceWords = source.toLowerCase().split(/\s+/);
-  const targetWords = target.toLowerCase().split(/\s+/);
-  
-  // Check for exact phrase match
-  if (source.toLowerCase().includes(target.toLowerCase())) {
-    return true;
-  }
-  
-  // Check if any target word is included in any source word
-  for (const targetWord of targetWords) {
-    if (targetWord.length < 3) continue; // Skip very short words
-    
-    for (const sourceWord of sourceWords) {
-      if (sourceWord.includes(targetWord) || targetWord.includes(sourceWord)) {
-        return true;
-      }
-    }
-  }
-  
-  return false;
 };

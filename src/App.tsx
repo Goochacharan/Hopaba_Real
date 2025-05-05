@@ -9,13 +9,11 @@ import { AuthProvider } from "./hooks/useAuth";
 import React, { Suspense, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
-// Eagerly import SearchResults since it's our main page
-import SearchResults from "./pages/SearchResults";
-
 // Eagerly import MyList to ensure it's available
 import MyList from "./pages/MyList";
 
 // Lazy load other route components with chunks named for better debugging
+const SearchResults = React.lazy(() => import(/* webpackChunkName: "search-results" */ "./pages/SearchResults"));
 const LocationDetails = React.lazy(() => import(/* webpackChunkName: "location-details" */ "./pages/LocationDetails"));
 const NotFound = React.lazy(() => import(/* webpackChunkName: "not-found" */ "./pages/NotFound"));
 const Profile = React.lazy(() => import(/* webpackChunkName: "profile" */ "./pages/Profile"));
@@ -77,7 +75,7 @@ const RoutePrefetcher = () => {
     // Prefetch adjacent routes based on current location
     const prefetchRoutes = () => {
       if (location.pathname === '/') {
-        import("./pages/LocationDetails");
+        import("./pages/SearchResults");
         import("./pages/Marketplace");
       } else if (location.pathname.startsWith('/marketplace')) {
         import("./pages/MarketplaceListingDetails");
