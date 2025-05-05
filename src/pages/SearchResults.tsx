@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -65,7 +66,8 @@ const SearchResults = () => {
     availability_days: rec.availability_days || [],
     hours: rec.hours || '',
     availability_start_time: rec.availability_start_time || '',
-    availability_end_time: rec.availability_end_time || ''
+    availability_end_time: rec.availability_end_time || '',
+    tags: rec.tags || []  // Ensure tags is never undefined
   }));
 
   const areaFilteredRecommendations = selectedArea 

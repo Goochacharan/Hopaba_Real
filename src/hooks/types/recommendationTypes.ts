@@ -35,7 +35,7 @@ export interface Recommendation {
   phone?: string;
   distance?: string;
   calculatedDistance?: number;
-  tags?: string[];
+  tags: string[]; // Changed from optional to required
   tagMatches?: string[];  // Added for tag matching
   isTagMatch?: boolean;   // Added to indicate if this is a tag match
   price_range_min?: number;
